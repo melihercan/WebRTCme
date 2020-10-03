@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RazorLangVersion>3.0</RazorLangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RootNamespace>WebRtc</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="DotNetStandard\wwwroot\background.png" />
+    <Content Include="DotNetStandard\wwwroot\exampleJsInterop.js" />
+    <Content Include="DotNetStandard\wwwroot\styles.css" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.8" />
+  </ItemGroup>
+
+</Project>
