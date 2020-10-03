@@ -39,6 +39,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var webRtc = CrossWebRtc.Current;
+        var rtcPeerConnection = webRtc.CreateRTCPeerConnection();
+        rtcPeerConnection.Do();
+
+
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
     }
 

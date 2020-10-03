@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public class ExampleJsInterop
+    public class JsInterop
     {
         public static ValueTask<string> Prompt(IJSRuntime jsRuntime, string message)
         {

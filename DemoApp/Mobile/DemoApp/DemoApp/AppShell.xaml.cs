@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DemoApp.ViewModels;
 using DemoApp.Views;
 using Xamarin.Forms;
+using WebRTCme;
 
 namespace DemoApp
 {
@@ -13,6 +14,11 @@ namespace DemoApp
             InitializeComponent();
             Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
             Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
+
+            var webRtc = CrossWebRtc.Current;
+            var rtcPeerConnection = webRtc.CreateRTCPeerConnection();
+            rtcPeerConnection.Do();
+
         }
 
         private async void OnMenuItemClicked(object sender, EventArgs e)
