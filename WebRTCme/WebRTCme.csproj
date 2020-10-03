@@ -15,9 +15,12 @@
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<Compile Include="DotNetStandard\**\*.cs" />
-		<Compile Include="DotNetStandard\**\*.razor" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
@@ -26,10 +29,6 @@
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="iOS\**\*.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Include="*.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

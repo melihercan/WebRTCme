@@ -1,7 +1,7 @@
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
 
-namespace WebRTCme
+namespace WebRtc
 {
     public class JsInterop
     {
