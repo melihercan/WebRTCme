@@ -8,7 +8,14 @@
         <RootNamespace>WebRtc</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+	<ItemGroup>
+		<UpToDateCheckInput Include="*.cs" />
+		<UpToDateCheckInput Include="DotNetStandard\**\*.cs" />
+		<UpToDateCheckInput Include="Android\**\*.cs" />
+		<UpToDateCheckInput Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<Compile Include="DotNetStandard\**\*.cs" />
 		<Compile Include="DotNetStandard\**\*.razor" />
 	</ItemGroup>
