@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme", "WebRTCme.csproj", "{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme", "WebRTCme\WebRTCme.csproj", "{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{EA22B5AD-3780-438C-8AC9-6EB7DE275D5B}"
 EndProject
@@ -13,13 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.Android", "DemoApp\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.iOS", "DemoApp\Mobile\DemoApp\DemoApp.iOS\DemoApp.iOS.csproj", "{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp", "DemoApp\Mobile\DemoApp\DemoApp\DemoApp.csproj", "{6627B1D8-329B-49C0-82EF-8597F109B8A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp", "DemoApp\Mobile\DemoApp\DemoApp\DemoApp.csproj", "{6627B1D8-329B-49C0-82EF-8597F109B8A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.Shared", "DemoApp\Web\DemoApp.Shared\DemoApp.Shared.csproj", "{F5C4B753-EC4D-4D65-A770-859D0EDB214F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Shared", "DemoApp\Web\DemoApp.Shared\DemoApp.Shared.csproj", "{F5C4B753-EC4D-4D65-A770-859D0EDB214F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.Wasm", "DemoApp\Web\DemoApp.Wasm\DemoApp.Wasm.csproj", "{1F444E45-98E7-4E8C-BAA1-F2E1AFAE4456}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Wasm", "DemoApp\Web\DemoApp.Wasm\DemoApp.Wasm.csproj", "{1F444E45-98E7-4E8C-BAA1-F2E1AFAE4456}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.Server", "DemoApp\Web\DemoApp.Server\DemoApp.Server.csproj", "{7A461FAA-8821-4FAD-A248-CF88297DC58F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Server", "DemoApp\Web\DemoApp.Server\DemoApp.Server.csproj", "{7A461FAA-8821-4FAD-A248-CF88297DC58F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DemoApp", "DemoApp", "{47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -124,6 +126,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{EA22B5AD-3780-438C-8AC9-6EB7DE275D5B} = {47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}
+		{A779D425-8A47-4C76-B96B-C5F00E90C934} = {47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}
 		{829B8C0C-D77B-4D32-92BF-04318DC0594F} = {A779D425-8A47-4C76-B96B-C5F00E90C934}
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF} = {A779D425-8A47-4C76-B96B-C5F00E90C934}
 		{6627B1D8-329B-49C0-82EF-8597F109B8A6} = {A779D425-8A47-4C76-B96B-C5F00E90C934}
