@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
 <PropertyGroup>
         <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
@@ -10,6 +10,8 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
+		<UpToDateCheckInput Include="Interfaces\**\*.cs" />
+		<UpToDateCheckInput Include="Models\**\*.cs" />
 		<UpToDateCheckInput Include="Web\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
@@ -17,6 +19,8 @@
 
 	<ItemGroup>
 		<Compile Include="*.cs" />
+		<Compile Include="Models\**\*.cs" />
+		<Compile Include="Interfaces\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -29,6 +33,11 @@
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.JSInterop" Version="3.1.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.8" />
 	</ItemGroup>
 
 </Project>

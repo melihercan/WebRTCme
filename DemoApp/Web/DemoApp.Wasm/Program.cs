@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using DemoApp.Shared;
 
 namespace DemoApp.Wasm
 {
@@ -19,7 +20,9 @@ namespace DemoApp.Wasm
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-            await builder.Build().RunAsync();
+            var host = builder.Build();
+            Registry.ServiceProvider = builder.Services.BuildServiceProvider();
+            await host.RunAsync();
         }
     }
 }

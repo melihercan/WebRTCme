@@ -17,4 +17,11 @@
     <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Content Update="wwwroot\me.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

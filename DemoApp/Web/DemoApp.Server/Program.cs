@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DemoApp.Shared;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +16,9 @@ namespace DemoApp.Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var hostBuilder = CreateHostBuilder(args).Build();
+            Registry.ServiceProvider = hostBuilder.Services;
+            hostBuilder.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
