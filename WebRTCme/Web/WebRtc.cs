@@ -5,6 +5,8 @@ using System.Text;
 using WebRtc.Web;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace WebRTCme
 {
@@ -19,7 +21,8 @@ namespace WebRTCme
             {
                 try
                 {
-                    var ret1 = await JsInterop.Prompt(jsRuntime, "hello there me");
+                    var mediaDevices = await jsRuntime.InvokeAsync<List<MediaDeviceInfo>>(
+                        "navigator.mediaDevices.enumerateDevices");
 
 
                     var x = await jsRuntime.InvokeAsync<object>(

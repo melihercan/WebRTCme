@@ -7,10 +7,9 @@ namespace WebRTCme
 {
     public enum MediaDeviceInfoKind
     {
-        AudioInput,
         VideoInput,
-        AudioOutput,
-        VideoOutput
+        AudioInput,
+        AudioOutput
     }
 
     public class MediaDeviceInfo
