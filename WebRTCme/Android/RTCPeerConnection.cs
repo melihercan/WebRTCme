@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRTCme
+namespace WebRrtc.Android
 {
     internal class RTCPeerConnection : IRTCPeerConnection
     {

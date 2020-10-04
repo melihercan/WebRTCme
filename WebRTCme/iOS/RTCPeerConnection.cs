@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRTCme
+namespace WebRtc.iOS
 {
     internal class RTCPeerConnection : IRTCPeerConnection
     {

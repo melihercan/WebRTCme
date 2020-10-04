@@ -1,9 +1,11 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using Microsoft.JSInterop;
-using System.Threading.Tasks;
 
-namespace WebRtc
+namespace WebRtc.Web
 {
-    public class JsInterop
+    internal class JsInterop
     {
         public static ValueTask<string> Prompt(IJSRuntime jsRuntime, string message)
         {

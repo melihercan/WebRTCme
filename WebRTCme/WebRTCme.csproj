@@ -10,7 +10,6 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="DotNetStandard\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -20,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<Compile Include="DotNetStandard\**\*.cs" />
+		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
@@ -32,8 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.8" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.8" />
-    </ItemGroup>
+	  <Compile Remove="Web\JsInterop.cs" />
+	</ItemGroup>
 
 </Project>
