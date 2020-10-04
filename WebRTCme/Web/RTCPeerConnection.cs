@@ -9,7 +9,7 @@ namespace WebRtc.Web
     {
         public void Do()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("I am WEB");
         }
     }
 }

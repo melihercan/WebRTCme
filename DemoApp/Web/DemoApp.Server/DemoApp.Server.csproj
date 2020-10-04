@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
+    <ProjectReference Include="..\DemoApp.Shared\DemoApp.Shared.csproj" />
   </ItemGroup>
 
 </Project>

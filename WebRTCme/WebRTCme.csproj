@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
+		<UpToDateCheckInput Include="Web\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -28,10 +29,6 @@
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="iOS\**\*.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Web\JsInterop.cs" />
 	</ItemGroup>
 
 </Project>

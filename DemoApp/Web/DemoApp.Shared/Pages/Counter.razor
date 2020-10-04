@@ -7,6 +7,14 @@
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var webRtc = CrossWebRtc.Current;
+        var rtcPeerConnection = webRtc.CreateRTCPeerConnection();
+        rtcPeerConnection.Do();
+    }
+
     private int currentCount = 0;
 
     private void IncrementCount()
