@@ -7,14 +7,28 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-@code {
+@code {        
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if(firstRender)
+        {
+            var webRtc = CrossWebRtc.Current;
+            //        webRtc.Initialize(Registry.ServiceProvider);
+//            var rtcPeerConnection = webRtc.CreateRTCPeerConnection(JsRuntime);
+  //          rtcPeerConnection.Do();
+
+
+            var promiseResult = await webRtc.GetUserMedia(JsRuntime);
+
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        var webRtc = CrossWebRtc.Current;
-//        webRtc.Initialize(Registry.ServiceProvider);
-        var rtcPeerConnection = webRtc.CreateRTCPeerConnection(JsRuntime);
-        rtcPeerConnection.Do();
     }
 
     private int currentCount = 0;

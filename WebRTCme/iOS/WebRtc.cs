@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRtc.iOS;
 
 namespace WebRTCme
@@ -10,9 +11,14 @@ namespace WebRTCme
     {
         public IRTCPeerConnection CreateRTCPeerConnection(IJSRuntime jsRuntime) => new RTCPeerConnection();
 
-//        public void Initialize(IServiceProvider serviceProvider)
-  //      {
-    //        throw new NotImplementedException();
-      //  }
+        public Task<object> GetUserMedia(IJSRuntime jsRuntime)
+        {
+            throw new NotImplementedException();
+        }
+
+        //        public void Initialize(IServiceProvider serviceProvider)
+        //      {
+        //        throw new NotImplementedException();
+        //  }
     }
 }
