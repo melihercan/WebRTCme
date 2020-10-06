@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Server", "DemoApp\W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DemoApp", "DemoApp", "{47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.JsInterop", "WebRTCme.JsInterop\WebRTCme.JsInterop.csproj", "{7A64000C-C4BB-419A-AB51-22DEB62C05D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +123,18 @@ Global
 		{7A461FAA-8821-4FAD-A248-CF88297DC58F}.Release|iPhone.Build.0 = Release|Any CPU
 		{7A461FAA-8821-4FAD-A248-CF88297DC58F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{7A461FAA-8821-4FAD-A248-CF88297DC58F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|iPhone.Build.0 = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{7A64000C-C4BB-419A-AB51-22DEB62C05D5}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
