@@ -10,6 +10,8 @@ namespace WebRTCme
     {
         public INavigator Navigator => throw new NotImplementedException();
 
+        public IWindow Window => throw new NotImplementedException();
+
         public IRTCPeerConnection CreateRTCPeerConnection() => new RTCPeerConnection();
 
         //public Task<object> GetUserMedia(IJSRuntime jsRuntime)

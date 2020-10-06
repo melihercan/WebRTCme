@@ -9,9 +9,9 @@ namespace WebRTCme
     {
         //void Initialize(IServiceProvider serviceProvider = null);
 
-        INavigator Navigator { get; }
+        IWindow Window { get; }
         
-        IRTCPeerConnection CreateRTCPeerConnection();
+        //IRTCPeerConnection CreateRTCPeerConnection();
 
 
 
