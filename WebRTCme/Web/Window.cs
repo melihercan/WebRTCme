@@ -15,7 +15,7 @@ namespace WebRtc.Web
 
         public IRTCPeerConnection NewRTCPeerConnection()
         {
-            throw new NotImplementedException();
+            return new RTCPeerConnection();
         }
     }
 }

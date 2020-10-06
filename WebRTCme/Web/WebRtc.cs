@@ -11,6 +11,10 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        public IWindow Window => new Window();
+        public Task<IWindow> NewWindow()
+        {
+            var window = new Window();
+            return Task.FromResult((IWindow)window);
+        }
     }
 }

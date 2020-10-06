@@ -7,16 +7,6 @@ namespace WebRTCme
 {
     public interface IWebRtc
     {
-        //void Initialize(IServiceProvider serviceProvider = null);
-
-        IWindow Window { get; }
-        
-        //IRTCPeerConnection CreateRTCPeerConnection();
-
-
-
-        //Task<object> GetUserMedia(IJSRuntime jsRuntime);
-
-
+        Task<IWindow> NewWindow();
     }
 }

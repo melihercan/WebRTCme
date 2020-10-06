@@ -16,15 +16,14 @@
         if(firstRender)
         {
             var webRtc = CrossWebRtc.Current;
+            var window = await webRtc.NewWindow();
 
-            var w1 = webRtc.Window;
-            var w2 = webRtc.Window;
 
-            var mediaStream = webRtc.Window.Navigator.MediaDevices.GetUserMedia(new MediaStreamConstraints
-            {
-                Audio = true,
-                Video = true
-            });
+//            var mediaStream = webRtc.Window.Navigator.MediaDevices.GetUserMedia(new MediaStreamConstraints
+  //          {
+    //            Audio = true,
+      //          Video = true
+        //    });
 
             //        webRtc.Initialize(Registry.ServiceProvider);
             //            var rtcPeerConnection = webRtc.CreateRTCPeerConnection(JsRuntime);
