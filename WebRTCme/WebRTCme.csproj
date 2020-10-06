@@ -9,8 +9,6 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="Interfaces\**\*.cs" />
-		<UpToDateCheckInput Include="Models\**\*.cs" />
 		<UpToDateCheckInput Include="Web\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
@@ -18,8 +16,6 @@
 
 	<ItemGroup>
 		<Compile Include="*.cs" />
-		<Compile Include="Models\**\*.cs" />
-		<Compile Include="Interfaces\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -35,6 +31,8 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+	</ItemGroup>
 
-	
 </Project>
