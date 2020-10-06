@@ -4,8 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface INavigator
+    public interface IMediaStream
     {
-        IMediaDevices MediaDevices { get; }
     }
 }

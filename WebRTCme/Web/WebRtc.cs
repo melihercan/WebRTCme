@@ -11,7 +11,7 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        public INavigator Navigator => throw new NotImplementedException();
+        public INavigator Navigator => new Navigator();
 
         //        internal IServiceProvider ServiceProvider { get; private set; }
 

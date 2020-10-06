@@ -1,8 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
-<PropertyGroup>
+	<PropertyGroup>
         <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
-        <RazorLangVersion>3.0</RazorLangVersion>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RootNamespace>WebRtc</RootNamespace>
@@ -36,4 +35,5 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	
 </Project>
