@@ -8,6 +8,6 @@ namespace WebRTCme
     {
         INavigator Navigator { get; }
 
-        IRTCPeerConnection NewRTCPeerConnection();
+        IRTCPeerConnection RTCPeerConnection();
     }
 }

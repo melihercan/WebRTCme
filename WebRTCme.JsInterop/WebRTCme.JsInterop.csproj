@@ -14,11 +14,6 @@
 
 
   <ItemGroup>
-    <Folder Include="Interops\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
     <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
 

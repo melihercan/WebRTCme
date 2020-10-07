@@ -6,14 +6,20 @@ using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using WebRtcJsInterop;
+using Microsoft.JSInterop;
 
 namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        public async Task<IWindow> NewWindow()
+        public Task<IWindow> Window()
         {
-            return await Window.New();
+            throw new NotImplementedException();
+        }
+
+        public async Task<IWindow> Window(IJSRuntime jsRuntime)
+        {
+            return await WebRtcJsInterop.Window.New(jsRuntime);
         }
     }
 }

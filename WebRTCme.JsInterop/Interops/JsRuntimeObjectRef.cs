@@ -3,7 +3,7 @@ using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace WebRtcJsInterop
+namespace WebRtcJsInterop.Interops
 {
     /// <summary>
     /// Represents a js object reference, send it to the js interop api and it will be seen as an instance instead of a serialized/deserialized object
