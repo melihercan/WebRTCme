@@ -17,6 +17,8 @@
         {
             var webRtc = CrossWebRtc.Current;
             var window = await webRtc.Window(JsRuntime);
+            var navigator = await window.Navigator();
+
 
 
 

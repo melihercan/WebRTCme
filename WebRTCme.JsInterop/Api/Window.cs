@@ -28,11 +28,19 @@ namespace WebRtcJsInterop
         }
 
 
-        public INavigator Navigator => new Navigator();
+
+
+        async Task<INavigator> IWindow.Navigator()
+        {
+            var navigatorInterop = await _windowInterop.Navigator();
+            var navigator = new Navigator(_jsRuntime, navigatorInterop);
+            return navigator;
+        }
 
         public IRTCPeerConnection RTCPeerConnection()
         {
             return new RTCPeerConnection();
         }
+
     }
 }

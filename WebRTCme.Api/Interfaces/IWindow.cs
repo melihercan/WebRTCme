@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
     public interface IWindow
     {
-        INavigator Navigator { get; }
+        Task<INavigator> Navigator();
 
         IRTCPeerConnection RTCPeerConnection();
     }
