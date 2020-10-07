@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRtcJsInterop.Extensions;
 using WebRTCme;
 
 namespace WebRtcJsInterop
@@ -19,6 +20,9 @@ namespace WebRtcJsInterop
         public static async Task<IWindow> New(IJSRuntime jsRuntime)
         {
             IWindow window = new Window(jsRuntime);
+
+
+            var w = await jsRuntime.Window();
 
 
             return window;

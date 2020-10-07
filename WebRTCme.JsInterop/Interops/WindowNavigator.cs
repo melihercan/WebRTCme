@@ -46,7 +46,7 @@ namespace WebRtcJsInterop.Interops
         /// <returns></returns>
         //public async ValueTask<WindowNavigatorBattery> GetBattery()
         //{
-        //    return await JsRuntime.InvokeAsync<WindowNavigatorBattery>("browserInterop.navigator.getBattery").ConfigureAwait(false);
+        //    return await JsRuntime.InvokeAsync<WindowNavigatorBattery>("webRtcInterop.navigator.getBattery").ConfigureAwait(false);
         //}
 
 

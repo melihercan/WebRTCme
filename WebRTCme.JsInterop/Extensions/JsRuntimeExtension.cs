@@ -35,7 +35,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<JsRuntimeObjectRef> GetWindowPropertyRef(this IJSRuntime jsRuntime,
             string propertyPath)
         {
-            return await jsRuntime.InvokeAsync<JsRuntimeObjectRef>("browserInterop.getPropertyRef", propertyPath).ConfigureAwait(false);
+            return await jsRuntime.InvokeAsync<JsRuntimeObjectRef>("webRtcInterop.getPropertyRef", propertyPath).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -75,7 +75,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<T> GetInstanceProperty<T>(this IJSRuntime jsRuntime,
             JsRuntimeObjectRef jsObjectRef, string propertyPath, object serializationSpec = null)
         {
-            return await jsRuntime.InvokeAsync<T>("browserInterop.getInstancePropertySerializable", jsObjectRef,
+            return await jsRuntime.InvokeAsync<T>("webRtcInterop.getInstancePropertySerializable", jsObjectRef,
                 propertyPath, serializationSpec).ConfigureAwait(false);
         }
 
@@ -120,7 +120,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask SetInstanceProperty(this IJSRuntime jsRuntime, JsRuntimeObjectRef jsObjectRef,
             string propertyPath, object value)
         {
-            await jsRuntime.InvokeVoidAsync("browserInterop.setInstanceProperty", jsObjectRef, propertyPath, value).ConfigureAwait(false);
+            await jsRuntime.InvokeVoidAsync("webRtcInterop.setInstanceProperty", jsObjectRef, propertyPath, value).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace WebRtcJsInterop.Extensions
             JsRuntimeObjectRef jsObjectRef, string propertyPath)
         {
             var jsRuntimeObjectRef =
-                await jsRuntime.InvokeAsync<JsRuntimeObjectRef>("browserInterop.getInstancePropertyRef", jsObjectRef,
+                await jsRuntime.InvokeAsync<JsRuntimeObjectRef>("webRtcInterop.getInstancePropertyRef", jsObjectRef,
                     propertyPath).ConfigureAwait(false);
             jsRuntimeObjectRef.JsRuntime = jsRuntime;
             return jsRuntimeObjectRef;
@@ -152,7 +152,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask InvokeInstanceMethod(this IJSRuntime jsRuntime, JsRuntimeObjectRef windowObject,
             string methodName, params object[] arguments)
         {
-            await jsRuntime.InvokeVoidAsync("browserInterop.callInstanceMethod",
+            await jsRuntime.InvokeVoidAsync("webRtcInterop.callInstanceMethod",
                 new object[] {windowObject, methodName}.Concat(arguments).ToArray()).ConfigureAwait(false);
         }
 
@@ -171,7 +171,7 @@ namespace WebRtcJsInterop.Extensions
 
             if (windowObject is null) throw new ArgumentNullException(nameof(windowObject));
 
-            return await jsRuntime.InvokeAsync<T>("browserInterop.callInstanceMethod",
+            return await jsRuntime.InvokeAsync<T>("webRtcInterop.callInstanceMethod",
                 new object[] {windowObject, methodName}.Concat(arguments).ToArray()).ConfigureAwait(false);
         }
 
@@ -190,7 +190,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<T> GetInstanceContent<T>(this IJSRuntime jsRuntime, JsRuntimeObjectRef jsObject,
             object serializationSpec)
         {
-            return await jsRuntime.InvokeAsync<T>("browserInterop.returnInstance", jsObject, serializationSpec).ConfigureAwait(false);
+            return await jsRuntime.InvokeAsync<T>("webRtcInterop.returnInstance", jsObject, serializationSpec).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace WebRtcJsInterop.Extensions
             if (jsRuntime is null) throw new ArgumentNullException(nameof(jsRuntime));
 
             var jsRuntimeObjectRef = await jsRuntime.InvokeAsync<JsRuntimeObjectRef>(
-                "browserInterop.callInstanceMethodGetRef",
+                "webRtcInterop.callInstanceMethodGetRef",
                 new object[] {windowObject, methodName}.Concat(arguments).ToArray()).ConfigureAwait(false);
             jsRuntimeObjectRef.JsRuntime = jsRuntime;
             return jsRuntimeObjectRef;
@@ -234,7 +234,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<bool> HasProperty(this IJSRuntime jsRuntime, JsRuntimeObjectRef jsObject,
             string propertyPath)
         {
-            return await jsRuntime.InvokeAsync<bool>("browserInterop.hasProperty", jsObject, propertyPath).ConfigureAwait(false);
+            return await jsRuntime.InvokeAsync<bool>("webRtcInterop.hasProperty", jsObject, propertyPath).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -249,11 +249,11 @@ namespace WebRtcJsInterop.Extensions
         //public static async ValueTask<IAsyncDisposable> AddEventListener(this IJSRuntime jsRuntime,
         //    JsRuntimeObjectRef jsRuntimeObject, string propertyName, string eventName, CallBackInteropWrapper callBack)
         //{
-        //    var listenerId = await jsRuntime.InvokeAsync<int>("browserInterop.addEventListener", jsRuntimeObject,
+        //    var listenerId = await jsRuntime.InvokeAsync<int>("webRtcInterop.addEventListener", jsRuntimeObject,
         //        propertyName, eventName, callBack).ConfigureAwait(false);
 
         //    return new ActionAsyncDisposable(async () =>
-        //        await jsRuntime.InvokeVoidAsync("browserInterop.removeEventListener", jsRuntimeObject, propertyName,
+        //        await jsRuntime.InvokeVoidAsync("webRtcInterop.removeEventListener", jsRuntimeObject, propertyName,
         //            eventName, listenerId).ConfigureAwait(false));
         //}
 
