@@ -10,7 +10,7 @@ using WebRtcJsInterop.Extensions;
 
 namespace WebRtcJsInterop.Interops
 {
-    public class WindowNavigator : JsObjectWrapperBase
+    public class NavigatorInterop : JsObjectWrapperBase
     {
         internal override void SetJsRuntime(IJSRuntime jsRuntime, JsRuntimeObjectRef navigatorRef)
         {

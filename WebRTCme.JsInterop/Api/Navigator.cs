@@ -10,9 +10,9 @@ namespace WebRtcJsInterop
     internal class Navigator : INavigator
     {
         private readonly IJSRuntime _jsRuntime;
-        private readonly WindowNavigator _navigatorInterop;
+        private readonly NavigatorInterop _navigatorInterop;
 
-        internal Navigator(IJSRuntime jsRuntime, WindowNavigator navigatorInterop)
+        internal Navigator(IJSRuntime jsRuntime, NavigatorInterop navigatorInterop)
         {
             _jsRuntime = jsRuntime;
             _navigatorInterop = navigatorInterop;

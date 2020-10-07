@@ -78,9 +78,9 @@ namespace WebRtcJsInterop.Interops
         /// Will return an instance of WindowNavigator that will give access to window.navigator API
         /// </summary>
         /// <value></value>
-        public async ValueTask<WindowNavigator> Navigator()
+        public async ValueTask<NavigatorInterop> Navigator()
         {
-            return await JsRuntime.GetInstancePropertyWrapper<WindowNavigator>(JsObjectRef, "navigator").ConfigureAwait(false);
+            return await JsRuntime.GetInstancePropertyWrapper<NavigatorInterop>(JsObjectRef, "navigator").ConfigureAwait(false);
         }
 
         /// <summary>
