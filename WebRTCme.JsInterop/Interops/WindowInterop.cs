@@ -106,6 +106,13 @@ namespace WebRtcJsInterop.Interops
         public int InnerWidth { get; set; }
 
         /// <summary>
+        /// Returns a boolean indicating whether the current context is secure (true) or not (false).
+        /// </summary>
+        /// <value></value>
+        public bool IsSecureContext { get; set; }
+
+
+        /// <summary>
         /// Returns the locationbar object, whose visibility can be checked.
         /// </summary>
         //public BarProp LocationBar => locationBarLazy.Value;
@@ -140,6 +147,13 @@ namespace WebRtcJsInterop.Interops
         {
             await JsRuntime.SetInstanceProperty(JsObjectRef, "name", name).ConfigureAwait(false);
         }
+
+
+        /// <summary>
+        /// Returns the global object's origin, serialized as a string. 
+        /// </summary>
+        /// <value></value>
+        public string Origin { get; set; }
 
         /// <summary>
         /// Returns a reference to the window that opened this current window.
@@ -249,17 +263,7 @@ namespace WebRtcJsInterop.Interops
         //    return await JsRuntime.GetInstancePropertyWrapper<WindowVisualViewPort>(JsObjectRef, "visualViewport").ConfigureAwait(false);
         //}
 
-        /// <summary>
-        /// Returns a boolean indicating whether the current context is secure (true) or not (false).
-        /// </summary>
-        /// <value></value>
-        public bool IsSecureContext { get; set; }
 
-        /// <summary>
-        /// Returns the global object's origin, serialized as a string. 
-        /// </summary>
-        /// <value></value>
-        public string Origin { get; set; }
 
         /// <summary>
         /// A string you want to display in the alert dialog

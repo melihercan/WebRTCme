@@ -19,11 +19,11 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<WindowInterop> Window(this IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.GetWindowPropertyRef("window").ConfigureAwait(false);
-            var wsInterop =
+            var windowInterop =
                 await jsRuntime.GetInstanceProperty<WindowInterop>(jsObjectRef, "self",
                     WindowInterop.SerializationSpec).ConfigureAwait(false);
-            wsInterop.SetJsRuntime(jsRuntime, jsObjectRef);
-            return wsInterop;
+            windowInterop.SetJsRuntime(jsRuntime, jsObjectRef);
+            return windowInterop;
         }
 
         /// <summary>
