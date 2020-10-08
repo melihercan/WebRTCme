@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 namespace WebRtcJsInterop.Interops
 {
     /// <summary>
-    /// Represents a js object reference, send it to the js interop api and it will be seen as an instance instead of a serialized/deserialized object
+    /// Represents a JS object reference, send it to the js interop api and it will be seen as an instance 
+    /// instead of a serialized/deserialized object.
     /// </summary>
     public class JsObjectRef : IAsyncDisposable
     {
-        internal IJSRuntime JsRuntime { get; set; }
-
         [JsonPropertyName("__jsObjectRefId")] 
         public int JsObjectRefId { get; set; }
 
-        public async ValueTask DisposeAsync()
-        {
+        internal IJSRuntime JsRuntime { get; set; }
+
+        public async ValueTask DisposeAsync() => 
             await JsRuntime.InvokeVoidAsync("webRtcInterop.removeJsObjectRef", JsObjectRefId).ConfigureAwait(false);
-        }
     }
 }
