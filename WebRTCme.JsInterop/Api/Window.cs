@@ -22,6 +22,18 @@ namespace WebRtcJsInterop
 
         public static async Task<IWindow> New(IJSRuntime jsRuntime)
         {
+            var x = await jsRuntime.InvokeAsync<JsObjectRef>("webRtcInterop.getPropertyJsObjectRef", new object[]
+            {
+                null,
+                "window"
+            });
+
+
+            var y = await jsRuntime.InvokeAsync<JsObjectRef>("webRtcInterop.getPropertyJsObjectRef", x, "navigator");
+
+            y.JsRuntime = jsRuntime;
+            await y.DisposeAsync();
+
             var windowInterop = await jsRuntime.Window();
             var window = new Window(jsRuntime, windowInterop);
             return window;

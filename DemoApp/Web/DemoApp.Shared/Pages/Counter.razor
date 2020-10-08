@@ -16,15 +16,15 @@
         if(firstRender)
         {
             //            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
-            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
-            {
-                null,
-                "window"
-            });
+            //var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
+            ///{
+               // null,
+                //"window"
+            //});
 
 
-            //            var webRtc = CrossWebRtc.Current;
-            //          var window = await webRtc.Window(JsRuntime);
+            var webRtc = CrossWebRtc.Current;
+            var window = await webRtc.Window(JsRuntime);
             //        var navigator = await window.Navigator();
 
 

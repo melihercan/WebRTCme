@@ -29,25 +29,30 @@
         return jsObjectRef;
     }
 
-    public.getProperty = function (object, property) {
-        if (object === null) {
-            object = window;
+    public.removeJsObjectRef = function (id) {
+        delete jsObjectRefs[id];
+    }
+
+
+    public.getPropertyJsObjectRef = function (instance, property) {
+        if (instance === null) {
+            instance = window;
         }
         let list = property.replace('[', '.').replace(']', '').split('.');
         if (list[0] === "") {
             list.shift();
         }
-        let current = object;
+        let object = instance;
         for (i = 0; i < list.length; i++) {
-            if (list[i] in current) {
-                current = current[list[i]];
+            if (list[i] in object) {
+                object = object[list[i]];
             } else {
                 return null;
             }
         }
 
-        let ret = addJsObjectRef(current);
-        return ret;
+        let objectRef = addJsObjectRef(object);
+        return objectRef;
     }
 
     return public;
