@@ -15,21 +15,26 @@
 
         if(firstRender)
         {
-            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.initialize");
+            //            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
+            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
+            {
+                null,
+                "window"
+            });
 
 
-//            var webRtc = CrossWebRtc.Current;
-  //          var window = await webRtc.Window(JsRuntime);
-    //        var navigator = await window.Navigator();
+            //            var webRtc = CrossWebRtc.Current;
+            //          var window = await webRtc.Window(JsRuntime);
+            //        var navigator = await window.Navigator();
 
 
 
 
-//            var mediaStream = webRtc.Window.Navigator.MediaDevices.GetUserMedia(new MediaStreamConstraints
-  //          {
-    //            Audio = true,
-      //          Video = true
-        //    });
+            //            var mediaStream = webRtc.Window.Navigator.MediaDevices.GetUserMedia(new MediaStreamConstraints
+            //          {
+            //            Audio = true,
+            //          Video = true
+            //    });
 
             //        webRtc.Initialize(Registry.ServiceProvider);
             //            var rtcPeerConnection = webRtc.CreateRTCPeerConnection(JsRuntime);
