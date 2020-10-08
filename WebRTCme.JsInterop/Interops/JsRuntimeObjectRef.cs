@@ -16,7 +16,7 @@ namespace WebRtcJsInterop.Interops
 
         public async ValueTask DisposeAsync()
         {
-            await JsRuntime.InvokeVoidAsync("webRtcInterop.removeObjectRef", JsObjectRefId).ConfigureAwait(false);
+            await JsRuntime.InvokeVoidAsync("webRtcInterop2.removeObjectRef", JsObjectRefId).ConfigureAwait(false);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace WebRtcJsInterop
         {
             var navigatorInterop = await _windowInterop.Navigator();
             var navigator = new Navigator(_jsRuntime, navigatorInterop);
+            await navigator.Init();
             return navigator;
         }
 

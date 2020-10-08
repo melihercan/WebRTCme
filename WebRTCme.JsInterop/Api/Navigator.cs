@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
@@ -18,9 +19,11 @@ namespace WebRtcJsInterop
             _navigatorInterop = navigatorInterop;
         }
 
+        internal async Task Init()
+        {
 
-        public IMediaDevices MediaDevices => new MediaDevices();
+        }
 
-
+        public IMediaDevices MediaDevices => throw new NotImplementedException();
     }
 }
