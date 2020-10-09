@@ -25,48 +25,33 @@ namespace WebRtcJsInterop
         {
             var windowObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
                 "webRtcInterop.getProperty", null, "window");
-//             windowObjRef.JsRuntime = jsRuntime;
+             windowObjRef.JsRuntime = jsRuntime;
 
-            //var navigatorObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-            //    "webRtcInterop.getProperty", windowObjRef, "navigator");
-            //navigatorObjRef.JsRuntime = jsRuntime;
+            var navigatorObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
+                "webRtcInterop.getProperty", windowObjRef, "navigator");
+            navigatorObjRef.JsRuntime = jsRuntime;
 
-            //var mediaDevicesObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-            //    "webRtcInterop.getProperty", navigatorObjRef, "mediaDevices");
-            //mediaDevicesObjRef.JsRuntime = jsRuntime;
+            var mediaDevicesObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
+                "webRtcInterop.getProperty", navigatorObjRef, "mediaDevices");
+            mediaDevicesObjRef.JsRuntime = jsRuntime;
 
-            //var mediaDevicesObjRef2 = await jsRuntime.InvokeAsync<JsObjectRef>(
-            //    "webRtcInterop.getProperty", 
-            //    new object[]
-            //    {
-            //        windowObjRef,
-            //        "navigator.mediaDevices"
-            //    });
-            //mediaDevicesObjRef2.JsRuntime = jsRuntime;
+            var mediaDevicesObjRef2 = await jsRuntime.InvokeAsync<JsObjectRef>(
+                "webRtcInterop.getProperty", 
+                new object[]
+                {
+                    windowObjRef,
+                    "navigator.mediaDevices"
+                });
+            mediaDevicesObjRef2.JsRuntime = jsRuntime;
 
-
-
-            //            var wor = await jsRuntime.InvokeAsync<JsObjectRef>(
-            //              "webRtcInterop.getProperty", null, "window");
-
-            //        try
-            //      {
-            //        var xxx = await jsRuntime.InvokeAsync<JsObjectRef>(
-            //          "webRtcInterop.getProperty", wor, "window.navigator.xxx");
-            //}
-            //catch (Exception ex)
-            //{
-            //  var x = ex.Message;
-            //}
-
-            //var obj = await jsRuntime.InvokeAsync<object>(
-              //  "webRtcInterop.createObject",
-//                new object[]
-  //              {
-    //                null,
-      //              "RTCPeerConnection"
-        //        });
-
+            var rtcPeerConnectionObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
+                "webRtcInterop.createObject",
+                new object[]
+                {
+                    null,
+                    "RTCPeerConnection"
+                });
+            rtcPeerConnectionObjRef.JsRuntime = jsRuntime;
 
             object contentSpec = new
             {
@@ -93,19 +78,18 @@ namespace WebRtcJsInterop
                 });
 
 
-
-            //var obj = await jsRuntime.InvokeAsync<object>(
-            //    "webRtcInterop.callMethodAsync",
-            //    new object[]
-            //    {
-            //        mediaDevicesObjRef,
-            //        "getUserMedia",
-            //        new MediaStreamConstraints
-            //        {
-            //            Audio = true,
-            //            Video = true
-            //        }
-            //    });
+            var streamObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
+                "webRtcInterop.callMethodAsync",
+                new object[]
+                {
+                    mediaDevicesObjRef,
+                    "getUserMedia",
+                    new MediaStreamConstraints
+                    {
+                        Audio = true,
+                        Video = true
+                    }
+                });
 
 
             //await mediaDevicesObjRef2.DisposeAsync();

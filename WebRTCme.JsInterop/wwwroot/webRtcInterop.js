@@ -24,9 +24,9 @@
     addObjectRef = function (object) {
         let id = objectRefId++;
         objectRefs[id] = object;
-        let jsObjectRef = {};
-        jsObjectRef[jsObjectRefKey] = id;
-        return jsObjectRef;
+        let objectRef = {};
+        objectRef[jsObjectRefKey] = id;
+        return objectRef;
     }
 
     getPropertyObject = function (rootObject, property) {
@@ -48,14 +48,34 @@
         return object;
     }
 
+    getInterfaceObject = function (rootObject, interface) {
+        if (rootObject === null) {
+            rootObject = window;
+        }
+        let list = interface.replace('[', '.').replace(']', '').split('.');
+        if (list[0] === "") {
+            list.shift();
+        }
+        let object = rootObject;
+        for (i = 0; i < list.length; i++) {
+            if (list[i] in object) {
+                object = object[list[i]];
+            } else {
+                throw new Error("Object referenced by " + interface + " does not exist");
+            }
+        }
+        return object;
+    }
+
+
     getMethodObject = function (rootObject, method) {
         if (method.includes(".")) {
             let property = method.substring(0, method.lastIndexOf('.'));
             rootObject = getPropertyObject(rootObject, property);
             method = method.substring(method.lastIndexOf('.') + 1);
         }
-        let methodObject = getPropertyObject(instance, method);
-        return methodObject;
+        let object = getPropertyObject(rootObject, method);
+        return object;
     }
 
     getObjectContent = function (data, alreadySerialized, contentSpec) {
@@ -74,7 +94,7 @@
             typeof data == "boolean") {
             return data;
         }
-        var res = (Array.isArray(data)) ? [] : {};
+        var content = (Array.isArray(data)) ? [] : {};
         if (!contentSpec) {
             contentSpec = "*";
         }
@@ -99,22 +119,22 @@
                 }
                 alreadySerialized.push(currentMember);
                 if (Array.isArray(currentMember) || currentMember.length) {
-                    res[i] = [];
+                    content[i] = [];
                     for (var j = 0; j < currentMember.length; j++) {
                         const arrayItem = currentMember[j];
                         if (typeof arrayItem === 'object') {
-                            res[i].push(self.getSerializableObject(arrayItem, alreadySerialized, currentMemberSpec));
+                            content[i].push(self.getSerializableObject(arrayItem, alreadySerialized, currentMemberSpec));
                         } else {
-                            res[i].push(arrayItem);
+                            content[i].push(arrayItem);
                         }
                     }
                 } else {
                     // the browser provides some member (like plugins) as hash with index as key, 
                     // if length == 0 we shall not convert it
                     if (currentMember.length === 0) {
-                        res[i] = [];
+                        content[i] = [];
                     } else {
-                        res[i] = self.getSerializableObject(currentMember, alreadySerialized, currentMemberSpec);
+                        content[i] = self.getSerializableObject(currentMember, alreadySerialized, currentMemberSpec);
                     }
                 }
 
@@ -125,11 +145,11 @@
                     currentMember = "Infinity";
                 }
                 if (currentMember !== null) { //needed because the default json serializer in jsinterop serialize null values
-                    res[i] = currentMember;
+                    content[i] = currentMember;
                 }
             }
         }
-        return res;
+        return content;
     };
 
 
@@ -137,7 +157,7 @@
 
     // JS object ref
     public.createObject = function (rootObject, interface, ...args) {
-        let interfaceObject = getPropertyObject(rootObject, interface);
+        let interfaceObject = getInterfaceObject(rootObject, interface);
         let createdObject = new interfaceObject(args);
         let objectRef = addObjectRef(createdObject);
         return objectRef;
@@ -150,32 +170,37 @@
 
     // JS object ref
     public.getProperty = function (rootObject, property) {
-        let object = getPropertyObject(rootObject, property);
-        let objectRef = addObjectRef(object);
+        let propertyObject = getPropertyObject(rootObject, property);
+        let objectRef = addObjectRef(propertyObject);
         return objectRef;
     }
 
     // JSON serialized content per spec
     public.getContent = function (rootObject, property, contentSpec) {
-        let object = getPropertyObject(rootObject, property);
-        let ret = getObjectContent(object, [], contentSpec);
-        return ret;
+        let propertyObject = getPropertyObject(rootObject, property);
+        let content = getObjectContent(propertyObject, [], contentSpec);
+        return content;
     }
 
     // JS object ref
     public.callMethod = function (rootObject, method, ...args) {
         let methodObject = getMethodObject(rootObject, method);
         let ret = methodObject.apply(rootObject, args);
-        //// TODO: Add to obj refs if ret is not void
+        if (ret != {}) {
+            let objectRef = addObjectRef(ret);
+            return objectRef;
+        }
         return ret;
-
     }
 
     // JS object ref
     public.callMethodAsync = async function (rootObject, method, ...args) {
         let methodObject = getMethodObject(rootObject, method);
         let ret = await methodObject.apply(rootObject, args);
-        //// TODO: Add to obj refs
+        if (ret != {}) {
+            let objectRef = addObjectRef(ret);
+            return objectRef;
+        }
         return ret;
     }
 
