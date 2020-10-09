@@ -2,84 +2,183 @@
 
     let public = {};
 
-    // Use same value on .NET side.
+    // Use same value on .NET side, "JsObjectRef.cs".
     const jsObjectRefKey = '__jsObjectRefId';
 
-    let jsObjectRefs = {};
-    let jsObjectRefId = 0;
+    let objectRefs = {};
+    let objectRefId = 0;
 
     DotNet.attachReviver(function (key, value) {
         if (value && typeof value === 'object' && value.hasOwnProperty(jsObjectRefKey) &&
             typeof value[jsObjectRefKey] === 'number') {
             let id = value[jsObjectRefKey];
-            if (!(id in jsObjectRefs)) {
+            if (!(id in objectRefs)) {
                 throw new Error('JS object reference with id:' + id + ' does not exist');
             }
-            return jsObjectRefs[id];
+            return objectRefs[id];
         } else {
             return value;
         }
     })
 
-    addJsObjectRef = function (object) {
-        let id = jsObjectRefId++;
-        jsObjectRefs[id] = object;
+    addObjectRef = function (object) {
+        let id = objectRefId++;
+        objectRefs[id] = object;
         let jsObjectRef = {};
         jsObjectRef[jsObjectRefKey] = id;
         return jsObjectRef;
     }
 
-    public.removeJsObjectRef = function (id) {
-        delete jsObjectRefs[id];
-    }
-
-    getPropertyObject = function (instance, property) {
-        if (instance === null) {
-            instance = window;
+    getPropertyObject = function (rootObject, property) {
+        if (rootObject === null) {
+            rootObject = window;
         }
         let list = property.replace('[', '.').replace(']', '').split('.');
         if (list[0] === "") {
             list.shift();
         }
-        let object = instance;
+        let object = rootObject;
         for (i = 0; i < list.length; i++) {
             if (list[i] in object) {
                 object = object[list[i]];
             } else {
-                return null;
+                throw new Error("Object referenced by " + property + " does not exist");
             }
         }
         return object;
     }
 
-    public.getPropertyJsObjectRef = function (instance, property) {
-        let object = getPropertyObject(instance, property);
-        let objectRef = addJsObjectRef(object);
+    getMethodObject = function (rootObject, method) {
+        if (method.includes(".")) {
+            let property = method.substring(0, method.lastIndexOf('.'));
+            rootObject = getPropertyObject(rootObject, property);
+            method = method.substring(method.lastIndexOf('.') + 1);
+        }
+        let methodObject = getPropertyObject(instance, method);
+        return methodObject;
+    }
+
+    getObjectContent = function (data, alreadySerialized, contentSpec) {
+        if (contentSpec === false) {
+            return undefined;
+        }
+        if (!alreadySerialized) {
+            alreadySerialized = [];
+        }
+        if (typeof data == "undefined" ||
+            data === null) {
+            return null;
+        }
+        if (typeof data === "number" ||
+            typeof data === "string" ||
+            typeof data == "boolean") {
+            return data;
+        }
+        var res = (Array.isArray(data)) ? [] : {};
+        if (!contentSpec) {
+            contentSpec = "*";
+        }
+        for (var i in data) {
+            var currentMember = data[i];
+
+            if (typeof currentMember === 'function' || currentMember === null) {
+                continue;
+            }
+            var currentMemberSpec;
+            if (contentSpec != "*") {
+                currentMemberSpec = Array.isArray(data) ? contentSpec : contentSpec[i];
+                if (!currentMemberSpec) {
+                    continue;
+                }
+            } else {
+                currentMemberSpec = "*"
+            }
+            if (typeof currentMember === 'object') {
+                if (alreadySerialized.indexOf(currentMember) >= 0) {
+                    continue;
+                }
+                alreadySerialized.push(currentMember);
+                if (Array.isArray(currentMember) || currentMember.length) {
+                    res[i] = [];
+                    for (var j = 0; j < currentMember.length; j++) {
+                        const arrayItem = currentMember[j];
+                        if (typeof arrayItem === 'object') {
+                            res[i].push(self.getSerializableObject(arrayItem, alreadySerialized, currentMemberSpec));
+                        } else {
+                            res[i].push(arrayItem);
+                        }
+                    }
+                } else {
+                    // the browser provides some member (like plugins) as hash with index as key, 
+                    // if length == 0 we shall not convert it
+                    if (currentMember.length === 0) {
+                        res[i] = [];
+                    } else {
+                        res[i] = self.getSerializableObject(currentMember, alreadySerialized, currentMemberSpec);
+                    }
+                }
+
+
+            } else {
+                // string, number or boolean
+                if (currentMember === Infinity) { //inifity is not serialized by JSON.stringify
+                    currentMember = "Infinity";
+                }
+                if (currentMember !== null) { //needed because the default json serializer in jsinterop serialize null values
+                    res[i] = currentMember;
+                }
+            }
+        }
+        return res;
+    };
+
+
+    ///////////////////// API
+
+    // JS object ref
+    public.createObject = function (rootObject, interface, ...args) {
+        let interfaceObject = getPropertyObject(rootObject, interface);
+        let createdObject = new interfaceObject(args);
+        let objectRef = addObjectRef(createdObject);
         return objectRef;
     }
 
+    // void
+    public.removeObject = function (id) {
+        delete objectRefs[id];
+    }
 
-    public.callMethodAsync = async function (instance, methodPath, ...args) {
-        if (methodPath.indexOf('.') >= 0) {
-            // if it's a method call on a child object we get this child object so the method call will happen in the 
-            // context of the child object
-            // some method like window.locaStorage.setItem  will throw an exception if the context is not expected
-            var instancePath = methodPath.substring(0, methodPath.lastIndexOf('.'));
-            instance = self.getInstanceProperty(instance, instancePath);
-            methodPath = methodPath.substring(methodPath.lastIndexOf('.') + 1);
-        }
-        for (let index = 0; index < args.length; index++) {
-            const element = args[index];
-            // we change null value to undefined as there is no way to pass undefined value from C# and most of 
-            // the browser API use undefined instead of null value for "no value"
-            if (element === null) {
-                args[index] = undefined;
-            }
-        }
-        let method = getPropertyObject(instance, methodPath);
-        let ret = await method.apply(instance, args);
+    // JS object ref
+    public.getProperty = function (rootObject, property) {
+        let object = getPropertyObject(rootObject, property);
+        let objectRef = addObjectRef(object);
+        return objectRef;
+    }
+
+    // JSON serialized content per spec
+    public.getContent = function (rootObject, property, contentSpec) {
+        let object = getPropertyObject(rootObject, property);
+        let ret = getObjectContent(object, [], contentSpec);
         return ret;
     }
+
+    // JS object ref
+    public.callMethod = function (rootObject, method, ...args) {
+        let methodObject = getMethodObject(rootObject, method);
+        let ret = methodObject.apply(rootObject, args);
+        //// TODO: Add to obj refs if ret is not void
+        return ret;
+
+    }
+
+    // JS object ref
+    public.callMethodAsync = async function (rootObject, method, ...args) {
+        let methodObject = getMethodObject(rootObject, method);
+        let ret = await methodObject.apply(rootObject, args);
+        //// TODO: Add to obj refs
+        return ret;
+    }
+
 
 
     return public;
