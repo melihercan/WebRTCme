@@ -3,20 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRtcJsInterop.Extensions;
+using WebRtcJsInterop.Interops;
 using WebRTCme;
 
 namespace WebRtcJsInterop
 {
     internal class RTCPeerConnection : IRTCPeerConnection
     {
-        public void Do()
+        private readonly IJSRuntime _jsRuntime;
+        private readonly JsObjectRef _jsObjectRef;
+
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
         {
-            Console.WriteLine("I am WEB");
+            _jsRuntime = jsRuntime;
+            _jsObjectRef = jsObjectRef;
         }
 
-        internal static Task<IRTCPeerConnection> New(IJSRuntime jsRuntime)
+        public ValueTask DisposeAsync()
         {
             throw new NotImplementedException();
+        }
+
+        internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime)
+        {
+            var jsObjectRef = await jsRuntime.CreateJsObject(null, "RTCPeerConnection", new object());
+            var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef);
+            return rtcPeerConnection;
         }
     }
 }

@@ -19,8 +19,7 @@ namespace WebRtcJsInterop.Extensions
                 {
                     parentObject,
                     interface_,
-                    args
-                }).ConfigureAwait(false);
+                }.Concat(args).ToArray()).ConfigureAwait(false);
             return jsObjectRef;
         }
 

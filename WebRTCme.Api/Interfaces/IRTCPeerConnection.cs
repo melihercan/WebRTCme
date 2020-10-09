@@ -4,8 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCPeerConnection
+    public interface IRTCPeerConnection : IAsyncDisposable
     {
-        void Do();
     }
 }

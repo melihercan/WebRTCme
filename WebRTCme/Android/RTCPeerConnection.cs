@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRrtc.Android
@@ -11,9 +12,9 @@ namespace WebRrtc.Android
         {
         }
 
-        public void Do()
+        public ValueTask DisposeAsync()
         {
-            Console.WriteLine("I am Android");
+            throw new NotImplementedException();
         }
     }
 }
