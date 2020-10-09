@@ -9,6 +9,6 @@ namespace WebRTCme
     {
         Task<INavigator> Navigator();
 
-        IRTCPeerConnection RTCPeerConnection();
+        Task<IRTCPeerConnection> RTCPeerConnection();
     }
 }

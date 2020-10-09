@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaDevices
+    public interface IMediaDevices : IAsyncDisposable
     {
-        IMediaStream GetUserMedia(MediaStreamConstraints constraints);
+        Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints);
     }
 }

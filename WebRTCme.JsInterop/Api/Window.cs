@@ -21,6 +21,14 @@ namespace WebRtcJsInterop
             _jsObjectRef = jsObjectRef;
         }
 
+
+        public async Task<INavigator> Navigator() => await WebRtcJsInterop.Navigator.New(_jsRuntime);
+
+        public async Task<IRTCPeerConnection> RTCPeerConnection() =>
+            await WebRtcJsInterop.RTCPeerConnection.New(_jsRuntime);
+
+        public async ValueTask DisposeAsync() => await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
+
         public static async Task<IWindow> New(IJSRuntime jsRuntime)
         {
 
@@ -117,26 +125,5 @@ namespace WebRtcJsInterop
             return window;
         }
 
-
-
-
-        async Task<INavigator> IWindow.Navigator()
-        {
-            return null;
-            //var navigatorInterop = await _windowInterop.Navigator();
-            //var navigator = new Navigator(_jsRuntime, navigatorInterop);
-            //await navigator.Init();
-            //return navigator;
-        }
-
-        public IRTCPeerConnection RTCPeerConnection()
-        {
-            return new RTCPeerConnection();
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
-        }
     }
 }

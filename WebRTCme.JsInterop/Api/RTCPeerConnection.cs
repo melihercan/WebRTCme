@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtcJsInterop
@@ -10,6 +12,11 @@ namespace WebRtcJsInterop
         public void Do()
         {
             Console.WriteLine("I am WEB");
+        }
+
+        internal static Task<IRTCPeerConnection> New(IJSRuntime jsRuntime)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -69,9 +69,8 @@ namespace WebRtcJsInterop.Extensions
                 new object[]
                 {
                     parentObject,
-                    method,
-                    args
-                }).ConfigureAwait(false);
+                    method
+                }.Concat(args).ToArray()).ConfigureAwait(false);
         }
 
         public static async ValueTask<JsObjectRef> CallJsMethod(this IJSRuntime jsRuntime, JsObjectRef parentObject,
@@ -82,9 +81,8 @@ namespace WebRtcJsInterop.Extensions
                 new object[]
                 {
                     parentObject,
-                    method,
-                    args
-                }).ConfigureAwait(false);
+                    method
+                }.Concat(args).ToArray()).ConfigureAwait(false);
             return jsObjectRef;
         }
 
@@ -96,9 +94,8 @@ namespace WebRtcJsInterop.Extensions
                 new object[]
                 {
                     parentObject,
-                    method,
-                    args
-                }).ConfigureAwait(false);
+                    method
+                }.Concat(args).ToArray()).ConfigureAwait(false);
         }
 
         public static async ValueTask<JsObjectRef> CallJsMethodAsync(this IJSRuntime jsRuntime, JsObjectRef parentObject,
@@ -109,9 +106,8 @@ namespace WebRtcJsInterop.Extensions
                 new object[]
                 {
                     parentObject,
-                    method,
-                    args
-                }).ConfigureAwait(false);
+                    method
+                }.Concat(args).ToArray()).ConfigureAwait(false);
             return jsObjectRef;
         }
 

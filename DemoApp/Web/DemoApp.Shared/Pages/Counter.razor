@@ -11,6 +11,9 @@
 @code {        
 
     private IWindow _window;
+    private INavigator _navigator;
+    private IMediaDevices _mediaDevices;
+    private IMediaStream _mediaStream;
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -21,6 +24,16 @@
         {
             var webRtc = CrossWebRtc.Current;
             _window = await webRtc.Window(JsRuntime);
+            _navigator = await _window.Navigator();
+            _mediaDevices = await _navigator.MediaDevices();
+            _mediaStream = await _mediaDevices.GetUserMedia(new MediaStreamConstraints
+            {
+                Audio = true,
+                Video = true
+            });
+
+
+
 
 
             //            StateHasChanged();
@@ -38,6 +51,8 @@
     {
         // It seems Blazor has no support for IDisposeAsync!!!
         // So we do fire and forget here!!!
+        Task.Run(async () => await _mediaDevices.DisposeAsync());
+        Task.Run(async () => await _navigator.DisposeAsync());
         Task.Run(async () => await _window.DisposeAsync());
     }
 

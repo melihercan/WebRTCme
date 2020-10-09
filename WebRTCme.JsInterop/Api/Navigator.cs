@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
@@ -10,20 +11,24 @@ namespace WebRtcJsInterop
 {
     internal class Navigator : INavigator
     {
-        //private readonly IJSRuntime _jsRuntime;
-        //private readonly NavigatorInterop _navigatorInterop;
+        private readonly IJSRuntime _jsRuntime;
+        private readonly JsObjectRef _jsObjectRef;
 
-        //internal Navigator(IJSRuntime jsRuntime, NavigatorInterop navigatorInterop)
-        //{
-        //    _jsRuntime = jsRuntime;
-        //    _navigatorInterop = navigatorInterop;
-        //}
+        private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
+        {
+            _jsRuntime = jsRuntime;
+            _jsObjectRef = jsObjectRef;
+        }
 
-        //internal async Task Init()
-        //{
+        public async Task<IMediaDevices> MediaDevices() => await WebRtcJsInterop.MediaDevices.New(_jsRuntime);
 
-        //}
+        public async ValueTask DisposeAsync() => await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
 
-        public IMediaDevices MediaDevices => throw new NotImplementedException();
+        internal static async Task<INavigator> New(IJSRuntime jsRuntime)
+        {
+            var jsObjectRef = await jsRuntime.GetJsProperty(null, "navigator");
+            var navigator = new Navigator(jsRuntime, jsObjectRef);
+            return navigator;
+        }
     }
 }
