@@ -1,5 +1,6 @@
 ﻿@page "/counter"
 @inject IJSRuntime JsRuntime
+@implements IDisposable
 
 <h1>Counter</h1>
 
@@ -9,46 +10,21 @@
 
 @code {        
 
-    protected override async void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
+    private IWindow _window;
 
-        if(firstRender)
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
         {
-            //            var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
-            //var x = await JsRuntime.InvokeAsync<object>("webRtcInterop.getProperty", new object[]
-            ///{
-               // null,
-                //"window"
-            //});
-
-
             var webRtc = CrossWebRtc.Current;
-            var window = await webRtc.Window(JsRuntime);
-            //        var navigator = await window.Navigator();
+            _window = await webRtc.Window(JsRuntime);
 
 
-
-
-            //            var mediaStream = webRtc.Window.Navigator.MediaDevices.GetUserMedia(new MediaStreamConstraints
-            //          {
-            //            Audio = true,
-            //          Video = true
-            //    });
-
-            //        webRtc.Initialize(Registry.ServiceProvider);
-            //            var rtcPeerConnection = webRtc.CreateRTCPeerConnection(JsRuntime);
-            //          rtcPeerConnection.Do();
-
-
-            //var promiseResult = await webRtc.GetUserMedia(JsRuntime);
-
-            StateHasChanged();
+            //            StateHasChanged();
         }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
     }
 
     private int currentCount = 0;
@@ -57,4 +33,12 @@
     {
         currentCount++;
     }
+
+    public void Dispose()
+    {
+        // It seems Blazor has no support for IDisposeAsync!!!
+        // So we do fire and forget here!!!
+        Task.Run(async () => await _window.DisposeAsync());
+    }
+
 }

@@ -35,15 +35,15 @@
         return objectRef;
     }
 
-    getPropertyObject = function (rootObject, property) {
-        if (rootObject === null) {
-            rootObject = window;
+    getPropertyObject = function (parentObject, property) {
+        if (parentObject === null) {
+            parentObject = window;
         }
         let list = property.replace('[', '.').replace(']', '').split('.');
         if (list[0] === "") {
             list.shift();
         }
-        let object = rootObject;
+        let object = parentObject;
         for (i = 0; i < list.length; i++) {
             if (list[i] in object) {
                 object = object[list[i]];
@@ -54,15 +54,15 @@
         return object;
     }
 
-    getInterfaceObject = function (rootObject, interface) {
-        if (rootObject === null) {
-            rootObject = window;
+    getInterfaceObject = function (parentObject, interface) {
+        if (parentObject === null) {
+            parentObject = window;
         }
         let list = interface.replace('[', '.').replace(']', '').split('.');
         if (list[0] === "") {
             list.shift();
         }
-        let object = rootObject;
+        let object = parentObject;
         for (i = 0; i < list.length; i++) {
             if (list[i] in object) {
                 object = object[list[i]];
@@ -73,13 +73,13 @@
         return object;
     }
 
-    getMethodObject = function (rootObject, method) {
+    getMethodObject = function (parentObject, method) {
         if (method.includes(".")) {
             let property = method.substring(0, method.lastIndexOf('.'));
-            rootObject = getPropertyObject(rootObject, property);
+            parentObject = getPropertyObject(parentObject, property);
             method = method.substring(method.lastIndexOf('.') + 1);
         }
-        let object = getPropertyObject(rootObject, method);
+        let object = getPropertyObject(parentObject, method);
         return object;
     }
 
@@ -154,41 +154,41 @@
      * 
      */
 
-    public.createObject = function (rootObject, interface, ...args) {
-        let interfaceObject = getInterfaceObject(rootObject, interface);
+    public.createObject = function (parentObject, interface, ...args) {
+        let interfaceObject = getInterfaceObject(parentObject, interface);
         let createdObject = new interfaceObject(args);
         let objectRef = addObjectRef(createdObject);
         return objectRef;
     }
 
-    public.removeObject = function (id) {
+    public.deleteObject = function (id) {
         delete objectRefs[id];
     }
 
-    public.getProperty = function (rootObject, property) {
-        let propertyObject = getPropertyObject(rootObject, property);
+    public.getProperty = function (parentObject, property) {
+        let propertyObject = getPropertyObject(parentObject, property);
         let objectRef = addObjectRef(propertyObject);
         return objectRef;
     }
 
-    public.getContent = function (rootObject, property, contentSpec) {
-        let propertyObject = getPropertyObject(rootObject, property);
+    public.getPropertyContent = function (parentObject, property, contentSpec) {
+        let propertyObject = getPropertyObject(parentObject, property);
         let content = getObjectContent(propertyObject, [], contentSpec);
         return content;
     }
 
-    public.callMethod = function (rootObject, method, ...args) {
-        let methodObject = getMethodObject(rootObject, method);
-        let ret = methodObject.apply(rootObject, args);
+    public.callMethod = function (parentObject, method, ...args) {
+        let methodObject = getMethodObject(parentObject, method);
+        let ret = methodObject.apply(parentObject, args);
         if (ret != undefined) {
             let objectRef = addObjectRef(ret);
             return objectRef;
         }
     }
 
-    public.callMethodAsync = async function (rootObject, method, ...args) {
-        let methodObject = getMethodObject(rootObject, method);
-        let ret = await methodObject.apply(rootObject, args);
+    public.callMethodAsync = async function (parentObject, method, ...args) {
+        let methodObject = getMethodObject(parentObject, method);
+        let ret = await methodObject.apply(parentObject, args);
         if (ret != undefined) {
             let objectRef = addObjectRef(ret);
             return objectRef;
