@@ -5,10 +5,6 @@ using System.Threading.Tasks;
 
 namespace WebRtcJsInterop.Interops
 {
-    /// <summary>
-    /// Represents a JS object reference, send it to the js interop api and it will be seen as an instance 
-    /// instead of a serialized/deserialized object.
-    /// </summary>
     public class JsObjectRef : IAsyncDisposable
     {
         [JsonPropertyName("__jsObjectRefId")] 

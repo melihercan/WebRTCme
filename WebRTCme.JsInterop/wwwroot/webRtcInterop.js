@@ -2,6 +2,12 @@
 
     let public = {};
 
+    /*
+     *
+     * private
+     *
+     */
+
     // Use same value on .NET side, "JsObjectRef.cs".
     const jsObjectRefKey = '__jsObjectRefId';
 
@@ -67,7 +73,6 @@
         return object;
     }
 
-
     getMethodObject = function (rootObject, method) {
         if (method.includes(".")) {
             let property = method.substring(0, method.lastIndexOf('.'));
@@ -78,35 +83,31 @@
         return object;
     }
 
-    getObjectContent = function (data, alreadySerialized, contentSpec) {
+    getObjectContent = function (object, accumulatedContent, contentSpec) {
         if (contentSpec === false) {
             return undefined;
         }
-        if (!alreadySerialized) {
-            alreadySerialized = [];
+        if (!accumulatedContent) {
+            accumulatedContent = [];
         }
-        if (typeof data == "undefined" ||
-            data === null) {
+        if (typeof object == "undefined" || object === null) {
             return null;
         }
-        if (typeof data === "number" ||
-            typeof data === "string" ||
-            typeof data == "boolean") {
-            return data;
+        if (typeof object === "number" || typeof object === "string" || typeof object == "boolean") {
+            return object;
         }
-        var content = (Array.isArray(data)) ? [] : {};
+        let content = (Array.isArray(object)) ? [] : {};
         if (!contentSpec) {
             contentSpec = "*";
         }
-        for (var i in data) {
-            var currentMember = data[i];
-
+        for (let i in object) {
+            let currentMember = object[i];
             if (typeof currentMember === 'function' || currentMember === null) {
                 continue;
             }
-            var currentMemberSpec;
+            let currentMemberSpec;
             if (contentSpec != "*") {
-                currentMemberSpec = Array.isArray(data) ? contentSpec : contentSpec[i];
+                currentMemberSpec = Array.isArray(object) ? contentSpec : contentSpec[i];
                 if (!currentMemberSpec) {
                     continue;
                 }
@@ -114,37 +115,32 @@
                 currentMemberSpec = "*"
             }
             if (typeof currentMember === 'object') {
-                if (alreadySerialized.indexOf(currentMember) >= 0) {
+                if (accumulatedContent.indexOf(currentMember) >= 0) {
                     continue;
                 }
-                alreadySerialized.push(currentMember);
+                accumulatedContent.push(currentMember);
                 if (Array.isArray(currentMember) || currentMember.length) {
                     content[i] = [];
-                    for (var j = 0; j < currentMember.length; j++) {
+                    for (let j = 0; j < currentMember.length; j++) {
                         const arrayItem = currentMember[j];
                         if (typeof arrayItem === 'object') {
-                            content[i].push(self.getSerializableObject(arrayItem, alreadySerialized, currentMemberSpec));
+                            content[i].push(getObjectContent(arrayItem, accumulatedContent, currentMemberSpec));
                         } else {
                             content[i].push(arrayItem);
                         }
                     }
                 } else {
-                    // the browser provides some member (like plugins) as hash with index as key, 
-                    // if length == 0 we shall not convert it
                     if (currentMember.length === 0) {
                         content[i] = [];
                     } else {
-                        content[i] = self.getSerializableObject(currentMember, alreadySerialized, currentMemberSpec);
+                        content[i] = getObjectContent(currentMember, accumulatedContent, currentMemberSpec);
                     }
                 }
-
-
             } else {
-                // string, number or boolean
-                if (currentMember === Infinity) { //inifity is not serialized by JSON.stringify
+                if (currentMember === Infinity) {
                     currentMember = "Infinity";
                 }
-                if (currentMember !== null) { //needed because the default json serializer in jsinterop serialize null values
+                if (currentMember !== null) {
                     content[i] = currentMember;
                 }
             }
@@ -152,10 +148,12 @@
         return content;
     };
 
+    /* 
+     * 
+     * public API
+     * 
+     */
 
-    ///////////////////// API
-
-    // JS object ref
     public.createObject = function (rootObject, interface, ...args) {
         let interfaceObject = getInterfaceObject(rootObject, interface);
         let createdObject = new interfaceObject(args);
@@ -163,48 +161,39 @@
         return objectRef;
     }
 
-    // void
     public.removeObject = function (id) {
         delete objectRefs[id];
     }
 
-    // JS object ref
     public.getProperty = function (rootObject, property) {
         let propertyObject = getPropertyObject(rootObject, property);
         let objectRef = addObjectRef(propertyObject);
         return objectRef;
     }
 
-    // JSON serialized content per spec
     public.getContent = function (rootObject, property, contentSpec) {
         let propertyObject = getPropertyObject(rootObject, property);
         let content = getObjectContent(propertyObject, [], contentSpec);
         return content;
     }
 
-    // JS object ref
     public.callMethod = function (rootObject, method, ...args) {
         let methodObject = getMethodObject(rootObject, method);
         let ret = methodObject.apply(rootObject, args);
-        if (ret != {}) {
+        if (ret != undefined) {
             let objectRef = addObjectRef(ret);
             return objectRef;
         }
-        return ret;
     }
 
-    // JS object ref
     public.callMethodAsync = async function (rootObject, method, ...args) {
         let methodObject = getMethodObject(rootObject, method);
         let ret = await methodObject.apply(rootObject, args);
-        if (ret != {}) {
+        if (ret != undefined) {
             let objectRef = addObjectRef(ret);
             return objectRef;
         }
-        return ret;
     }
-
-
 
     return public;
 

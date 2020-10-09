@@ -91,6 +91,15 @@ namespace WebRtcJsInterop
                     }
                 });
 
+            var obj = await jsRuntime.InvokeAsync<object>(
+                "webRtcInterop.callMethod",
+                new object[]
+                {
+                    windowObjRef,
+                    "alert",
+                    "hello melik"
+                });
+
 
             //await mediaDevicesObjRef2.DisposeAsync();
             //await mediaDevicesObjRef.DisposeAsync();
