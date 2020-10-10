@@ -6,7 +6,7 @@ using WebRtcJsInterop.Interops;
 
 namespace WebRtcJsInterop.Extensions
 {
-    // If parentObject is null, 'window' will be used as root object on JS side.
+    // If parentObject is null, 'window' will be used as parent object on JS side.
 
     public static class JsRuntimeExtension
     {
@@ -46,11 +46,12 @@ namespace WebRtcJsInterop.Extensions
             return jsObjectRef;
         }
 
-        public static async ValueTask<T> GetJsPropertyContent<T>(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+        // If property is null, whole parentObject content will be returned.
+        public static async ValueTask<T> GetJsContent<T>(this IJSRuntime jsRuntime, JsObjectRef parentObject,
             string property, object contentSpec)
         {
             var content = await jsRuntime.InvokeAsync<T>(
-                "webRtcInterop.getPropertyContent",
+                "webRtcInterop.getContent",
                 new object[]
                 {
                     parentObject,

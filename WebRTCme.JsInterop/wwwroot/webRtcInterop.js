@@ -171,8 +171,13 @@
         return objectRef;
     }
 
-    public.getPropertyContent = function (parentObject, property, contentSpec) {
-        let propertyObject = getPropertyObject(parentObject, property);
+    public.getContent = function (parentObject, property, contentSpec) {
+        let propertyObject = {};
+        if (propert == null) {
+            propertyObject = parentObject;
+        } else {
+            propertyObject = getPropertyObject(parentObject, property);
+        }
         let content = getObjectContent(propertyObject, [], contentSpec);
         return content;
     }
