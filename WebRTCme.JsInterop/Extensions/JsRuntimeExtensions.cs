@@ -8,13 +8,13 @@ namespace WebRtcJsInterop.Extensions
 {
     // If parentObject is null, 'window' will be used as parent object on JS side.
 
-    public static class JsRuntimeExtension
+    public static class JsRuntimeExtensions
     {
         public static async ValueTask<JsObjectRef> CreateJsObject(this IJSRuntime jsRuntime, JsObjectRef parentObject, 
             string interface_, params object[] args)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "webRtcInterop.createObject",
+                "objectRef.create",
                 new object[]
                 {
                     parentObject,
@@ -26,7 +26,7 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask DeleteJsObject(this IJSRuntime jsRuntime,  int id)
         {
             await jsRuntime.InvokeAsync<object>(
-                "webRtcInterop.deleteObject",
+                "objectRef.delete",
                 new object[]
                 {
                     id,
@@ -37,7 +37,7 @@ namespace WebRtcJsInterop.Extensions
             string property)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "webRtcInterop.getProperty",
+                "objectRef.get",
                 new object[]
                 {
                     parentObject,
@@ -46,12 +46,38 @@ namespace WebRtcJsInterop.Extensions
             return jsObjectRef;
         }
 
+        public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, object parentObject,
+            string property, object value)
+        {
+            await jsRuntime.InvokeVoidAsync(
+                "objectRef.set",
+                new object[]
+                {
+                    parentObject,
+                    property,
+                    value
+                }).ConfigureAwait(false);
+        }
+
+        //public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+        //    string property, object value)
+        //{
+        //    await jsRuntime.InvokeVoidAsync(
+        //        "objectRef.set",
+        //        new object[]
+        //        {
+        //            parentObject,
+        //            property,
+        //            value
+        //        }).ConfigureAwait(false);
+        //}
+
         // If property is null, whole parentObject content will be returned.
         public static async ValueTask<T> GetJsContent<T>(this IJSRuntime jsRuntime, JsObjectRef parentObject,
             string property, object contentSpec)
         {
             var content = await jsRuntime.InvokeAsync<T>(
-                "webRtcInterop.getContent",
+                "objectRef.content",
                 new object[]
                 {
                     parentObject,
@@ -65,7 +91,7 @@ namespace WebRtcJsInterop.Extensions
             string method, params object[] args)
         {
             await jsRuntime.InvokeVoidAsync(
-                "webRtcInterop.callMethod",
+                "objectRef.call",
                 new object[]
                 {
                     parentObject,
@@ -77,7 +103,7 @@ namespace WebRtcJsInterop.Extensions
             string method, params object[] args)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "webRtcInterop.callMethod",
+                "objectRef.call",
                 new object[]
                 {
                     parentObject,
@@ -90,7 +116,7 @@ namespace WebRtcJsInterop.Extensions
             string method, params object[] args)
         {
             await jsRuntime.InvokeVoidAsync(
-                "webRtcInterop.callMethodAsync",
+                "objectRef.callAsync",
                 new object[]
                 {
                     parentObject,
@@ -102,7 +128,7 @@ namespace WebRtcJsInterop.Extensions
             string method, params object[] args)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "webRtcInterop.callMethodAsync",
+                "objectRef.callAsync",
                 new object[]
                 {
                     parentObject,

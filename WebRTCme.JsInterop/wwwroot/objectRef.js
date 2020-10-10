@@ -1,4 +1,4 @@
-﻿webRtcInterop = (function () {
+﻿objectRef = (function () {
 
     let public = {};
 
@@ -35,7 +35,7 @@
         return objectRef;
     }
 
-    getPropertyObject = function (parentObject, property) {
+    getObject = function (parentObject, property) {
         if (parentObject === null) {
             parentObject = window;
         }
@@ -54,34 +54,34 @@
         return object;
     }
 
-    getInterfaceObject = function (parentObject, interface) {
-        if (parentObject === null) {
-            parentObject = window;
-        }
-        let list = interface.replace('[', '.').replace(']', '').split('.');
-        if (list[0] === "") {
-            list.shift();
-        }
-        let object = parentObject;
-        for (i = 0; i < list.length; i++) {
-            if (list[i] in object) {
-                object = object[list[i]];
-            } else {
-                throw new Error("Object referenced by " + interface + " does not exist");
-            }
-        }
-        return object;
-    }
+    //getInterfaceObject = function (parentObject, interface) {
+    //    if (parentObject === null) {
+    //        parentObject = window;
+    //    }
+    //    let list = interface.replace('[', '.').replace(']', '').split('.');
+    //    if (list[0] === "") {
+    //        list.shift();
+    //    }
+    //    let object = parentObject;
+    //    for (i = 0; i < list.length; i++) {
+    //        if (list[i] in object) {
+    //            object = object[list[i]];
+    //        } else {
+    //            throw new Error("Object referenced by " + interface + " does not exist");
+    //        }
+    //    }
+    //    return object;
+    //}
 
-    getMethodObject = function (parentObject, method) {
-        if (method.includes(".")) {
-            let property = method.substring(0, method.lastIndexOf('.'));
-            parentObject = getPropertyObject(parentObject, property);
-            method = method.substring(method.lastIndexOf('.') + 1);
-        }
-        let object = getPropertyObject(parentObject, method);
-        return object;
-    }
+    //getMethodObject = function (parentObject, method) {
+    //    if (method.includes(".")) {
+    //        let property = method.substring(0, method.lastIndexOf('.'));
+    //        parentObject = getPropertyObject(parentObject, property);
+    //        method = method.substring(method.lastIndexOf('.') + 1);
+    //    }
+    //    let object = getPropertyObject(parentObject, method);
+    //    return object;
+    //}
 
     getObjectContent = function (object, accumulatedContent, contentSpec) {
         if (contentSpec === false) {
@@ -154,36 +154,43 @@
      * 
      */
 
-    public.createObject = function (parentObject, interface, ...args) {
-        let interfaceObject = getInterfaceObject(parentObject, interface);
+    public.create = function (parentObject, interface, ...args) {
+        let interfaceObject = getObject(parentObject, interface);
         let createdObject = new interfaceObject(args);
         let objectRef = addObjectRef(createdObject);
         return objectRef;
     }
 
-    public.deleteObject = function (id) {
+    public.delete = function (id) {
         delete objectRefs[id];
     }
 
-    public.getProperty = function (parentObject, property) {
-        let propertyObject = getPropertyObject(parentObject, property);
+    public.get = function (parentObject, property) {
+        let propertyObject = getObject(parentObject, property);
         let objectRef = addObjectRef(propertyObject);
         return objectRef;
     }
 
-    public.getContent = function (parentObject, property, contentSpec) {
+    public.set = function (parentObject, property, value) {
+        if (parentObject === null) {
+            parentObject = window;
+        }
+        parentObject[property] = value;
+    }
+
+    public.content = function (parentObject, property, contentSpec) {
         let propertyObject = {};
         if (property === null) {
             propertyObject = parentObject;
         } else {
-            propertyObject = getPropertyObject(parentObject, property);
+            propertyObject = getObject(parentObject, property);
         }
         let content = getObjectContent(propertyObject, [], contentSpec);
         return content;
     }
 
-    public.callMethod = function (parentObject, method, ...args) {
-        let methodObject = getMethodObject(parentObject, method);
+    public.call = function (parentObject, method, ...args) {
+        let methodObject = getObject(parentObject, method);
         let ret = methodObject.apply(parentObject, args);
         if (ret != undefined) {
             let objectRef = addObjectRef(ret);
@@ -191,8 +198,8 @@
         }
     }
 
-    public.callMethodAsync = async function (parentObject, method, ...args) {
-        let methodObject = getMethodObject(parentObject, method);
+    public.callAsync = async function (parentObject, method, ...args) {
+        let methodObject = getObject(parentObject, method);
         let ret = await methodObject.apply(parentObject, args);
         if (ret != undefined) {
             let objectRef = addObjectRef(ret);

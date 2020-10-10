@@ -11,19 +11,16 @@ namespace WebRtcJsInterop.Api
 {
     internal class MediaDevices : BaseApi, IMediaDevices
     {
-        private JsObjectRef _jsObjectRefStream;
-
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         async Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
         {
-            _jsObjectRefStream = await JsRuntime.CallJsMethodAsync(JsObjectRef, "getUserMedia", constraints);
-            return null;// new MediaStream();
+            var jsObjectRefStream = await JsRuntime.CallJsMethodAsync(JsObjectRef, "getUserMedia", constraints);
+            return MediaStream.New(JsRuntime, jsObjectRefStream);
         }
 
         public async ValueTask DisposeAsync()
         {
-            await JsRuntime.DeleteJsObject(_jsObjectRefStream.JsObjectRefId);
             await DisposeBaseAsync();
         }
 

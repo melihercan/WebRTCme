@@ -1,8 +1,10 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
@@ -10,11 +12,38 @@ namespace WebRtcJsInterop.Api
 {
     internal class MediaStream : BaseApi, IMediaStream
     {
-        private MediaStream(JSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            throw new NotImplementedException();
+            await DisposeBaseAsync();
+        }
+
+        internal static async Task<IMediaStream> New(IJSRuntime jsRuntime)
+        {
+            var jsObjectRef = await jsRuntime.CreateJsObject(null, "MediaStream");
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
+            return mediaStream;
+        }
+        internal static IMediaStream New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefStream)
+        {
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRefStream);
+            return mediaStream;
+        }
+
+        public async Task SetMediaSourceAsync(object/*ElementReference*/ elementReference)
+        {
+            await JsRuntime.SetJsProperty(elementReference, "srcObject", JsObjectRef);
+
+            //await JsRuntime.InvokeVoidAsync(
+            //    "objectRef.set",
+            //    new object[]
+            //    {
+            //        elementReference,
+            //        "srcObject",
+            //        JsObjectRef
+            //    });
+
         }
     }
 }

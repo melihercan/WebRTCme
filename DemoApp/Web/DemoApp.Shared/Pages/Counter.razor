@@ -7,8 +7,12 @@
 <p>Current count: @currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<video autoplay @ref=testVideo></video>
 
-@code {        
+
+@code {
+
+    ElementReference testVideo;
 
     private IWindow _window;
     private INavigator _navigator;
@@ -32,11 +36,11 @@
                 Audio = true,
                 Video = true
             });
+            await _mediaStream.SetMediaSourceAsync(testVideo);
 
-            _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration 
-            { 
+            _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration
+            {
             });
-
 
             //            StateHasChanged();
         }
