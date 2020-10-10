@@ -33,9 +33,9 @@
                 Video = true
             });
 
-            _rtcPeerConnection = await _window.RTCPeerConnection();
-
-
+            _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration 
+            { 
+            });
 
 
             //            StateHasChanged();

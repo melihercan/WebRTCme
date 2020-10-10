@@ -173,7 +173,7 @@
 
     public.getContent = function (parentObject, property, contentSpec) {
         let propertyObject = {};
-        if (propert == null) {
+        if (property === null) {
             propertyObject = parentObject;
         } else {
             propertyObject = getPropertyObject(parentObject, property);

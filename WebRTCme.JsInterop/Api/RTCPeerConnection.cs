@@ -11,17 +11,23 @@ namespace WebRtcJsInterop.Api
 {
     internal class RTCPeerConnection : BaseApi, IRTCPeerConnection
     {
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private RTCConfiguration _rtcConfiguration;
+
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
+            : base(jsRuntime, jsObjectRef) 
+        {
+            _rtcConfiguration = rtcConfiguration;
+        }
 
         public async ValueTask DisposeAsync()
         {
             await DisposeBaseAsync();
         }
 
-        internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime)
+        internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
             var jsObjectRef = await jsRuntime.CreateJsObject(null, "RTCPeerConnection", new object());
-            var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef);
+            var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
             return rtcPeerConnection;
         }
     }

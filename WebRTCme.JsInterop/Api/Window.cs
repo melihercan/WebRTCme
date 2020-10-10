@@ -16,8 +16,8 @@ namespace WebRtcJsInterop.Api
 
         public async Task<INavigator> Navigator() => await Api.Navigator.New(JsRuntime);
 
-        public async Task<IRTCPeerConnection> RTCPeerConnection() =>
-            await Api.RTCPeerConnection.New(JsRuntime);
+        public async Task<IRTCPeerConnection> RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
+            await Api.RTCPeerConnection.New(JsRuntime, rtcConfiguration);
 
         public async ValueTask DisposeAsync()
         {
