@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using WebRtcJsInterop;
 using Microsoft.JSInterop;
 
 namespace WebRTCme
@@ -20,7 +19,7 @@ namespace WebRTCme
         public async Task<IWindow> Window(IJSRuntime jsRuntime)
         {
 
-            return await WebRtcJsInterop.Window.New(jsRuntime);
+            return await WebRtcJsInterop.Api.Window.New(jsRuntime);
         }
     }
 }

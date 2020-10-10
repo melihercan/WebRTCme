@@ -7,22 +7,15 @@ using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop
+namespace WebRtcJsInterop.Api
 {
-    internal class RTCPeerConnection : IRTCPeerConnection
+    internal class RTCPeerConnection : BaseApi, IRTCPeerConnection
     {
-        private readonly IJSRuntime _jsRuntime;
-        private readonly JsObjectRef _jsObjectRef;
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
+        public async ValueTask DisposeAsync()
         {
-            _jsRuntime = jsRuntime;
-            _jsObjectRef = jsObjectRef;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            throw new NotImplementedException();
+            await DisposeBaseAsync();
         }
 
         internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime)

@@ -7,27 +7,25 @@ using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop
+namespace WebRtcJsInterop.Api
 {
-    internal class MediaDevices : IMediaDevices
+    internal class MediaDevices : BaseApi, IMediaDevices
     {
-        private readonly IJSRuntime _jsRuntime;
-        private readonly JsObjectRef _jsObjectRef;
         private JsObjectRef _jsObjectRefStream;
 
-        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
-        {
-            _jsRuntime = jsRuntime;
-            _jsObjectRef = jsObjectRef;
-        }
+        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         async Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
         {
-            _jsObjectRefStream = await _jsRuntime.CallJsMethodAsync(_jsObjectRef, "getUserMedia", constraints);
-            return new MediaStream();
+            _jsObjectRefStream = await JsRuntime.CallJsMethodAsync(JsObjectRef, "getUserMedia", constraints);
+            return null;// new MediaStream();
         }
 
-        public async ValueTask DisposeAsync() => await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
+        public async ValueTask DisposeAsync()
+        {
+            await JsRuntime.DeleteJsObject(_jsObjectRefStream.JsObjectRefId);
+            await DisposeBaseAsync();
+        }
 
         internal static async Task<IMediaDevices> New(IJSRuntime jsRuntime)
         {

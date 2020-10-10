@@ -7,22 +7,18 @@ using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop
+namespace WebRtcJsInterop.Api
 {
-    internal class Navigator : INavigator
+    internal class Navigator : BaseApi, INavigator
     {
-        private readonly IJSRuntime _jsRuntime;
-        private readonly JsObjectRef _jsObjectRef;
+        private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
+        async Task<IMediaDevices> INavigator.MediaDevices() => await Api.MediaDevices.New(JsRuntime);
+
+        public async ValueTask DisposeAsync()
         {
-            _jsRuntime = jsRuntime;
-            _jsObjectRef = jsObjectRef;
+            await DisposeBaseAsync();
         }
-
-        public async Task<IMediaDevices> MediaDevices() => await WebRtcJsInterop.MediaDevices.New(_jsRuntime);
-
-        public async ValueTask DisposeAsync() => await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
 
         internal static async Task<INavigator> New(IJSRuntime jsRuntime)
         {
@@ -30,5 +26,6 @@ namespace WebRtcJsInterop
             var navigator = new Navigator(jsRuntime, jsObjectRef);
             return navigator;
         }
+
     }
 }

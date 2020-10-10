@@ -8,26 +8,21 @@ using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop
+namespace WebRtcJsInterop.Api
 {
-    public class Window : IWindow
+    public class Window : BaseApi, IWindow
     {
-        private readonly IJSRuntime _jsRuntime;
-        private readonly JsObjectRef _jsObjectRef;
+        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
-        {
-            _jsRuntime = jsRuntime;
-            _jsObjectRef = jsObjectRef;
-        }
-
-
-        public async Task<INavigator> Navigator() => await WebRtcJsInterop.Navigator.New(_jsRuntime);
+        public async Task<INavigator> Navigator() => await Api.Navigator.New(JsRuntime);
 
         public async Task<IRTCPeerConnection> RTCPeerConnection() =>
-            await WebRtcJsInterop.RTCPeerConnection.New(_jsRuntime);
+            await Api.RTCPeerConnection.New(JsRuntime);
 
-        public async ValueTask DisposeAsync() => await _jsRuntime.DeleteJsObject(_jsObjectRef.JsObjectRefId);
+        public async ValueTask DisposeAsync()
+        {
+            await DisposeBaseAsync();
+        }
 
         public static async Task<IWindow> New(IJSRuntime jsRuntime)
         {
