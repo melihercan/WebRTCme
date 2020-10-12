@@ -11,8 +11,14 @@
     // Use same value on .NET side, "JsObjectRef.cs".
     const jsObjectRefKey = '__jsObjectRefId';
 
+    // Use same value on .NET side, "JsEventHandler.cs".
+    const jsEventRefKey = '__jsEventRefHandler';
+
     let objectRefs = {};
     let objectRefId = 0;
+
+    let eventListenerId = 0;
+    let eventListeners = {};
 
     DotNet.attachReviver(function (key, value) {
         if (value && typeof value === 'object' && value.hasOwnProperty(jsObjectRefKey) &&
@@ -26,6 +32,29 @@
             return value;
         }
     })
+
+    DotNet.attachReviver(function (key, value) {
+        if (value && typeof value === 'object' && value.hasOwnProperty(jsEventRefKey)) {
+            var netObjectRef = value.callbackRef;
+            return function () {
+                var args = [];
+                if (!value.getJsObjectRef) {
+                    for (let index = 0; index < arguments.length; index++) {
+                        const element = arguments[index];
+                        args.push(getObjectContent(element, [], value.contentSpec));
+                    }
+                } else {
+                    for (let index = 0; index < arguments.length; index++) {
+                        const element = arguments[index];
+                        args.push(addObjectRef(element));
+                    }
+                }
+                return netObjectRef.invokeMethodAsync('Invoke', ...args);
+            };
+        } else {
+            return value;
+        }
+    });
 
     addObjectRef = function (object) {
         let id = objectRefId++;
@@ -206,6 +235,19 @@
             return objectRef;
         }
     }
+
+    public.addEventListener = function (parentObject, property, event, callback) {
+        var target = getObject(parentObject, property);
+        target.addEventListener(event, callback);
+        var eventId = eventListenerId++;
+        eventListeners[eventId] = callback;
+        return eventId;
+    };
+    public.removeEventListener = function (parentObject, property, event, id) {
+        var target = getObject(parentObject, property);
+        target.removeEventListener(event, eventListeners[id]);
+        delete eventListeners[id];
+    };
 
     return public;
 
