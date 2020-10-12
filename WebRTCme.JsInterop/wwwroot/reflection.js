@@ -12,7 +12,7 @@
      * @param {string} interface: Interface(class) name to be created.
      * @param {...any} args: Argument list of the constructor.
      */
-    public.create = function (parent, interface, ...args) {
+    public.createObject = function (parent, interface, ...args) {
     }
 
     /**
@@ -20,7 +20,7 @@
      * 
      * @param {number} id
      */
-    public.delete = function (id) {
+    public.deleteObjectRef = function (id) {
     }
 
     /**
@@ -36,7 +36,7 @@
      * @param {string} contentSpec: Filter of the content to be returned. 'null' indicates that JS object reference
      *                              shall be returned if property specifies an 'object'
      */
-    public.get = function (parent, property, contentSpec) {
+    public.getObject = function (parent, property, contentSpec) {
 
     }
 
@@ -51,7 +51,7 @@
      *                     converted into a JS object by the reviver. If it is a string, it will be converted into
      *                     JS object first.
      */
-    public.set = function (parent, property, value) {
+    public.setObject = function (parent, property, value) {
 
     }
 
@@ -65,7 +65,7 @@
      * @param {string} method: String specifying the method to be called.
      * @param {...any} args: Argument list of the method.
      */
-    public.call = function (parent, method, ...args) {
+    public.callMethod = function (parent, method, ...args) {
     }
 
 
@@ -79,7 +79,7 @@
      * @param {string} method: String specifying the method to be called.
      * @param {...any} args: Argument list of the method.
      */
-    public.callAsync = async function (parent, method, ...args) {
+    public.callMethodAsync = async function (parent, method, ...args) {
     }
 
     /**
