@@ -24,19 +24,19 @@
     }
 
     /**
-     * Gets specified property.
+     * Gets specified property. If property is 'object' type and 'contentSpec' is 'null', it adds the object 
+     * to the 'objectRefs' and returns the JS object reference. If 'contentSpec' is provided then the content
+     * specified in 'contentSpec' will be returned.
+     * If property is a primitive type, it will be returned verbatim. 
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be 
      *                      converted into a JS object by the reviver. If it is a string, it will be converted into
      *                      JS object first.
      * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
-     * @param {boolean} isObjectRef: If true, JS object refence will be returned. If false, JS object will be returned.
-     *                               'contentSpec' if not null, will specify the filter of what parameters shall be
-     *                               returned.
-     * @param {string} contentSpec: If 'isObjectRef' is false and 'contentSpec' is not 'null', parameters specified in 
-     *                              the spec will be returned. If 'contentSpec' is null then JS object will be returned.
+     * @param {string} contentSpec: Filter of the content to be returned. 'null' indicates that JS object reference
+     *                              shall be returned if property specifies an 'object'
      */
-    public.get = function (parent, property, isObjectRef, contentSpec) {
+    public.get = function (parent, property, contentSpec) {
 
     }
 
@@ -57,7 +57,7 @@
 
     /**
      * Calls a method synchronously. If return value is object type, it adds the object to 'objectRefs' and 
-     * returna JS object reference. Otherwise the primitive type is returned.
+     * returns JS object reference. Otherwise the primitive type is returned.
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
      *                      converted into a JS object by the reviver. If it is a string, it will be converted into
@@ -83,12 +83,14 @@
     }
 
     /**
-     * Adds a new event listener. .NET callback will be invoken on JS event.
+     * Adds a new event listener. .NET callback will be invoken on JS event. It returns an id as event reference. 
      * 
-     * @param {any} parent
-     * @param {any} property
-     * @param {any} event
-     * @param {any} callback
+     * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
+     *                      converted into a JS object by the reviver. If it is a string, it will be converted into
+     *                      JS object first.
+     * @param {string} property: String specifying the property to set. If 'null', parent object will be used.
+     * @param {string} event: String indicating the event name.
+     * @param {any} callback: .NET callback handler. 
      */
     public.addEventListener = function (parent, property, event, callback) {
     };
@@ -96,10 +98,12 @@
     /**
      *  Removes the specifed event listener.
      *  
-     * @param {any} parent
-     * @param {any} property
-     * @param {any} event
-     * @param {any} id
+     * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
+     *                      converted into a JS object by the reviver. If it is a string, it will be converted into
+     *                      JS object first.
+     * @param {string} property: String specifying the property to set. If 'null', parent object will be used.
+     * @param {string} event: String indicating the event name.
+     * @param {int} id: Event id.
      */
     public.removeEventListener = function (parent, property, event, id) {
     }
