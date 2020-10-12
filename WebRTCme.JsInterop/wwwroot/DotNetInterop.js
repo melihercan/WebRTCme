@@ -192,7 +192,7 @@
      * Gets specified property. If property is 'object' type and 'contentSpec' is 'null', it adds the object 
      * to the 'objectRefs' and returns the JS object reference. If 'contentSpec' is provided then the content
      * specified in 'contentSpec' will be returned.
-     * If property is a primitive type, it will be returned verbatim. 
+     * If property is a primitive type, it will be just a normal return. 
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be 
      *                      converted into a JS object by the reviver. If it is a string, it will be converted into

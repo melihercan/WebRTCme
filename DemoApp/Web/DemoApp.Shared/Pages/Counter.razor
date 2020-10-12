@@ -41,6 +41,15 @@
             _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration
             {
             });
+            //// TODO: USE OBJJ REF of the event.
+            await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
+            {
+                //// TODO: if objectRef != null => 
+                /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
+
+                await Task.CompletedTask;
+            });
+
 
             //            StateHasChanged();
         }

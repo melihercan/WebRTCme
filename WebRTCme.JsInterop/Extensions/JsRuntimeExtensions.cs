@@ -122,5 +122,17 @@ namespace WebRtcJsInterop.Extensions
                 }.Concat(args).ToArray()).ConfigureAwait(false);
             return ret;
         }
+
+        public static async ValueTask<IAsyncDisposable> AddEventListener(this IJSRuntime jsRuntime,
+            JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)
+        {
+            var listenerId = await jsRuntime.InvokeAsync<int>("DotNetInterop.addEventListener", jsObjectRef,
+                property, event_, callBack).ConfigureAwait(false);
+
+            return new ActionAsyncDisposable(async () =>
+                await jsRuntime.InvokeVoidAsync("DotNetInterop.removeEventListener", jsObjectRef, property,
+                    event_, listenerId).ConfigureAwait(false));
+        }
+
     }
 }
