@@ -22,7 +22,7 @@ namespace WebRtcJsInterop.Api
 
         internal static async Task<INavigator> New(IJSRuntime jsRuntime)
         {
-            var jsObjectRef = await jsRuntime.GetJsProperty(null, "navigator");
+            var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator");
             var navigator = new Navigator(jsRuntime, jsObjectRef);
             return navigator;
         }

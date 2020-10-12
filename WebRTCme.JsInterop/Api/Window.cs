@@ -115,7 +115,7 @@ namespace WebRtcJsInterop.Api
             //            var windowInterop = await jsRuntime.Window();
             //          var window = new Window(jsRuntime, windowInterop);
 
-            var jsObjectRef = await jsRuntime.GetJsProperty(null, "window");
+            var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", null);
             var window = new Window(jsRuntime, jsObjectRef);
             return window;
         }

@@ -23,7 +23,7 @@ namespace WebRtcJsInterop.Api
         {
             if (JsObjectRef != null)
             {
-                await JsRuntime.DeleteJsObject(JsObjectRef.JsObjectRefId);
+                await JsRuntime.DeleteJsObjectRef(JsObjectRef.JsObjectRefId);
             }
         }
     }

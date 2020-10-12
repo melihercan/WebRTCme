@@ -26,7 +26,7 @@ namespace WebRtcJsInterop.Api
 
         internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
-            var jsObjectRef = await jsRuntime.CreateJsObject(null, "RTCPeerConnection", new object());
+            var jsObjectRef = await jsRuntime.CreateJsObject("window", "RTCPeerConnection", new object());
             var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
             return rtcPeerConnection;
         }

@@ -6,137 +6,121 @@ using WebRtcJsInterop.Interops;
 
 namespace WebRtcJsInterop.Extensions
 {
-    // If parentObject is null, 'window' will be used as parent object on JS side.
-
     public static class JsRuntimeExtensions
     {
-        public static async ValueTask<JsObjectRef> CreateJsObject(this IJSRuntime jsRuntime, JsObjectRef parentObject, 
+        public static async ValueTask<JsObjectRef> CreateJsObject(this IJSRuntime jsRuntime, object parent, 
             string interface_, params object[] args)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "objectRef.create",
+                "DotNetInterop.createObject",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     interface_,
                 }.Concat(args).ToArray()).ConfigureAwait(false);
             return jsObjectRef;
         }
 
-        public static async ValueTask DeleteJsObject(this IJSRuntime jsRuntime,  int id)
+        public static async ValueTask DeleteJsObjectRef(this IJSRuntime jsRuntime,  int id)
         {
             await jsRuntime.InvokeAsync<object>(
-                "objectRef.delete",
+                "DotNetInterop.deleteObjectRef",
                 new object[]
                 {
                     id,
                 }).ConfigureAwait(false);
         }
 
-        public static async ValueTask<JsObjectRef> GetJsProperty(this IJSRuntime jsRuntime, JsObjectRef parentObject,
-            string property)
+        public static async ValueTask<JsObjectRef> GetJsPropertyObjectRef(this IJSRuntime jsRuntime, 
+            object parent,  string property)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "objectRef.get",
+                "DotNetInterop.getProperty",
                 new object[]
                 {
-                    parentObject,
-                    property
+                    parent,
+                    property,
+                    null
                 }).ConfigureAwait(false);
             return jsObjectRef;
         }
 
-        public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, object parentObject,
-            string property, object value)
-        {
-            await jsRuntime.InvokeVoidAsync(
-                "objectRef.set",
-                new object[]
-                {
-                    parentObject,
-                    property,
-                    value
-                }).ConfigureAwait(false);
-        }
-
-        //public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, JsObjectRef parentObject,
-        //    string property, object value)
-        //{
-        //    await jsRuntime.InvokeVoidAsync(
-        //        "objectRef.set",
-        //        new object[]
-        //        {
-        //            parentObject,
-        //            property,
-        //            value
-        //        }).ConfigureAwait(false);
-        //}
-
-        // If property is null, whole parentObject content will be returned.
-        public static async ValueTask<T> GetJsContent<T>(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+        public static async ValueTask<T> GetJsPropertyContent<T>(this IJSRuntime jsRuntime, object parent,
             string property, object contentSpec)
         {
             var content = await jsRuntime.InvokeAsync<T>(
-                "objectRef.content",
+                "DotNetInterop.getProperty",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     property,
                     contentSpec
                 }).ConfigureAwait(false);
             return content;
         }
 
-        public static async ValueTask CallJsMethodVoid(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+
+        public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, object parent,
+            string property, object value)
+        {
+            await jsRuntime.InvokeVoidAsync(
+                "DotNetInterop.setProperty",
+                new object[]
+                {
+                    parent,
+                    property,
+                    value
+                }).ConfigureAwait(false);
+        }
+
+        public static async ValueTask CallJsMethodVoid(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
             await jsRuntime.InvokeVoidAsync(
-                "objectRef.call",
+                "DotNetInterop.callMethod",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     method
                 }.Concat(args).ToArray()).ConfigureAwait(false);
         }
 
-        public static async ValueTask<JsObjectRef> CallJsMethod(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+        public static async ValueTask<T> CallJsMethod<T>(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
-            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "objectRef.call",
+            var ret = await jsRuntime.InvokeAsync<T>(
+                "DotNetInterop.callMethod",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     method
                 }.Concat(args).ToArray()).ConfigureAwait(false);
-            return jsObjectRef;
+            return ret;
         }
 
-        public static async ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, JsObjectRef parentObject,
+        public static async ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
             await jsRuntime.InvokeVoidAsync(
-                "objectRef.callAsync",
+                "DotNetInterop.callMethodAsync",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     method
                 }.Concat(args).ToArray()).ConfigureAwait(false);
         }
 
-        public static async ValueTask<JsObjectRef> CallJsMethodAsync(this IJSRuntime jsRuntime, JsObjectRef parentObject,
-            string method, params object[] args)
+        public static async ValueTask<T> CallJsMethodAsync<T>(this IJSRuntime jsRuntime, 
+            object parent, string method, params object[] args)
         {
-            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "objectRef.callAsync",
+            var ret = await jsRuntime.InvokeAsync<T>(
+                "DotNetInterop.callMethodAsync",
                 new object[]
                 {
-                    parentObject,
+                    parent,
                     method
                 }.Concat(args).ToArray()).ConfigureAwait(false);
-            return jsObjectRef;
+            return ret;
         }
-
-
     }
 }

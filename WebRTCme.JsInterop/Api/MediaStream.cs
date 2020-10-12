@@ -21,7 +21,7 @@ namespace WebRtcJsInterop.Api
 
         internal static async Task<IMediaStream> New(IJSRuntime jsRuntime)
         {
-            var jsObjectRef = await jsRuntime.CreateJsObject(null, "MediaStream");
+            var jsObjectRef = await jsRuntime.CreateJsObject("window", "MediaStream");
             var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
             return mediaStream;
         }

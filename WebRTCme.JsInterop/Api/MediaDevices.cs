@@ -15,7 +15,8 @@ namespace WebRtcJsInterop.Api
 
         async Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
         {
-            var jsObjectRefStream = await JsRuntime.CallJsMethodAsync(JsObjectRef, "getUserMedia", constraints);
+            var jsObjectRefStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
+                "getUserMedia", constraints);
             return MediaStream.New(JsRuntime, jsObjectRefStream);
         }
 
@@ -26,7 +27,7 @@ namespace WebRtcJsInterop.Api
 
         internal static async Task<IMediaDevices> New(IJSRuntime jsRuntime)
         {
-            var jsObjectRef = await jsRuntime.GetJsProperty(null, "navigator.mediaDevices");
+            var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
             var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
             return mediaDevices;
         }
