@@ -172,7 +172,8 @@
      * @param {...any} args: Argument list of the constructor.
      */
     public.createObject = function (parent, interface, ...args) {
-        let interfaceObject = getPropertyObject(parent, interface);
+        let parentObject = getParentObject(parent);;
+        let interfaceObject = getPropertyObject(parentObject, interface);
         let createdObject = new interfaceObject(args);
         let objectRef = addObjectRef(createdObject);
         return objectRef;
