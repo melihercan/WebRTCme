@@ -23,9 +23,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Server", "DemoApp\W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DemoApp", "DemoApp", "{47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.JsInterop", "WebRTCme.JsInterop\WebRTCme.JsInterop.csproj", "{7A64000C-C4BB-419A-AB51-22DEB62C05D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.JsInterop", "WebRTCme.JsInterop\WebRTCme.JsInterop.csproj", "{7A64000C-C4BB-419A-AB51-22DEB62C05D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Api", "WebRTCme.Api\WebRTCme.Api.csproj", "{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Api", "WebRTCme.Api\WebRTCme.Api.csproj", "{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Signalling", "WebRTCme.Signalling\WebRTCme.Signalling.csproj", "{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -149,6 +151,18 @@ Global
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Release|iPhone.Build.0 = Release|Any CPU
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|iPhone.Build.0 = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
