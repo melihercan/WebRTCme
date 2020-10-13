@@ -26,15 +26,32 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        async ValueTask<IAsyncDisposable> IRTCPeerConnection.OnIceCandidate(
+        public async ValueTask<IAsyncDisposable> OnIceCandidate(
             Func<RTCPeerConnectionIceEvent, ValueTask> callback)
         {
-            return await JsRuntime.AddEventListener(JsObjectRef, null, "onicecandidate",
+            var ret = await JsRuntime.AddEventListener(JsObjectRef, null, "onicecandidate",
                 JsEventHandler.New<RTCPeerConnectionIceEvent>(async e => 
                 { 
                     await callback.Invoke(e).ConfigureAwait(false); 
                 },
                 null, false)).ConfigureAwait(false);
+            return ret;
+        }
+
+        public async ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback)
+        {
+            var ret = await JsRuntime.AddEventListener(JsObjectRef, null, "ontrack",
+                JsEventHandler.New<RTCTrackEvent>(async e =>
+                {
+                    await callback.Invoke(e).ConfigureAwait(false);
+                },
+                null, false)).ConfigureAwait(false);
+            return ret;
+        }
+
+        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream[] stream)
+        {
+            throw new NotImplementedException();
         }
 
         internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)

@@ -11,6 +11,7 @@ namespace WebRtcSignalling.Hubs
     {
         public async Task SendMessage(string message)
         {
+            // For now just send to all other parties.
             await Clients.Others.ReceiveMessage(message);
         }
     }

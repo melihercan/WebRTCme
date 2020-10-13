@@ -13,12 +13,22 @@ namespace WebRrtc.Android
         {
         }
 
+        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream[] stream)
+        {
+            throw new NotImplementedException();
+        }
+
         public ValueTask DisposeAsync()
         {
             throw new NotImplementedException();
         }
 
         public ValueTask<IAsyncDisposable> OnIceCandidate(Func<RTCPeerConnectionIceEvent, ValueTask> callback)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback)
         {
             throw new NotImplementedException();
         }
