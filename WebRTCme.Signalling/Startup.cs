@@ -13,6 +13,9 @@ using Microsoft.Extensions.Hosting;
 using System.Linq;
 using WebRtcSignalling.Data;
 using WebRtcSignalling.Models;
+using WebRtcSignalling.Hubs;
+using WebRtcSignalling.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace WebRtcSignalling
 {
@@ -41,6 +44,8 @@ namespace WebRtcSignalling
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
+
+            services.AddSignalR();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -76,6 +81,9 @@ namespace WebRtcSignalling
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                
+                endpoints.MapHub<SignallingHub>("/signallinghub");
+
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
