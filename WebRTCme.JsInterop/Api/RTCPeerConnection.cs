@@ -38,9 +38,10 @@ namespace WebRtcJsInterop.Api
 
         public async ValueTask<RTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
-            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, "createOffer", 
-                new object[] { });
-            var rtcSessionDescription = await JsRuntime.GetJsPropertyValue<RTCSessionDescription>(jsObjectRef, null,
+            var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
+                "createOffer", new object[] { });
+            var rtcSessionDescription = await JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
+                jsObjectRefRtcSessionDescription, null,
                 new
                 {
                     type = true,
