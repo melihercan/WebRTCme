@@ -40,7 +40,7 @@ namespace WebRtcJsInterop.Api
         {
             var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, "createOffer", 
                 new object[] { });
-            var rtcSessionDescription = await JsRuntime.GetJsPropertyContent<RTCSessionDescription>(jsObjectRef, null,
+            var rtcSessionDescription = await JsRuntime.GetJsPropertyValue<RTCSessionDescription>(jsObjectRef, null,
                 new
                 {
                     type = true,
@@ -50,10 +50,9 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        public async ValueTask<IAsyncDisposable> OnIceCandidate(
-            Func<RTCPeerConnectionIceEvent, ValueTask> callback)
+        public async ValueTask<IAsyncDisposable> OnIceCandidate(Func<RTCPeerConnectionIceEvent, ValueTask> callback)
         {
-            var ret = await JsRuntime.AddEventListener(JsObjectRef, null, "onicecandidate",
+            var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "onicecandidate",
                 JsEventHandler.New<RTCPeerConnectionIceEvent>(async e => 
                 { 
                     await callback.Invoke(e).ConfigureAwait(false); 
@@ -64,7 +63,7 @@ namespace WebRtcJsInterop.Api
 
         public async ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback)
         {
-            var ret = await JsRuntime.AddEventListener(JsObjectRef, null, "ontrack",
+            var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "ontrack",
                 JsEventHandler.New<RTCTrackEvent>(async e =>
                 {
                     await callback.Invoke(e).ConfigureAwait(false);

@@ -36,7 +36,7 @@ namespace WebRtcJsInterop.Extensions
             object parent,  string property)
         {
             var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "DotNetInterop.getProperty",
+                "DotNetInterop.getPropertyObjectRef",
                 new object[]
                 {
                     parent,
@@ -46,25 +46,25 @@ namespace WebRtcJsInterop.Extensions
             return jsObjectRef;
         }
 
-        public static async ValueTask<T> GetJsPropertyContent<T>(this IJSRuntime jsRuntime, object parent,
-            string property, object contentSpec)
+        public static async ValueTask<T> GetJsPropertyValue<T>(this IJSRuntime jsRuntime, object parent,
+            string property, object valueSpec)
         {
             var content = await jsRuntime.InvokeAsync<T>(
-                "DotNetInterop.getProperty",
+                "DotNetInterop.getPropertyValue",
                 new object[]
                 {
                     parent,
                     property,
-                    contentSpec
+                    valueSpec
                 }).ConfigureAwait(false);
             return content;
         }
 
-        public static async ValueTask<IEnumerable<JsObjectRef>> GetJsPropertyObjectRefArray(this IJSRuntime jsRuntime,
+        public static async ValueTask<IEnumerable<JsObjectRef>> GetJsPropertyArray(this IJSRuntime jsRuntime,
             object parent, string property)
         {
             var jsObjectRefs = await jsRuntime.InvokeAsync<IEnumerable<JsObjectRef>>(
-                "DotNetInterop.getArray",
+                "DotNetInterop.getPropertyArray",
                 new object[]
                 {
                     parent,
@@ -137,7 +137,7 @@ namespace WebRtcJsInterop.Extensions
             return ret;
         }
 
-        public static async ValueTask<IAsyncDisposable> AddEventListener(this IJSRuntime jsRuntime,
+        public static async ValueTask<IAsyncDisposable> AddJsEventListener(this IJSRuntime jsRuntime,
             JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)
         {
             var listenerId = await jsRuntime.InvokeAsync<int>("DotNetInterop.addEventListener", jsObjectRef,
@@ -147,6 +147,5 @@ namespace WebRtcJsInterop.Extensions
                 await jsRuntime.InvokeVoidAsync("DotNetInterop.removeEventListener", jsObjectRef, property,
                     event_, listenerId).ConfigureAwait(false));
         }
-
     }
 }

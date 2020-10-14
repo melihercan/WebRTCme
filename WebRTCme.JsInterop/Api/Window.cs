@@ -24,9 +24,15 @@ namespace WebRtcJsInterop.Api
             await DisposeBaseAsync();
         }
 
+        public class X
+        {
+            public bool JavaEnabled { get; set; }
+            public string[] Languages { get; set; }
+            public bool OnLine { get; set; }
+        }
+
         public static async Task<IWindow> New(IJSRuntime jsRuntime)
         {
-
             //var windowObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
             //    "webRtcInterop.getProperty", null, "window");
             // windowObjRef.JsRuntime = jsRuntime;

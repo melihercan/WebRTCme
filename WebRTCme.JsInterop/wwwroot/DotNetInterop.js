@@ -186,19 +186,14 @@
     }
 
     /**
-     * Gets specified property. If property is 'object' type and 'contentSpec' is 'null', it adds the object 
-     * to the 'objectRefs' and returns the JS object reference. If 'contentSpec' is provided then the content
-     * specified in 'contentSpec' will be returned.
-     * If property is a primitive type, it will be just a normal return. 
+     * Gets object reference of the specified property. 
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be 
      *                      converted into a JS object by the reviver. If it is a string, it will be converted into
      *                      JS object first.
      * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
-     * @param {string} contentSpec: Filter of the content to be returned. 'null' indicates that JS object reference
-     *                              shall be returned if property specifies an 'object'
      */
-    public.getProperty = function (parent, property, contentSpec) {
+    public.getPropertyObjectRef = function (parent, property, contentSpec) {
         let parentObject = getParentObject(parent);;
 
         let propertyObject = getPropertyObject(parentObject, property);
@@ -215,6 +210,29 @@
     }
 
     /**
+     * Gets object as value. If 'valueSpec' is provided then the values specified in 'valueSpec' will be returned.
+     * Otherwise it will be just a normal return. 
+     * 
+     * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be 
+     *                      converted into a JS object by the reviver. If it is a string, it will be converted into
+     *                      JS object first.
+     * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
+     * @param {string} contentSpec: Filter of the content to be returned. 'null' indicates that JS object reference
+     *                              shall be returned if property specifies an 'object'
+     */
+    public.getPropertyValue = function (parent, property, contentSpec) {
+        let parentObject = getParentObject(parent);;
+
+        let propertyObject = getPropertyObject(parentObject, property);
+        if (typeof (propertyObject) === 'object' && contentSpec != null) {
+            let value = getObjectContent(propertyObject, [], contentSpec);
+            return value;
+        } else {
+            return propertyObject;
+        }
+    }
+
+    /**
      * Gets the array of object references.
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
@@ -222,7 +240,7 @@
      *                      JS object first.
      * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
      */
-    public.getArray = function (parent, property) {
+    public.getPropertyArray = function (parent, property) {
         let parentObject = getParentObject(parent);
         let arrayObject = getPropertyObject(parentObject, property);
         if (Array.isArray(arrayObject)) {
