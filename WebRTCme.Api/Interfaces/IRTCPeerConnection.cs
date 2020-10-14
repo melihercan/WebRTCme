@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Models;
 
 namespace WebRTCme
 {
@@ -11,5 +10,6 @@ namespace WebRTCme
         ValueTask<IAsyncDisposable> OnIceCandidate(Func<RTCPeerConnectionIceEvent, ValueTask> callback);
         ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback);
         ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream);
+        ValueTask<RTCSessionDescription> CreateOffer(RTCOfferOptions options);
     }
 }

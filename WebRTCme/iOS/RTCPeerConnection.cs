@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRTCme.Models;
 
 namespace WebRtc.iOS
 {
@@ -15,6 +14,11 @@ namespace WebRtc.iOS
         }
 
         public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<RTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
             throw new NotImplementedException();
         }

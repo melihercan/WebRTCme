@@ -10,8 +10,8 @@ namespace WebRtcJsInterop.Api
 {
     public abstract class BaseApi 
     {
-        protected IJSRuntime JsRuntime { get; }
-        protected JsObjectRef JsObjectRef { get; }
+        internal IJSRuntime JsRuntime { get; }
+        internal JsObjectRef JsObjectRef { get; }
 
         protected BaseApi(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
         {

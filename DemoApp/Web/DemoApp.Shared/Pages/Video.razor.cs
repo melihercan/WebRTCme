@@ -74,7 +74,9 @@ namespace DemoApp.Shared.Pages
                     await Task.CompletedTask;
                 });
 
-
+                var rtcSessionDescription = await _rtcPeerConnection.CreateOffer(new RTCOfferOptions 
+                { 
+                });
 
 
 

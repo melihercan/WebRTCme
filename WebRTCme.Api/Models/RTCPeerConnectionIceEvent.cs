@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Models
+namespace WebRTCme
 {
     public class RTCPeerConnectionIceEvent
     {

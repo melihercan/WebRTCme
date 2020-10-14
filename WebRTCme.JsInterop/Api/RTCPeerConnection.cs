@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using WebRtcJsInterop.Extensions;
 using WebRtcJsInterop.Interops;
 using WebRTCme;
-using WebRTCme.Models;
 
 namespace WebRtcJsInterop.Api
 {
@@ -23,6 +22,31 @@ namespace WebRtcJsInterop.Api
         public async ValueTask DisposeAsync()
         {
             await DisposeBaseAsync();
+        }
+
+        public async ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        {
+            var x = (MediaStreamTrack)track;
+            var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(JsObjectRef, "addTrack", new object[] 
+            { 
+                ((MediaStreamTrack)track).JsObjectRef,
+                ((MediaStream)stream).JsObjectRef
+            });
+            var rtcRtpSender = RTCRtpSender.New(JsRuntime, jsObjectRefRtcRtpSender);
+            return rtcRtpSender;
+        }
+
+        public async ValueTask<RTCSessionDescription> CreateOffer(RTCOfferOptions options)
+        {
+            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, "createOffer", 
+                new object[] { });
+            var rtcSessionDescription = await JsRuntime.GetJsPropertyContent<RTCSessionDescription>(jsObjectRef, null,
+                new
+                {
+                    type = true,
+                    sdp = true
+                });
+            return rtcSessionDescription;
         }
 
 
@@ -49,10 +73,6 @@ namespace WebRtcJsInterop.Api
             return ret;
         }
 
-        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
-        {
-            throw new NotImplementedException();
-        }
 
         internal static async Task<IRTCPeerConnection> New(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {

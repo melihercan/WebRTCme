@@ -1,4 +1,4 @@
-﻿namespace WebRTCme.Models
+﻿namespace WebRTCme
 {
     public enum RTCIceTcpCandidateType
     {

@@ -26,7 +26,7 @@ namespace WebRtcJsInterop.Api
             var mediaStreamTracks = new List<IMediaStreamTrack>();
             foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
             {
-                mediaStreamTracks.Add(await MediaStreamTrack.New(JsRuntime, jsObjectRefMediaStreamTrack));
+                mediaStreamTracks.Add(MediaStreamTrack.New(JsRuntime, jsObjectRefMediaStreamTrack));
             }
             return mediaStreamTracks;
         }

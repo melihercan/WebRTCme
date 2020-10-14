@@ -227,7 +227,8 @@
         let arrayObject = getPropertyObject(parentObject, property);
         if (Array.isArray(arrayObject)) {
             let objectRefArray = [];
-            parentObject.forEach(objectRef => {
+            arrayObject.forEach(object => {
+                let objectRef = addObjectRef(object);
                 objectRefArray.push(objectRef);
             });
             return objectRefArray;

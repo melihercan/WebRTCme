@@ -16,7 +16,7 @@ namespace WebRtcJsInterop.Api
 
 
 
-        internal static async Task<IMediaStreamTrack> New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
+        internal static IMediaStreamTrack New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
         {
             var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
             return mediaStreamTrack;
