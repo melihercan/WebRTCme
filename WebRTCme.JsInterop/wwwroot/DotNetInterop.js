@@ -60,7 +60,6 @@
         return parentObject;
     }
 
-
     addObjectRef = function (object) {
         let id = objectRefId++;
         objectRefs[id] = object;
@@ -88,8 +87,6 @@
         }
         return object;
     }
-
-
 
     getObjectContent = function (object, accumulatedContent, contentSpec) {
         if (contentSpec === false) {
@@ -218,6 +215,29 @@
     }
 
     /**
+     * Gets the array of object references.
+     * 
+     * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
+     *                      converted into a JS object by the reviver. If it is a string, it will be converted into
+     *                      JS object first.
+     * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
+     */
+    public.getArray = function (parent, property) {
+        let parentObject = getParentObject(parent);
+        let arrayObject = getPropertyObject(parentObject, property);
+        if (Array.isArray(arrayObject)) {
+            let objectRefArray = [];
+            parentObject.forEach(objectRef => {
+                objectRefArray.push(objectRef);
+            });
+            return objectRefArray;
+        } else {
+            throw new Error("Object does not contain array");
+        }
+    } 
+
+
+    /**
      * Sets specified property.
      * 
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be
@@ -263,7 +283,6 @@
             }
         }
     }
-
 
     /**
      * Calls a method asynchronously. it waits for the promise to be completed. If return value is object type, 

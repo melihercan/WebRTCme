@@ -49,7 +49,7 @@ namespace WebRtcJsInterop.Api
             return ret;
         }
 
-        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream[] stream)
+        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
             throw new NotImplementedException();
         }

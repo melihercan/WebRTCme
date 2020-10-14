@@ -1,5 +1,6 @@
 using Microsoft.JSInterop;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebRtcJsInterop.Interops;
@@ -57,6 +58,19 @@ namespace WebRtcJsInterop.Extensions
                     contentSpec
                 }).ConfigureAwait(false);
             return content;
+        }
+
+        public static async ValueTask<IEnumerable<JsObjectRef>> GetJsPropertyObjectRefArray(this IJSRuntime jsRuntime,
+            object parent, string property)
+        {
+            var jsObjectRefs = await jsRuntime.InvokeAsync<IEnumerable<JsObjectRef>>(
+                "DotNetInterop.getArray",
+                new object[]
+                {
+                    parent,
+                    property,
+                }).ConfigureAwait(false);
+            return jsObjectRefs;
         }
 
 

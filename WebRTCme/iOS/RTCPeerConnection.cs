@@ -14,6 +14,11 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
+        public ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        {
+            throw new NotImplementedException();
+        }
+
         public ValueTask DisposeAsync()
         {
             throw new NotImplementedException();

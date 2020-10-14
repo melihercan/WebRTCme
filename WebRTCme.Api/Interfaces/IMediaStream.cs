@@ -8,10 +8,10 @@ namespace WebRTCme
 {
     public interface IMediaStream : IAsyncDisposable
     {
+        Task<List<IMediaStreamTrack>> GetTracks();
 
 
-
-
-        Task SetMediaSourceAsync(object media);
+        // Custom APIs.
+        Task SetElementReferenceSrcObjectAsync(object media);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
@@ -37,7 +38,8 @@ namespace DemoApp.Shared.Pages
                     Audio = true,
                     Video = true
                 });
-                await _mediaStream.SetMediaSourceAsync(_localVideo);
+
+                await _mediaStream.SetElementReferenceSrcObjectAsync(_localVideo);
 
                 _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration
                 {
@@ -50,15 +52,18 @@ namespace DemoApp.Shared.Pages
                                 "stun:stun.stunprotocol.org:3478",
                                 "stun:stun.l.google.com:19302"
                             } 
-                        },
-
+                        }
                     }
                 });
+                var mediaStreamTracks = await _mediaStream.GetTracks();
+                foreach(var mediaStreamTrack in mediaStreamTracks)
+                {
+                    await _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
+                }
 
-                //// TODO: USE OBJJ REF of the event.
                 await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
                 {
-                    //// TODO: if objectRef != null =>
+                    //// TODO: object != null =>
                     /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
 
                     await Task.CompletedTask;
@@ -68,7 +73,10 @@ namespace DemoApp.Shared.Pages
 
                     await Task.CompletedTask;
                 });
-                //_rtcRtpSender = await _rtcPeerConnection.AddTrack()
+
+
+
+
 
                 //            StateHasChanged();
             }

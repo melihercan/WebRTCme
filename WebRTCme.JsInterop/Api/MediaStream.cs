@@ -19,19 +19,19 @@ namespace WebRtcJsInterop.Api
             await DisposeBaseAsync();
         }
 
-        internal static async Task<IMediaStream> New(IJSRuntime jsRuntime)
+        public async Task<List<IMediaStreamTrack>> GetTracks()
         {
-            var jsObjectRef = await jsRuntime.CreateJsObject("window", "MediaStream");
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
-            return mediaStream;
-        }
-        internal static IMediaStream New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefStream)
-        {
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRefStream);
-            return mediaStream;
+            var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(JsObjectRef, "getTracks", new object[] { });
+            var jsObjectRefMediaStreamTrackArray = await JsRuntime.GetJsPropertyObjectRefArray(jsObjectRef, null);
+            var mediaStreamTracks = new List<IMediaStreamTrack>();
+            foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
+            {
+                mediaStreamTracks.Add(await MediaStreamTrack.New(JsRuntime, jsObjectRefMediaStreamTrack));
+            }
+            return mediaStreamTracks;
         }
 
-        public async Task SetMediaSourceAsync(object/*ElementReference*/ elementReference)
+        public async Task SetElementReferenceSrcObjectAsync(object/*ElementReference*/ elementReference)
         {
             await JsRuntime.SetJsProperty(elementReference, "srcObject", JsObjectRef);
 
@@ -45,5 +45,18 @@ namespace WebRtcJsInterop.Api
             //    });
 
         }
+
+        internal static async Task<IMediaStream> New(IJSRuntime jsRuntime)
+        {
+            var jsObjectRef = await jsRuntime.CreateJsObject("window", "MediaStream");
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
+            return mediaStream;
+        }
+        internal static IMediaStream New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
+        {
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRefMediaStream);
+            return mediaStream;
+        }
+
     }
 }

@@ -10,6 +10,6 @@ namespace WebRTCme
     {
         ValueTask<IAsyncDisposable> OnIceCandidate(Func<RTCPeerConnectionIceEvent, ValueTask> callback);
         ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback);
-        ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream[] stream);
+        ValueTask<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream);
     }
 }

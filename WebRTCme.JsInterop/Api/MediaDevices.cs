@@ -15,9 +15,9 @@ namespace WebRtcJsInterop.Api
 
         async Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
         {
-            var jsObjectRefStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
+            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
                 "getUserMedia", constraints);
-            return MediaStream.New(JsRuntime, jsObjectRefStream);
+            return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
         }
 
         public async ValueTask DisposeAsync()
