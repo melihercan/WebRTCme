@@ -6,5 +6,6 @@ namespace WebRTCme
 {
     public interface IRTCRtpSender : IAsyncDisposable
     {
+        void DeleteMe();
     }
 }

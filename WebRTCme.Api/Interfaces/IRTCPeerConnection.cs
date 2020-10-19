@@ -7,8 +7,8 @@ namespace WebRTCme
 {
     public interface IRTCPeerConnection
     {
-        IAsyncDisposable OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback);
-        IAsyncDisposable OnTrack(Func<IRTCTrackEvent, ValueTask> callback);
+        void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback);
+        void OnTrack(Func<IRTCTrackEvent> callback);
         IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
         IRTCSessionDescription CreateOffer(RTCOfferOptions options);
     }

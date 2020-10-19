@@ -24,13 +24,6 @@ namespace WebRtcJsInterop.Api
             await DisposeBaseAsync();
         }
 
-        public class X
-        {
-            public bool JavaEnabled { get; set; }
-            public string[] Languages { get; set; }
-            public bool OnLine { get; set; }
-        }
-
         public static async Task<IWindowAsync> NewAsync(IJSRuntime jsRuntime)
         {
             //var windowObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(

@@ -7,7 +7,7 @@ using ObjCRuntime;
 using UIKit;
 //using WebRTC;
 
-namespace WebRtc
+namespace Webrtc
 {
 	// @protocol RTCCodecSpecificInfo <NSObject>
 	[Protocol, Model]

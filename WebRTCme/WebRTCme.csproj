@@ -33,11 +33,6 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="Android\Window.cs" />
-	  <UpToDateCheckInput Remove="iOS\Navigator.cs" />
-	  <UpToDateCheckInput Remove="iOS\Window.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.9" />

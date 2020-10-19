@@ -24,5 +24,9 @@ namespace WebRtcJsInterop.Api
             return rtcRtpSender;
         }
 
+        public void DeleteMe()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

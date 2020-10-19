@@ -13,6 +13,5 @@ namespace WebRtc.iOS
         {
             throw new NotImplementedException();
         }
-
     }
 }

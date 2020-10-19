@@ -4,7 +4,7 @@ using Foundation;
 using ObjCRuntime;
 //using WebRTC;
 
-namespace WebRtc
+namespace Webrtc
 {
 	[Native]
 	public enum RTCVideoRotation : long////nint
