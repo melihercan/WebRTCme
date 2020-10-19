@@ -12,6 +12,44 @@ I am inspired and also modified some code from this project.
 Please see the license file: "LICENSE.BrowserInterop".
 
 
- 
 
 
+iOS bindings (install sharpie first and cocoapods:"sudo gem install cocoapods")
+macOS open terminal:
+- cd Projects
+- pod lib create WebRTC
+- mkdir WebRTC
+- cd WebRTC
+- pod setup
+- pod init
+- Edit Podfile, clean all and add this:
+source 'https://github.com/CocoaPods/Specs.git'
+target 'GoogleWebRTC' do
+ platform :ios, '14.0'
+ pod 'GoogleWebRTC'
+end
+- pod install
+- edit WebRTC.h file and remove all WebRTC/ from imports
+##- sharpie bind -o WebRTC.iOS -sdk iphoneos14.0 -namespace="WebRTC" -scope Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers  Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers/WebRTC.h -c -I Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers -arch arm64
+
+##sharpie bind -o WebRTC.iOS -sdk iphoneos14.0 -scope Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers  Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers/WebRTC.h -c -I Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers -arch arm64
+
+##sharpie bind -o WebRTC.iOS -sdk iphoneos14.0 -scope Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers  Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers/WebRTC.h -c -I Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers -arch arm64
+
+ sharpie bind -o WebRTC.iOS -sdk iphoneos14.0 -scope Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers  Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers/WebRTC.h
+
+
+
+1.) Created an ObjC static lib "WebRTCContiner", removed all sources.
+2.)
+- pod init
+- Edit Podfile, clean all and add this:
+source 'https://github.com/CocoaPods/Specs.git'
+target 'WebRTCContainer' do
+ platform :ios, '14.0'
+ pod 'GoogleWebRTC'
+end
+- pod install
+3.) edit WebRTC.h file and convert all <WebRTC/xxx.h> into "xxx.h"
+sharpie bind -o WebRTC.iOS -sdk iphoneos14.0 -scope Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers  Pods/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework/Headers/WebRTC.h
+<
