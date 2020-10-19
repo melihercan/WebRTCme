@@ -9,15 +9,15 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class MediaDevices : BaseApi, IMediaDevices
+    internal class MediaDevicesAsync : BaseApi, IMediaDevicesAsync
     {
-        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private MediaDevicesAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        async Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
+        async Task<IMediaStreamAsync> IMediaDevicesAsync.GetUserMediaAsync(MediaStreamConstraints constraints)
         {
             var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
                 "getUserMedia", constraints);
-            return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
+            return MediaStreamAsync.New(JsRuntime, jsObjectRefMediaStream);
         }
 
         public async ValueTask DisposeAsync()
@@ -25,10 +25,10 @@ namespace WebRtcJsInterop.Api
             await DisposeBaseAsync();
         }
 
-        internal static async Task<IMediaDevices> New(IJSRuntime jsRuntime)
+        internal static async Task<IMediaDevicesAsync> NewAsync(IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
-            var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
+            var mediaDevices = new MediaDevicesAsync(jsRuntime, jsObjectRef);
             return mediaDevices;
         }
 

@@ -9,21 +9,22 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class Navigator : BaseApi, INavigator
+    internal class NavigatorAsync : BaseApi, INavigatorAsync
     {
-        private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private NavigatorAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        async Task<IMediaDevices> INavigator.MediaDevices() => await Api.MediaDevices.New(JsRuntime);
+        async Task<IMediaDevicesAsync> INavigatorAsync.MediaDevicesAsync() => 
+            await Api.MediaDevicesAsync.NewAsync(JsRuntime);
 
         public async ValueTask DisposeAsync()
         {
             await DisposeBaseAsync();
         }
 
-        internal static async Task<INavigator> New(IJSRuntime jsRuntime)
+        internal static async Task<INavigatorAsync> NewAsync(IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator");
-            var navigator = new Navigator(jsRuntime, jsObjectRef);
+            var navigator = new NavigatorAsync(jsRuntime, jsObjectRef);
             return navigator;
         }
 

@@ -7,6 +7,11 @@ namespace WebRTCme
 {
     public interface INavigator : IAsyncDisposable
     {
-        Task<IMediaDevices> MediaDevices();
+        IMediaDevices MediaDevices();
+    }
+
+    public interface INavigatorAsync : IAsyncDisposable
+    {
+        Task<IMediaDevicesAsync> MediaDevicesAsync();
     }
 }

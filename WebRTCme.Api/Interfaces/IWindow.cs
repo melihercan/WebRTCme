@@ -5,11 +5,19 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IWindow : IAsyncDisposable
+    public interface IWindow
     {
-        Task<INavigator> Navigator();
+        INavigator Navigator { get; }
 
-
-        Task<IRTCPeerConnection> RTCPeerConnection(RTCConfiguration configuration);
+        IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration);
     }
+
+    public interface IWindowAsync : IAsyncDisposable
+    {
+        Task<INavigatorAsync> NavigatorAsync();
+
+
+        Task<IRTCPeerConnectionAsync> RTCPeerConnectionAsync(RTCConfiguration configuration);
+    }
+
 }
