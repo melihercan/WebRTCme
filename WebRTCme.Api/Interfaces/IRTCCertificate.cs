@@ -4,8 +4,8 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCCertificate
+    public interface IRTCCertificate
     {
-        public DateTime Expires { get; set; }
+        DateTime Expires { get; set; }
     }
 }

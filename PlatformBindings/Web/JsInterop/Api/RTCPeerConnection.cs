@@ -36,7 +36,7 @@ namespace WebRtcJsInterop.Api
             return rtcRtpSender;
         }
 
-        public async ValueTask<RTCSessionDescription> CreateOffer(RTCOfferOptions options)
+        public async ValueTask<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
                 "createOffer", new object[] { });
@@ -47,14 +47,15 @@ namespace WebRtcJsInterop.Api
                     type = true,
                     sdp = true
                 });
+            //// TODO: REMOVE JS OBJ REF
             return rtcSessionDescription;
         }
 
 
-        public async ValueTask<IAsyncDisposable> OnIceCandidate(Func<RTCPeerConnectionIceEvent, ValueTask> callback)
+        public async ValueTask<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "onicecandidate",
-                JsEventHandler.New<RTCPeerConnectionIceEvent>(async e => 
+                JsEventHandler.New<IRTCPeerConnectionIceEvent>(async e => 
                 { 
                     await callback.Invoke(e).ConfigureAwait(false); 
                 },
@@ -62,10 +63,10 @@ namespace WebRtcJsInterop.Api
             return ret;
         }
 
-        public async ValueTask<IAsyncDisposable> OnTrack(Func<RTCTrackEvent, ValueTask> callback)
+        public async ValueTask<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "ontrack",
-                JsEventHandler.New<RTCTrackEvent>(async e =>
+                JsEventHandler.New<IRTCTrackEvent>(async e =>
                 {
                     await callback.Invoke(e).ConfigureAwait(false);
                 },

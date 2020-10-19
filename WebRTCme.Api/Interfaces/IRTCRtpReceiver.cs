@@ -1,6 +1,6 @@
 ﻿namespace WebRTCme
 {
-    public class RTCRtpReceiver
+    public interface IRTCRtpReceiver
     {
     }
 }

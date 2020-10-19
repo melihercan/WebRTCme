@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using WebRTCme;
 
-namespace WebRTCme
+namespace WebRtcJsInterop.Api
 {
-    public class RTCSessionDescription
+    internal class RTCSessionDescription : IRTCSessionDescription
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public RTCSdpType Type { get; set; }
-        public string Sdp { get; set; }
 
+        public string Sdp { get; set; }
     }
 }
