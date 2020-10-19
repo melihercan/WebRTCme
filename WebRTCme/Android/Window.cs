@@ -5,11 +5,14 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
-    internal class Navigator : INavigator
+    internal class Window : IWindow
     {
-        public IMediaDevices MediaDevices()
+        public INavigator Navigator => new Navigator();
+
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }
+
     }
 }

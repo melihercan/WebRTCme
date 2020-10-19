@@ -24,7 +24,7 @@ namespace WebRtcJsInterop.Api
             await DisposeBaseAsync();
         }
 
-        public async ValueTask<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream)
+        public async Task<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream)
         {
             var x = (MediaStreamTrackAsync)track;
             var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(JsObjectRef, "addTrack", new object[] 
@@ -36,7 +36,7 @@ namespace WebRtcJsInterop.Api
             return rtcRtpSender;
         }
 
-        public async ValueTask<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options)
+        public async Task<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options)
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
                 "createOffer", new object[] { });
@@ -52,7 +52,7 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        public async ValueTask<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
+        public async Task<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "onicecandidate",
                 JsEventHandler.New<IRTCPeerConnectionIceEvent>(async e => 
@@ -63,7 +63,7 @@ namespace WebRtcJsInterop.Api
             return ret;
         }
 
-        public async ValueTask<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback)
+        public async Task<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(JsObjectRef, null, "ontrack",
                 JsEventHandler.New<IRTCTrackEvent>(async e =>

@@ -13,9 +13,6 @@ namespace WebRtcJsInterop.Api
         private MediaStreamTrackAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
-
-
-
         internal static IMediaStreamTrackAsync NewAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
         {
             var mediaStreamTrack = new MediaStreamTrackAsync(jsRuntime, jsObjectRefMediaStreamTrack);

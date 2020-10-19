@@ -8,9 +8,12 @@ namespace WebRTCme
     public interface IMediaDeviceInfo
     {
         string DeviceId { get; set; }
+
         string GroupId { get; set; }
+        
         [JsonConverter(typeof(JsonStringEnumConverter))]
         MediaDeviceInfoKind Kind { get; set; }
+        
         string Label { get; set; }
     }
 }

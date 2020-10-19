@@ -15,10 +15,10 @@ namespace WebRTCme
 
     public interface IRTCPeerConnectionAsync : IAsyncDisposable
     {
-        ValueTask<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback);
-        ValueTask<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback);
-        ValueTask<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream);
-        ValueTask<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options);
+        Task<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback);
+        Task<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback);
+        Task<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream);
+        Task<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options);
     }
 
 }
