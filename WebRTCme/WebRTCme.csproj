@@ -24,10 +24,12 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<ProjectReference Include="..\PlatformBindings\Xamarin\Android\Android.csproj" />
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<ProjectReference Include="..\PlatformBindings\Xamarin\iOS\iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 

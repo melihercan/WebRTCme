@@ -15,9 +15,9 @@ namespace DemoApp
             Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
             Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
 
-            var webRtc = CrossWebRtc.Current;
-            var rtcPeerConnection = webRtc.CreateRTCPeerConnection();
-            rtcPeerConnection.Do();
+////            var webRtc = CrossWebRtc.Current;
+////            var rtcPeerConnection = webRtc.CreateRTCPeerConnection();
+////            rtcPeerConnection.Do();
 
         }
 

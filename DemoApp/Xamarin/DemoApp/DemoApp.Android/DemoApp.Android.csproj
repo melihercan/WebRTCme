@@ -93,6 +93,10 @@
       <Project>{47cf7b0b-b7d4-48cc-86a1-68a52d059df7}</Project>
       <Name>WebRTCme</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DemoApp\DemoApp.csproj">
+      <Project>{92371e4d-25ee-4d22-958b-ed33f5709232}</Project>
+      <Name>DemoApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>
