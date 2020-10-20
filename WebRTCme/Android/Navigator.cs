@@ -5,11 +5,8 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
-    internal class Navigator : INavigator
+    internal class Navigator : ApiBase<object>, INavigator
     {
-        public IMediaDevices MediaDevices()
-        {
-            throw new NotImplementedException();
-        }
+        public IMediaDevices MediaDevices() => new MediaDevices();
     }
 }

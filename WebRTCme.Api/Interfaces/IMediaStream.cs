@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStream
+    public interface IMediaStream : IDisposable
     {
         List<IMediaStreamTrack> GetTracks();
 

@@ -8,15 +8,10 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class RTCRtpSender : BaseApi, IRTCRtpSender
+    internal class RTCRtpSender : ApiBase, IRTCRtpSender
     {
         private RTCRtpSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-
-        public ValueTask DisposeAsync()
-        {
-            throw new NotImplementedException();
-        }
 
         internal static IRTCRtpSender New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcRtpSender)
         {

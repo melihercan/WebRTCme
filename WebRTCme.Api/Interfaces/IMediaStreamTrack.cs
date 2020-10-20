@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IMediaStreamTrack
+    public interface IMediaStreamTrack : IDisposable
     {
     }
 

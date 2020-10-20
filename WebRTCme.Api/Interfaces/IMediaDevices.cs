@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaDevices
+    public interface IMediaDevices : IDisposable
     {
         IMediaStream GetUserMedia(MediaStreamConstraints constraints);
     }

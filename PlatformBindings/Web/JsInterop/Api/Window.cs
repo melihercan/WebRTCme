@@ -10,19 +10,14 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    public class WindowAsync : BaseApi, IWindowAsync
+    public class Window : ApiBase, IWindowAsync
     {
-        private WindowAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public async Task<INavigatorAsync> NavigatorAsync() => await Api.NavigatorAsync.NewAsync(JsRuntime);
+        public async Task<INavigatorAsync> NavigatorAsync() => await Api.Navigator.NewAsync(JsRuntime);
 
         public async Task<IRTCPeerConnectionAsync> RTCPeerConnectionAsync(RTCConfiguration rtcConfiguration) =>
-            await Api.RTCPeerConnectionAsync.NewAsync(JsRuntime, rtcConfiguration);
-
-        public async ValueTask DisposeAsync()
-        {
-            await DisposeBaseAsync();
-        }
+            await Api.RTCPeerConnection.NewAsync(JsRuntime, rtcConfiguration);
 
         public static async Task<IWindowAsync> NewAsync(IJSRuntime jsRuntime)
         {
@@ -115,7 +110,7 @@ namespace WebRtcJsInterop.Api
             //          var window = new Window(jsRuntime, windowInterop);
 
             var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", null);
-            var window = new WindowAsync(jsRuntime, jsObjectRef);
+            var window = new Window(jsRuntime, jsObjectRef);
             return window;
         }
     }

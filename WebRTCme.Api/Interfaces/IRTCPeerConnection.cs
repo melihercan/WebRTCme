@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCPeerConnection
+    public interface IRTCPeerConnection : IDisposable
     {
         void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback);
         void OnTrack(Func<IRTCTrackEvent> callback);

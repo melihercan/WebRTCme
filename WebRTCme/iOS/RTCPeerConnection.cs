@@ -6,7 +6,7 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    internal class RTCPeerConnection : IRTCPeerConnection
+    internal class RTCPeerConnection : ApiBase<object>, IRTCPeerConnection
     {
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {

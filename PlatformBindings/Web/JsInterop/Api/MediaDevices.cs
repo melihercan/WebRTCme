@@ -9,26 +9,21 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class MediaDevicesAsync : BaseApi, IMediaDevicesAsync
+    internal class MediaDevices : ApiBase, IMediaDevicesAsync
     {
-        private MediaDevicesAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         async Task<IMediaStreamAsync> IMediaDevicesAsync.GetUserMediaAsync(MediaStreamConstraints constraints)
         {
-            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(JsObjectRef, 
+            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, 
                 "getUserMedia", constraints);
-            return MediaStreamAsync.New(JsRuntime, jsObjectRefMediaStream);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await DisposeBaseAsync();
+            return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
         }
 
         internal static async Task<IMediaDevicesAsync> NewAsync(IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
-            var mediaDevices = new MediaDevicesAsync(jsRuntime, jsObjectRef);
+            var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
             return mediaDevices;
         }
 
