@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Interfaces
 {
-    public interface IRTCRtpTransceiver : IAsyncDisposable
+    public interface IRTCRtpTransceiver 
     {
     }
 }

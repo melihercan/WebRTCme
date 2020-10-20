@@ -5,7 +5,7 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    internal class Window : ApiBase<object>, IWindow
+    internal class Window : ApiBase, IWindow
     {
         public INavigator Navigator => new Navigator();
 

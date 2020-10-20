@@ -5,7 +5,7 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    internal class Navigator : ApiBase<object>, INavigator
+    internal class Navigator : ApiBase, INavigator
     {
         public IMediaDevices MediaDevices() => new MediaDevices();
     }

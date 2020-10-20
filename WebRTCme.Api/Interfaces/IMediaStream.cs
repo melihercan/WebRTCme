@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStream : IDisposable
+    public interface IMediaStream : INativeObject
     {
         List<IMediaStreamTrack> GetTracks();
 
@@ -15,7 +15,7 @@ namespace WebRTCme
         void SetElementReferenceSrcObject(object media);
     }
 
-    public interface IMediaStreamAsync : IAsyncDisposable
+    public interface IMediaStreamAsync : INativeObjectAsync
     {
         Task<List<IMediaStreamTrackAsync>> GetTracksAsync();
 

@@ -5,7 +5,7 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
-    internal class MediaDevices : ApiBase<object>, IMediaDevices
+    internal class MediaDevices : ApiBase, IMediaDevices
     {
         public IMediaStream GetUserMedia(MediaStreamConstraints constraints)
         {

@@ -9,9 +9,9 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    public abstract class ApiBase : INativeObjectAsync<JsObjectRef>
+    public abstract class ApiBase : INativeObjectAsync
     {
-        protected ApiBase(IJSRuntime jsRuntime,  JsObjectRef jsObjectRef = null)
+        protected ApiBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
             JsRuntime = jsRuntime;
             NativeObject = jsObjectRef;
@@ -19,14 +19,14 @@ namespace WebRtcJsInterop.Api
 
         public IJSRuntime JsRuntime { get; }
 
-        public JsObjectRef NativeObject { get; }
-
-
+        public object NativeObject { get; }
+        
         public async ValueTask DisposeAsync()
         {
             if (NativeObject != null)
             {
-                await JsRuntime.DeleteJsObjectRef(NativeObject.JsObjectRefId);
+                var jsObjectRef = NativeObject as JsObjectRef;
+                await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             }
         }
     }

@@ -2,7 +2,7 @@
 
 namespace WebRTCme
 {
-    public interface IRTCRtpReceiver : IAsyncDisposable
+    public interface IRTCRtpReceiver
     {
     }
 }

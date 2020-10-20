@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpSender : IAsyncDisposable
+    public interface IRTCRtpSender
     {
         void DeleteMe();
     }

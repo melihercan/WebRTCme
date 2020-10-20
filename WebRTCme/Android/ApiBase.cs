@@ -5,14 +5,11 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
-    public abstract class ApiBase<T> : INativeObject<T> where T : class
+    public abstract class ApiBase : INativeObject
     {
-        protected ApiBase(T nativeObject = null)
-        {
-            NativeObject = nativeObject;
-        }
+        protected ApiBase(object nativeObject = null) => NativeObject = nativeObject;
 
-        public T NativeObject { get; }
+        public object NativeObject { get; }
 
         public void Dispose()
         {

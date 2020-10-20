@@ -6,7 +6,7 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
-    internal class Window : ApiBase<object>, IWindow
+    internal class Window : ApiBase, IWindow
     {
         public INavigator Navigator => new Navigator();
 
