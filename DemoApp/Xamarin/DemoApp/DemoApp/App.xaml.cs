@@ -15,20 +15,19 @@ namespace DemoApp
             InitializeComponent();
 
 
-            var msg = new WebRtcGuiXamarin.Video().Get();
 
 
             var webRtc = CrossWebRtc.Current;
             var _window = webRtc.Window;
             var _navigator = _window.Navigator;
             var _mediaDevices = _navigator.MediaDevices();
-            var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
-            {
-                Audio = true,
-                Video = true
-            });
+            //var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
+            //{
+            //    Audio = true,
+            //    Video = true
+            //});
 
-            _mediaStream.SetElementReferenceSrcObject(null);
+            //_mediaStream.SetElementReferenceSrcObject(null);
 
 
             DependencyService.Register<MockDataStore>();

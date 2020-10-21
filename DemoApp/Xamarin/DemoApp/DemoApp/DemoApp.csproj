@@ -14,4 +14,10 @@
     <ProjectReference Include="..\..\..\..\Gui\WebRTCme.Gui.Xamarin\WebRTCme.Gui.Xamarin.csproj" />
     <ProjectReference Include="..\..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Views\VideoPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>
