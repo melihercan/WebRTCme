@@ -42,5 +42,15 @@ namespace WebRtcGuiXamarin.Android
 
 
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Control.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }

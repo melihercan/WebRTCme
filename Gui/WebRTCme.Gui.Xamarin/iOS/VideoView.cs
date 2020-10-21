@@ -12,6 +12,10 @@ namespace WebRtcGuiXamarin.iOS
         public VideoView(VideoOptions videoOptions)
         {
             _videoOptions = videoOptions;
+
+
+            ///var capturer = new RTCCameraVideoCapturer();
+
         }
 
 

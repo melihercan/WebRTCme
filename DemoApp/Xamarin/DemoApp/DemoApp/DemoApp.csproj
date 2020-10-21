@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Gui\WebRTCme.Gui.Xamarin\WebRTCme.Gui.Xamarin.csproj" />
-    <ProjectReference Include="..\..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
   <ItemGroup>

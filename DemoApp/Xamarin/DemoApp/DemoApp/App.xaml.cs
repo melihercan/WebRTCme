@@ -3,7 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using DemoApp.Services;
 using DemoApp.Views;
-using WebRTCme;
+using WebRtcGuiXamarin;
 
 namespace DemoApp
 {
@@ -14,21 +14,7 @@ namespace DemoApp
         {
             InitializeComponent();
 
-
-
-
-            var webRtc = CrossWebRtc.Current;
-            var _window = webRtc.Window;
-            var _navigator = _window.Navigator;
-            var _mediaDevices = _navigator.MediaDevices();
-            //var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
-            //{
-            //    Audio = true,
-            //    Video = true
-            //});
-
-            //_mediaStream.SetElementReferenceSrcObject(null);
-
+            WebRtcGui.Initialize();
 
             DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();

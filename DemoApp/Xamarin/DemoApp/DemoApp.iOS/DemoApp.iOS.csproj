@@ -140,10 +140,6 @@
       <Project>{d2d8ee39-8488-4ad2-abe1-46ca63972a7b}</Project>
       <Name>WebRTCme.Gui.Xamarin</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\WebRTCme\WebRTCme.csproj">
-      <Project>{47cf7b0b-b7d4-48cc-86a1-68a52d059df7}</Project>
-      <Name>WebRTCme</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DemoApp\DemoApp.csproj">
       <Project>{92371e4d-25ee-4d22-958b-ed33f5709232}</Project>
       <Name>DemoApp</Name>
