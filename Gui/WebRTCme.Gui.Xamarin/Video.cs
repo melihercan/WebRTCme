@@ -8,11 +8,11 @@ namespace WebRtcGuiXamarin
     public class Video : View       
     {
         public static readonly BindableProperty TestProperty = BindableProperty
-            .Create("Test", typeof(int), typeof(Video));
+            .Create("Test", typeof(VideoOptions), typeof(Video), VideoOptions.Option1);
 
-        public int Test
+        public VideoOptions Options
         {
-            get => (int)GetValue(TestProperty);
+            get => (VideoOptions)GetValue(TestProperty);
             set => SetValue(TestProperty, value);
         }
 

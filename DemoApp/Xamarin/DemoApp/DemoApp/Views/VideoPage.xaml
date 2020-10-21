@@ -8,7 +8,7 @@
             <Label Text="Welcome to Xamarin.Forms!"
                    HorizontalOptions="CenterAndExpand" />
 
-            <webRtc:Video Test="100"/>
+            <webRtc:Video Options="Option1"/>
             
         </StackLayout>
     </ContentPage.Content>
