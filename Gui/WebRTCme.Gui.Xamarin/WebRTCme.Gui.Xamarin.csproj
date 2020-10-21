@@ -1,0 +1,36 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
+	
+    <PropertyGroup>
+	    <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<RootNamespace>WebRtcGuiXamarin</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Include="*.cs" />
+		<UpToDateCheckInput Include="NetStandard\**\*.cs" />
+		<UpToDateCheckInput Include="Android\**\*.cs" />
+		<UpToDateCheckInput Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<Compile Include="NetStandard\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<Compile Include="Android\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<Compile Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+
+
+
+</Project>
