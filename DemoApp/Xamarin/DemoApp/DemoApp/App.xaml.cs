@@ -14,6 +14,10 @@ namespace DemoApp
         {
             InitializeComponent();
 
+
+            var msg = new WebRtcGuiXamarin.Video().Get();
+
+
             var webRtc = CrossWebRtc.Current;
             var _window = webRtc.Window;
             var _navigator = _window.Navigator;

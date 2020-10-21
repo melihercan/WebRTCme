@@ -9,7 +9,6 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="NetStandard\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -18,16 +17,22 @@
 		<Compile Include="*.cs" />
 	</ItemGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<Compile Include="NetStandard\**\*.cs" />
-	</ItemGroup>
-
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+	
+	
+	
+	
+	
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>
 
 
