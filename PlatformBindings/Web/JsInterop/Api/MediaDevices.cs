@@ -13,11 +13,26 @@ namespace WebRtcJsInterop.Api
     {
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        async Task<IMediaStreamAsync> IMediaDevicesAsync.GetUserMediaAsync(MediaStreamConstraints constraints)
+        public async Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints)
         {
             var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, 
                 "getUserMedia", constraints);
             return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
+        }
+
+        public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync()
+        {
+            var mediaDeviceInfos = new List<MediaDeviceInfo>();
+            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "enumerateDevices");
+            var jsObjectRefMediaDeviceInfoArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
+            foreach (var jsObjectRefMediaDeviceInfo in jsObjectRefMediaDeviceInfoArray)
+            {
+                mediaDeviceInfos.Add(await JsRuntime.GetJsPropertyValue<MediaDeviceInfo>
+                    (jsObjectRefMediaDeviceInfo, null, null));
+                await JsRuntime.DeleteJsObjectRef(jsObjectRefMediaDeviceInfo.JsObjectRefId);
+            }
+            await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            return mediaDeviceInfos;
         }
 
         internal static async Task<IMediaDevicesAsync> NewAsync(IJSRuntime jsRuntime)
@@ -27,9 +42,5 @@ namespace WebRtcJsInterop.Api
             return mediaDevices;
         }
 
-        public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

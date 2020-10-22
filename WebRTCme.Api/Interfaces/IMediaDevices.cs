@@ -14,7 +14,7 @@ namespace WebRTCme
     public interface IMediaDevicesAsync : INativeObjectAsync
     {
         Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints);
-        Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices();
+        Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync();
     }
 
 }

@@ -12,13 +12,17 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<JsObjectRef> CreateJsObject(this IJSRuntime jsRuntime, object parent, 
             string interface_, params object[] args)
         {
-            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
-                "DotNetInterop.createObject",
-                new object[]
-                {
-                    parent,
-                    interface_,
-                }.Concat(args).ToArray()).ConfigureAwait(false);
+            var invokeParams = new object[]
+            {
+                parent,
+                interface_
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>("DotNetInterop.createObject", invokeParams)
+                .ConfigureAwait(false);
             return jsObjectRef;
         }
 
@@ -61,7 +65,7 @@ namespace WebRtcJsInterop.Extensions
         }
 
         public static async ValueTask<IEnumerable<JsObjectRef>> GetJsPropertyArray(this IJSRuntime jsRuntime,
-            object parent, string property)
+            object parent, string property = null)
         {
             var jsObjectRefs = await jsRuntime.InvokeAsync<IEnumerable<JsObjectRef>>(
                 "DotNetInterop.getPropertyArray",
@@ -90,50 +94,66 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask CallJsMethodVoid(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
-            await jsRuntime.InvokeVoidAsync(
-                "DotNetInterop.callMethod",
-                new object[]
-                {
-                    parent,
-                    method
-                }.Concat(args).ToArray()).ConfigureAwait(false);
+            var invokeParams = new object[]
+            {
+                parent,
+                method
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            await jsRuntime.InvokeVoidAsync("DotNetInterop.callMethod", invokeParams)
+                .ConfigureAwait(false);
         }
 
         public static async ValueTask<T> CallJsMethod<T>(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
-            var ret = await jsRuntime.InvokeAsync<T>(
-                "DotNetInterop.callMethod",
-                new object[]
-                {
-                    parent,
-                    method
-                }.Concat(args).ToArray()).ConfigureAwait(false);
+            var invokeParams = new object[]
+            {
+                parent,
+                method
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            var ret = await jsRuntime.InvokeAsync<T>("DotNetInterop.callMethod", invokeParams)
+                .ConfigureAwait(false);
             return ret;
         }
 
         public static async ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
-            await jsRuntime.InvokeVoidAsync(
-                "DotNetInterop.callMethodAsync",
-                new object[]
-                {
-                    parent,
-                    method
-                }.Concat(args).ToArray()).ConfigureAwait(false);
+            var invokeParams = new object[]
+            {
+                parent,
+                method
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            await jsRuntime.InvokeVoidAsync("DotNetInterop.callMethodAsync", invokeParams)
+                .ConfigureAwait(false);
         }
 
         public static async ValueTask<T> CallJsMethodAsync<T>(this IJSRuntime jsRuntime, 
             object parent, string method, params object[] args)
         {
-            var ret = await jsRuntime.InvokeAsync<T>(
-                "DotNetInterop.callMethodAsync",
-                new object[]
-                {
-                    parent,
-                    method
-                }.Concat(args).ToArray()).ConfigureAwait(false);
+            var invokeParams = new object[]
+            {
+                parent,
+                method
+            };
+            if(args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            var ret = await jsRuntime.InvokeAsync<T>("DotNetInterop.callMethodAsync", invokeParams)
+                .ConfigureAwait(false);
             return ret;
         }
 

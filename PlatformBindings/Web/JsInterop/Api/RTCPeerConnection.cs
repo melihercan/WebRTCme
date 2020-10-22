@@ -22,12 +22,12 @@ namespace WebRtcJsInterop.Api
         public async Task<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream)
         {
             var x = (MediaStreamTrack)track;
-            var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(NativeObject as JsObjectRef, 
-                "addTrack", new object[] 
-            { 
-                ((MediaStreamTrack)track).NativeObject,
-                ((MediaStream)stream).NativeObject
-            });
+            var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack", 
+                new object[] 
+                { 
+                    ((MediaStreamTrack)track).NativeObject,
+                    ((MediaStream)stream).NativeObject
+                });
             var rtcRtpSender = RTCRtpSender.New(JsRuntime, jsObjectRefRtcRtpSender);
             return rtcRtpSender;
         }
@@ -35,7 +35,7 @@ namespace WebRtcJsInterop.Api
         public async Task<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options)
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                NativeObject as JsObjectRef, "createOffer", new object[] { });
+                NativeObject, "createOffer");
             var rtcSessionDescription = await JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
                 jsObjectRefRtcSessionDescription, null,
                 new
@@ -73,7 +73,7 @@ namespace WebRtcJsInterop.Api
 
         internal static async Task<IRTCPeerConnectionAsync> NewAsync(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
-            var jsObjectRef = await jsRuntime.CreateJsObject("window", "RTCPeerConnection", new object());
+            var jsObjectRef = await jsRuntime.CreateJsObject("window", "RTCPeerConnection");
             var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
             return rtcPeerConnection;
         }

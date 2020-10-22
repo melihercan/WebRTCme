@@ -45,7 +45,7 @@ namespace WebRtc.iOS
 
         public IMediaStream GetUserMedia(MediaStreamConstraints constraints)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

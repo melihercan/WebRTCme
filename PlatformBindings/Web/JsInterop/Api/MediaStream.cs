@@ -17,8 +17,8 @@ namespace WebRtcJsInterop.Api
 
         public async Task<List<IMediaStreamTrackAsync>> GetTracksAsync()
         {
-            var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks", new object[] { });
-            var jsObjectRefMediaStreamTrackArray = await JsRuntime.GetJsPropertyArray(jsObjectRef, null);
+            var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
+            var jsObjectRefMediaStreamTrackArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
             var mediaStreamTracks = new List<IMediaStreamTrackAsync>();
             foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
             {

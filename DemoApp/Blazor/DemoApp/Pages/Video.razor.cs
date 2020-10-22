@@ -33,6 +33,7 @@ namespace DemoApp.Pages
                 _window = await webRtc.WindowAsync(JsRuntime);
                 _navigator = await _window.NavigatorAsync();
                 _mediaDevices = await _navigator.MediaDevicesAsync();
+                var mediDeviceInfos = (await _mediaDevices.EnumerateDevicesAsync()).ToList();
                 _mediaStream = await _mediaDevices.GetUserMediaAsync(new MediaStreamConstraints
                 {
                     Audio = true,
