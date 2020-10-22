@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
-using WebRTCme.Bindings.Xamarin.iOS;
+//using WebRTCme.Bindings.Xamarin.iOS;
+using Webrtc;
 
 namespace WebRtc.iOS
 {
@@ -21,23 +22,42 @@ namespace WebRtc.iOS
                 {
                     DeviceId = cameraVideoCaptureDevice.UniqueID,
                     GroupId = cameraVideoCaptureDevice.ModelID,
-                    //Kind = MediaDeviceInfoKind.
-                    Label = cameraVideoCaptureDevice.Description
+                    Kind = MediaDeviceInfoKind.VideoInput,
+                    Label = cameraVideoCaptureDevice.LocalizedName
                 });
             }
 
-            var avCaptureDevices = AVCaptureDevice.Devices;
+            var avCaptureDevices = AVCaptureDeviceDiscoverySession.Create(new AVCaptureDeviceType[]
+                { AVCaptureDeviceType.BuiltInMicrophone }, AVMediaType.Audio, AVCaptureDevicePosition.Unspecified)
+                .Devices;
             foreach (var avCaptureDevice in avCaptureDevices)
             {
                 mediaDeviceInfoList.Add(new MediaDeviceInfo
                 {
                     DeviceId = avCaptureDevice.UniqueID,
                     GroupId = avCaptureDevice.ModelID,
-                    //Kind = MediaDeviceInfoKind.
-                    Label = avCaptureDevice.Description
-                }); ;
+                    Kind = MediaDeviceInfoKind.AudioInput,
+                    Label = avCaptureDevice.LocalizedName
+                });
             }
 
+
+# if false
+//// DEPRECATED
+            avCaptureDevices = AVCaptureDevice.Devices;
+            foreach (var avCaptureDevice in avCaptureDevices)
+            {
+                mediaDeviceInfoList.Add(new MediaDeviceInfo
+                {
+                    DeviceId = avCaptureDevice.UniqueID,
+                    GroupId = avCaptureDevice.ModelID,
+                    Kind = MediaDeviceInfoKind.AudioInput,
+                    Label = avCaptureDevice.LocalizedName
+                });
+            }
+#endif
+
+            //// TODO: How to get AudioOutput device list???
 
 
             return mediaDeviceInfoList;

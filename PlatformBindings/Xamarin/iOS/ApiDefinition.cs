@@ -7,8 +7,8 @@ using ObjCRuntime;
 using UIKit;
 //using WebRTC;
 
-//namespace Webrtc
-namespace WebRTCme.Bindings.Xamarin.iOS
+namespace Webrtc
+//namespace WebRTCme.Bindings.Xamarin.iOS
 {
 	// @protocol RTCCodecSpecificInfo <NSObject>
 	[Protocol, Model]

@@ -5,8 +5,8 @@ using AVFoundation;
 using Foundation;
 using UIKit;
 
-//namespace Webrtc
-namespace WebRTCme.Bindings.Xamarin.iOS
+namespace Webrtc
+//namespace WebRTCme.Bindings.Xamarin.iOS
 {
     /// <summary>
     /// Place any extensions of Interfaces of ApiDefinition here.

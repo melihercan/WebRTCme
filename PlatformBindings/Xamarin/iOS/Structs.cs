@@ -4,8 +4,8 @@ using Foundation;
 using ObjCRuntime;
 //using WebRTC;
 
-//namespace Webrtc
-namespace WebRTCme.Bindings.Xamarin.iOS
+namespace Webrtc
+//namespace WebRTCme.Bindings.Xamarin.iOS
 {
 	[Native]
 	public enum RTCVideoRotation : long////nint
