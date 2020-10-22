@@ -7,7 +7,7 @@ namespace WebRtc.Android
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {
-        public IEnumerable<IMediaDeviceInfo> EnumerateDevices()
+        public IEnumerable<MediaDeviceInfo> EnumerateDevices()
         {
             throw new NotImplementedException();
         }

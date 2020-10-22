@@ -974,7 +974,8 @@ namespace WebRTCme.Bindings.Xamarin.iOS
 	delegate void RTCFileVideoCapturerErrorBlock(NSError arg0);
 
 	// @interface RTCFileVideoCapturer : RTCVideoCapturer
-	[iOS(10, 0)]
+	////[iOS(10, 0)]
+	[Introduced(PlatformName.iOS, 10, 0)]
 	[BaseType(typeof(RTCVideoCapturer))]
 	interface RTCFileVideoCapturer
 	{

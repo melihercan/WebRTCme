@@ -5,15 +5,15 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    public interface IMediaDeviceInfo
+    public class MediaDeviceInfo
     {
-        string DeviceId { get; set; }
+        public string DeviceId { get; set; }
 
-        string GroupId { get; set; }
+        public string GroupId { get; set; }
         
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        MediaDeviceInfoKind Kind { get; set; }
+        public MediaDeviceInfoKind Kind { get; set; }
         
-        string Label { get; set; }
+        public string Label { get; set; }
     }
 }

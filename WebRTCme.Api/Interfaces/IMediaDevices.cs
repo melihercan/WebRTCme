@@ -8,13 +8,13 @@ namespace WebRTCme
     public interface IMediaDevices : INativeObject
     {
         IMediaStream GetUserMedia(MediaStreamConstraints constraints);
-        IEnumerable<IMediaDeviceInfo> EnumerateDevices(); 
+        IEnumerable<MediaDeviceInfo> EnumerateDevices(); 
     }
 
     public interface IMediaDevicesAsync : INativeObjectAsync
     {
         Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints);
-        Task<IEnumerable<IMediaDeviceInfo>> EnumerateDevices();
+        Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices();
     }
 
 }
