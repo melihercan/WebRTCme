@@ -27,5 +27,9 @@ namespace WebRtcJsInterop.Api
             return mediaDevices;
         }
 
+        public Task<IEnumerable<IMediaDeviceInfo>> EnumerateDevices()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

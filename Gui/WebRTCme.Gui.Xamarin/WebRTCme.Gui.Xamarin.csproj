@@ -25,9 +25,7 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="WebRtcGui.cs" />
-	</ItemGroup>
+
 
 
 

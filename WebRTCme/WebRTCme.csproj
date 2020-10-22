@@ -29,6 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
 		<ProjectReference Include="..\PlatformBindings\Xamarin\iOS\iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -42,3 +43,5 @@
 	</ItemGroup>
 
 </Project>
+
+

@@ -7,7 +7,8 @@ using ObjCRuntime;
 using UIKit;
 //using WebRTC;
 
-namespace Webrtc
+//namespace Webrtc
+namespace WebRTCme.Bindings.Xamarin.iOS
 {
 	// @protocol RTCCodecSpecificInfo <NSObject>
 	[Protocol, Model]
@@ -556,22 +557,22 @@ namespace Webrtc
 		void DidChangeVideoSize(RTCVideoRenderer videoView, CGSize size);
 	}
 
-	[Static]
-	////[Verify(ConstantsInterfaceAssociation)]
-	partial interface Constants
-	{
-		// extern NSString *const _Nonnull kRTCAudioSessionErrorDomain;
-		[Field("kRTCAudioSessionErrorDomain", "__Internal")]
-		NSString kRTCAudioSessionErrorDomain { get; }
+	//[Static]
+	//////[Verify(ConstantsInterfaceAssociation)]
+	//partial interface Constants
+	//{
+	//	// extern NSString *const _Nonnull kRTCAudioSessionErrorDomain;
+	//	[Field("kRTCAudioSessionErrorDomain", "__Internal")]
+	//	NSString kRTCAudioSessionErrorDomain { get; }
 
-		// extern const NSInteger kRTCAudioSessionErrorLockRequired;
-		[Field("kRTCAudioSessionErrorLockRequired", "__Internal")]
-		nint kRTCAudioSessionErrorLockRequired { get; }
+	//	// extern const NSInteger kRTCAudioSessionErrorLockRequired;
+	//	[Field("kRTCAudioSessionErrorLockRequired", "__Internal")]
+	//	nint kRTCAudioSessionErrorLockRequired { get; }
 
-		// extern const NSInteger kRTCAudioSessionErrorConfiguration;
-		[Field("kRTCAudioSessionErrorConfiguration", "__Internal")]
-		nint kRTCAudioSessionErrorConfiguration { get; }
-	}
+	//	// extern const NSInteger kRTCAudioSessionErrorConfiguration;
+	//	[Field("kRTCAudioSessionErrorConfiguration", "__Internal")]
+	//	nint kRTCAudioSessionErrorConfiguration { get; }
+	//}
 
 	// @protocol RTCAudioSessionDelegate <NSObject>
 	[Protocol, Model]
@@ -987,37 +988,37 @@ namespace Webrtc
 	}
 
 	// @interface RTCNetworkMonitor : NSObject
-	[BaseType(typeof(NSObject))]
-	[DisableDefaultCtor]
-	interface RTCNetworkMonitor
-	{
-	}
+////	[BaseType(typeof(NSObject))]
+////	[DisableDefaultCtor]
+////	interface RTCNetworkMonitor
+////	{
+////	}
 
 	// @interface RTCMTLVideoView : UIView <RTCVideoRenderer>
-	[iOS(9, 0)]
-	[BaseType(typeof(UIView))]
-	interface RTCMTLVideoView : /****I****/RTCVideoRenderer
-	{
-		[Wrap("WeakDelegate")]
-		[NullAllowed]
-		RTCVideoViewDelegate Delegate { get; set; }
+	//[iOS(9, 0)]
+	//[BaseType(typeof(UIView))]
+	//interface RTCMTLVideoView : /****I****/RTCVideoRenderer
+	//{
+	//	[Wrap("WeakDelegate")]
+	//	[NullAllowed]
+	//	RTCVideoViewDelegate Delegate { get; set; }
 
-		// @property (nonatomic, weak) id<RTCVideoViewDelegate> _Nullable delegate;
-		[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
-		NSObject WeakDelegate { get; set; }
+	//	// @property (nonatomic, weak) id<RTCVideoViewDelegate> _Nullable delegate;
+	//	[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
+	//	NSObject WeakDelegate { get; set; }
 
-		// @property (nonatomic) UIViewContentMode videoContentMode;
-		[Export("videoContentMode", ArgumentSemantic.Assign)]
-		UIViewContentMode VideoContentMode { get; set; }
+	//	// @property (nonatomic) UIViewContentMode videoContentMode;
+	//	[Export("videoContentMode", ArgumentSemantic.Assign)]
+	//	UIViewContentMode VideoContentMode { get; set; }
 
-		// @property (getter = isEnabled, nonatomic) BOOL enabled;
-		[Export("enabled")]
-		bool Enabled { [Bind("isEnabled")] get; set; }
+	//	// @property (getter = isEnabled, nonatomic) BOOL enabled;
+	//	[Export("enabled")]
+	//	bool Enabled { [Bind("isEnabled")] get; set; }
 
-		// @property (nonatomic) NSValue * _Nullable rotationOverride;
-		[NullAllowed, Export("rotationOverride", ArgumentSemantic.Assign)]
-		NSValue RotationOverride { get; set; }
-	}
+	//	// @property (nonatomic) NSValue * _Nullable rotationOverride;
+	//	[NullAllowed, Export("rotationOverride", ArgumentSemantic.Assign)]
+	//	NSValue RotationOverride { get; set; }
+	//}
 
 	// @protocol RTCVideoViewShading <NSObject>
 	[Protocol, Model]
@@ -1915,16 +1916,16 @@ namespace Webrtc
 
 	////[Static]
 	////[Verify(ConstantsInterfaceAssociation)]
-	partial interface Constants
-	{
-		// extern NSString *const _Nonnull kRTCPeerConnectionErrorDomain;
-		[Field("kRTCPeerConnectionErrorDomain", "__Internal")]
-		NSString kRTCPeerConnectionErrorDomain { get; }
+	//partial interface Constants
+	//{
+	//	// extern NSString *const _Nonnull kRTCPeerConnectionErrorDomain;
+	//	[Field("kRTCPeerConnectionErrorDomain", "__Internal")]
+	//	NSString kRTCPeerConnectionErrorDomain { get; }
 
-		// extern const int kRTCSessionDescriptionErrorCode;
-		[Field("kRTCSessionDescriptionErrorCode", "__Internal")]
-		int kRTCSessionDescriptionErrorCode { get; }
-	}
+	//	// extern const int kRTCSessionDescriptionErrorCode;
+	//	[Field("kRTCSessionDescriptionErrorCode", "__Internal")]
+	//	int kRTCSessionDescriptionErrorCode { get; }
+	//}
 
 	// @protocol RTCPeerConnectionDelegate <NSObject>
 	[Protocol, Model]

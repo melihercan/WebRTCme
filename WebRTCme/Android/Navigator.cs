@@ -7,6 +7,6 @@ namespace WebRtc.Android
 {
     internal class Navigator : ApiBase, INavigator
     {
-        public IMediaDevices MediaDevices() => new MediaDevices();
+        public IMediaDevices MediaDevices => new MediaDevices();
     }
 }

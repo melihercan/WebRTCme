@@ -46,9 +46,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.iOS", "DemoApp\Xama
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gui", "Gui", "{1B143511-677C-4946-A201-C8D429A563A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Gui.Xamarin", "Gui\WebRTCme.Gui.Xamarin\WebRTCme.Gui.Xamarin.csproj", "{D2D8EE39-8488-4AD2-ABE1-46CA63972A7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Gui.Xamarin", "Gui\WebRTCme.Gui.Xamarin\WebRTCme.Gui.Xamarin.csproj", "{D2D8EE39-8488-4AD2-ABE1-46CA63972A7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Gui.Blazor", "Gui\WebRTCme.Gui.Blazor\WebRTCme.Gui.Blazor.csproj", "{954F2F4E-D5A1-433F-9CB3-96655AA7902D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Gui.Blazor", "Gui\WebRTCme.Gui.Blazor\WebRTCme.Gui.Blazor.csproj", "{954F2F4E-D5A1-433F-9CB3-96655AA7902D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -201,6 +201,7 @@ Global
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|Any CPU.ActiveCfg = Debug|iPhoneSimulator
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|iPhone.Build.0 = Debug|iPhone
+		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|iPhone.Deploy.0 = Debug|iPhone
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|Any CPU.ActiveCfg = Release|iPhoneSimulator

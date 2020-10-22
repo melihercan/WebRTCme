@@ -16,7 +16,7 @@ namespace WebRtcGuiXamarin
             var webRtc = CrossWebRtc.Current;
             Window = webRtc.Window;
             Navigator = Window.Navigator;
-            var _mediaDevices = Navigator.MediaDevices();
+            //var _mediaDevices = Navigator.MediaDevices();
             //var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
             //{
             //    Audio = true,
