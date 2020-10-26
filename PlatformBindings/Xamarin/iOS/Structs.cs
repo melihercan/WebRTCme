@@ -2,13 +2,13 @@
 using System.Runtime.InteropServices;
 using Foundation;
 using ObjCRuntime;
-//using WebRTC;
+////using WebRTC;
 
 namespace Webrtc
-//namespace WebRTCme.Bindings.Xamarin.iOS
+////namespace WebRTCme.Bindings.Xamarin.iOS
 {
 	[Native]
-	public enum RTCVideoRotation : long////nint
+	public enum RTCVideoRotation : long
 	{
 		RTCVideoRotation_0 = 0,
 		RTCVideoRotation_90 = 90,
@@ -17,7 +17,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCFrameType : ulong////nuint
+	public enum RTCFrameType : ulong
 	{
 		EmptyFrame = 0,
 		AudioFrameSpeech = 1,
@@ -27,14 +27,14 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCVideoContentType : ulong////nuint
+	public enum RTCVideoContentType : ulong
 	{
 		Unspecified,
 		Screenshare
 	}
 
 	[Native]
-	public enum RTCLoggingSeverity : long////nint
+	public enum RTCLoggingSeverity : long
 	{
 		Verbose,
 		Info,
@@ -107,21 +107,21 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCVideoCodecMode : ulong////nuint
+	public enum RTCVideoCodecMode : ulong
 	{
 		RealtimeVideo,
 		Screensharing
 	}
 
 	[Native]
-	public enum RTCH264PacketizationMode : ulong////nuint
+	public enum RTCH264PacketizationMode : ulong
 	{
 		NonInterleaved = 0,
 		SingleNalUnit
 	}
 
 	[Native]
-	public enum RTCH264Profile : ulong////nuint
+	public enum RTCH264Profile : ulong
 	{
 		ConstrainedBaseline,
 		Baseline,
@@ -131,7 +131,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCH264Level : ulong////nuint
+	public enum RTCH264Level : ulong
 	{
 		RTCH264Level1_b = 0,
 		RTCH264Level1 = 10,
@@ -153,7 +153,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCDispatcherQueueType : long////nint
+	public enum RTCDispatcherQueueType : long
 	{
 		Main,
 		CaptureSession,
@@ -162,7 +162,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCDeviceType : long////nint
+	public enum RTCDeviceType : long
 	{
 		Unknown,
 		IPhone1G,
@@ -239,7 +239,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCSourceState : long////nint
+	public enum RTCSourceState : long
 	{
 		Initializing,
 		Live,
@@ -248,14 +248,14 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCMediaStreamTrackState : long////nint
+	public enum RTCMediaStreamTrackState : long
 	{
 		Live,
 		Ended
 	}
 
 	[Native]
-	public enum RTCIceTransportPolicy : long////nint
+	public enum RTCIceTransportPolicy : long
 	{
 		None,
 		Relay,
@@ -264,7 +264,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCBundlePolicy : long////nint
+	public enum RTCBundlePolicy : long
 	{
 		Balanced,
 		MaxCompat,
@@ -272,49 +272,49 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCRtcpMuxPolicy : long////nint
+	public enum RTCRtcpMuxPolicy : long
 	{
 		Negotiate,
 		Require
 	}
 
 	[Native]
-	public enum RTCTcpCandidatePolicy : long////nint
+	public enum RTCTcpCandidatePolicy : long
 	{
 		Enabled,
 		Disabled
 	}
 
 	[Native]
-	public enum RTCCandidateNetworkPolicy : long////nint
+	public enum RTCCandidateNetworkPolicy : long
 	{
 		All,
 		LowCost
 	}
 
 	[Native]
-	public enum RTCContinualGatheringPolicy : long////nint
+	public enum RTCContinualGatheringPolicy : long
 	{
 		Once,
 		Continually
 	}
 
 	[Native]
-	public enum RTCEncryptionKeyType : long////nint
+	public enum RTCEncryptionKeyType : long
 	{
 		Rsa,
 		Ecdsa
 	}
 
 	[Native]
-	public enum RTCSdpSemantics : long////nint
+	public enum RTCSdpSemantics : long
 	{
 		PlanB,
 		UnifiedPlan
 	}
 
 	[Native]
-	public enum RTCDataChannelState : long////nint
+	public enum RTCDataChannelState : long
 	{
 		Connecting,
 		Open,
@@ -323,14 +323,14 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCTlsCertPolicy : ulong////nuint
+	public enum RTCTlsCertPolicy : ulong
 	{
 		Secure,
 		InsecureNoCheck
 	}
 
 	[Native]
-	public enum RTCSignalingState : long////nint
+	public enum RTCSignalingState : long
 	{
 		Stable,
 		HaveLocalOffer,
@@ -341,7 +341,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCIceConnectionState : long////nint
+	public enum RTCIceConnectionState : long
 	{
 		New,
 		Checking,
@@ -354,7 +354,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCPeerConnectionState : long////nint
+	public enum RTCPeerConnectionState : long
 	{
 		New,
 		Connecting,
@@ -365,7 +365,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCIceGatheringState : long////nint
+	public enum RTCIceGatheringState : long
 	{
 		New,
 		Gathering,
@@ -373,14 +373,14 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCStatsOutputLevel : long////nint
+	public enum RTCStatsOutputLevel : long
 	{
 		Standard,
 		Debug
 	}
 
 	[Native]
-	public enum RTCPriority : long////nint
+	public enum RTCPriority : long
 	{
 		VeryLow,
 		Low,
@@ -389,7 +389,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCDegradationPreference : long////nint
+	public enum RTCDegradationPreference : long
 	{
 		Disabled,
 		MaintainFramerate,
@@ -398,15 +398,16 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCRtpMediaType : long////nint
+	public enum RTCRtpMediaType : long
 	{
 		Audio,
 		Video,
-		Data
+		Data,
+		Unsupported
 	}
 
 	[Native]
-	public enum RTCRtpTransceiverDirection : long////nint
+	public enum RTCRtpTransceiverDirection : long
 	{
 		SendRecv,
 		SendOnly,
@@ -416,15 +417,16 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCSdpType : long////nint
+	public enum RTCSdpType : long
 	{
 		Offer,
 		PrAnswer,
-		Answer
+		Answer,
+		Rollback
 	}
 
 	[Native]
-	public enum RTCFileLoggerSeverity : ulong////nuint
+	public enum RTCFileLoggerSeverity : ulong
 	{
 		Verbose,
 		Info,
@@ -433,7 +435,7 @@ namespace Webrtc
 	}
 
 	[Native]
-	public enum RTCFileLoggerRotationType : ulong////nuint
+	public enum RTCFileLoggerRotationType : ulong
 	{
 		Call,
 		App

@@ -5,13 +5,22 @@ using CoreVideo;
 using Foundation;
 using ObjCRuntime;
 using UIKit;
-//using WebRTC;
+////using WebRTC;
 
 namespace Webrtc
-//namespace WebRTCme.Bindings.Xamarin.iOS
+////namespace WebRTCme.Bindings.Xamarin.iOS
 {
 	// @protocol RTCCodecSpecificInfo <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCCodecSpecificInfo
 	{
@@ -47,12 +56,12 @@ namespace Webrtc
 		RTCVideoFrameBuffer Buffer { get; }
 
 		// -(instancetype _Nonnull)initWithPixelBuffer:(CVPixelBufferRef _Nonnull)pixelBuffer rotation:(RTCVideoRotation)rotation timeStampNs:(int64_t)timeStampNs __attribute__((deprecated("use initWithBuffer instead")));
-		////		[Export("initWithPixelBuffer:rotation:timeStampNs:")]
-		////		unsafe IntPtr Constructor(CVPixelBufferRef* pixelBuffer, RTCVideoRotation rotation, long timeStampNs);
+		[Export("initWithPixelBuffer:rotation:timeStampNs:")]
+		IntPtr Constructor(CVPixelBuffer pixelBuffer, RTCVideoRotation rotation, long timeStampNs);
 
 		// -(instancetype _Nonnull)initWithPixelBuffer:(CVPixelBufferRef _Nonnull)pixelBuffer scaledWidth:(int)scaledWidth scaledHeight:(int)scaledHeight cropWidth:(int)cropWidth cropHeight:(int)cropHeight cropX:(int)cropX cropY:(int)cropY rotation:(RTCVideoRotation)rotation timeStampNs:(int64_t)timeStampNs __attribute__((deprecated("use initWithBuffer instead")));
-		////		[Export("initWithPixelBuffer:scaledWidth:scaledHeight:cropWidth:cropHeight:cropX:cropY:rotation:timeStampNs:")]
-		////		unsafe IntPtr Constructor(CVPixelBufferRef* pixelBuffer, int scaledWidth, int scaledHeight, int cropWidth, int cropHeight, int cropX, int cropY, RTCVideoRotation rotation, long timeStampNs);
+		[Export("initWithPixelBuffer:scaledWidth:scaledHeight:cropWidth:cropHeight:cropX:cropY:rotation:timeStampNs:")]
+		IntPtr Constructor(CVPixelBuffer pixelBuffer, int scaledWidth, int scaledHeight, int cropWidth, int cropHeight, int cropX, int cropY, RTCVideoRotation rotation, long timeStampNs);
 
 		// -(instancetype _Nonnull)initWithBuffer:(id<RTCVideoFrameBuffer> _Nonnull)frameBuffer rotation:(RTCVideoRotation)rotation timeStampNs:(int64_t)timeStampNs;
 		[Export("initWithBuffer:rotation:timeStampNs:")]
@@ -126,99 +135,132 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoFrameBuffer <NSObject>
-	[Protocol]////, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoFrameBuffer
 	{
 		// @required @property (readonly, nonatomic) int width;
-		////[Abstract]
+		[Abstract]
 		[Export("width")]
 		int Width { get; }
 
 		// @required @property (readonly, nonatomic) int height;
-		////[Abstract]
+		[Abstract]
 		[Export("height")]
 		int Height { get; }
 
 		// @required -(id<RTCI420Buffer> _Nonnull)toI420;
-		////[Abstract]
+		[Abstract]
 		[Export("toI420")]
 		////[Verify(MethodToProperty)]
 		RTCI420Buffer ToI420 { get; }
 	}
 
 	// @protocol RTCYUVPlanarBuffer <RTCVideoFrameBuffer>
-	[Protocol]////, Model]
-	[BaseType(typeof(NSObject))]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	interface RTCYUVPlanarBuffer : /****I****/RTCVideoFrameBuffer
 	{
 		// @required @property (readonly, nonatomic) int chromaWidth;
-		////[Abstract]
+		[Abstract]
 		[Export("chromaWidth")]
 		int ChromaWidth { get; }
 
 		// @required @property (readonly, nonatomic) int chromaHeight;
-		////[Abstract]
+		[Abstract]
 		[Export("chromaHeight")]
 		int ChromaHeight { get; }
 
 		// @required @property (readonly, nonatomic) const uint8_t * _Nonnull dataY;
-		////[Abstract]
+		[Abstract]
 		[Export("dataY")]
 		unsafe /****byte* ****/IntPtr DataY { get; }
 
 		// @required @property (readonly, nonatomic) const uint8_t * _Nonnull dataU;
-		////[Abstract]
+		[Abstract]
 		[Export("dataU")]
 		unsafe /****byte* ****/IntPtr DataU { get; }
 
 		// @required @property (readonly, nonatomic) const uint8_t * _Nonnull dataV;
-		////[Abstract]
+		[Abstract]
 		[Export("dataV")]
-		unsafe /****byte* ****/IntPtr DataV
-		{ get; }
+		unsafe /****byte* ****/IntPtr DataV { get; }
 
 		// @required @property (readonly, nonatomic) int strideY;
-		////[Abstract]
+		[Abstract]
 		[Export("strideY")]
 		int StrideY { get; }
 
 		// @required @property (readonly, nonatomic) int strideU;
-		////[Abstract]
+		[Abstract]
 		[Export("strideU")]
 		int StrideU { get; }
 
 		// @required @property (readonly, nonatomic) int strideV;
-		////[Abstract]
+		[Abstract]
 		[Export("strideV")]
 		int StrideV { get; }
 
 		// @required -(instancetype _Nonnull)initWithWidth:(int)width height:(int)height dataY:(const uint8_t * _Nonnull)dataY dataU:(const uint8_t * _Nonnull)dataU dataV:(const uint8_t * _Nonnull)dataV;
-		////[Abstract]
+		[Abstract]
 		[Export("initWithWidth:height:dataY:dataU:dataV:")]
-		/****unsafe****/
-		IntPtr InitWithWidth/****Height****/(int width, int height, /****byte* ****/IntPtr dataY, /****byte* ****/IntPtr dataU, /****byte* ****/IntPtr dataV);
+		/****unsafe****/ IntPtr /****Height****/InitWithWidth(int width, int height, /****byte* ****/IntPtr dataY, /****byte* ****/IntPtr dataU, /****byte* ****/IntPtr dataV);
 
 		// @required -(instancetype _Nonnull)initWithWidth:(int)width height:(int)height;
-		////[Abstract]
+		[Abstract]
 		[Export("initWithWidth:height:")]
-		IntPtr InitWithWidth/****Height****/(int width, int height);
+		IntPtr /****Height****/InitWithWidth(int width, int height);
 
 		// @required -(instancetype _Nonnull)initWithWidth:(int)width height:(int)height strideY:(int)strideY strideU:(int)strideU strideV:(int)strideV;
-		////[Abstract]
+		[Abstract]
 		[Export("initWithWidth:height:strideY:strideU:strideV:")]
-		IntPtr InitWithWidth/****Height****/(int width, int height, int strideY, int strideU, int strideV);
+		IntPtr /****Height****/InitWithWidth(int width, int height, int strideY, int strideU, int strideV);
 	}
 
 	// @protocol RTCI420Buffer <RTCYUVPlanarBuffer>
-	[Protocol]////, Model]
-	[BaseType(typeof(NSObject))]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
+		[BaseType(typeof(NSObject))]
 	interface RTCI420Buffer : /****I****/RTCYUVPlanarBuffer
 	{
 	}
 
 	// @protocol RTCMutableYUVPlanarBuffer <RTCYUVPlanarBuffer>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	interface RTCMutableYUVPlanarBuffer : /****I****/RTCYUVPlanarBuffer
 	{
 		// @required @property (readonly, nonatomic) uint8_t * _Nonnull mutableDataY;
@@ -229,8 +271,7 @@ namespace Webrtc
 		// @required @property (readonly, nonatomic) uint8_t * _Nonnull mutableDataU;
 		[Abstract]
 		[Export("mutableDataU")]
-		unsafe /****byte* ****/IntPtr MutableDataU
-		{ get; }
+		unsafe /****byte* ****/IntPtr MutableDataU { get; }
 
 		// @required @property (readonly, nonatomic) uint8_t * _Nonnull mutableDataV;
 		[Abstract]
@@ -239,7 +280,16 @@ namespace Webrtc
 	}
 
 	// @protocol RTCMutableI420Buffer <RTCI420Buffer, RTCMutableYUVPlanarBuffer>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	interface RTCMutableI420Buffer : /****I****/RTCI420Buffer, /****I****/RTCMutableYUVPlanarBuffer
 	{
 	}
@@ -266,7 +316,7 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoCapturerDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoCapturerDelegate
 	{
@@ -365,7 +415,16 @@ namespace Webrtc
 	delegate void RTCVideoDecoderCallback(RTCVideoFrame arg0);
 
 	// @protocol RTCVideoDecoder <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoDecoder
 	{
@@ -398,12 +457,21 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoDecoderFactory <NSObject>
-	[Protocol]////, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoDecoderFactory
 	{
 		// @required -(id<RTCVideoDecoder> _Nullable)createDecoder:(RTCVideoCodecInfo * _Nonnull)info;
-		////[Abstract]
+		[Abstract]
 		[Export("createDecoder:")]
 		[return: NullAllowed]
 		RTCVideoDecoder CreateDecoder(RTCVideoCodecInfo info);
@@ -436,7 +504,16 @@ namespace Webrtc
 	delegate bool RTCVideoEncoderCallback(RTCEncodedImage arg0, RTCCodecSpecificInfo arg1, RTCRtpFragmentationHeader arg2);
 
 	// @protocol RTCVideoEncoder <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoEncoder
 	{
@@ -480,7 +557,16 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoEncoderSelector <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoEncoderSelector
 	{
@@ -503,12 +589,21 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoEncoderFactory <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoEncoderFactory
 	{
 		// @required -(id<RTCVideoEncoder> _Nullable)createEncoder:(RTCVideoCodecInfo * _Nonnull)info;
-		////[Abstract]
+		[Abstract]
 		[Export("createEncoder:")]
 		[return: NullAllowed]
 		RTCVideoEncoder CreateEncoder(RTCVideoCodecInfo info);
@@ -531,24 +626,34 @@ namespace Webrtc
 	}
 
 	// @protocol RTCVideoRenderer <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoRenderer
 	{
 		// @required -(void)setSize:(CGSize)size;
-		////[Abstract]
+		[Abstract]
 		[Export("setSize:")]
 		void SetSize(CGSize size);
 
 		// @required -(void)renderFrame:(RTCVideoFrame * _Nullable)frame;
-		////[Abstract]
+		[Abstract]
 		[Export("renderFrame:")]
 		void RenderFrame([NullAllowed] RTCVideoFrame frame);
 	}
 
 	// @protocol RTCVideoViewDelegate
-	[Protocol, Model]
-	[BaseType(typeof(NSObject))]
+	////[Protocol, Model(AutoGeneratedName = true)]
+		[Protocol, Model]
+		[BaseType(typeof(NSObject))]
 	interface RTCVideoViewDelegate
 	{
 		// @required -(void)videoView:(id<RTCVideoRenderer> _Nonnull)videoView didChangeVideoSize:(CGSize)size;
@@ -557,25 +662,25 @@ namespace Webrtc
 		void DidChangeVideoSize(RTCVideoRenderer videoView, CGSize size);
 	}
 
-	//[Static]
-	//////[Verify(ConstantsInterfaceAssociation)]
-	//partial interface Constants
-	//{
-	//	// extern NSString *const _Nonnull kRTCAudioSessionErrorDomain;
-	//	[Field("kRTCAudioSessionErrorDomain", "__Internal")]
-	//	NSString kRTCAudioSessionErrorDomain { get; }
+	[Static]
+	////[Verify(ConstantsInterfaceAssociation)]
+	partial interface Constants
+	{
+		// extern NSString *const _Nonnull kRTCAudioSessionErrorDomain;
+		[Field("kRTCAudioSessionErrorDomain", "__Internal")]
+		NSString kRTCAudioSessionErrorDomain { get; }
 
-	//	// extern const NSInteger kRTCAudioSessionErrorLockRequired;
-	//	[Field("kRTCAudioSessionErrorLockRequired", "__Internal")]
-	//	nint kRTCAudioSessionErrorLockRequired { get; }
+		// extern const NSInteger kRTCAudioSessionErrorLockRequired;
+		[Field("kRTCAudioSessionErrorLockRequired", "__Internal")]
+		nint kRTCAudioSessionErrorLockRequired { get; }
 
-	//	// extern const NSInteger kRTCAudioSessionErrorConfiguration;
-	//	[Field("kRTCAudioSessionErrorConfiguration", "__Internal")]
-	//	nint kRTCAudioSessionErrorConfiguration { get; }
-	//}
+		// extern const NSInteger kRTCAudioSessionErrorConfiguration;
+		[Field("kRTCAudioSessionErrorConfiguration", "__Internal")]
+		nint kRTCAudioSessionErrorConfiguration { get; }
+	}
 
 	// @protocol RTCAudioSessionDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCAudioSessionDelegate
 	{
@@ -621,13 +726,11 @@ namespace Webrtc
 
 		// @optional -(void)audioSession:(RTCAudioSession * _Nonnull)audioSession willSetActive:(BOOL)active;
 		[Export("audioSession:willSetActive:")]
-		////void AudioSession(RTCAudioSession audioSession, bool active);
-		void AudioSessionWillSetActive(RTCAudioSession audioSession, bool active);
+		void /****AudioSession****/AudioSessionWillSetActive(RTCAudioSession audioSession, bool active);
 
 		// @optional -(void)audioSession:(RTCAudioSession * _Nonnull)audioSession didSetActive:(BOOL)active;
 		[Export("audioSession:didSetActive:")]
-		////void AudioSession(RTCAudioSession audioSession, bool active);
-		void AudioSessionDidiSetActive(RTCAudioSession audioSession, bool active);
+		void /****AudioSession****/AudioSessionDidSetActive(RTCAudioSession audioSession, bool active);
 
 		// @optional -(void)audioSession:(RTCAudioSession * _Nonnull)audioSession failedToSetActive:(BOOL)active error:(NSError * _Nonnull)error;
 		[Export("audioSession:failedToSetActive:error:")]
@@ -635,7 +738,7 @@ namespace Webrtc
 	}
 
 	// @protocol RTCAudioSessionActivationDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCAudioSessionActivationDelegate
 	{
@@ -719,17 +822,25 @@ namespace Webrtc
 		[NullAllowed, Export("inputDataSources")]
 		AVAudioSessionDataSourceDescription[] InputDataSources { get; }
 
+		[Wrap("WeakInputDataSource")]
+		[NullAllowed]
+		AVAudioSessionDataSourceDescription InputDataSource { get; }
+
 		// @property (readonly) AVAudioSessionDataSourceDescription * _Nullable inputDataSource;
 		[NullAllowed, Export("inputDataSource")]
-		AVAudioSessionDataSourceDescription InputDataSource { get; }
+		NSObject WeakInputDataSource { get; }
 
 		// @property (readonly) NSArray<AVAudioSessionDataSourceDescription *> * _Nullable outputDataSources;
 		[NullAllowed, Export("outputDataSources")]
 		AVAudioSessionDataSourceDescription[] OutputDataSources { get; }
 
+		[Wrap("WeakOutputDataSource")]
+		[NullAllowed]
+		AVAudioSessionDataSourceDescription OutputDataSource { get; }
+
 		// @property (readonly) AVAudioSessionDataSourceDescription * _Nullable outputDataSource;
 		[NullAllowed, Export("outputDataSource")]
-		AVAudioSessionDataSourceDescription OutputDataSource { get; }
+		NSObject WeakOutputDataSource { get; }
 
 		// @property (readonly) double sampleRate;
 		[Export("sampleRate")]
@@ -974,8 +1085,7 @@ namespace Webrtc
 	delegate void RTCFileVideoCapturerErrorBlock(NSError arg0);
 
 	// @interface RTCFileVideoCapturer : RTCVideoCapturer
-	////[iOS(10, 0)]
-	[Introduced(PlatformName.iOS, 10, 0)]
+	[iOS(10, 0)]
 	[BaseType(typeof(RTCVideoCapturer))]
 	interface RTCFileVideoCapturer
 	{
@@ -989,40 +1099,49 @@ namespace Webrtc
 	}
 
 	// @interface RTCNetworkMonitor : NSObject
-////	[BaseType(typeof(NSObject))]
-////	[DisableDefaultCtor]
-////	interface RTCNetworkMonitor
-////	{
-////	}
+	[BaseType(typeof(NSObject))]
+	[DisableDefaultCtor]
+	interface RTCNetworkMonitor
+	{
+	}
 
 	// @interface RTCMTLVideoView : UIView <RTCVideoRenderer>
-	//[iOS(9, 0)]
-	//[BaseType(typeof(UIView))]
-	//interface RTCMTLVideoView : /****I****/RTCVideoRenderer
-	//{
-	//	[Wrap("WeakDelegate")]
-	//	[NullAllowed]
-	//	RTCVideoViewDelegate Delegate { get; set; }
+	[iOS(9, 0)]
+	[BaseType(typeof(UIView))]
+	interface RTCMTLVideoView : /****I****/RTCVideoRenderer
+	{
+		[Wrap("WeakDelegate")]
+		[NullAllowed]
+		RTCVideoViewDelegate Delegate { get; set; }
 
-	//	// @property (nonatomic, weak) id<RTCVideoViewDelegate> _Nullable delegate;
-	//	[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
-	//	NSObject WeakDelegate { get; set; }
+		// @property (nonatomic, weak) id<RTCVideoViewDelegate> _Nullable delegate;
+		[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
+		NSObject WeakDelegate { get; set; }
 
-	//	// @property (nonatomic) UIViewContentMode videoContentMode;
-	//	[Export("videoContentMode", ArgumentSemantic.Assign)]
-	//	UIViewContentMode VideoContentMode { get; set; }
+		// @property (nonatomic) UIViewContentMode videoContentMode;
+		[Export("videoContentMode", ArgumentSemantic.Assign)]
+		UIViewContentMode VideoContentMode { get; set; }
 
-	//	// @property (getter = isEnabled, nonatomic) BOOL enabled;
-	//	[Export("enabled")]
-	//	bool Enabled { [Bind("isEnabled")] get; set; }
+		// @property (getter = isEnabled, nonatomic) BOOL enabled;
+		[Export("enabled")]
+		bool Enabled { [Bind("isEnabled")] get; set; }
 
-	//	// @property (nonatomic) NSValue * _Nullable rotationOverride;
-	//	[NullAllowed, Export("rotationOverride", ArgumentSemantic.Assign)]
-	//	NSValue RotationOverride { get; set; }
-	//}
+		// @property (nonatomic) NSValue * _Nullable rotationOverride;
+		[NullAllowed, Export("rotationOverride", ArgumentSemantic.Assign)]
+		NSValue RotationOverride { get; set; }
+	}
 
 	// @protocol RTCVideoViewShading <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCVideoViewShading
 	{
@@ -1178,7 +1297,6 @@ namespace Webrtc
 	{
 		// @property (readonly, nonatomic) CVPixelBufferRef _Nonnull pixelBuffer;
 		[Export("pixelBuffer")]
-		////unsafe CVPixelBufferRef* PixelBuffer { get; }
 		CVPixelBuffer PixelBuffer { get; }
 
 		// @property (readonly, nonatomic) int cropX;
@@ -1205,13 +1323,11 @@ namespace Webrtc
 
 		// -(instancetype _Nonnull)initWithPixelBuffer:(CVPixelBufferRef _Nonnull)pixelBuffer;
 		[Export("initWithPixelBuffer:")]
-		////unsafe IntPtr Constructor(CVPixelBufferRef* pixelBuffer);
-		IntPtr InitWithPixelBuffer(CVPixelBuffer pixelBuffer);
+		IntPtr Constructor(CVPixelBuffer pixelBuffer);
 
 		// -(instancetype _Nonnull)initWithPixelBuffer:(CVPixelBufferRef _Nonnull)pixelBuffer adaptedWidth:(int)adaptedWidth adaptedHeight:(int)adaptedHeight cropWidth:(int)cropWidth cropHeight:(int)cropHeight cropX:(int)cropX cropY:(int)cropY;
 		[Export("initWithPixelBuffer:adaptedWidth:adaptedHeight:cropWidth:cropHeight:cropX:cropY:")]
-		////unsafe IntPtr Constructor(CVPixelBufferRef* pixelBuffer, int adaptedWidth, int adaptedHeight, int cropWidth, int cropHeight, int cropX, int cropY);
-		IntPtr InitWithPixelBuffer(CVPixelBuffer pixelBuffer, int adaptedWidth, int adaptedHeight, int cropWidth, int cropHeight, int cropX, int cropY);
+		IntPtr Constructor(CVPixelBuffer pixelBuffer, int adaptedWidth, int adaptedHeight, int cropWidth, int cropHeight, int cropX, int cropY);
 
 		// -(BOOL)requiresCropping;
 		[Export("requiresCropping")]
@@ -1228,8 +1344,7 @@ namespace Webrtc
 
 		// -(BOOL)cropAndScaleTo:(CVPixelBufferRef _Nonnull)outputPixelBuffer withTempBuffer:(uint8_t * _Nullable)tmpBuffer;
 		[Export("cropAndScaleTo:withTempBuffer:")]
-		////unsafe bool CropAndScaleTo(CVPixelBufferRef* outputPixelBuffer, [NullAllowed] byte* tmpBuffer);
-		bool CropAndScaleTo(CVPixelBuffer outputPixelBuffer, [NullAllowed] IntPtr tmpBuffer);
+		/****unsafe****/ bool CropAndScaleTo(CVPixelBuffer outputPixelBuffer, [NullAllowed] /****byte* ****/IntPtr tmpBuffer);
 	}
 
 	// @interface RTCCameraPreviewView : UIView
@@ -1532,7 +1647,7 @@ namespace Webrtc
 	}
 
 	// @protocol RTCDataChannelDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCDataChannelDelegate
 	{
@@ -1917,19 +2032,19 @@ namespace Webrtc
 
 	////[Static]
 	////[Verify(ConstantsInterfaceAssociation)]
-	//partial interface Constants
-	//{
-	//	// extern NSString *const _Nonnull kRTCPeerConnectionErrorDomain;
-	//	[Field("kRTCPeerConnectionErrorDomain", "__Internal")]
-	//	NSString kRTCPeerConnectionErrorDomain { get; }
+	partial interface Constants
+	{
+		// extern NSString *const _Nonnull kRTCPeerConnectionErrorDomain;
+		[Field("kRTCPeerConnectionErrorDomain", "__Internal")]
+		NSString kRTCPeerConnectionErrorDomain { get; }
 
-	//	// extern const int kRTCSessionDescriptionErrorCode;
-	//	[Field("kRTCSessionDescriptionErrorCode", "__Internal")]
-	//	int kRTCSessionDescriptionErrorCode { get; }
-	//}
+		// extern const int kRTCSessionDescriptionErrorCode;
+		[Field("kRTCSessionDescriptionErrorCode", "__Internal")]
+		int kRTCSessionDescriptionErrorCode { get; }
+	}
 
 	// @protocol RTCPeerConnectionDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCPeerConnectionDelegate
 	{
@@ -1941,14 +2056,12 @@ namespace Webrtc
 		// @required -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddStream:(RTCMediaStream * _Nonnull)stream;
 		[Abstract]
 		[Export("peerConnection:didAddStream:")]
-		////void PeerConnection(RTCPeerConnection peerConnection, RTCMediaStream stream);
-		void PeerConnectionDidAddStream(RTCPeerConnection peerConnection, RTCMediaStream stream);
+		void /****PeerConnection****/PeerConnectionDidAddStream(RTCPeerConnection peerConnection, RTCMediaStream stream);
 
 		// @required -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveStream:(RTCMediaStream * _Nonnull)stream;
 		[Abstract]
 		[Export("peerConnection:didRemoveStream:")]
-		////void PeerConnection(RTCPeerConnection peerConnection, RTCMediaStream stream);
-		void PeerConnectionDidRemoveStream(RTCPeerConnection peerConnection, RTCMediaStream stream);
+		void /****PeerConnection****/PeerConnectionDidRemoveStream(RTCPeerConnection peerConnection, RTCMediaStream stream);
 
 		// @required -(void)peerConnectionShouldNegotiate:(RTCPeerConnection * _Nonnull)peerConnection;
 		[Abstract]
@@ -1958,13 +2071,12 @@ namespace Webrtc
 		// @required -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeIceConnectionState:(RTCIceConnectionState)newState;
 		[Abstract]
 		[Export("peerConnection:didChangeIceConnectionState:")]
-		////void PeerConnection(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
-		void PeerConnectionDidChangeIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
+		void /****PeerConnection****/PeerConnectionDidChangeIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
 
 		// @required -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeIceGatheringState:(RTCIceGatheringState)newState;
 		[Abstract]
 		[Export("peerConnection:didChangeIceGatheringState:")]
-		void PeerConnection(RTCPeerConnection peerConnection, RTCIceGatheringState newState);
+		void /****PeerConnection****/PeerConnectionDidChangeIceGatheringState(RTCPeerConnection peerConnection, RTCIceGatheringState newState);
 
 		// @required -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didGenerateIceCandidate:(RTCIceCandidate * _Nonnull)candidate;
 		[Abstract]
@@ -1983,12 +2095,11 @@ namespace Webrtc
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeStandardizedIceConnectionState:(RTCIceConnectionState)newState;
 		[Export("peerConnection:didChangeStandardizedIceConnectionState:")]
-		////void PeerConnection(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
-		void PeerConnectionDidChangeStandardizedIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
+		void /****PeerConnection****/PeerConnectionDidChangeStandardizedIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeConnectionState:(RTCPeerConnectionState)newState;
 		[Export("peerConnection:didChangeConnectionState:")]
-		void PeerConnection(RTCPeerConnection peerConnection, RTCPeerConnectionState newState);
+		void /****PeerConnection****/PeerConnectionDidChangeConnectionState(RTCPeerConnection peerConnection, RTCPeerConnectionState newState);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didStartReceivingOnTransceiver:(RTCRtpTransceiver * _Nonnull)transceiver;
 		[Export("peerConnection:didStartReceivingOnTransceiver:")]
@@ -2473,7 +2584,7 @@ namespace Webrtc
 	}
 
 	// @protocol RTCRtpReceiverDelegate <NSObject>
-	[Protocol, Model]
+	[Protocol, Model(AutoGeneratedName = true)]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpReceiverDelegate
 	{
@@ -2484,7 +2595,17 @@ namespace Webrtc
 	}
 
 	// @protocol RTCRtpReceiver <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	////[Protocol]
+		[Protocol, Model]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpReceiver
 	{
@@ -2504,24 +2625,34 @@ namespace Webrtc
 		RTCMediaStreamTrack Track { get; }
 
 		////[Wrap("WeakDelegate"), Abstract]
-		////[NullAllowed]
-		////RTCRtpReceiverDelegate Delegate { get; set; }
+			[Wrap("WeakDelegate")]
+		[NullAllowed]
+		RTCRtpReceiverDelegate Delegate { get; set; }
 
 		// @required @property (nonatomic, weak) id<RTCRtpReceiverDelegate> _Nullable delegate;
-		////[Abstract]
-		////[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
-		////NSObject WeakDelegate { get; set; }
+		[Abstract]
+		[NullAllowed, Export("delegate", ArgumentSemantic.Weak)]
+		NSObject WeakDelegate { get; set; }
 	}
 
 	// @interface RTCRtpReceiver : NSObject <RTCRtpReceiver>
-	////	[BaseType(typeof(NSObject))]
-	////	[DisableDefaultCtor]
-	////	interface RTCRtpReceiver : IRTCRtpReceiver
-	////	{
-	////	}
+	////[BaseType(typeof(NSObject))]
+	////[DisableDefaultCtor]
+	////interface RTCRtpReceiver : IRTCRtpReceiver
+	////{
+	////}
 
 	// @protocol RTCDtmfSender <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCDtmfSender
 	{
@@ -2531,9 +2662,9 @@ namespace Webrtc
 		bool CanInsertDtmf { get; }
 
 		// @required -(BOOL)insertDtmf:(NSString * _Nonnull)tones duration:(NSTimeInterval)duration interToneGap:(NSTimeInterval)interToneGap;
-		////		[Abstract]
-		////		[Export("insertDtmf:duration:interToneGap:")]
-		////		bool Duration(string tones, double duration, double interToneGap);
+		[Abstract]
+		[Export("insertDtmf:duration:interToneGap:")]
+		bool /****Duration****/InsertDtmf(string tones, double duration, double interToneGap);
 
 		// @required -(NSString * _Nonnull)remainingTones;
 		[Abstract]
@@ -2555,7 +2686,16 @@ namespace Webrtc
 	}
 
 	// @protocol RTCRtpSender <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpSender
 	{
@@ -2586,11 +2726,11 @@ namespace Webrtc
 	}
 
 	// @interface RTCRtpSender : NSObject <RTCRtpSender>
-	////	[BaseType(typeof(NSObject))]
-	////	[DisableDefaultCtor]
-	////	interface RTCRtpSender : IRTCRtpSender
-	////	{
-	////	}
+	////[BaseType(typeof(NSObject))]
+	////[DisableDefaultCtor]
+	////interface RTCRtpSender : IRTCRtpSender
+	////{
+	////}
 
 	////[Static]
 	////[Verify(ConstantsInterfaceAssociation)]
@@ -2619,7 +2759,16 @@ namespace Webrtc
 	}
 
 	// @protocol RTCRtpTransceiver <NSObject>
-	[Protocol, Model]
+	/*
+	  Check whether adding [Model] to this declaration is appropriate.
+	  [Model] is used to generate a C# class that implements this protocol,
+	  and might be useful for protocols that consumers are supposed to implement,
+	  since consumers can subclass the generated class instead of implementing
+	  the generated interface. If consumers are not supposed to implement this
+	  protocol, then [Model] is redundant and will generate code that will never
+	  be used.
+	*/
+	[Protocol]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpTransceiver
 	{
@@ -2656,7 +2805,7 @@ namespace Webrtc
 		// @required -(BOOL)currentDirection:(RTCRtpTransceiverDirection * _Nonnull)currentDirectionOut;
 		[Abstract]
 		[Export("currentDirection:")]
-		unsafe bool CurrentDirection(/****RTCRtpTransceiverDirection* ****/IntPtr currentDirectionOut);
+		/****unsafe****/ bool CurrentDirection(/****RTCRtpTransceiverDirection* ****/IntPtr currentDirectionOut);
 
 		// @required -(void)stopInternal;
 		[Abstract]
@@ -2670,11 +2819,11 @@ namespace Webrtc
 	}
 
 	// @interface RTCRtpTransceiver : NSObject <RTCRtpTransceiver>
-	////	[BaseType(typeof(NSObject))]
-	////	[DisableDefaultCtor]
-	////	interface RTCRtpTransceiver : IRTCRtpTransceiver
-	////	{
-	////	}
+	////[BaseType(typeof(NSObject))]
+	////[DisableDefaultCtor]
+	////interface RTCRtpTransceiver : IRTCRtpTransceiver
+	////{
+	////}
 
 	// @interface RTCSessionDescription : NSObject
 	[BaseType(typeof(NSObject))]
@@ -2827,16 +2976,16 @@ namespace Webrtc
 	}
 
 	// @interface RTCI420Buffer : NSObject <RTCI420Buffer>
-	////	[BaseType(typeof(NSObject))]
-	////	interface RTCI420Buffer : IRTCI420Buffer
-	////	{
-	////	}
+	////[BaseType(typeof(NSObject))]
+	////interface RTCI420Buffer : IRTCI420Buffer
+	////{
+	////}
 
 	// @interface RTCMutableI420Buffer : RTCI420Buffer <RTCMutableI420Buffer>
-	////	[BaseType(typeof(RTCI420Buffer))]
-	////	interface RTCMutableI420Buffer : IRTCMutableI420Buffer
-	////	{
-	////	}
+	////[BaseType(typeof(RTCI420Buffer))]
+	////interface RTCMutableI420Buffer : IRTCMutableI420Buffer
+	////{
+	////}
 
 	// typedef void (^RTCCallbackLoggerMessageHandler)(NSString * _Nonnull);
 	delegate void RTCCallbackLoggerMessageHandler(string arg0);
@@ -2903,4 +3052,5 @@ namespace Webrtc
 		////[Verify(MethodToProperty)]
 		NSData LogData { get; }
 	}
+
 }

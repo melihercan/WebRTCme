@@ -1,6 +1,0 @@
-source 'https://github.com/CocoaPods/Specs.git'
-target 'WebRTCContainer' do
- platform :ios, '14.0'
- pod 'GoogleWebRTC'
-end
-
