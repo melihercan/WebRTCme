@@ -4,11 +4,10 @@
              xmlns:webRtc="clr-namespace:WebRtcGuiXamarin;assembly=WebRTCme.Gui.Xamarin"
              x:Class="DemoApp.Views.VideoPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                   HorizontalOptions="CenterAndExpand" />
-
-            <webRtc:Video Options="Option1"/>
+        <StackLayout BackgroundColor="Red">
+            <Label Text="Welcome to Xamarin.Forms!" BackgroundColor="LightGreen"/>
+            <webRtc:Video Options="Option1" BackgroundColor="Orange" VerticalOptions="FillAndExpand" 
+                          HorizontalOptions="FillAndExpand"/>
             
         </StackLayout>
     </ContentPage.Content>

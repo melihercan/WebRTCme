@@ -41,6 +41,7 @@ namespace WebRtcGuiXamarin.iOS
         {
             if (disposing)
             {
+                Control.CaptureSession.Dispose();
                 Control.Dispose();
             }
 

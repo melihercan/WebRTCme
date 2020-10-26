@@ -536,12 +536,12 @@ namespace Webrtc
 	interface RTCVideoRenderer
 	{
 		// @required -(void)setSize:(CGSize)size;
-		[Abstract]
+		////[Abstract]
 		[Export("setSize:")]
 		void SetSize(CGSize size);
 
 		// @required -(void)renderFrame:(RTCVideoFrame * _Nullable)frame;
-		[Abstract]
+		////[Abstract]
 		[Export("renderFrame:")]
 		void RenderFrame([NullAllowed] RTCVideoFrame frame);
 	}
