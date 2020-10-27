@@ -30,17 +30,25 @@ namespace WebRtcGuiXamarin.iOS
             _videoOptions = videoOptions;
             _videoWebRtc = new VideoWebRtc();
 
-
-
-
-            ///LocalVideoView = new RTCCameraPreviewView();
-
+#if true
             CaptureSession = new AVCaptureSession();
-            _previewLayer = new AVCaptureVideoPreviewLayer(CaptureSession)
-            {
-                Frame = Bounds,
-                VideoGravity = AVLayerVideoGravity.ResizeAspectFill
-            };
+            var cameraPreviewView = new RTCCameraPreviewView();
+            cameraPreviewView.CaptureSession = CaptureSession;
+            LocalVideoView = cameraPreviewView;
+            AddSubview(LocalVideoView);
+
+#endif
+
+#if false
+            CaptureSession = new AVCaptureSession();
+                        _previewLayer = new AVCaptureVideoPreviewLayer(CaptureSession)
+                        {
+                            Frame = Bounds,
+                            VideoGravity = AVLayerVideoGravity.ResizeAspectFill
+                        };
+                        Layer.AddSublayer(_previewLayer);
+#endif
+
 
             var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
             var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
@@ -54,7 +62,6 @@ namespace WebRtcGuiXamarin.iOS
             NSError error;
             var input = new AVCaptureDeviceInput(device, out error);
             CaptureSession.AddInput(input);
-            Layer.AddSublayer(_previewLayer);
             CaptureSession.StartRunning();
         }
 
@@ -62,12 +69,13 @@ namespace WebRtcGuiXamarin.iOS
         {
             base.LayoutSubviews();
 
+#if false
             if (_previewLayer != null)
             {
                 _previewLayer.Frame = Bounds;
             }
+#endif
+            LocalVideoView.Frame = Bounds;
         }
-
-
     }
 }
