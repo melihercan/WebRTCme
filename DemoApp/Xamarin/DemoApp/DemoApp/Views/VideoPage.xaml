@@ -5,10 +5,12 @@
              x:Class="DemoApp.Views.VideoPage">
     <ContentPage.Content>
         <StackLayout BackgroundColor="Red">
-            <Label Text="Welcome to Xamarin.Forms!" BackgroundColor="LightGreen"/>
+            <Label Text="Welcome to Xamarin.Forms!" BackgroundColor="Green"/>
             <webRtc:Video Options="Option1" BackgroundColor="Orange" VerticalOptions="FillAndExpand" 
-                          HorizontalOptions="FillAndExpand"/>
-            
+                          HorizontalOptions="FillAndExpand" Type="Local" Source="{Binding LocalSource}"/>
+            <!--<webRtc:Video Options="Option1" BackgroundColor="Orange" VerticalOptions="FillAndExpand" 
+                          HorizontalOptions="FillAndExpand" Type="Remote" Source="{Binding RemoteSource}"/>-->
+
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
