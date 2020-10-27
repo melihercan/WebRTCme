@@ -32,7 +32,7 @@ namespace WebRtcGuiXamarin.Android
                 {
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    _videoView = new VideoView(Context, e.NewElement.Options);
+                    _videoView = new VideoView(Context, e.NewElement.Type, e.NewElement.Source);
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers.

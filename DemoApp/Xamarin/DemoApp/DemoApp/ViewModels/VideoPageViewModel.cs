@@ -12,7 +12,7 @@ namespace DemoApp.ViewModels
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private string _localSource;
+        private string _localSource = string.Empty;
         public string LocalSource
         {
             get => _localSource;

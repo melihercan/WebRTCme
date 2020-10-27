@@ -29,7 +29,7 @@ namespace WebRtcGuiXamarin.iOS
                 {
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    _videoView = new VideoView(e.NewElement.Options);
+                    _videoView = new VideoView(e.NewElement.Type, e.NewElement.Source);
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers.

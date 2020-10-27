@@ -8,11 +8,13 @@ namespace WebRtcGuiXamarin.Android
 {
     public class VideoView : View
     {
-        private readonly VideoOptions _videoOptions;
+        private readonly Video.TypeEnum _type;
+        private readonly string _source;
 
-        public VideoView(Context context, VideoOptions videoOptions) : base(context)
+        public VideoView(Context context, Video.TypeEnum type, string source) : base(context)
         {
-            _videoOptions = videoOptions;
+            _type = type;
+            _source = source;
         }
     }
 }
