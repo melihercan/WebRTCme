@@ -17,7 +17,7 @@ namespace WebRtcJsInterop.Api
 
         public async Task<List<IMediaStreamTrackAsync>> GetTracksAsync()
         {
-            var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
+            var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "getTracks");
             var jsObjectRefMediaStreamTrackArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
             var mediaStreamTracks = new List<IMediaStreamTrackAsync>();
             foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
@@ -29,7 +29,7 @@ namespace WebRtcJsInterop.Api
 
         public async Task SetElementReferenceSrcObjectAsync(object/*ElementReference*/ elementReference)
         {
-            await JsRuntime.SetJsProperty(elementReference, "srcObject", NativeObject);
+            await JsRuntime.SetJsProperty(elementReference, "srcObject", SelfNativeObject);
 
             //await JsRuntime.InvokeVoidAsync(
             //    "objectRef.set",

@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaDevices : INativeObject
+    public interface IMediaDevices : INativeObjects
     {
         IMediaStream GetUserMedia(MediaStreamConstraints constraints);
         IEnumerable<MediaDeviceInfo> EnumerateDevices(); 
     }
 
-    public interface IMediaDevicesAsync : INativeObjectAsync
+    public interface IMediaDevicesAsync : INativeObjectsAsync
     {
         Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints);
         Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync();

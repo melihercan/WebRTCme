@@ -4,11 +4,11 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IMediaStreamTrack : INativeObject
+    public interface IMediaStreamTrack : INativeObjects
     {
     }
 
-    public interface IMediaStreamTrackAsync : INativeObjectAsync
+    public interface IMediaStreamTrackAsync : INativeObjectsAsync
     {
     }
 }

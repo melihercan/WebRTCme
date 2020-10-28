@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCPeerConnection : INativeObject
+    public interface IRTCPeerConnection : INativeObjects
     {
         void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback);
         void OnTrack(Func<IRTCTrackEvent> callback);
@@ -13,7 +13,7 @@ namespace WebRTCme
         IRTCSessionDescription CreateOffer(RTCOfferOptions options);
     }
 
-    public interface IRTCPeerConnectionAsync : INativeObjectAsync
+    public interface IRTCPeerConnectionAsync : INativeObjectsAsync
     {
         Task<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback);
         Task<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback);

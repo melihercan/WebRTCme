@@ -15,7 +15,7 @@ namespace WebRtcJsInterop.Api
 
         public async Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints)
         {
-            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, 
+            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, 
                 "getUserMedia", constraints);
             return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
         }
@@ -23,7 +23,7 @@ namespace WebRtcJsInterop.Api
         public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync()
         {
             var mediaDeviceInfos = new List<MediaDeviceInfo>();
-            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "enumerateDevices");
+            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, "enumerateDevices");
             var jsObjectRefMediaDeviceInfoArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
             foreach (var jsObjectRefMediaDeviceInfo in jsObjectRefMediaDeviceInfoArray)
             {

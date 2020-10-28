@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IWindow : INativeObject
+    public interface IWindow : INativeObjects
     {
         INavigator Navigator { get; }
 
         IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration);
     }
 
-    public interface IWindowAsync : INativeObjectAsync
+    public interface IWindowAsync : INativeObjectsAsync
     {
         Task<INavigatorAsync> NavigatorAsync();
 

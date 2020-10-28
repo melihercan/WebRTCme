@@ -18,7 +18,7 @@ namespace WebRtcGuiXamarin
             .Create(nameof(TypeProperty), typeof(TypeEnum), typeof(Video), TypeEnum.Local);
 
         public static readonly BindableProperty SourceProperty = BindableProperty
-            .Create(nameof(SourceProperty), typeof(string), typeof(Video), "Default");
+            .Create(nameof(SourceProperty), typeof(string), typeof(Video), string.Empty);
         
         public TypeEnum Type
         {

@@ -9,23 +9,30 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    public abstract class ApiBase : INativeObjectAsync
+    public abstract class ApiBase : INativeObjectsAsync
     {
         protected ApiBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
             JsRuntime = jsRuntime;
-            NativeObject = jsObjectRef;
+            SelfNativeObject = jsObjectRef;
         }
 
         public IJSRuntime JsRuntime { get; }
 
-        public object NativeObject { get; }
-        
+        public object SelfNativeObject { get; }
+        public List<object> OtherNativeObjects { get; set; } = new List<object>();
+
         public async ValueTask DisposeAsync()
         {
-            if (NativeObject != null)
+            foreach (var otherNativeObject in OtherNativeObjects)
             {
-                var jsObjectRef = NativeObject as JsObjectRef;
+                var jsObjectRef = otherNativeObject as JsObjectRef;
+                await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            }
+
+            if (SelfNativeObject != null)
+            {
+                var jsObjectRef = SelfNativeObject as JsObjectRef;
                 await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             }
         }

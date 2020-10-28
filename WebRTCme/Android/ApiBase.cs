@@ -1,19 +1,29 @@
-﻿using System;
+﻿using Java.Security.Spec;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
 namespace WebRtc.Android
 {
-    public abstract class ApiBase : INativeObject
+    public abstract class ApiBase : INativeObjects
     {
-        protected ApiBase(object nativeObject = null) => NativeObject = nativeObject;
+        protected ApiBase(object nativeObject = null) => SelfNativeObject = nativeObject;
 
-        public object NativeObject { get; }
+        public object SelfNativeObject { get; }
+        public List<object> OtherNativeObjects { get; set; } = new List<object>();
 
         public void Dispose()
         {
-            if(NativeObject != null && NativeObject is IDisposable disposable)
+            foreach (var otherNativeObject in OtherNativeObjects)
+            {
+                if (otherNativeObject is IDisposable otherDisposable)
+                {
+                    otherDisposable.Dispose();
+                }
+            }
+
+            if (SelfNativeObject != null && SelfNativeObject is IDisposable disposable)
             {
                 disposable.Dispose();
             }
