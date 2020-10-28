@@ -12,6 +12,12 @@ namespace WebRtcJsInterop.Api
 {
     internal class MediaStream : ApiBase, IMediaStreamAsync
     {
+        public bool Active => throw new NotImplementedException();
+
+        public bool Ended => throw new NotImplementedException();
+
+        public string Id => throw new NotImplementedException();
+
         private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
@@ -54,5 +60,34 @@ namespace WebRtcJsInterop.Api
             return mediaStream;
         }
 
+        public Task<IMediaStreamAsync> CloneAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMediaStreamTrackAsync> GetTrackByIdAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<IMediaStreamTrack>> GetVideoTracksAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<IMediaStreamTrack>> GetAudioTracksAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddTrackAsync(IMediaStreamTrackAsync track)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveTrackAsync(IMediaStreamTrackAsync track)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

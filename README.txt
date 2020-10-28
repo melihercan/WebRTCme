@@ -1,3 +1,61 @@
+iOS camera capture
+==================
+var session = new AVCaptureSession();
+var cameraPreviewLayer 
+
+
+A minimal setup for camera output preview (Swift 2, Swift 3)
+
+import UIKit
+import AVFoundation
+
+class ViewController: UIViewController {
+    var session: AVCaptureSession?
+    var cameraPreviewLayer: AVCaptureVideoPreviewLayer?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupSession()
+        if let cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: session) {
+            view.layer.addSublayer(cameraPreviewLayer)
+            self.cameraPreviewLayer = cameraPreviewLayer
+            session?.startRunning()
+        }
+    }
+
+    func setupSession() {
+        session = AVCaptureSession()
+        //setup input
+        let device =  AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        do {
+            let input = try AVCaptureDeviceInput(device: device)
+            if session?.canAddInput(input) == true {
+                session?.addInput(input)
+            }
+        } catch {
+            print("An error occured: \(error.localizedDescription)")
+        }
+
+
+        //setup output
+        let output = AVCaptureVideoDataOutput()
+        output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as AnyHashable: kCVPixelFormatType_32BGRA]
+        if session?.canAddOutput(output) == true {
+            session?.addOutput(output)
+        }
+    
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.cameraPreviewLayer?.frame = self.view.layer.bounds
+    }
+}
+ 
+
+
+
+
 I wanted to create a single cross platform library with Razor and possible Xamarin UI support.
 But it seems we cannot compile Razor files with <Project Sdk="MSBuild.Sdk.Extras/2.0.54">.
 So this library will be pure API (with JS interop).
