@@ -10,6 +10,8 @@ namespace WebRtc.iOS
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+
         public IEnumerable<MediaDeviceInfo> EnumerateDevices()
         {
             var mediaDeviceInfoList = new List<MediaDeviceInfo>();
@@ -86,6 +88,16 @@ namespace WebRtc.iOS
             }
 
 
+        }
+
+        public IMediaStream GetDisplayMedia(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
+        }
+
+        public MediaTrackSupportedConstraints GetSupportedConstraints()
+        {
+            throw new NotImplementedException();
         }
 
         public IMediaStream GetUserMedia(MediaStreamConstraints constraints)

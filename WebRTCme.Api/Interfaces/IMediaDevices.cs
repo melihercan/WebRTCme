@@ -7,14 +7,30 @@ namespace WebRTCme
 {
     public interface IMediaDevices : INativeObjects
     {
+        IEnumerable<MediaDeviceInfo> EnumerateDevices();
+
+        MediaTrackSupportedConstraints GetSupportedConstraints();
+
+        IMediaStream GetDisplayMedia(MediaStreamConstraints constraints);
+
         IMediaStream GetUserMedia(MediaStreamConstraints constraints);
-        IEnumerable<MediaDeviceInfo> EnumerateDevices(); 
+
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+
+
     }
 
     public interface IMediaDevicesAsync : INativeObjectsAsync
     {
-        Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints);
         Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync();
-    }
 
+        Task<MediaTrackSupportedConstraints> GetSupportedConstraintsAsync();
+
+        Task<IMediaStream> GetDisplayMediaAsync(MediaStreamConstraints constraints);
+
+
+        Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints);
+
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+    }
 }

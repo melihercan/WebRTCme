@@ -13,6 +13,8 @@ namespace WebRtcJsInterop.Api
     {
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+
         public async Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints)
         {
             var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, 
@@ -42,5 +44,14 @@ namespace WebRtcJsInterop.Api
             return mediaDevices;
         }
 
+        public Task<MediaTrackSupportedConstraints> GetSupportedConstraintsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IMediaStream> GetDisplayMediaAsync(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
