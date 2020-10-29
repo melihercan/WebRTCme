@@ -15,7 +15,7 @@ namespace WebRTCme
         public string Single { get; set; }
         public string[] Array { get; set; }
 
-        Object Exact { get; set; } 
-        Object Ideal { get; set; }
+        public Object Exact { get; set; } 
+        public Object Ideal { get; set; }
     }
 }

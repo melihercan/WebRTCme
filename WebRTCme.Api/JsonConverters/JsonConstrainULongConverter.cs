@@ -27,14 +27,14 @@ namespace WebRTCme.JsonConverters
                     var propertyName = reader.GetString();
                     reader.Read();
                     var value = reader.GetUInt64();
-                    _ = (propertyName switch
+                    _ = propertyName switch
                     {
                         nameof(constrainULong.Min) => constrainULong.Min = value,
                         nameof(constrainULong.Max) => constrainULong.Max = value,
                         nameof(constrainULong.Exact) => constrainULong.Exact = value,
                         nameof(constrainULong.Ideal) => constrainULong.Ideal = value,
                         _ => throw new JsonException("Invalid element in ConstrainULong object.")
-                    });
+                    };
                 }
             }
             else

@@ -6,7 +6,9 @@ namespace WebRTCme
 {
     public class ConstrainBoolean
     {
-        public bool Exact { get; set; }
-        public bool Ideal { get; set; }
+        public bool? Single { get; set; }
+        
+        public bool? Exact { get; set; }
+        public bool? Ideal { get; set; }
     }
 }
