@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public enum ReadyState
+    public enum MediaStreamTrackState
     {
         Live,
         Ended

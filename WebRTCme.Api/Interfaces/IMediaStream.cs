@@ -6,15 +6,19 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStream : INativeObjects
+    public interface IMediaStreamShared
     {
-        IMediaStream Clone();
-
         public bool Active { get; }
 
         public bool Ended { get; }
 
         public string Id { get; }
+
+    }
+
+    public interface IMediaStream : IMediaStreamShared, INativeObjects
+    {
+        IMediaStream Clone();
 
         List<IMediaStreamTrack> GetTracks();
 
@@ -37,15 +41,9 @@ namespace WebRTCme
         void SetElementReferenceSrcObject(object media);
     }
 
-    public interface IMediaStreamAsync : INativeObjectsAsync
+    public interface IMediaStreamAsync : IMediaStreamShared, INativeObjectsAsync
     {
         Task<IMediaStreamAsync> CloneAsync();
-
-        public bool Active { get; }
-
-        public bool Ended { get; }
-
-        public string Id { get; }
 
         Task<List<IMediaStreamTrackAsync>> GetTracksAsync();
 

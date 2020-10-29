@@ -4,12 +4,10 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class ConstrainDouble 
+    public class ConstrainDouble : DoubleRange
     {
         public double? Single { get; set; }
 
-        public double? Min { get; set; }
-        public double? Max { get; set; }
         public double? Exact { get; set; }
         public double? Ideal { get; set; }
     }

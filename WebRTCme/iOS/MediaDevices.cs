@@ -106,6 +106,7 @@ namespace WebRtc.iOS
             var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
 
 
+            var mediaStream = new MediaStream(/*tracks*/);
 
             return null;
         }

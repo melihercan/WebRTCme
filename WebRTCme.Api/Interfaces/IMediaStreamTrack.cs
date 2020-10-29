@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
 
-    public interface IMediaStreamTrackProperties
+    public interface IMediaStreamTrackShared
     {
         public string ContentHint { get; set; }
         public bool Enabled { get; set; }
@@ -17,32 +18,42 @@ namespace WebRTCme
         public bool Muted { get; }
         public bool Readonly { get; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ReadyState ReadyState { get; }
+        public MediaStreamTrackState ReadyState { get; }
         public bool Remote { get; }
+
+        public event EventHandler OnMute;
+        public event EventHandler OnUnmute;
+        public event EventHandler OnEnded;
+
     }
 
-    public interface IMediaStreamTrack : IMediaStreamTrackProperties, INativeObjects
+    public interface IMediaStreamTrack : IMediaStreamTrackShared, INativeObjects
     {
-        //public string ContentHint { get; set; }
-        //public bool Enabled { get; set; }
-        //public string Id { get; }
-        //public bool Isolated { get; }
-        //public string Kind { get; }
-        //public string Label { get; }
-        //public bool Muted { get; }
-        //public bool Readonly { get; }
-        //[JsonConverter(typeof(JsonStringEnumConverter))]
-        //public ReadyState ReadyState { get; }
-        //public bool Remote { get; }
         IMediaStreamTrack Clone();
 
+        MediaTrackCapabilities GetCapabilities();
 
+        MediaTrackSettings GetSettings();
 
+        MediaTrackConstraints GetContraints();
+        void ApplyConstraints(MediaTrackConstraints contraints);
 
-
+        void Stop();
     }
 
-    public interface IMediaStreamTrackAsync : IMediaStreamTrackProperties, INativeObjectsAsync
+    public interface IMediaStreamTrackAsync : IMediaStreamTrackShared, INativeObjectsAsync
     {
+        Task<IMediaStreamTrackAsync> CloneAsync();
+
+        Task<MediaTrackCapabilities> GetCapabilitiesAsync();
+
+        Task<MediaTrackSettings> GetSettingsAsync();
+
+        Task<MediaTrackConstraints> GetContraintsAsync();
+
+        Task ApplyConstraintsAsync(MediaTrackConstraints contraints);
+
+        Task Stop();
+
     }
 }

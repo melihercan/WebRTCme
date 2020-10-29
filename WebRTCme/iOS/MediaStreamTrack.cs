@@ -1,17 +1,12 @@
-﻿using Microsoft.JSInterop;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-using WebRtcJsInterop.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop.Api
+namespace WebRtc.iOS
 {
-    internal class MediaStreamTrack : ApiBase, IMediaStreamTrackAsync
+    internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
-        private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
-
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -35,38 +30,32 @@ namespace WebRtcJsInterop.Api
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
-        internal static IMediaStreamTrackAsync NewAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
-        {
-            var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
-            return mediaStreamTrack;
-        }
-
-        public Task ApplyConstraintsAsync(MediaTrackConstraints contraints)
+        public void ApplyConstraints(MediaTrackConstraints contraints)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStreamTrackAsync> CloneAsync()
+        public IMediaStreamTrack Clone()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackCapabilities> GetCapabilitiesAsync()
+        public MediaTrackCapabilities GetCapabilities()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackConstraints> GetContraintsAsync()
+        public MediaTrackConstraints GetContraints()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackSettings> GetSettingsAsync()
+        public MediaTrackSettings GetSettings()
         {
             throw new NotImplementedException();
         }
 
-        public Task Stop()
+        public void Stop()
         {
             throw new NotImplementedException();
         }
