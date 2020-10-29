@@ -7,11 +7,11 @@ namespace WebRTCme
     public class MediaStreamConstraints
     {
         public bool Audio { get; set; }
-        //// TODO: or IMediaTrackConstraints
+        public MediaTrackConstraints AudioConstraints { get; set; }
 
         public bool Video { get; set; }
-        //// TODO: or IMediaTrackConstraints
+        public MediaTrackConstraints VideoConstraints { get; set; }
 
-        //// TODO: public string PeerIdentity { get; set; } 
+        public string PeerIdentity { get; set; } 
     }
 }

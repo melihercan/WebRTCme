@@ -7,7 +7,8 @@ namespace WebRTCme
 {
     public class RTCConfiguration
     {
-        public string BundlePolicy { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public RTCBundlePolicy BundlePolicy { get; set; }
         
         public IRTCCertificate[] Certificates { get; set; }
         

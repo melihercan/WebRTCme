@@ -34,6 +34,7 @@ namespace WebRTCme
         //[JsonConverter(typeof(JsonStringEnumConverter))]
         //public ReadyState ReadyState { get; }
         //public bool Remote { get; }
+        IMediaStreamTrack Clone();
 
 
 

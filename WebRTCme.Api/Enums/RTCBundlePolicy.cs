@@ -4,9 +4,10 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class LongRange
+    public enum RTCBundlePolicy
     {
-        public int Max { get; set; }
-        public int Min { get; set; }
+        Balanced,
+        MaxCompat,
+        MaxBundle,
     }
 }

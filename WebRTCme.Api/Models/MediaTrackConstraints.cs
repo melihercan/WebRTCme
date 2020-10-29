@@ -13,12 +13,12 @@ namespace WebRTCme
 
         // Audio tracks.
         public ConstrainBoolean AutoGainControl { get; set; }
-        public ConstrainLong ChannelCount { get; set; }
+        public ConstrainULong ChannelCount { get; set; }
         public ConstrainBoolean EchoCancellation { get; set; }
         public ConstrainDouble Latency { get; set; }
         public ConstrainBoolean NoiseSuppression { get; set; }
-        public ConstrainLong SampleRate { get; set; }
-        public ConstrainLong SampleSize { get; set; }
+        public ConstrainULong SampleRate { get; set; }
+        public ConstrainULong SampleSize { get; set; }
         public ConstrainDouble Volume { get; set; }
 
         // Image tracks.
@@ -44,8 +44,8 @@ namespace WebRTCme
         public ConstrainDouble AspectRatio { get; set; }
         public ConstrainDOMString FacingMode { get; set; }
         public ConstrainDouble FrameRate { get; set; }
-        public ConstrainLong Height { get; set; }
-        public ConstrainLong Width { get; set; }
+        public ConstrainULong Height { get; set; }
+        public ConstrainULong Width { get; set; }
         public ConstrainDOMString ResizeMode { get; set; }
 
         // Shared screen tracks.
