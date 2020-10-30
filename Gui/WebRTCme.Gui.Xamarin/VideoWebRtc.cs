@@ -15,12 +15,15 @@ namespace WebRtcGuiXamarin
 
             var mediaStream = mediaDevices.GetUserMedia(new MediaStreamConstraints
             {
-                Audio = true,
-                Video = true
+                Audio = new MediaStreamContraintsUnion
+                { 
+                    Value = true
+                },
+                Video = new MediaStreamContraintsUnion
+                {
+                    Value = true
+                }
             });
-
-
-
         }
     }
 }

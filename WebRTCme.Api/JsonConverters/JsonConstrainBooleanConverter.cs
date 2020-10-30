@@ -15,26 +15,11 @@ namespace WebRTCme.JsonConverters
 
             if (reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False)
             {
-                constrainBoolean.Single = reader.GetBoolean();
+                constrainBoolean.Value = reader.GetBoolean();
             }
             else if (reader.TokenType == JsonTokenType.StartObject)
             {
-                while (reader.Read())
-                {
-                    if (reader.TokenType == JsonTokenType.EndObject)
-                    {
-                        break;
-                    }
-                    var propertyName = reader.GetString();
-                    reader.Read();
-                    var value = reader.GetBoolean();
-                    _ = propertyName switch
-                    {
-                        nameof(constrainBoolean.Exact) => constrainBoolean.Exact = value,
-                        nameof(constrainBoolean.Ideal) => constrainBoolean.Ideal = value,
-                        _ => throw new JsonException("Invalid element in ConstrainBoolean object.")
-                    };
-                }
+                constrainBoolean.Object = JsonSerializer.Deserialize<ConstrainBooleanParameters>(ref reader, options);
             }
             else
             {
@@ -45,16 +30,17 @@ namespace WebRTCme.JsonConverters
 
         public override void Write(Utf8JsonWriter writer, ConstrainBoolean value, JsonSerializerOptions options)
         {
-            if (value.Single != null)
+            if (value.Value != null)
             {
-                writer.WriteBooleanValue((bool)value.Single);
+                writer.WriteBooleanValue((bool)value.Value);
+            }
+            else if (value.Object != null)
+            {
+                JsonSerializer.Serialize(writer, value.Object, options);
             }
             else
             {
-                writer.WriteStartObject();
-                if (value.Exact != null) writer.WriteBoolean(nameof(value.Exact), (bool)value.Exact);
-                if (value.Ideal != null) writer.WriteBoolean(nameof(value.Ideal), (bool)value.Ideal);
-                writer.WriteEndObject();
+                throw new JsonException("Invalid ContraintBoolean object.");
             }
         }
     }

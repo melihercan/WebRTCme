@@ -36,8 +36,14 @@ namespace DemoApp.Pages
                 var mediDeviceInfos = (await _mediaDevices.EnumerateDevicesAsync()).ToList();
                 _mediaStream = await _mediaDevices.GetUserMediaAsync(new MediaStreamConstraints
                 {
-                    Audio = true,
-                    Video = true
+                    Audio = new MediaStreamContraintsUnion
+                    {
+                        Value = true
+                    },
+                    Video = new MediaStreamContraintsUnion
+                    {
+                        Value = true
+                    }
                 });
 
                 await _mediaStream.SetElementReferenceSrcObjectAsync(_localVideo);

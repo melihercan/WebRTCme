@@ -8,7 +8,7 @@ namespace WebRTCme.JsonConverters
 {
     public class JsonMediaStreamContraintsUnionConverter : JsonConverter<MediaStreamContraintsUnion>
     {
-        public override MediaStreamContraintsUnion Read(ref Utf8JsonReader reader, Type typeToConvert, 
+        public override MediaStreamContraintsUnion Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
             var mediaStreamConstraintsUnion = new MediaStreamContraintsUnion();
@@ -19,7 +19,8 @@ namespace WebRTCme.JsonConverters
             }
             else if (reader.TokenType == JsonTokenType.StartObject)
             {
-                mediaStreamConstraintsUnion.Object = null;
+                mediaStreamConstraintsUnion.Object = JsonSerializer
+                    .Deserialize<MediaTrackConstraints>(ref reader, options);
             }
             else
             {
@@ -28,7 +29,7 @@ namespace WebRTCme.JsonConverters
             return mediaStreamConstraintsUnion;
         }
 
-        public override void Write(Utf8JsonWriter writer, MediaStreamContraintsUnion value, 
+        public override void Write(Utf8JsonWriter writer, MediaStreamContraintsUnion value,
             JsonSerializerOptions options)
         {
             if (value.Value != null)
@@ -37,7 +38,7 @@ namespace WebRTCme.JsonConverters
             }
             else if (value.Object != null)
             {
-                writer.WriteStringValue(JsonSerializer.Serialize(value.Object));
+                JsonSerializer.Serialize(writer, value.Object, options);
             }
             else
             {

@@ -14,28 +14,11 @@ namespace WebRTCme.JsonConverters
 
             if (reader.TokenType == JsonTokenType.Number)
             {
-                constrainULong.Single = reader.GetUInt64();
+                constrainULong.Value = reader.GetUInt64();
             }
             else if (reader.TokenType == JsonTokenType.StartObject)
             {
-                while (reader.Read())
-                {
-                    if (reader.TokenType == JsonTokenType.EndObject)
-                    {
-                        break;
-                    }
-                    var propertyName = reader.GetString();
-                    reader.Read();
-                    var value = reader.GetUInt64();
-                    _ = propertyName switch
-                    {
-                        nameof(constrainULong.Min) => constrainULong.Min = value,
-                        nameof(constrainULong.Max) => constrainULong.Max = value,
-                        nameof(constrainULong.Exact) => constrainULong.Exact = value,
-                        nameof(constrainULong.Ideal) => constrainULong.Ideal = value,
-                        _ => throw new JsonException("Invalid element in ConstrainULong object.")
-                    };
-                }
+                constrainULong.Object = JsonSerializer.Deserialize<ConstrainULongRange>(ref reader, options);
             }
             else
             {
@@ -46,18 +29,17 @@ namespace WebRTCme.JsonConverters
 
         public override void Write(Utf8JsonWriter writer, ConstrainULong value, JsonSerializerOptions options)
         {
-            if (value.Single != null)
+            if (value.Value != null)
             {
-                writer.WriteNumberValue((ulong)value.Single);
+                writer.WriteNumberValue((ulong)value.Value);
+            }
+            else if (value.Object != null)
+            {
+                JsonSerializer.Serialize(writer, value.Object, options);
             }
             else
             {
-                writer.WriteStartObject();
-                if (value.Min != null) writer.WriteNumber(nameof(value.Min), (ulong)value.Min);
-                if (value.Max != null) writer.WriteNumber(nameof(value.Max), (ulong)value.Max);
-                if (value.Exact != null) writer.WriteNumber(nameof(value.Exact), (ulong)value.Exact);
-                if (value.Ideal != null) writer.WriteNumber(nameof(value.Ideal), (ulong)value.Ideal);
-                writer.WriteEndObject();
+                throw new JsonException("Invalid ContraintULong object.");
             }
         }
     }

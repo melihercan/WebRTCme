@@ -15,7 +15,7 @@ namespace WebRTCme.JsonConverters
 
             if (reader.TokenType == JsonTokenType.String)
             {
-                constrainDOMString.Single = reader.GetString();
+                constrainDOMString.Value = reader.GetString();
             }
             else if (reader.TokenType == JsonTokenType.StartArray)
             {
@@ -44,10 +44,10 @@ namespace WebRTCme.JsonConverters
                     switch (propertyName)
                     {
                         case nameof(constrainDOMString.Exact):
-                            constrainDOMString.Exact = new ConstrainDOMString.Object();
+                            constrainDOMString.Exact = new ConstrainDOMStringUnion();
                             if (reader.TokenType == JsonTokenType.String)
                             {
-                                constrainDOMString.Exact.Single = reader.GetString();
+                                constrainDOMString.Exact.Value = reader.GetString();
                             }
                             else if (reader.TokenType == JsonTokenType.StartArray)
                             {
@@ -65,10 +65,10 @@ namespace WebRTCme.JsonConverters
                             }
                             break;
                         case nameof(constrainDOMString.Ideal):
-                            constrainDOMString.Ideal = new ConstrainDOMString.Object();
+                            constrainDOMString.Ideal = new ConstrainDOMStringUnion();
                             if (reader.TokenType == JsonTokenType.String)
                             {
-                                constrainDOMString.Ideal.Single = reader.GetString();
+                                constrainDOMString.Ideal.Value = reader.GetString();
                             }
                             else if (reader.TokenType == JsonTokenType.StartArray)
                             {
@@ -100,9 +100,9 @@ namespace WebRTCme.JsonConverters
 
         public override void Write(Utf8JsonWriter writer, ConstrainDOMString value, JsonSerializerOptions options)
         {
-            if (value.Single != null)
+            if (value.Value != null)
             {
-                writer.WriteStringValue(value.Single);
+                writer.WriteStringValue(value.Value);
             }
             else if (value.Array != null)
             {
@@ -119,9 +119,9 @@ namespace WebRTCme.JsonConverters
 
                 if (value.Exact != null)
                 {
-                    if (value.Exact.Single != null)
+                    if (value.Exact.Value != null)
                     {
-                        writer.WriteString(nameof(value.Exact), value.Exact.Single);
+                        writer.WriteString(nameof(value.Exact), value.Exact.Value);
                     }
                     else if (value.Exact.Array != null)
                     {
@@ -136,9 +136,9 @@ namespace WebRTCme.JsonConverters
                 
                 if (value.Ideal != null)
                 {
-                    if (value.Ideal.Single != null)
+                    if (value.Ideal.Value != null)
                     {
-                        writer.WriteString(nameof(value.Ideal), value.Ideal.Single);
+                        writer.WriteString(nameof(value.Ideal), value.Ideal.Value);
                     }
                     else if (value.Ideal.Array != null)
                     {

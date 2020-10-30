@@ -4,11 +4,10 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class ConstrainULong : ULongRange
+    public class ConstrainULong
     {
-        public ulong? Single { get; set; }
+        public ulong? Value { get; set; }
 
-        public ulong? Exact { get; set; }
-        public ulong? Ideal { get; set; }
+        public ConstrainULongRange Object { get; set; }
     }
 }

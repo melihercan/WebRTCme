@@ -4,13 +4,9 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class ConstrainDOMString
+    public class ConstrainDOMStringUnion
     {
         public string Value { get; set; }
         public string[] Array { get; set; }
-
-
-        public ConstrainDOMStringUnion Exact { get; set; } 
-        public ConstrainDOMStringUnion Ideal { get; set; }
     }
 }
