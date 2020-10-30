@@ -41,14 +41,14 @@ namespace WebRTCme
         public ConstrainDouble Volume { get; set; }
 
         // Image tracks.
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ImageMode WhiteBalanceMode { get; set; }
-        
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ImageMode ExposureMode { get; set; }
-        
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ImageMode FocusMode { get; set; }
+        [JsonConverter(typeof(JsonStringNullableEnumConverter<ImageMode?>))]
+        public ImageMode? WhiteBalanceMode { get; set; }
+
+        [JsonConverter(typeof(JsonStringNullableEnumConverter<ImageMode?>))]
+        public ImageMode? ExposureMode { get; set; }
+
+        [JsonConverter(typeof(JsonStringNullableEnumConverter<ImageMode?>))]
+        public ImageMode? FocusMode { get; set; }
         
         public PointsOfInterest PointsOfInterest { get; set; }
 
@@ -79,7 +79,7 @@ namespace WebRTCme
         [JsonConverter(typeof(JsonConstrainDoubleConverter))]
         public ConstrainDouble Zoom { get; set; }
         
-        public bool Torch { get; set; }
+        public bool? Torch { get; set; }
 
         // Video tracks.
         [JsonConverter(typeof(JsonConstrainDoubleConverter))]

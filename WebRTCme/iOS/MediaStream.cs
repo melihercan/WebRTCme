@@ -9,6 +9,13 @@ namespace WebRtc.iOS
     {
         public MediaStream()
         {
+////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
+
+        }
+
+        public MediaStream(MediaStreamConstraints constraints)
+        {
 
         }
 

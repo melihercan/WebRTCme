@@ -13,7 +13,7 @@ namespace WebRTCme.JsonConverters
         {
             var constrainBoolean = new ConstrainBoolean();
 
-            if (reader.TokenType == JsonTokenType.Number)
+            if (reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False)
             {
                 constrainBoolean.Single = reader.GetBoolean();
             }

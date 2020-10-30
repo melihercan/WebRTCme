@@ -102,13 +102,12 @@ namespace WebRtc.iOS
 
         public IMediaStream GetUserMedia(MediaStreamConstraints constraints)
         {
-            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
-            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
-
-
-            var mediaStream = new MediaStream(/*tracks*/);
-
-            return null;
+            ////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+            ////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
+            ////            var mediaStream = new MediaStream(/*tracks*/);
+            ////            return null;
+            ///
+            return new MediaStream(constraints);
         }
     }
 }
