@@ -41,6 +41,8 @@ namespace WebRtcGuiXamarin.iOS
 
 #endif
 
+            ////RTCSSLAdapter.RTCInitializeSSL();
+
 #if false
             CaptureSession = new AVCaptureSession();
                         _previewLayer = new AVCaptureVideoPreviewLayer(CaptureSession)
@@ -51,7 +53,7 @@ namespace WebRtcGuiXamarin.iOS
                         Layer.AddSublayer(_previewLayer);
 #endif
 
-
+#if true
             var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
             var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
             var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
@@ -65,6 +67,7 @@ namespace WebRtcGuiXamarin.iOS
             var input = new AVCaptureDeviceInput(device, out error);
             CaptureSession.AddInput(input);
             CaptureSession.StartRunning();
+#endif
         }
 
         public override void LayoutSubviews()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using Webrtc;
 
 namespace WebRtc.iOS
 {
@@ -9,8 +10,28 @@ namespace WebRtc.iOS
     {
         public MediaStream()
         {
-////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
-////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
+            ////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+            ////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
+
+
+
+
+            var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
+            var videoEncoderFactory = new RTCDefaultVideoEncoderFactory();
+
+            //var peerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
+
+            //var videoSource = new RTCVideoSource();
+
+
+
+            // if video is camera
+            var cameraVideoCapturer = new RTCCameraVideoCapturer();
+            //var cameraVideoCapturer.WeakDelegate = videoSource;
+
+
+            CFunctions.RTCInitializeSSL();
+
 
         }
 

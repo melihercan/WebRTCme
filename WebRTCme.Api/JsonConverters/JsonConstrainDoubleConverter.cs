@@ -8,7 +8,8 @@ namespace WebRTCme.JsonConverters
 {
     public class JsonConstrainDoubleConverter : JsonConverter<ConstrainDouble>
     {
-        public override ConstrainDouble Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ConstrainDouble Read(ref Utf8JsonReader reader, Type typeToConvert, 
+            JsonSerializerOptions options)
         {
             var constrainDouble = new ConstrainDouble();
 

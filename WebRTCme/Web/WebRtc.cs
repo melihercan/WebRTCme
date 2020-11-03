@@ -11,6 +11,16 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
+        public void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Cleanup()
+        {
+            throw new NotImplementedException();
+        }
+
         public IWindow Window => throw new NotImplementedException();
 
         public async Task<IWindowAsync> WindowAsync(IJSRuntime jsRuntime)

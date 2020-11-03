@@ -43,67 +43,68 @@ namespace Webrtc
 		None
 	}
 
-	static class CFunctions
+////	static class CFunctions //// add public to all
+	public static class CFunctions
 	{
 		// extern void RTCLogEx (RTCLoggingSeverity severity, NSString *log_string) __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCLogEx(RTCLoggingSeverity severity, NSString log_string);
+		public static extern void RTCLogEx(RTCLoggingSeverity severity, NSString log_string);
 
 		// extern void RTCSetMinDebugLogLevel (RTCLoggingSeverity severity) __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCSetMinDebugLogLevel(RTCLoggingSeverity severity);
+		public static extern void RTCSetMinDebugLogLevel(RTCLoggingSeverity severity);
 
 		// extern NSString * RTCFileName (const char *filePath) __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern unsafe NSString RTCFileName(sbyte* filePath);
+		public static extern unsafe NSString RTCFileName(sbyte* filePath);
 
 		// extern void RTCInitFieldTrialDictionary (NSDictionary<NSString *,NSString *> *fieldTrials) __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCInitFieldTrialDictionary(NSDictionary<NSString, NSString> fieldTrials);
+		public static extern void RTCInitFieldTrialDictionary(NSDictionary<NSString, NSString> fieldTrials);
 
 		// extern void RTCEnableMetrics () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCEnableMetrics();
+		public static extern void RTCEnableMetrics();
 
 		// extern NSArray<RTCMetricsSampleInfo *> * RTCGetAndResetMetrics () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
+		/****public****/ static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
 
 		// extern BOOL RTCInitializeSSL () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern bool RTCInitializeSSL();
+		public static extern bool RTCInitializeSSL();
 
 		// extern BOOL RTCCleanupSSL () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern bool RTCCleanupSSL();
+		public static extern bool RTCCleanupSSL();
 
 		// extern void RTCSetupInternalTracer () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCSetupInternalTracer();
+		public static extern void RTCSetupInternalTracer();
 
 		// extern BOOL RTCStartInternalCapture (NSString *filePath) __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern bool RTCStartInternalCapture(NSString filePath);
+		public static extern bool RTCStartInternalCapture(NSString filePath);
 
 		// extern void RTCStopInternalCapture () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCStopInternalCapture();
+		public static extern void RTCStopInternalCapture();
 
 		// extern void RTCShutdownInternalTracer () __attribute__((visibility("default")));
 		[DllImport("__Internal")]
 		////[Verify(PlatformInvoke)]
-		static extern void RTCShutdownInternalTracer();
+		public static extern void RTCShutdownInternalTracer();
 	}
 
 	[Native]

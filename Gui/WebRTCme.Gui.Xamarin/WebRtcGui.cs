@@ -14,6 +14,8 @@ namespace WebRtcGuiXamarin
         public static void Initialize()
         {
             var webRtc = CrossWebRtc.Current;
+            webRtc.Initialize(); 
+
             Window = webRtc.Window;
             Navigator = Window.Navigator;
             //var _mediaDevices = Navigator.MediaDevices();
@@ -30,7 +32,8 @@ namespace WebRtcGuiXamarin
 
         public static void Cleanup()
         {
-
+            var webRtc = CrossWebRtc.Current;
+            webRtc.Cleanup();
         }
     }
 }
