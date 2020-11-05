@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using Webrtc;
 using Xamarin.Forms;
+using Webrtc;
 
 namespace WebRtcGuiXamarin.iOS
 {
@@ -26,17 +26,29 @@ namespace WebRtcGuiXamarin.iOS
         private AVCaptureVideoPreviewLayer _previewLayer;
 
 
-        public VideoView(Video.TypeEnum type, string source)
+        public VideoView(Video.TypeEnum type, string sourceIn)
         {
             _type = type;
-            _source = source;
+            _source = sourceIn;
             _videoWebRtc = new VideoWebRtc();
+
+
+            var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
+            var videoEncoderFactory = new RTCDefaultVideoEncoderFactory();
+            var peerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
+            var source = peerConnectionFactory.VideoSource;
+
+
 
 
             LocalVideoView = new RTCCameraPreviewView();
             AddSubview(LocalVideoView);
-            var cameraVideoCapturer = new RTCCameraVideoCapturer(/*source*/);
+            var cameraVideoCapturer = new RTCCameraVideoCapturer(source);
             LocalVideoView.CaptureSession = cameraVideoCapturer.CaptureSession;
+
+        var videoTrack = peerConnectionFactory.VideoTrackWithSource(source, "MyVideoTrack");
+        var mediaStream = peerConnectionFactory.MediaStreamWithStreamId("MyMediaStream");
+
 
             var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
             var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
@@ -51,7 +63,8 @@ namespace WebRtcGuiXamarin.iOS
                 const float _frameRateLimit = 30.0f;
 
                 var maxSupportedFps = 0d;
-                foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges) maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
+                foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges) 
+                    maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
 
                 return (int)Math.Min(maxSupportedFps, _frameRateLimit);
             }
