@@ -44,8 +44,9 @@ namespace WebRtc.iOS
                 });
             }
 
+            return mediaDeviceInfoList;
 
-# if false
+#if false
 //// DEPRECATED
             avCaptureDevices = AVCaptureDevice.Devices;
             foreach (var avCaptureDevice in avCaptureDevices)
@@ -64,7 +65,7 @@ namespace WebRtc.iOS
 
 
 
-
+#if false
             var cameraVideoCapturer = new RTCCameraVideoCapturer();
             var device = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
             var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
@@ -87,7 +88,7 @@ namespace WebRtc.iOS
                 return (int)Math.Min(maxSupportedFps, _frameRateLimit);
             }
 
-
+#endif
         }
 
         public IMediaStream GetDisplayMedia(MediaStreamConstraints constraints)

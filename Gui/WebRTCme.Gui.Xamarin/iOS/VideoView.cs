@@ -14,7 +14,7 @@ namespace WebRtcGuiXamarin.iOS
     public class VideoView : UIView
     {
 
-        public UIView LocalVideoView { get; }
+        public /****UIView***/RTCCameraPreviewView LocalVideoView { get; }
         ////        public UIView RemoteVideoView { get; }
 
         public AVCaptureSession CaptureSession { get; private set; }
@@ -31,6 +31,33 @@ namespace WebRtcGuiXamarin.iOS
             _type = type;
             _source = source;
             _videoWebRtc = new VideoWebRtc();
+
+
+            LocalVideoView = new RTCCameraPreviewView();
+            AddSubview(LocalVideoView);
+            var cameraVideoCapturer = new RTCCameraVideoCapturer(/*source*/);
+            LocalVideoView.CaptureSession = cameraVideoCapturer.CaptureSession;
+
+            var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+            var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
+            var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
+            var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
+            var fps = GetFpsByFormat(format);
+            cameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
+
+
+            int GetFpsByFormat(AVCaptureDeviceFormat fmt)
+            {
+                const float _frameRateLimit = 30.0f;
+
+                var maxSupportedFps = 0d;
+                foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges) maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
+
+                return (int)Math.Min(maxSupportedFps, _frameRateLimit);
+            }
+
+
+#if false
 
 #if true
             CaptureSession = new AVCaptureSession();
@@ -67,6 +94,8 @@ namespace WebRtcGuiXamarin.iOS
             var input = new AVCaptureDeviceInput(device, out error);
             CaptureSession.AddInput(input);
             CaptureSession.StartRunning();
+#endif
+
 #endif
         }
 

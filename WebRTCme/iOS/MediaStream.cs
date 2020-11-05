@@ -10,16 +10,19 @@ namespace WebRtc.iOS
     {
         public MediaStream()
         {
+
+
+
+#if false
+
             ////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
             ////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
-
-
 
 
             var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
             var videoEncoderFactory = new RTCDefaultVideoEncoderFactory();
 
-            //var peerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
+            var peerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
 
             //var videoSource = new RTCVideoSource();
 
@@ -31,6 +34,7 @@ namespace WebRtc.iOS
 
 
             CFunctions.RTCInitializeSSL();
+#endif
 
 
         }
