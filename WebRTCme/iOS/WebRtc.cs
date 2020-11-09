@@ -10,6 +10,12 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
+        private static RTCPeerConnectionFactory _nativePeerConnectionFactory;
+        public static RTCPeerConnectionFactory NativePeerConnectionFactory =>
+            _nativePeerConnectionFactory ?? (_nativePeerConnectionFactory = new RTCPeerConnectionFactory(
+                new RTCDefaultVideoEncoderFactory(),
+                new RTCDefaultVideoDecoderFactory()));
+
         public void Initialize()
         {
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());

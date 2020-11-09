@@ -4,6 +4,7 @@
         <TargetFrameworks>netstandard2.1; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<LangVersion>8.0</LangVersion>		
         <RootNamespace>WebRtc</RootNamespace>
     </PropertyGroup>
 
@@ -32,6 +33,10 @@
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
 		<ProjectReference Include="..\PlatformBindings\Xamarin\iOS\iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="iOS\NativeExtensions.cs" />
 	</ItemGroup>
 
 

@@ -7,17 +7,19 @@ namespace WebRtcGuiXamarin
 {
     public static class WebRtcGui
     {
+        internal static IWebRtc WebRtc { get; set; }
+
         internal static IWindow Window { get; private set; }
         internal static INavigator Navigator { get; private set; }
 
 
         public static void Initialize()
         {
-            var webRtc = CrossWebRtc.Current;
-            webRtc.Initialize(); 
+            WebRtc = CrossWebRtc.Current;
+            WebRtc.Initialize(); 
 
-            Window = webRtc.Window;
-            Navigator = Window.Navigator;
+            //Window = WebRtc.Window;
+            //Navigator = Window.Navigator;
             //var _mediaDevices = Navigator.MediaDevices();
             //var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
             //{
@@ -32,8 +34,7 @@ namespace WebRtcGuiXamarin
 
         public static void Cleanup()
         {
-            var webRtc = CrossWebRtc.Current;
-            webRtc.Cleanup();
+            WebRtc.Cleanup();
         }
     }
 }

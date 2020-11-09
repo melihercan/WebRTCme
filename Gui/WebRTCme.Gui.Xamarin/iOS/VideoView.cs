@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using UIKit;
 using Xamarin.Forms;
-using Webrtc;
+using WebRTCme;
 
 namespace WebRtcGuiXamarin.iOS
 {
     public class VideoView : UIView
     {
 
-        public /****UIView***/RTCCameraPreviewView LocalVideoView { get; }
+        public UIView /****RTCCameraPreviewView****/ LocalVideoView { get; }
         ////        public UIView RemoteVideoView { get; }
 
         public AVCaptureSession CaptureSession { get; private set; }
@@ -22,32 +22,63 @@ namespace WebRtcGuiXamarin.iOS
 
         private readonly Video.TypeEnum _type;
         private readonly string _source;
-        private readonly VideoWebRtc _videoWebRtc;
+////        private readonly VideoWebRtc _videoWebRtc;
         private AVCaptureVideoPreviewLayer _previewLayer;
 
 
-        public VideoView(Video.TypeEnum type, string sourceIn)
+        public VideoView(Video.TypeEnum type, string source)
         {
             _type = type;
-            _source = sourceIn;
-            _videoWebRtc = new VideoWebRtc();
+            _source = source;
+            ////            _videoWebRtc = new VideoWebRtc();
+            ///
 
+            if (_type == Video.TypeEnum.Local)
+            {
+                if (string.IsNullOrEmpty(source))
+                {
+                    // Default devices.
+                    var mediaDevices = WebRtcGui.WebRtc.Window.Navigator.MediaDevices;
+                    ////var mediaDevicesInfo = mediaDevices.EnumerateDevices();
+                    var mediaStream = mediaDevices.GetUserMedia(new MediaStreamConstraints
+                    {
+                        Audio = new MediaStreamContraintsUnion { Value = true },
+                        Video = new MediaStreamContraintsUnion { Value = true }
+                    });
+                }
+            }
+#if TESTING
 
             var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
             var videoEncoderFactory = new RTCDefaultVideoEncoderFactory();
             var peerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
-            var source = peerConnectionFactory.VideoSource;
+            var sourceX = peerConnectionFactory.VideoSource;
+
 
 
 
 
             LocalVideoView = new RTCCameraPreviewView();
             AddSubview(LocalVideoView);
-            var cameraVideoCapturer = new RTCCameraVideoCapturer(source);
+            var cameraVideoCapturer = new RTCCameraVideoCapturer(/****source****/);
             LocalVideoView.CaptureSession = cameraVideoCapturer.CaptureSession;
 
-        var videoTrack = peerConnectionFactory.VideoTrackWithSource(source, "MyVideoTrack");
+        var videoTrack = peerConnectionFactory.VideoTrackWithSource(sourceX, "MyVideoTrack");
         var mediaStream = peerConnectionFactory.MediaStreamWithStreamId("MyMediaStream");
+            mediaStream.AddVideoTrack(videoTrack);
+
+            //// Given RTCMediaStream. Get RTCVideoTrack and get capturer and stream from it.
+            var vt = mediaStream.VideoTracks[0];
+            var kind = vt.Kind;
+            var tid = vt.TrackId;
+            var ie = vt.IsEnabled;
+            ////var rs = ReadyState;
+            var src = vt.Source;
+            var del = src.Delegate;
+
+
+
+
 
 
             var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
@@ -68,7 +99,7 @@ namespace WebRtcGuiXamarin.iOS
 
                 return (int)Math.Min(maxSupportedFps, _frameRateLimit);
             }
-
+#endif
 
 #if false
 
@@ -122,7 +153,7 @@ namespace WebRtcGuiXamarin.iOS
                 _previewLayer.Frame = Bounds;
             }
 #endif
-            LocalVideoView.Frame = Bounds;
+            ////LocalVideoView.Frame = Bounds;
         }
     }
 }

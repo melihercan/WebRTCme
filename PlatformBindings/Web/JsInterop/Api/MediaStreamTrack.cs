@@ -19,7 +19,7 @@ namespace WebRtcJsInterop.Api
 
         public bool Isolated => throw new NotImplementedException();
 
-        public string Kind => throw new NotImplementedException();
+        public MediaStreamTrackKind Kind => throw new NotImplementedException();
 
         public string Label => throw new NotImplementedException();
 

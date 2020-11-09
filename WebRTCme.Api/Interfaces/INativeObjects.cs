@@ -8,7 +8,7 @@ namespace WebRTCme
     public interface INativeObjects : IDisposable
     {
         object SelfNativeObject { get; }
-        List<object> OtherNativeObjects { get; set; }
+        List<object> NativeObjects { get; set; }
     }
 
     public interface INativeObjectsAsync : IAsyncDisposable

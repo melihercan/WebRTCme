@@ -11,11 +11,11 @@ namespace WebRtc.Android
         protected ApiBase(object nativeObject = null) => SelfNativeObject = nativeObject;
 
         public object SelfNativeObject { get; }
-        public List<object> OtherNativeObjects { get; set; } = new List<object>();
+        public List<object> NativeObjects { get; set; } = new List<object>();
 
         public void Dispose()
         {
-            foreach (var otherNativeObject in OtherNativeObjects)
+            foreach (var otherNativeObject in NativeObjects)
             {
                 if (otherNativeObject is IDisposable otherDisposable)
                 {

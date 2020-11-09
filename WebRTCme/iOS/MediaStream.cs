@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 using Webrtc;
+using System.Linq;
+using AVFoundation;
 
 namespace WebRtc.iOS
 {
     internal class MediaStream : ApiBase, IMediaStream
     {
+
+        private readonly RTCPeerConnectionFactory _nativePeerConnectionFactory;
+        private readonly RTCMediaStream _nativeMediaStream;
+
+        private List<IMediaStreamTrack> _mediaStreamTracks = new List<IMediaStreamTrack>();
+
         public MediaStream()
         {
 
@@ -41,7 +49,37 @@ namespace WebRtc.iOS
 
         public MediaStream(MediaStreamConstraints constraints)
         {
+            // Assume default for now.
+            var videoDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+            var audioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
 
+            ////            var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
+            //NativeObjects.Add(videoDecoderFactory);
+            ////        var videoEncoderFactory = new RTCDefaultVideoEncoderFactory();
+            //NativeObjects.Add(videoEncoderFactory);
+
+            ////    _nativePeerConnectionFactory = new RTCPeerConnectionFactory(videoEncoderFactory, videoDecoderFactory);
+            //NativeObjects.Add(_peerConnectionFactory);
+            ////            var videoSource = _nativePeerConnectionFactory.VideoSource;
+
+            ////_nativeMediaStream = _nativePeerConnectionFactory.MediaStreamWithStreamId("LocalMediaStream");
+            //NativeObjects.Add(_mediaStream);
+
+            ////var nativeVideoTrack = _nativePeerConnectionFactory.VideoTrackWithSource(videoSource, videoDevice.UniqueID);
+            //NativeObjects.Add(nativeVideoTrack);
+            ////AddTrack(new MediaStreamTrack(nativeVideoTrack));
+            ///
+
+            AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? "MyAudio"));
+            AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? "MyVideo"));
+
+
+            //SelfNativeObject = 
+
+
+
+
+            
         }
 
         public MediaStream(IMediaStream stream)
@@ -71,38 +109,26 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public List<IMediaStreamTrack> GetTracks()
-        {
-            throw new NotImplementedException();
-        }
+        public List<IMediaStreamTrack> GetTracks() => _mediaStreamTracks;
 
-        public IMediaStreamTrack GetTrackById(string id)
-        {
-            throw new NotImplementedException();
-        }
+        public IMediaStreamTrack GetTrackById(string id) => _mediaStreamTracks.Find(track => track.Id == id);
 
-        public List<IMediaStreamTrack> GetVideoTracks()
-        {
-            throw new NotImplementedException();
-        }
+        public List<IMediaStreamTrack> GetVideoTracks() =>
+            _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Video).ToList();
 
-        public List<IMediaStreamTrack> GetAudioTracks()
-        {
-            throw new NotImplementedException();
-        }
-
-
+        public List<IMediaStreamTrack> GetAudioTracks() => 
+            _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Audio).ToList();
 
 
         public void AddTrack(IMediaStreamTrack track)
         {
-            throw new NotImplementedException();
+            if (GetTrackById(track.Id) is null)
+            {
+                _mediaStreamTracks.Add(track);
+            };
         }
 
-        public void RemoveTrack(IMediaStreamTrack track)
-        {
-            throw new NotImplementedException();
-        }
+        public void RemoveTrack(IMediaStreamTrack track) => _mediaStreamTracks.Remove(track);
 
         public void SetElementReferenceSrcObject(object media)
         {
