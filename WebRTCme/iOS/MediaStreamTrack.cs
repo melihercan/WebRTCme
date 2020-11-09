@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 using Webrtc;
+using UIKit;
+using AVFoundation;
+using System.Linq;
 
 namespace WebRtc.iOS
 {
@@ -11,22 +14,69 @@ namespace WebRtc.iOS
         const string Audio = "audio";
         const string Video = "video";
 
+        private readonly RTCCameraPreviewView _nativeCameraPreviewView;
+        private readonly RTCCameraVideoCapturer _nativeCameraVideoCapturer;
+        private readonly RTCFileVideoCapturer _nativeFileVIdeoCapturer;
+        private readonly RTCVideoSource _nativeVideoSource;
+
+        private readonly RTCAudioSource _nativeAudioSource;
+
         public MediaStreamTrack(MediaStreamTrackKind mediaStreamTrackKind, string id)
         {
+            //// TODO: Remote flag???? We need to pass constructor this flag.
+            /// CURRENTLY LOCAL IS ASSUMED.
+            
+            /// TODO: If local, RTCCameraVideoCapturer or RTCFileVideoCapturer???
+            /// CURENTLY Camera is assumed.
+
+
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
-                    NativeObjects.Add(nativeAudioSource);
+                    _nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
+                    NativeObjects.Add(_nativeAudioSource);
                     SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                        .AudioTrackWithSource(nativeAudioSource, id);
+                        .AudioTrackWithSource(_nativeAudioSource, id);
                     break;
+                
                 case MediaStreamTrackKind.Video:
-                    var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
-                    NativeObjects.Add(nativeVideoSource);
+                    _nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
+                    NativeObjects.Add(_nativeVideoSource);
+                    
+                    _nativeCameraPreviewView = new RTCCameraPreviewView();
+                    NativeObjects.Add(_nativeCameraPreviewView);
+
+                    _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(/* nativeVideoSource */);
+                    NativeObjects.Add(_nativeCameraVideoCapturer);
+
+                    _nativeCameraPreviewView.CaptureSession = _nativeCameraVideoCapturer.CaptureSession;
+
                     SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                        .VideoTrackWithSource(nativeVideoSource, id);
+                        .VideoTrackWithSource(_nativeVideoSource, id);
+
+                    var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+                    var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
+                    var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
+                    var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
+                    var fps = GetFpsByFormat(format);
+                    _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
+
+
+////                    var renderer = (object)_nativeCameraPreviewView;    ////????
+    /////                ((RTCVideoTrack)SelfNativeObject).AddRenderer((RTCVideoRenderer)renderer);
                     break;
+
+                    int GetFpsByFormat(AVCaptureDeviceFormat fmt)
+                    {
+                        const float _frameRateLimit = 30.0f;
+
+                        var maxSupportedFps = 0d;
+                        foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges)
+                            maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
+
+                        return (int)Math.Min(maxSupportedFps, _frameRateLimit);
+                    }
+
             }
         }
 
@@ -83,9 +133,40 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
+
         public void Stop()
         {
             throw new NotImplementedException();
+        }
+
+        //public void Play<TRenderer>(TRenderer renderer)
+        //{
+        //    switch (Kind)
+        //    {
+        //        case MediaStreamTrackKind.Audio:
+        //            break;
+
+        //        case MediaStreamTrackKind.Video:
+        //            if (typeof(TRenderer) != typeof(UIView))
+        //            {
+        //                throw new Exception("UIView is expected as renderer for video track");
+        //            }
+
+        //            var view = renderer as UIView;
+        //            view = _nativeCameraPreviewView;
+
+        //            var view = renderer as object;//UIView;
+        //            var nativeTrack = SelfNativeObject as RTCVideoTrack;
+        //            nativeTrack.AddRenderer((RTCVideoRenderer)view);
+        //            break;
+
+        //    }
+
+        //}
+
+        public UIView GetView<UIView>()
+        {
+            return (UIView)((object)_nativeCameraPreviewView);
         }
     }
 }

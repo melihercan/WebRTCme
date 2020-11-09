@@ -40,6 +40,11 @@ namespace WebRTCme
         void ApplyConstraints(MediaTrackConstraints contraints);
 
         void Stop();
+
+        // Custom APIs.
+        ////void Play<TRenderer>(TRenderer renderer);
+
+        TView GetView<TView>();
     }
 
     public interface IMediaStreamTrackAsync : IMediaStreamTrackShared, INativeObjectsAsync
@@ -56,5 +61,6 @@ namespace WebRTCme
 
         Task Stop();
 
+        // Custom APIs.
     }
 }

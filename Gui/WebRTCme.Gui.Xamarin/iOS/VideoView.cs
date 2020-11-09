@@ -28,6 +28,8 @@ namespace WebRtcGuiXamarin.iOS
 
         public VideoView(Video.TypeEnum type, string source)
         {
+
+
             _type = type;
             _source = source;
             ////            _videoWebRtc = new VideoWebRtc();
@@ -45,8 +47,19 @@ namespace WebRtcGuiXamarin.iOS
                         Audio = new MediaStreamContraintsUnion { Value = true },
                         Video = new MediaStreamContraintsUnion { Value = true }
                     });
+
+
+
+                    var videoTrack = mediaStream.GetVideoTracks().First();
+                    LocalVideoView = videoTrack.GetView<UIView>();
+                    AddSubview(LocalVideoView);
+
+                    ////                    videoTrack.Play<UIView>(this);
+
                 }
             }
+
+
 #if TESTING
 
             var videoDecoderFactory = new RTCDefaultVideoDecoderFactory();
@@ -153,7 +166,7 @@ namespace WebRtcGuiXamarin.iOS
                 _previewLayer.Frame = Bounds;
             }
 #endif
-            ////LocalVideoView.Frame = Bounds;
+            LocalVideoView.Frame = Bounds;
         }
     }
 }

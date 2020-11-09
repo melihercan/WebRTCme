@@ -37,7 +37,7 @@ namespace WebRtc.iOS
 
 
             // if video is camera
-            var cameraVideoCapturer = new RTCCameraVideoCapturer();
+            var = new RTCCameraVideoCapturer();
             //var cameraVideoCapturer.WeakDelegate = videoSource;
 
 
@@ -50,6 +50,10 @@ namespace WebRtc.iOS
         public MediaStream(MediaStreamConstraints constraints)
         {
             // Assume default for now.
+
+
+            SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId("LocalMediaStream");
+
             var videoDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
             var audioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
 
@@ -124,6 +128,16 @@ namespace WebRtc.iOS
         {
             if (GetTrackById(track.Id) is null)
             {
+                switch (track.Kind)
+                {
+                    case MediaStreamTrackKind.Audio:
+                        ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
+                        break;
+                    case MediaStreamTrackKind.Video:
+                        ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
+                        break;
+                }
+
                 _mediaStreamTracks.Add(track);
             };
         }
