@@ -46,7 +46,7 @@ namespace WebRtc.iOS
                     _nativeCameraPreviewView = new RTCCameraPreviewView();
                     NativeObjects.Add(_nativeCameraPreviewView);
 
-                    _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(/* nativeVideoSource */);
+                    _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(_nativeVideoSource);
                     NativeObjects.Add(_nativeCameraVideoCapturer);
 
                     _nativeCameraPreviewView.CaptureSession = _nativeCameraVideoCapturer.CaptureSession;
@@ -62,8 +62,8 @@ namespace WebRtc.iOS
                     _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
 
 
-////                    var renderer = (object)_nativeCameraPreviewView;    ////????
-    /////                ((RTCVideoTrack)SelfNativeObject).AddRenderer((RTCVideoRenderer)renderer);
+                    //var renderer = (UIView)_nativeCameraPreviewView;    ////????
+                    //((RTCVideoTrack)SelfNativeObject).AddRenderer((IRTCVideoRenderer)renderer);
                     break;
 
                     int GetFpsByFormat(AVCaptureDeviceFormat fmt)
