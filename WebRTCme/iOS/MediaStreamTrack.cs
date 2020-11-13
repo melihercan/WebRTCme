@@ -14,12 +14,12 @@ namespace WebRtc.iOS
         const string Audio = "audio";
         const string Video = "video";
 
-        private readonly RTCCameraPreviewView _nativeCameraPreviewView;
-        private readonly RTCCameraVideoCapturer _nativeCameraVideoCapturer;
-        private readonly RTCFileVideoCapturer _nativeFileVIdeoCapturer;
-        private readonly RTCVideoSource _nativeVideoSource;
+        private RTCCameraPreviewView _nativeCameraPreviewView;
+        private RTCCameraVideoCapturer _nativeCameraVideoCapturer;
+        private RTCFileVideoCapturer _nativeFileVIdeoCapturer;
+        private RTCVideoSource _nativeVideoSource;
 
-        private readonly RTCAudioSource _nativeAudioSource;
+        private RTCAudioSource _nativeAudioSource;
 
         public MediaStreamTrack(MediaStreamTrackKind mediaStreamTrackKind, string id, 
             VideoType videoType = VideoType.Local, string videoSource = null)
@@ -34,53 +34,79 @@ namespace WebRtc.iOS
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    _nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
-                    NativeObjects.Add(_nativeAudioSource);
-                    SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                        .AudioTrackWithSource(_nativeAudioSource, id);
+                    AddAudioStreamTrack();
                     break;
                 
                 case MediaStreamTrackKind.Video:
-                    _nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
-                    NativeObjects.Add(_nativeVideoSource);
-                    
-                    _nativeCameraPreviewView = new RTCCameraPreviewView();
-                    NativeObjects.Add(_nativeCameraPreviewView);
-
-                    _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(_nativeVideoSource);
-                    NativeObjects.Add(_nativeCameraVideoCapturer);
-
-                    _nativeCameraPreviewView.CaptureSession = _nativeCameraVideoCapturer.CaptureSession;
-
-                    SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                        .VideoTrackWithSource(_nativeVideoSource, id);
-
-                    var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
-                    var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
-                    var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
-                    var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
-                    var fps = GetFpsByFormat(format);
-                    _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
-
-                    ///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is no derived from RTCVideoRenderer
-                    /// !!!! SO USE IT WITH REMOTE 
-                    //var renderer = (UIView)_nativeCameraPreviewView;    ////????
-                    //((RTCVideoTrack)SelfNativeObject).AddRenderer((IRTCVideoRenderer)renderer);
+                    AddLocalVideoStreamTrack();
                     break;
 
-                    int GetFpsByFormat(AVCaptureDeviceFormat fmt)
-                    {
-                        const float _frameRateLimit = 30.0f;
-
-                        var maxSupportedFps = 0d;
-                        foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges)
-                            maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
-
-                        return (int)Math.Min(maxSupportedFps, _frameRateLimit);
-                    }
 
             }
+
+            void AddAudioStreamTrack()
+            {
+                _nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
+                NativeObjects.Add(_nativeAudioSource);
+                SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    .AudioTrackWithSource(_nativeAudioSource, id);
+            }
+
+            void AddLocalVideoStreamTrack()
+            {
+                _nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
+                NativeObjects.Add(_nativeVideoSource);
+
+                _nativeCameraPreviewView = new RTCCameraPreviewView();
+                NativeObjects.Add(_nativeCameraPreviewView);
+
+                _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(_nativeVideoSource);
+                NativeObjects.Add(_nativeCameraVideoCapturer);
+
+                _nativeCameraPreviewView.CaptureSession = _nativeCameraVideoCapturer.CaptureSession;
+
+                SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    .VideoTrackWithSource(_nativeVideoSource, id);
+
+                var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+                var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
+                var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
+                var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
+                var fps = GetFpsByFormat(format);
+                _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
+
+                ///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is no derived from RTCVideoRenderer
+                /// !!!! SO USE IT WITH REMOTE 
+                //var renderer = (UIView)_nativeCameraPreviewView;    ////????
+                //((RTCVideoTrack)SelfNativeObject).AddRenderer((IRTCVideoRenderer)renderer);
+
+            }
+
+            void AddMp4VideoStreamTrack()
+            {
+
+            }
+
+            void AddRemoteVideoStreamTrack()
+            {
+
+            }
+
+            int GetFpsByFormat(AVCaptureDeviceFormat fmt)
+            {
+                const float _frameRateLimit = 30.0f;
+
+                var maxSupportedFps = 0d;
+                foreach (var fpsRange in fmt.VideoSupportedFrameRateRanges)
+                    maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
+
+                return (int)Math.Min(maxSupportedFps, _frameRateLimit);
+            }
+
         }
+
+
+
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
