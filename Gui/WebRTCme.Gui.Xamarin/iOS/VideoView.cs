@@ -20,13 +20,13 @@ namespace WebRtcGuiXamarin.iOS
         public AVCaptureSession CaptureSession { get; private set; }
 
 
-        private readonly Video.TypeEnum _type;
+        private readonly VideoType _type;
         private readonly string _source;
 ////        private readonly VideoWebRtc _videoWebRtc;
         private AVCaptureVideoPreviewLayer _previewLayer;
 
 
-        public VideoView(Video.TypeEnum type, string source)
+        public VideoView(VideoType type, string source)
         {
 
 
@@ -35,7 +35,7 @@ namespace WebRtcGuiXamarin.iOS
             ////            _videoWebRtc = new VideoWebRtc();
             ///
 
-            if (_type == Video.TypeEnum.Local)
+            if (_type == VideoType.Local)
             {
                 if (string.IsNullOrEmpty(source))
                 {

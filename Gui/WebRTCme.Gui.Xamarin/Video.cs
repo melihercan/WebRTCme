@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
+using WebRTCme;
 
 namespace WebRtcGuiXamarin
 {
     public class Video : View       
     {
-        public enum TypeEnum
-        {
-            Local,
-            Remote,
-            MP4
-        }
+        //public enum VideoType
+        //{
+        //    Local,
+        //    Remote,
+        //    MP4
+        //}
 
         public static readonly BindableProperty TypeProperty = BindableProperty
-            .Create(nameof(TypeProperty), typeof(TypeEnum), typeof(Video), TypeEnum.Local);
+            .Create(nameof(TypeProperty), typeof(VideoType), typeof(Video), VideoType.Local);
 
         public static readonly BindableProperty SourceProperty = BindableProperty
             .Create(nameof(SourceProperty), typeof(string), typeof(Video), string.Empty);
         
-        public TypeEnum Type
+        public VideoType Type
         {
-            get => (TypeEnum)GetValue(TypeProperty);
+            get => (VideoType)GetValue(TypeProperty);
             set => SetValue(TypeProperty, value);
         }
 

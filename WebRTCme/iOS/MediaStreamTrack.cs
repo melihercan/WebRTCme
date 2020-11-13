@@ -61,7 +61,8 @@ namespace WebRtc.iOS
                     var fps = GetFpsByFormat(format);
                     _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
 
-
+                    ///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is no derived from RTCVideoRenderer
+                    /// !!!! SO USE IT WITH REMOTE 
                     //var renderer = (UIView)_nativeCameraPreviewView;    ////????
                     //((RTCVideoTrack)SelfNativeObject).AddRenderer((IRTCVideoRenderer)renderer);
                     break;
