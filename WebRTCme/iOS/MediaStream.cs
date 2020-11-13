@@ -47,7 +47,8 @@ namespace WebRtc.iOS
 
         }
 
-        public MediaStream(MediaStreamConstraints constraints)
+        public MediaStream(MediaStreamConstraints constraints, VideoType videoType = VideoType.Local, 
+            string videoSource = null)
         {
             // Assume default for now.
 
@@ -75,7 +76,8 @@ namespace WebRtc.iOS
             ///
 
             AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? "MyAudio"));
-            AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? "MyVideo"));
+            AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? "MyVideo", 
+                videoType, videoSource));
 
 
             //SelfNativeObject = 

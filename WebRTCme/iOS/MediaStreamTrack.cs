@@ -21,7 +21,8 @@ namespace WebRtc.iOS
 
         private readonly RTCAudioSource _nativeAudioSource;
 
-        public MediaStreamTrack(MediaStreamTrackKind mediaStreamTrackKind, string id)
+        public MediaStreamTrack(MediaStreamTrackKind mediaStreamTrackKind, string id, 
+            VideoType videoType = VideoType.Local, string videoSource = null)
         {
             //// TODO: Remote flag???? We need to pass constructor this flag.
             /// CURRENTLY LOCAL IS ASSUMED.
