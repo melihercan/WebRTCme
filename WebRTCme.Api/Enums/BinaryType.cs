@@ -4,7 +4,9 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpSender
+    public enum BinaryType
     {
+        Blob,
+        ArrayBuffer
     }
 }

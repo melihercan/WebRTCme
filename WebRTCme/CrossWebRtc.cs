@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public static class CrossWebRtc
+    public static class CrossWebRtc 
     {
-        private static Lazy<IWebRtc> _webRtc = new Lazy<IWebRtc>(() => CreateWebRtc());
+        public static Task<IWebRtc> Instance => _webRtc.Value;
 
-        public static IWebRtc Current => _webRtc.Value;
 
-        private static IWebRtc CreateWebRtc() => new WebRtc();
+        private static Lazy<Task<IWebRtc>> _webRtc = new Lazy<Task<IWebRtc>>(() => CreateWebRtcAsync());
+
+
+        private static Task<IWebRtc> CreateWebRtcAsync() => WebRtc.CreateAsync();
+
     }
 }

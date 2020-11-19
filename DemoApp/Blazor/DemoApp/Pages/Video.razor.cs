@@ -16,11 +16,11 @@ namespace DemoApp.Pages
 
         private ElementReference _localVideo;
 
-        private IWindowAsync _window;
-        private INavigatorAsync _navigator;
-        private IMediaDevicesAsync _mediaDevices;
-        private IMediaStreamAsync _mediaStream;
-        private IRTCPeerConnectionAsync _rtcPeerConnection;
+        private IWindow _window;
+        private INavigator _navigator;
+        private IMediaDevices _mediaDevices;
+        private IMediaStream _mediaStream;
+        private IRTCPeerConnection _rtcPeerConnection;
         ///private IRTCRtpSender _rtcRtpSender;
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -29,12 +29,12 @@ namespace DemoApp.Pages
 
             if (firstRender)
             {
-                var webRtc = CrossWebRtc.Current;
-                _window = await webRtc.WindowAsync(JsRuntime);
-                _navigator = await _window.NavigatorAsync();
-                _mediaDevices = await _navigator.MediaDevicesAsync();
-                var mediDeviceInfos = (await _mediaDevices.EnumerateDevicesAsync()).ToList();
-                _mediaStream = await _mediaDevices.GetUserMediaAsync(new MediaStreamConstraints
+                var webRtc = await CrossWebRtc.Instance;
+                _window = await webRtc.Window(JsRuntime);
+                _navigator = await _window.Navigator();
+                _mediaDevices = await _navigator.MediaDevices();
+                var mediDeviceInfos = (await _mediaDevices.EnumerateDevices()).ToList();
+                _mediaStream = await _mediaDevices.GetUserMedia(new MediaStreamConstraints
                 {
                     Audio = new MediaStreamContraintsUnion
                     {
@@ -48,7 +48,7 @@ namespace DemoApp.Pages
 
                 await _mediaStream.SetElementReferenceSrcObjectAsync(_localVideo);
 
-                _rtcPeerConnection = await _window.RTCPeerConnectionAsync(new RTCConfiguration
+                _rtcPeerConnection = await _window.RTCPeerConnection(new RTCConfiguration
                 {
                     IceServers = new RTCIceServer[] 
                     { 
@@ -62,26 +62,26 @@ namespace DemoApp.Pages
                         }
                     }
                 });
-                var mediaStreamTracks = await _mediaStream.GetTracksAsync();
+                var mediaStreamTracks = await _mediaStream.GetTracks();
                 foreach(var mediaStreamTrack in mediaStreamTracks)
                 {
-                    await _rtcPeerConnection.AddTrackAsync(mediaStreamTrack, _mediaStream);
+                    await _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
 
-                await _rtcPeerConnection.OnIceCandidateAsync(async rtcPeerConnectionIceEvent =>
-                {
+                ///await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
+                ////{
                     //// TODO: object != null =>
                     /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
 
                     await Task.CompletedTask;
-                });
-                await _rtcPeerConnection.OnTrackAsync(async rtcTrackEvent => 
-                {
+                ////});
+                ////await _rtcPeerConnection.OnTrack(async rtcTrackEvent => 
+                ///{
 
-                    await Task.CompletedTask;
-                });
+                   //// await Task.CompletedTask;
+                ////});
 
-                var rtcSessionDescription = await _rtcPeerConnection.CreateOfferAsync(new RTCOfferOptions 
+                var rtcSessionDescription = await _rtcPeerConnection.CreateOffer(new RTCOfferOptions 
                 { 
                 });
 

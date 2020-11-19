@@ -6,57 +6,30 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStreamShared
+    public interface IMediaStream : INativeObjects
     {
-        public bool Active { get; }
+        public Task<bool> Active { get; }
 
-        public bool Ended { get; }
+        public Task<bool> Ended { get; }
 
-        public string Id { get; }
+        public Task<string> Id { get; }
 
-    }
+        Task<IMediaStream> Clone();
 
-    public interface IMediaStream : IMediaStreamShared, INativeObjects
-    {
-        IMediaStream Clone();
+        Task<List<IMediaStreamTrack>> GetTracks();
 
-        List<IMediaStreamTrack> GetTracks();
+        Task<IMediaStreamTrack> GetTrackById(string id);
 
-        IMediaStreamTrack GetTrackById(string id);
+        Task<List<IMediaStreamTrack>> GetVideoTracks();
 
-        List<IMediaStreamTrack> GetVideoTracks();
+        Task<List<IMediaStreamTrack>> GetAudioTracks();
 
-        List<IMediaStreamTrack> GetAudioTracks();
-
-        public void AddTrack(IMediaStreamTrack track);
-
-        public void RemoveTrack(IMediaStreamTrack track);
-
-        public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
-        public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
-        public event EventHandler OnActive;
-        public event EventHandler OnInactive;
-
-        // Custom APIs.
-        void SetElementReferenceSrcObject(object media);
-    }
-
-    public interface IMediaStreamAsync : IMediaStreamShared, INativeObjectsAsync
-    {
-        Task<IMediaStreamAsync> CloneAsync();
-
-        Task<List<IMediaStreamTrackAsync>> GetTracksAsync();
-
-        Task<IMediaStreamTrackAsync> GetTrackByIdAsync(string id);
-
-        Task<List<IMediaStreamTrack>> GetVideoTracksAsync();
-
-        Task<List<IMediaStreamTrack>> GetAudioTracksAsync();
-
-        public Task AddTrackAsync(IMediaStreamTrackAsync track);
+        public Task AddTrack(IMediaStreamTrack track);
         
-        public Task RemoveTrackAsync(IMediaStreamTrackAsync track);
+        public Task RemoveTrack(IMediaStreamTrack track);
 
+        
+        
         // Custom APIs.
         Task SetElementReferenceSrcObjectAsync(object media);
     }

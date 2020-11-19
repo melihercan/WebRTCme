@@ -40,19 +40,19 @@ namespace WebRtcGuiXamarin.iOS
                 if (string.IsNullOrEmpty(source))
                 {
                     // Default devices.
-                    var mediaDevices = WebRtcGui.WebRtc.Window.Navigator.MediaDevices;
+////                    var mediaDevices = WebRtcGui.WebRtc.Window.Navigator.MediaDevices;
                     ////var mediaDevicesInfo = mediaDevices.EnumerateDevices();
-                    var mediaStream = mediaDevices.GetUserMedia(new MediaStreamConstraints
-                    {
-                        Audio = new MediaStreamContraintsUnion { Value = true },
-                        Video = new MediaStreamContraintsUnion { Value = true }
-                    });
+////                    var mediaStream = mediaDevices.GetUserMedia(new MediaStreamConstraints
+////                    {
+////                        Audio = new MediaStreamContraintsUnion { Value = true },
+////                        Video = new MediaStreamContraintsUnion { Value = true }
+////                    });
 
 
 
-                    var videoTrack = mediaStream.GetVideoTracks().First();
-                    LocalVideoView = videoTrack.GetView<UIView>();
-                    AddSubview(LocalVideoView);
+////                    var videoTrack = mediaStream.GetVideoTracks().First();
+////                    LocalVideoView = videoTrack.GetView<UIView>();
+////                    AddSubview(LocalVideoView);
 
                     ////                    videoTrack.Play<UIView>(this);
 

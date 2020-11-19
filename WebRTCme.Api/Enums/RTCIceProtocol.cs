@@ -2,7 +2,7 @@
 {
     public enum RTCIceProtocol
     {
-        Tcp,
-        Udp
+        Udp,
+        Tcp
     }
 }

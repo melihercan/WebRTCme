@@ -1,40 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtcGuiXamarin
 {
     public static class WebRtcGui
     {
-        internal static IWebRtc WebRtc { get; set; }
-
-        internal static IWindow Window { get; private set; }
-        internal static INavigator Navigator { get; private set; }
+        internal static IWebRtc WebRtc { get; private set; }
 
 
-        public static void Initialize()
+        public static async Task InitializeAsync()
         {
-            WebRtc = CrossWebRtc.Current;
-            WebRtc.Initialize(); 
-
-            //Window = WebRtc.Window;
-            //Navigator = Window.Navigator;
-            //var _mediaDevices = Navigator.MediaDevices();
-            //var _mediaStream = _mediaDevices.GetUserMedia(new MediaStreamConstraints
-            //{
-            //    Audio = true,
-            //    Video = true
-            //});
-
-            //_mediaStream.SetElementReferenceSrcObject(null);
-
-
+            WebRtc = await CrossWebRtc.Instance;
         }
 
-        public static void Cleanup()
+        public static async Task CleanupAsync()
         {
-            WebRtc.Cleanup();
+            await WebRtc.CleanupAsync();
         }
     }
 }

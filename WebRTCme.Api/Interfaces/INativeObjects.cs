@@ -5,15 +5,10 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface INativeObjects : IDisposable
+    public interface INativeObjects : IAsyncDisposable
     {
         object SelfNativeObject { get; }
-        List<object> NativeObjects { get; set; }
-    }
 
-    public interface INativeObjectsAsync : IAsyncDisposable
-    {
-        object SelfNativeObject { get; }
-        List<object> OtherNativeObjects { get; set; }
+        List<object> NativeObjects { get; set; }
     }
 }

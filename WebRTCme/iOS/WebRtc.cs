@@ -16,21 +16,32 @@ namespace WebRTCme
                 new RTCDefaultVideoEncoderFactory(),
                 new RTCDefaultVideoDecoderFactory()));
 
-        public void Initialize()
+        public static Task<IWebRtc> CreateAsync()
+        {
+            var ret = new WebRtc();
+            return ret.InitializeAsync();
+        }
+
+        private Task<IWebRtc> InitializeAsync()
         {
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());
             ////CFunctionsRTCSetupInternalTracer();
             CFunctions.RTCInitializeSSL();
+
+            return Task.FromResult(this as IWebRtc);
         }
 
-        public void Cleanup()
+        public Task CleanupAsync()
         {
             ////CFunctions.RTCShutdownInternalTracer();
             CFunctions.RTCCleanupSSL();
+
+            return Task.CompletedTask;
         }
 
-        public IWindow Window => new Window();
-
-        public Task<IWindowAsync> WindowAsync(IJSRuntime jsRuntime) => throw new NotImplementedException();
+        Task<IWindow> IWebRtc.Window(IJSRuntime jsRuntime)
+        {
+            return Task.FromResult(new Window() as IWindow);
+        }
     }
 }

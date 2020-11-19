@@ -14,7 +14,7 @@ namespace DemoApp
         {
             InitializeComponent();
 
-            WebRtcGui.Initialize();
+            ////WebRtcGui.Initialize();
 
             DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();

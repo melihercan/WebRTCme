@@ -9,20 +9,20 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class MediaDevices : ApiBase, IMediaDevicesAsync
+    internal class MediaDevices : ApiBase, IMediaDevices
     {
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public async Task<IMediaStreamAsync> GetUserMediaAsync(MediaStreamConstraints constraints)
+        public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
         {
             var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, 
                 "getUserMedia", constraints);
-            return MediaStream.New(JsRuntime, jsObjectRefMediaStream);
+            return MediaStream.Create(JsRuntime, jsObjectRefMediaStream);
         }
 
-        public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevicesAsync()
+        public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
         {
             var mediaDeviceInfos = new List<MediaDeviceInfo>();
             var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, "enumerateDevices");
@@ -37,19 +37,19 @@ namespace WebRtcJsInterop.Api
             return mediaDeviceInfos;
         }
 
-        internal static async Task<IMediaDevicesAsync> NewAsync(IJSRuntime jsRuntime)
+        internal static async Task<IMediaDevices> CreateAsync(IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
             var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
             return mediaDevices;
         }
 
-        public Task<MediaTrackSupportedConstraints> GetSupportedConstraintsAsync()
+        public Task<MediaTrackSupportedConstraints> GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetDisplayMediaAsync(MediaStreamConstraints constraints)
+        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
             throw new NotImplementedException();
         }

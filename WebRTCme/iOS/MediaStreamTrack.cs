@@ -6,6 +6,7 @@ using Webrtc;
 using UIKit;
 using AVFoundation;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace WebRtc.iOS
 {
@@ -108,64 +109,62 @@ namespace WebRtc.iOS
 
 
 
-        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public string Id => ((RTCMediaStreamTrack)SelfNativeObject).TrackId;
+        public Task<string> Id => Task.FromResult(((RTCMediaStreamTrack)SelfNativeObject).TrackId);
 
-        public bool Isolated => throw new NotImplementedException();
 
-        public MediaStreamTrackKind Kind => ((RTCMediaStreamTrack)SelfNativeObject).Kind switch
+        public Task<MediaStreamTrackKind> Kind => Task.FromResult(((RTCMediaStreamTrack)SelfNativeObject).Kind switch
         {
             Audio => MediaStreamTrackKind.Audio,
             Video => MediaStreamTrackKind.Video,
             _ => throw new Exception($"Invalid RTCMediaStreamTrack.Kind: {((RTCMediaStreamTrack)SelfNativeObject).Kind}")
-        };
+        });
 
-        public string Label => throw new NotImplementedException();
+        public Task<string> ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Task<bool> Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public bool Muted => throw new NotImplementedException();
+        public Task<bool> Isolated => throw new NotImplementedException();
 
-        public bool Readonly => throw new NotImplementedException();
+        public Task<string> Label => throw new NotImplementedException();
 
-        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
+        public Task<bool> Muted => throw new NotImplementedException();
 
-        public bool Remote => throw new NotImplementedException();
+        public Task<bool> Readonly => throw new NotImplementedException();
+
+        public Task<MediaStreamTrackState> ReadyState => throw new NotImplementedException();
+
+        public Task<bool> Remote => throw new NotImplementedException();
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
-        public void ApplyConstraints(MediaTrackConstraints contraints)
+        public Task ApplyConstraints(MediaTrackConstraints contraints)
         {
             throw new NotImplementedException();
         }
 
-        public IMediaStreamTrack Clone()
+        public Task<IMediaStreamTrack> Clone()
         {
             throw new NotImplementedException();
         }
 
-        public MediaTrackCapabilities GetCapabilities()
+        public Task<MediaTrackCapabilities> GetCapabilities()
         {
             throw new NotImplementedException();
         }
 
-        public MediaTrackConstraints GetContraints()
+        public Task<MediaTrackConstraints> GetContraints()
         {
             throw new NotImplementedException();
         }
 
-        public MediaTrackSettings GetSettings()
+        public Task<MediaTrackSettings> GetSettings()
         {
             throw new NotImplementedException();
         }
 
 
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
 
         //public void Play<TRenderer>(TRenderer renderer)
         //{
@@ -195,6 +194,11 @@ namespace WebRtc.iOS
         public UIView GetView<UIView>()
         {
             return (UIView)((object)_nativeCameraPreviewView);
+        }
+
+        public Task Stop()
+        {
+            throw new NotImplementedException();
         }
     }
 }

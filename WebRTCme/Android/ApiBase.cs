@@ -2,31 +2,45 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtc.Android
 {
     public abstract class ApiBase : INativeObjects
     {
-        protected ApiBase(object nativeObject = null) => SelfNativeObject = nativeObject;
+        protected ApiBase() { }
 
-        public object SelfNativeObject { get; }
+        protected ApiBase(object nativeObject)
+        {
+            SelfNativeObject = nativeObject;
+            NativeObjects.Add(nativeObject);
+        }
+
+        private object _selfNativeObject;
+        public object SelfNativeObject
+        {
+            get => _selfNativeObject;
+            protected set
+            {
+                _selfNativeObject = value;
+                NativeObjects.Add(value);
+            }
+        }
+
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public void Dispose()
+
+        public ValueTask DisposeAsync()
         {
-            foreach (var otherNativeObject in NativeObjects)
+            foreach (var nativeObject in NativeObjects)
             {
-                if (otherNativeObject is IDisposable otherDisposable)
+                if (nativeObject is IDisposable disposable)
                 {
-                    otherDisposable.Dispose();
+                    disposable.Dispose();
                 }
             }
-
-            if (SelfNativeObject != null && SelfNativeObject is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
+            return default;
         }
     }
 }

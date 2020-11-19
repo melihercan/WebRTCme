@@ -7,60 +7,41 @@ using System.Threading.Tasks;
 namespace WebRTCme
 {
 
-    public interface IMediaStreamTrackShared
+    public interface IMediaStreamTrack : INativeObjects
     {
-        public string ContentHint { get; set; }
-        public bool Enabled { get; set; }
-        public string Id { get; }
-        public bool Isolated { get; }
+        public Task<string> ContentHint { get; set; }
+        public Task<bool> Enabled { get; set; }
+        public Task<string> Id { get; }
+        public Task<bool> Isolated { get; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public MediaStreamTrackKind Kind { get; }
-        public string Label { get; }
-        public bool Muted { get; }
-        public bool Readonly { get; }
+        public Task<MediaStreamTrackKind> Kind { get; }
+        public Task<string> Label { get; }
+        public Task<bool> Muted { get; }
+        public Task<bool> Readonly { get; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public MediaStreamTrackState ReadyState { get; }
-        public bool Remote { get; }
+        public Task<MediaStreamTrackState> ReadyState { get; }
+        public Task<bool> Remote { get; }
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
-    }
 
-    public interface IMediaStreamTrack : IMediaStreamTrackShared, INativeObjects
-    {
-        IMediaStreamTrack Clone();
+        Task<IMediaStreamTrack> Clone();
 
-        MediaTrackCapabilities GetCapabilities();
+        Task<MediaTrackCapabilities> GetCapabilities();
 
-        MediaTrackSettings GetSettings();
+        Task<MediaTrackSettings> GetSettings();
 
-        MediaTrackConstraints GetContraints();
-        void ApplyConstraints(MediaTrackConstraints contraints);
+        Task<MediaTrackConstraints> GetContraints();
 
-        void Stop();
-
-        // Custom APIs.
-        ////void Play<TRenderer>(TRenderer renderer);
-
-        TView GetView<TView>();
-    }
-
-    public interface IMediaStreamTrackAsync : IMediaStreamTrackShared, INativeObjectsAsync
-    {
-        Task<IMediaStreamTrackAsync> CloneAsync();
-
-        Task<MediaTrackCapabilities> GetCapabilitiesAsync();
-
-        Task<MediaTrackSettings> GetSettingsAsync();
-
-        Task<MediaTrackConstraints> GetContraintsAsync();
-
-        Task ApplyConstraintsAsync(MediaTrackConstraints contraints);
+        Task ApplyConstraints(MediaTrackConstraints contraints);
 
         Task Stop();
 
+        
+        
+        
         // Custom APIs.
     }
 }

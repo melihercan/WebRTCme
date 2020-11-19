@@ -11,8 +11,8 @@ namespace WebRTCme
         public RTCBundlePolicy BundlePolicy { get; set; }
         
         public IRTCCertificate[] Certificates { get; set; }
-        
-        public ushort IceCandidatePoolSize { get; set; }
+
+        public byte? /*ushort?*/ IceCandidatePoolSize { get; set; }
         
         public RTCIceServer[] IceServers { get; set; }
         

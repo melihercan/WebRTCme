@@ -1,13 +1,17 @@
 ﻿using System.Dynamic;
+using System.Threading.Tasks;
 using WebRTCme.Interfaces;
 
 namespace WebRTCme
 {
     public interface IRTCTrackEvent
     {
-        IRTCRtpReceiver Receiver { get; set; }
-        IMediaStream[] Streams { get; set; }
-        IMediaStreamTrack Track { get; set; }
-        IRTCRtpTransceiver Transceiver { get; set; }
+        Task<IRTCRtpReceiver> Receiver { get; set; }
+
+        Task<IMediaStream[]> Streams { get; set; }
+
+        Task<IMediaStreamTrack> Track { get; set; }
+
+        Task<IRTCRtpTransceiver> Transceiver { get; set; }
     }
 }

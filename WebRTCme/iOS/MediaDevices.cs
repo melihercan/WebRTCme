@@ -5,6 +5,7 @@ using System.Text;
 using WebRTCme;
 //using WebRTCme.Bindings.Xamarin.iOS;
 using Webrtc;
+using System.Threading.Tasks;
 
 namespace WebRtc.iOS
 {
@@ -109,6 +110,26 @@ namespace WebRtc.iOS
             ////            return null;
             ///
             return new MediaStream(constraints);
+        }
+
+        Task<IEnumerable<MediaDeviceInfo>> IMediaDevices.EnumerateDevices()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IMediaStream> IMediaDevices.GetDisplayMedia(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<MediaTrackSupportedConstraints> IMediaDevices.GetSupportedConstraints()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
         }
     }
 }

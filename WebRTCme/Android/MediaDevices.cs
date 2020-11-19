@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtc.Android
@@ -25,6 +26,26 @@ namespace WebRtc.Android
         }
 
         public IMediaStream GetUserMedia(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IEnumerable<MediaDeviceInfo>> IMediaDevices.EnumerateDevices()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IMediaStream> IMediaDevices.GetDisplayMedia(MediaStreamConstraints constraints)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<MediaTrackSupportedConstraints> IMediaDevices.GetSupportedConstraints()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
         {
             throw new NotImplementedException();
         }

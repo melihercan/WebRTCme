@@ -5,20 +5,30 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
+
     public interface IRTCPeerConnection : INativeObjects
     {
-        void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback);
-        void OnTrack(Func<IRTCTrackEvent> callback);
-        IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
-        IRTCSessionDescription CreateOffer(RTCOfferOptions options);
-    }
+        Task AddIceCandidate(IRTCIceCandidate candidate);
 
-    public interface IRTCPeerConnectionAsync : INativeObjectsAsync
-    {
-        Task<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback);
-        Task<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback);
-        Task<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream);
-        Task<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options);
+
+        Task<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream);
+        Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options);
+
+        event EventHandler OnConnectionStateChanged;
+
+        ////event EventHandler<IRTCDataChannelEvent> OnDataChannel;
+
+        event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+
+        ////event EventHandler OnIceConnectionStateChange;
+        ////event EventHandler OnIceGatheringStateChange;
+        ////event EventHandler<I???> OnIdentityResult;
+        ////event EventHandler OnNegotiationNeeded;
+
+        event EventHandler OnSignallingStateChange;
+
+        ////event EventHandler<IRTCTrackEvent???  IMediaStreamTrackEvent???> OnTrack;
+
     }
 
 }

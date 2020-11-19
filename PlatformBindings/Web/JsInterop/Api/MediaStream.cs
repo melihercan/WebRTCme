@@ -10,25 +10,25 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class MediaStream : ApiBase, IMediaStreamAsync
+    internal class MediaStream : ApiBase, IMediaStream
     {
-        public bool Active => throw new NotImplementedException();
+        public Task<bool> Active => throw new NotImplementedException();
 
-        public bool Ended => throw new NotImplementedException();
+        public Task<bool> Ended => throw new NotImplementedException();
 
-        public string Id => throw new NotImplementedException();
+        public Task<string> Id => throw new NotImplementedException();
 
         private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
-        public async Task<List<IMediaStreamTrackAsync>> GetTracksAsync()
+        public async Task<List<IMediaStreamTrack>> GetTracks()
         {
             var jsObjectRef = await JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "getTracks");
             var jsObjectRefMediaStreamTrackArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
-            var mediaStreamTracks = new List<IMediaStreamTrackAsync>();
+            var mediaStreamTracks = new List<IMediaStreamTrack>();
             foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
             {
-                mediaStreamTracks.Add(MediaStreamTrack.NewAsync(JsRuntime, jsObjectRefMediaStreamTrack));
+                mediaStreamTracks.Add(MediaStreamTrack.CreateAsync(JsRuntime, jsObjectRefMediaStreamTrack));
             }
             return mediaStreamTracks;
         }
@@ -48,44 +48,44 @@ namespace WebRtcJsInterop.Api
 
         }
 
-        internal static async Task<IMediaStreamAsync> NewAsync(IJSRuntime jsRuntime)
+        internal static async Task<IMediaStream> CreateAsync(IJSRuntime jsRuntime)
         {
             var jsObjectRef = await jsRuntime.CreateJsObject("window", "MediaStream");
             var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
             return mediaStream;
         }
-        internal static IMediaStreamAsync New(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
+        internal static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
         {
             var mediaStream = new MediaStream(jsRuntime, jsObjectRefMediaStream);
             return mediaStream;
         }
 
-        public Task<IMediaStreamAsync> CloneAsync()
+        public Task<IMediaStream> Clone()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStreamTrackAsync> GetTrackByIdAsync(string id)
+        public Task<IMediaStreamTrack> GetTrackById(string id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<IMediaStreamTrack>> GetVideoTracksAsync()
+        public Task<List<IMediaStreamTrack>> GetVideoTracks()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<IMediaStreamTrack>> GetAudioTracksAsync()
+        public Task<List<IMediaStreamTrack>> GetAudioTracks()
         {
             throw new NotImplementedException();
         }
 
-        public Task AddTrackAsync(IMediaStreamTrackAsync track)
+        public Task AddTrack(IMediaStreamTrack track)
         {
             throw new NotImplementedException();
         }
 
-        public Task RemoveTrackAsync(IMediaStreamTrackAsync track)
+        public Task RemoveTrack(IMediaStreamTrack track)
         {
             throw new NotImplementedException();
         }

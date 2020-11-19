@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtc.iOS
 {
     public abstract class ApiBase : INativeObjects
     {
-        protected ApiBase()
-        {
-        }
+        protected ApiBase() { }
 
         protected ApiBase(object nativeObject) 
         {
-                SelfNativeObject = nativeObject;
-                NativeObjects.Add(nativeObject);
+            SelfNativeObject = nativeObject;
+            NativeObjects.Add(nativeObject);
         }
 
         private object _selfNativeObject;
@@ -30,15 +29,17 @@ namespace WebRtc.iOS
 
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public void Dispose()
+
+        public ValueTask DisposeAsync()
         {
-            foreach(var nativeObject in NativeObjects)
+            foreach (var nativeObject in NativeObjects)
             {
                 if (nativeObject is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
             }
+            return default;
         }
     }
 }

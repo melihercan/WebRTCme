@@ -6,7 +6,7 @@ namespace WebRTCme
 {
     public enum RTCIceTransportPolicy
     {
+        Relay,
         All,
-        Relay
     }
 }

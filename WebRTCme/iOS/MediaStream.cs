@@ -5,6 +5,7 @@ using WebRTCme;
 using Webrtc;
 using System.Linq;
 using AVFoundation;
+using System.Threading.Tasks;
 
 namespace WebRtc.iOS
 {
@@ -98,55 +99,61 @@ namespace WebRtc.iOS
 
         }
 
-        public bool Active => throw new NotImplementedException();
+        public Task<bool> Active => throw new NotImplementedException();
 
-        public bool Ended => throw new NotImplementedException();
+        public Task<bool> Ended => throw new NotImplementedException();
 
-        public string Id => throw new NotImplementedException();
-
-        public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
-        public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
-        public event EventHandler OnActive;
-        public event EventHandler OnInactive;
+        public Task<string> Id => throw new NotImplementedException();
 
 
-        public IMediaStream Clone()
+
+        public Task<IMediaStream> Clone()
         {
             throw new NotImplementedException();
         }
 
-        public List<IMediaStreamTrack> GetTracks() => _mediaStreamTracks;
+        public Task<List<IMediaStreamTrack>> GetTracks() => Task.FromResult(_mediaStreamTracks);
 
-        public IMediaStreamTrack GetTrackById(string id) => _mediaStreamTracks.Find(track => track.Id == id);
+        public Task<IMediaStreamTrack> GetTrackById(string id) =>
+            throw new NotImplementedException();
+        ////            _mediaStreamTracks.Find(async track => (await track.Id) == id);
 
-        public List<IMediaStreamTrack> GetVideoTracks() =>
-            _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Video).ToList();
+        public Task<List<IMediaStreamTrack>> GetVideoTracks() =>
+                        throw new NotImplementedException();
+        ////_mediaStreamTracks.Where(async track => (await track.Kind) == MediaStreamTrackKind.Video).ToList();
 
-        public List<IMediaStreamTrack> GetAudioTracks() => 
-            _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Audio).ToList();
-
-
-        public void AddTrack(IMediaStreamTrack track)
+        public Task<List<IMediaStreamTrack>> GetAudioTracks()
         {
-            if (GetTrackById(track.Id) is null)
-            {
-                switch (track.Kind)
-                {
-                    case MediaStreamTrackKind.Audio:
-                        ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
-                        break;
-                    case MediaStreamTrackKind.Video:
-                        ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
-                        break;
-                }
-
-                _mediaStreamTracks.Add(track);
-            };
+            throw new NotImplementedException();
+            ////        var x = _mediaStreamTracks.Select(async track => await track.Kind);
+            //.Where(kind => kind == MediaStreamTrackKind.Audio)
+            ///   _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Audio).ToList();
         }
 
-        public void RemoveTrack(IMediaStreamTrack track) => _mediaStreamTracks.Remove(track);
+        public Task AddTrack(IMediaStreamTrack track)
+        {
+            throw new NotImplementedException();
+            //if (GetTrackById(track.Id) is null)
+            //{
+            //    switch (track.Kind)
+            //    {
+            //        case MediaStreamTrackKind.Audio:
+            //            ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
+            //            break;
+            //        case MediaStreamTrackKind.Video:
+            //            ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
+            //            break;
+            //    }
 
-        public void SetElementReferenceSrcObject(object media)
+            //    _mediaStreamTracks.Add(track);
+            //};
+            //return Task.CompletedTask;
+        }
+
+        public Task RemoveTrack(IMediaStreamTrack track) => Task.FromResult(_mediaStreamTracks.Remove(track));
+
+
+        public Task SetElementReferenceSrcObjectAsync(object media)
         {
             throw new NotImplementedException();
         }

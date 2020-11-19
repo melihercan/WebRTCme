@@ -9,9 +9,12 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    internal class RTCPeerConnection : ApiBase, IRTCPeerConnectionAsync
+    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
         private RTCConfiguration _rtcConfiguration;
+
+        public event EventHandler OnConnectionStateChanged;
+        public event EventHandler OnSignallingStateChange;
 
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
             : base(jsRuntime, jsObjectRef) 
@@ -19,7 +22,20 @@ namespace WebRtcJsInterop.Api
             _rtcConfiguration = rtcConfiguration;
         }
 
-        public async Task<IRTCRtpSender> AddTrackAsync(IMediaStreamTrackAsync track, IMediaStreamAsync stream)
+        event EventHandler<IRTCPeerConnectionIceEvent> IRTCPeerConnection.OnIceCandidate
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public async Task<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
             var x = (MediaStreamTrack)track;
             var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "addTrack", 
@@ -32,7 +48,7 @@ namespace WebRtcJsInterop.Api
             return rtcRtpSender;
         }
 
-        public async Task<IRTCSessionDescription> CreateOfferAsync(RTCOfferOptions options)
+        public async Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 SelfNativeObject, "createOffer");
@@ -48,7 +64,7 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        public async Task<IAsyncDisposable> OnIceCandidateAsync(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
+        public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(SelfNativeObject as JsObjectRef, null, "onicecandidate",
                 JsEventHandler.New<IRTCPeerConnectionIceEvent>(async e => 
@@ -59,7 +75,7 @@ namespace WebRtcJsInterop.Api
             return ret;
         }
 
-        public async Task<IAsyncDisposable> OnTrackAsync(Func<IRTCTrackEvent, ValueTask> callback)
+        public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(SelfNativeObject as JsObjectRef, null, "ontrack",
                 JsEventHandler.New<IRTCTrackEvent>(async e =>
@@ -71,12 +87,16 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        internal static async Task<IRTCPeerConnectionAsync> NewAsync(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        internal static async Task<IRTCPeerConnection> CreateAsync(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
             var jsObjectRef = await jsRuntime.CreateJsObject("window", "RTCPeerConnection");
             var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
             return rtcPeerConnection;
         }
 
+        public Task AddIceCandidate(IRTCIceCandidate candidate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

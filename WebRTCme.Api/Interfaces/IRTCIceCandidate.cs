@@ -2,41 +2,45 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
     public interface IRTCIceCandidate
     {
-        string Candidate { get; set; }
+        Task<string> Candidate { get; }
         
-        string Component { get; set; }
-        
-        string Foundation { get; set; }
-        
-        string Ip { get; set; }
-        
-        int Port { get; set; }
-        
-        ulong Priority { get; set; }
-        
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        RTCIceProtocol Protocol { get; set; }
-        
-        string RelatedAddress { get; set; }
-        
-        int? RelatedPort { get; set; }
-        
-        string SdpMid { get; set; }
-        
-        int? SdpMLineIndex { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        
-        RTCIceTcpCandidateType TcpType { get; set; }
-        
-        string Type { get; set; }
-        
-        string UsernameFragment { get; set; }
+        Task<string> Component { get; }
 
-        string ToJson();
+        Task<string> Foundation { get; }
+
+        Task<string> Ip { get; }
+
+        Task <ushort?> Port { get; }
+
+        Task<ulong?> Priority { get; }
+
+        Task<string> Address { get; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        Task<RTCIceProtocol> Protocol { get; set; }
+
+        Task<string> RelatedAddress { get; }
+
+        Task<ushort?> RelatedPort { get; }
+
+        Task<string> SdpMid { get; }
+
+        Task<ushort?> SdpMLineIndex { get; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+
+        Task<RTCIceTcpCandidateType> TcpType { get; }
+
+        Task<string> Type { get; set; }
+
+        Task<string> UsernameFragment { get; set; }
+
+        Task<string> ToJson();
     }
 }

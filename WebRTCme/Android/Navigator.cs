@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRtc.Android
 {
     internal class Navigator : ApiBase, INavigator
     {
-        public IMediaDevices MediaDevices => new MediaDevices();
+        public Task<IMediaDevices> MediaDevices() => Task.FromResult(new MediaDevices() as IMediaDevices);
     }
 }

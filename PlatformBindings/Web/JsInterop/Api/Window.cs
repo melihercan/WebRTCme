@@ -10,16 +10,16 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    public class Window : ApiBase, IWindowAsync
+    public class Window : ApiBase, IWindow
     {
         private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public async Task<INavigatorAsync> NavigatorAsync() => await Api.Navigator.NewAsync(JsRuntime);
+        public async Task<INavigator> Navigator() => await Api.Navigator.CreateAsync(JsRuntime);
 
-        public async Task<IRTCPeerConnectionAsync> RTCPeerConnectionAsync(RTCConfiguration rtcConfiguration) =>
-            await Api.RTCPeerConnection.NewAsync(JsRuntime, rtcConfiguration);
+        public async Task<IRTCPeerConnection> RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
+            await Api.RTCPeerConnection.CreateAsync(JsRuntime, rtcConfiguration);
 
-        public static async Task<IWindowAsync> NewAsync(IJSRuntime jsRuntime)
+        public static async Task<IWindow> CreateAsync(IJSRuntime jsRuntime)
         {
             //var windowObjRef = await jsRuntime.InvokeAsync<JsObjectRef>(
             //    "webRtcInterop.getProperty", null, "window");

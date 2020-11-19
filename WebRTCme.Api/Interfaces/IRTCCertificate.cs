@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme
 {
     public interface IRTCCertificate
     {
-        DateTime Expires { get; set; }
+        Task<ulong> Expires { get; }
+        //// RTCDtlsFingerprint[] GetFingerprints();
     }
 }
