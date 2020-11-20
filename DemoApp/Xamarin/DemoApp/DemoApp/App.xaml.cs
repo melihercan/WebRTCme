@@ -14,14 +14,13 @@ namespace DemoApp
         {
             InitializeComponent();
 
-            ////WebRtcGui.Initialize();
-
             DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
+            await WebRtcGui.InitializeAsync();
         }
 
         protected override void OnSleep()
@@ -30,6 +29,12 @@ namespace DemoApp
 
         protected override void OnResume()
         {
+        }
+
+        protected override async void CleanUp()
+        {
+            await WebRtcGui.CleanupAsync();
+            base.CleanUp();
         }
     }
 }

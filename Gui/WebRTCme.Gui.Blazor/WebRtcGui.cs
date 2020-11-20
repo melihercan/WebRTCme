@@ -4,16 +4,13 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-//// TODO: REFACTOR TO WebRTCme.Xamarin
-namespace WebRtcGuiXamarin
+//// TODO: REFACTOR TO WebRTCme.Blazor
+namespace WebRtcGuiBlazor
 {
-    /// <summary>
-    //// TODO: RENAME TO WebRtcXamarin
-    /// </summary>
+    //// TODO: RENAME TO WebRtcBlazor
     public static class WebRtcGui
     {
         internal static IWebRtc WebRtc { get; private set; }
-
 
         public static async Task InitializeAsync()
         {
@@ -24,5 +21,6 @@ namespace WebRtcGuiXamarin
         {
             await WebRtc.CleanupAsync();
         }
+
     }
 }

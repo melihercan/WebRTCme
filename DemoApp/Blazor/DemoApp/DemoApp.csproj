@@ -14,6 +14,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Gui\WebRTCme.Gui.Blazor\WebRTCme.Gui.Blazor.csproj" />
     <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 

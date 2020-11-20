@@ -114,40 +114,41 @@ namespace WebRtc.iOS
 
         public Task<List<IMediaStreamTrack>> GetTracks() => Task.FromResult(_mediaStreamTracks);
 
-        public Task<IMediaStreamTrack> GetTrackById(string id) =>
-            throw new NotImplementedException();
-        ////            _mediaStreamTracks.Find(async track => (await track.Id) == id);
+        public async Task<IMediaStreamTrack> GetTrackById(string id) =>
+            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Id = await track.Id, Track = track })
+            .ToArray()))
+            .FirstOrDefault(a => a.Id == id)?.Track;
 
-        public Task<List<IMediaStreamTrack>> GetVideoTracks() =>
-                        throw new NotImplementedException();
-        ////_mediaStreamTracks.Where(async track => (await track.Kind) == MediaStreamTrackKind.Video).ToList();
+        public async Task<List<IMediaStreamTrack>> GetVideoTracks() =>
+            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Kind = await track.Kind, Track = track })
+            .ToArray()))
+            .Where(a => a.Kind == MediaStreamTrackKind.Video)
+            .Select(a => a.Track)
+            .ToList();
 
-        public Task<List<IMediaStreamTrack>> GetAudioTracks()
+        public async Task<List<IMediaStreamTrack>> GetAudioTracks() =>
+            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Kind = await track.Kind, Track = track })
+            .ToArray()))
+            .Where(a => a.Kind == MediaStreamTrackKind.Audio)
+            .Select(a => a.Track)
+            .ToList();
+
+        public async Task AddTrack(IMediaStreamTrack track)
         {
-            throw new NotImplementedException();
-            ////        var x = _mediaStreamTracks.Select(async track => await track.Kind);
-            //.Where(kind => kind == MediaStreamTrackKind.Audio)
-            ///   _mediaStreamTracks.Where(track => track.Kind == MediaStreamTrackKind.Audio).ToList();
-        }
+            if (await GetTrackById(await track.Id) is null)
+            {
+                switch (await track.Kind)
+                {
+                    case MediaStreamTrackKind.Audio:
+                        ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
+                        break;
+                    case MediaStreamTrackKind.Video:
+                        ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
+                        break;
+                }
 
-        public Task AddTrack(IMediaStreamTrack track)
-        {
-            throw new NotImplementedException();
-            //if (GetTrackById(track.Id) is null)
-            //{
-            //    switch (track.Kind)
-            //    {
-            //        case MediaStreamTrackKind.Audio:
-            //            ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
-            //            break;
-            //        case MediaStreamTrackKind.Video:
-            //            ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
-            //            break;
-            //    }
-
-            //    _mediaStreamTracks.Add(track);
-            //};
-            //return Task.CompletedTask;
+                _mediaStreamTracks.Add(track);
+            };
         }
 
         public Task RemoveTrack(IMediaStreamTrack track) => Task.FromResult(_mediaStreamTracks.Remove(track));

@@ -20,25 +20,30 @@ namespace WebRtcGuiXamarin.iOS
         public AVCaptureSession CaptureSession { get; private set; }
 
 
-        private readonly VideoType _type;
-        private readonly string _source;
+        ////private readonly VideoType _type;
+        ////private readonly string _source;
 ////        private readonly VideoWebRtc _videoWebRtc;
         private AVCaptureVideoPreviewLayer _previewLayer;
 
+        public VideoView(UIView view)
+        {
+            LocalVideoView = view;
+            AddSubview(LocalVideoView);
+        }
 
         public VideoView(VideoType type, string source)
         {
 
 
-            _type = type;
-            _source = source;
+           //_type = type;
+            //_source = source;
             ////            _videoWebRtc = new VideoWebRtc();
             ///
 
-            if (_type == VideoType.Local)
-            {
-                if (string.IsNullOrEmpty(source))
-                {
+            //if (_type == VideoType.Local)
+            //{
+              //  if (string.IsNullOrEmpty(source))
+                //{
                     // Default devices.
 ////                    var mediaDevices = WebRtcGui.WebRtc.Window.Navigator.MediaDevices;
                     ////var mediaDevicesInfo = mediaDevices.EnumerateDevices();
@@ -56,8 +61,8 @@ namespace WebRtcGuiXamarin.iOS
 
                     ////                    videoTrack.Play<UIView>(this);
 
-                }
-            }
+                //}
+            //}
 
 
 #if TESTING

@@ -191,14 +191,14 @@ namespace WebRtc.iOS
 
         //}
 
-        public UIView GetView<UIView>()
-        {
-            return (UIView)((object)_nativeCameraPreviewView);
-        }
-
         public Task Stop()
         {
             throw new NotImplementedException();
+        }
+
+        public Task<UIView> GetView<UIView>()
+        {
+            return Task.FromResult((UIView)(object)_nativeCameraPreviewView);
         }
     }
 }

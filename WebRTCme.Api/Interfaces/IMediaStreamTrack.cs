@@ -39,9 +39,11 @@ namespace WebRTCme
 
         Task Stop();
 
-        
-        
-        
+
+
+
         // Custom APIs.
+        Task<TView> GetView<TView>();
+
     }
 }

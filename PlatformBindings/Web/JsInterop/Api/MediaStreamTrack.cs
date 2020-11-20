@@ -91,6 +91,11 @@ namespace WebRtcJsInterop.Api
             throw new NotImplementedException();
         }
 
+        public Task<TView> GetView<TView>()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task Stop()
         {
             throw new NotImplementedException();
