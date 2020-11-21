@@ -11,6 +11,8 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
+        private WebRtc() { }
+
         public static Task<IWebRtc> CreateAsync()
         {
             var ret = new WebRtc();

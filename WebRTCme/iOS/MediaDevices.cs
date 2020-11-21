@@ -6,6 +6,7 @@ using WebRTCme;
 //using WebRTCme.Bindings.Xamarin.iOS;
 using Webrtc;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace WebRtc.iOS
 {
@@ -13,7 +14,7 @@ namespace WebRtc.iOS
     {
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public IEnumerable<MediaDeviceInfo> EnumerateDevices()
+        public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
         {
             var mediaDeviceInfoList = new List<MediaDeviceInfo>();
 
@@ -45,7 +46,7 @@ namespace WebRtc.iOS
                 });
             }
 
-            return mediaDeviceInfoList;
+             return Task.FromResult(mediaDeviceInfoList.AsEnumerable());
 
 #if false
 //// DEPRECATED
@@ -92,44 +93,32 @@ namespace WebRtc.iOS
 #endif
         }
 
-        public IMediaStream GetDisplayMedia(MediaStreamConstraints constraints)
+        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
             throw new NotImplementedException();
         }
 
-        public MediaTrackSupportedConstraints GetSupportedConstraints()
+        public Task<MediaTrackSupportedConstraints> GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }
 
-        public IMediaStream GetUserMedia(MediaStreamConstraints constraints)
+        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
         {
             ////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
             ////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
             ////            var mediaStream = new MediaStream(/*tracks*/);
             ////            return null;
             ///
-            return new MediaStream(constraints);
+            return MediaStream.CreateAsync(constraints);
         }
 
-        Task<IEnumerable<MediaDeviceInfo>> IMediaDevices.EnumerateDevices()
-        {
-            throw new NotImplementedException();
-        }
 
-        Task<IMediaStream> IMediaDevices.GetDisplayMedia(MediaStreamConstraints constraints)
-        {
-            throw new NotImplementedException();
-        }
 
         Task<MediaTrackSupportedConstraints> IMediaDevices.GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }
 
-        Task<IMediaStream> IMediaDevices.GetUserMedia(MediaStreamConstraints constraints)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
