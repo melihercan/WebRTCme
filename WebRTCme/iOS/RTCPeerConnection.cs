@@ -8,9 +8,18 @@ namespace WebRtc.iOS
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        public RTCPeerConnection(RTCConfiguration configuration)
-        {
 
+        public static Task<IRTCPeerConnection> CreateAsync(RTCConfiguration configuration)
+        {
+            var ret = new RTCPeerConnection();
+            return ret.InitializeAsync(configuration);
+        }
+
+        private RTCPeerConnection() { }
+
+        private Task<IRTCPeerConnection> InitializeAsync(RTCConfiguration configuration)
+        {
+            return Task.FromResult(this as IRTCPeerConnection);
         }
 
         public event EventHandler OnConnectionStateChanged;

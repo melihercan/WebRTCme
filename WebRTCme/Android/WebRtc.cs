@@ -25,7 +25,7 @@ namespace WebRTCme
             return Task.CompletedTask;
         }
 
-        Task<IWindow> IWebRtc.Window(IJSRuntime jsRuntime)
+        Task<IWindow> IWebRtc.CreateWindow(IJSRuntime jsRuntime)
         {
             return Task.FromResult(new Window() as IWindow);
         }

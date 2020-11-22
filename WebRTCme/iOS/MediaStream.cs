@@ -12,10 +12,9 @@ namespace WebRtc.iOS
     internal class MediaStream : ApiBase, IMediaStream
     {
 
-        private readonly RTCPeerConnectionFactory _nativePeerConnectionFactory;
-        private readonly RTCMediaStream _nativeMediaStream;
-
-        private List<IMediaStreamTrack> _mediaStreamTracks = new List<IMediaStreamTrack>();
+        ////private readonly RTCPeerConnectionFactory _nativePeerConnectionFactory;
+        ////private readonly RTCMediaStream _nativeMediaStream;
+        ////private List<IMediaStreamTrack> _mediaStreamTracks = new List<IMediaStreamTrack>();
 
 
 
@@ -56,8 +55,8 @@ namespace WebRtc.iOS
             return ret.InitializeAsync(constraints);
         }
 
-        private async Task<IMediaStream> InitializeAsync(MediaStreamConstraints constraints, VideoType videoType = VideoType.Local, 
-            string videoSource = null)
+        private async Task<IMediaStream> InitializeAsync(MediaStreamConstraints constraints, 
+            VideoType videoType = VideoType.Local, string videoSource = null)
         {
             // Assume default for now.
 
@@ -84,9 +83,10 @@ namespace WebRtc.iOS
             ////AddTrack(new MediaStreamTrack(nativeVideoTrack));
             ///
 
-            await AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? "MyAudio"));
-            await AddTrack(new MediaStreamTrack(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? "MyVideo", 
-                videoType, videoSource));
+            await AddTrack(await MediaStreamTrack.CreateAsync(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? 
+                "MyAudio"));
+            await AddTrack(await MediaStreamTrack.CreateAsync(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? 
+                "MyVideo", videoType, videoSource));
 
 
             //SelfNativeObject = 
@@ -120,26 +120,49 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<List<IMediaStreamTrack>> GetTracks() => Task.FromResult(_mediaStreamTracks);
+        public Task<List<IMediaStreamTrack>> GetTracks() =>
+            throw new NotImplementedException();
+        ////            Task.FromResult(_mediaStreamTracks);
 
         public async Task<IMediaStreamTrack> GetTrackById(string id) =>
-            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Id = await track.Id, Track = track })
-            .ToArray()))
-            .FirstOrDefault(a => a.Id == id)?.Track;
+            throw new NotImplementedException();
+        ////            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Id = await track.Id, Track = track })
+        ////            .ToArray()))
+        ////            .FirstOrDefault(a => a.Id == id)?.Track;
 
-        public async Task<List<IMediaStreamTrack>> GetVideoTracks() =>
-            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Kind = await track.Kind, Track = track })
-            .ToArray()))
-            .Where(a => a.Kind == MediaStreamTrackKind.Video)
-            .Select(a => a.Track)
-            .ToList();
+        public async Task<List<IMediaStreamTrack>> GetVideoTracks()
+        {
+            var nativeVideoTracks = ((RTCMediaStream)SelfNativeObject).VideoTracks;
+            var videoTracks =
+                (await Task.WhenAll(nativeVideoTracks.Select(async nativeVideoTrack =>
+                    await MediaStreamTrack.CreateAsync(nativeVideoTrack)).ToArray()))
+                .ToList();
+            return videoTracks;
+            ////            (await Task.WhenAll(_mediaStreamTracks.Select(async track => 
+            ///                 new { Kind = await track.Kind, Track = track })
+            ////            .ToArray()))
+            ////            .Where(a => a.Kind == MediaStreamTrackKind.Video)
+            ////            .Select(a => a.Track)
+            ////            .ToList();
+            ///
+        }
 
-        public async Task<List<IMediaStreamTrack>> GetAudioTracks() =>
-            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Kind = await track.Kind, Track = track })
-            .ToArray()))
-            .Where(a => a.Kind == MediaStreamTrackKind.Audio)
-            .Select(a => a.Track)
-            .ToList();
+        public async Task<List<IMediaStreamTrack>> GetAudioTracks()
+        {
+            var nativeAudioTracks = ((RTCMediaStream)SelfNativeObject).AudioTracks;
+            var audioTracks =
+                (await Task.WhenAll(nativeAudioTracks.Select(async nativeAudioTrack =>
+                    await MediaStreamTrack.CreateAsync(nativeAudioTrack)).ToArray()))
+                .ToList();
+            return audioTracks;
+
+            ////            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Kind = await track.Kind, Track = track })
+            ////            .ToArray()))
+            ////            .Where(a => a.Kind == MediaStreamTrackKind.Audio)
+            ////            .Select(a => a.Track)
+            ///            .ToList();
+            ///            
+        }
 
         public async Task AddTrack(IMediaStreamTrack track)
         {
@@ -155,11 +178,13 @@ namespace WebRtc.iOS
                         break;
                 }
 
-                _mediaStreamTracks.Add(track);
+                ////_mediaStreamTracks.Add(track);
             };
         }
 
-        public Task RemoveTrack(IMediaStreamTrack track) => Task.FromResult(_mediaStreamTracks.Remove(track));
+        public Task RemoveTrack(IMediaStreamTrack track) =>
+            throw new NotImplementedException();
+        ////            Task.FromResult(_mediaStreamTracks.Remove(track));
 
 
         public Task SetElementReferenceSrcObjectAsync(object media)

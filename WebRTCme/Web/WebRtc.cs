@@ -29,7 +29,7 @@ namespace WebRTCme
             return Task.CompletedTask;
         }
 
-        public async Task<IWindow> Window(IJSRuntime jsRuntime)
+        public async Task<IWindow> CreateWindow(IJSRuntime jsRuntime)
         {
             return await WebRtcJsInterop.Api.Window.CreateAsync(jsRuntime);
         }

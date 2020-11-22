@@ -8,7 +8,7 @@ namespace WebRTCme
 {
     public interface IWebRtc
     {
-        Task<IWindow> Window(IJSRuntime jsRuntime = null);
+        Task<IWindow> CreateWindow(IJSRuntime jsRuntime = null);
 
         Task CleanupAsync();
     }

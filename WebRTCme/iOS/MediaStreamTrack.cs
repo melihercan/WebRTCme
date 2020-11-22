@@ -22,8 +22,26 @@ namespace WebRtc.iOS
 
         private RTCAudioSource _nativeAudioSource;
 
-        public MediaStreamTrack(MediaStreamTrackKind mediaStreamTrackKind, string id, 
+        public static Task<IMediaStreamTrack> CreateAsync(RTCMediaStreamTrack nativeMediaStreamTrack)
+        {
+            var ret = new MediaStreamTrack();
+            ret.SelfNativeObject = nativeMediaStreamTrack;
+            ret.IsNativeObjectsOwner = false;
+            return Task.FromResult(ret as IMediaStreamTrack);
+        }
+
+        public static Task<IMediaStreamTrack> CreateAsync(MediaStreamTrackKind mediaStreamTrackKind, string id,
             VideoType videoType = VideoType.Local, string videoSource = null)
+        {
+            var ret = new MediaStreamTrack();
+            return ret.InitializeAsync(mediaStreamTrackKind, id, videoType, videoSource);
+        }
+
+        private MediaStreamTrack() { }
+
+
+        private Task<IMediaStreamTrack> InitializeAsync(MediaStreamTrackKind mediaStreamTrackKind, string id, 
+            VideoType videoType, string videoSource)
         {
             //// TODO: Remote flag???? We need to pass constructor this flag.
             /// CURRENTLY LOCAL IS ASSUMED.
@@ -44,6 +62,8 @@ namespace WebRtc.iOS
 
 
             }
+
+            return Task.FromResult(this as IMediaStreamTrack);
 
             void AddAudioStreamTrack()
             {

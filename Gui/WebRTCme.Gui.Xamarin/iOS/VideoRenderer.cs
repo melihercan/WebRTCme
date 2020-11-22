@@ -40,7 +40,9 @@ namespace WebRtcGuiXamarin.iOS
                         if (string.IsNullOrEmpty(source))
                         {
                             // Default devices.
-                            var mediaDevices = await(await(await WebRtcGui.WebRtc.Window()).Navigator()).MediaDevices();
+                            var window = await WebRtcGui.WebRtc.CreateWindow();
+                            var navigator = await window.CreateNavigator();
+                            var mediaDevices = await navigator.MediaDevices;
                             var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
                             var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
                             {
@@ -49,6 +51,24 @@ namespace WebRtcGuiXamarin.iOS
                             });
                             var videoTrack = (await mediaStream.GetVideoTracks()).First();
                             view = await videoTrack.GetView<UIView>();
+
+
+                            //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
+                            ///
+                            var peerConnection = await window.CreateRTCPeerConnection(new RTCConfiguration
+                            {
+                                IceServers = new RTCIceServer[]
+                                {
+                                    new RTCIceServer
+                                    {
+                                        Urls = new string[]
+                                        {
+                                            "stun:stun.stunprotocol.org:3478",
+                                            "stun:stun.l.google.com:19302"
+                                        }
+                                    }
+                                }
+                            });
                         }
                     }
 

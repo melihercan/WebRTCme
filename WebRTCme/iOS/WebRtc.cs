@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtc.iOS;
 using Webrtc;
+using WebRtc.iOS;
 
 namespace WebRTCme
 {
@@ -39,9 +39,6 @@ namespace WebRTCme
             return Task.CompletedTask;
         }
 
-        Task<IWindow> IWebRtc.Window(IJSRuntime jsRuntime)
-        {
-            return Task.FromResult(new Window() as IWindow);
-        }
+        public Task<IWindow> CreateWindow(IJSRuntime jsRuntime) => Window.CreateAsync();
     }
 }

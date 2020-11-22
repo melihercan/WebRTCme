@@ -14,9 +14,9 @@ namespace WebRtcJsInterop.Api
     {
         private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public async Task<INavigator> Navigator() => await Api.Navigator.CreateAsync(JsRuntime);
+        public async Task<INavigator> CreateNavigator() => await Api.Navigator.CreateAsync(JsRuntime);
 
-        public async Task<IRTCPeerConnection> RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
+        public async Task<IRTCPeerConnection> CreateRTCPeerConnection(RTCConfiguration rtcConfiguration) =>
             await Api.RTCPeerConnection.CreateAsync(JsRuntime, rtcConfiguration);
 
         public static async Task<IWindow> CreateAsync(IJSRuntime jsRuntime)

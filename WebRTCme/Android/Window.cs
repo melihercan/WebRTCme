@@ -9,9 +9,9 @@ namespace WebRtc.Android
 {
     internal class Window : ApiBase, IWindow
     {
-        public Task<INavigator> Navigator() => Task.FromResult(new Navigator() as INavigator);
+        public Task<INavigator> CreateNavigator() => Task.FromResult(new Navigator() as INavigator);
 
-        public Task<IRTCPeerConnection> RTCPeerConnection(RTCConfiguration configuration)
+        public Task<IRTCPeerConnection> CreateRTCPeerConnection(RTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }

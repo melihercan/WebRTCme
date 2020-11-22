@@ -8,6 +8,6 @@ namespace WebRtc.Android
 {
     internal class Navigator : ApiBase, INavigator
     {
-        public Task<IMediaDevices> MediaDevices() => Task.FromResult(new MediaDevices() as IMediaDevices);
+        public Task<IMediaDevices> MediaDevices => Task.FromResult(new MediaDevices() as IMediaDevices);
     }
 }

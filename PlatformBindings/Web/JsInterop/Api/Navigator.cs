@@ -13,7 +13,7 @@ namespace WebRtcJsInterop.Api
     {
         private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public Task<IMediaDevices> MediaDevices() => 
+        public Task<IMediaDevices> MediaDevices => 
             Api.MediaDevices.CreateAsync(JsRuntime);
 
         public static async Task<INavigator> CreateAsync(IJSRuntime jsRuntime)
@@ -22,6 +22,5 @@ namespace WebRtcJsInterop.Api
             var navigator = new Navigator(jsRuntime, jsObjectRef);
             return navigator;
         }
-
     }
 }

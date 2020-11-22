@@ -8,13 +8,7 @@ namespace WebRtc.iOS
 {
     public abstract class ApiBase : INativeObjects
     {
-        protected ApiBase() { }
-
-        protected ApiBase(object nativeObject) 
-        {
-            SelfNativeObject = nativeObject;
-            NativeObjects.Add(nativeObject);
-        }
+        public bool IsNativeObjectsOwner { get; set; } = true;
 
         private object _selfNativeObject;
         public object SelfNativeObject
@@ -29,14 +23,16 @@ namespace WebRtc.iOS
 
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-
         public ValueTask DisposeAsync()
         {
-            foreach (var nativeObject in NativeObjects)
+            if (IsNativeObjectsOwner)
             {
-                if (nativeObject is IDisposable disposable)
+                foreach (var nativeObject in NativeObjects)
                 {
-                    disposable.Dispose();
+                    if (nativeObject is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
                 }
             }
             return default;

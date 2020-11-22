@@ -12,6 +12,17 @@ namespace WebRtc.iOS
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {
+
+        public static Task<IMediaDevices> CreateAsync()
+        {
+            var ret = new MediaDevices();
+            return ret.InitializeAsync();
+        }
+
+        private MediaDevices() { }
+
+        private Task<IMediaDevices> InitializeAsync() => Task.FromResult(this as IMediaDevices);
+        
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
         public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
