@@ -120,15 +120,15 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<List<IMediaStreamTrack>> GetTracks() =>
-            throw new NotImplementedException();
+        public async Task<List<IMediaStreamTrack>> GetTracks() =>
+            (await GetVideoTracks()).Concat(await GetAudioTracks()).ToList();
         ////            Task.FromResult(_mediaStreamTracks);
 
         public async Task<IMediaStreamTrack> GetTrackById(string id) =>
-            throw new NotImplementedException();
-        ////            (await Task.WhenAll(_mediaStreamTracks.Select(async track => new { Id = await track.Id, Track = track })
-        ////            .ToArray()))
-        ////            .FirstOrDefault(a => a.Id == id)?.Track;
+            (await Task.WhenAll((await GetTracks()).Select(async track => 
+                new { Id = await track.Id, Track = track })
+            .ToArray()))
+            .FirstOrDefault(a => a.Id == id)?.Track;
 
         public async Task<List<IMediaStreamTrack>> GetVideoTracks()
         {
