@@ -6,8 +6,13 @@ using WebRTCme;
 
 namespace WebRtc.Android
 {
+
     internal class Navigator : ApiBase, INavigator
     {
-        public Task<IMediaDevices> MediaDevices => Task.FromResult(new MediaDevices() as IMediaDevices);
+        public static INavigator Create() => new Navigator();
+
+        private Navigator() { }
+
+        public IMediaDevices MediaDevices => Android.MediaDevices.Create();
     }
 }

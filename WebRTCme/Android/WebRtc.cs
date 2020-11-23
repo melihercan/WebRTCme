@@ -25,9 +25,6 @@ namespace WebRTCme
             return Task.CompletedTask;
         }
 
-        Task<IWindow> IWebRtc.CreateWindow(IJSRuntime jsRuntime)
-        {
-            return Task.FromResult(new Window() as IWindow);
-        }
+        public IWindow Window(IJSRuntime jsRuntime) => global::WebRtc.Android.Window.Create();
     }
 }

@@ -7,9 +7,9 @@ namespace WebRTCme
 {
     public interface IWindow : INativeObjects
     {
-        Task<INavigator> CreateNavigator();
+        INavigator Navigator { get; }
 
-        Task<IRTCPeerConnection> CreateRTCPeerConnection(RTCConfiguration configuration = null);
+        IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null);
     }
 
 }

@@ -49,13 +49,13 @@ namespace WebRtc.iOS
 
         }
 
-        public static Task<IMediaStream> CreateAsync(MediaStreamConstraints constraints)
+        public static IMediaStream Create(MediaStreamConstraints constraints)
         {
             var ret = new MediaStream();
-            return ret.InitializeAsync(constraints);
+            return ret.Initialize(constraints);
         }
 
-        private async Task<IMediaStream> InitializeAsync(MediaStreamConstraints constraints, 
+        private IMediaStream Initialize(MediaStreamConstraints constraints, 
             VideoType videoType = VideoType.Local, string videoSource = null)
         {
             // Assume default for now.
@@ -83,9 +83,8 @@ namespace WebRtc.iOS
             ////AddTrack(new MediaStreamTrack(nativeVideoTrack));
             ///
 
-            await AddTrack(await MediaStreamTrack.CreateAsync(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? 
-                "MyAudio"));
-            await AddTrack(await MediaStreamTrack.CreateAsync(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? 
+            AddTrack(MediaStreamTrack.Create(MediaStreamTrackKind.Audio, audioDevice?.UniqueID ?? "MyAudio"));
+            AddTrack(MediaStreamTrack.Create(MediaStreamTrackKind.Video, videoDevice?.UniqueID ?? 
                 "MyVideo", videoType, videoSource));
 
 
@@ -107,11 +106,11 @@ namespace WebRtc.iOS
 
         }
 
-        public Task<bool> Active
+        public bool Active
         {
             get
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
 //        public Task<bool> Active => //Task.FromResult(
@@ -123,38 +122,36 @@ namespace WebRtc.iOS
 
         ////public Task<bool> Ended => throw new NotImplementedException();
 
-        public Task<string> Id => Task.FromResult(((RTCMediaStream)SelfNativeObject).StreamId);
+        public string Id => ((RTCMediaStream)SelfNativeObject).StreamId;
 
 
 
-        public Task<IMediaStream> Clone()
+        public IMediaStream Clone()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<IMediaStreamTrack>> GetTracks() =>
-            (await GetVideoTracks()).Concat(await GetAudioTracks()).ToList();
+        public List<IMediaStreamTrack> GetTracks() =>
+            GetVideoTracks().Concat(GetAudioTracks()).ToList();
 
-        public async Task<IMediaStreamTrack> GetTrackById(string id) =>
-            (await Task.WhenAll((await GetTracks()).Select(async track => 
-                new { Id = await track.Id, Track = track }).ToArray()))
-            .FirstOrDefault(a => a.Id == id)?.Track;
+        public IMediaStreamTrack GetTrackById(string id) =>
+            GetTracks().Find(track => track.Id == id);
 
-        public async Task<List<IMediaStreamTrack>> GetVideoTracks() =>
-                (await Task.WhenAll(((RTCMediaStream)SelfNativeObject).VideoTracks.Select(async nativeVideoTrack =>
-                    await MediaStreamTrack.CreateAsync(nativeVideoTrack)).ToArray()))
-                .ToList();
+        public List<IMediaStreamTrack> GetVideoTracks() =>
+            ((RTCMediaStream)SelfNativeObject).VideoTracks
+            .Select(track => MediaStreamTrack.Create(track))
+            .ToList();
 
-        public async Task<List<IMediaStreamTrack>> GetAudioTracks() =>
-                (await Task.WhenAll(((RTCMediaStream)SelfNativeObject).AudioTracks.Select(async nativeAudioTrack =>
-                    await MediaStreamTrack.CreateAsync(nativeAudioTrack)).ToArray()))
-                .ToList();
+        public List<IMediaStreamTrack> GetAudioTracks() =>
+            ((RTCMediaStream)SelfNativeObject).AudioTracks
+            .Select(track => MediaStreamTrack.Create(track))
+            .ToList();
 
-        public async Task AddTrack(IMediaStreamTrack track)
+        public void AddTrack(IMediaStreamTrack track)
         {
-            if (await GetTrackById(await track.Id) is null)
+            if (GetTrackById(track.Id) is null)
             {
-                switch (await track.Kind)
+                switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
                         ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
@@ -166,11 +163,11 @@ namespace WebRtc.iOS
             };
         }
 
-        public async Task RemoveTrack(IMediaStreamTrack track)
+        public void RemoveTrack(IMediaStreamTrack track)
         {
-            if (await GetTrackById(await track.Id) != null)
+            if (GetTrackById(track.Id) != null)
             {
-                switch (await track.Kind)
+                switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
                         ((RTCMediaStream)SelfNativeObject).RemoveAudioTrack((RTCAudioTrack)track.SelfNativeObject);

@@ -40,22 +40,22 @@ namespace WebRtcGuiXamarin.iOS
                         if (string.IsNullOrEmpty(source))
                         {
                             // Default devices.
-                            var window = await WebRtcGui.WebRtc.CreateWindow();
-                            var navigator = await window.CreateNavigator();
-                            var mediaDevices = await navigator.MediaDevices;
+                            var window = WebRtcGui.WebRtc.Window();
+                            var navigator = window.Navigator;
+                            var mediaDevices = navigator.MediaDevices;
                             var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
                             var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
                             {
                                 Audio = new MediaStreamContraintsUnion { Value = true },
                                 Video = new MediaStreamContraintsUnion { Value = true }
                             });
-                            var videoTrack = (await mediaStream.GetVideoTracks()).First();
-                            view = await videoTrack.GetView<UIView>();
+                            var videoTrack = mediaStream.GetVideoTracks().First();
+                            view = videoTrack.GetView<UIView>();
 
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
                             ///
-                            var peerConnection = await window.CreateRTCPeerConnection(new RTCConfiguration
+                            var peerConnection = window.RTCPeerConnection(new RTCConfiguration
                             {
                                 IceServers = new RTCIceServer[]
                                 {

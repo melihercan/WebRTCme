@@ -22,25 +22,25 @@ namespace WebRtc.iOS
 
         private RTCAudioSource _nativeAudioSource;
 
-        public static Task<IMediaStreamTrack> CreateAsync(RTCMediaStreamTrack nativeMediaStreamTrack)
+        public static IMediaStreamTrack Create(RTCMediaStreamTrack nativeMediaStreamTrack)
         {
             var ret = new MediaStreamTrack();
             ret.SelfNativeObject = nativeMediaStreamTrack;
             ret.IsNativeObjectsOwner = false;
-            return Task.FromResult(ret as IMediaStreamTrack);
+            return ret;
         }
 
-        public static Task<IMediaStreamTrack> CreateAsync(MediaStreamTrackKind mediaStreamTrackKind, string id,
+        public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id,
             VideoType videoType = VideoType.Local, string videoSource = null)
         {
             var ret = new MediaStreamTrack();
-            return ret.InitializeAsync(mediaStreamTrackKind, id, videoType, videoSource);
+            return ret.Initialize(mediaStreamTrackKind, id, videoType, videoSource);
         }
 
         private MediaStreamTrack() { }
 
 
-        private Task<IMediaStreamTrack> InitializeAsync(MediaStreamTrackKind mediaStreamTrackKind, string id, 
+        private IMediaStreamTrack Initialize(MediaStreamTrackKind mediaStreamTrackKind, string id, 
             VideoType videoType, string videoSource)
         {
             //// TODO: Remote flag???? We need to pass constructor this flag.
@@ -63,7 +63,7 @@ namespace WebRtc.iOS
 
             }
 
-            return Task.FromResult(this as IMediaStreamTrack);
+            return this;
 
             void AddAudioStreamTrack()
             {
@@ -130,30 +130,30 @@ namespace WebRtc.iOS
 
 
 
-        public Task<string> Id => Task.FromResult(((RTCMediaStreamTrack)SelfNativeObject).TrackId);
+        public string Id => ((RTCMediaStreamTrack)SelfNativeObject).TrackId;
 
 
-        public Task<MediaStreamTrackKind> Kind => Task.FromResult(((RTCMediaStreamTrack)SelfNativeObject).Kind switch
+        public MediaStreamTrackKind Kind => ((RTCMediaStreamTrack)SelfNativeObject).Kind switch
         {
             Audio => MediaStreamTrackKind.Audio,
             Video => MediaStreamTrackKind.Video,
             _ => throw new Exception($"Invalid RTCMediaStreamTrack.Kind: {((RTCMediaStreamTrack)SelfNativeObject).Kind}")
-        });
+        };
 
-        public Task<string> ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Task<bool> Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<bool> Isolated => throw new NotImplementedException();
+        public bool Isolated => throw new NotImplementedException();
 
-        public Task<string> Label => throw new NotImplementedException();
+        public string Label => throw new NotImplementedException();
 
-        public Task<bool> Muted => throw new NotImplementedException();
+        public bool Muted => throw new NotImplementedException();
 
-        public Task<bool> Readonly => throw new NotImplementedException();
+        public bool Readonly => throw new NotImplementedException();
 
-        public Task<MediaStreamTrackState> ReadyState => throw new NotImplementedException();
+        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
 
-        public Task<bool> Remote => throw new NotImplementedException();
+        public bool Remote => throw new NotImplementedException();
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
@@ -164,22 +164,22 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStreamTrack> Clone()
+        public IMediaStreamTrack Clone()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackCapabilities> GetCapabilities()
+        public MediaTrackCapabilities GetCapabilities()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackConstraints> GetContraints()
+        public MediaTrackConstraints GetContraints()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackSettings> GetSettings()
+        public MediaTrackSettings GetSettings()
         {
             throw new NotImplementedException();
         }
@@ -211,14 +211,14 @@ namespace WebRtc.iOS
 
         //}
 
-        public Task Stop()
+        public void Stop()
         {
             throw new NotImplementedException();
         }
 
-        public Task<UIView> GetView<UIView>()
+        public UIView GetView<UIView>()
         {
-            return Task.FromResult((UIView)(object)_nativeCameraPreviewView);
+            return (UIView)(object)_nativeCameraPreviewView;
         }
     }
 }

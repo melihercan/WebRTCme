@@ -9,7 +9,7 @@ namespace WebRTCme
     {
         Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices();
 
-        Task<MediaTrackSupportedConstraints> GetSupportedConstraints();
+        MediaTrackSupportedConstraints GetSupportedConstraints();
 
         Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints);
 

@@ -49,10 +49,6 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        Task<IRTCRtpSender> IRTCPeerConnection.AddTrack(IMediaStreamTrack track, IMediaStream stream)
-        {
-            throw new NotImplementedException();
-        }
 
         Task<IRTCSessionDescription> IRTCPeerConnection.CreateOffer(RTCOfferOptions options)
         {

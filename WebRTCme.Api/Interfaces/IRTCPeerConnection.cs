@@ -11,7 +11,8 @@ namespace WebRTCme
         Task AddIceCandidate(IRTCIceCandidate candidate);
 
 
-        Task<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream);
+        IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
+
         Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options);
 
         event EventHandler OnConnectionStateChanged;

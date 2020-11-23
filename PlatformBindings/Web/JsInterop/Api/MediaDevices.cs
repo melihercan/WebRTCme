@@ -26,25 +26,25 @@ namespace WebRtcJsInterop.Api
         {
             var mediaDeviceInfos = new List<MediaDeviceInfo>();
             var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(SelfNativeObject, "enumerateDevices");
-            var jsObjectRefMediaDeviceInfoArray = await JsRuntime.GetJsPropertyArray(jsObjectRef);
+            var jsObjectRefMediaDeviceInfoArray = JsRuntime.GetJsPropertyArray(jsObjectRef);
             foreach (var jsObjectRefMediaDeviceInfo in jsObjectRefMediaDeviceInfoArray)
             {
-                mediaDeviceInfos.Add(await JsRuntime.GetJsPropertyValue<MediaDeviceInfo>
+                mediaDeviceInfos.Add(JsRuntime.GetJsPropertyValue<MediaDeviceInfo>
                     (jsObjectRefMediaDeviceInfo, null, null));
-                await JsRuntime.DeleteJsObjectRef(jsObjectRefMediaDeviceInfo.JsObjectRefId);
+                JsRuntime.DeleteJsObjectRef(jsObjectRefMediaDeviceInfo.JsObjectRefId);
             }
-            await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             return mediaDeviceInfos;
         }
 
-        internal static async Task<IMediaDevices> CreateAsync(IJSRuntime jsRuntime)
+        internal static IMediaDevices Create(IJSRuntime jsRuntime)
         {
-            var jsObjectRef = await jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
+            var jsObjectRef = jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
             var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
             return mediaDevices;
         }
 
-        public Task<MediaTrackSupportedConstraints> GetSupportedConstraints()
+        public MediaTrackSupportedConstraints GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }

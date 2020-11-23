@@ -39,7 +39,7 @@ namespace WebRtcJsInterop.Api
             foreach (var nativeObject in NativeObjects)
             {
                 var jsObjectRef = nativeObject as JsObjectRef;
-                await JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             }
         }
     }

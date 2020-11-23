@@ -8,19 +8,14 @@ namespace WebRtc.iOS
 {
     internal class Window : ApiBase, IWindow
     {
-        public static Task<IWindow> CreateAsync()
-        {
-            var ret = new Window();
-            return ret.InitializeAsync();
-        }
+        public static IWindow Create() => new Window();
 
         private Window() { }
 
-        private Task<IWindow> InitializeAsync() => Task.FromResult(this as IWindow);
 
-        public Task<INavigator> CreateNavigator() => Task.FromResult(new Navigator() as INavigator);
+        public INavigator Navigator => iOS.Navigator.Create();
 
-        public Task<IRTCPeerConnection> CreateRTCPeerConnection(RTCConfiguration configuration) => 
-            iOS.RTCPeerConnection.CreateAsync(configuration);
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
+            iOS.RTCPeerConnection.Create(configuration);
     }
 }

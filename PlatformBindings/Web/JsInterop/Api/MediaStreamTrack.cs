@@ -12,30 +12,31 @@ namespace WebRtcJsInterop.Api
     {
         private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public Task<string> ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Task<bool> Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<string> Id => throw new NotImplementedException();
+        public string Id => throw new NotImplementedException();
 
-        public Task<bool> Isolated => throw new NotImplementedException();
+        public bool Isolated => throw new NotImplementedException();
 
-        public Task<MediaStreamTrackKind> Kind => throw new NotImplementedException();
+        public MediaStreamTrackKind Kind => throw new NotImplementedException();
 
-        public Task<string> Label => throw new NotImplementedException();
+        public string Label => throw new NotImplementedException();
 
-        public Task<bool> Muted => throw new NotImplementedException();
+        public bool Muted => throw new NotImplementedException();
 
-        public Task<bool> Readonly => throw new NotImplementedException();
+        public bool Readonly => throw new NotImplementedException();
 
-        public Task<MediaStreamTrackState> ReadyState => throw new NotImplementedException();
+        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
 
-        public Task<bool> Remote => throw new NotImplementedException();
+        public bool Remote => throw new NotImplementedException();
+
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
-        internal static IMediaStreamTrack CreateAsync(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
+        internal static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
         {
             var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
             return mediaStreamTrack;
@@ -46,57 +47,33 @@ namespace WebRtcJsInterop.Api
             throw new NotImplementedException();
         }
 
-        public Task ApplyConstraintsAsync(MediaTrackConstraints contraints)
+        public IMediaStreamTrack Clone()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStreamTrack> Clone()
+        public MediaTrackCapabilities GetCapabilities()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStreamTrack> CloneAsync()
+        public MediaTrackConstraints GetContraints()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackCapabilities> GetCapabilities()
+
+        public MediaTrackSettings GetSettings()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackCapabilities> GetCapabilitiesAsync()
+        public TView GetView<TView>()
         {
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackConstraints> GetContraints()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<MediaTrackConstraints> GetContraintsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<MediaTrackSettings> GetSettings()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<MediaTrackSettings> GetSettingsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TView> GetView<TView>()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Stop()
+        public void Stop()
         {
             throw new NotImplementedException();
         }

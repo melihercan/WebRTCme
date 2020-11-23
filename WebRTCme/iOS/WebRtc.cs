@@ -39,6 +39,6 @@ namespace WebRTCme
             return Task.CompletedTask;
         }
 
-        public Task<IWindow> CreateWindow(IJSRuntime jsRuntime) => Window.CreateAsync();
+        public IWindow Window(IJSRuntime jsRuntime) => global::WebRtc.iOS.Window.Create();
     }
 }

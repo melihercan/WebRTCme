@@ -7,6 +7,6 @@ namespace WebRTCme
 {
     public interface INavigator : INativeObjects
     {
-        Task<IMediaDevices> MediaDevices { get; }
+        IMediaDevices MediaDevices { get; }
     }
 }

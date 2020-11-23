@@ -8,6 +8,10 @@ namespace WebRtc.iOS
 {
     internal class Navigator : ApiBase, INavigator
     {
-        public Task<IMediaDevices> MediaDevices => iOS.MediaDevices.CreateAsync();
+        public static INavigator Create() => new Navigator();
+
+        private Navigator() { }
+        
+        public IMediaDevices MediaDevices => iOS.MediaDevices.Create();
     }
 }

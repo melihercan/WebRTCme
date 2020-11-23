@@ -30,9 +30,9 @@ namespace DemoApp.Pages
             if (firstRender)
             {
                 var webRtc = await CrossWebRtc.Instance;
-                _window = await webRtc.CreateWindow(JsRuntime);
-                _navigator = await _window.CreateNavigator();
-                _mediaDevices = await _navigator.MediaDevices;
+                _window = webRtc.Window(JsRuntime);
+                _navigator = _window.Navigator;
+                _mediaDevices = _navigator.MediaDevices;
                 var mediDeviceInfos = (await _mediaDevices.EnumerateDevices()).ToList();
                 _mediaStream = await _mediaDevices.GetUserMedia(new MediaStreamConstraints
                 {
@@ -48,7 +48,7 @@ namespace DemoApp.Pages
 
                 await _mediaStream.SetElementReferenceSrcObjectAsync(_localVideo);
 
-                _rtcPeerConnection = await _window.CreateRTCPeerConnection(new RTCConfiguration
+                _rtcPeerConnection = _window.RTCPeerConnection(new RTCConfiguration
                 {
                     IceServers = new RTCIceServer[] 
                     { 
@@ -62,10 +62,10 @@ namespace DemoApp.Pages
                         }
                     }
                 });
-                var mediaStreamTracks = await _mediaStream.GetTracks();
+                var mediaStreamTracks = _mediaStream.GetTracks();
                 foreach(var mediaStreamTrack in mediaStreamTracks)
                 {
-                    await _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
+                    _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
 
                 ///await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>

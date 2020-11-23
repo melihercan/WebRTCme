@@ -13,16 +13,11 @@ namespace WebRtc.iOS
     internal class MediaDevices : ApiBase, IMediaDevices
     {
 
-        public static Task<IMediaDevices> CreateAsync()
-        {
-            var ret = new MediaDevices();
-            return ret.InitializeAsync();
-        }
+        public static IMediaDevices Create() => new MediaDevices();
 
         private MediaDevices() { }
 
-        private Task<IMediaDevices> InitializeAsync() => Task.FromResult(this as IMediaDevices);
-        
+      
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
         public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
@@ -109,7 +104,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<MediaTrackSupportedConstraints> GetSupportedConstraints()
+        public MediaTrackSupportedConstraints GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }
@@ -121,7 +116,7 @@ namespace WebRtc.iOS
             ////            var mediaStream = new MediaStream(/*tracks*/);
             ////            return null;
             ///
-            return MediaStream.CreateAsync(constraints);
+            return Task.FromResult(MediaStream.Create(constraints));
         }
     }
 }

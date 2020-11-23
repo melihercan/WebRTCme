@@ -35,10 +35,10 @@ namespace WebRtcJsInterop.Api
             }
         }
 
-        public async Task<IRTCRtpSender> AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
             var x = (MediaStreamTrack)track;
-            var jsObjectRefRtcRtpSender = await JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "addTrack", 
+            var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "addTrack", 
                 new object[] 
                 { 
                     ((MediaStreamTrack)track).SelfNativeObject,
@@ -52,7 +52,7 @@ namespace WebRtcJsInterop.Api
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 SelfNativeObject, "createOffer");
-            var rtcSessionDescription = await JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
+            var rtcSessionDescription = JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
                 jsObjectRefRtcSessionDescription, null,
                 new
                 {
@@ -87,9 +87,9 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        internal static async Task<IRTCPeerConnection> CreateAsync(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
-            var jsObjectRef = await jsRuntime.CreateJsObject("window", "RTCPeerConnection");
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
             var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
             return rtcPeerConnection;
         }

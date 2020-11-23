@@ -9,18 +9,10 @@ namespace WebRtc.iOS
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
 
-        public static Task<IRTCPeerConnection> CreateAsync(RTCConfiguration configuration)
-        {
-            var ret = new RTCPeerConnection();
-            return ret.InitializeAsync(configuration);
-        }
+        public static IRTCPeerConnection Create(RTCConfiguration configuration) => new RTCPeerConnection();
 
         private RTCPeerConnection() { }
 
-        private Task<IRTCPeerConnection> InitializeAsync(RTCConfiguration configuration)
-        {
-            return Task.FromResult(this as IRTCPeerConnection);
-        }
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;
@@ -48,11 +40,6 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public IRTCSessionDescription CreateOffer(RTCOfferOptions options)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback)
         {
             throw new NotImplementedException();
@@ -63,12 +50,8 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        Task<IRTCRtpSender> IRTCPeerConnection.AddTrack(IMediaStreamTrack track, IMediaStream stream)
-        {
-            throw new NotImplementedException();
-        }
 
-        Task<IRTCSessionDescription> IRTCPeerConnection.CreateOffer(RTCOfferOptions options)
+        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
             throw new NotImplementedException();
         }

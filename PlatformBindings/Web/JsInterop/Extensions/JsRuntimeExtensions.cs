@@ -9,7 +9,7 @@ namespace WebRtcJsInterop.Extensions
 {
     public static class JsRuntimeExtensions
     {
-        public static async ValueTask<JsObjectRef> CreateJsObject(this IJSRuntime jsRuntime, object parent, 
+        public static JsObjectRef CreateJsObject(this IJSRuntime jsRuntime, object parent, 
             string interface_, params object[] args)
         {
             var invokeParams = new object[]
@@ -21,77 +21,76 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>("DotNetInterop.createObject", invokeParams)
-                .ConfigureAwait(false);
+            var jsObjectRef = jsRuntime.Invoke<JsObjectRef>("DotNetInterop.createObject", invokeParams);
             return jsObjectRef;
         }
 
-        public static async ValueTask DeleteJsObjectRef(this IJSRuntime jsRuntime,  int id)
+        public static void DeleteJsObjectRef(this IJSRuntime jsRuntime,  int id)
         {
-            await jsRuntime.InvokeAsync<object>(
+            jsRuntime.Invoke<object>(
                 "DotNetInterop.deleteObjectRef",
                 new object[]
                 {
                     id,
-                }).ConfigureAwait(false);
+                });
         }
 
-        public static async ValueTask<JsObjectRef> GetJsPropertyObjectRef(this IJSRuntime jsRuntime, 
+        public static JsObjectRef GetJsPropertyObjectRef(this IJSRuntime jsRuntime, 
             object parent,  string property)
         {
-            var jsObjectRef = await jsRuntime.InvokeAsync<JsObjectRef>(
+            var jsObjectRef = jsRuntime.Invoke<JsObjectRef>(
                 "DotNetInterop.getPropertyObjectRef",
                 new object[]
                 {
                     parent,
                     property,
                     null
-                }).ConfigureAwait(false);
+                });
             return jsObjectRef;
         }
 
-        public static async ValueTask<T> GetJsPropertyValue<T>(this IJSRuntime jsRuntime, object parent,
+        public static T GetJsPropertyValue<T>(this IJSRuntime jsRuntime, object parent,
             string property, object valueSpec)
         {
-            var content = await jsRuntime.InvokeAsync<T>(
+            var content = jsRuntime.Invoke<T>(
                 "DotNetInterop.getPropertyValue",
                 new object[]
                 {
                     parent,
                     property,
                     valueSpec
-                }).ConfigureAwait(false);
+                });
             return content;
         }
 
-        public static async ValueTask<IEnumerable<JsObjectRef>> GetJsPropertyArray(this IJSRuntime jsRuntime,
+        public static IEnumerable<JsObjectRef> GetJsPropertyArray(this IJSRuntime jsRuntime,
             object parent, string property = null)
         {
-            var jsObjectRefs = await jsRuntime.InvokeAsync<IEnumerable<JsObjectRef>>(
+            var jsObjectRefs = jsRuntime.Invoke<IEnumerable<JsObjectRef>>(
                 "DotNetInterop.getPropertyArray",
                 new object[]
                 {
                     parent,
                     property,
-                }).ConfigureAwait(false);
+                });
             return jsObjectRefs;
         }
 
 
-        public static async ValueTask SetJsProperty(this IJSRuntime jsRuntime, object parent,
+        public static void SetJsProperty(this IJSRuntime jsRuntime, object parent,
             string property, object value)
         {
-            await jsRuntime.InvokeVoidAsync(
+            jsRuntime.InvokeVoid(
                 "DotNetInterop.setProperty",
                 new object[]
                 {
                     parent,
                     property,
                     value
-                }).ConfigureAwait(false);
+                });
         }
 
-        public static async ValueTask CallJsMethodVoid(this IJSRuntime jsRuntime, object parent,
+        public static void CallJsMethodVoid(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
             var invokeParams = new object[]
@@ -103,11 +102,10 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            await jsRuntime.InvokeVoidAsync("DotNetInterop.callMethod", invokeParams)
-                .ConfigureAwait(false);
+            jsRuntime.InvokeVoid("DotNetInterop.callMethod", invokeParams);
         }
 
-        public static async ValueTask<T> CallJsMethod<T>(this IJSRuntime jsRuntime, object parent,
+        public static T CallJsMethod<T>(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
             var invokeParams = new object[]
@@ -119,8 +117,7 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            var ret = await jsRuntime.InvokeAsync<T>("DotNetInterop.callMethod", invokeParams)
-                .ConfigureAwait(false);
+            var ret = jsRuntime.Invoke<T>("DotNetInterop.callMethod", invokeParams);
             return ret;
         }
 
@@ -166,6 +163,42 @@ namespace WebRtcJsInterop.Extensions
             return new ActionAsyncDisposable(async () =>
                 await jsRuntime.InvokeVoidAsync("DotNetInterop.removeEventListener", jsObjectRef, property,
                     event_, listenerId).ConfigureAwait(false));
+        }
+
+        public static TValue Invoke<TValue>(this IJSRuntime jsRuntime, string identifier, params object[] args)
+        {
+            var isWasm = jsRuntime is IJSInProcessRuntime;
+
+            if (isWasm)
+            {
+                return ((IJSInProcessRuntime)jsRuntime).Invoke<TValue>(identifier, args);
+            }
+            else
+            {
+                // !!! Blocking UI thread !!!
+                return Task.Run(async () =>
+                {
+                    return await jsRuntime.InvokeAsync<TValue>(identifier, args);
+                }).Result;
+            }
+        }
+
+        public static void InvokeVoid(this IJSRuntime jsRuntime, string identifier, params object[] args)
+        {
+            var isWasm = jsRuntime is IJSInProcessRuntime;
+
+            if (isWasm)
+            {
+                ((IJSInProcessRuntime)jsRuntime).InvokeVoid(identifier, args);
+            }
+            else
+            {
+                // !!! Blocking UI thread !!!
+                Task.Run(async () =>
+                {
+                    await jsRuntime.InvokeVoidAsync(identifier, args);
+                }).Wait();
+            }
         }
     }
 }

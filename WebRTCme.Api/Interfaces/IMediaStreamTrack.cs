@@ -9,41 +9,41 @@ namespace WebRTCme
 
     public interface IMediaStreamTrack : INativeObjects
     {
-        public Task<string> ContentHint { get; set; }
-        public Task<bool> Enabled { get; set; }
-        public Task<string> Id { get; }
-        public Task<bool> Isolated { get; }
+        public string ContentHint { get; set; }
+        public bool Enabled { get; set; }
+        public string Id { get; }
+        public bool Isolated { get; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Task<MediaStreamTrackKind> Kind { get; }
-        public Task<string> Label { get; }
-        public Task<bool> Muted { get; }
-        public Task<bool> Readonly { get; }
+        public MediaStreamTrackKind Kind { get; }
+        public string Label { get; }
+        public bool Muted { get; }
+        public bool Readonly { get; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Task<MediaStreamTrackState> ReadyState { get; }
-        public Task<bool> Remote { get; }
+        public MediaStreamTrackState ReadyState { get; }
+        public bool Remote { get; }
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
 
-        Task<IMediaStreamTrack> Clone();
+        IMediaStreamTrack Clone();
 
-        Task<MediaTrackCapabilities> GetCapabilities();
+        MediaTrackCapabilities GetCapabilities();
 
-        Task<MediaTrackSettings> GetSettings();
+        MediaTrackSettings GetSettings();
 
-        Task<MediaTrackConstraints> GetContraints();
+        MediaTrackConstraints GetContraints();
 
         Task ApplyConstraints(MediaTrackConstraints contraints);
 
-        Task Stop();
+        void Stop();
 
 
 
 
         // Custom APIs.
-        Task<TView> GetView<TView>();
+        TView GetView<TView>();
 
     }
 }
