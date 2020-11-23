@@ -10,7 +10,7 @@ namespace WebRTCme
     {
         public Task<bool> Active { get; }
 
-        public Task<bool> Ended { get; }
+        ////public Task<bool> Ended { get; }
 
         public Task<string> Id { get; }
 

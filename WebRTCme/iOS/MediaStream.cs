@@ -107,9 +107,21 @@ namespace WebRtc.iOS
 
         }
 
-        public Task<bool> Active => throw new NotImplementedException();
+        public Task<bool> Active
+        {
+            get
+            {
+                return Task.FromResult(false);
+            }
+        }
+//        public Task<bool> Active => //Task.FromResult(
+  //          await GetTracks()).Select(async track => await track.ReadyState).ToArray()))
+    //        .All(state => state == MediaStreamTrackState.Live);
 
-        public Task<bool> Ended => throw new NotImplementedException();
+
+            //(await GetTracks()).Select(async AppTrackingTransparency => )
+
+        ////public Task<bool> Ended => throw new NotImplementedException();
 
         public Task<string> Id => Task.FromResult(((RTCMediaStream)SelfNativeObject).StreamId);
 
@@ -125,29 +137,18 @@ namespace WebRtc.iOS
 
         public async Task<IMediaStreamTrack> GetTrackById(string id) =>
             (await Task.WhenAll((await GetTracks()).Select(async track => 
-                new { Id = await track.Id, Track = track })
-            .ToArray()))
+                new { Id = await track.Id, Track = track }).ToArray()))
             .FirstOrDefault(a => a.Id == id)?.Track;
 
-        public async Task<List<IMediaStreamTrack>> GetVideoTracks()
-        {
-            var nativeVideoTracks = ((RTCMediaStream)SelfNativeObject).VideoTracks;
-            var videoTracks =
-                (await Task.WhenAll(nativeVideoTracks.Select(async nativeVideoTrack =>
+        public async Task<List<IMediaStreamTrack>> GetVideoTracks() =>
+                (await Task.WhenAll(((RTCMediaStream)SelfNativeObject).VideoTracks.Select(async nativeVideoTrack =>
                     await MediaStreamTrack.CreateAsync(nativeVideoTrack)).ToArray()))
                 .ToList();
-            return videoTracks;
-        }
 
-        public async Task<List<IMediaStreamTrack>> GetAudioTracks()
-        {
-            var nativeAudioTracks = ((RTCMediaStream)SelfNativeObject).AudioTracks;
-            var audioTracks =
-                (await Task.WhenAll(nativeAudioTracks.Select(async nativeAudioTrack =>
+        public async Task<List<IMediaStreamTrack>> GetAudioTracks() =>
+                (await Task.WhenAll(((RTCMediaStream)SelfNativeObject).AudioTracks.Select(async nativeAudioTrack =>
                     await MediaStreamTrack.CreateAsync(nativeAudioTrack)).ToArray()))
                 .ToList();
-            return audioTracks;
-        }
 
         public async Task AddTrack(IMediaStreamTrack track)
         {

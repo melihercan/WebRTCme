@@ -14,7 +14,7 @@ namespace WebRtcJsInterop.Api
     {
         public Task<bool> Active => throw new NotImplementedException();
 
-        public Task<bool> Ended => throw new NotImplementedException();
+        ////public Task<bool> Ended => throw new NotImplementedException();
 
         public Task<string> Id => throw new NotImplementedException();
 
