@@ -123,13 +123,5 @@ namespace WebRtc.iOS
             ///
             return MediaStream.CreateAsync(constraints);
         }
-
-
-
-        Task<MediaTrackSupportedConstraints> IMediaDevices.GetSupportedConstraints()
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }
