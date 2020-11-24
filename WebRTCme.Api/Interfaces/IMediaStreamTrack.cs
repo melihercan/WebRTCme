@@ -43,7 +43,7 @@ namespace WebRTCme
 
 
         // Custom APIs.
-        TView GetView<TView>();
+        object GetView();
 
     }
 }

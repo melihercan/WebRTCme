@@ -68,7 +68,8 @@ namespace WebRtcJsInterop.Api
             throw new NotImplementedException();
         }
 
-        public TView GetView<TView>()
+
+        public object GetView()
         {
             throw new NotImplementedException();
         }

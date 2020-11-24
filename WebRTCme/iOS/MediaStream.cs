@@ -11,10 +11,10 @@ namespace WebRtc.iOS
 {
     internal class MediaStream : ApiBase, IMediaStream
     {
-
         ////private readonly RTCPeerConnectionFactory _nativePeerConnectionFactory;
         ////private readonly RTCMediaStream _nativeMediaStream;
-        ////private List<IMediaStreamTrack> _mediaStreamTracks = new List<IMediaStreamTrack>();
+        private List<IMediaStreamTrack> _videoStreamTracks = new List<IMediaStreamTrack>();
+        private List<IMediaStreamTrack> _audioStreamTracks = new List<IMediaStreamTrack>();
 
 
 
@@ -106,16 +106,8 @@ namespace WebRtc.iOS
 
         }
 
-        public bool Active
-        {
-            get
-            {
-                return false;
-            }
-        }
-//        public Task<bool> Active => //Task.FromResult(
-  //          await GetTracks()).Select(async track => await track.ReadyState).ToArray()))
-    //        .All(state => state == MediaStreamTrackState.Live);
+        public bool Active =>
+            GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
 
             //(await GetTracks()).Select(async AppTrackingTransparency => )
@@ -137,15 +129,15 @@ namespace WebRtc.iOS
         public IMediaStreamTrack GetTrackById(string id) =>
             GetTracks().Find(track => track.Id == id);
 
-        public List<IMediaStreamTrack> GetVideoTracks() =>
-            ((RTCMediaStream)SelfNativeObject).VideoTracks
-            .Select(track => MediaStreamTrack.Create(track))
-            .ToList();
+        public List<IMediaStreamTrack> GetVideoTracks() => _videoStreamTracks;
+            /////((RTCMediaStream)SelfNativeObject).VideoTracks
+            /////.Select(track => MediaStreamTrack.Create(track))
+            /////.ToList();
 
-        public List<IMediaStreamTrack> GetAudioTracks() =>
-            ((RTCMediaStream)SelfNativeObject).AudioTracks
-            .Select(track => MediaStreamTrack.Create(track))
-            .ToList();
+        public List<IMediaStreamTrack> GetAudioTracks() => _audioStreamTracks;
+            ////((RTCMediaStream)SelfNativeObject).AudioTracks
+            ////.Select(track => MediaStreamTrack.Create(track))
+            ////.ToList();
 
         public void AddTrack(IMediaStreamTrack track)
         {
@@ -155,9 +147,11 @@ namespace WebRtc.iOS
                 {
                     case MediaStreamTrackKind.Audio:
                         ((RTCMediaStream)SelfNativeObject).AddAudioTrack((RTCAudioTrack)track.SelfNativeObject);
+                        _audioStreamTracks.Add(track);
                         break;
                     case MediaStreamTrackKind.Video:
                         ((RTCMediaStream)SelfNativeObject).AddVideoTrack((RTCVideoTrack)track.SelfNativeObject);
+                        _videoStreamTracks.Add(track);
                         break;
                 }
             };
@@ -170,9 +164,11 @@ namespace WebRtc.iOS
                 switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
+                        _audioStreamTracks.Remove(track);
                         ((RTCMediaStream)SelfNativeObject).RemoveAudioTrack((RTCAudioTrack)track.SelfNativeObject);
                         break;
                     case MediaStreamTrackKind.Video:
+                        _videoStreamTracks.Remove(track);
                         ((RTCMediaStream)SelfNativeObject).RemoveVideoTrack((RTCVideoTrack)track.SelfNativeObject);
                         break;
                 }

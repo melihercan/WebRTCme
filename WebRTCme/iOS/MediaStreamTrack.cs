@@ -22,13 +22,13 @@ namespace WebRtc.iOS
 
         private RTCAudioSource _nativeAudioSource;
 
-        public static IMediaStreamTrack Create(RTCMediaStreamTrack nativeMediaStreamTrack)
-        {
-            var ret = new MediaStreamTrack();
-            ret.SelfNativeObject = nativeMediaStreamTrack;
-            ret.IsNativeObjectsOwner = false;
-            return ret;
-        }
+        //public static IMediaStreamTrack Create(RTCMediaStreamTrack nativeMediaStreamTrack)
+        //{
+        //    var ret = new MediaStreamTrack();
+        //    ret.SelfNativeObject = nativeMediaStreamTrack;
+        //    ////ret.IsNativeObjectsOwner = false;
+        //    return ret;
+        //}
 
         public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id,
             VideoType videoType = VideoType.Local, string videoSource = null)
@@ -216,9 +216,16 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public UIView GetView<UIView>()
+
+        public object GetView()
         {
-            return (UIView)(object)_nativeCameraPreviewView;
+            return _nativeCameraPreviewView;
+////            throw new NotImplementedException();
         }
+
+        ////public UIView GetView<UIView>()
+        ////{
+        ////            return /*(UIView)(object)*/_nativeCameraPreviewView as UIView;
+        ////    }
     }
 }

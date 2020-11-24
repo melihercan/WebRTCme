@@ -50,7 +50,7 @@ namespace WebRtcGuiXamarin.iOS
                                 Video = new MediaStreamContraintsUnion { Value = true }
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
-                            view = videoTrack.GetView<UIView>();
+                            view = videoTrack.GetView() as UIView;
 
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE

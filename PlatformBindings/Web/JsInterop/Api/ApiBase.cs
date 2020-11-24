@@ -17,7 +17,7 @@ namespace WebRtcJsInterop.Api
             SelfNativeObject = jsObjectRef;
         }
 
-        public bool IsNativeObjectsOwner { get; set; } = true;
+        ////public bool IsNativeObjectsOwner { get; set; } = true;
 
         public IJSRuntime JsRuntime { get; }
 

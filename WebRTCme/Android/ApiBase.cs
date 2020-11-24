@@ -9,7 +9,7 @@ namespace WebRtc.Android
 {
     public abstract class ApiBase : INativeObjects
     {
-        public bool IsNativeObjectsOwner { get; set; } = true;
+        ////public bool IsNativeObjectsOwner { get; set; } = true;
 
         protected ApiBase() { }
 

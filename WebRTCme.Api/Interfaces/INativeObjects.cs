@@ -7,7 +7,7 @@ namespace WebRTCme
 {
     public interface INativeObjects : IAsyncDisposable
     {
-        bool IsNativeObjectsOwner { get; set; }
+        ////bool IsNativeObjectsOwner { get; set; }
         
         object SelfNativeObject { get; }
 
