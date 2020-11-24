@@ -175,7 +175,7 @@ namespace WebRtc.iOS
             };
         }
 
-        public Task SetElementReferenceSrcObjectAsync(object media)
+        public void SetElementReferenceSrcObject(object media)
         {
             throw new NotImplementedException();
         }

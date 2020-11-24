@@ -189,7 +189,7 @@ namespace WebRtcJsInterop.Extensions
 
             if (isWasm)
             {
-                ((IJSInProcessRuntime)jsRuntime).InvokeVoid(identifier, args);
+                _ = (IJSInProcessRuntime)jsRuntime.Invoke<object>(identifier, args);
             }
             else
             {

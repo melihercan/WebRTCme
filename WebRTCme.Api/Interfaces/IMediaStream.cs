@@ -31,7 +31,7 @@ namespace WebRTCme
         
         
         // Custom APIs.
-        Task SetElementReferenceSrcObjectAsync(object media);
+        void SetElementReferenceSrcObject(object media);
     }
 
 }

@@ -76,7 +76,7 @@ namespace WebRtcJsInterop.Api
             throw new NotImplementedException();
         }
 
-        public async Task SetElementReferenceSrcObjectAsync(object/*ElementReference*/ elementReference)
+        public void SetElementReferenceSrcObject(object/*ElementReference*/ elementReference)
         {
             JsRuntime.SetJsProperty(elementReference, "srcObject", SelfNativeObject);
 

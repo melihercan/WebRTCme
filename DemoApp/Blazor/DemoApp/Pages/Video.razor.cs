@@ -46,7 +46,7 @@ namespace DemoApp.Pages
                     }
                 });
 
-                await _mediaStream.SetElementReferenceSrcObjectAsync(_localVideo);
+                _mediaStream.SetElementReferenceSrcObject(_localVideo);
 
                 _rtcPeerConnection = _window.RTCPeerConnection(new RTCConfiguration
                 {
@@ -73,7 +73,7 @@ namespace DemoApp.Pages
                     //// TODO: object != null =>
                     /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
 
-                    await Task.CompletedTask;
+                    ////await Task.CompletedTask;
                 ////});
                 ////await _rtcPeerConnection.OnTrack(async rtcTrackEvent => 
                 ///{
@@ -81,9 +81,9 @@ namespace DemoApp.Pages
                    //// await Task.CompletedTask;
                 ////});
 
-                var rtcSessionDescription = await _rtcPeerConnection.CreateOffer(new RTCOfferOptions 
-                { 
-                });
+                ////var rtcSessionDescription = await _rtcPeerConnection.CreateOffer(new RTCOfferOptions 
+                /////{ 
+                /////});
 
 
 
