@@ -15,14 +15,14 @@ namespace WebRtcGuiXamarin
         internal static IWebRtc WebRtc { get; private set; }
 
 
-        public static async Task InitializeAsync()
+        public static void Initialize()
         {
-            WebRtc = await CrossWebRtc.Instance;
+            WebRtc = CrossWebRtc.Current;
         }
 
-        public static async Task CleanupAsync()
+        public static void Cleanup()
         {
-            await WebRtc.CleanupAsync();
+            WebRtc.Cleanup();
         }
     }
 }

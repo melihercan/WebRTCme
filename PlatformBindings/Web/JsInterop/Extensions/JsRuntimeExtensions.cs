@@ -175,11 +175,14 @@ namespace WebRtcJsInterop.Extensions
             }
             else
             {
+                // TODO: INVESTIGATE IF IT IS POSSIBLE TO RUN SERVER SIDE CODE SYNCHRONOUSLY
+                //          IF NOT, CREATE ALL AYNC API
                 // !!! Blocking UI thread !!!
-                return Task.Run(async () =>
-                {
-                    return await jsRuntime.InvokeAsync<TValue>(identifier, args);
-                }).Result;
+                //return Task.Run(async () =>
+                //{
+                //return await jsRuntime.InvokeAsync<TValue>(identifier, args);
+                //}).Result;
+                throw new NotImplementedException();
             }
         }
 
@@ -193,11 +196,14 @@ namespace WebRtcJsInterop.Extensions
             }
             else
             {
+                // TODO: INVESTIGATE IF IT IS POSSIBLE TO RUN SERVER SIDE CODE SYNCHRONOUSLY
+                //          IF NOT, CREATE ALL AYNC API
                 // !!! Blocking UI thread !!!
-                Task.Run(async () =>
-                {
-                    await jsRuntime.InvokeVoidAsync(identifier, args);
-                }).Wait();
+                //Task.Run(async () =>
+                //{
+                //await jsRuntime.InvokeVoidAsync(identifier, args);
+                //}).Wait();
+                throw new NotImplementedException();
             }
         }
     }

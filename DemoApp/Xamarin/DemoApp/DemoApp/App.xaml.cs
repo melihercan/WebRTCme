@@ -18,9 +18,9 @@ namespace DemoApp
             MainPage = new AppShell();
         }
 
-        protected override async void OnStart()
+        protected override void OnStart()
         {
-            await WebRtcGui.InitializeAsync();
+            WebRtcGui.Initialize();
         }
 
         protected override void OnSleep()
@@ -31,9 +31,9 @@ namespace DemoApp
         {
         }
 
-        protected override async void CleanUp()
+        protected override void CleanUp()
         {
-            await WebRtcGui.CleanupAsync();
+            WebRtcGui.Cleanup();
             base.CleanUp();
         }
     }

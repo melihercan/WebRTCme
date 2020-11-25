@@ -10,6 +10,6 @@ namespace WebRTCme
     {
         IWindow Window(IJSRuntime jsRuntime = null);
 
-        Task CleanupAsync();
+        void Cleanup();
     }
 }

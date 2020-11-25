@@ -9,21 +9,9 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        public static Task<IWebRtc> CreateAsync()
-        {
-            var ret = new WebRtc();
-            return ret.InitializeAsync();
-        }
+        public static IWebRtc Create() => new WebRtc();
 
-        private Task<IWebRtc> InitializeAsync()
-        {
-            return Task.FromResult(this as IWebRtc);
-        }
-
-        public Task CleanupAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public void Cleanup() { }
 
         public IWindow Window(IJSRuntime jsRuntime) => global::WebRtc.Android.Window.Create();
     }

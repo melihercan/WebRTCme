@@ -29,7 +29,7 @@ namespace DemoApp.Pages
 
             if (firstRender)
             {
-                var webRtc = await CrossWebRtc.Instance;
+                var webRtc = CrossWebRtc.Current;
                 _window = webRtc.Window(JsRuntime);
                 _navigator = _window.Navigator;
                 _mediaDevices = _navigator.MediaDevices;

@@ -7,10 +7,10 @@ namespace WebRTCme
 {
     public static class CrossWebRtc 
     {
-        public static Task<IWebRtc> Instance => _webRtc.Value;
+        public static IWebRtc Current => _webRtc.Value;
 
-        private static Lazy<Task<IWebRtc>> _webRtc = new Lazy<Task<IWebRtc>>(() => CreateWebRtcAsync());
+        private static Lazy<IWebRtc> _webRtc = new Lazy<IWebRtc>(() => CreateWebRtc());
 
-        private static Task<IWebRtc> CreateWebRtcAsync() => WebRtc.CreateAsync();
+        private static IWebRtc CreateWebRtc() => WebRtc.Create();
     }
 }
