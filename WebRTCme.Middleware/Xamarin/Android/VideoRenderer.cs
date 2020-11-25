@@ -12,6 +12,8 @@ using WebRtcMiddlewareXamarin;
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 //namespace WebRtcMiddlewareXamarin.Android
 namespace WebRtcMiddlewareXamarin
+//namespace WebRTCme.Middleware.Xamarin
+
 {
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {

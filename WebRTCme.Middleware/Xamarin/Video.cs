@@ -4,8 +4,8 @@ using System.Text;
 using Xamarin.Forms;
 using WebRTCme;
 
-//namespace WebRTCme.Middleware.Xamarin
-namespace WebRtcMiddlewareXamarin
+namespace WebRTCme.Middleware.Xamarin
+//namespace WebRtcMiddlewareXamarin
 {
     public class Video : View       
     {
