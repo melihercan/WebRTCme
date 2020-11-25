@@ -3,13 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
-using WebRtcGuiXamarin;
-using WebRtcGuiXamarin.Android;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using WebRTCme.Middleware.Xamarin;
+//using WebRtcMiddlewareXamarin.Android;
+using WebRtcMiddlewareXamarin;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
-namespace WebRtcGuiXamarin.Android
+//namespace WebRtcMiddlewareXamarin.Android
+namespace WebRtcMiddlewareXamarin
 {
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {

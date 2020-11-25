@@ -9,7 +9,9 @@ using UIKit;
 using Xamarin.Forms;
 using WebRTCme;
 
-namespace WebRtcGuiXamarin.iOS
+//namespace WebRtcMiddlewareXamarin.iOS
+//namespace WebRTCme.Middleware.Xamarin
+namespace WebRtcMiddlewareXamarin
 {
     public class VideoView : UIView
     {

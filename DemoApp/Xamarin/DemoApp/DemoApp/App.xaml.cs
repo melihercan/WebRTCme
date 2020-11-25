@@ -3,7 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using DemoApp.Services;
 using DemoApp.Views;
-using WebRtcGuiXamarin;
+using WebRTCme.Middleware.Xamarin;
 
 namespace DemoApp
 {
@@ -20,7 +20,7 @@ namespace DemoApp
 
         protected override void OnStart()
         {
-            WebRtcGui.Initialize();
+            WebRtcMiddleware.Initialize();
         }
 
         protected override void OnSleep()
@@ -33,7 +33,7 @@ namespace DemoApp
 
         protected override void CleanUp()
         {
-            WebRtcGui.Cleanup();
+            WebRtcMiddleware.Cleanup();
             base.CleanUp();
         }
     }

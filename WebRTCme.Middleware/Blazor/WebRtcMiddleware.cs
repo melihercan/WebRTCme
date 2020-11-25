@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using WebRTCme;
 
 //// TODO: REFACTOR TO WebRTCme.Blazor
-namespace WebRtcGuiBlazor
+namespace WebRTCme.Middleware.Blazor
 {
     //// TODO: RENAME TO WebRtcBlazor
-    public static class WebRtcGui
+    public static class WebRtcMiddleware
     {
         internal static IWebRtc WebRtc { get; private set; }
 

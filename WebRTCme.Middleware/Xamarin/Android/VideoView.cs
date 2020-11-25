@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtcGuiXamarin.Android
+//namespace WebRtcMiddlewareXamarin.Android
+namespace WebRtcMiddlewareXamarin
 {
     public class VideoView : View
     {

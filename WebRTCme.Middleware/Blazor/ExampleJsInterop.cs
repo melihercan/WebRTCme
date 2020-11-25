@@ -1,7 +1,7 @@
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Gui.Blazor
+namespace WebRtc.Middleware.Blazor
 {
     public class ExampleJsInterop
     {

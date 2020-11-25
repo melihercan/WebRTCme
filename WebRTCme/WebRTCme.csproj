@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
 	<PropertyGroup>
-        <TargetFrameworks>netstandard2.1; MonoAndroid10.0; Xamarin.iOS10; net5; </TargetFrameworks>
+        <TargetFrameworks>netstandard2.1; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>8.0</LangVersion>		
@@ -10,30 +10,28 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="WebWasm\**\*.cs" />
+		<UpToDateCheckInput Include="Web\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\PlatformBindings\Web\Wasm\Wasm.csproj" />
-		<Compile Include="IWebRtc.cs" />
-		<Compile Include="CrossWebRtc.cs" />
-		<Compile Include="WebWasm\**\*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Web\Web.csproj" />
+		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<ProjectReference Include="..\PlatformBindings\Xamarin\Android\Android.csproj" />
-		<Compile Include="IWebRtc.cs" />
-		<Compile Include="CrossWebRtc.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\Android\Android.csproj" />
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
-		<ProjectReference Include="..\PlatformBindings\Xamarin\iOS\iOS.csproj" />
-		<Compile Include="IWebRtc.cs" />
-		<Compile Include="CrossWebRtc.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\iOS\iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
@@ -50,12 +48,6 @@
 
 
 
-	
-
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="CrossWebRtcAsync.cs" />
-	  <UpToDateCheckInput Remove="IWebRtcAsync.cs" />
-	</ItemGroup>
 
 </Project>
 

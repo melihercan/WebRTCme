@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using WebRTCme;
 
 //// TODO: REFACTOR TO WebRTCme.Xamarin
-namespace WebRtcGuiXamarin
+namespace WebRTCme.Middleware.Xamarin
 {
     /// <summary>
     //// TODO: RENAME TO WebRtcXamarin
     /// </summary>
-    public static class WebRtcGui
+    public static class WebRtcMiddleware
     {
         internal static IWebRtc WebRtc { get; private set; }
 

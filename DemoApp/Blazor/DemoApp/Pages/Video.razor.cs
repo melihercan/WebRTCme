@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Middleware.Blazor;
+
 
 namespace DemoApp.Pages
 {
@@ -29,6 +31,8 @@ namespace DemoApp.Pages
 
             if (firstRender)
             {
+                ////WebRtcMiddleware.Initialize();
+
                 var webRtc = CrossWebRtc.Current;
                 _window = webRtc.Window(JsRuntime);
                 _navigator = _window.Navigator;
@@ -108,6 +112,8 @@ namespace DemoApp.Pages
                 if (_navigator != null) await _navigator.DisposeAsync();
                 if (_window != null) await _window.DisposeAsync();
             });
+
+////            WebRtcMiddleware.Cleanup();
         }
 
     }

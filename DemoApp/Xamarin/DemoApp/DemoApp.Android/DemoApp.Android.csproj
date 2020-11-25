@@ -89,14 +89,15 @@
     <AndroidResource Include="Resources\drawable\tab_feed.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Gui\WebRTCme.Gui.Xamarin\Xamarin.csproj">
-      <Project>{d2d8ee39-8488-4ad2-abe1-46ca63972a7b}</Project>
-      <Name>Xamarin</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DemoApp\DemoApp.csproj">
       <Project>{92371e4d-25ee-4d22-958b-ed33f5709232}</Project>
       <Name>DemoApp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties TriggeredFromHotReload="False" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

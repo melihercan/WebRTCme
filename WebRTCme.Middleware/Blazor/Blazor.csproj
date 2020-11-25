@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <RootNamespace>WebRtcGuiBlazor</RootNamespace>
+    <RootNamespace>WebRtcMiddlewareBlazor</RootNamespace>
+    <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
   </PropertyGroup>
 
 

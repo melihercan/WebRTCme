@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using WebRtcGuiXamarin;
-using WebRtcGuiXamarin.iOS;
 using WebRTCme;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+using WebRTCme.Middleware.Xamarin;
+//using WebRtcMiddlewareXamarin.iOS;
+using WebRtcMiddlewareXamarin;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
-namespace WebRtcGuiXamarin.iOS
+//namespace WebRTCme.Middleware.Xamarin
+//namespace WebRtcMiddlewareXamarin.iOS
+namespace WebRtcMiddlewareXamarin
 {
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {
 
         private VideoView _videoView;
+
+        public VideoRenderer()
+        {
+        }
 
         protected override async void OnElementChanged(ElementChangedEventArgs<Video> e)
         {
@@ -40,7 +47,7 @@ namespace WebRtcGuiXamarin.iOS
                         if (string.IsNullOrEmpty(source))
                         {
                             // Default devices.
-                            var window = WebRtcGui.WebRtc.Window();
+                            var window = WebRtcMiddleware.WebRtc.Window();
                             var navigator = window.Navigator;
                             var mediaDevices = navigator.MediaDevices;
                             var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
