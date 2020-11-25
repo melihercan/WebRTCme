@@ -26,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{7D14E8A5-DEB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin", "Xamarin", "{5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JsInterop", "PlatformBindings\Web\JsInterop\JsInterop.csproj", "{E83AADC6-FF28-48E9-ADB6-96AA13759054}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wasm", "PlatformBindings\Web\Wasm\Wasm.csproj", "{E83AADC6-FF28-48E9-ADB6-96AA13759054}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Android", "PlatformBindings\Xamarin\Android\Android.csproj", "{5ACBD735-F68F-4699-A1E4-CC96660C045C}"
 EndProject

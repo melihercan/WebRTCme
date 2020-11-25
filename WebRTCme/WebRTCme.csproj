@@ -10,28 +10,30 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="Web\**\*.cs" />
+		<UpToDateCheckInput Include="WebWasm\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="*.cs" />
-	</ItemGroup>
-
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\PlatformBindings\Web\JsInterop\JsInterop.csproj" />
-		<Compile Include="Web\**\*.cs" />
+		<ProjectReference Include="..\PlatformBindings\Web\Wasm\Wasm.csproj" />
+		<Compile Include="IWebRtc.cs" />
+		<Compile Include="CrossWebRtc.cs" />
+		<Compile Include="WebWasm\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
 		<ProjectReference Include="..\PlatformBindings\Xamarin\Android\Android.csproj" />
+		<Compile Include="IWebRtc.cs" />
+		<Compile Include="CrossWebRtc.cs" />
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
 		<ProjectReference Include="..\PlatformBindings\Xamarin\iOS\iOS.csproj" />
+		<Compile Include="IWebRtc.cs" />
+		<Compile Include="CrossWebRtc.cs" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
@@ -43,6 +45,16 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.9" />
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+	</ItemGroup>
+
+
+
+
+	
+
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="CrossWebRtcAsync.cs" />
+	  <UpToDateCheckInput Remove="IWebRtcAsync.cs" />
 	</ItemGroup>
 
 </Project>

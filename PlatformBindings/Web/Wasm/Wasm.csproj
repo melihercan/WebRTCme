@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <AssemblyName>WebRTCme.Bindings.Web.JsInterop</AssemblyName>
-    <RootNamespace>WebRtcJsInterop</RootNamespace>
+    <AssemblyName>WebRTCme.Bindings.Web.Wasm</AssemblyName>
+    <RootNamespace>WebRtcWasm</RootNamespace>
   </PropertyGroup>
 
 
