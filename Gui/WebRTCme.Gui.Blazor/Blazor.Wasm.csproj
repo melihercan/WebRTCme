@@ -1,10 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+ <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <AssemblyName>WebRTCme.Bindings.Web.Wasm</AssemblyName>
-    <RootNamespace>WebRtcWasm</RootNamespace>
+    <RootNamespace>WebRtcGuiBlazor</RootNamespace>
   </PropertyGroup>
 
 
@@ -15,7 +14,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
+    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
 </Project>

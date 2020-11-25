@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Api", "WebRTCme.Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Signalling", "WebRTCme.Signalling\WebRTCme.Signalling.csproj", "{F1A297A2-EF7C-4867-80B4-C5E5B4A5F214}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlatformBindings", "PlatformBindings", "{761DF7FB-69F0-441D-B18F-B9803E48F6A5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Bindings", "WebRTCme.Bindings", "{761DF7FB-69F0-441D-B18F-B9803E48F6A5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{A957C062-0BC5-42F0-86F9-4D04AD9E6BBD}"
 	ProjectSection(SolutionItems) = preProject
@@ -44,11 +44,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.Android", "DemoApp\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.iOS", "DemoApp\Xamarin\DemoApp\DemoApp.iOS\DemoApp.iOS.csproj", "{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gui", "Gui", "{1B143511-677C-4946-A201-C8D429A563A5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware", "WebRTCme.Middleware", "{1B143511-677C-4946-A201-C8D429A563A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Gui.Xamarin", "Gui\WebRTCme.Gui.Xamarin\WebRTCme.Gui.Xamarin.csproj", "{D2D8EE39-8488-4AD2-ABE1-46CA63972A7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xamarin", "Gui\WebRTCme.Gui.Xamarin\Xamarin.csproj", "{D2D8EE39-8488-4AD2-ABE1-46CA63972A7B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Gui.Blazor", "Gui\WebRTCme.Gui.Blazor\WebRTCme.Gui.Blazor.csproj", "{954F2F4E-D5A1-433F-9CB3-96655AA7902D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Wasm", "Gui\WebRTCme.Gui.Blazor\Blazor.Wasm.csproj", "{954F2F4E-D5A1-433F-9CB3-96655AA7902D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

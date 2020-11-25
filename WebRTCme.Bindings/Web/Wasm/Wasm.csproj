@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <RootNamespace>WebRtcGuiBlazor</RootNamespace>
+    <AssemblyName>WebRTCme.Bindings.Web.Wasm</AssemblyName>
+    <RootNamespace>WebRtcBindingsWebWasm</RootNamespace>
   </PropertyGroup>
 
 
@@ -14,7 +15,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
+    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
 
 </Project>
