@@ -89,7 +89,7 @@
     <AndroidResource Include="Resources\drawable\tab_feed.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\WebRTCme.Middleware\Xamarin\WebRTCme.Middleware.Xamarin.csproj">
+    <ProjectReference Include="..\..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Xamarin\WebRTCme.Middleware.Xamarin.csproj">
       <Project>{fc0f9a4d-0d31-4930-a0ca-56d9cf55efdf}</Project>
       <Name>WebRTCme.Middleware.Xamarin</Name>
     </ProjectReference>
