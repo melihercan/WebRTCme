@@ -9,7 +9,7 @@ using WebRTCme;
 using WebRTCme.Middleware.Blazor;
 
 
-namespace DemoApp.Pages
+namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 {
     partial class Video : IDisposable
     {
@@ -24,6 +24,7 @@ namespace DemoApp.Pages
         private IMediaStream _mediaStream;
         private IRTCPeerConnection _rtcPeerConnection;
         ///private IRTCRtpSender _rtcRtpSender;
+
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
