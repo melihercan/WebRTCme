@@ -10,6 +10,7 @@ namespace WebRtc.Android
     {
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;
+        public event EventHandler<IMediaStreamEvent> OnAddStream;
 
         event EventHandler<IRTCPeerConnectionIceEvent> IRTCPeerConnection.OnIceCandidate
         {

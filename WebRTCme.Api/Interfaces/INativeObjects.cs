@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface INativeObjects : IAsyncDisposable
+    public interface INativeObjects : IDisposable
     {
         ////bool IsNativeObjectsOwner { get; set; }
         

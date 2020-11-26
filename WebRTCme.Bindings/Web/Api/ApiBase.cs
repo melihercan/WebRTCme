@@ -34,7 +34,7 @@ namespace WebRtcJsInterop.Api
 
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
             foreach (var nativeObject in NativeObjects)
             {

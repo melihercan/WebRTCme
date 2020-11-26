@@ -15,6 +15,7 @@ namespace WebRtcJsInterop.Api
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;
+        public event EventHandler<IMediaStreamEvent> OnAddStream;
 
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
             : base(jsRuntime, jsObjectRef) 

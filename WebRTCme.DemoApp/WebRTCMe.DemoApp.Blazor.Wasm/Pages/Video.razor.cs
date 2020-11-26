@@ -103,18 +103,13 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
         public void Dispose()
         {
-            // It seems Blazor has no support for IDisposeAsync!!!
-            // So we do fire and forget here!!!
-            Task.Run(async () =>
-            {
-                if (_rtcPeerConnection != null) await _rtcPeerConnection.DisposeAsync();
-                if (_mediaStream != null) await _mediaStream.DisposeAsync();
-                if (_mediaDevices != null) await _mediaDevices.DisposeAsync();
-                if (_navigator != null) await _navigator.DisposeAsync();
-                if (_window != null) await _window.DisposeAsync();
-            });
+            if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
+            if (_mediaStream != null) _mediaStream.Dispose();
+            if (_mediaDevices != null) _mediaDevices.Dispose();
+            if (_navigator != null) _navigator.Dispose();
+            if (_window != null) _window.Dispose();
 
-////            WebRtcMiddleware.Cleanup();
+            ////            WebRtcMiddleware.Cleanup();
         }
 
     }

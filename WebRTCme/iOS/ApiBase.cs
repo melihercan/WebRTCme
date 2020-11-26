@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Foundation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -6,7 +7,7 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    public abstract class ApiBase : INativeObjects
+    public abstract class ApiBase : NSObject, INativeObjects
     {
         ////public bool IsNativeObjectsOwner { get; set; } = true;
 
@@ -23,7 +24,7 @@ namespace WebRtc.iOS
 
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public ValueTask DisposeAsync()
+        public void Dispose()
         {
             ////if (IsNativeObjectsOwner)
             {
@@ -35,7 +36,6 @@ namespace WebRtc.iOS
                     }
                 }
             }
-            return default;
         }
     }
 }

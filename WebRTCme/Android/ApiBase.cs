@@ -33,7 +33,7 @@ namespace WebRtc.Android
         public List<object> NativeObjects { get; set; } = new List<object>();
 
 
-        public ValueTask DisposeAsync()
+        public void Dispose()
         {
             foreach (var nativeObject in NativeObjects)
             {
@@ -42,7 +42,6 @@ namespace WebRtc.Android
                     disposable.Dispose();
                 }
             }
-            return default;
         }
     }
 }
