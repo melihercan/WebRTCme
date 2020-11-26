@@ -38,19 +38,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp.iOS", "DemoApp\Xama
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware", "WebRTCme.Middleware", "{1B143511-677C-4946-A201-C8D429A563A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "WebRTCme.Bindings\Web\Web.csproj", "{D368EA8F-816D-4150-B407-70D0F7F11B95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Web", "WebRTCme.Bindings\Web\WebRTCme.Bindings.Web.csproj", "{D368EA8F-816D-4150-B407-70D0F7F11B95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Android", "WebRTCme.Bindings\Xamarin\Android\Android.csproj", "{5ACBD735-F68F-4699-A1E4-CC96660C045C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Xamarin.Android", "WebRTCme.Bindings\Xamarin\Android\WebRTCme.Bindings.Xamarin.Android.csproj", "{5ACBD735-F68F-4699-A1E4-CC96660C045C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iOS", "WebRTCme.Bindings\Xamarin\iOS\iOS.csproj", "{25994A74-2A57-46DC-B6CA-999F9C5885A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Xamarin.iOS", "WebRTCme.Bindings\Xamarin\iOS\WebRTCme.Bindings.Xamarin.iOS.csproj", "{25994A74-2A57-46DC-B6CA-999F9C5885A1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor", "WebRTCme.Middleware\Blazor\Blazor.csproj", "{E5C6665E-EE0E-41F9-9FB1-766DDB6EBB39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Blazor", "WebRTCme.Middleware\Blazor\WebRTCme.Middleware.Blazor.csproj", "{E5C6665E-EE0E-41F9-9FB1-766DDB6EBB39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xamarin", "WebRTCme.Middleware\Xamarin\Xamarin.csproj", "{FC0F9A4D-0D31-4930-A0CA-56D9CF55EFDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Xamarin", "WebRTCme.Middleware\Xamarin\WebRTCme.Middleware.Xamarin.csproj", "{FC0F9A4D-0D31-4930-A0CA-56D9CF55EFDF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Bindings.Async", "WebRTCme.Bindings.Async", "{9260AB56-054A-49D1-8354-F98AE59E5261}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Async", "WebRTCme.Async\WebRTCme.Async.csproj", "{31B2BDCE-EBD8-45A5-863E-0ED4BAE1D3ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Async", "WebRTCme.Async\WebRTCme.Async.csproj", "{31B2BDCE-EBD8-45A5-863E-0ED4BAE1D3ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware.Async", "WebRTCme.Middleware.Async", "{6CCE9BFB-495D-44F2-8FDC-24DED940FA48}"
 EndProject

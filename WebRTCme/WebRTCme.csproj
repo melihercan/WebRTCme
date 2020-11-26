@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\Web\Web.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Web\WebRTCme.Bindings.Web.csproj" />
 		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
@@ -43,6 +43,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.9" />
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
 	</ItemGroup>
 
 
