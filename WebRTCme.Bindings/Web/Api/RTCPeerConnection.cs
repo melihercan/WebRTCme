@@ -99,5 +99,10 @@ namespace WebRtcJsInterop.Api
         {
             throw new NotImplementedException();
         }
+
+        public void AddStream(IMediaStream mediaStream)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

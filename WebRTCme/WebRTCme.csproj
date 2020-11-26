@@ -35,6 +35,10 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="iOS\ModelExtensions.cs" />
+	</ItemGroup>
+
 
 
 

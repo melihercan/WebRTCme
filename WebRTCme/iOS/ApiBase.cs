@@ -24,7 +24,7 @@ namespace WebRtc.iOS
 
         public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public void Dispose()
+        public new void Dispose()
         {
             ////if (IsNativeObjectsOwner)
             {

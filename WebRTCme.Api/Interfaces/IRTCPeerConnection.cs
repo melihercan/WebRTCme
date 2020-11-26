@@ -15,6 +15,9 @@ namespace WebRTCme
 
         Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options);
 
+
+        void AddStream(IMediaStream mediaStream);
+
         event EventHandler<IMediaStreamEvent> OnAddStream;
 
         event EventHandler OnConnectionStateChanged;

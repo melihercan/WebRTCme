@@ -30,6 +30,11 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
+        public void AddStream(IMediaStream mediaStream)
+        {
+            throw new NotImplementedException();
+        }
+
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
             throw new NotImplementedException();
