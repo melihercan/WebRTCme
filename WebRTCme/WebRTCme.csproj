@@ -25,13 +25,13 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\Android\Android.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
-		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\iOS\iOS.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
@@ -43,7 +43,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.9" />
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
 	</ItemGroup>
 
 
