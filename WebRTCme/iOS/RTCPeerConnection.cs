@@ -60,7 +60,7 @@ namespace WebRtc.iOS
 
         public void AddStream(IMediaStream mediaStream)
         {
-            throw new NotImplementedException();
+            ((Webrtc.RTCPeerConnection)NativeObject).AddStream((Webrtc.RTCMediaStream)mediaStream.NativeObject);
         }
 
 

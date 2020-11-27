@@ -9,21 +9,25 @@ namespace WebRtc.iOS
 {
     internal static class ModelExtensions
     {
-        public static Webrtc.RTCConfiguration ToNative(this RTCConfiguration configuration) => 
-            new Webrtc.RTCConfiguration
+        public static Webrtc.RTCConfiguration ToNative(this RTCConfiguration configuration)
+        {   // => 
+            var p =
+            new Webrtc.RTCConfiguration();
             {
-                BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.RTCBundlePolicy.Balanced,
-                Certificate = (Webrtc.RTCCertificate)(configuration.Certificates[0]?.NativeObject) ??
+                p.BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.RTCBundlePolicy.Balanced;
+                p.Certificate = (Webrtc.RTCCertificate)(configuration.Certificates?.ElementAt(0).NativeObject) ??
                     //new Webrtc.RTCCertificate("TODO:private key", "TODO: certiciate"),
                     Webrtc.RTCCertificate.GenerateCertificateWithParams(new NSDictionary<NSString, NSObject>(
                         new[] { new NSString("expires"), new NSString("name") },
-                        new NSObject[] { new NSNumber(100000), new NSString("RSASSA-PKCS1-v1_5") })),
+                        new NSObject[] { new NSNumber(100000), new NSString("RSASSA-PKCS1-v1_5") }));
 
-                IceCandidatePoolSize = configuration.IceCandidatePoolSize ?? 0,
-                IceServers = configuration.IceServers.Select(server => server.ToNative()).ToArray(),
-                IceTransportPolicy = configuration.IceTransportPolicy?.ToNative() ?? Webrtc.RTCIceTransportPolicy.All,
-                RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.RTCRtcpMuxPolicy.Require
+                p.IceCandidatePoolSize = configuration.IceCandidatePoolSize ?? 0;
+                p.IceServers = configuration.IceServers.Select(server => server.ToNative()).ToArray();
+                p.IceTransportPolicy = configuration.IceTransportPolicy?.ToNative() ?? Webrtc.RTCIceTransportPolicy.All;
+                p.RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.RTCRtcpMuxPolicy.Require;
             };
+      return p;
+        }
 
         public static Webrtc.RTCIceServer ToNative(this RTCIceServer iceServer) =>
             new Webrtc.RTCIceServer

@@ -76,6 +76,13 @@ namespace WebRtcMiddlewareXamarin
                                     }
                                 }
                             });
+
+                            peerConnection.OnAddStream += (sender, mediaStreamEvent) =>
+                            {
+                                var x = mediaStreamEvent.MediaStream;
+                            };
+
+                            peerConnection.AddStream(mediaStream);
                         }
                     }
 
