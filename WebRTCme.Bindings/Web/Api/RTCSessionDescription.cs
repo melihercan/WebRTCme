@@ -10,8 +10,8 @@ namespace WebRtcJsInterop.Api
     internal class RTCSessionDescription : IRTCSessionDescription
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Task<RTCSdpType> Type { get; set; }
+        public RTCSdpType Type { get; set; }
 
-        public Task<string> Sdp { get; set; }
+        public string Sdp { get; set; }
     }
 }

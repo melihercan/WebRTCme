@@ -7,6 +7,6 @@ namespace WebRTCme
 {
     public interface IRTCDataChannelEvent
     {
-        Task<IRTCDataChannel> Channel { get; }
+        IRTCDataChannel Channel { get; }
     }
 }

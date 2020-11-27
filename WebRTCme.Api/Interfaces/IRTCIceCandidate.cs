@@ -8,39 +8,39 @@ namespace WebRTCme
 {
     public interface IRTCIceCandidate
     {
-        Task<string> Candidate { get; }
+        string Candidate { get; }
         
-        Task<string> Component { get; }
+        string Component { get; }
 
-        Task<string> Foundation { get; }
+        string Foundation { get; }
 
-        Task<string> Ip { get; }
+        string Ip { get; }
 
-        Task <ushort?> Port { get; }
+        ushort? Port { get; }
 
-        Task<ulong?> Priority { get; }
+        ulong? Priority { get; }
 
-        Task<string> Address { get; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        Task<RTCIceProtocol> Protocol { get; set; }
-
-        Task<string> RelatedAddress { get; }
-
-        Task<ushort?> RelatedPort { get; }
-
-        Task<string> SdpMid { get; }
-
-        Task<ushort?> SdpMLineIndex { get; }
+        string Address { get; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
+        RTCIceProtocol Protocol { get; set; }
 
-        Task<RTCIceTcpCandidateType> TcpType { get; }
+        string RelatedAddress { get; }
 
-        Task<string> Type { get; set; }
+        ushort? RelatedPort { get; }
 
-        Task<string> UsernameFragment { get; set; }
+        string SdpMid { get; }
 
-        Task<string> ToJson();
+        ushort? SdpMLineIndex { get; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+
+        RTCIceTcpCandidateType TcpType { get; }
+
+        string Type { get; set; }
+
+        string UsernameFragment { get; set; }
+
+        string ToJson();
     }
 }

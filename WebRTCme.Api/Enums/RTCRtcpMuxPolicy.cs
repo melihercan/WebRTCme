@@ -6,6 +6,7 @@ namespace WebRTCme
 {
     public enum RTCRtcpMuxPolicy
     {
+        Negotiate,
         Require
     }
 }

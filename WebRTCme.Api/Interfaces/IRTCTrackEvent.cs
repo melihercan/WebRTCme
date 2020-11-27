@@ -6,12 +6,12 @@ namespace WebRTCme
 {
     public interface IRTCTrackEvent
     {
-        Task<IRTCRtpReceiver> Receiver { get; set; }
+        IRTCRtpReceiver Receiver { get; set; }
 
-        Task<IMediaStream[]> Streams { get; set; }
+        IMediaStream[] Streams { get; set; }
 
-        Task<IMediaStreamTrack> Track { get; set; }
+        IMediaStreamTrack Track { get; set; }
 
-        Task<IRTCRtpTransceiver> Transceiver { get; set; }
+        IRTCRtpTransceiver Transceiver { get; set; }
     }
 }

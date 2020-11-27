@@ -9,9 +9,9 @@ namespace WebRTCme
     public interface IRTCSessionDescription
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        Task<RTCSdpType> Type { get; set; }
+        RTCSdpType Type { get; set; }
         
-        Task<string> Sdp { get; set; }
+        string Sdp { get; set; }
 
     }
 }

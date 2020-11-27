@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCCertificate
+    public interface IRTCCertificate : INativeObject
     {
-        Task<ulong> Expires { get; }
+        ulong Expires { get; }
         //// RTCDtlsFingerprint[] GetFingerprints();
     }
 }

@@ -7,25 +7,25 @@ namespace WebRTCme
 {
     public interface IRTCDataChannel
     {
-        Task<BinaryType> BinaryType { get; set; }
+        BinaryType BinaryType { get; set; }
 
-        Task<uint> BufferedAmount { get; }
+        uint BufferedAmount { get; }
         
-        Task<uint> BufferedAmountLowThreshold { get; set; }
+        uint BufferedAmountLowThreshold { get; set; }
 
-        Task<ushort?> Id { get; }
+        ushort? Id { get; }
 
-        Task<string> Label { get; }
+        string Label { get; }
 
-        Task<ushort?> MaxPacketLifeTime { get; }
+        ushort? MaxPacketLifeTime { get; }
 
-        Task<ushort?> MaxRetransmits { get; }
+        ushort? MaxRetransmits { get; }
 
-        Task<bool> Negotiated { get; }
+        bool Negotiated { get; }
 
-        Task<bool> Ordered { get; }
+        bool Ordered { get; }
 
-        Task<string> Protocol { get; }
+        string Protocol { get; }
 
         event EventHandler OnBufferedAmountLow;
 

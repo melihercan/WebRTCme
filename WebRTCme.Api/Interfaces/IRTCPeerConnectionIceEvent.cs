@@ -7,7 +7,7 @@ namespace WebRTCme
 {
     public interface IRTCPeerConnectionIceEvent
     {
-        Task<IRTCIceCandidate> Candidate { get; }
+        IRTCIceCandidate Candidate { get; }
         
         ////string Url { get; }
     }
