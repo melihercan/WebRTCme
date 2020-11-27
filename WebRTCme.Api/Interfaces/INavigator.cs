@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface INavigator : INativeObjects
+    public interface INavigator : INativeObject
     {
         IMediaDevices MediaDevices { get; }
     }

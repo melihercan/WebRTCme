@@ -7,35 +7,43 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    public abstract class ApiBase : NSObject, INativeObjects
+    public abstract class ApiBase : NSObject, INativeObject
     {
         ////public bool IsNativeObjectsOwner { get; set; } = true;
 
-        private object _selfNativeObject;
-        public object SelfNativeObject
+        protected ApiBase() { }
+
+        protected ApiBase(object nativeObject)
         {
-            get => _selfNativeObject;
-            protected set
-            {
-                _selfNativeObject = value;
-                NativeObjects.Add(value);
-            }
+            NativeObject = nativeObject;
+            //NativeObjects.Add(nativeObject);
         }
 
-        public List<object> NativeObjects { get; set; } = new List<object>();
+        //private object _selfNativeObject;
+        public object NativeObject { get; set; }
+        //{
+        //    get => _selfNativeObject;
+        //    protected set
+        //    {
+        //        _selfNativeObject = value;
+        //        NativeObjects.Add(value);
+        //    }
+        //}
 
-        public new void Dispose()
-        {
-            ////if (IsNativeObjectsOwner)
-            {
-                foreach (var nativeObject in NativeObjects)
-                {
-                    if (nativeObject is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-            }
-        }
+        //public List<object> NativeObjects { get; set; } = new List<object>();
+
+        //public void Dispose()
+        //{
+        //    ////if (IsNativeObjectsOwner)
+        //    {
+        //        foreach (var nativeObject in NativeObjects)
+        //        {
+        //            if (nativeObject is IDisposable disposable)
+        //            {
+        //                disposable.Dispose();
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

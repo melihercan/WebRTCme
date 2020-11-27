@@ -27,7 +27,7 @@ namespace WebRtc.iOS
         private IRTCPeerConnection Initialize(RTCConfiguration configuration)
         {
             var nativeConfiguration = configuration.ToNative();
-            NativeObjects.Add(nativeConfiguration);
+            //NativeObjects.Add(nativeConfiguration);
 
             var mandatory = new Dictionary<string, string>
             {
@@ -43,9 +43,9 @@ namespace WebRtc.iOS
                     mandatory.Values.ToArray(), mandatory.Keys.ToArray()), 
                 NSDictionary<NSString, NSString>.FromObjectsAndKeys(
                     optional.Values.ToArray(), optional.Keys.ToArray()));
-            NativeObjects.Add(nativeConstraints);
+            //NativeObjects.Add(nativeConstraints);
             
-            SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
+            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
                 nativeConfiguration,
                 nativeConstraints,
                 this);

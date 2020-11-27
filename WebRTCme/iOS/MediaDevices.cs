@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 //using WebRTCme.Bindings.Xamarin.iOS;
-using Webrtc;
+//using Webrtc;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -25,7 +25,7 @@ namespace WebRtc.iOS
             var mediaDeviceInfoList = new List<MediaDeviceInfo>();
 
             //var cameraCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
-            var cameraCaptureDevices = RTCCameraVideoCapturer.CaptureDevices;
+            var cameraCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
             foreach (var cameraCaptureDevice in cameraCaptureDevices)
             {
                 mediaDeviceInfoList.Add(new MediaDeviceInfo

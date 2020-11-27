@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
-using Webrtc;
+//using Webrtc;
 using UIKit;
 using AVFoundation;
 using System.Linq;
@@ -15,12 +15,12 @@ namespace WebRtc.iOS
         const string Audio = "audio";
         const string Video = "video";
 
-        private RTCCameraPreviewView _nativeCameraPreviewView;
-        private RTCCameraVideoCapturer _nativeCameraVideoCapturer;
-        private RTCFileVideoCapturer _nativeFileVIdeoCapturer;
-        private RTCVideoSource _nativeVideoSource;
+        private Webrtc.RTCCameraPreviewView _nativeCameraPreviewView;
+        private Webrtc.RTCCameraVideoCapturer _nativeCameraVideoCapturer;
+        private Webrtc.RTCFileVideoCapturer _nativeFileVIdeoCapturer;
+        private Webrtc.RTCVideoSource _nativeVideoSource;
 
-        private RTCAudioSource _nativeAudioSource;
+        private Webrtc.RTCAudioSource _nativeAudioSource;
 
         //public static IMediaStreamTrack Create(RTCMediaStreamTrack nativeMediaStreamTrack)
         //{
@@ -68,31 +68,31 @@ namespace WebRtc.iOS
             void AddAudioStreamTrack()
             {
                 _nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
-                NativeObjects.Add(_nativeAudioSource);
-                SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                //NativeObjects.Add(_nativeAudioSource);
+                NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
                     .AudioTrackWithSource(_nativeAudioSource, id);
             }
 
             void AddLocalVideoStreamTrack()
             {
                 _nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
-                NativeObjects.Add(_nativeVideoSource);
+                //NativeObjects.Add(_nativeVideoSource);
 
-                _nativeCameraPreviewView = new RTCCameraPreviewView();
-                NativeObjects.Add(_nativeCameraPreviewView);
+                _nativeCameraPreviewView = new Webrtc.RTCCameraPreviewView();
+                //NativeObjects.Add(_nativeCameraPreviewView);
 
-                _nativeCameraVideoCapturer = new RTCCameraVideoCapturer(_nativeVideoSource);
-                NativeObjects.Add(_nativeCameraVideoCapturer);
+                _nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer(_nativeVideoSource);
+                //NativeObjects.Add(_nativeCameraVideoCapturer);
 
                 _nativeCameraPreviewView.CaptureSession = _nativeCameraVideoCapturer.CaptureSession;
 
-                SelfNativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
                     .VideoTrackWithSource(_nativeVideoSource, id);
 
                 var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
                 var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
                 var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
-                var format = RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
+                var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
                 var fps = GetFpsByFormat(format);
                 _nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
 
@@ -130,14 +130,14 @@ namespace WebRtc.iOS
 
 
 
-        public string Id => ((RTCMediaStreamTrack)SelfNativeObject).TrackId;
+        public string Id => ((Webrtc.RTCMediaStreamTrack)NativeObject).TrackId;
 
 
-        public MediaStreamTrackKind Kind => ((RTCMediaStreamTrack)SelfNativeObject).Kind switch
+        public MediaStreamTrackKind Kind => ((Webrtc.RTCMediaStreamTrack)NativeObject).Kind switch
         {
             Audio => MediaStreamTrackKind.Audio,
             Video => MediaStreamTrackKind.Video,
-            _ => throw new Exception($"Invalid RTCMediaStreamTrack.Kind: {((RTCMediaStreamTrack)SelfNativeObject).Kind}")
+            _ => throw new Exception($"Invalid RTCMediaStreamTrack.Kind: {((Webrtc.RTCMediaStreamTrack)NativeObject).Kind}")
         };
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

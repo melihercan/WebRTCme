@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaDevices : INativeObjects
+    public interface IMediaDevices : INativeObject
     {
         Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices();
 

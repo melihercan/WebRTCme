@@ -39,11 +39,11 @@ namespace WebRtcJsInterop.Api
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
             var x = (MediaStreamTrack)track;
-            var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(SelfNativeObject, "addTrack", 
+            var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack", 
                 new object[] 
                 { 
-                    ((MediaStreamTrack)track).SelfNativeObject,
-                    ((MediaStream)stream).SelfNativeObject
+                    ((MediaStreamTrack)track).NativeObject,
+                    ((MediaStream)stream).NativeObject
                 });
             var rtcRtpSender = RTCRtpSender.New(JsRuntime, jsObjectRefRtcRtpSender);
             return rtcRtpSender;
@@ -52,7 +52,7 @@ namespace WebRtcJsInterop.Api
         public async Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
             var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                SelfNativeObject, "createOffer");
+                NativeObject, "createOffer");
             var rtcSessionDescription = JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
                 jsObjectRefRtcSessionDescription, null,
                 new
@@ -67,7 +67,7 @@ namespace WebRtcJsInterop.Api
 
         public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
         {
-            var ret = await JsRuntime.AddJsEventListener(SelfNativeObject as JsObjectRef, null, "onicecandidate",
+            var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onicecandidate",
                 JsEventHandler.New<IRTCPeerConnectionIceEvent>(async e => 
                 { 
                     await callback.Invoke(e).ConfigureAwait(false); 
@@ -78,7 +78,7 @@ namespace WebRtcJsInterop.Api
 
         public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
         {
-            var ret = await JsRuntime.AddJsEventListener(SelfNativeObject as JsObjectRef, null, "ontrack",
+            var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
                 JsEventHandler.New<IRTCTrackEvent>(async e =>
                 {
                     await callback.Invoke(e).ConfigureAwait(false);

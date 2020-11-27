@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStream : INativeObjects
+    public interface IMediaStream : INativeObject
     {
         public bool Active { get; }
 

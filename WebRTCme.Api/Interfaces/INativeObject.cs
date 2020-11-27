@@ -5,12 +5,12 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface INativeObjects : IDisposable
+    public interface INativeObject //: IDisposable
     {
         ////bool IsNativeObjectsOwner { get; set; }
         
-        object SelfNativeObject { get; }
+        object NativeObject { get; set; }
 
-        List<object> NativeObjects { get; set; }
+        ////List<object> NativeObjects { get; set; }
     }
 }

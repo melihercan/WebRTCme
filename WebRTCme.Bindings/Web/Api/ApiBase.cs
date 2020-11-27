@@ -9,38 +9,39 @@ using WebRTCme;
 
 namespace WebRtcJsInterop.Api
 {
-    public abstract class ApiBase : INativeObjects
+    public abstract class ApiBase : INativeObject
     {
         protected ApiBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
             JsRuntime = jsRuntime;
-            SelfNativeObject = jsObjectRef;
+            //NativeObject = jsObjectRef;
         }
 
         ////public bool IsNativeObjectsOwner { get; set; } = true;
 
         public IJSRuntime JsRuntime { get; }
+        public object NativeObject { get; set; }
 
-        private object _selfNativeObject;
-        public object SelfNativeObject
-        {
-            get => _selfNativeObject;
-            protected set
-            {
-                _selfNativeObject = value;
-                NativeObjects.Add(value);
-            }
-        }
+        //private object _selfNativeObject;
+        //public object NativeObject// { get; protected set; }
+        //{
+        //  get => _selfNativeObject;
+        //set
+        //{
+        //  _selfNativeObject = value;
+        //        NativeObjects.Add(value);
+        //}
+        //}
 
-        public List<object> NativeObjects { get; set; } = new List<object>();
+        //public List<object> NativeObjects { get; set; } = new List<object>();
 
-        public void Dispose()
-        {
-            foreach (var nativeObject in NativeObjects)
-            {
-                var jsObjectRef = nativeObject as JsObjectRef;
-                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
-            }
-        }
+        //public void Dispose()
+        //{
+        //    foreach (var nativeObject in NativeObjects)
+        //    {
+        //        var jsObjectRef = nativeObject as JsObjectRef;
+        //        JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+        //    }
+        //}
     }
 }
