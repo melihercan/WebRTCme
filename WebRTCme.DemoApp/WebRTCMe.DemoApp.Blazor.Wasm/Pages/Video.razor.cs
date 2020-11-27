@@ -103,11 +103,11 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
         public void Dispose()
         {
-            if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
-            if (_mediaStream != null) _mediaStream.Dispose();
-            if (_mediaDevices != null) _mediaDevices.Dispose();
-            if (_navigator != null) _navigator.Dispose();
-            if (_window != null) _window.Dispose();
+            //if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
+            //if (_mediaStream != null) _mediaStream.Dispose();
+            //if (_mediaDevices != null) _mediaDevices.Dispose();
+            //if (_navigator != null) _navigator.Dispose();
+            //if (_window != null) _window.Dispose();
 
             ////            WebRtcMiddleware.Cleanup();
         }

@@ -14,7 +14,7 @@ namespace WebRtcJsInterop.Api
         protected ApiBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
             JsRuntime = jsRuntime;
-            //NativeObject = jsObjectRef;
+            NativeObject = jsObjectRef;
         }
 
         ////public bool IsNativeObjectsOwner { get; set; } = true;
