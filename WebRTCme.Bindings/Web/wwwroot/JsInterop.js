@@ -1,4 +1,4 @@
-﻿DotNetInterop = (function () {
+﻿JsInterop = (function () {
 
     let public = {};
 

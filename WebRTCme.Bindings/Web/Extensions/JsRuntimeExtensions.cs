@@ -21,14 +21,14 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            var jsObjectRef = jsRuntime.Invoke<JsObjectRef>("DotNetInterop.createObject", invokeParams);
+            var jsObjectRef = jsRuntime.Invoke<JsObjectRef>("JsInterop.createObject", invokeParams);
             return jsObjectRef;
         }
 
         public static void DeleteJsObjectRef(this IJSRuntime jsRuntime,  int id)
         {
             jsRuntime.Invoke<object>(
-                "DotNetInterop.deleteObjectRef",
+                "JsInterop.deleteObjectRef",
                 new object[]
                 {
                     id,
@@ -39,7 +39,7 @@ namespace WebRtcJsInterop.Extensions
             object parent,  string property)
         {
             var jsObjectRef = jsRuntime.Invoke<JsObjectRef>(
-                "DotNetInterop.getPropertyObjectRef",
+                "JsInterop.getPropertyObjectRef",
                 new object[]
                 {
                     parent,
@@ -53,7 +53,7 @@ namespace WebRtcJsInterop.Extensions
             string property, object valueSpec)
         {
             var content = jsRuntime.Invoke<T>(
-                "DotNetInterop.getPropertyValue",
+                "JsInterop.getPropertyValue",
                 new object[]
                 {
                     parent,
@@ -67,7 +67,7 @@ namespace WebRtcJsInterop.Extensions
             object parent, string property = null)
         {
             var jsObjectRefs = jsRuntime.Invoke<IEnumerable<JsObjectRef>>(
-                "DotNetInterop.getPropertyArray",
+                "JsInterop.getPropertyArray",
                 new object[]
                 {
                     parent,
@@ -81,7 +81,7 @@ namespace WebRtcJsInterop.Extensions
             string property, object value)
         {
             jsRuntime.InvokeVoid(
-                "DotNetInterop.setProperty",
+                "JsInterop.setProperty",
                 new object[]
                 {
                     parent,
@@ -102,7 +102,7 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            jsRuntime.InvokeVoid("DotNetInterop.callMethod", invokeParams);
+            jsRuntime.InvokeVoid("JsInterop.callMethod", invokeParams);
         }
 
         public static T CallJsMethod<T>(this IJSRuntime jsRuntime, object parent,
@@ -117,7 +117,7 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            var ret = jsRuntime.Invoke<T>("DotNetInterop.callMethod", invokeParams);
+            var ret = jsRuntime.Invoke<T>("JsInterop.callMethod", invokeParams);
             return ret;
         }
 
@@ -133,7 +133,7 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            await jsRuntime.InvokeVoidAsync("DotNetInterop.callMethodAsync", invokeParams)
+            await jsRuntime.InvokeVoidAsync("JsInterop.callMethodAsync", invokeParams)
                 .ConfigureAwait(false);
         }
 
@@ -149,7 +149,7 @@ namespace WebRtcJsInterop.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            var ret = await jsRuntime.InvokeAsync<T>("DotNetInterop.callMethodAsync", invokeParams)
+            var ret = await jsRuntime.InvokeAsync<T>("JsInterop.callMethodAsync", invokeParams)
                 .ConfigureAwait(false);
             return ret;
         }
@@ -157,11 +157,11 @@ namespace WebRtcJsInterop.Extensions
         public static async ValueTask<IAsyncDisposable> AddJsEventListener(this IJSRuntime jsRuntime,
             JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)
         {
-            var listenerId = await jsRuntime.InvokeAsync<int>("DotNetInterop.addEventListener", jsObjectRef,
+            var listenerId = await jsRuntime.InvokeAsync<int>("JsInterop.addEventListener", jsObjectRef,
                 property, event_, callBack).ConfigureAwait(false);
 
             return new ActionAsyncDisposable(async () =>
-                await jsRuntime.InvokeVoidAsync("DotNetInterop.removeEventListener", jsObjectRef, property,
+                await jsRuntime.InvokeVoidAsync("JsInterop.removeEventListener", jsObjectRef, property,
                     event_, listenerId).ConfigureAwait(false));
         }
 
