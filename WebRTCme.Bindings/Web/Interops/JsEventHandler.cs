@@ -20,7 +20,7 @@ namespace WebRtcJsInterop.Interops
 
         private JsEventHandler() { }
 
-        public static JsEventHandler New(Func<ValueTask> callback, object contentSpec = null,
+        public static JsEventHandler Create(Func<ValueTask> callback, object contentSpec = null,
             bool getJsObjectRef = false)
         {
             return new JsEventHandler
@@ -31,7 +31,7 @@ namespace WebRtcJsInterop.Interops
             };
         }
 
-        public static JsEventHandler New<T>(Func<T, ValueTask> callback, object contentSpec = null,
+        public static JsEventHandler Create<T>(Func<T, ValueTask> callback, object contentSpec = null,
             bool getJsObjectRef = false)
         {
             return new JsEventHandler

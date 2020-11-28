@@ -35,13 +35,18 @@ namespace WebRtcJsInterop.Api
 
         //public List<object> NativeObjects { get; set; } = new List<object>();
 
-        //public void Dispose()
-        //{
-        //    foreach (var nativeObject in NativeObjects)
-        //    {
-        //        var jsObjectRef = nativeObject as JsObjectRef;
-        //        JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
-        //    }
-        //}
+        public void Dispose()
+        {
+            if (NativeObject != null)
+            {
+                var jsObjectRef = NativeObject as JsObjectRef;
+                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            }
+            //    foreach (var nativeObject in NativeObjects)
+            //    {
+            //        var jsObjectRef = nativeObject as JsObjectRef;
+            //JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            //    }
+        }
     }
 }

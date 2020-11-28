@@ -73,13 +73,13 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                     _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
 
-                ///await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
-                ////{
+                //await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
+                //{
                     //// TODO: object != null =>
                     /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
 
                     ////await Task.CompletedTask;
-                ////});
+                //});
                 ////await _rtcPeerConnection.OnTrack(async rtcTrackEvent => 
                 ///{
 
@@ -103,11 +103,11 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
         public void Dispose()
         {
-            //if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
-            //if (_mediaStream != null) _mediaStream.Dispose();
-            //if (_mediaDevices != null) _mediaDevices.Dispose();
-            //if (_navigator != null) _navigator.Dispose();
-            //if (_window != null) _window.Dispose();
+            if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
+            if (_mediaStream != null) _mediaStream.Dispose();
+            if (_mediaDevices != null) _mediaDevices.Dispose();
+            if (_navigator != null) _navigator.Dispose();
+            if (_window != null) _window.Dispose();
 
             ////            WebRtcMiddleware.Cleanup();
         }

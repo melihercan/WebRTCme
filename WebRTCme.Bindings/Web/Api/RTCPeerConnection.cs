@@ -17,6 +17,13 @@ namespace WebRtcJsInterop.Api
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IMediaStreamEvent> OnAddStream;
 
+        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        {
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
+            var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
+            return rtcPeerConnection;
+        }
+
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
             : base(jsRuntime, jsObjectRef) 
         {
@@ -68,7 +75,7 @@ namespace WebRtcJsInterop.Api
         public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onicecandidate",
-                JsEventHandler.New<IRTCPeerConnectionIceEvent>(async e => 
+                JsEventHandler.Create<IRTCPeerConnectionIceEvent>(async e => 
                 { 
                     await callback.Invoke(e).ConfigureAwait(false); 
                 },
@@ -79,7 +86,7 @@ namespace WebRtcJsInterop.Api
         public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
         {
             var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
-                JsEventHandler.New<IRTCTrackEvent>(async e =>
+                JsEventHandler.Create<IRTCTrackEvent>(async e =>
                 {
                     await callback.Invoke(e).ConfigureAwait(false);
                 },
@@ -88,12 +95,6 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
-        {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
-            var rtcPeerConnection = new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
-            return rtcPeerConnection;
-        }
 
         public Task AddIceCandidate(IRTCIceCandidate candidate)
         {

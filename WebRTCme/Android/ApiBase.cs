@@ -33,8 +33,8 @@ namespace WebRtc.Android
         //public List<object> NativeObjects { get; set; } = new List<object>();
 
 
-        //public void Dispose()
-        //{
+        public void Dispose()
+        {
         //    foreach (var nativeObject in NativeObjects)
         //    {
         //        if (nativeObject is IDisposable disposable)
@@ -42,6 +42,6 @@ namespace WebRtc.Android
         //            disposable.Dispose();
         //        }
         //    }
-        //}
+        }
     }
 }
