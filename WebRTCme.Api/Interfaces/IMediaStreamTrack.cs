@@ -18,6 +18,7 @@ namespace WebRTCme
         public string Label { get; }
         public bool Muted { get; }
         public bool Readonly { get; }
+
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public MediaStreamTrackState ReadyState { get; }
         public bool Remote { get; }

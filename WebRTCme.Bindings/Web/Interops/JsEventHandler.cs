@@ -51,9 +51,10 @@ namespace WebRtcJsInterop.Interops
                 _action = action;
             }
             [JSInvokable]
-            public void Invoke()
+            public Task Invoke()
             {
                 _action.Invoke();
+                return Task.CompletedTask;
             }
         }
 
@@ -66,9 +67,10 @@ namespace WebRtcJsInterop.Interops
                 _action = action;
             }
             [JSInvokable]
-            public void Invoke(T arg)
+            public Task Invoke(T arg)
             {
                 _action.Invoke(arg);
+                return Task.CompletedTask;
             }
         }
 

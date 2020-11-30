@@ -68,18 +68,18 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                     }
                 });
 
-                _rtcPeerConnection.OnAddStream += (sender, trackEvent) => 
-                {
-                    var ms = trackEvent.MediaStream;
-                };
-
-                _rtcPeerConnection.AddStream(_mediaStream);
-
-                //var mediaStreamTracks = _mediaStream.GetTracks();
-                //foreach(var mediaStreamTrack in mediaStreamTracks)
+                //_rtcPeerConnection.OnAddStream += (sender, trackEvent) => 
                 //{
-                  //  _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
-                //}
+                //    var ms = trackEvent.MediaStream;
+                //};
+
+                //_rtcPeerConnection.AddStream(_mediaStream);
+
+                var mediaStreamTracks = _mediaStream.GetTracks();
+                foreach(var mediaStreamTrack in mediaStreamTracks)
+                {
+                    _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
+                }
 
 
 

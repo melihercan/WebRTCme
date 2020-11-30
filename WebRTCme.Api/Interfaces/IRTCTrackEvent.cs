@@ -1,6 +1,5 @@
 ﻿using System.Dynamic;
 using System.Threading.Tasks;
-using WebRTCme.Interfaces;
 
 namespace WebRTCme
 {

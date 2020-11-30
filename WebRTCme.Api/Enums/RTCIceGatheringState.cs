@@ -4,7 +4,10 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpTransceiver 
+    public enum RTCIceGatheringState
     {
+        New,
+        Gathering,
+        Complete
     }
 }

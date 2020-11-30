@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpTransceiver 
+    public class RTCAnswerOptions
     {
     }
 }
