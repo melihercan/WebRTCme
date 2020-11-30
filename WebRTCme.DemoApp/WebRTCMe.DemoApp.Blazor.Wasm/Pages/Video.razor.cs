@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware.Blazor;
@@ -81,6 +82,13 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                     _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
 
+                //var state = _rtcPeerConnection.ConnectionState;
+                //var json = JsonSerializer.Serialize(state);
+                //var str = JsonSerializer.Deserialize<RTCIceConnectionState>(json);
+
+                var canTrickeIceCandidates = _rtcPeerConnection.CanTrickleIceCandidates;
+                var peerConnectionSTate = _rtcPeerConnection.ConnectionState;
+                //var iceConnectionState = _rtcPeerConnection.IceConnectionState;
 
 
                 //await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>

@@ -11,7 +11,6 @@ namespace WebRTCme
 
         double Timestamp { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCStatsType Type { get; set; }
     }
 }

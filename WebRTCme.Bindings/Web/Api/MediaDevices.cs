@@ -30,7 +30,7 @@ namespace WebRtcJsInterop.Api
             foreach (var jsObjectRefMediaDeviceInfo in jsObjectRefMediaDeviceInfoArray)
             {
                 mediaDeviceInfos.Add(JsRuntime.GetJsPropertyValue<MediaDeviceInfo>
-                    (jsObjectRefMediaDeviceInfo, null, null));
+                    (jsObjectRefMediaDeviceInfo, null));
                 JsRuntime.DeleteJsObjectRef(jsObjectRefMediaDeviceInfo.JsObjectRefId);
             }
             JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);

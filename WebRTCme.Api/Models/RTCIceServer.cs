@@ -9,7 +9,6 @@ namespace WebRTCme
     {
         public string Credential { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RTCIceCredentialType? CredentialType { get; set; }
         
         public string[] Urls { get; set; }

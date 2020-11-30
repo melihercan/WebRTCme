@@ -7,7 +7,6 @@ namespace WebRTCme
 {
     public class RTCConfiguration
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RTCBundlePolicy? BundlePolicy { get; set; }
         
         public IRTCCertificate[] Certificates { get; set; }
@@ -16,12 +15,10 @@ namespace WebRTCme
         
         public RTCIceServer[] IceServers { get; set; }
         
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RTCIceTransportPolicy? IceTransportPolicy { get; set; }
         
         public string PeerIdentity { get; set; }
         
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RTCRtcpMuxPolicy? RtcpMuxPolicy { get; set; }
     }
 }

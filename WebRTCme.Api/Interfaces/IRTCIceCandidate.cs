@@ -22,7 +22,6 @@ namespace WebRTCme
 
         string Address { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCIceProtocol Protocol { get; set; }
 
         string RelatedAddress { get; }
@@ -33,7 +32,6 @@ namespace WebRTCme
 
         ushort? SdpMLineIndex { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
 
         RTCIceTcpCandidateType TcpType { get; }
 

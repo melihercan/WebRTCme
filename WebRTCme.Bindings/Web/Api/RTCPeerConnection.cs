@@ -11,15 +11,16 @@ namespace WebRtcJsInterop.Api
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        private RTCConfiguration _rtcConfiguration;
+        public bool CanTrickleIceCandidates => JsRuntime.GetJsPropertyValue<bool>(
+            NativeObject, "canTrickleIceCandidates");
 
-        public bool CanTrickleIceCandidates => throw new NotImplementedException();
-
-        public RTCPeerConnectionState ConnectionState => throw new NotImplementedException();
+        public RTCPeerConnectionState ConnectionState => RTCPeerConnectionState.New;  //JsRuntime.GetJsPropertyValue<RTCPeerConnectionState>(
+            //NativeObject, "connectionState");
 
         public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
 
-        public RTCIceConnectionState IceConnectionState => throw new NotImplementedException();
+        public RTCIceConnectionState IceConnectionState => JsRuntime.GetJsPropertyValue<RTCIceConnectionState>(
+            NativeObject, "iceConnectionState");
 
         public RTCIceGatheringState IceGatheringState => throw new NotImplementedException();
 
@@ -58,17 +59,16 @@ namespace WebRtcJsInterop.Api
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
             : base(jsRuntime, jsObjectRef) 
         {
-            _rtcConfiguration = rtcConfiguration;
-
-            //NativeOnTrack(rtcTrackEvent =>
-            //{
-            //  var x = rtcTrackEvent.Track;
-            //});
-
-
-
+            AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
+            AddNativeEventListener("ondatachannel", OnDataChannel);
+            AddNativeEventListener("onicecandidate", OnIceCandidate);
+            AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
+            AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
+            AddNativeEventListener("onidentityresult", OnIdentityResult);
+            AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
+            AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
+            AddNativeEventListener("onconnectionstatechanged", OnTrack);
         }
-
 
         public RTCIceServer[] GetDefaultIceServers()
         {
@@ -221,16 +221,26 @@ namespace WebRtcJsInterop.Api
         //    return ret;
         //}
 
-        public IDisposable NativeOnTrack(Action<IRTCTrackEvent> callback)
+
+
+        private void AddNativeEventListener(string eventName, EventHandler eventHandler)
         {
-            var ret = JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
-                JsEventHandler.Create<IRTCTrackEvent>(e =>
+            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
+                JsEventHandler.Create(() =>
                 {
-                    callback.Invoke(e);
+                    eventHandler?.Invoke(this, EventArgs.Empty);
                 },
-                null, false));
-            return ret;
+                null, false)));
         }
 
+        private void AddNativeEventListener<T>(string eventName, EventHandler<T> eventHandler)
+        {
+            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
+                JsEventHandler.Create<T>(e =>
+                {
+                    eventHandler?.Invoke(this, e);
+                },
+                null, false)));
+        }
     }
 }

@@ -11,7 +11,6 @@ namespace WebRTCme
 
         public string GroupId { get; set; }
         
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MediaDeviceInfoKind Kind { get; set; }
         
         public string Label { get; set; }

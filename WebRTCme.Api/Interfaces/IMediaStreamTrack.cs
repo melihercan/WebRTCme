@@ -13,13 +13,11 @@ namespace WebRTCme
         public bool Enabled { get; set; }
         public string Id { get; }
         public bool Isolated { get; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MediaStreamTrackKind Kind { get; }
         public string Label { get; }
         public bool Muted { get; }
         public bool Readonly { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MediaStreamTrackState ReadyState { get; }
         public bool Remote { get; }
 

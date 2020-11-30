@@ -43,14 +43,14 @@ namespace WebRtcJsInterop.Extensions
                 new object[]
                 {
                     parent,
-                    property,
-                    null
+                    property//,
+                    //null
                 });
             return jsObjectRef;
         }
 
         public static T GetJsPropertyValue<T>(this IJSRuntime jsRuntime, object parent,
-            string property, object valueSpec)
+            string property, object valueSpec = null)
         {
             var content = jsRuntime.Invoke<T>(
                 "JsInterop.getPropertyValue",

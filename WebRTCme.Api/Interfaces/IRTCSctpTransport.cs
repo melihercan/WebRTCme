@@ -11,7 +11,6 @@ namespace WebRTCme
 
         int MaxMessageSize { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCSctpTransportState State { get; }
 
         IRTCSctpTransport Transport { get; }

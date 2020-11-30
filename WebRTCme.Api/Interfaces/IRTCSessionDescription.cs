@@ -8,7 +8,6 @@ namespace WebRTCme
 {
     public interface IRTCSessionDescription
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCSdpType Type { get; set; }
         
         string Sdp { get; set; }

@@ -11,15 +11,12 @@ namespace WebRTCme
     {
         bool CanTrickleIceCandidates { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCPeerConnectionState ConnectionState { get; }
 
         IRTCSessionDescription CurrentRemoteDescription { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCIceConnectionState IceConnectionState { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCIceGatheringState IceGatheringState { get; }
 
         IRTCSessionDescription LocalDescription { get; }
@@ -34,7 +31,6 @@ namespace WebRTCme
 
         IRTCSctpTransport Sctp { get; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         RTCSignallingState SignallingState { get; }
 
 
