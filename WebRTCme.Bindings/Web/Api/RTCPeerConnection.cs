@@ -15,6 +15,7 @@ namespace WebRtcJsInterop.Api
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;
+
         public event EventHandler<IMediaStreamEvent> OnAddStream;
 
         internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
@@ -24,10 +25,25 @@ namespace WebRtcJsInterop.Api
             return rtcPeerConnection;
         }
 
+        private RTCPeerConnection() : base(null) { }
+
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
             : base(jsRuntime, jsObjectRef) 
         {
             _rtcConfiguration = rtcConfiguration;
+
+            //NativeOnTrack(rtcTrackEvent =>
+            //{
+            //  var x = rtcTrackEvent.Track;
+            //});
+
+            JsEvents.Add(NativeOnAddStream(mediaStreamEvent =>
+            {
+                OnAddStream?.Invoke(this, mediaStreamEvent);
+////                var x = mediaStreamEvent.MediaStream;
+            }));
+
+
         }
 
         event EventHandler<IRTCPeerConnectionIceEvent> IRTCPeerConnection.OnIceCandidate
@@ -45,14 +61,13 @@ namespace WebRtcJsInterop.Api
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
         {
-            var x = (MediaStreamTrack)track;
             var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack", 
                 new object[] 
                 { 
                     ((MediaStreamTrack)track).NativeObject,
                     ((MediaStream)stream).NativeObject
                 });
-            var rtcRtpSender = RTCRtpSender.New(JsRuntime, jsObjectRefRtcRtpSender);
+            var rtcRtpSender = RTCRtpSender.Create(JsRuntime, jsObjectRefRtcRtpSender);
             return rtcRtpSender;
         }
 
@@ -72,30 +87,6 @@ namespace WebRtcJsInterop.Api
         }
 
 
-        public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
-        {
-            var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onicecandidate",
-                JsEventHandler.Create<IRTCPeerConnectionIceEvent>(async e => 
-                { 
-                    await callback.Invoke(e).ConfigureAwait(false); 
-                },
-                null, false)).ConfigureAwait(false);
-            return ret;
-        }
-
-        public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
-        {
-            var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
-                JsEventHandler.Create<IRTCTrackEvent>(async e =>
-                {
-                    await callback.Invoke(e).ConfigureAwait(false);
-                },
-                null, false)).ConfigureAwait(false);
-            return ret;
-        }
-
-
-
         public Task AddIceCandidate(IRTCIceCandidate candidate)
         {
             throw new NotImplementedException();
@@ -103,7 +94,57 @@ namespace WebRtcJsInterop.Api
 
         public void AddStream(IMediaStream mediaStream)
         {
-            throw new NotImplementedException();
+            var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addStream",
+                new object[]
+                {
+                    ((MediaStream)mediaStream).NativeObject
+                });
         }
+
+        //public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
+        //{
+        //    var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onicecandidate",
+        //        JsEventHandler.Create<IRTCPeerConnectionIceEvent>(async e =>
+        //        {
+        //            await callback.Invoke(e).ConfigureAwait(false);
+        //        },
+        //        null, false)).ConfigureAwait(false);
+        //    return ret;
+        //}
+
+        //public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
+        //{
+        //    var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
+        //        JsEventHandler.Create<IRTCTrackEvent>(async e =>
+        //        {
+        //            await callback.Invoke(e).ConfigureAwait(false);
+        //        },
+        //        null, false)).ConfigureAwait(false);
+        //    return ret;
+        //}
+
+        public IDisposable NativeOnTrack(Action<IRTCTrackEvent> callback)
+        {
+            var ret = JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
+                JsEventHandler.Create<IRTCTrackEvent>(e =>
+                {
+                    callback.Invoke(e);
+                },
+                null, false));
+            return ret;
+        }
+
+
+        public IDisposable NativeOnAddStream(Action<IMediaStreamEvent> callback)
+        {
+            var ret = JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onaddstream",
+                JsEventHandler.Create<IMediaStreamEvent>(e =>
+                {
+                    callback.Invoke(e);
+                },
+                null, false));
+            return ret;
+        }
+
     }
 }

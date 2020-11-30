@@ -17,36 +17,42 @@ namespace WebRtcJsInterop.Api
             NativeObject = jsObjectRef;
         }
 
-        ////public bool IsNativeObjectsOwner { get; set; } = true;
-
         public IJSRuntime JsRuntime { get; }
-        public object NativeObject { get; set; }
+        
+////        public object NativeObject { get; set; }
 
-        //private object _selfNativeObject;
-        //public object NativeObject// { get; protected set; }
-        //{
-        //  get => _selfNativeObject;
-        //set
-        //{
-        //  _selfNativeObject = value;
-        //        NativeObjects.Add(value);
-        //}
-        //}
+        private object _nativeObject;
+        public object NativeObject// { get; protected set; }
+        {
+            get => _nativeObject;
+            set
+            { 
+                _nativeObject = value;
+                JsObjects.Add(value as JsObjectRef);
+            }
+        }
 
-        //public List<object> NativeObjects { get; set; } = new List<object>();
+        public List<JsObjectRef> JsObjects { get; set; } = new List<JsObjectRef>();
+
+        public List<IDisposable> JsEvents { get; set; } = new List<IDisposable>();
+        
 
         public void Dispose()
         {
-            if (NativeObject != null)
+            ////            if (NativeObject != null)
+            ////        {
+            ////        var jsObjectRef = NativeObject as JsObjectRef;
+            ////                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            ////        }
+            foreach (var jsEvent in JsEvents)
             {
-                var jsObjectRef = NativeObject as JsObjectRef;
+                jsEvent.Dispose();
+            }
+            foreach (var jsObjectRef in JsObjects)
+            {
                 JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             }
-            //    foreach (var nativeObject in NativeObjects)
-            //    {
-            //        var jsObjectRef = nativeObject as JsObjectRef;
-            //JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
-            //    }
+
         }
     }
 }

@@ -154,16 +154,29 @@ namespace WebRtcJsInterop.Extensions
             return ret;
         }
 
-        public static async ValueTask<IAsyncDisposable> AddJsEventListener(this IJSRuntime jsRuntime,
+        public static IDisposable AddJsEventListener(this IJSRuntime jsRuntime,
             JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)
         {
-            var listenerId = await jsRuntime.InvokeAsync<int>("JsInterop.addEventListener", jsObjectRef,
-                property, event_, callBack).ConfigureAwait(false);
+            var listenerId = jsRuntime.Invoke<int>("JsInterop.addEventListener", jsObjectRef,
+                property, event_, callBack);
 
-            return new ActionAsyncDisposable(async () =>
-                await jsRuntime.InvokeVoidAsync("JsInterop.removeEventListener", jsObjectRef, property,
-                    event_, listenerId).ConfigureAwait(false));
+            return new DisposableAction(() =>
+                jsRuntime.InvokeVoid("JsInterop.removeEventListener", jsObjectRef, property,
+                    event_, listenerId));
         }
+
+        //public static async ValueTask<IAsyncDisposable> AddJsEventListener(this IJSRuntime jsRuntime,
+        //    JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)
+        //{
+        //    var listenerId = await jsRuntime.InvokeAsync<int>("JsInterop.addEventListener", jsObjectRef,
+        //        property, event_, callBack).ConfigureAwait(false);
+
+        //    return new ActionAsyncDisposable(async () =>
+        //        await jsRuntime.InvokeVoidAsync("JsInterop.removeEventListener", jsObjectRef, property,
+        //            event_, listenerId).ConfigureAwait(false));
+        //}
+
+
 
         public static TValue Invoke<TValue>(this IJSRuntime jsRuntime, string identifier, params object[] args)
         {

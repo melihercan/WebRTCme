@@ -20,7 +20,7 @@ namespace WebRtcJsInterop.Interops
 
         private JsEventHandler() { }
 
-        public static JsEventHandler Create(Action callback, object contentSpec = null,
+        public static JsEventHandler Create(Func<ValueTask> callback, object contentSpec = null,
             bool getJsObjectRef = false)
         {
             return new JsEventHandler
@@ -31,7 +31,7 @@ namespace WebRtcJsInterop.Interops
             };
         }
 
-        public static JsEventHandler Create<T>(Action<T> callback, object contentSpec = null,
+        public static JsEventHandler Create<T>(Func<T, ValueTask> callback, object contentSpec = null,
             bool getJsObjectRef = false)
         {
             return new JsEventHandler
@@ -44,31 +44,31 @@ namespace WebRtcJsInterop.Interops
 
         private class JsInteropActionHandler
         {
-            private readonly Action _action;
+            private readonly Func<ValueTask> _func;
 
-            internal JsInteropActionHandler(Action action)
+            internal JsInteropActionHandler(Func<ValueTask> func)
             {
-                _action = action;
+                _func = func;
             }
             [JSInvokable]
-            public void Invoke()
+            public async Task Invoke()
             {
-                _action.Invoke();
+                await _func.Invoke();
             }
         }
 
         private class JsInteropActionHandler<T>
         {
-            private readonly Action<T> _action;
+            private readonly Func<T, ValueTask> _func;
 
-            internal JsInteropActionHandler(Action<T> action)
+            internal JsInteropActionHandler(Func<T, ValueTask> func)
             {
-                _action = action;
+                _func = func;
             }
             [JSInvokable]
-            public void Invoke(T arg)
+            public async Task Invoke(T arg)
             {
-                _action.Invoke(arg);
+                await _func.Invoke(arg);
             }
         }
 
