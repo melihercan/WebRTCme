@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
 	<PropertyGroup>
-        <TargetFrameworks>netstandard2.1; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
+        <TargetFrameworks>netstandard2.1; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>8.0</LangVersion>		
@@ -20,7 +20,12 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\Web\WebRTCme.Bindings.Web.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Web\WebRTCme.Bindings.Web.csproj" />
+		<Compile Include="Web\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Web\WebRTCme.Bindings.Web.csproj" />
 		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
@@ -38,9 +43,16 @@
 	
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.JSInterop" Version="3.1.9" />
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="3.1.10" Condition="'$(TargetFramework)' != 'net5'" />
+		<PackageReference Include="Microsoft.JSInterop" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5'" />
 	</ItemGroup>
+
+	
+
+
+	
+
 
 </Project>
 

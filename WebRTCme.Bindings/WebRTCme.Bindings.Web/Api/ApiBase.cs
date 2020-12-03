@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcJsInterop.Extensions;
-using WebRtcJsInterop.Interops;
+using WebRtcBindingsWeb.Extensions;
+using WebRtcBindingsWeb.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop.Api
+namespace WebRtcBindingsWeb.Api
 {
     public abstract class ApiBase : INativeObject
     {

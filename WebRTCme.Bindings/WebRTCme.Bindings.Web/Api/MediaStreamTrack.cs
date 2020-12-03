@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcJsInterop.Interops;
+using WebRtcBindingsWeb.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop.Api
+namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {

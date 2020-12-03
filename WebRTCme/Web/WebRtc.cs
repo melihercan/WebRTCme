@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Microsoft.JSInterop;
 
+
 namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
@@ -17,6 +18,6 @@ namespace WebRTCme
 
         public void Cleanup() { }
 
-        public IWindow Window(IJSRuntime jsRuntime) => WebRtcJsInterop.Api.Window.Create(jsRuntime);
+        public IWindow Window(IJSRuntime jsRuntime) => WebRtcBindingsWeb.Api.Window.Create(jsRuntime);
     }
 }

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebRtcJsInterop.Interops;
+using WebRtcBindingsWeb.Interops;
 
-namespace WebRtcJsInterop.Extensions
+namespace WebRtcBindingsWeb.Extensions
 {
     public static class JsRuntimeExtensions
     {

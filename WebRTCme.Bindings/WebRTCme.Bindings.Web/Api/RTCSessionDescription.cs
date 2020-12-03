@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtcJsInterop.Api
+namespace WebRtcBindingsWeb.Api
 {
     internal class RTCSessionDescription : IRTCSessionDescription
     {

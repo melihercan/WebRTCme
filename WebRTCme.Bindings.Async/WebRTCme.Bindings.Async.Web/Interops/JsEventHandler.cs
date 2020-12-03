@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace WebRtcJsInterop.Interops
+namespace WebRtcBindingsWeb.Interops
 {
     public class JsEventHandler
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace WebRtcJsInterop.Interops
+namespace WebRtcBindingsWeb.Interops
 {
     internal class ActionAsyncDisposable : IAsyncDisposable
     {

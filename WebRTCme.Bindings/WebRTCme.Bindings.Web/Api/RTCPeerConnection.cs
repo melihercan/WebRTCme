@@ -3,26 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcJsInterop.Extensions;
-using WebRtcJsInterop.Interops;
+using WebRtcBindingsWeb.Extensions;
+using WebRtcBindingsWeb.Interops;
 using WebRTCme;
 
-namespace WebRtcJsInterop.Api
+namespace WebRtcBindingsWeb.Api
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        public bool CanTrickleIceCandidates => JsRuntime.GetJsPropertyValue<bool>(
-            NativeObject, "canTrickleIceCandidates");
+        public bool CanTrickleIceCandidates => GetNativeProperty<bool>("canTrickleIceCandidates");
 
-        public RTCPeerConnectionState ConnectionState => RTCPeerConnectionState.New;  //JsRuntime.GetJsPropertyValue<RTCPeerConnectionState>(
-            //NativeObject, "connectionState");
+        public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");
 
         public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
 
-        public RTCIceConnectionState IceConnectionState => JsRuntime.GetJsPropertyValue<RTCIceConnectionState>(
-            NativeObject, "iceConnectionState");
+        public RTCIceConnectionState IceConnectionState => 
+            GetNativeProperty<RTCIceConnectionState>("iceConnectionState");
 
-        public RTCIceGatheringState IceGatheringState => throw new NotImplementedException();
+        public RTCIceGatheringState IceGatheringState => GetNativeProperty<RTCIceGatheringState>("iceGatheringState");
 
         public IRTCSessionDescription LocalDescription => throw new NotImplementedException();
 
@@ -242,5 +240,8 @@ namespace WebRtcJsInterop.Api
                 },
                 null, false)));
         }
+
+        private T GetNativeProperty<T>(string propertyName) => JsRuntime.GetJsPropertyValue<T>(
+            NativeObject, propertyName);
     }
 }

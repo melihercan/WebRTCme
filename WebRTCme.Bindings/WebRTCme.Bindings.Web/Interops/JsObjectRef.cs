@@ -2,9 +2,9 @@ using Microsoft.JSInterop;
 using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WebRtcJsInterop.Extensions;
+using WebRtcBindingsWeb.Extensions;
 
-namespace WebRtcJsInterop.Interops
+namespace WebRtcBindingsWeb.Interops
 {
     public class JsObjectRef
     {
