@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCIceCandidate
+    public interface IRTCIceCandidate : INativeObject
     {
         string Candidate { get; }
         

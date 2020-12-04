@@ -58,7 +58,7 @@ namespace WebRTCme
 
         Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options = null);
 
-        /*static*/ Task<IRTCCertificate> GenerateCertificate();
+        /*static*/ Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm);
 
         RTCConfiguration GetConfiguration();
 

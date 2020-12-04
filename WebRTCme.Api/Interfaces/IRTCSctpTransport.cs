@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    public interface IRTCSctpTransport
+    public interface IRTCSctpTransport : INativeObject
     {
         int MaxChannels { get; }
 

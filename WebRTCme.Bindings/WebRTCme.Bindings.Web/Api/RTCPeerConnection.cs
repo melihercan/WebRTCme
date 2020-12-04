@@ -1,6 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Extensions;
@@ -45,9 +46,10 @@ namespace WebRtcBindingsWeb.Api
             RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
                 NativeObject, "remoteDescription"));
 
-        public IRTCSctpTransport Sctp => throw new NotImplementedException();
+        public IRTCSctpTransport Sctp =>
+            RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
 
-        public RTCSignallingState SignallingState => throw new NotImplementedException();
+        public RTCSignallingState SignallingState => GetNativeProperty<RTCSignallingState>("signallingState");
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -83,81 +85,83 @@ namespace WebRtcBindingsWeb.Api
 
         public RTCIceServer[] GetDefaultIceServers()
         {
-            throw new NotImplementedException();
+            var iceServers = new List<RTCIceServer>();
+            var jsObjectRefGetDefaultIceServers = 
+                JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getDefaultIceServers");
+            var jsObjectRefIceServerArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetDefaultIceServers);
+            foreach (var jsObjectRefIceServer in jsObjectRefIceServerArray)
+            {
+                iceServers.Add(JsRuntime.GetJsPropertyValue<RTCIceServer>(jsObjectRefIceServer, null));
+                JsRuntime.DeleteJsObjectRef(jsObjectRefIceServer.JsObjectRefId);
+            }
+            JsRuntime.DeleteJsObjectRef(jsObjectRefGetDefaultIceServers.JsObjectRefId);
+            return iceServers.ToArray();
         }
 
 
-        public Task AddIceCandidate(IRTCIceCandidate candidate)
-        {
-            throw new NotImplementedException();
-        }
+        public Task AddIceCandidate(IRTCIceCandidate candidate) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate.NativeObject).AsTask(); 
 
-        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
-        {
-            var jsObjectRefRtcRtpSender = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",
+        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
+            RTCRtpSender.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",
                 new object[]
                 {
                     ((MediaStreamTrack)track).NativeObject,
                     ((MediaStream)stream).NativeObject
-                });
-            var rtcRtpSender = RTCRtpSender.Create(JsRuntime, jsObjectRefRtcRtpSender);
-            return rtcRtpSender;
-        }
+                }));
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
+        public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 
-        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null) =>
+            await Task.FromResult(RTCSessionDescription.Create(
+                JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+                    NativeObject, "createAnswer", options)));
 
-        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
-        {
-            var jsObjectRefRtcSessionDescription = await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                NativeObject, "createOffer");
-            var rtcSessionDescription = JsRuntime.GetJsPropertyValue<RTCSessionDescription>(
-                jsObjectRefRtcSessionDescription, null,
-                new
+        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null) =>
+            RTCDataChannel.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "createDataChannel",
+                new object[]
                 {
-                    type = true,
-                    sdp = true
-                });
-            //// TODO: REMOVE JS OBJ REF
-            return rtcSessionDescription;
-        }
+                    label,
+                    options
+                }));
+
+        public async Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options) =>
+            await Task.FromResult(RTCSessionDescription.Create(
+                JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+                    NativeObject, "createOffer", options)));
 
 
-        /*static*/public Task<IRTCCertificate> GenerateCertificate()
-        {
-            throw new NotImplementedException();
-        }
+        /*static*/
+        public async Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
+            await Task.FromResult(RTCCertificate.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+                "RTCPeerConnection", "generateCertificate", keygenAlgorithm)));
 
-        public RTCConfiguration GetConfiguration()
-        {
-            throw new NotImplementedException();
-        }
+        public RTCConfiguration GetConfiguration() =>
+            JsRuntime.CallJsMethod<RTCConfiguration>(NativeObject, "getConfiguration");
 
-        public void GetIdentityAssertion()
-        {
-            throw new NotImplementedException();
-        }
+        public void GetIdentityAssertion() =>
+            JsRuntime.CallJsMethodVoid(NativeObject, "getIdentityAssertion");
 
         public IRTCRtpReceiver[] GetReceivers()
         {
-            throw new NotImplementedException();
+            var jsObjectRefGetReceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getReceivers");
+            var jsObjectRefRtpReceiversArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetReceivers);
+            var rtpReceivers = jsObjectRefRtpReceiversArray
+                .Select(jsObjectRef => RTCRtpReceiver.Create(JsRuntime, jsObjectRef))
+                .ToArray();
+            JsRuntime.DeleteJsObjectRef(jsObjectRefGetReceivers.JsObjectRefId);
+            return rtpReceivers;
         }
 
         public IRTCRtpSender[] GetSenders()
         {
-            throw new NotImplementedException();
+            var jsObjectRefGetSenders = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getSenders");
+            var jsObjectRefRtpSendersArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetSenders);
+            var rtpSenders = jsObjectRefRtpSendersArray
+                .Select(jsObjectRef => RTCRtpSender.Create(JsRuntime, jsObjectRef))
+                .ToArray();
+            JsRuntime.DeleteJsObjectRef(jsObjectRefGetSenders.JsObjectRefId);
+            return rtpSenders;
         }
 
         public Task<IRTCStatsReport> GetStats()

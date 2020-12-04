@@ -2,7 +2,7 @@
 
 namespace WebRTCme
 {
-    public interface IRTCRtpReceiver
+    public interface IRTCRtpReceiver : INativeObject
     {
     }
 }

@@ -135,7 +135,7 @@ namespace WebRtcBindingsWeb.Extensions
             return ret;
         }
 
-        public static async ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, object parent,
+        public static ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)
         {
             var invokeParams = new object[]
@@ -147,8 +147,8 @@ namespace WebRtcBindingsWeb.Extensions
             {
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
-            await jsRuntime.InvokeVoidAsync("JsInterop.callMethodAsync", invokeParams)
-                .ConfigureAwait(false);
+            return jsRuntime.InvokeVoidAsync("JsInterop.callMethodAsync", invokeParams);
+                //.ConfigureAwait(false);
         }
 
         public static async ValueTask<T> CallJsMethodAsync<T>(this IJSRuntime jsRuntime, 
