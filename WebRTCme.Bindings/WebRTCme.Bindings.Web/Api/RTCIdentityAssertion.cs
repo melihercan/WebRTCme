@@ -1,0 +1,30 @@
+﻿using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using WebRtcBindingsWeb.Interops;
+using WebRTCme;
+
+namespace WebRtcBindingsWeb.Api
+{
+    internal class RTCIdentityAssertion : ApiBase, IRTCIdentityAssertion
+    {
+        internal static IRTCIdentityAssertion Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefIdentityAssertion)
+        {
+            return new RTCIdentityAssertion(jsRuntime, jsObjectRefIdentityAssertion);
+        }
+
+        private RTCIdentityAssertion() : base(null) { }
+
+        private RTCIdentityAssertion(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
+        {
+
+        }
+
+        public string Idp { get; set; }
+        public string Name { get; set; }
+    }
+}

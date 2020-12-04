@@ -49,6 +49,20 @@ namespace WebRtcBindingsWeb.Extensions
             return jsObjectRef;
         }
 
+        public static ValueTask<JsObjectRef> GetJsPropertyObjectRefAsync(this IJSRuntime jsRuntime,
+            object parent, string property)
+        {
+            var jsObjectRef = jsRuntime.InvokeAsync<JsObjectRef>(
+                "DotNetInterop.getPropertyObjectRef",
+                new object[]
+                {
+                    parent,
+                    property
+                });//.ConfigureAwait(false);
+            return jsObjectRef;
+        }
+
+
         public static T GetJsPropertyValue<T>(this IJSRuntime jsRuntime, object parent,
             string property, object valueSpec = null)
         {

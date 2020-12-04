@@ -15,22 +15,35 @@ namespace WebRtcBindingsWeb.Api
 
         public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");
 
-        public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription CurrentRemoteDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "currentRemoteDescription"));
 
         public RTCIceConnectionState IceConnectionState => 
             GetNativeProperty<RTCIceConnectionState>("iceConnectionState");
 
         public RTCIceGatheringState IceGatheringState => GetNativeProperty<RTCIceGatheringState>("iceGatheringState");
 
-        public IRTCSessionDescription LocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription LocalDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "localDescription"));
 
-        public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
+        public Task<IRTCIdentityAssertion> PeerIdentity => GetPeerIdentity();
+        private async Task<IRTCIdentityAssertion> GetPeerIdentity() => 
+            await Task.FromResult(RTCIdentityAssertion.Create(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
+                NativeObject, "peerIdentity")));
 
-        public IRTCSessionDescription PendingLocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingLocalDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "pendingLocalDescription"));
 
-        public IRTCSessionDescription PendingRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingRemoteDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "pendingRemoteDescription"));
 
-        public IRTCSessionDescription RemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription RemoteDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "remoteDescription"));
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 

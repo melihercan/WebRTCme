@@ -83,28 +83,6 @@ namespace WebRTCme
         Task SetLocalDescription(IRTCSessionDescription sessionDescription);
 
         Task SetRemoteDescription(IRTCSessionDescription sessionDescription);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
 }

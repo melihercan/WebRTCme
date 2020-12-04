@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCSessionDescription
+    public interface IRTCSessionDescription : INativeObject
     {
-        RTCSdpType Type { get; set; }
+        RTCSdpType Type { get; }
         
-        string Sdp { get; set; }
+        string Sdp { get; }
+
+        string ToJson();
 
     }
 }
