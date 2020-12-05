@@ -10,7 +10,7 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
-        internal static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
+        public static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
         {
             var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
             return mediaStreamTrack;
