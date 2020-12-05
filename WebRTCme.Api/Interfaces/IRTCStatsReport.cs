@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    public interface IRTCStatsReport
+    public interface IRTCStatsReport : INativeObject
     {
         string Id { get; set; }
 

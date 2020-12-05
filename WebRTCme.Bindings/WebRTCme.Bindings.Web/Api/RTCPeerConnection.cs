@@ -164,79 +164,45 @@ namespace WebRtcBindingsWeb.Api
             return rtpSenders;
         }
 
-        public Task<IRTCStatsReport> GetStats()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IRTCStatsReport> GetStats() =>
+            await Task.FromResult(RTCStatsReport.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+                NativeObject, "getStats")));
 
         public IRTCRtpTransceiver[] GetTransceivers()
         {
-            throw new NotImplementedException();
+            var jsObjectRefGetTransceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTransceivers");
+            var jsObjectRefRtpTransceiverArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetTransceivers);
+            var rtpTransceivers = jsObjectRefRtpTransceiverArray
+                .Select(jsObjectRef => RTCRtpTransceiver.Create(JsRuntime, jsObjectRef))
+                .ToArray();
+            JsRuntime.DeleteJsObjectRef(jsObjectRefGetTransceivers.JsObjectRefId);
+            return rtpTransceivers;
         }
 
-        public void RemoveTrack(IRTCRtpSender sender)
-        {
-            throw new NotImplementedException();
-        }
+        public void RemoveTrack(IRTCRtpSender sender) => JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack",
+            sender.NativeObject);
 
-        public void RestartIce()
-        {
-            throw new NotImplementedException();
-        }
+        public void RestartIce() => JsRuntime.CallJsMethodVoid(NativeObject, "restartIce");
 
-        public void SetConfiguration(RTCConfiguration configuration)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetConfiguration(RTCConfiguration configuration) => JsRuntime.CallJsMethodVoid(NativeObject,
+            "setConfiguration", configuration);
 
-        public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetIdentityProvider(string domainName, string protocol = null, string userName = null) =>
+            JsRuntime.CallJsMethodVoid(NativeObject, "setIdentifierProvider",
+                new object[]
+                {
+                    domainName,
+                    protocol,
+                    userName
+                });
 
-        public Task SetLocalDescription(IRTCSessionDescription sessionDescription)
-        {
-            throw new NotImplementedException();
-        }
+        public Task SetLocalDescription(IRTCSessionDescription sessionDescription) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription", sessionDescription.NativeObject)
+            .AsTask();
 
-        public Task SetRemoteDescription(IRTCSessionDescription sessionDescription)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
-
-
-
-
-
-
-
-
-        //public async Task<IAsyncDisposable> OnIceCandidate(Func<IRTCPeerConnectionIceEvent, ValueTask> callback)
-        //{
-        //    var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "onicecandidate",
-        //        JsEventHandler.Create<IRTCPeerConnectionIceEvent>(async e =>
-        //        {
-        //            await callback.Invoke(e).ConfigureAwait(false);
-        //        },
-        //        null, false)).ConfigureAwait(false);
-        //    return ret;
-        //}
-
-        //public async Task<IAsyncDisposable> OnTrack(Func<IRTCTrackEvent, ValueTask> callback)
-        //{
-        //    var ret = await JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, "ontrack",
-        //        JsEventHandler.Create<IRTCTrackEvent>(async e =>
-        //        {
-        //            await callback.Invoke(e).ConfigureAwait(false);
-        //        },
-        //        null, false)).ConfigureAwait(false);
-        //    return ret;
-        //}
-
-
+        public Task SetRemoteDescription(IRTCSessionDescription sessionDescription) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setRemoteDescription", sessionDescription.NativeObject)
+            .AsTask();
 
         private void AddNativeEventListener(string eventName, EventHandler eventHandler)
         {
