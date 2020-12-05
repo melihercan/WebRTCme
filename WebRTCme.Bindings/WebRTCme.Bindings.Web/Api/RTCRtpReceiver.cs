@@ -16,8 +16,6 @@ namespace WebRtcBindingsWeb.Api
         internal static IRTCRtpReceiver Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpReceiver) => 
             new RTCRtpReceiver(jsRuntime, jsObjectRefRtpReceiver);
 
-        private RTCRtpReceiver() : base(null) { }
-
         private RTCRtpReceiver(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 

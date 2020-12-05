@@ -6,26 +6,19 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
 
 namespace WebRtcBindingsWeb.Api
 {
     internal class RTCCertificate : ApiBase, IRTCCertificate
     {
+        public static IRTCCertificate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefCertificate) => 
+            new RTCCertificate(jsRuntime, jsObjectRefCertificate);
 
-        internal static IRTCCertificate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefCertificate)
-        {
-            return new RTCCertificate(jsRuntime, jsObjectRefCertificate);
-        }
+        private RTCCertificate(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        private RTCCertificate() : base(null) { }
-
-        private RTCCertificate(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
-        {
-
-        }
-
-        public ulong Expires => throw new NotImplementedException();
+        public ulong Expires => GetNativeProperty<ulong>("expires");
 
     }
 }

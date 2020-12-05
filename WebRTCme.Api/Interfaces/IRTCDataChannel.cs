@@ -13,7 +13,7 @@ namespace WebRTCme
         
         uint BufferedAmountLowThreshold { get; set; }
 
-        ushort? Id { get; }
+        ushort Id { get; }
 
         string Label { get; }
 
@@ -27,17 +27,18 @@ namespace WebRTCme
 
         string Protocol { get; }
 
+        public RTCDataChannelState ReadyState { get; }
+
         event EventHandler OnBufferedAmountLow;
-
         event EventHandler OnClose;
-
         event EventHandler OnClosing;
-
         event EventHandler<IErrorEvent> OnError;
-
         event EventHandler<IMessageEvent> OnMessage;
-
         event EventHandler OnOpen;
+
+        void Close();
+
+        void Send();
 
     }
 }

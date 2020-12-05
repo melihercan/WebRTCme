@@ -13,8 +13,6 @@ namespace WebRtcBindingsWeb.Api
         internal static IRTCRtpSender Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpSender) => 
             new RTCRtpSender(jsRuntime, jsObjectRefRtpSender);
 
-        private RTCRtpSender() : base(null) { }
-
         private RTCRtpSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 

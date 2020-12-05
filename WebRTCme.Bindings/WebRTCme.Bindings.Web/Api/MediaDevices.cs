@@ -11,6 +11,9 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {
+        public static IMediaDevices Create(IJSRuntime jsRuntime) =>
+            new MediaDevices(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices"));
+
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
@@ -37,12 +40,6 @@ namespace WebRtcBindingsWeb.Api
             return mediaDeviceInfos;
         }
 
-        internal static IMediaDevices Create(IJSRuntime jsRuntime)
-        {
-            var jsObjectRef = jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices");
-            var mediaDevices = new MediaDevices(jsRuntime, jsObjectRef);
-            return mediaDevices;
-        }
 
         public MediaTrackSupportedConstraints GetSupportedConstraints()
         {

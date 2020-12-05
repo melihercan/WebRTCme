@@ -17,12 +17,7 @@ namespace WebRtcBindingsWeb.Api
             return new RTCSctpTransport(jsRuntime, jsObjectRefSctpTransport);
         }
 
-        private RTCSctpTransport() : base(null) { }
-
-        private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
-        {
-
-        }
+        private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public int MaxChannels => throw new NotImplementedException();
 

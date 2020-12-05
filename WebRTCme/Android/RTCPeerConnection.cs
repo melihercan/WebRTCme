@@ -107,6 +107,11 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
+        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
+        {
+            throw new NotImplementedException();
+        }
+
         public RTCConfiguration GetConfiguration()
         {
             throw new NotImplementedException();

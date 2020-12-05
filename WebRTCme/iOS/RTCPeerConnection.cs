@@ -277,5 +277,10 @@ namespace WebRtc.iOS
         {
             throw new NotImplementedException();
         }
+
+        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -17,12 +17,7 @@ namespace WebRtcBindingsWeb.Api
             return new RTCSessionDescription(jsRuntime, jsObjectRefSessionDescription);
         }
 
-        private RTCSessionDescription() : base(null) { }
-
-        private RTCSessionDescription(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
-        {
-
-        }
+        private RTCSessionDescription(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public RTCSdpType Type { get; }
 

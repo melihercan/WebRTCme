@@ -12,12 +12,6 @@ namespace WebRtcBindingsWeb.Api
 {
     public class Window : ApiBase, IWindow
     {
-        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
-
-        public INavigator Navigator => Api.Navigator.Create(JsRuntime);
-
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
-            Api.RTCPeerConnection.Create(JsRuntime, rtcConfiguration);
 
         public static IWindow Create(IJSRuntime jsRuntime)
         {
@@ -109,9 +103,20 @@ namespace WebRtcBindingsWeb.Api
             //            var windowInterop = await jsRuntime.Window();
             //          var window = new Window(jsRuntime, windowInterop);
 
+
+
             var jsObjectRef = jsRuntime.GetJsPropertyObjectRef("window", null);
             var window = new Window(jsRuntime, jsObjectRef);
             return window;
         }
+
+        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+
+        public INavigator Navigator => Api.Navigator.Create(JsRuntime);
+
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
+            Api.RTCPeerConnection.Create(JsRuntime, rtcConfiguration);
+
+
     }
 }

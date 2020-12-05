@@ -10,6 +10,11 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
+        internal static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
+        {
+            var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
+            return mediaStreamTrack;
+        }
         private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -36,11 +41,6 @@ namespace WebRtcBindingsWeb.Api
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
-        internal static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
-        {
-            var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
-            return mediaStreamTrack;
-        }
 
         public Task ApplyConstraints(MediaTrackConstraints contraints)
         {

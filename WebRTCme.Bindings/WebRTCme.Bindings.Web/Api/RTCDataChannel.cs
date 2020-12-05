@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
 
 namespace WebRtcBindingsWeb.Api
@@ -13,38 +14,48 @@ namespace WebRtcBindingsWeb.Api
     internal class RTCDataChannel : ApiBase, IRTCDataChannel
     {
 
-        internal static IRTCDataChannel Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDataChannel)
+        public static IRTCDataChannel Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDataChannel) =>
+            new RTCDataChannel(jsRuntime, jsObjectRefDataChannel);
+
+        private RTCDataChannel(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            return new RTCDataChannel(jsRuntime, jsObjectRefDataChannel);
+            AddNativeEventListener("onbufferedamountlow", OnBufferedAmountLow);
+            AddNativeEventListener("onclose", OnClose);
+            AddNativeEventListener("onclosing", OnClosing);
+            AddNativeEventListener("onerror", OnError);
+            AddNativeEventListener("onmessage", OnMessage);
+            AddNativeEventListener("onpen", OnOpen);
         }
 
-        private RTCDataChannel() : base(null) { }
-
-        private RTCDataChannel(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
+        public BinaryType BinaryType 
         {
-
+            get => GetNativeProperty<BinaryType>("binaryType");
+            set => SetNativeProperty("binaryType", value);
         }
 
+        public uint BufferedAmount => GetNativeProperty<uint>("bufferedAmount");
 
-        public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public uint BufferedAmountLowThreshold 
+        {
+            get => GetNativeProperty<uint>("bufferedAmountLowThreshold");
+            set => SetNativeProperty("bufferedAmountLowThreshold", value);
+        }
 
-        public uint BufferedAmount => throw new NotImplementedException();
+        public ushort Id => GetNativeProperty<ushort>("id");
 
-        public uint BufferedAmountLowThreshold { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Label => GetNativeProperty<string>("label");
 
-        public ushort? Id => throw new NotImplementedException();
+        public ushort? MaxPacketLifeTime => GetNativeProperty<ushort>("maxPacketLifeTime");
 
-        public string Label => throw new NotImplementedException();
+        public ushort? MaxRetransmits => GetNativeProperty<ushort>("maxretransmits");
 
-        public ushort? MaxPacketLifeTime => throw new NotImplementedException();
+        public bool Negotiated => GetNativeProperty<bool>("negotiated");
 
-        public ushort? MaxRetransmits => throw new NotImplementedException();
+        public bool Ordered => GetNativeProperty<bool>("ordered");
 
-        public bool Negotiated => throw new NotImplementedException();
+        public string Protocol => GetNativeProperty<string>("protocol");
 
-        public bool Ordered => throw new NotImplementedException();
-
-        public string Protocol => throw new NotImplementedException();
+        public RTCDataChannelState ReadyState => GetNativeProperty<RTCDataChannelState>("readyState");
 
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
@@ -52,6 +63,10 @@ namespace WebRtcBindingsWeb.Api
         public event EventHandler<IErrorEvent> OnError;
         public event EventHandler<IMessageEvent> OnMessage;
         public event EventHandler OnOpen;
+
+        public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
+
+        public void Send() => JsRuntime.CallJsMethodVoid(NativeObject, "send");
 
     }
 }

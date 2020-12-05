@@ -6,16 +6,10 @@ using WebRTCme;
 
 namespace WebRtc.iOS
 {
-    internal class RTCRtpSender : IRTCRtpSender
+    internal class RTCRtpSender : ApiBase, IRTCRtpSender
     {
-        public void DeleteMe()
-        {
-            throw new NotImplementedException();
-        }
+        public object NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public ValueTask DisposeAsync()
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

@@ -12,13 +12,27 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStream : ApiBase, IMediaStream
     {
+        internal static IMediaStream Create(IJSRuntime jsRuntime)
+        {
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaStream");
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
+            return mediaStream;
+        }
+
+        internal static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
+        {
+            var mediaStream = new MediaStream(jsRuntime, jsObjectRefMediaStream);
+            return mediaStream;
+        }
+
+        private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+
         public bool Active => throw new NotImplementedException();
 
         ////public Task<bool> Ended => throw new NotImplementedException();
 
         public string Id => throw new NotImplementedException();
 
-        private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
         public List<IMediaStreamTrack> GetTracks()
@@ -34,17 +48,6 @@ namespace WebRtcBindingsWeb.Api
         }
 
 
-        internal static IMediaStream Create(IJSRuntime jsRuntime)
-        {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaStream");
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
-            return mediaStream;
-        }
-        internal static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
-        {
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRefMediaStream);
-            return mediaStream;
-        }
 
         public IMediaStream Clone()
         {

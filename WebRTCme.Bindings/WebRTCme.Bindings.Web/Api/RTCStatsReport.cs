@@ -13,8 +13,6 @@ namespace WebRtcBindingsWeb.Api
         internal static IRTCStatsReport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new RTCStatsReport(jsRuntime, jsObjectRefRtcStatsReport);
 
-        private RTCStatsReport() : base(null) { }
-
         private RTCStatsReport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 

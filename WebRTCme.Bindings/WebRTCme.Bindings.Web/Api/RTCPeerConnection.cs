@@ -12,6 +12,27 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
+        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        {
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
+            return new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
+        }
+
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration)
+            : base(jsRuntime, jsObjectRef)
+        {
+            AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
+            AddNativeEventListener("ondatachannel", OnDataChannel);
+            AddNativeEventListener("onicecandidate", OnIceCandidate);
+            AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
+            AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
+            AddNativeEventListener("onidentityresult", OnIdentityResult);
+            AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
+            AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
+            AddNativeEventListener("onconnectionstatechanged", OnTrack);
+        }
+
+
         public bool CanTrickleIceCandidates => GetNativeProperty<bool>("canTrickleIceCandidates");
 
         public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");
@@ -61,27 +82,6 @@ namespace WebRtcBindingsWeb.Api
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
-        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
-        {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
-            return new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
-        }
-
-        private RTCPeerConnection() : base(null) { }
-
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration) 
-            : base(jsRuntime, jsObjectRef) 
-        {
-            AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
-            AddNativeEventListener("ondatachannel", OnDataChannel);
-            AddNativeEventListener("onicecandidate", OnIceCandidate);
-            AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
-            AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
-            AddNativeEventListener("onidentityresult", OnIdentityResult);
-            AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
-            AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
-            AddNativeEventListener("onconnectionstatechanged", OnTrack);
-        }
 
         public RTCIceServer[] GetDefaultIceServers()
         {
@@ -203,28 +203,5 @@ namespace WebRtcBindingsWeb.Api
         public Task SetRemoteDescription(IRTCSessionDescription sessionDescription) =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "setRemoteDescription", sessionDescription.NativeObject)
             .AsTask();
-
-        private void AddNativeEventListener(string eventName, EventHandler eventHandler)
-        {
-            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
-                JsEventHandler.Create(() =>
-                {
-                    eventHandler?.Invoke(this, EventArgs.Empty);
-                },
-                null, false)));
-        }
-
-        private void AddNativeEventListener<T>(string eventName, EventHandler<T> eventHandler)
-        {
-            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
-                JsEventHandler.Create<T>(e =>
-                {
-                    eventHandler?.Invoke(this, e);
-                },
-                null, false)));
-        }
-
-        private T GetNativeProperty<T>(string propertyName) => JsRuntime.GetJsPropertyValue<T>(
-            NativeObject, propertyName);
     }
 }

@@ -19,8 +19,6 @@ namespace WebRtcBindingsWeb.Api
 
         public IJSRuntime JsRuntime { get; }
         
-////        public object NativeObject { get; set; }
-
         private object _nativeObject;
         public object NativeObject// { get; protected set; }
         {
@@ -39,11 +37,6 @@ namespace WebRtcBindingsWeb.Api
 
         public void Dispose()
         {
-            ////            if (NativeObject != null)
-            ////        {
-            ////        var jsObjectRef = NativeObject as JsObjectRef;
-            ////                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
-            ////        }
             foreach (var jsEvent in JsEvents)
             {
                 jsEvent.Dispose();
@@ -54,5 +47,31 @@ namespace WebRtcBindingsWeb.Api
             }
 
         }
+
+        protected void AddNativeEventListener(string eventName, EventHandler eventHandler)
+        {
+            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
+                JsEventHandler.Create(() =>
+                {
+                    eventHandler?.Invoke(this, EventArgs.Empty);
+                },
+                null, false)));
+        }
+
+        protected void AddNativeEventListener<T>(string eventName, EventHandler<T> eventHandler)
+        {
+            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
+                JsEventHandler.Create<T>(e =>
+                {
+                    eventHandler?.Invoke(this, e);
+                },
+                null, false)));
+        }
+
+        protected T GetNativeProperty<T>(string propertyName) => JsRuntime.GetJsPropertyValue<T>(
+            NativeObject, propertyName);
+
+        protected void SetNativeProperty(string propertyName, object value) => JsRuntime.SetJsProperty(
+            NativeObject, propertyName, value);
     }
 }

@@ -8,6 +8,5 @@ namespace WebRTCme
     public interface IRTCCertificate : INativeObject
     {
         ulong Expires { get; }
-        //// RTCDtlsFingerprint[] GetFingerprints();
     }
 }
