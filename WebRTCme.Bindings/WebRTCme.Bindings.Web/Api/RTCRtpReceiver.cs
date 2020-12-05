@@ -68,6 +68,6 @@ namespace WebRtcBindingsWeb.Api
 
         /*static*/
         public RTCRtpCapabilities GetCapabilities(string kind) =>
-            JsRuntime.CallJsMethod<RTCRtpCapabilities>(NativeObject, "getCapabilities", kind);
+            JsRuntime.CallJsMethod<RTCRtpCapabilities>("RTCRtpReceiver", "getCapabilities", kind);
     }
 }
