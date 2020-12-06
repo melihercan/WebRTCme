@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
 
 namespace WebRtcBindingsWeb.Api
@@ -17,18 +18,20 @@ namespace WebRtcBindingsWeb.Api
             return new RTCSctpTransport(jsRuntime, jsObjectRefSctpTransport);
         }
 
-        private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        {
+            AddNativeEventListener("onstatechange", OnStateChange);
+        }
 
-        public int MaxChannels => throw new NotImplementedException();
+        public int MaxChannels => GetNativeProperty<int>("maxChannels");
 
-        public int MaxMessageSize => throw new NotImplementedException();
+        public int MaxMessageSize => GetNativeProperty<int>("maxMessageSize");
 
-        public RTCSctpTransportState State => throw new NotImplementedException();
+        public RTCSctpTransportState State => GetNativeProperty<RTCSctpTransportState>("state");
 
-        public IRTCSctpTransport Transport => throw new NotImplementedException();
+        public IRTCSctpTransport Transport =>
+            RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
         public event EventHandler<RTCSctpTransportState> OnStateChange;
-
-
     }
 }
