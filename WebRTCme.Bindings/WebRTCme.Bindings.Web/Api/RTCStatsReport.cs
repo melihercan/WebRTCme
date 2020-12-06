@@ -15,10 +15,23 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCStatsReport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-
-        public string Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public double Timestamp { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public RTCStatsType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Id 
+        {
+            get => GetNativeProperty<string>("id");
+            set => SetNativeProperty("id", value);
+        }
+        
+        public double Timestamp 
+        {
+            get => GetNativeProperty<double>("timestamp");
+            set => SetNativeProperty("timestamp", value);
+        }
+        
+        public RTCStatsType Type 
+        {
+            get => GetNativeProperty<RTCStatsType>("type");
+            set => SetNativeProperty("type", value);
+        }
 
 
 
