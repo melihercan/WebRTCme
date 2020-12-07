@@ -12,7 +12,7 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        internal static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        public static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
             var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
             return new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaStreamTrackEvent
+    public interface IMediaStreamTrackEvent : INativeObject
     {
-        Task<IMediaStreamTrack> Track { get; }
+        IMediaStreamTrack Track { get; }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
 
 namespace WebRtcBindingsWeb.Api
@@ -15,7 +16,7 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCDataChannelEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public IRTCDataChannel Channel => throw new NotImplementedException();
-
+        public IRTCDataChannel Channel => 
+            RTCDataChannel.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "channel"));
     }
 }

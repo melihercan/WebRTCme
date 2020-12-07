@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
 
 namespace WebRtcBindingsWeb.Api
@@ -15,17 +16,14 @@ namespace WebRtcBindingsWeb.Api
 
         private ErrorEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public string Message => throw new NotImplementedException();
+        public string Message => GetNativeProperty<string>("message");
 
-        public string FileName => throw new NotImplementedException();
+        public string FileName => GetNativeProperty<string>("fileName");
 
-        public int LineNo => throw new NotImplementedException();
+        public int LineNo => GetNativeProperty<int>("lineNo");
 
-        public int ColNo => throw new NotImplementedException();
+        public int ColNo => GetNativeProperty<int>("colNo");
 
         public object Error => throw new NotImplementedException();
-
-
-
     }
 }

@@ -17,9 +17,9 @@ namespace WebRtcBindingsWeb.Api
 
         public object Data => throw new NotImplementedException();
 
-        public string Origin => throw new NotImplementedException();
+        public string Origin => GetNativeProperty<string>("origin");
 
-        public string LastEventId => throw new NotImplementedException();
+        public string LastEventId => GetNativeProperty<string>("lastEventId");
 
         public object Source => throw new NotImplementedException();
 

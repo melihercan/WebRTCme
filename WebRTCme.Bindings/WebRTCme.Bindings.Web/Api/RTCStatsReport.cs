@@ -32,8 +32,5 @@ namespace WebRtcBindingsWeb.Api
             get => GetNativeProperty<RTCStatsType>("type");
             set => SetNativeProperty("type", value);
         }
-
-
-
     }
 }

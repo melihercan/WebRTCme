@@ -15,8 +15,6 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCIdentityEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public string Assertion => throw new NotImplementedException();
-
-
+        public string Assertion => GetNativeProperty<string>("assertion");
     }
 }

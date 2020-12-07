@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Extensions;
@@ -12,72 +13,56 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStream : ApiBase, IMediaStream
     {
-        internal static IMediaStream Create(IJSRuntime jsRuntime)
-        {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaStream");
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRef);
-            return mediaStream;
-        }
+        public static IMediaStream Create(IJSRuntime jsRuntime) =>
+            new MediaStream(jsRuntime, jsRuntime.CreateJsObject("window", "MediaStream"));
 
-        internal static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream)
-        {
-            var mediaStream = new MediaStream(jsRuntime, jsObjectRefMediaStream);
-            return mediaStream;
-        }
+        internal static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream) =>
+            new MediaStream(jsRuntime, jsObjectRefMediaStream);
 
         private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public bool Active => throw new NotImplementedException();
+        public bool Active => GetNativeProperty<bool>("active");
 
-        ////public Task<bool> Ended => throw new NotImplementedException();
-
-        public string Id => throw new NotImplementedException();
-
-
+        public string Id => GetNativeProperty<string>("id");
 
         public List<IMediaStreamTrack> GetTracks()
         {
-            var jsObjectRef = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
-            var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRef);
-            var mediaStreamTracks = new List<IMediaStreamTrack>();
-            foreach(var jsObjectRefMediaStreamTrack in jsObjectRefMediaStreamTrackArray)
-            {
-                mediaStreamTracks.Add(MediaStreamTrack.Create(JsRuntime, jsObjectRefMediaStreamTrack));
-            }
-            return mediaStreamTracks;
+            var jsObjectRefGetTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
+            var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetTracks);
+            return jsObjectRefMediaStreamTrackArray
+                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .ToList();
         }
 
+        public IMediaStream Clone() =>
+            Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
-
-        public IMediaStream Clone()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMediaStreamTrack GetTrackById(string id)
-        {
-            throw new NotImplementedException();
-        }
+        public IMediaStreamTrack GetTrackById(string id) => 
+            MediaStreamTrack.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTranckById", id));
 
         public List<IMediaStreamTrack> GetVideoTracks()
         {
-            throw new NotImplementedException();
+            var jsObjectRefGetVideoTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getVideoTracks");
+            var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetVideoTracks);
+            return jsObjectRefMediaStreamTrackArray
+                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .ToList();
         }
 
         public List<IMediaStreamTrack> GetAudioTracks()
         {
-            throw new NotImplementedException();
+            var jsObjectRefGetAudioTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getAudioTracks");
+            var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetAudioTracks);
+            return jsObjectRefMediaStreamTrackArray
+                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .ToList();
         }
 
-        public void AddTrack(IMediaStreamTrack track)
-        {
-            throw new NotImplementedException();
-        }
+        public void AddTrack(IMediaStreamTrack track) =>
+            JsRuntime.CallJsMethodVoid(NativeObject, "addTrack", track.NativeObject);
 
-        public void RemoveTrack(IMediaStreamTrack track)
-        {
-            throw new NotImplementedException();
-        }
+        public void RemoveTrack(IMediaStreamTrack track) =>
+            JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack", track.NativeObject);
 
         public void SetElementReferenceSrcObject(object/*ElementReference*/ elementReference)
         {

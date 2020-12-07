@@ -13,11 +13,10 @@ namespace WebRtcBindingsWeb.Api
     internal class RTCDtlsTransport : ApiBase, IRTCDtlsTransport
     {
 
-        internal static IRTCDtlsTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDtlsTransport) => 
+        public static IRTCDtlsTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDtlsTransport) => 
             new RTCDtlsTransport(jsRuntime, jsObjectRefDtlsTransport);
 
         private RTCDtlsTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
-
 
     }
 }

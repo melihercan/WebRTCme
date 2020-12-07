@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRtcBindingsWeb.Extensions;
 using WebRtcBindingsWeb.Interops;
 using WebRTCme;
 
@@ -10,73 +11,70 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
-        public static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack)
+        public static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack) =>
+            new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
+            
+        private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            var mediaStreamTrack = new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
-            return mediaStreamTrack;
+            AddNativeEventListener("onmute", OnMute);
+            AddNativeEventListener("onunmute", OnUnmute);
+            AddNativeEventListener("onended", OnEnded);
         }
-        private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string ContentHint 
+        {
+            get => GetNativeProperty<string>("contentHint");
+            set => SetNativeProperty("contentHint", value);
+        }
 
-        public string Id => throw new NotImplementedException();
+        public bool Enabled 
+        {
+            get => GetNativeProperty<bool>("enabled");
+            set => SetNativeProperty("enabled", value);
+        }
 
-        public bool Isolated => throw new NotImplementedException();
+        public string Id => GetNativeProperty<string>("id");
 
-        public MediaStreamTrackKind Kind => throw new NotImplementedException();
+        public bool Isolated => GetNativeProperty<bool>("isolated");
 
-        public string Label => throw new NotImplementedException();
+        public MediaStreamTrackKind Kind => GetNativeProperty<MediaStreamTrackKind>("kind");
 
-        public bool Muted => throw new NotImplementedException();
+        public string Label => GetNativeProperty<string>("label");
 
-        public bool Readonly => throw new NotImplementedException();
+        public bool Muted => GetNativeProperty<bool>("muted");
 
-        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
+        public bool Readonly => GetNativeProperty<bool>("readonly");
 
-        public bool Remote => throw new NotImplementedException();
+        public MediaStreamTrackState ReadyState => GetNativeProperty<MediaStreamTrackState>("readyState");
 
+        public bool Remote => GetNativeProperty<bool>("remote");
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;
 
+        public Task ApplyConstraints(MediaTrackConstraints contraints) =>
+            JsRuntime.InvokeVoidAsync("applyConstraints", contraints).AsTask();
 
-        public Task ApplyConstraints(MediaTrackConstraints contraints)
-        {
-            throw new NotImplementedException();
-        }
+        public IMediaStreamTrack Clone() =>
+            Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
-        public IMediaStreamTrack Clone()
-        {
-            throw new NotImplementedException();
-        }
+        public MediaTrackCapabilities GetCapabilities() =>
+            JsRuntime.CallJsMethod<MediaTrackCapabilities>(NativeObject, "getCapabilities");
 
-        public MediaTrackCapabilities GetCapabilities()
-        {
-            throw new NotImplementedException();
-        }
+        public MediaTrackConstraints GetContraints() =>
+            JsRuntime.CallJsMethod<MediaTrackConstraints>(NativeObject, "getContraints");
 
-        public MediaTrackConstraints GetContraints()
-        {
-            throw new NotImplementedException();
-        }
+        public MediaTrackSettings GetSettings() =>
+            JsRuntime.CallJsMethod<MediaTrackSettings>(NativeObject, "getSettings");
 
-
-        public MediaTrackSettings GetSettings()
-        {
-            throw new NotImplementedException();
-        }
-
+        public void Stop() =>
+            JsRuntime.CallJsMethodVoid(NativeObject, "stop");
 
         public object GetView()
         {
             throw new NotImplementedException();
         }
 
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

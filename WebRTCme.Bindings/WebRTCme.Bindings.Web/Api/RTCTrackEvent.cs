@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Interops;
+using WebRtcBindingsWeb.Extensions;
 using WebRTCme;
+using System.Linq;
 
 namespace WebRtcBindingsWeb.Api
 {
@@ -16,11 +18,37 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCTrackEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public IRTCRtpReceiver Receiver { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IMediaStream[] Streams { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IMediaStreamTrack Track { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IRTCRtpTransceiver Transceiver { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IRTCRtpReceiver Receiver 
+        {
+            get => RTCRtpReceiver.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "receiver"));
+            set => SetNativeProperty("receiver", value.NativeObject);
+        }
+        
+        public IMediaStream[] Streams 
+        {
+            get
+            {
+                var jsObjectRef = JsRuntime.GetJsPropertyObjectRef(NativeObject, "streams");
+                var jsObjectRefStreamsArray = JsRuntime.GetJsPropertyArray(jsObjectRef);
+                var streams = jsObjectRefStreamsArray
+                    .Select(jsObjectRef => MediaStream.Create(JsRuntime, jsObjectRef))
+                    .ToArray();
+                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+                return streams;
+            }
+            set => SetNativeProperty("streams", value.Select(stream => stream.NativeObject).ToArray());
+        }
 
-
+        public IMediaStreamTrack Track 
+        {
+            get => MediaStreamTrack.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "track"));
+            set => SetNativeProperty("track", value.NativeObject);
+        }
+        
+        public IRTCRtpTransceiver Transceiver 
+        {
+            get => RTCRtpTransceiver.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transceiver"));
+            set => SetNativeProperty("transceiver", value.NativeObject);
+        }
     }
 }

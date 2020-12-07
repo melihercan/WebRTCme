@@ -13,7 +13,6 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class RTCDataChannel : ApiBase, IRTCDataChannel
     {
-
         public static IRTCDataChannel Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDataChannel) =>
             new RTCDataChannel(jsRuntime, jsObjectRefDataChannel);
 

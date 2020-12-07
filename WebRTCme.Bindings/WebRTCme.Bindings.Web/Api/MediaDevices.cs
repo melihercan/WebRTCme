@@ -14,16 +14,16 @@ namespace WebRtcBindingsWeb.Api
         public static IMediaDevices Create(IJSRuntime jsRuntime) =>
             new MediaDevices(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices"));
 
-        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        {
+            AddNativeEventListenerForObjectRef("ondevicechange", OnDeviceChange, MediaStreamTrackEvent.Create);
+        }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
-        {
-            var jsObjectRefMediaStream = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, 
-                "getUserMedia", constraints);
-            return MediaStream.Create(JsRuntime, jsObjectRefMediaStream);
-        }
+        public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
+            await Task.FromResult(MediaStream.Create(JsRuntime, 
+                await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getUserMedia", constraints)));
 
         public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
         {
@@ -41,14 +41,11 @@ namespace WebRtcBindingsWeb.Api
         }
 
 
-        public MediaTrackSupportedConstraints GetSupportedConstraints()
-        {
-            throw new NotImplementedException();
-        }
+        public MediaTrackSupportedConstraints GetSupportedConstraints() =>
+            GetNativeProperty<MediaTrackSupportedConstraints>("getSupportedConstraints");
 
-        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints) =>
+            await Task.FromResult(MediaStream.Create(
+                JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getDisplayMedia")));
     }
 }

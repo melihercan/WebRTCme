@@ -63,7 +63,6 @@ namespace WebRtcBindingsWeb.Api
             JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
                 JsEventHandler.CreateForValue<T>(e =>
                 {
-
                     eventHandler?.Invoke(this, e);
                 },
                 contentSpec)));
