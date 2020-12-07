@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCTrackEvent
+    public interface IRTCTrackEvent : INativeObject
     {
         IRTCRtpReceiver Receiver { get; set; }
 

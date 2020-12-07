@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IErrorEvent
+    public interface IErrorEvent : INativeObject
     {
-        public Task<string> Message { get; }
+        string Message { get; }
 
-        public Task<string> FileName { get; }
+        string FileName { get; }
 
-        public Task<int?> LineNo { get; }
+        int LineNo { get; }
 
-        public Task<int?> ColNo { get; }
+        int ColNo { get; }
 
-        ////public object Error { get; }
+        object Error { get; }
     }
 }

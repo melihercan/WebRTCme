@@ -22,8 +22,8 @@ namespace WebRtcBindingsWeb.Api
             AddNativeEventListener("onbufferedamountlow", OnBufferedAmountLow);
             AddNativeEventListener("onclose", OnClose);
             AddNativeEventListener("onclosing", OnClosing);
-            AddNativeEventListener("onerror", OnError);
-            AddNativeEventListener("onmessage", OnMessage);
+            AddNativeEventListenerForObjectRef("onerror", OnError, ErrorEvent.Create);
+            AddNativeEventListenerForObjectRef("onmessage", OnMessage, MessageEvent.Create);
             AddNativeEventListener("onpen", OnOpen);
         }
 

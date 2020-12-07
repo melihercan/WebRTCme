@@ -54,18 +54,29 @@ namespace WebRtcBindingsWeb.Api
                 JsEventHandler.Create(() =>
                 {
                     eventHandler?.Invoke(this, EventArgs.Empty);
-                },
-                null, false)));
+                })));
         }
 
-        protected void AddNativeEventListener<T>(string eventName, EventHandler<T> eventHandler)
+        protected void AddNativeEventListenerForValue<T>(string eventName, EventHandler<T> eventHandler, 
+            object contentSpec = null)
         {
             JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
-                JsEventHandler.Create<T>(e =>
+                JsEventHandler.CreateForValue<T>(e =>
                 {
+
                     eventHandler?.Invoke(this, e);
                 },
-                null, false)));
+                contentSpec)));
+        }
+
+        protected void AddNativeEventListenerForObjectRef<T>(string eventName, EventHandler<T> eventHandler, 
+            Func<IJSRuntime, JsObjectRef, T> fromNative)
+        {
+            JsEvents.Add(JsRuntime.AddJsEventListener(NativeObject as JsObjectRef, null, eventName,
+                JsEventHandler.CreateForObjectRef<JsObjectRef>(jsObjectRef =>
+                {
+                    eventHandler?.Invoke(this, fromNative(JsRuntime, jsObjectRef));
+                })));
         }
 
         protected T GetNativeProperty<T>(string propertyName) => JsRuntime.GetJsPropertyValue<T>(

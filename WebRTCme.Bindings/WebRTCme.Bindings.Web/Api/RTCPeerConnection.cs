@@ -22,14 +22,14 @@ namespace WebRtcBindingsWeb.Api
             : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
-            AddNativeEventListener("ondatachannel", OnDataChannel);
-            AddNativeEventListener("onicecandidate", OnIceCandidate);
+            AddNativeEventListenerForObjectRef("ondatachannel", OnDataChannel, RTCDataChannelEvent.Create);
+            AddNativeEventListenerForObjectRef("onicecandidate", OnIceCandidate, RTCPeerConnectionIceEvent.Create);
             AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
             AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
-            AddNativeEventListener("onidentityresult", OnIdentityResult);
+            AddNativeEventListenerForObjectRef("onidentityresult", OnIdentityResult, RTCIdentityEvent.Create);
             AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
             AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
-            AddNativeEventListener("onconnectionstatechanged", OnTrack);
+            AddNativeEventListenerForObjectRef("onconnectionstatechanged", OnTrack, RTCTrackEvent.Create);
         }
 
 

@@ -20,25 +20,33 @@ namespace WebRtcBindingsWeb.Interops
 
         private JsEventHandler() { }
 
-        public static JsEventHandler Create(Action callback, object contentSpec = null,
-            bool getJsObjectRef = false)
+        public static JsEventHandler Create(Action callback)
         {
             return new JsEventHandler
             {
                 CallbackRef = DotNetObjectReference.Create(new JsInteropActionHandler(callback)),
-                ContentSpec = contentSpec,
-                GetJsObjectRef = getJsObjectRef
+                ContentSpec = null,
+                GetJsObjectRef = false
             };
         }
 
-        public static JsEventHandler Create<T>(Action<T> callback, object contentSpec = null,
-            bool getJsObjectRef = false)
+        public static JsEventHandler CreateForValue<T>(Action<T> callback, object contentSpec = null)
         {
             return new JsEventHandler
             {
                 CallbackRef = DotNetObjectReference.Create(new JsInteropActionHandler<T>(callback)),
                 ContentSpec = contentSpec,
-                GetJsObjectRef = getJsObjectRef
+                GetJsObjectRef = false
+            };
+        }
+
+        public static JsEventHandler CreateForObjectRef<T>(Action<T> callback)
+        {
+            return new JsEventHandler
+            {
+                CallbackRef = DotNetObjectReference.Create(new JsInteropActionHandler<T>(callback)),
+                ContentSpec = null,
+                GetJsObjectRef = true
             };
         }
 

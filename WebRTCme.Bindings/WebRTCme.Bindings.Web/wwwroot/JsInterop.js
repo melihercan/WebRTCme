@@ -35,12 +35,20 @@
                 if (!value.getJsObjectRef) {
                     for (let index = 0; index < arguments.length; index++) {
                         const element = arguments[index];
-                        args.push(getObjectContent(element, [], value.contentSpec));
+                        if (typeof (element) === 'object' && contentSpec != null) {
+                            args.push(getObjectContent(element, [], value.contentSpec));
+                        } else {
+                            args.push(element);
+                        }
                     }
                 } else {
                     for (let index = 0; index < arguments.length; index++) {
                         const element = arguments[index];
-                        args.push(addObjectRef(element));
+                        if (typeof (element) === 'object') {
+                            args.push(addObjectRef(element));
+                        } else {
+                            args.push(element);
+                        }
                     }
                 }
                 return netObjectRef.invokeMethodAsync('Invoke', ...args);
@@ -205,7 +213,7 @@
   //          let content = getObjectContent(propertyObject, [], contentSpec);
     //        return content;
         } else {
-            return propertyObject;
+            return null;//propertyObject;
         }
     }
 
