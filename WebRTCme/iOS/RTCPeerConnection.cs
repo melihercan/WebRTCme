@@ -34,7 +34,7 @@ namespace WebRtc.iOS
 
         public RTCSignallingState SignallingState => throw new NotImplementedException();
 
-        public static IRTCPeerConnection Create(RTCConfiguration configuration)
+        public static IRTCPeerConnection Create(IRTCConfiguration configuration)
         {
             var ret = new RTCPeerConnection();
             return ret.Initialize(configuration);
@@ -45,7 +45,7 @@ namespace WebRtc.iOS
 
         }
 
-        private IRTCPeerConnection Initialize(RTCConfiguration configuration)
+        private IRTCPeerConnection Initialize(IRTCConfiguration configuration)
         {
             var nativeConfiguration = configuration.ToNative();
             //NativeObjects.Add(nativeConfiguration);
@@ -85,7 +85,6 @@ namespace WebRtc.iOS
         }
 
 
-        public event EventHandler<IMediaStreamEvent> OnAddStream;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
@@ -218,7 +217,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public RTCConfiguration GetConfiguration()
+        public IRTCConfiguration GetConfiguration()
         {
             throw new NotImplementedException();
         }
@@ -258,7 +257,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(RTCConfiguration configuration)
+        public void SetConfiguration(IRTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }

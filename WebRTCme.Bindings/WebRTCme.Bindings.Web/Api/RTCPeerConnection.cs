@@ -12,13 +12,13 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        public static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        public static IRTCPeerConnection Create(IJSRuntime jsRuntime, IRTCConfiguration rtcConfiguration)
         {
             var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
             return new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
         }
 
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration)
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, IRTCConfiguration rtcConfiguration)
             : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
@@ -136,8 +136,8 @@ namespace WebRtcBindingsWeb.Api
             await Task.FromResult(RTCCertificate.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 "RTCPeerConnection", "generateCertificate", keygenAlgorithm)));
 
-        public RTCConfiguration GetConfiguration() =>
-            JsRuntime.CallJsMethod<RTCConfiguration>(NativeObject, "getConfiguration");
+        public IRTCConfiguration GetConfiguration() =>
+            JsRuntime.CallJsMethod<IRTCConfiguration>(NativeObject, "getConfiguration");
 
         public void GetIdentityAssertion() =>
             JsRuntime.CallJsMethodVoid(NativeObject, "getIdentityAssertion");
@@ -184,7 +184,7 @@ namespace WebRtcBindingsWeb.Api
 
         public void RestartIce() => JsRuntime.CallJsMethodVoid(NativeObject, "restartIce");
 
-        public void SetConfiguration(RTCConfiguration configuration) => JsRuntime.CallJsMethodVoid(NativeObject,
+        public void SetConfiguration(IRTCConfiguration configuration) => JsRuntime.CallJsMethodVoid(NativeObject,
             "setConfiguration", configuration);
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null) =>

@@ -24,6 +24,6 @@ namespace WebRtcBindingsWeb.Api
 
         public int ColNo => GetNativeProperty<int>("colNo");
 
-        public object Error => throw new NotImplementedException();
+        ////public object Error => throw new NotImplementedException();
     }
 }

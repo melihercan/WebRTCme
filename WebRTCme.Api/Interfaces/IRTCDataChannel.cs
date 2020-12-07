@@ -39,6 +39,5 @@ namespace WebRTCme
         void Close();
 
         void Send();
-
     }
 }

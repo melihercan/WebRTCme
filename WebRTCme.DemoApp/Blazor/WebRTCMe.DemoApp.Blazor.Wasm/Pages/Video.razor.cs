@@ -37,7 +37,7 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
                 var webRtc = CrossWebRtc.Current;
                 _window = webRtc.Window(JsRuntime);
-                _navigator = _window.Navigator;
+                _navigator = _window.Navigator();
                 _mediaDevices = _navigator.MediaDevices;
                 var mediDeviceInfos = (await _mediaDevices.EnumerateDevices()).ToList();
                 _mediaStream = await _mediaDevices.GetUserMedia(new MediaStreamConstraints
@@ -54,20 +54,19 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
                 _mediaStream.SetElementReferenceSrcObject(_localVideo);
 
-                _rtcPeerConnection = _window.RTCPeerConnection(new RTCConfiguration
+                var configuration = _window.RTCConfiguration();
+                configuration.IceServers = new RTCIceServer[]
                 {
-                    IceServers = new RTCIceServer[] 
-                    { 
-                        new RTCIceServer
-                        {
-                            Urls = new string[] 
-                            {
-                                "stun:stun.stunprotocol.org:3478",
-                                "stun:stun.l.google.com:19302"
-                            } 
-                        }
-                    }
-                });
+                                new RTCIceServer
+                                {
+                                    Urls = new string[]
+                                    {
+                                        "stun:stun.stunprotocol.org:3478",
+                                        "stun:stun.l.google.com:19302"
+                                    }
+                                }
+                };
+                _rtcPeerConnection = _window.RTCPeerConnection(configuration);
 
                 //_rtcPeerConnection.OnAddStream += (sender, trackEvent) => 
                 //{

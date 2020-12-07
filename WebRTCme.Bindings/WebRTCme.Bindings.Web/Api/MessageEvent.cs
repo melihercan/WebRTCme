@@ -15,17 +15,14 @@ namespace WebRtcBindingsWeb.Api
 
         private MessageEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public object Data => throw new NotImplementedException();
+        ////public object Data => throw new NotImplementedException();
 
         public string Origin => GetNativeProperty<string>("origin");
 
         public string LastEventId => GetNativeProperty<string>("lastEventId");
 
-        public object Source => throw new NotImplementedException();
+        ////public object Source => throw new NotImplementedException();
 
-        public object[] Ports => throw new NotImplementedException();
-
-
-
+        ////public object[] Ports => throw new NotImplementedException();
     }
 }

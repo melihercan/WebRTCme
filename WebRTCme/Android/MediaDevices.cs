@@ -15,7 +15,7 @@ namespace WebRtc.Android
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
+        public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
             throw new NotImplementedException();
         }

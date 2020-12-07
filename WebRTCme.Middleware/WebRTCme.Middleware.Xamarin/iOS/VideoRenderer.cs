@@ -48,7 +48,7 @@ namespace WebRtcMiddlewareXamarin
                         {
                             // Default devices.
                             var window = WebRtcMiddleware.WebRtc.Window();
-                            var navigator = window.Navigator;
+                            var navigator = window.Navigator();
                             var mediaDevices = navigator.MediaDevices;
                             var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
                             var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
@@ -62,20 +62,19 @@ namespace WebRtcMiddlewareXamarin
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
                             ///
-                            var peerConnection = window.RTCPeerConnection(new RTCConfiguration
+                            var configuration = window.RTCConfiguration();
+                            configuration.IceServers = new RTCIceServer[]
                             {
-                                IceServers = new RTCIceServer[]
+                                new RTCIceServer
                                 {
-                                    new RTCIceServer
+                                    Urls = new string[]
                                     {
-                                        Urls = new string[]
-                                        {
-                                            "stun:stun.stunprotocol.org:3478",
-                                            "stun:stun.l.google.com:19302"
-                                        }
+                                        "stun:stun.stunprotocol.org:3478",
+                                        "stun:stun.l.google.com:19302"
                                     }
                                 }
-                            });
+                            };
+                            var peerConnection = window.RTCPeerConnection(configuration);
 
                             //peerConnection.OnAddStream += (sender, mediaStreamEvent) =>
                             //{

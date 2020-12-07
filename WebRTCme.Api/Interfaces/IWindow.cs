@@ -7,9 +7,13 @@ namespace WebRTCme
 {
     public interface IWindow : INativeObject
     {
-        INavigator Navigator { get; }
+        INavigator Navigator();
 
-        IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null);
+        IRTCConfiguration RTCConfiguration();
+
+        IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration = null);
+
+
     }
 
 }

@@ -28,12 +28,12 @@ namespace WebRtcBindingsWeb.Api
         {
             get
             {
-                var jsObjectRef = JsRuntime.GetJsPropertyObjectRef(NativeObject, "streams");
-                var jsObjectRefStreamsArray = JsRuntime.GetJsPropertyArray(jsObjectRef);
+                var jsObjectRefStreams = JsRuntime.GetJsPropertyObjectRef(NativeObject, "streams");
+                var jsObjectRefStreamsArray = JsRuntime.GetJsPropertyArray(jsObjectRefStreams);
                 var streams = jsObjectRefStreamsArray
                     .Select(jsObjectRef => MediaStream.Create(JsRuntime, jsObjectRef))
                     .ToArray();
-                JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+                JsRuntime.DeleteJsObjectRef(jsObjectRefStreams.JsObjectRefId);
                 return streams;
             }
             set => SetNativeProperty("streams", value.Select(stream => stream.NativeObject).ToArray());

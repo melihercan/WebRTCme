@@ -20,7 +20,7 @@ namespace WebRtc.iOS
       
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
+        public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
             var mediaDeviceInfoList = new List<MediaDeviceInfo>();
 
@@ -52,7 +52,7 @@ namespace WebRtc.iOS
                 });
             }
 
-             return Task.FromResult(mediaDeviceInfoList.AsEnumerable());
+             return Task.FromResult(mediaDeviceInfoList.ToArray());
 
 #if false
 //// DEPRECATED

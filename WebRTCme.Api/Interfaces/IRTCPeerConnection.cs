@@ -60,7 +60,7 @@ namespace WebRTCme
 
         /*static*/ Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm);
 
-        RTCConfiguration GetConfiguration();
+        IRTCConfiguration GetConfiguration();
 
         void GetIdentityAssertion();
 
@@ -76,7 +76,7 @@ namespace WebRTCme
 
         void RestartIce();
 
-        void SetConfiguration(RTCConfiguration configuration);
+        void SetConfiguration(IRTCConfiguration configuration);
 
         void SetIdentityProvider(string domainName, string protocol = null, string userName = null);
 

@@ -16,7 +16,8 @@ namespace WebRtc.iOS
         private List<IMediaStreamTrack> _videoStreamTracks = new List<IMediaStreamTrack>();
         private List<IMediaStreamTrack> _audioStreamTracks = new List<IMediaStreamTrack>();
 
-
+        public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
+        public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
 
         private MediaStream()
         {

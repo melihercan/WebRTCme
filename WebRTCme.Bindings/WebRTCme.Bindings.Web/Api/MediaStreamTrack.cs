@@ -16,9 +16,9 @@ namespace WebRtcBindingsWeb.Api
             
         private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
+            AddNativeEventListener("onended", OnEnded);
             AddNativeEventListener("onmute", OnMute);
             AddNativeEventListener("onunmute", OnUnmute);
-            AddNativeEventListener("onended", OnEnded);
         }
 
         public string ContentHint 
@@ -49,9 +49,9 @@ namespace WebRtcBindingsWeb.Api
 
         public bool Remote => GetNativeProperty<bool>("remote");
 
+        public event EventHandler OnEnded;
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
-        public event EventHandler OnEnded;
 
         public Task ApplyConstraints(MediaTrackConstraints contraints) =>
             JsRuntime.InvokeVoidAsync("applyConstraints", contraints).AsTask();
@@ -71,6 +71,8 @@ namespace WebRtcBindingsWeb.Api
         public void Stop() =>
             JsRuntime.CallJsMethodVoid(NativeObject, "stop");
 
+        
+        
         public object GetView()
         {
             throw new NotImplementedException();

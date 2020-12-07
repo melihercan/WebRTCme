@@ -15,6 +15,6 @@ namespace WebRTCme
 
         int ColNo { get; }
 
-        object Error { get; }
+        ////object Error { get; }
     }
 }

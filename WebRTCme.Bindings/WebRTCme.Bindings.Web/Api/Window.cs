@@ -112,9 +112,14 @@ namespace WebRtcBindingsWeb.Api
 
         private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public INavigator Navigator => Api.Navigator.Create(JsRuntime);
+        public INavigator Navigator() => Api.Navigator.Create(JsRuntime);
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration rtcConfiguration) =>
+        public IRTCConfiguration RTCConfiguration() 
+        {
+            throw new NotImplementedException();
+        }
+
+        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration rtcConfiguration) =>
             Api.RTCPeerConnection.Create(JsRuntime, rtcConfiguration);
 
 

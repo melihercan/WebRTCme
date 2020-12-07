@@ -11,11 +11,14 @@ namespace WebRtc.Android
     {
         public static IWindow Create() => new Window();
 
-        private Window() { }
+        public INavigator Navigator() => Android.Navigator.Create();
 
-        public INavigator Navigator => Android.Navigator.Create();
+        public IRTCConfiguration RTCConfiguration()
+        {
+            throw new NotImplementedException();
+        }
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration)
+        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }

@@ -10,12 +10,14 @@ namespace WebRtc.iOS
     {
         public static IWindow Create() => new Window();
 
-        private Window() { }
+        public INavigator Navigator() => iOS.Navigator.Create();
 
+        public IRTCConfiguration RTCConfiguration()
+        {
+            throw new NotImplementedException();
+        }
 
-        public INavigator Navigator => iOS.Navigator.Create();
-
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
+        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);
     }
 }

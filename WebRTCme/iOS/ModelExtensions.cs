@@ -9,7 +9,7 @@ namespace WebRtc.iOS
 {
     internal static class ModelExtensions
     {
-        public static Webrtc.RTCConfiguration ToNative(this RTCConfiguration configuration)
+        public static Webrtc.RTCConfiguration ToNative(this IRTCConfiguration configuration)
         {   // => 
             var p =
             new Webrtc.RTCConfiguration();

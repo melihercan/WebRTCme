@@ -21,11 +21,7 @@ namespace WebRtcBindingsWeb.Api
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
-        public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
-            await Task.FromResult(MediaStream.Create(JsRuntime, 
-                await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getUserMedia", constraints)));
-
-        public async Task<IEnumerable<MediaDeviceInfo>> EnumerateDevices()
+        public async Task<MediaDeviceInfo[]> EnumerateDevices()
         {
             var mediaDeviceInfos = new List<MediaDeviceInfo>();
             var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "enumerateDevices");
@@ -37,9 +33,8 @@ namespace WebRtcBindingsWeb.Api
                 JsRuntime.DeleteJsObjectRef(jsObjectRefMediaDeviceInfo.JsObjectRefId);
             }
             JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
-            return mediaDeviceInfos;
+            return mediaDeviceInfos.ToArray();
         }
-
 
         public MediaTrackSupportedConstraints GetSupportedConstraints() =>
             GetNativeProperty<MediaTrackSupportedConstraints>("getSupportedConstraints");
@@ -47,5 +42,10 @@ namespace WebRtcBindingsWeb.Api
         public async Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints) =>
             await Task.FromResult(MediaStream.Create(
                 JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getDisplayMedia")));
+
+        public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
+            await Task.FromResult(MediaStream.Create(JsRuntime,
+                await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getUserMedia", constraints)));
+
     }
 }

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    public class RTCConfiguration
+    public interface IRTCConfiguration : INativeObject
     {
         public RTCBundlePolicy? BundlePolicy { get; set; }
         

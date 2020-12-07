@@ -8,25 +8,26 @@ namespace WebRTCme
 {
     public interface IMediaStream : INativeObject
     {
-        public bool Active { get; }
+        bool Active { get; }
 
-        ////public Task<bool> Ended { get; }
+        string Id { get; }
 
-        public string Id { get; }
+        event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
+        event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
+
+        void AddTrack(IMediaStreamTrack track);
 
         IMediaStream Clone();
 
-        List<IMediaStreamTrack> GetTracks();
+        List<IMediaStreamTrack> GetAudioTracks();
 
         IMediaStreamTrack GetTrackById(string id);
 
+        List<IMediaStreamTrack> GetTracks();
+
         List<IMediaStreamTrack> GetVideoTracks();
 
-        List<IMediaStreamTrack> GetAudioTracks();
-
-        public void AddTrack(IMediaStreamTrack track);
-        
-        public void RemoveTrack(IMediaStreamTrack track);
+        void RemoveTrack(IMediaStreamTrack track);
 
         
         

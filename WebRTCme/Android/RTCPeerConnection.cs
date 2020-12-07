@@ -34,7 +34,6 @@ namespace WebRtc.Android
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;
-        public event EventHandler<IMediaStreamEvent> OnAddStream;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
@@ -112,7 +111,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public RTCConfiguration GetConfiguration()
+        public IRTCConfiguration GetConfiguration()
         {
             throw new NotImplementedException();
         }
@@ -167,7 +166,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(RTCConfiguration configuration)
+        public void SetConfiguration(IRTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }
