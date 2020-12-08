@@ -8,6 +8,11 @@ namespace WebRtc.iOS
 {
     internal class RTCRtpSender : ApiBase, IRTCRtpSender
     {
+        public static IRTCRtpSender Create(Webrtc.RTCRtpSender nativeRtpSender) => new RTCRtpSender(nativeRtpSender);
+
+        private RTCRtpSender(Webrtc.RTCRtpSender nativeRtpSender) : base(nativeRtpSender)
+        {
+        }
 
         public IRTCDTMFSender Dtmf => throw new NotImplementedException();
 
