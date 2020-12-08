@@ -12,10 +12,7 @@ namespace WebRtc.iOS
 
         public INavigator Navigator() => iOS.Navigator.Create();
 
-        public IRTCConfiguration RTCConfiguration()
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCConfiguration RTCConfiguration() => iOS.RTCConfiguration.Create();
 
         public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);

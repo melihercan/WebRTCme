@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
-//using WebRTCme.Bindings.Xamarin.iOS;
-//using Webrtc;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -14,9 +12,6 @@ namespace WebRtc.iOS
     {
 
         public static IMediaDevices Create() => new MediaDevices();
-
-        private MediaDevices() { }
-
       
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
@@ -24,7 +19,6 @@ namespace WebRtc.iOS
         {
             var mediaDeviceInfoList = new List<MediaDeviceInfo>();
 
-            //var cameraCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
             var cameraCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
             foreach (var cameraCaptureDevice in cameraCaptureDevices)
             {
@@ -99,24 +93,18 @@ namespace WebRtc.iOS
 #endif
         }
 
-        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
-        {
-            throw new NotImplementedException();
-        }
-
         public MediaTrackSupportedConstraints GetSupportedConstraints()
         {
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
+        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
-            ////            var video = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
-            ////            var audio = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
-            ////            var mediaStream = new MediaStream(/*tracks*/);
-            ////            return null;
-            ///
-            return Task.FromResult(MediaStream.Create(constraints));
+            throw new NotImplementedException();
         }
+
+
+        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
+            Task.FromResult(MediaStream.Create(constraints));
     }
 }

@@ -10,6 +10,33 @@ namespace WebRtc.iOS
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.IRTCPeerConnectionDelegate
     {
+        public static IRTCPeerConnection Create(IRTCConfiguration configuration) => new RTCPeerConnection(configuration);
+
+        private RTCPeerConnection(IRTCConfiguration configuration)
+        {
+            var nativeConfiguration = configuration.NativeObject as Webrtc.RTCConfiguration;
+
+            var mandatory = new Dictionary<string, string>
+            {
+                ["OfferToReceiveAudio"] = "true",
+                ["OfferToReceiveVideo"] = "true"
+            };
+            var optional = new Dictionary<string, string>
+            {
+                ["DtlsSrtpKeyAgreement"] = "true"
+            };
+            var nativeConstraints = new Webrtc.RTCMediaConstraints(
+                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
+                    mandatory.Values.ToArray(), mandatory.Keys.ToArray()),
+                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
+                    optional.Values.ToArray(), optional.Keys.ToArray()));
+
+            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
+                nativeConfiguration,
+                nativeConstraints,
+                this);
+        }
+
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
         public RTCPeerConnectionState ConnectionState => throw new NotImplementedException();
@@ -34,87 +61,20 @@ namespace WebRtc.iOS
 
         public RTCSignallingState SignallingState => throw new NotImplementedException();
 
-        public static IRTCPeerConnection Create(IRTCConfiguration configuration)
-        {
-            var ret = new RTCPeerConnection();
-            return ret.Initialize(configuration);
-        }
-
-        private RTCPeerConnection()
-        { 
-
-        }
-
-        private IRTCPeerConnection Initialize(IRTCConfiguration configuration)
-        {
-            var nativeConfiguration = configuration.ToNative();
-            //NativeObjects.Add(nativeConfiguration);
-
-            var mandatory = new Dictionary<string, string>
-            {
-                ["OfferToReceiveAudio"] = "true",
-                ["OfferToReceiveVideo"] = "true"
-            };
-            var optional = new Dictionary<string, string>
-            {
-                ["DtlsSrtpKeyAgreement"] = "true"
-            };
-            var nativeConstraints = new Webrtc.RTCMediaConstraints(
-                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
-                    mandatory.Values.ToArray(), mandatory.Keys.ToArray()), 
-                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
-                    optional.Values.ToArray(), optional.Keys.ToArray()));
-            //NativeObjects.Add(nativeConstraints);
-            
-            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
-                nativeConfiguration,
-                nativeConstraints,
-                this);
-
-            return this;
-        }
-
         public event EventHandler OnConnectionStateChanged;
-        public event EventHandler OnSignallingStateChange;
-
-
-
-        public void AddStream(IMediaStream mediaStream)
-        {
-            ((Webrtc.RTCPeerConnection)NativeObject).AddStream((Webrtc.RTCMediaStream)mediaStream.NativeObject);
-        }
-
-
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
+        public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         public event EventHandler OnNegotiationNeeded;
+        public event EventHandler OnSignallingStateChange;
+        public event EventHandler<IRTCTrackEvent> OnTrack;
 
-        event EventHandler<IRTCPeerConnectionIceEvent> IRTCPeerConnection.OnIceCandidate
+
+        public RTCIceServer[] GetDefaultIceServers()
         {
-            add
-            {
-                throw new NotImplementedException();
-            }
-
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        event EventHandler<IRTCTrackEvent> IRTCPeerConnection.OnTrack
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
-
-            remove
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
 
         public Task AddIceCandidate(IRTCIceCandidate candidate)
@@ -123,76 +83,6 @@ namespace WebRtc.iOS
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnTrack(Func<IRTCTrackEvent> callback)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
-        {
-            throw new NotImplementedException();
-        }
-
-        
-        
-        
-        
-        public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCSignalingState stateChanged)
-        {
-
-        }
-
-        public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
-        {
-
-        }
-
-        public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
-        {
-
-        }
-
-        public void PeerConnectionShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)
-        {
-
-        }
-
-        public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceConnectionState newState)
-        {
-
-        }
-
-        public void DidChangeIceGatheringState(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceGatheringState newState)
-        {
-
-        }
-
-        public void DidGenerateIceCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate candidate)
-        {
-
-        }
-
-        public void DidRemoveIceCandidates(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate[] candidates)
-        {
-
-        }
-
-        public void DidOpenDataChannel(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCDataChannel dataChannel)
-        {
-
-        }
-
-        public RTCIceServer[] GetDefaultIceServers()
         {
             throw new NotImplementedException();
         }
@@ -212,7 +102,12 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<IRTCCertificate> GenerateCertificate()
+        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
         {
             throw new NotImplementedException();
         }
@@ -277,9 +172,94 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
+        
+        
+        
+        #region NativeEvents
+        public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, 
+            Webrtc.RTCSignalingState stateChanged)
         {
-            throw new NotImplementedException();
+
         }
+
+        public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
+        {
+            // Depreceted
+        }
+
+        public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
+        {
+            // Depreceted
+        }
+
+        public void PeerConnectionShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)
+        {
+
+        }
+
+        public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
+            Webrtc.RTCIceConnectionState newState)
+        {
+
+        }
+
+        public void DidChangeIceGatheringState(Webrtc.RTCPeerConnection peerConnection, 
+            Webrtc.RTCIceGatheringState newState)
+        {
+
+        }
+
+        public void DidGenerateIceCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate candidate)
+        {
+
+        }
+
+        public void DidRemoveIceCandidates(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate[] candidates)
+        {
+
+        }
+
+        public void DidOpenDataChannel(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCDataChannel dataChannel)
+        {
+            OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(dataChannel));
+        }
+
+        public void DidChangeStandardizedIceConnectionState(Webrtc.RTCPeerConnection peerConnection,
+            Webrtc.RTCIceConnectionState newState)
+        {
+
+        }
+
+        public void DidChangeConnectionState(Webrtc.RTCPeerConnection peerConnection, 
+            Webrtc.RTCPeerConnectionState newState)
+        {
+            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void DidStartReceivingOnTransceiver(Webrtc.RTCPeerConnection peerConnection,
+            Webrtc.RTCRtpTransceiver transceiver)
+        {
+
+        }
+
+        public void DidAddReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCRtpReceiver rtpReceiver,
+            Webrtc.RTCMediaStream[] mediaStreams)
+        {
+
+        }
+
+        public void DidRemoveReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCRtpReceiver rtpReceiver)
+        {
+
+        }
+
+        public void DidChangeLocalCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate local,
+            Webrtc.RTCIceCandidate remote, int lastDataReceivedMs, string reason)
+        {
+
+        }
+
+
+        #endregion
     }
 }

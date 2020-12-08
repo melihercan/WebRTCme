@@ -32,7 +32,6 @@ namespace WebRtcBindingsWeb.Api
             AddNativeEventListenerForObjectRef("onconnectionstatechanged", OnTrack, RTCTrackEvent.Create);
         }
 
-
         public bool CanTrickleIceCandidates => GetNativeProperty<bool>("canTrickleIceCandidates");
 
         public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");

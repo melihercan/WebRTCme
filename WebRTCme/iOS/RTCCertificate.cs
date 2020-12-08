@@ -9,9 +9,18 @@ namespace WebRtc.iOS
     internal class RTCCertificate : ApiBase, IRTCCertificate
     {
 
-        public static IRTCCertificate Create() => new RTCCertificate();
+////        public static IRTCCertificate Create() => new RTCCertificate();
 
-        private RTCCertificate() { }
+        public static IRTCCertificate Create(Webrtc.RTCCertificate nativeCertificate) => 
+            new RTCCertificate(nativeCertificate);
+
+//        private RTCCertificate() 
+  //      { 
+    //    }
+
+        private RTCCertificate(Webrtc.RTCCertificate nativeCertificate) : base(nativeCertificate)
+        {
+        }
 
         public ulong Expires => throw new NotImplementedException();
 

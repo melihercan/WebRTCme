@@ -2113,26 +2113,32 @@ namespace Webrtc
 		void /****PeerConnection****/DidOpenDataChannel(RTCPeerConnection peerConnection, RTCDataChannel dataChannel);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeStandardizedIceConnectionState:(RTCIceConnectionState)newState;
+	[Abstract]
 		[Export("peerConnection:didChangeStandardizedIceConnectionState:")]
 		void /****PeerConnection****/DidChangeStandardizedIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeConnectionState:(RTCPeerConnectionState)newState;
+	[Abstract]
 		[Export("peerConnection:didChangeConnectionState:")]
 		void /****PeerConnection****/DidChangeConnectionState(RTCPeerConnection peerConnection, RTCPeerConnectionState newState);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didStartReceivingOnTransceiver:(RTCRtpTransceiver * _Nonnull)transceiver;
+	[Abstract]
 		[Export("peerConnection:didStartReceivingOnTransceiver:")]
 		void /****PeerConnection****/DidStartReceivingOnTransceiver(RTCPeerConnection peerConnection, RTCRtpTransceiver transceiver);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver streams:(NSArray<RTCMediaStream *> * _Nonnull)mediaStreams;
+	[Abstract]
 		[Export("peerConnection:didAddReceiver:streams:")]
 		void /****PeerConnection****/DidAddReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver, RTCMediaStream[] mediaStreams);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver;
+	[Abstract]
 		[Export("peerConnection:didRemoveReceiver:")]
 		void /****PeerConnection****/DidRemoveReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeLocalCandidate:(RTCIceCandidate * _Nonnull)local remoteCandidate:(RTCIceCandidate * _Nonnull)remote lastReceivedMs:(int)lastDataReceivedMs changeReason:(NSString * _Nonnull)reason;
+	[Abstract]
 		[Export("peerConnection:didChangeLocalCandidate:remoteCandidate:lastReceivedMs:changeReason:")]
 		void /****PeerConnection****/DidChangeLocalCandidate(RTCPeerConnection peerConnection, RTCIceCandidate local, RTCIceCandidate remote, int lastDataReceivedMs, string reason);
 	}

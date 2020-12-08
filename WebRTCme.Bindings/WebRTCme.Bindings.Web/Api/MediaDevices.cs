@@ -46,6 +46,5 @@ namespace WebRtcBindingsWeb.Api
         public async Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
             await Task.FromResult(MediaStream.Create(JsRuntime,
                 await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "getUserMedia", constraints)));
-
     }
 }
