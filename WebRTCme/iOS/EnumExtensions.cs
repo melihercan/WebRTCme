@@ -46,5 +46,38 @@ namespace WebRtc.iOS
                 Webrtc.RTCPeerConnectionState.Failed => RTCPeerConnectionState.Failed,
                 Webrtc.RTCPeerConnectionState.Closed => RTCPeerConnectionState.Closed
             };
+
+        public static RTCIceConnectionState FromNative(this Webrtc.RTCIceConnectionState nativeIceConnectionState) =>
+            nativeIceConnectionState switch
+            {
+                Webrtc.RTCIceConnectionState.New => RTCIceConnectionState.New,
+                Webrtc.RTCIceConnectionState.Checking => RTCIceConnectionState.Checking,
+                Webrtc.RTCIceConnectionState.Connected => RTCIceConnectionState.Connected,
+                Webrtc.RTCIceConnectionState.Completed => RTCIceConnectionState.Completed,
+                Webrtc.RTCIceConnectionState.Failed => RTCIceConnectionState.Failed,
+                Webrtc.RTCIceConnectionState.Disconnected => RTCIceConnectionState.Disconnected,
+                Webrtc.RTCIceConnectionState.Closed => RTCIceConnectionState.Closed,
+                Webrtc.RTCIceConnectionState.Count => throw new NotSupportedException()
+            };
+
+        public static RTCIceGatheringState FromNative(this Webrtc.RTCIceGatheringState nativeIceGatheringState) =>
+            nativeIceGatheringState switch
+            {
+                Webrtc.RTCIceGatheringState.New => RTCIceGatheringState.New, 
+                Webrtc.RTCIceGatheringState.Gathering => RTCIceGatheringState.Gathering,
+                Webrtc.RTCIceGatheringState.Complete => RTCIceGatheringState.Complete
+            };
+
+        public static RTCSignalingState FromNative(this Webrtc.RTCSignalingState nativeSignalingState) =>
+            nativeSignalingState switch
+            {
+                Webrtc.RTCSignalingState.Stable => RTCSignalingState.Stable,
+                Webrtc.RTCSignalingState.HaveLocalOffer => RTCSignalingState.HaveLocalOffer,
+                Webrtc.RTCSignalingState.HaveLocalPrAnswer => RTCSignalingState.HaveLocalPranswer,
+                Webrtc.RTCSignalingState.HaveRemoteOffer => RTCSignalingState.HaveRemoteOffer,
+                Webrtc.RTCSignalingState.HaveRemotePrAnswer => RTCSignalingState.HaveRemotePranswer,
+                Webrtc.RTCSignalingState.Closed => throw new NotSupportedException()
+            };
+
     }
 }

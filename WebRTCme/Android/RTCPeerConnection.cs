@@ -30,7 +30,7 @@ namespace WebRtc.Android
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
-        public RTCSignallingState SignallingState => throw new NotImplementedException();
+        public RTCSignalingState SignalingState => throw new NotImplementedException();
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler OnSignallingStateChange;

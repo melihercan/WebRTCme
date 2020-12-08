@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace WebRTCme
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum RTCSignallingState
+    public enum RTCSignalingState
     {
         Stable,
 
@@ -15,7 +15,7 @@ namespace WebRTCme
         HaveLocalOffer,
 
         [Description("have-remote-offer")]
-        HaveeEmoteOffer,
+        HaveRemoteOffer,
 
         [Description("have-local-pranswer")]
         HaveLocalPranswer,

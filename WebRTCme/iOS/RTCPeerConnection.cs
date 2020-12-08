@@ -37,7 +37,7 @@ namespace WebRtc.iOS
                 this);
         }
 
-        public bool CanTrickleIceCandidates => false;
+        public bool CanTrickleIceCandidates => throw new NotSupportedException();
 
         public RTCPeerConnectionState ConnectionState => 
             ((Webrtc.RTCPeerConnection)NativeObject).ConnectionState.FromNative();
@@ -45,23 +45,31 @@ namespace WebRtc.iOS
         public IRTCSessionDescription CurrentRemoteDescription =>
             RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
 
-        public RTCIceConnectionState IceConnectionState => throw new NotImplementedException();
+        public RTCIceConnectionState IceConnectionState =>
+            ((Webrtc.RTCPeerConnection)NativeObject).IceConnectionState.FromNative();
 
-        public RTCIceGatheringState IceGatheringState => throw new NotImplementedException();
+        public RTCIceGatheringState IceGatheringState => 
+            ((Webrtc.RTCPeerConnection)NativeObject).IceGatheringState.FromNative();
 
-        public IRTCSessionDescription LocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription LocalDescription =>
+            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).LocalDescription);
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
-        public IRTCSessionDescription PendingLocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingLocalDescription => 
+            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).LocalDescription);
 
-        public IRTCSessionDescription PendingRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingRemoteDescription => 
+            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
 
-        public IRTCSessionDescription RemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription RemoteDescription =>
+            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
+
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
-        public RTCSignallingState SignallingState => throw new NotImplementedException();
+        public RTCSignalingState SignalingState => 
+            ((Webrtc.RTCPeerConnection)NativeObject).SignalingState.FromNative();
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -72,7 +80,6 @@ namespace WebRtc.iOS
         public event EventHandler OnNegotiationNeeded;
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
-
 
         public RTCIceServer[] GetDefaultIceServers()
         {

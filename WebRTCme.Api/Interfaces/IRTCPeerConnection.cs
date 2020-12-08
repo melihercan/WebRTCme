@@ -31,7 +31,7 @@ namespace WebRTCme
 
         IRTCSctpTransport Sctp { get; }
 
-        RTCSignallingState SignallingState { get; }
+        RTCSignalingState SignalingState { get; }
 
 
         event EventHandler OnConnectionStateChanged;

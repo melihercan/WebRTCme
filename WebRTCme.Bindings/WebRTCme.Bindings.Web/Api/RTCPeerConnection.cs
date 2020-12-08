@@ -69,7 +69,7 @@ namespace WebRtcBindingsWeb.Api
         public IRTCSctpTransport Sctp =>
             RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
 
-        public RTCSignallingState SignallingState => GetNativeProperty<RTCSignallingState>("signallingState");
+        public RTCSignalingState SignalingState => GetNativeProperty<RTCSignalingState>("signallingState");
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
