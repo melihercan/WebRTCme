@@ -81,10 +81,10 @@ namespace WebRtc.iOS
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
-        public RTCIceServer[] GetDefaultIceServers()
-        {
-            throw new NotImplementedException();
-        }
+        public RTCIceServer[] GetDefaultIceServers() =>
+            ((Webrtc.RTCPeerConnection)NativeObject).Configuration.IceServers
+                .Select(nativeIceServer => nativeIceServer.FromNative())
+                .ToArray();
 
         public Task AddIceCandidate(IRTCIceCandidate candidate)
         {

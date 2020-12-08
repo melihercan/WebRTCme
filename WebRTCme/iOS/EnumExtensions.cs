@@ -79,5 +79,12 @@ namespace WebRtc.iOS
                 Webrtc.RTCSignalingState.Closed => throw new NotSupportedException()
             };
 
+        public static RTCIceCredentialType FromNative(this Webrtc.RTCTlsCertPolicy nativeTlsCertPolicy) =>
+            nativeTlsCertPolicy switch
+            {
+                Webrtc.RTCTlsCertPolicy.InsecureNoCheck => throw new NotImplementedException(),
+                Webrtc.RTCTlsCertPolicy.Secure => RTCIceCredentialType.Password
+            };
+
     }
 }

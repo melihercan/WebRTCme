@@ -37,5 +37,14 @@ namespace WebRtc.iOS
                 credential: iceServer.Credential,
                 tlsCertPolicy: iceServer.CredentialType?.ToNative() ?? Webrtc.RTCTlsCertPolicy.Secure
             );
+
+        public static RTCIceServer FromNative(this Webrtc.RTCIceServer nativeIceServer) =>
+            new RTCIceServer
+            {
+                Credential = nativeIceServer.Credential,
+                CredentialType = nativeIceServer.TlsCertPolicy.FromNative(),
+                Urls = nativeIceServer.UrlStrings,
+                Username = nativeIceServer.Username
+            };
     }
 }
