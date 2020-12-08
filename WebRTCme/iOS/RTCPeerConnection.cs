@@ -110,7 +110,6 @@ namespace WebRtc.iOS
         public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<IRTCSessionDescription>();
-
             ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, err) => 
                 { 
@@ -119,19 +118,28 @@ namespace WebRtc.iOS
                         tcs.SetException(new Exception($"{err.LocalizedDescription}"));
                     }
                     tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
-
                 });
             return tcs.Task;
         }
 
-        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options)
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
+            ////RTCDataChannel.Create(((Webrtc.RTCPeerConnection)NativeObject).DataChannelForLabel(label, null));
+            RTCDataChannel.Create(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
+                (Webrtc.RTCPeerConnection)NativeObject, label, options.ToNative()));
 
         public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(NativeDefaultRTCMediaConstraints,
+                (nativeSessionDescription, err) =>
+                {
+                    if (err != null)
+                    {
+                        tcs.SetException(new Exception($"{err.LocalizedDescription}"));
+                    }
+                    tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
+                });
+            return tcs.Task;
         }
 
         public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)

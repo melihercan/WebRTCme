@@ -6,16 +6,16 @@ namespace WebRTCme
 {
     public class RTCDataChannelInit
     {
-        bool? Ordered { get; set; } 
+        public bool? Ordered { get; set; }
 
-        ushort? MaxPacketLifeTime { get; set; }
+        public ushort? MaxPacketLifeTime { get; set; }
 
-        ushort? MaxRetransmits { get; set; }
+        public ushort? MaxRetransmits { get; set; }
 
-        string Protocol { get; set; }
+        public string Protocol { get; set; }
 
-        bool? Negotiated { get; set; }
+        public bool? Negotiated { get; set; }
 
-        short? Id { get; set; } 
+        public short? Id { get; set; } 
     }
 }

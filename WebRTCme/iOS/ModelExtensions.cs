@@ -38,6 +38,18 @@ namespace WebRtc.iOS
                 tlsCertPolicy: iceServer.CredentialType?.ToNative() ?? Webrtc.RTCTlsCertPolicy.Secure
             );
 
+
+        public static Webrtc.RTCDataChannelConfiguration ToNative(this RTCDataChannelInit dataChannelInit) =>
+            new Webrtc.RTCDataChannelConfiguration
+            {
+                IsOrdered = dataChannelInit.Ordered ?? true,
+                MaxPacketLifeTime = dataChannelInit.MaxPacketLifeTime ?? 0,
+                MaxRetransmits = dataChannelInit.MaxRetransmits ?? 0,
+                Protocol = dataChannelInit.Protocol,
+                IsNegotiated = dataChannelInit.Negotiated ?? false,
+                StreamId = dataChannelInit.Id ?? 0
+            };
+
         public static RTCIceServer FromNative(this Webrtc.RTCIceServer nativeIceServer) =>
             new RTCIceServer
             {
@@ -46,5 +58,6 @@ namespace WebRtc.iOS
                 Urls = nativeIceServer.UrlStrings,
                 Username = nativeIceServer.Username
             };
+
     }
 }
