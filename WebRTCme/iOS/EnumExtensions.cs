@@ -35,5 +35,16 @@ namespace WebRtc.iOS
                 RTCRtcpMuxPolicy.Negotiate => Webrtc.RTCRtcpMuxPolicy.Negotiate,
                 RTCRtcpMuxPolicy.Require => Webrtc.RTCRtcpMuxPolicy.Require
             };
+
+        public static RTCPeerConnectionState FromNative(this Webrtc.RTCPeerConnectionState nativePeerConnectionState) =>
+            nativePeerConnectionState switch
+            {
+                Webrtc.RTCPeerConnectionState.New => RTCPeerConnectionState.New,
+                Webrtc.RTCPeerConnectionState.Connecting => RTCPeerConnectionState.Connecting,
+                Webrtc.RTCPeerConnectionState.Connected => RTCPeerConnectionState.Connected,
+                Webrtc.RTCPeerConnectionState.Disconnected => RTCPeerConnectionState.Disconnected,
+                Webrtc.RTCPeerConnectionState.Failed => RTCPeerConnectionState.Failed,
+                Webrtc.RTCPeerConnectionState.Closed => RTCPeerConnectionState.Closed
+            };
     }
 }

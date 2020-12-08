@@ -37,9 +37,10 @@ namespace WebRtc.iOS
                 this);
         }
 
-        public bool CanTrickleIceCandidates => throw new NotImplementedException();
+        public bool CanTrickleIceCandidates => false;
 
-        public RTCPeerConnectionState ConnectionState => throw new NotImplementedException();
+        public RTCPeerConnectionState ConnectionState => 
+            ((Webrtc.RTCPeerConnection)NativeObject).ConnectionState.FromNative();
 
         public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
 
@@ -179,7 +180,7 @@ namespace WebRtc.iOS
         public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCSignalingState stateChanged)
         {
-
+            OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
@@ -194,19 +195,19 @@ namespace WebRtc.iOS
 
         public void PeerConnectionShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)
         {
-
+            OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceConnectionState newState)
         {
-
+            OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidChangeIceGatheringState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceGatheringState newState)
         {
-
+            OnIceGatheringStateChange?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidGenerateIceCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate candidate)
@@ -216,7 +217,7 @@ namespace WebRtc.iOS
 
         public void DidRemoveIceCandidates(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate[] candidates)
         {
-
+            //// TODO: Anything to do for removal???
         }
 
         public void DidOpenDataChannel(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCDataChannel dataChannel)
