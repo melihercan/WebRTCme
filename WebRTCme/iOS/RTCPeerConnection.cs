@@ -142,10 +142,12 @@ namespace WebRtc.iOS
             return tcs.Task;
         }
 
-        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
+            Task.FromResult(
+                RTCCertificate.Create(Webrtc.RTCCertificate.GenerateCertificateWithParams(
+                    NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                        keygenAlgorithm.Values.Select(value => NSObject.FromObject(value)).ToArray(),
+                        keygenAlgorithm.Keys.ToArray()))));
 
         public IRTCConfiguration GetConfiguration()
         {
