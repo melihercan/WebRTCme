@@ -149,10 +149,8 @@ namespace WebRtc.iOS
                         keygenAlgorithm.Values.Select(value => NSObject.FromObject(value)).ToArray(),
                         keygenAlgorithm.Keys.ToArray()))));
 
-        public IRTCConfiguration GetConfiguration()
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCConfiguration GetConfiguration() =>
+            RTCConfiguration.Create(((Webrtc.RTCPeerConnection)NativeObject).Configuration);
 
         public void GetIdentityAssertion()
         {

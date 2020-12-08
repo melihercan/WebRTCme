@@ -7,7 +7,13 @@ namespace WebRtc.iOS
 {
     internal class RTCConfiguration : ApiBase, IRTCConfiguration
     {
-        public static IRTCConfiguration Create() => new RTCConfiguration();
+        public static IRTCConfiguration Create() => 
+            new RTCConfiguration(new Webrtc.RTCConfiguration());
+
+        public static IRTCConfiguration Create(Webrtc.RTCConfiguration nativeConfiguration) => 
+            new RTCConfiguration(nativeConfiguration);
+
+        private RTCConfiguration(Webrtc.RTCConfiguration nativeConfiguration) : base(nativeConfiguration) { }
 
         public RTCBundlePolicy? BundlePolicy { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public IRTCCertificate[] Certificates { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
