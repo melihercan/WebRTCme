@@ -211,7 +211,7 @@ namespace WebRtc.iOS
 
         public void DidGenerateIceCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate candidate)
         {
-
+            OnIceCandidate?.Invoke(this, RTCPeerConnectionIceEvent.Create(candidate));
         }
 
         public void DidRemoveIceCandidates(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate[] candidates)

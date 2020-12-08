@@ -39,12 +39,16 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
-
+	
+	
+	
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.10" Condition="'$(TargetFramework)' != 'net5'" />
 		<PackageReference Include="Microsoft.JSInterop" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5'" />
 	</ItemGroup>
+
+
 
 </Project>
 
