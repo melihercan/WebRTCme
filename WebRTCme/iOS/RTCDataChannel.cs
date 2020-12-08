@@ -7,7 +7,8 @@ namespace WebRtc.iOS
 {
     internal class RTCDataChannel : ApiBase, IRTCDataChannel
     {
-        public static IRTCDataChannel Create(Webrtc.RTCDataChannel nativeDataChannel) => new RTCDataChannel(nativeDataChannel);
+        public static IRTCDataChannel Create(Webrtc.RTCDataChannel nativeDataChannel) => 
+            new RTCDataChannel(nativeDataChannel);
 
         private RTCDataChannel(Webrtc.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) { }
 

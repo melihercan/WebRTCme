@@ -39,7 +39,8 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
-	
+
+
 	
 	
 	<ItemGroup>

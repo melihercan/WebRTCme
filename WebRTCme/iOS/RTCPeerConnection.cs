@@ -42,7 +42,8 @@ namespace WebRtc.iOS
         public RTCPeerConnectionState ConnectionState => 
             ((Webrtc.RTCPeerConnection)NativeObject).ConnectionState.FromNative();
 
-        public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription CurrentRemoteDescription =>
+            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
 
         public RTCIceConnectionState IceConnectionState => throw new NotImplementedException();
 
