@@ -10,27 +10,35 @@ namespace WebRtc.iOS
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.IRTCPeerConnectionDelegate
     {
+        private static Webrtc.RTCMediaConstraints NativeDefaultRTCMediaConstraints
+        {
+            get
+            {
+                var mandatory = new Dictionary<string, string>
+                {
+                    ["OfferToReceiveAudio"] = "true",
+                    ["OfferToReceiveVideo"] = "true"
+                };
+                var optional = new Dictionary<string, string>
+                {
+                    ["DtlsSrtpKeyAgreement"] = "true"
+                };
+                var nativeConstraints = new Webrtc.RTCMediaConstraints(
+                    NSDictionary<NSString, NSString>.FromObjectsAndKeys(
+                        mandatory.Values.ToArray(), mandatory.Keys.ToArray()),
+                    NSDictionary<NSString, NSString>.FromObjectsAndKeys(
+                        optional.Values.ToArray(), optional.Keys.ToArray()));
+                return nativeConstraints;
+            }
+        }
+
+
         public static IRTCPeerConnection Create(IRTCConfiguration configuration) => new RTCPeerConnection(configuration);
 
         private RTCPeerConnection(IRTCConfiguration configuration)
         {
             var nativeConfiguration = configuration.NativeObject as Webrtc.RTCConfiguration;
-
-            var mandatory = new Dictionary<string, string>
-            {
-                ["OfferToReceiveAudio"] = "true",
-                ["OfferToReceiveVideo"] = "true"
-            };
-            var optional = new Dictionary<string, string>
-            {
-                ["DtlsSrtpKeyAgreement"] = "true"
-            };
-            var nativeConstraints = new Webrtc.RTCMediaConstraints(
-                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
-                    mandatory.Values.ToArray(), mandatory.Keys.ToArray()),
-                NSDictionary<NSString, NSString>.FromObjectsAndKeys(
-                    optional.Values.ToArray(), optional.Keys.ToArray()));
-
+            var nativeConstraints = NativeDefaultRTCMediaConstraints;
             NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
                 nativeConfiguration,
                 nativeConstraints,
@@ -99,12 +107,24 @@ namespace WebRtc.iOS
         public void Close() =>
             ((Webrtc.RTCPeerConnection)NativeObject).Close();
 
-        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null)
+        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+
+            ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(NativeDefaultRTCMediaConstraints,
+                (nativeSessionDescription, err) => 
+                { 
+                    if(err != null)
+                    {
+                        tcs.SetException(new Exception($"{err.LocalizedDescription}"));
+                    }
+                    tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
+
+                });
+            return tcs.Task;
         }
 
-        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null)
+        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options)
         {
             throw new NotImplementedException();
         }

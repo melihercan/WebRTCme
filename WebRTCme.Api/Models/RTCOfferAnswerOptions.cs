@@ -4,7 +4,8 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCAnswerOptions : RTCOfferAnswerOptions
+    public class RTCOfferAnswerOptions
     {
+        public bool? VoiceActivityDetection { get; set; }
     }
 }
