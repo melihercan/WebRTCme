@@ -8,6 +8,14 @@ namespace WebRtc.Android
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
+        public static IRTCPeerConnection Create(IRTCConfiguration configuration) =>
+            new RTCPeerConnection(configuration);
+
+        private RTCPeerConnection(IRTCConfiguration configuration)
+        {
+
+        }
+
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
         public RTCPeerConnectionState ConnectionState => throw new NotImplementedException();

@@ -32,8 +32,8 @@ namespace WebRtc.iOS
             }
         }
 
-
-        public static IRTCPeerConnection Create(IRTCConfiguration configuration) => new RTCPeerConnection(configuration);
+        public static IRTCPeerConnection Create(IRTCConfiguration configuration) => 
+            new RTCPeerConnection(configuration);
 
         private RTCPeerConnection(IRTCConfiguration configuration)
         {

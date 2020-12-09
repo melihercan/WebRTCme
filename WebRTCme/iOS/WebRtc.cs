@@ -10,16 +10,22 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        private static Webrtc.RTCPeerConnectionFactory _nativePeerConnectionFactory;
-        public static Webrtc.RTCPeerConnectionFactory NativePeerConnectionFactory =>
-            _nativePeerConnectionFactory ?? (_nativePeerConnectionFactory = new Webrtc.RTCPeerConnectionFactory(
-                new Webrtc.RTCDefaultVideoEncoderFactory(),
-                new Webrtc.RTCDefaultVideoDecoderFactory()));
+        //private static Webrtc.RTCPeerConnectionFactory _nativePeerConnectionFactory;
+        public static Webrtc.RTCPeerConnectionFactory NativePeerConnectionFactory { get; private set; }
+        //=>
+        //  _nativePeerConnectionFactory ?? (_nativePeerConnectionFactory = new Webrtc.RTCPeerConnectionFactory(
+        //    new Webrtc.RTCDefaultVideoEncoderFactory(),
+        //  new Webrtc.RTCDefaultVideoDecoderFactory()));
 
         public static IWebRtc Create() => new WebRtc();
 
         private WebRtc()
         {
+            NativePeerConnectionFactory = new Webrtc.RTCPeerConnectionFactory(
+                new Webrtc.RTCDefaultVideoEncoderFactory(),
+                new Webrtc.RTCDefaultVideoDecoderFactory());
+
+
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());
             ////CFunctionsRTCSetupInternalTracer();
             Webrtc.CFunctions.RTCInitializeSSL();
