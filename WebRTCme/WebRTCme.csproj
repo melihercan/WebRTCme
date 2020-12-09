@@ -43,6 +43,8 @@
 
 	
 	
+	
+	
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.10" Condition="'$(TargetFramework)' != 'net5'" />

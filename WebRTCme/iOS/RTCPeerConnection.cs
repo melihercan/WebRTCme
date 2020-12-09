@@ -131,11 +131,11 @@ namespace WebRtc.iOS
         {
             var tcs = new TaskCompletionSource<IRTCSessionDescription>();
             ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(NativeDefaultRTCMediaConstraints,
-                (nativeSessionDescription, err) =>
+                (nativeSessionDescription, nsError) =>
                 {
-                    if (err != null)
+                    if (nsError != null)
                     {
-                        tcs.SetException(new Exception($"{err.LocalizedDescription}"));
+                        tcs.SetException(new Exception($"{nsError.LocalizedDescription}"));
                     }
                     tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
                 });
@@ -157,57 +157,71 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public IRTCRtpReceiver[] GetReceivers()
+        public IRTCRtpReceiver[] GetReceivers() =>
+            ((Webrtc.RTCPeerConnection)NativeObject).Receivers
+                .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
+
+        public IRTCRtpSender[] GetSenders() =>
+            ((Webrtc.RTCPeerConnection)NativeObject).Senders
+                .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
+
+        public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
             throw new NotImplementedException();
         }
 
-        public IRTCRtpSender[] GetSenders()
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCRtpTransceiver[] GetTransceivers() =>
+            ((Webrtc.RTCPeerConnection) NativeObject).Transceivers
+                 .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
-        public Task<IRTCStatsReport> GetStats()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IRTCRtpTransceiver[] GetTransceivers()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveTrack(IRTCRtpSender sender)
-        {
-            throw new NotImplementedException();
-        }
+        public void RemoveTrack(IRTCRtpSender sender) =>
+            ((Webrtc.RTCPeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RTCRtpSender);
 
         public void RestartIce()
         {
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(IRTCConfiguration configuration)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetConfiguration(IRTCConfiguration configuration) =>
+            ((Webrtc.RTCPeerConnection) NativeObject).SetConfiguration(
+                configuration.NativeObject as Webrtc.RTCConfiguration);
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task SetLocalDescription(IRTCSessionDescription sessionDescription)
+        public Task SetLocalDescription(IRTCSessionDescription sessionDescription) 
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<object>();
+            ((Webrtc.RTCPeerConnection)NativeObject).SetLocalDescription(
+                sessionDescription.NativeObject as Webrtc.RTCSessionDescription,
+                (nsError) =>
+                {
+                    if (nsError != null)
+                    {
+                        tcs.SetException(new Exception($"{nsError.LocalizedDescription}"));
+                    }
+                    tcs.SetResult(null);
+                });
+            return tcs.Task;
         }
 
         public Task SetRemoteDescription(IRTCSessionDescription sessionDescription)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<object>();
+            ((Webrtc.RTCPeerConnection)NativeObject).SetRemoteDescription(
+                sessionDescription.NativeObject as Webrtc.RTCSessionDescription,
+                (nsError) =>
+                {
+                    if (nsError != null)
+                    {
+                        tcs.SetException(new Exception($"{nsError.LocalizedDescription}"));
+                    }
+                    tcs.SetResult(null);
+                });
+            return tcs.Task;
         }
-
-        
         
         
         #region NativeEvents
