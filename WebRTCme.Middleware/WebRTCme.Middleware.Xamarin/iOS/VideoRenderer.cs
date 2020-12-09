@@ -62,15 +62,17 @@ namespace WebRtcMiddlewareXamarin
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
                             ///
-                            var configuration = window.RTCConfiguration();
-                            configuration.IceServers = new RTCIceServer[]
-                            {
-                                new RTCIceServer
+                            var configuration = new RTCConfiguration
+                            { 
+                                IceServers = new RTCIceServer[]
                                 {
-                                    Urls = new string[]
+                                    new RTCIceServer
                                     {
-                                        "stun:stun.stunprotocol.org:3478",
-                                        "stun:stun.l.google.com:19302"
+                                        Urls = new string[]
+                                        {
+                                            "stun:stun.stunprotocol.org:3478",
+                                            "stun:stun.l.google.com:19302"
+                                        }
                                     }
                                 }
                             };

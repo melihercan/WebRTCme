@@ -32,12 +32,12 @@ namespace WebRtc.iOS
             }
         }
 
-        public static IRTCPeerConnection Create(IRTCConfiguration configuration) => 
+        public static IRTCPeerConnection Create(RTCConfiguration configuration) => 
             new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(IRTCConfiguration configuration)
+        private RTCPeerConnection(RTCConfiguration configuration)
         {
-            var nativeConfiguration = configuration.NativeObject as Webrtc.RTCConfiguration;
+            var nativeConfiguration = configuration.ToNative();
             var nativeConstraints = NativeDefaultRTCMediaConstraints;
             NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
                 nativeConfiguration,
@@ -149,8 +149,8 @@ namespace WebRtc.iOS
                         keygenAlgorithm.Values.Select(value => NSObject.FromObject(value)).ToArray(),
                         keygenAlgorithm.Keys.ToArray()))));
 
-        public IRTCConfiguration GetConfiguration() =>
-            RTCConfiguration.Create(((Webrtc.RTCPeerConnection)NativeObject).Configuration);
+        public RTCConfiguration GetConfiguration() =>
+            ((Webrtc.RTCPeerConnection)NativeObject).Configuration.FromNative();
 
         public void GetIdentityAssertion()
         {
@@ -182,9 +182,9 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(IRTCConfiguration configuration) =>
+        public void SetConfiguration(RTCConfiguration configuration) =>
             ((Webrtc.RTCPeerConnection) NativeObject).SetConfiguration(
-                configuration.NativeObject as Webrtc.RTCConfiguration);
+                configuration.ToNative());
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {

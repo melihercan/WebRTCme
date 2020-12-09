@@ -8,10 +8,10 @@ namespace WebRtc.Android
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
     {
-        public static IRTCPeerConnection Create(IRTCConfiguration configuration) =>
+        public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(IRTCConfiguration configuration)
+        private RTCPeerConnection(RTCConfiguration configuration)
         {
 
         }
@@ -119,7 +119,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public IRTCConfiguration GetConfiguration()
+        public RTCConfiguration GetConfiguration()
         {
             throw new NotImplementedException();
         }
@@ -174,7 +174,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(IRTCConfiguration configuration)
+        public void SetConfiguration(RTCConfiguration configuration)
         {
             throw new NotImplementedException();
         }

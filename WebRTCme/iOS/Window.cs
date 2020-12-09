@@ -12,9 +12,7 @@ namespace WebRtc.iOS
 
         public INavigator Navigator() => iOS.Navigator.Create();
 
-        public IRTCConfiguration RTCConfiguration() => iOS.RTCConfiguration.Create();
-
-        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration) => 
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);
     }
 }

@@ -9,11 +9,7 @@ namespace WebRTCme
     {
         INavigator Navigator();
 
-        IRTCConfiguration RTCConfiguration();
-
-        IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration = null);
-
-
+        IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null);
     }
 
 }

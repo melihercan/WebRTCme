@@ -13,9 +13,7 @@ namespace WebRtc.Android
 
         public INavigator Navigator() => Android.Navigator.Create();
 
-        public IRTCConfiguration RTCConfiguration() => null;// Android.RTCConfiguration.Create();
-
-        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration) =>
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Android.RTCPeerConnection.Create(configuration);
     }
 }

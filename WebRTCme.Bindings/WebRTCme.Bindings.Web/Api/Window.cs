@@ -19,10 +19,7 @@ namespace WebRtcBindingsWeb.Api
 
         public INavigator Navigator() => Api.Navigator.Create(JsRuntime);
 
-        public IRTCConfiguration RTCConfiguration() =>
-            Api.RTCConfiguration.Create(JsRuntime, JsRuntime.CreateJsObject(NativeObject, "RTCConfiguration"));
-
-        public IRTCPeerConnection RTCPeerConnection(IRTCConfiguration configuration) =>
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Api.RTCPeerConnection.Create(JsRuntime, configuration);
 
 

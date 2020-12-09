@@ -36,6 +36,21 @@ namespace WebRtc.iOS
                 RTCRtcpMuxPolicy.Require => Webrtc.RTCRtcpMuxPolicy.Require
             };
 
+        public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
+            nativeBundlePolicy switch
+            {
+                Webrtc.RTCBundlePolicy.Balanced => RTCBundlePolicy.Balanced,
+                Webrtc.RTCBundlePolicy.MaxCompat => RTCBundlePolicy.MaxCompat,
+                Webrtc.RTCBundlePolicy.MaxBundle => RTCBundlePolicy.MaxBundle
+            };
+
+        public static RTCIceTransportPolicy FromNative(this Webrtc.RTCIceTransportPolicy nativeIceTransportPolicy) =>
+            nativeIceTransportPolicy switch
+            {
+                Webrtc.RTCIceTransportPolicy.Relay => RTCIceTransportPolicy.Relay,
+                Webrtc.RTCIceTransportPolicy.All => RTCIceTransportPolicy.All
+            };
+
         public static RTCPeerConnectionState FromNative(this Webrtc.RTCPeerConnectionState nativePeerConnectionState) =>
             nativePeerConnectionState switch
             {
@@ -84,6 +99,13 @@ namespace WebRtc.iOS
             {
                 Webrtc.RTCTlsCertPolicy.InsecureNoCheck => throw new NotImplementedException(),
                 Webrtc.RTCTlsCertPolicy.Secure => RTCIceCredentialType.Password
+            };
+
+        public static RTCRtcpMuxPolicy FromNative(this Webrtc.RTCRtcpMuxPolicy nativeRtcpMuxPolicy) =>
+            nativeRtcpMuxPolicy switch
+            {
+                Webrtc.RTCRtcpMuxPolicy.Negotiate => RTCRtcpMuxPolicy.Negotiate,
+                Webrtc.RTCRtcpMuxPolicy.Require => RTCRtcpMuxPolicy.Require
             };
 
     }
