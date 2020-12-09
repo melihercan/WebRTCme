@@ -11,7 +11,13 @@ namespace WebRTCme
     {
         public static IWebRtc Create() => new WebRtc();
 
-        public void Cleanup() { }
+        private WebRtc()
+        {
+        }
+
+        public void Cleanup() 
+        { 
+        }
 
         public IWindow Window(IJSRuntime jsRuntime) => global::WebRtc.Android.Window.Create();
     }

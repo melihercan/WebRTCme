@@ -16,19 +16,13 @@ namespace WebRTCme
                 new Webrtc.RTCDefaultVideoEncoderFactory(),
                 new Webrtc.RTCDefaultVideoDecoderFactory()));
 
-        public static IWebRtc Create()
-        {
-            var ret = new WebRtc();
-            return ret.Initialize();
-        }
+        public static IWebRtc Create() => new WebRtc();
 
-        private IWebRtc Initialize()
+        private WebRtc()
         {
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());
             ////CFunctionsRTCSetupInternalTracer();
             Webrtc.CFunctions.RTCInitializeSSL();
-
-            return this;
         }
 
         public void Cleanup()
