@@ -3,20 +3,23 @@ using Android.Views;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRTCme;
 
-//namespace WebRtcMiddlewareXamarin.Android
 namespace WebRtcMiddlewareXamarin
 {
-    public class VideoView : View
+    public class VideoView : ViewGroup
     {
-        private readonly VideoType _type;
-        private readonly string _source;
 
-        public VideoView(Context context, VideoType type, string source) : base(context)
+        public View LocalVideoView { get; }
+
+        public VideoView(Context context, View view) : base(context)
         {
-            _type = type;
-            _source = source;
+            LocalVideoView = view;
+            AddView(view);
+        }
+
+        protected override void OnLayout(bool changed, int l, int t, int r, int b)
+        {
+            LocalVideoView.Layout(l, t, r, b);
         }
     }
 }

@@ -6,11 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using Xamarin.Forms;
-using WebRTCme;
 
-//namespace WebRtcMiddlewareXamarin.iOS
-//namespace WebRTCme.Middleware.Xamarin
 namespace WebRtcMiddlewareXamarin
 {
     public class VideoView : UIView

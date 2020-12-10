@@ -17,9 +17,7 @@ namespace WebRtcMiddlewareXamarin
 
         private VideoView _videoView;
 
-        public VideoRenderer()
-        {
-        }
+        public VideoRenderer() { }
 
         protected override async void OnElementChanged(ElementChangedEventArgs<Video> e)
         {
@@ -75,7 +73,6 @@ namespace WebRtcMiddlewareXamarin
                             var peerConnection = window.RTCPeerConnection(configuration);
                         }
                     }
-
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.

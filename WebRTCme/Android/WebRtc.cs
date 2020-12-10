@@ -32,21 +32,24 @@ namespace WebRTCme
                     //.SetFieldTrials("")
                     .SetEnableInternalTracer(true);
             Webrtc.PeerConnectionFactory.Initialize(options.CreateInitializationOptions());
-            var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
 
+
+            //var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
             var adm = CreateJavaAudioDevice(context);
-
-            var encoderFactory = new Webrtc.DefaultVideoEncoderFactory(eglBaseContext, true, true);
-            var decoderFactory = new Webrtc.DefaultVideoDecoderFactory(eglBaseContext);
+            //var encoderFactory = new Webrtc.DefaultVideoEncoderFactory(eglBaseContext, true, true);
+            var encoderFactory = new Webrtc.SoftwareVideoEncoderFactory();
+            //var decoderFactory = new Webrtc.DefaultVideoDecoderFactory(eglBaseContext);
+            var decoderFactory = new Webrtc.SoftwareVideoDecoderFactory();
             var factory = Webrtc.PeerConnectionFactory.InvokeBuilder()
                 .SetAudioDeviceModule(adm)
                 .SetVideoEncoderFactory(encoderFactory)
                 .SetVideoDecoderFactory(decoderFactory)
                 .CreatePeerConnectionFactory();
-
             adm.Release();
-
             NativePeerConnectionFactory = factory;
+
+
+
 
         }
 

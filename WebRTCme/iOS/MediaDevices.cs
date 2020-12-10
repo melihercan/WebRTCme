@@ -12,7 +12,9 @@ namespace WebRtc.iOS
     {
 
         public static IMediaDevices Create() => new MediaDevices();
-      
+
+        private MediaDevices() { }
+
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()

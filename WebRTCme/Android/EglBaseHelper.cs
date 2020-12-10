@@ -59,7 +59,7 @@ namespace WebRtc.Android
             return new EglBase14Impl(null, CreateConfigAttributes());
         }
 
-        private class EglBase14Impl : Java.Lang.Object, Webrtc.IEglBase
+        private class EglBase14Impl : Object, Webrtc.IEglBase
         {
             private EGLContext _eglContext;
 
