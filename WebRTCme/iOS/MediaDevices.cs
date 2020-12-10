@@ -19,36 +19,28 @@ namespace WebRtc.iOS
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
-            var mediaDeviceInfoList = new List<MediaDeviceInfo>();
-
-            var cameraCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
-            foreach (var cameraCaptureDevice in cameraCaptureDevices)
-            {
-                mediaDeviceInfoList.Add(new MediaDeviceInfo
+            var cameraCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices
+                .Select(device => new MediaDeviceInfo
                 {
-                    DeviceId = cameraCaptureDevice.UniqueID,
-                    GroupId = cameraCaptureDevice.ModelID,
+                    DeviceId = device.UniqueID,
+                    GroupId = device.ModelID,
                     Kind = MediaDeviceInfoKind.VideoInput,
-                    Label = cameraCaptureDevice.LocalizedName
+                    Label = device.LocalizedName
                 });
-            }
 
             //var audioCaptureDevices = AVCaptureDeviceDiscoverySession.Create(new AVCaptureDeviceType[]
               //  { AVCaptureDeviceType.BuiltInMicrophone }, AVMediaType.Audio, AVCaptureDevicePosition.Unspecified)
                 //.Devices;
-            var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Audio);
-            foreach (var audioCaptureDevice in audioCaptureDevices)
-            {
-                mediaDeviceInfoList.Add(new MediaDeviceInfo
+            var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Audio)
+                .Select(device =>new MediaDeviceInfo
                 {
-                    DeviceId = audioCaptureDevice.UniqueID,
-                    GroupId = audioCaptureDevice.ModelID,
+                    DeviceId = device.UniqueID,
+                    GroupId = device.ModelID,
                     Kind = MediaDeviceInfoKind.AudioInput,
-                    Label = audioCaptureDevice.LocalizedName
+                    Label = device.LocalizedName
                 });
-            }
 
-             return Task.FromResult(mediaDeviceInfoList.ToArray());
+             return Task.FromResult(cameraCaptureDevices.Concat(audioCaptureDevices).ToArray());
 
 #if false
 //// DEPRECATED

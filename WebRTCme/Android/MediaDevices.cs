@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
+//using Android.Hardware.Camera2;
+using Android.Media;
 
 namespace WebRtc.Android
 {
@@ -19,14 +22,41 @@ namespace WebRtc.Android
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
-            var camera1Enumerator = new Webrtc.Camera1Enumerator();
-            var names1 = camera1Enumerator.GetDeviceNames();
+            var activity = Platform.CurrentActivity;
+            var context = activity.ApplicationContext;
 
-            var context = Platform.CurrentActivity.ApplicationContext;
             var camera2Enumerator = new Webrtc.Camera2Enumerator(context);
-            var names2 = camera2Enumerator.GetDeviceNames();
+            var camera2Names = camera2Enumerator.GetDeviceNames();
+            var cameraCaptureDevices = camera2Names.Select(name => new MediaDeviceInfo
+            {
+                DeviceId = name,
+                GroupId = name,
+                Kind = MediaDeviceInfoKind.VideoInput,
+                Label = name
+            });
+            //var cm = (CameraManager)activity.GetSystemService(global::Android.Content.Context.CameraService);
+            //var list = cm.GetCameraIdList();
 
-            return null;
+            var audioManager = (AudioManager)activity.GetSystemService(global::Android.Content.Context.AudioService);
+            var inputs = audioManager.GetDevices(GetDevicesTargets.Inputs);
+            var audioCaptureDevices = inputs.Select(input => new MediaDeviceInfo
+            {
+                DeviceId = input.Id.ToString(),
+                GroupId = input.Id.ToString(),
+                Kind = MediaDeviceInfoKind.AudioInput,
+                Label = input.Address
+            });
+            var outputs = audioManager.GetDevices(GetDevicesTargets.Outputs);
+            var audioRenderDevices = outputs.Select(output => new MediaDeviceInfo
+            {
+                DeviceId = output.Id.ToString(),
+                GroupId = output.Id.ToString(),
+                Kind = MediaDeviceInfoKind.AudioOutput,
+                Label = output.Address
+            });
+
+            return Task.FromResult(
+                cameraCaptureDevices.Concat(audioCaptureDevices).Concat(audioRenderDevices).ToArray());
         }
 
 
