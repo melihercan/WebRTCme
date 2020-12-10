@@ -7,12 +7,9 @@ using WebRTCme;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using WebRTCme.Middleware.Xamarin;
-//using WebRtcMiddlewareXamarin.iOS;
 using WebRtcMiddlewareXamarin;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
-//namespace WebRTCme.Middleware.Xamarin
-//namespace WebRtcMiddlewareXamarin.iOS
 namespace WebRtcMiddlewareXamarin
 {
     public class VideoRenderer : ViewRenderer<Video, VideoView>
@@ -40,7 +37,6 @@ namespace WebRtcMiddlewareXamarin
                     var type = e.NewElement.Type;
                     var source = e.NewElement.Source;
                     UIView view = null;
-
 
                     if (type == VideoType.Local)
                     {
@@ -77,20 +73,12 @@ namespace WebRtcMiddlewareXamarin
                                 }
                             };
                             var peerConnection = window.RTCPeerConnection(configuration);
-
-                            //peerConnection.OnAddStream += (sender, mediaStreamEvent) =>
-                            //{
-                            //    var x = mediaStreamEvent.MediaStream;
-                            //};
-
-                            //peerConnection.AddStream(mediaStream);
                         }
                     }
 
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    ////_videoView = new VideoView(e.NewElement.Type, e.NewElement.Source);
                     _videoView = new VideoView(view);
                     SetNativeControl(_videoView);
                 }
@@ -103,7 +91,6 @@ namespace WebRtcMiddlewareXamarin
         {
             if (disposing)
             {
-                Control.CaptureSession.Dispose();
                 Control.Dispose();
             }
 
