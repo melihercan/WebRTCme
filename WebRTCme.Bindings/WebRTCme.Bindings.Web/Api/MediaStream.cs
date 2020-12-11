@@ -39,34 +39,34 @@ namespace WebRtcBindingsWeb.Api
         public IMediaStream Clone() =>
             Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
-        public List<IMediaStreamTrack> GetAudioTracks()
+        public IMediaStreamTrack[] GetAudioTracks()
         {
             var jsObjectRefGetAudioTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getAudioTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetAudioTracks);
             return jsObjectRefMediaStreamTrackArray
                 .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
-                .ToList();
+                .ToArray();
         }
 
         public IMediaStreamTrack GetTrackById(string id) =>
             MediaStreamTrack.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTranckById", id));
 
-        public List<IMediaStreamTrack> GetTracks()
+        public IMediaStreamTrack[] GetTracks()
         {
             var jsObjectRefGetTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetTracks);
             return jsObjectRefMediaStreamTrackArray
                 .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
-                .ToList();
+                .ToArray();
         }
 
-        public List<IMediaStreamTrack> GetVideoTracks()
+        public IMediaStreamTrack[] GetVideoTracks()
         {
             var jsObjectRefGetVideoTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getVideoTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetVideoTracks);
             return jsObjectRefMediaStreamTrackArray
                 .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
-                .ToList();
+                .ToArray();
         }
 
         public void RemoveTrack(IMediaStreamTrack track) =>

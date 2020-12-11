@@ -6,10 +6,6 @@ namespace WebRTCme
 {
     public interface INativeObject : IDisposable
     {
-        ////bool IsNativeObjectsOwner { get; set; }
-        
         object NativeObject { get; set; }
-
-        ////List<object> NativeObjects { get; set; }
     }
 }

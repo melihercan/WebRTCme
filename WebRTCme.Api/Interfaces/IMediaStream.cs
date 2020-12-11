@@ -19,13 +19,13 @@ namespace WebRTCme
 
         IMediaStream Clone();
 
-        List<IMediaStreamTrack> GetAudioTracks();
+        IMediaStreamTrack[] GetAudioTracks();
 
         IMediaStreamTrack GetTrackById(string id);
 
-        List<IMediaStreamTrack> GetTracks();
+        IMediaStreamTrack[] GetTracks();
 
-        List<IMediaStreamTrack> GetVideoTracks();
+        IMediaStreamTrack[] GetVideoTracks();
 
         void RemoveTrack(IMediaStreamTrack track);
 

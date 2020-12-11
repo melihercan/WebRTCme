@@ -66,41 +66,62 @@ namespace WebRtc.Android
 
         private MediaStream(Webrtc.MediaStream nativeMediaStream) : base(nativeMediaStream) { }
 
-        public bool Active => throw new NotImplementedException();
+        public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
-        public string Id => throw new NotImplementedException();
+        public string Id => ((Webrtc.MediaStream)NativeObject).Id;
 
         public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
         public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
 
+        IMediaStream IMediaStream.Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IMediaStreamTrack[] GetTracks() => GetVideoTracks().Concat(GetAudioTracks()).ToArray();
+
+        public IMediaStreamTrack GetTrackById(string id) => GetTracks().ToList().Find(track => track.Id == id);
+
+        public IMediaStreamTrack[] GetVideoTracks()
+        {
+            var videoTracks = new List<IMediaStreamTrack>();
+            foreach (Webrtc.MediaStreamTrack track in ((Webrtc.MediaStream)NativeObject).VideoTracks)
+                videoTracks.Add(MediaStreamTrack.Create(track));
+            return videoTracks.ToArray();
+        }
+
+        public IMediaStreamTrack[] GetAudioTracks()
+        {
+            var audioTracks = new List<IMediaStreamTrack>();
+            foreach (Webrtc.MediaStreamTrack track in ((Webrtc.MediaStream)NativeObject).AudioTracks)
+                audioTracks.Add(MediaStreamTrack.Create(track));
+            return audioTracks.ToArray();
+        }
+
         public void AddTrack(IMediaStreamTrack track)
         {
-            throw new NotImplementedException();
-        }
-
-        public List<IMediaStreamTrack> GetAudioTracks()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMediaStreamTrack GetTrackById(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<IMediaStreamTrack> GetTracks()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<IMediaStreamTrack> GetVideoTracks()
-        {
-            throw new NotImplementedException();
+            switch(track.Kind)
+            {
+                case MediaStreamTrackKind.Video:
+                    ((Webrtc.MediaStream)NativeObject).AddTrack(track.NativeObject as Webrtc.VideoTrack);
+                    break;
+                case MediaStreamTrackKind.Audio:
+                    ((Webrtc.MediaStream)NativeObject).AddTrack(track.NativeObject as Webrtc.AudioTrack);
+                    break;
+            };
         }
 
         public void RemoveTrack(IMediaStreamTrack track)
         {
-            throw new NotImplementedException();
+            switch (track.Kind)
+            {
+                case MediaStreamTrackKind.Video:
+                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(track.NativeObject as Webrtc.VideoTrack);
+                    break;
+                case MediaStreamTrackKind.Audio:
+                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(track.NativeObject as Webrtc.AudioTrack);
+                    break;
+            };
         }
 
         public void SetElementReferenceSrcObject(object media)
@@ -108,9 +129,5 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        IMediaStream IMediaStream.Clone()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

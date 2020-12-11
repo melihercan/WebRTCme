@@ -70,19 +70,17 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public List<IMediaStreamTrack> GetTracks() => GetVideoTracks().Concat(GetAudioTracks()).ToList();
+        public IMediaStreamTrack[] GetTracks() => GetVideoTracks().Concat(GetAudioTracks()).ToArray();
 
-        public IMediaStreamTrack GetTrackById(string id) => GetTracks().Find(track => track.Id == id);
+        public IMediaStreamTrack GetTrackById(string id) => GetTracks().ToList().Find(track => track.Id == id);
 
-        public List<IMediaStreamTrack> GetVideoTracks() => 
-            ((Webrtc.RTCMediaStream)NativeObject).VideoTracks
-                .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
-                .ToList();
+        public IMediaStreamTrack[] GetVideoTracks() => ((Webrtc.RTCMediaStream)NativeObject).VideoTracks
+            .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
+            .ToArray();
 
-        public List<IMediaStreamTrack> GetAudioTracks() => 
-            ((Webrtc.RTCMediaStream)NativeObject).AudioTracks
-                .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
-                .ToList();
+        public IMediaStreamTrack[] GetAudioTracks() => ((Webrtc.RTCMediaStream)NativeObject).AudioTracks
+            .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
+            .ToArray();
 
         public void AddTrack(IMediaStreamTrack track)
         {
