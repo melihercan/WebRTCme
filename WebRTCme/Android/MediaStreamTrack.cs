@@ -9,6 +9,9 @@ namespace WebRtc.Android
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
+        const string Audio = "audio";
+        const string Video = "video";
+
         public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id,
             MediaTrackConstraints constraints = null)
         {
@@ -46,11 +49,18 @@ namespace WebRtc.Android
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public string Id => throw new NotImplementedException();
+        public string Id => ((Webrtc.MediaStreamTrack)NativeObject).Id();
 
         public bool Isolated => throw new NotImplementedException();
 
-        public MediaStreamTrackKind Kind => throw new NotImplementedException();
+        public MediaStreamTrackKind Kind => ((Webrtc.MediaStreamTrack)NativeObject).Kind() switch
+        {
+            Audio => MediaStreamTrackKind.Audio,
+            Video => MediaStreamTrackKind.Video,
+            _ => throw new Exception(
+                $"Invalid RTCMediaStreamTrack.Kind: {((Webrtc.MediaStreamTrack)NativeObject).Kind()}")
+
+        };
 
         public string Label => throw new NotImplementedException();
 
@@ -67,6 +77,11 @@ namespace WebRtc.Android
         public event EventHandler OnUnmute;
 
         public Task ApplyConstraints(MediaTrackConstraints contraints)
+        {
+            throw new NotImplementedException();
+        }
+
+        IMediaStreamTrack IMediaStreamTrack.Clone()
         {
             throw new NotImplementedException();
         }
@@ -91,9 +106,5 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        IMediaStreamTrack IMediaStreamTrack.Clone()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

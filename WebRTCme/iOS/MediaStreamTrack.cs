@@ -45,7 +45,13 @@ namespace WebRtc.iOS
         { }
 
 
+
+
+        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Id => ((Webrtc.RTCMediaStreamTrack)NativeObject).TrackId;
+
+        public bool Isolated => throw new NotImplementedException();
 
         public MediaStreamTrackKind Kind => ((Webrtc.RTCMediaStreamTrack)NativeObject).Kind switch
         {
@@ -54,11 +60,6 @@ namespace WebRtc.iOS
             _ => throw new Exception(
                 $"Invalid RTCMediaStreamTrack.Kind: {((Webrtc.RTCMediaStreamTrack)NativeObject).Kind}")
         };
-
-        public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public bool Isolated => throw new NotImplementedException();
 
         public string Label => throw new NotImplementedException();
 
