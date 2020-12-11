@@ -52,6 +52,7 @@ namespace WebRtcMiddlewareXamarin
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
                             //view = videoTrack.GetView() as Android.Views.View;
+                            view = PlatformSupport.CreateCameraView(videoTrack);
 
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE

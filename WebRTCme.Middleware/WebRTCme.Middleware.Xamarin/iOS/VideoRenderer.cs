@@ -8,7 +8,6 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
-using WebRt;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin

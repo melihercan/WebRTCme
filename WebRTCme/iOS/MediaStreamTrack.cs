@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
-//using Webrtc;
 using UIKit;
 using AVFoundation;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace WebRtc.iOS
 
         public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id)
         {
-            object nativeMediaStreamTrack = null;
+            Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack = null;
 
             switch (mediaStreamTrackKind)
             {
