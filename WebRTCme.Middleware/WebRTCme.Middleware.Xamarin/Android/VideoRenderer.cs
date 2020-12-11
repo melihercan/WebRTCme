@@ -51,7 +51,7 @@ namespace WebRtcMiddlewareXamarin
                                 Video = new MediaStreamContraintsUnion { Value = true }
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
-                            view = videoTrack.GetView() as Android.Views.View;
+                            //view = videoTrack.GetView() as Android.Views.View;
 
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE

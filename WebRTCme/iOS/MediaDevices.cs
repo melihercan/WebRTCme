@@ -10,7 +10,6 @@ namespace WebRtc.iOS
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {
-
         public static IMediaDevices Create() => new MediaDevices();
 
         private MediaDevices() { }
@@ -29,10 +28,10 @@ namespace WebRtc.iOS
                 });
 
             //var audioCaptureDevices = AVCaptureDeviceDiscoverySession.Create(new AVCaptureDeviceType[]
-              //  { AVCaptureDeviceType.BuiltInMicrophone }, AVMediaType.Audio, AVCaptureDevicePosition.Unspecified)
-                //.Devices;
+            //  { AVCaptureDeviceType.BuiltInMicrophone }, AVMediaType.Audio, AVCaptureDevicePosition.Unspecified)
+            //.Devices;
             var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Audio)
-                .Select(device =>new MediaDeviceInfo
+                .Select(device => new MediaDeviceInfo
                 {
                     DeviceId = device.UniqueID,
                     GroupId = device.ModelID,
@@ -40,7 +39,7 @@ namespace WebRtc.iOS
                     Label = device.LocalizedName
                 });
 
-             return Task.FromResult(cameraCaptureDevices.Concat(audioCaptureDevices).ToArray());
+            return Task.FromResult(cameraCaptureDevices.Concat(audioCaptureDevices).ToArray());
 
 #if false
 //// DEPRECATED
@@ -97,8 +96,9 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-
-        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
-            Task.FromResult(MediaStream.Create(constraints));
+        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
+        {
+            return Task.FromResult(MediaStream.Create(constraints));
+        }
     }
 }

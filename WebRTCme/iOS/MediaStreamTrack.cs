@@ -15,12 +15,12 @@ namespace WebRtc.iOS
         const string Audio = "audio";
         const string Video = "video";
 
-        private Webrtc.RTCCameraPreviewView _nativeCameraPreviewView;
-        private Webrtc.RTCCameraVideoCapturer _nativeCameraVideoCapturer;
-        private Webrtc.RTCFileVideoCapturer _nativeFileVIdeoCapturer;
-        private Webrtc.RTCVideoSource _nativeVideoSource;
+        //private Webrtc.RTCCameraPreviewView _nativeCameraPreviewView;
+        //private Webrtc.RTCCameraVideoCapturer _nativeCameraVideoCapturer;
+        //private Webrtc.RTCFileVideoCapturer _nativeFileVIdeoCapturer;
+        //private Webrtc.RTCVideoSource _nativeVideoSource;
 
-        private Webrtc.RTCAudioSource _nativeAudioSource;
+        //private Webrtc.RTCAudioSource _nativeAudioSource;
 
         //public static IMediaStreamTrack Create(RTCMediaStreamTrack nativeMediaStreamTrack)
         //{
@@ -30,22 +30,28 @@ namespace WebRtc.iOS
         //    return ret;
         //}
 
-        public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id,
-            VideoType videoType = VideoType.Local, string videoSource = null)
+        public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id)//,
+            //VideoType videoType = VideoType.Local, string videoSource = null)
         {
             var ret = new MediaStreamTrack();
-            return ret.Initialize(mediaStreamTrackKind, id, videoType, videoSource);
+            return ret.Initialize(mediaStreamTrackKind, id);//, videoType, videoSource);
+        }
+
+        public static IMediaStreamTrack Create(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack)  
+        {
+            return new MediaStreamTrack(nativeMediaStreamTrack);
         }
 
         private MediaStreamTrack() { }
 
+        private MediaStreamTrack(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
+        { }
 
-        private IMediaStreamTrack Initialize(MediaStreamTrackKind mediaStreamTrackKind, string id, 
-            VideoType videoType, string videoSource)
+
+        private IMediaStreamTrack Initialize(MediaStreamTrackKind mediaStreamTrackKind, string id)//, 
+            //VideoType videoType, string videoSource)
         {
-            //// TODO: Remote flag???? We need to pass constructor this flag.
-            /// CURRENTLY LOCAL IS ASSUMED.
-            
+          
             /// TODO: If local, RTCCameraVideoCapturer or RTCFileVideoCapturer???
             /// CURENTLY Camera is assumed.
 
@@ -53,18 +59,22 @@ namespace WebRtc.iOS
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    AddAudioStreamTrack();
+                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
+                    //NativeObjects.Add(_nativeAudioSource);
+                    NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                        .AudioTrackWithSource(nativeAudioSource, id);
                     break;
                 
                 case MediaStreamTrackKind.Video:
-                    AddLocalVideoStreamTrack();
+                     var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
+                    NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                        .VideoTrackWithSource(nativeVideoSource, id);
                     break;
-
-
             }
 
             return this;
 
+#if false
             void AddAudioStreamTrack()
             {
                 _nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
@@ -99,7 +109,7 @@ namespace WebRtc.iOS
                 ///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is no derived from RTCVideoRenderer
                 /// !!!! SO USE IT WITH REMOTE 
                 //var renderer = (UIView)_nativeCameraPreviewView;    ////????
-                //((RTCVideoTrack)SelfNativeObject).AddRenderer((IRTCVideoRenderer)renderer);
+                //((RTCVideoTrack)NativeObject).AddRenderer((IRTCVideoRenderer)renderer);
 
             }
 
@@ -123,6 +133,7 @@ namespace WebRtc.iOS
 
                 return (int)Math.Min(maxSupportedFps, _frameRateLimit);
             }
+#endif
 
         }
 
@@ -217,11 +228,11 @@ namespace WebRtc.iOS
         }
 
 
-        public object GetView()
-        {
-            return _nativeCameraPreviewView;
+        //public object GetView()
+        //{
+          //  return _nativeCameraPreviewView;
 ////            throw new NotImplementedException();
-        }
+        //}
 
         ////public UIView GetView<UIView>()
         ////{

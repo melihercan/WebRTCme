@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
+using WebRt;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
@@ -51,7 +52,9 @@ namespace WebRtcMiddlewareXamarin
                                 Video = new MediaStreamContraintsUnion { Value = true }
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
-                            view = videoTrack.GetView() as UIView;
+                            //view = videoTrack.GetView() as UIView;
+                            view = PlatformSupport.CreateCameraView(videoTrack);
+
 
 
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE

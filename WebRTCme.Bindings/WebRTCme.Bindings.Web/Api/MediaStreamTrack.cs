@@ -73,10 +73,10 @@ namespace WebRtcBindingsWeb.Api
 
         
         
-        public object GetView()
-        {
-            throw new NotImplementedException();
-        }
+        //public object GetView()
+        //{
+          //  throw new NotImplementedException();
+        //}
 
     }
 }

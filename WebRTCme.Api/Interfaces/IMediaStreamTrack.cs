@@ -50,7 +50,7 @@ namespace WebRTCme
 
 
         // Custom APIs.
-        object GetView();
+        //object GetView();
 
     }
 }

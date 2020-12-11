@@ -17,7 +17,6 @@ namespace WebRtc.Android
 
         private MediaDevices() { }
 
-
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
@@ -59,7 +58,6 @@ namespace WebRtc.Android
                 cameraCaptureDevices.Concat(audioCaptureDevices).Concat(audioRenderDevices).ToArray());
         }
 
-
         public MediaTrackSupportedConstraints GetSupportedConstraints()
         {
             throw new NotImplementedException();
@@ -74,6 +72,5 @@ namespace WebRtc.Android
         {
             throw new NotImplementedException();
         }
-
     }
 }

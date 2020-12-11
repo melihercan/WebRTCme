@@ -9,7 +9,15 @@ namespace WebRTCme
     {
         INavigator Navigator();
 
+
+        //IMediaStream MediaStream();
+        //IMediaStream MediaStream(IMediaStream stream);
+        //IMediaStream MediaStream(IMediaStreamTrack[] tracks);
+
+        
         IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null);
+
+
     }
 
 }
