@@ -9,9 +9,30 @@ namespace WebRtc.Android
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {
-        public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id)
+        public static IMediaStreamTrack Create(MediaStreamTrackKind mediaStreamTrackKind, string id,
+            MediaTrackConstraints constraints = null)
         {
-            throw new NotImplementedException();
+            Webrtc.MediaStreamTrack nativeMediaStreamTrack = null;
+
+            switch (mediaStreamTrackKind)
+            {
+                case MediaStreamTrackKind.Audio:
+                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateAudioSource(
+                        (constraints ?? new MediaTrackConstraints
+                        {
+                        }).ToNative());
+                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                        .CreateAudioTrack(id, nativeAudioSource);
+                    break;
+
+                case MediaStreamTrackKind.Video:
+                    var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);
+                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoTrack(
+                        id, nativeVideoSource);
+                    break;
+            }
+
+            return new MediaStreamTrack(nativeMediaStreamTrack);
         }
 
         public static IMediaStreamTrack Create(Webrtc.MediaStreamTrack nativeMediaStreamTrack)

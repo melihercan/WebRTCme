@@ -68,9 +68,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
+            Task.FromResult(MediaStream.Create(constraints));
     }
 }

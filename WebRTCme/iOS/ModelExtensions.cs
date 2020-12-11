@@ -10,7 +10,7 @@ namespace WebRtc.iOS
     internal static class ModelExtensions
     {
         public static Webrtc.RTCConfiguration ToNative(this RTCConfiguration configuration) =>
-            new Webrtc.RTCConfiguration()
+            new Webrtc.RTCConfiguration
             {
                 BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.RTCBundlePolicy.Balanced,
                 Certificate = (Webrtc.RTCCertificate)(configuration.Certificates?.ElementAt(0).NativeObject) ??
@@ -47,7 +47,7 @@ namespace WebRtc.iOS
             };
 
         public static RTCConfiguration FromNative(this Webrtc.RTCConfiguration nativeConfiguration) =>
-            new RTCConfiguration()
+            new RTCConfiguration
             {
                 BundlePolicy = nativeConfiguration.BundlePolicy.FromNative(),
                 Certificates = new IRTCCertificate[] 

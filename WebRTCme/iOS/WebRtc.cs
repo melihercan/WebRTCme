@@ -2,20 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-//using Webrtc;
 using WebRtc.iOS;
 
 namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        //private static Webrtc.RTCPeerConnectionFactory _nativePeerConnectionFactory;
         public static Webrtc.RTCPeerConnectionFactory NativePeerConnectionFactory { get; private set; }
-        //=>
-        //  _nativePeerConnectionFactory ?? (_nativePeerConnectionFactory = new Webrtc.RTCPeerConnectionFactory(
-        //    new Webrtc.RTCDefaultVideoEncoderFactory(),
-        //  new Webrtc.RTCDefaultVideoDecoderFactory()));
+
+        private static int _id = 1000;
+        public static int Id => Interlocked.Increment(ref _id);
 
         public static IWebRtc Create() => new WebRtc();
 

@@ -5,6 +5,7 @@ using Org.Webrtc.Audio;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WebRtc.Android;
 using Xamarin.Essentials;
@@ -14,12 +15,10 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        //private static Webrtc.PeerConnectionFactory _nativePeerConnectionFactory;
+        public static Webrtc.PeerConnectionFactory NativePeerConnectionFactory { get; private set; }
 
-        public static Webrtc.PeerConnectionFactory NativePeerConnectionFactory { get; private set; }// =>
-          //  _nativePeerConnectionFactory ?? (_nativePeerConnectionFactory = 
-            //    Webrtc.PeerConnectionFactory.InvokeBuilder(Platform.CurrentActivity.Application)
-              //      .SetVideoEncoderFactory(new Webrtc.DefaultVideoEncoderFactory()
+        private static int _id = 1000;
+        public static int Id => Interlocked.Increment(ref _id);
 
         public static IWebRtc Create() => new WebRtc();
 

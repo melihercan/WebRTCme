@@ -23,7 +23,7 @@ namespace WebRtc.iOS
         public static IMediaStream Create(IMediaStreamTrack[] tracks)
         {
             var nativeMediaStream = 
-                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId("LocalMediaStream");
+                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in tracks) 
                 self.AddTrack(track);
@@ -49,7 +49,7 @@ namespace WebRtc.iOS
             }
 
             var nativeMediaStream = 
-                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId("LocalMediaStream");
+                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in mediaStreamTracks)
                 self.AddTrack(track);
