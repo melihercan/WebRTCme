@@ -33,7 +33,6 @@ namespace WebRTCme
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
 
-
         Task ApplyConstraints(MediaTrackConstraints contraints);
 
         IMediaStreamTrack Clone();
@@ -45,12 +44,5 @@ namespace WebRTCme
         MediaTrackSettings GetSettings();
 
         void Stop();
-
-
-
-
-        // Custom APIs.
-        //object GetView();
-
     }
 }
