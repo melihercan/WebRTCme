@@ -13,11 +13,11 @@ namespace WebRtc.Android
         {
             var mandatoryDictionary = new Dictionary<string, string>();
             var optionalDictionary = new Dictionary<string, string>();
-            
-            mandatoryDictionary.Add("googEchoCancellation", Get(constraints.EchoCancellation) ? "true" : "false");
-            mandatoryDictionary.Add("googAutoGainControl", Get(constraints.AutoGainControl) ? "true" : "false");
+
+            mandatoryDictionary.Add("googEchoCancellation", constraints.EchoCancellation.ToBool() ? "true" : "false");
+            mandatoryDictionary.Add("googAutoGainControl", constraints.AutoGainControl.ToBool() ? "true" : "false");
             mandatoryDictionary.Add("googHighpassFilter", "false");
-            mandatoryDictionary.Add("googNoiseSuppression", Get(constraints.NoiseSuppression) ? "true" : "false");
+            mandatoryDictionary.Add("googNoiseSuppression", constraints.NoiseSuppression.ToBool() ? "true" : "false");
 
             var mandatory = mandatoryDictionary.Select(
                 pair => new Webrtc.MediaConstraints.KeyValuePair(pair.Key, pair.Value)).ToList();
@@ -31,9 +31,6 @@ namespace WebRtc.Android
             };
 
             return nativeConstrains;
-
-            bool Get(ConstrainBoolean param) =>
-                param.Value ?? param.Object.Exact ?? param.Object.Ideal ?? false;
         }
     }
 }

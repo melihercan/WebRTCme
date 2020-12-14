@@ -23,6 +23,9 @@ namespace WebRtc.Android
                     var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateAudioSource(
                         (constraints ?? new MediaTrackConstraints
                         {
+                            EchoCancellation = new ConstrainBoolean { Value = false },
+                            AutoGainControl = new ConstrainBoolean { Value = false },
+                            NoiseSuppression = new ConstrainBoolean { Value = false }
                         }).ToNative());
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
                         .CreateAudioTrack(id, nativeAudioSource);

@@ -9,7 +9,7 @@ namespace WebRTCme
     {
         public static IWebRtc Current => _webRtc.Value;
 
-        private static Lazy<IWebRtc> _webRtc = new Lazy<IWebRtc>(() => CreateWebRtc());
+        private static readonly Lazy<IWebRtc> _webRtc = new Lazy<IWebRtc>(() => CreateWebRtc());
 
         private static IWebRtc CreateWebRtc() => WebRtc.Create();
     }
