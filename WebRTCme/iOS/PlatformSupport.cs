@@ -11,31 +11,11 @@ namespace WebRTCme
     {
         public static UIView CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            //// TODO: HOW TO GET AVCaptureDevice from track??? from TrackId or Source????
-            /// FOUND: match TrackID with AVCaptureDevice.ModelId ( Webrtc.RTCCameraVideoCapturer.CaptureDevices)
-
-
-
-
-
-            ////            var nativeTrack = (Webrtc.RTCMediaStreamTrack)track.NativeObject;
-            ////            var nativeCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
-
-
-
-
-            ////            var nativeVideoSource = ((Webrtc.RTCVideoTrack)track.NativeObject).Source;
-            var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer(/****nativeVideoSource****/);
-
+            var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer();
 
             // TODO USE constraints to set the below values
-
             // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelId from
             // RTCCameraVideoCapturer.CaptureDevices list.
-
-            //var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
-            //var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
-            //var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
             var device = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 .FirstOrDefault(capturer => capturer.ModelID == ((Webrtc.RTCMediaStreamTrack)track.NativeObject).TrackId);
             var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
