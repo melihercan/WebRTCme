@@ -57,7 +57,8 @@ namespace WebRtc.Android
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"{id}"));
             }
 
-            var nativeMediaStream = new Webrtc.MediaStream(WebRTCme.WebRtc.Id);
+            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in mediaStreamTracks)
                 self.AddTrack(track);
