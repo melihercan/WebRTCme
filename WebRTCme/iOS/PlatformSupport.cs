@@ -11,20 +11,39 @@ namespace WebRTCme
     {
         public static UIView CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-////            var nativeVideoSource = ((Webrtc.RTCVideoTrack)track.NativeObject).Source;
+            //// TODO: HOW TO GET AVCaptureDevice from track??? from TrackId or Source????
+            /// FOUND: match TrackID with AVCaptureDevice.ModelId ( Webrtc.RTCCameraVideoCapturer.CaptureDevices)
+
+
+
+
+
+            ////            var nativeTrack = (Webrtc.RTCMediaStreamTrack)track.NativeObject;
+            ////            var nativeCaptureDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
+
+
+
+
+            ////            var nativeVideoSource = ((Webrtc.RTCVideoTrack)track.NativeObject).Source;
             var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer(/****nativeVideoSource****/);
-            var nativeCameraPreviewView = new Webrtc.RTCCameraPreviewView();
-            nativeCameraPreviewView.CaptureSession = nativeCameraVideoCapturer.CaptureSession;
 
 
             // TODO USE constraints to set the below values
-            var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
-            var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
-            var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
+
+            // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelId from
+            // RTCCameraVideoCapturer.CaptureDevices list.
+
+            //var videoDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+            //var cameraPosition = AVCaptureDevicePosition.Front;// AVCaptureDevicePosition.Back;
+            //var device = videoDevices.FirstOrDefault(d => d.Position == cameraPosition);
+            var device = Webrtc.RTCCameraVideoCapturer.CaptureDevices
+                .FirstOrDefault(capturer => capturer.ModelID == ((Webrtc.RTCMediaStreamTrack)track.NativeObject).TrackId);
             var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
             var fps = GetFpsByFormat(format);
             nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
 
+            var nativeCameraPreviewView = new Webrtc.RTCCameraPreviewView();
+            nativeCameraPreviewView.CaptureSession = nativeCameraVideoCapturer.CaptureSession;
             return nativeCameraPreviewView;
 
             int GetFpsByFormat(AVCaptureDeviceFormat fmt)
