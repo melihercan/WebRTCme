@@ -11,8 +11,8 @@ namespace WebRTCme
     {
         public static UIView CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            var nativeVideoSource = ((Webrtc.RTCVideoTrack)track.NativeObject).Source;
-            var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer(nativeVideoSource);
+////            var nativeVideoSource = ((Webrtc.RTCVideoTrack)track.NativeObject).Source;
+            var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer(/****nativeVideoSource****/);
             var nativeCameraPreviewView = new Webrtc.RTCCameraPreviewView();
             nativeCameraPreviewView.CaptureSession = nativeCameraVideoCapturer.CaptureSession;
 

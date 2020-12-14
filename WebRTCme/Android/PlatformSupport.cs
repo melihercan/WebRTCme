@@ -11,6 +11,9 @@ namespace WebRTCme
     {
         public static View CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
+
+////            var nativeCameraVideoCapturer = 
+
             return null;
         }
     }
