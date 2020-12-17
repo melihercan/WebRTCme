@@ -17,7 +17,7 @@ namespace WebRTCme
             // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelId from
             // RTCCameraVideoCapturer.CaptureDevices list.
             var device = Webrtc.RTCCameraVideoCapturer.CaptureDevices
-                .FirstOrDefault(capturer => capturer.ModelID == ((Webrtc.RTCMediaStreamTrack)track.NativeObject).TrackId);
+                .First(capturer => capturer.ModelID == track.Id);
             var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(device)[0];
             var fps = GetFpsByFormat(format);
             nativeCameraVideoCapturer.StartCaptureWithDevice(device, format, fps);
@@ -40,7 +40,7 @@ namespace WebRTCme
     }
 }
 
-///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is no derived from RTCVideoRenderer
+///// !!!!AddRenderer will not work with RTCCameraPreviewView as it is not derived from RTCVideoRenderer
 /// !!!! SO USE IT WITH REMOTE 
 //var renderer = (UIView)_nativeCameraPreviewView;    ////????
 //((RTCVideoTrack)NativeObject).AddRenderer((IRTCVideoRenderer)renderer);

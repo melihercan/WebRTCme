@@ -9,6 +9,8 @@ using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
 using WebRTCme;
 using System.Linq;
+using Xamarin.Essentials;
+using Android.Widget;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
@@ -52,6 +54,16 @@ namespace WebRtcMiddlewareXamarin
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
                             //view = videoTrack.GetView() as Android.Views.View;
+
+                            var permission = await Permissions.RequestAsync<Permissions.Camera>();
+                            if (permission != PermissionStatus.Granted)
+                            { 
+                                Toast.MakeText(Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext, 
+                                    "No Video permission was granted.", 
+                                    ToastLength.Long).Show();
+                            }
+
+
                             view = PlatformSupport.CreateCameraView(videoTrack);
 
 

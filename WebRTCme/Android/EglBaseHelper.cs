@@ -35,7 +35,7 @@ namespace WebRtc.Android
             {
                 list.Add(EGL14.EglRenderableType);
                 list.Add(_openGlesVersion == 3 ? 64 : 4);
-                list.Add(4);
+                //list.Add(4);
             }
 
             if (_supportsPixelBuffer)
@@ -260,6 +260,20 @@ namespace WebRtc.Android
                 var configs = new EGLConfig[1];
                 var numConfigs = new int[1];
                 if (!EGL14.EglChooseConfig(eglDisplay, configAttributes, 0, configs, 0, configs.Length, numConfigs, 0))
+
+#if false
+                    int[] _attribs_config = new int[]{
+                        EGL14.EglRenderableType, EGL14.EglOpenglEs2Bit,
+                        EGL14.EglRedSize, 8,
+                        EGL14.EglGreenSize, 8,
+                        EGL14.EglBlueSize, 8,
+                        EGL14.EglAlphaSize, 8,
+                        EGL14.EglDepthSize, 0,
+                        EGL14.EglStencilSize, 0,
+                        EGL14.EglNone
+                    };
+                if (!EGL14.EglChooseConfig(eglDisplay, _attribs_config, 0, configs, 0, configs.Length, numConfigs, 0))
+#endif
                 {
                     throw new RuntimeException("eglChooseConfig failed: 0x" + Integer.ToHexString(EGL14.EglGetError()));
                 }
