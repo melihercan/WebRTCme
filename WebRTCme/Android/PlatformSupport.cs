@@ -70,8 +70,6 @@ namespace WebRTCme
             var nativeCameraEnumerator = new Webrtc.Camera2Enumerator(context);
             var nativeCameraVideoCapturer = nativeCameraEnumerator.CreateCapturer(track.Id, null);
 
-            //var nativeVideoSource = WebRtc.NativePeerConnectionFactory.CreateVideoSource(
-            // nativeCameraVideoCapturer.IsScreencast);
             var nativeVideoSource = WebRtc.NativeMediaSourceStore.Get(track.Id) as Webrtc.VideoSource;
             nativeCameraVideoCapturer.Initialize(Webrtc.SurfaceTextureHelper.Create(
                 "CameraVideoCapturerThread",
@@ -84,22 +82,7 @@ namespace WebRTCme
             nativeSurfaceViewRenderer.SetMirror(true);
             nativeSurfaceViewRenderer.Init(eglBaseContext, null);
 
-
-            //var nativeVideoTrack = WebRtc.NativePeerConnectionFactory.CreateVideoTrack(
-              //  $"{WebRtc.Id}", nativeVideoSource);
-
-
-            // Replace the existing native video track with the one created here!!!
-            //// TODO: Check if there is a better way to accomplish this.
-            //// Ideally we need to use both VideoSource and VideoTrack from input "track" parameter,
-            /// Unfortunately VideoTrack does not expose VideoSource. This is weird because
-            /// CreateVideoTrack takes VideoSource as the second parameter!!!
-///            track.NativeObject = nativeVideoTrack;
-///            
-
-
             nativeVideoTrack.AddSink(nativeSurfaceViewRenderer);
-
             return nativeSurfaceViewRenderer;
 
 
