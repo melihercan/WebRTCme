@@ -64,16 +64,17 @@ namespace WebRTCme
         public static SurfaceView CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
             var context = Platform.CurrentActivity.ApplicationContext;
-
-            var nativeCameraEnumerator = new Webrtc.Camera2Enumerator(context);
-            var deviceName = nativeCameraEnumerator.GetDeviceNames().First(name => name == track.Id);
+            var nativeVideoTrack = track.NativeObject as Webrtc.VideoTrack;
 
             var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
-            var nativeCameraVideoCapturer = nativeCameraEnumerator.CreateCapturer(deviceName, null);
-            var nativeVideoSource = WebRtc.NativePeerConnectionFactory.CreateVideoSource(
-                nativeCameraVideoCapturer.IsScreencast);
+            var nativeCameraEnumerator = new Webrtc.Camera2Enumerator(context);
+            var nativeCameraVideoCapturer = nativeCameraEnumerator.CreateCapturer(track.Id, null);
+
+            //var nativeVideoSource = WebRtc.NativePeerConnectionFactory.CreateVideoSource(
+            // nativeCameraVideoCapturer.IsScreencast);
+            var nativeVideoSource = WebRtc.NativeMediaSourceStore.Get(track.Id) as Webrtc.VideoSource;
             nativeCameraVideoCapturer.Initialize(Webrtc.SurfaceTextureHelper.Create(
-                "CaptureThread",
+                "CameraVideoCapturerThread",
                 eglBaseContext),
                 context,
                 nativeVideoSource.CapturerObserver);
@@ -83,8 +84,21 @@ namespace WebRTCme
             nativeSurfaceViewRenderer.SetMirror(true);
             nativeSurfaceViewRenderer.Init(eglBaseContext, null);
 
-            var nativeLocalVideoTrack = WebRtc.NativePeerConnectionFactory.CreateVideoTrack("105", nativeVideoSource);
-             nativeLocalVideoTrack.AddSink(nativeSurfaceViewRenderer);
+
+            //var nativeVideoTrack = WebRtc.NativePeerConnectionFactory.CreateVideoTrack(
+              //  $"{WebRtc.Id}", nativeVideoSource);
+
+
+            // Replace the existing native video track with the one created here!!!
+            //// TODO: Check if there is a better way to accomplish this.
+            //// Ideally we need to use both VideoSource and VideoTrack from input "track" parameter,
+            /// Unfortunately VideoTrack does not expose VideoSource. This is weird because
+            /// CreateVideoTrack takes VideoSource as the second parameter!!!
+///            track.NativeObject = nativeVideoTrack;
+///            
+
+
+            nativeVideoTrack.AddSink(nativeSurfaceViewRenderer);
 
             return nativeSurfaceViewRenderer;
 

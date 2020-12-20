@@ -36,8 +36,7 @@ namespace WebRtcMiddlewareXamarin
                 {
                     var type = e.NewElement.Type;
                     var source = e.NewElement.Source;
-                    SurfaceView view = null;
-
+                    SurfaceView surfaceView = null;
 
                     if (type == VideoType.Local)
                     {
@@ -54,7 +53,6 @@ namespace WebRtcMiddlewareXamarin
                                 Video = new MediaStreamContraintsUnion { Value = true }
                             });
                             var videoTrack = mediaStream.GetVideoTracks().First();
-                            
 
                             var permission = await Permissions.RequestAsync<Permissions.Camera>();
                             if (permission != PermissionStatus.Granted)
@@ -64,19 +62,15 @@ namespace WebRtcMiddlewareXamarin
                                     ToastLength.Long).Show();
                             }
 
-                            view = PlatformSupport.CreateCameraView(videoTrack);
+                            surfaceView = PlatformSupport.CreateCameraView(videoTrack);
 
                             // Instantiate the native control and assign it to the Control property with
                             // the SetNativeControl method
-                            var surfaceView = new VideoView(Context,view);
-                            SetNativeControl(surfaceView);
-
-                            //PlatformSupport.SetCameraView(Control, videoTrack);
-
+                            var videoView = new VideoView(Context, surfaceView);
+                            SetNativeControl(videoView);
                         }
 
                         // Configure the control and subscribe to event handlers
-
                     }
                 }
             }

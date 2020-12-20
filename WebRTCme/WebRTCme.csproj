@@ -41,8 +41,7 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	
-	
+
 	
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />

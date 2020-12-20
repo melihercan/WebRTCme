@@ -27,12 +27,14 @@ namespace WebRtc.Android
                             AutoGainControl = new ConstrainBoolean { Value = false },
                             NoiseSuppression = new ConstrainBoolean { Value = false }
                         }).ToNative());
+                    WebRTCme.WebRtc.NativeMediaSourceStore.Set(id, nativeAudioSource);
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
                         .CreateAudioTrack(id, nativeAudioSource);
                     break;
 
                 case MediaStreamTrackKind.Video:
                     var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);
+                    WebRTCme.WebRtc.NativeMediaSourceStore.Set(id, nativeVideoSource);
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoTrack(
                         id, nativeVideoSource);
                     break;

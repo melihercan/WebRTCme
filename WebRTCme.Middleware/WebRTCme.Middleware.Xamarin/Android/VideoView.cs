@@ -11,19 +11,19 @@ namespace WebRtcMiddlewareXamarin
     public class VideoView : ViewGroup
     {
 
-    public SurfaceView LocalVideoView { get; }
+        private readonly SurfaceView _surfaceView;
 
-    public VideoView(Context context, SurfaceView view) : base(context)
-    {
-        LocalVideoView = view;
-        AddView(view);
-    }
+        public VideoView(Context context, SurfaceView surfaceView) : base(context)
+        {
+            _surfaceView = surfaceView;
+            AddView(surfaceView);
+        }
 
-    protected override void OnLayout(bool changed, int l, int t, int r, int b)
-    {
-        LocalVideoView.Layout(l, t, r, b);
+        protected override void OnLayout(bool changed, int l, int t, int r, int b)
+        {
+            _surfaceView.Layout(l, t, r, b);
+        }
     }
-}
 
 
 
