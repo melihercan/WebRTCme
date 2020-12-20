@@ -17,8 +17,6 @@ namespace WebRTCme
     {
         public static Webrtc.PeerConnectionFactory NativePeerConnectionFactory { get; private set; }
 
-        public static NativeMediaSourceStore NativeMediaSourceStore { get; private set; } 
-
         private static int _id = 1000;
         public static int Id => Interlocked.Increment(ref _id);
 
@@ -26,8 +24,6 @@ namespace WebRTCme
 
         private WebRtc()
         {
-            NativeMediaSourceStore = new NativeMediaSourceStore();
-
             var context = Platform.CurrentActivity.ApplicationContext;
 
             var options = Webrtc.PeerConnectionFactory.InitializationOptions

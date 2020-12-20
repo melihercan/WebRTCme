@@ -16,6 +16,7 @@ namespace WebRtc.Android
             MediaTrackConstraints constraints = null)
         {
             Webrtc.MediaStreamTrack nativeMediaStreamTrack = null;
+            Webrtc.MediaSource nativeMediaSource = null;
 
             switch (mediaStreamTrackKind)
             {
@@ -27,20 +28,22 @@ namespace WebRtc.Android
                             AutoGainControl = new ConstrainBoolean { Value = false },
                             NoiseSuppression = new ConstrainBoolean { Value = false }
                         }).ToNative());
-                    WebRTCme.WebRtc.NativeMediaSourceStore.Set(id, nativeAudioSource);
+                    nativeMediaSource = nativeAudioSource;
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
                         .CreateAudioTrack(id, nativeAudioSource);
                     break;
 
                 case MediaStreamTrackKind.Video:
                     var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);
-                    WebRTCme.WebRtc.NativeMediaSourceStore.Set(id, nativeVideoSource);
-                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoTrack(
-                        id, nativeVideoSource);
+                    nativeMediaSource = nativeVideoSource;
+                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                        .CreateVideoTrack(id, nativeVideoSource);
                     break;
             }
 
-            return new MediaStreamTrack(nativeMediaStreamTrack);
+            var mediaStreamTrack  = new MediaStreamTrack(nativeMediaStreamTrack);
+            mediaStreamTrack.SetNativeMediaSource(nativeMediaSource);
+            return mediaStreamTrack;
         }
 
         public static IMediaStreamTrack Create(Webrtc.MediaStreamTrack nativeMediaStreamTrack)
