@@ -11,10 +11,79 @@ using WebRTCme;
 using System.Linq;
 using Xamarin.Essentials;
 using Android.Widget;
+using Android.Views;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
 {
+
+    public class VideoRenderer : ViewRenderer<Video, VideoView>
+    {
+        public VideoRenderer(Context context) : base(context) { }
+
+        protected override async void OnElementChanged(ElementChangedEventArgs<Video> e)
+        {
+            base.OnElementChanged(e);
+
+            if (e.OldElement != null)
+            {
+                // Unsubscribe from event handlers and cleanup any resources.
+            }
+
+            if (e.NewElement != null)
+            {
+                if (Control == null)
+                {
+                    var type = e.NewElement.Type;
+                    var source = e.NewElement.Source;
+                    SurfaceView view = null;
+
+
+                    if (type == VideoType.Local)
+                    {
+                        if (string.IsNullOrEmpty(source))
+                        {
+                            // Default devices.
+                            var window = WebRtcMiddleware.WebRtc.Window();
+                            var navigator = window.Navigator();
+                            var mediaDevices = navigator.MediaDevices;
+                            var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
+                            var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
+                            {
+                                Audio = new MediaStreamContraintsUnion { Value = true },
+                                Video = new MediaStreamContraintsUnion { Value = true }
+                            });
+                            var videoTrack = mediaStream.GetVideoTracks().First();
+                            
+
+                            var permission = await Permissions.RequestAsync<Permissions.Camera>();
+                            if (permission != PermissionStatus.Granted)
+                            {
+                                Toast.MakeText(Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext,
+                                    "No Video permission was granted.",
+                                    ToastLength.Long).Show();
+                            }
+
+                            view = PlatformSupport.CreateCameraView(videoTrack);
+
+                            // Instantiate the native control and assign it to the Control property with
+                            // the SetNativeControl method
+                            var surfaceView = new VideoView(Context,view);
+                            SetNativeControl(surfaceView);
+
+                            //PlatformSupport.SetCameraView(Control, videoTrack);
+
+                        }
+
+                        // Configure the control and subscribe to event handlers
+
+                    }
+                }
+            }
+        }
+    }
+}
+#if false
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {
         private VideoView _videoView;
@@ -111,4 +180,5 @@ namespace WebRtcMiddlewareXamarin
             base.Dispose(disposing);
         }
     }
-}
+#endif
+

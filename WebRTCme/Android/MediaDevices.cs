@@ -36,7 +36,7 @@ namespace WebRtc.Android
             //var cm = (CameraManager)activity.GetSystemService(global::Android.Content.Context.CameraService);
             //var list = cm.GetCameraIdList();
 
-            var audioManager = (AudioManager)activity.GetSystemService(global::Android.Content.Context.AudioService);
+            var audioManager = (AudioManager)/*activity*/context.GetSystemService(global::Android.Content.Context.AudioService);
             var inputs = audioManager.GetDevices(GetDevicesTargets.Inputs);
             var audioCaptureDevices = inputs.Select(input => new MediaDeviceInfo
             {
