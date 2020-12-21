@@ -32,5 +32,28 @@ namespace WebRtc.Android
 
             return nativeConstrains;
         }
+
+        public static Webrtc.PeerConnection.RTCConfiguration ToNative(this RTCConfiguration configuration) =>
+            new Webrtc.PeerConnection.RTCConfiguration(configuration.IceServers
+                .Select(server => server.ToNative()).ToArray())
+            {
+                BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.PeerConnection.BundlePolicy.Balanced,
+                Certificate = (Webrtc.RtcCertificatePem)(configuration.Certificates?.ElementAt(0).NativeObject) ??
+                    Webrtc.RtcCertificatePem.GenerateCertificate(),
+                IceCandidatePoolSize = configuration.IceCandidatePoolSize ?? 0,
+                IceTransportsType = configuration.IceTransportPolicy?.ToNative() ?? 
+                    Webrtc.PeerConnection.IceTransportsType.All,
+                RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.PeerConnection.RtcpMuxPolicy.Require 
+
+            };
+            
+        public static Webrtc.PeerConnection.IceServer ToNative(this RTCIceServer iceServer) =>
+            Webrtc.PeerConnection.IceServer.InvokeBuilder(iceServer.Urls)
+                .SetTlsCertPolicy(iceServer.CredentialType?.ToNative() ??
+                    Webrtc.PeerConnection.TlsCertPolicy.TlsCertPolicySecure)
+                .SetUsername(iceServer.Username)
+                .SetPassword(iceServer.Credential)
+                .CreateIceServer();
+
     }
 }

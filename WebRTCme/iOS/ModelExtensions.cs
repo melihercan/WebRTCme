@@ -14,7 +14,7 @@ namespace WebRtc.iOS
             {
                 BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.RTCBundlePolicy.Balanced,
                 Certificate = (Webrtc.RTCCertificate)(configuration.Certificates?.ElementAt(0).NativeObject) ??
-                    //new Webrtc.RTCCertificate("TODO:private key", "TODO: certiciate"),
+                    //new Webrtc.RTCCertificate("TODO:private key", "TODO: certificate"),
                     Webrtc.RTCCertificate.GenerateCertificateWithParams(new NSDictionary<NSString, NSObject>(
                         new[] { new NSString("expires"), new NSString("name") },
                         new NSObject[] { new NSNumber(100000), new NSString("RSASSA-PKCS1-v1_5") })),

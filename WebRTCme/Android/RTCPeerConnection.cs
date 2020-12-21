@@ -1,85 +1,71 @@
-﻿using System;
+﻿using Org.Webrtc;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using Webrtc = Org.Webrtc;
 
 namespace WebRtc.Android
 {
-    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
+    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.PeerConnection.IObserver
     {
         public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(RTCConfiguration configuration)
-        {
-
-        }
+        private RTCPeerConnection(RTCConfiguration configuration) => 
+            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
+                .CreatePeerConnection(configuration.ToNative(), this);
 
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
-        public RTCPeerConnectionState ConnectionState => throw new NotImplementedException();
+        public RTCPeerConnectionState ConnectionState =>
+            ((Webrtc.PeerConnection)NativeObject).ConnectionState().FromNative();
 
-        public IRTCSessionDescription CurrentRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription CurrentRemoteDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).RemoteDescription);
 
-        public RTCIceConnectionState IceConnectionState => throw new NotImplementedException();
+        public RTCIceConnectionState IceConnectionState =>
+            ((Webrtc.PeerConnection)NativeObject).InvokeIceConnectionState().FromNative();
 
-        public RTCIceGatheringState IceGatheringState => throw new NotImplementedException();
+        public RTCIceGatheringState IceGatheringState =>
+            ((Webrtc.PeerConnection)NativeObject).InvokeIceGatheringState().FromNative();
 
-        public IRTCSessionDescription LocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription LocalDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
-        public IRTCSessionDescription PendingLocalDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingLocalDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
 
-        public IRTCSessionDescription PendingRemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription PendingRemoteDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).RemoteDescription);
 
-        public IRTCSessionDescription RemoteDescription => throw new NotImplementedException();
+        public IRTCSessionDescription RemoteDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection) NativeObject).RemoteDescription);
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
-        public RTCSignalingState SignalingState => throw new NotImplementedException();
+        public RTCSignalingState SignalingState =>
+            ((Webrtc.PeerConnection)NativeObject).InvokeSignalingState().FromNative();
 
         public event EventHandler OnConnectionStateChanged;
-        public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
+        public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         public event EventHandler OnNegotiationNeeded;
+        public event EventHandler OnSignallingStateChange;
+        public event EventHandler<IRTCTrackEvent> OnTrack;
 
-        event EventHandler<IRTCPeerConnectionIceEvent> IRTCPeerConnection.OnIceCandidate
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
+        public RTCIceServer[] GetDefaultIceServers() =>
+            //((Webrtc.PeerConnection)NativeObject).
+            throw new NotImplementedException();
 
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        event EventHandler<IRTCTrackEvent> IRTCPeerConnection.OnTrack
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
-
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public Task AddIceCandidate(IRTCIceCandidate candidate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddStream(IMediaStream mediaStream)
         {
             throw new NotImplementedException();
         }
@@ -104,12 +90,7 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public IRTCSessionDescription CreateOffer(RTCOfferOptions options)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IRTCCertificate> GenerateCertificate()
+        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options = null)
         {
             throw new NotImplementedException();
         }
@@ -120,11 +101,6 @@ namespace WebRtc.Android
         }
 
         public RTCConfiguration GetConfiguration()
-        {
-            throw new NotImplementedException();
-        }
-
-        public RTCIceServer[] GetDefaultIceServers()
         {
             throw new NotImplementedException();
         }
@@ -150,16 +126,6 @@ namespace WebRtc.Android
         }
 
         public IRTCRtpTransceiver[] GetTransceivers()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnIceCandidate(Func<IRTCPeerConnectionIceEvent> callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnTrack(Func<IRTCTrackEvent> callback)
         {
             throw new NotImplementedException();
         }
@@ -194,9 +160,64 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        Task<IRTCSessionDescription> IRTCPeerConnection.CreateOffer(RTCOfferOptions options)
+
+
+
+        #region NativeEvents
+        public void OnAddStream(Webrtc.MediaStream p0)
         {
             throw new NotImplementedException();
         }
+
+        public void OnAddTrack(RtpReceiver p0, Webrtc.MediaStream[] p1)
+        {
+            throw new NotImplementedException();
+        }
+
+        void Webrtc.PeerConnection.IObserver.OnDataChannel(DataChannel p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        void Webrtc.PeerConnection.IObserver.OnIceCandidate(IceCandidate p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnIceCandidatesRemoved(IceCandidate[] p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnIceConnectionChange(PeerConnection.IceConnectionState p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnIceConnectionReceivingChange(bool p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnIceGatheringChange(PeerConnection.IceGatheringState p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnRemoveStream(Webrtc.MediaStream p0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnRenegotiationNeeded()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnSignalingChange(PeerConnection.SignalingState p0)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }
