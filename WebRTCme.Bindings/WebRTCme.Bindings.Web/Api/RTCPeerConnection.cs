@@ -26,7 +26,6 @@ namespace WebRtcBindingsWeb.Api
             AddNativeEventListenerForObjectRef("onicecandidate", OnIceCandidate, RTCPeerConnectionIceEvent.Create);
             AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
             AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
-            AddNativeEventListenerForObjectRef("onidentityresult", OnIdentityResult, RTCIdentityEvent.Create);
             AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
             AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
             AddNativeEventListenerForObjectRef("onconnectionstatechanged", OnTrack, RTCTrackEvent.Create);
@@ -76,7 +75,6 @@ namespace WebRtcBindingsWeb.Api
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
-        public event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         public event EventHandler OnNegotiationNeeded;
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;

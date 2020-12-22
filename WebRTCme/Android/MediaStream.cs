@@ -12,6 +12,8 @@ namespace WebRtc.Android
 {
     internal class MediaStream : ApiBase, IMediaStream
     {
+        public static IMediaStream Create(Webrtc.MediaStream nativeMediaStream) => new MediaStream(nativeMediaStream);
+
         public static IMediaStream Create()
         {
             throw new NotImplementedException();

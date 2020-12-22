@@ -5,12 +5,12 @@ namespace WebRTCme
 {
     public interface IRTCTrackEvent : INativeObject
     {
-        IRTCRtpReceiver Receiver { get; set; }
+        IRTCRtpReceiver Receiver { get; }
 
-        IMediaStream[] Streams { get; set; }
+        IMediaStream[] Streams { get; }
 
-        IMediaStreamTrack Track { get; set; }
+        IMediaStreamTrack Track { get; }
 
-        IRTCRtpTransceiver Transceiver { get; set; }
+        IRTCRtpTransceiver Transceiver { get; }
     }
 }

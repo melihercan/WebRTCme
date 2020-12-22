@@ -10,7 +10,7 @@ namespace WebRtc.Android
         public static IRTCDataChannel Create(Webrtc.DataChannel nativeDataChannel) =>
             new RTCDataChannel(nativeDataChannel);
 
-        public RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
+        private RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
         {
         }
 

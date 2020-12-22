@@ -79,7 +79,6 @@ namespace WebRtc.Android
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
-        public event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         public event EventHandler OnNegotiationNeeded;
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
@@ -192,58 +191,45 @@ namespace WebRtc.Android
         #region NativeEvents
         public void OnAddStream(Webrtc.MediaStream p0)
         {
-            throw new NotImplementedException();
+            // Depreceted.
         }
 
-        public void OnAddTrack(RtpReceiver p0, Webrtc.MediaStream[] p1)
-        {
-            throw new NotImplementedException();
-        }
+        public void OnAddTrack(RtpReceiver p0, Webrtc.MediaStream[] p1) => 
+            OnTrack?.Invoke(this, RTCTrackEvent.Create(p0, p1));
 
-        void Webrtc.PeerConnection.IObserver.OnDataChannel(DataChannel p0)
-        {
-            throw new NotImplementedException();
-        }
+        void Webrtc.PeerConnection.IObserver.OnDataChannel(DataChannel p0) =>
+            OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(p0));
 
         void Webrtc.PeerConnection.IObserver.OnIceCandidate(IceCandidate p0)
         {
-            throw new NotImplementedException();
+            OnIceCandidate?.Invoke(this, RTCPeerConnectionIceEvent.Create(p0));
         }
 
         public void OnIceCandidatesRemoved(IceCandidate[] p0)
         {
-            throw new NotImplementedException();
         }
 
-        public void OnIceConnectionChange(PeerConnection.IceConnectionState p0)
-        {
-            throw new NotImplementedException();
-        }
+        public void OnIceConnectionChange(PeerConnection.IceConnectionState p0) =>
+            OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
         public void OnIceConnectionReceivingChange(bool p0)
         {
-            throw new NotImplementedException();
+
         }
 
-        public void OnIceGatheringChange(PeerConnection.IceGatheringState p0)
-        {
-            throw new NotImplementedException();
-        }
+        public void OnIceGatheringChange(PeerConnection.IceGatheringState p0) =>
+            OnIceGatheringStateChange?.Invoke(this, EventArgs.Empty);
 
         public void OnRemoveStream(Webrtc.MediaStream p0)
         {
-            throw new NotImplementedException();
+            // Depreceted.
         }
 
-        public void OnRenegotiationNeeded()
-        {
-            throw new NotImplementedException();
-        }
+        public void OnRenegotiationNeeded() => OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
 
-        public void OnSignalingChange(PeerConnection.SignalingState p0)
-        {
-            throw new NotImplementedException();
-        }
+        public void OnSignalingChange(PeerConnection.SignalingState p0) =>
+            OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
+        
         #endregion
 
 
@@ -253,35 +239,18 @@ namespace WebRtc.Android
             private readonly TaskCompletionSource<IRTCSessionDescription> _tcsCreate;
             private readonly TaskCompletionSource<object> _tcsSet;
 
-            public SdpObserverProxy(TaskCompletionSource<IRTCSessionDescription> tcs)
-            {
-                _tcsCreate = tcs;
-            }
+            public SdpObserverProxy(TaskCompletionSource<IRTCSessionDescription> tcs) => _tcsCreate = tcs;
 
-            public SdpObserverProxy(TaskCompletionSource<object> tcs)
-            {
-                _tcsSet = tcs;
-            }
+            public SdpObserverProxy(TaskCompletionSource<object> tcs) => _tcsSet = tcs;
 
-            public void OnCreateFailure(string p0)
-            {
-                _tcsCreate?.SetException(new Exception($"{p0}"));
-            }
+            public void OnCreateFailure(string p0) => _tcsCreate?.SetException(new Exception($"{p0}"));
 
-            public void OnCreateSuccess(SessionDescription p0)
-            {
+            public void OnCreateSuccess(SessionDescription p0) => 
                 _tcsCreate?.SetResult(RTCSessionDescription.Create(p0));
-            }
 
-            public void OnSetFailure(string p0)
-            {
-                _tcsSet?.SetException(new Exception($"{p0}"));
-            }
+            public void OnSetFailure(string p0) => _tcsSet?.SetException(new Exception($"{p0}"));
 
-            public void OnSetSuccess()
-            {
-                _tcsSet?.SetResult(null);
-            }
+            public void OnSetSuccess() => _tcsSet?.SetResult(null);
         }
         #endregion
 

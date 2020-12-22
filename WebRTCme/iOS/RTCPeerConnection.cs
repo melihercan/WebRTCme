@@ -84,7 +84,6 @@ namespace WebRtc.iOS
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
-        public event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         public event EventHandler OnNegotiationNeeded;
         public event EventHandler OnSignallingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
@@ -231,12 +230,12 @@ namespace WebRtc.iOS
 
         public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
         {
-            // Depreceted
+            // Depreceted.
         }
 
         public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
         {
-            // Depreceted
+            // Depreceted.
         }
 
         public void PeerConnectionShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)

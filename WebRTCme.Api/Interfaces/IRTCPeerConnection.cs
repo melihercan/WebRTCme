@@ -39,7 +39,6 @@ namespace WebRTCme
         event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
         event EventHandler OnIceConnectionStateChange;
         event EventHandler OnIceGatheringStateChange;
-        event EventHandler<IRTCIdentityEvent> OnIdentityResult;
         event EventHandler OnNegotiationNeeded;
         event EventHandler OnSignallingStateChange;
         event EventHandler<IRTCTrackEvent> OnTrack;
