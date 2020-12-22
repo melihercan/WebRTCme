@@ -1,6 +1,7 @@
 ﻿using Org.Webrtc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
@@ -10,6 +11,29 @@ namespace WebRtc.Android
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.PeerConnection.IObserver
     {
+        private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
+        {
+            get
+            {
+                var mandatory = new Dictionary<string, string>
+                {
+                    ["OfferToReceiveAudio"] = "true",
+                    ["OfferToReceiveVideo"] = "true"
+                };
+                var optional = new Dictionary<string, string>
+                {
+                    ["DtlsSrtpKeyAgreement"] = "true"
+                };
+                var nativeConstraints = new Webrtc.MediaConstraints
+                {
+                    Mandatory = mandatory.Select(p => new Webrtc.MediaConstraints.KeyValuePair(p.Key, p.Value)).ToList(),
+                    Optional = optional.Select(p => new Webrtc.MediaConstraints.KeyValuePair(p.Key, p.Value)).ToList()
+                };
+                return nativeConstraints;
+            }
+        }
+
+
         public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
 
@@ -61,47 +85,48 @@ namespace WebRtc.Android
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
         public RTCIceServer[] GetDefaultIceServers() =>
-            //((Webrtc.PeerConnection)NativeObject).
             throw new NotImplementedException();
 
 
         public Task AddIceCandidate(IRTCIceCandidate candidate)
         {
-            throw new NotImplementedException();
+            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(candidate.NativeObject as Webrtc.IceCandidate);
+            return Task.CompletedTask;
         }
 
-        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
+            RTCRtpSender.Create(((Webrtc.PeerConnection)NativeObject).AddTrack(
+                track.NativeObject as Webrtc.MediaStreamTrack, new List<string> { stream.Id }));
+
+
+        public void Close() => ((Webrtc.PeerConnection)NativeObject).Close();
+
+        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            ((Webrtc.PeerConnection)NativeObject).CreateAnswer(
+                new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
+            return tcs.Task;
         }
 
-        public void Close()
+        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
+            RTCDataChannel.Create(((Webrtc.PeerConnection)NativeObject).CreateDataChannel(label, options.ToNative()));
+
+        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            ((Webrtc.PeerConnection)NativeObject).CreateOffer(
+                new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
+            return tcs.Task;
         }
 
-        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
+            //// TODO: How to use keygenAlgorithm
+            Task.FromResult(RTCCertificate.Create(Webrtc.RtcCertificatePem.GenerateCertificate()));
 
         public RTCConfiguration GetConfiguration()
         {
+            //// TODO: HOW TO GET Configuration??? Requires for IceServers too.
             throw new NotImplementedException();
         }
 
@@ -110,40 +135,35 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpReceiver[] GetReceivers()
+        public IRTCRtpReceiver[] GetReceivers() =>
+            ((Webrtc.PeerConnection)NativeObject).Receivers
+                .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
+
+        public IRTCRtpSender[] GetSenders() =>
+            ((Webrtc.PeerConnection)NativeObject).Senders
+                .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
+
+
+        public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
             throw new NotImplementedException();
         }
 
-        public IRTCRtpSender[] GetSenders()
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCRtpTransceiver[] GetTransceivers() =>
+            ((Webrtc.PeerConnection)NativeObject).Transceivers
+                .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
-        public Task<IRTCStatsReport> GetStats()
-        {
-            throw new NotImplementedException();
-        }
 
-        public IRTCRtpTransceiver[] GetTransceivers()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveTrack(IRTCRtpSender sender)
-        {
-            throw new NotImplementedException();
-        }
+        public void RemoveTrack(IRTCRtpSender sender) =>
+            ((Webrtc.PeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
 
         public void RestartIce()
         {
             throw new NotImplementedException();
         }
 
-        public void SetConfiguration(RTCConfiguration configuration)
-        {
-            throw new NotImplementedException();
-        }
+        public void SetConfiguration(RTCConfiguration configuration) =>
+            ((Webrtc.PeerConnection)NativeObject).SetConfiguration(configuration.ToNative());
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {
@@ -152,12 +172,18 @@ namespace WebRtc.Android
 
         public Task SetLocalDescription(IRTCSessionDescription sessionDescription)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<object>();
+            ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
+                new SdpObserverProxy(tcs), sessionDescription.NativeObject as Webrtc.SessionDescription);
+            return tcs.Task;
         }
 
         public Task SetRemoteDescription(IRTCSessionDescription sessionDescription)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<object>();
+            ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
+                new SdpObserverProxy(tcs), sessionDescription.NativeObject as Webrtc.SessionDescription);
+            return tcs.Task;
         }
 
 
@@ -219,5 +245,47 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
         #endregion
+
+
+        #region SdpObserver
+        private class SdpObserverProxy : Java.Lang.Object, Webrtc.ISdpObserver
+        {
+            private readonly TaskCompletionSource<IRTCSessionDescription> _tcsCreate;
+            private readonly TaskCompletionSource<object> _tcsSet;
+
+            public SdpObserverProxy(TaskCompletionSource<IRTCSessionDescription> tcs)
+            {
+                _tcsCreate = tcs;
+            }
+
+            public SdpObserverProxy(TaskCompletionSource<object> tcs)
+            {
+                _tcsSet = tcs;
+            }
+
+            public void OnCreateFailure(string p0)
+            {
+                _tcsCreate?.SetException(new Exception($"{p0}"));
+            }
+
+            public void OnCreateSuccess(SessionDescription p0)
+            {
+                _tcsCreate?.SetResult(RTCSessionDescription.Create(p0));
+            }
+
+            public void OnSetFailure(string p0)
+            {
+                _tcsSet?.SetException(new Exception($"{p0}"));
+            }
+
+            public void OnSetSuccess()
+            {
+                _tcsSet?.SetResult(null);
+            }
+        }
+        #endregion
+
     }
+
+
 }

@@ -104,8 +104,7 @@ namespace WebRtc.iOS
             RTCRtpSender.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTrack(
                 track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] {stream.Id}));
 
-        public void Close() =>
-            ((Webrtc.RTCPeerConnection)NativeObject).Close();
+        public void Close() => ((Webrtc.RTCPeerConnection)NativeObject).Close();
 
         public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
         {
@@ -183,8 +182,7 @@ namespace WebRtc.iOS
         }
 
         public void SetConfiguration(RTCConfiguration configuration) =>
-            ((Webrtc.RTCPeerConnection) NativeObject).SetConfiguration(
-                configuration.ToNative());
+            ((Webrtc.RTCPeerConnection) NativeObject).SetConfiguration(configuration.ToNative());
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {

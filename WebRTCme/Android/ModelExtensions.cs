@@ -55,5 +55,17 @@ namespace WebRtc.Android
                 .SetPassword(iceServer.Credential)
                 .CreateIceServer();
 
+
+        public static Webrtc.DataChannel.Init ToNative(this RTCDataChannelInit dataChannelInit) =>
+            new Webrtc.DataChannel.Init
+            {
+                Ordered = dataChannelInit.Ordered ?? true,
+                ///// TODO: CHECK THIS!!!! MaxRetransmitTimeMs = dataChannelInit.MaxPacketLifeTime ?? 0,
+                MaxRetransmits = dataChannelInit.MaxRetransmits ?? 0,
+                Protocol = dataChannelInit.Protocol,
+                Negotiated = dataChannelInit.Negotiated ?? false,
+                Id = dataChannelInit.Id ?? 0
+            };
+
     }
 }
