@@ -6,12 +6,10 @@ namespace WebRTCme
 {
     public class RTCRtpParameters
     {
-        public RTCRtpCodecParameters[] Codecs { get; } 
+        public RTCRtpCodecParameters[] Codecs { get; init; } 
 
-        public RTCRtpHeaderExtensionParameters[] HeaderExtensions { get; }
+        public RTCRtpHeaderExtensionParameters[] HeaderExtensions { get; init; }
 
-        public RTCRtcpParameters Rtcp { get; }
-
-
+        public RTCRtcpParameters Rtcp { get; init; }
     }
 }

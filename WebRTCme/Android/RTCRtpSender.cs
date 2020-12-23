@@ -14,9 +14,9 @@ namespace WebRtc.Android
         {
         }
 
-        public IRTCDTMFSender Dtmf => throw new NotImplementedException();
+        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(((Webrtc.RtpSender)NativeObject).Dtmf());
 
-        public IMediaStreamTrack Track => throw new NotImplementedException();
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.RtpSender)NativeObject).Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 

@@ -78,7 +78,6 @@ namespace WebRtc.Android
 
         public MediaStreamTrackState ReadyState => throw new NotImplementedException();
 
-        public bool Remote => throw new NotImplementedException();
 
         public event EventHandler OnEnded;
         public event EventHandler OnMute;

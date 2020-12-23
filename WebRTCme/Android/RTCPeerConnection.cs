@@ -46,6 +46,9 @@ namespace WebRtc.Android
         public RTCPeerConnectionState ConnectionState =>
             ((Webrtc.PeerConnection)NativeObject).ConnectionState().FromNative();
 
+        public IRTCSessionDescription CurrentLocalDescription =>
+            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
+
         public IRTCSessionDescription CurrentRemoteDescription =>
             RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).RemoteDescription);
 

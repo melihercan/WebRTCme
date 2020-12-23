@@ -6,7 +6,7 @@ namespace WebRTCme
 {
     public class RTCRtpSendParameters : RTCRtpParameters
     {
-        public RTCRtpEncoodingParameters Encodings { get; set; }
+        public RTCRtpEncodingParameters Encodings { get; set; }
 
         public string TransactionId { get; set; }
     }

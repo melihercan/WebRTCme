@@ -6,14 +6,14 @@ namespace WebRTCme
 {
     public class RTCRtpCodecParameters
     {
-        public byte? PayloadType { get; }
+        public byte? PayloadType { get; init; }
 
-        public string MimeType { get; }
+        public string MimeType { get; init; }
 
-        public ulong? ClockRate { get; }
+        public ulong? ClockRate { get; init; }
 
-        public ushort? Channels { get; }
+        public ushort? Channels { get; init; }
 
-        public string SdpFmtpLine { get; }
+        public string SdpFmtpLine { get; init; }
     }
 }

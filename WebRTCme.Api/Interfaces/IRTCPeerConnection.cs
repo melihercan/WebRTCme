@@ -13,6 +13,8 @@ namespace WebRTCme
 
         RTCPeerConnectionState ConnectionState { get; }
 
+        IRTCSessionDescription CurrentLocalDescription { get; }
+
         IRTCSessionDescription CurrentRemoteDescription { get; }
 
         RTCIceConnectionState IceConnectionState { get; }

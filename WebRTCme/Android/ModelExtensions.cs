@@ -67,5 +67,45 @@ namespace WebRtc.Android
                 Id = dataChannelInit.Id ?? 0
             };
 
+        public static RTCRtpCodecParameters FromNative(this Webrtc.RtpParameters.Codec nativeCodecParameters) =>
+            new RTCRtpCodecParameters
+            {
+                PayloadType = (byte)nativeCodecParameters.PayloadType,
+                MimeType = "TODO: FIX ME",
+                ClockRate = (ulong)(int)nativeCodecParameters.ClockRate,
+                Channels = (ushort)(int)nativeCodecParameters.NumChannels,
+                SdpFmtpLine = "TODO: FIX ME"
+            };
+
+        public static RTCRtpHeaderExtensionParameters FromNative(this Webrtc.RtpParameters.HeaderExtension
+            nativeHeaderExtension) =>
+            new RTCRtpHeaderExtensionParameters
+            {
+                Uri = nativeHeaderExtension.Uri,
+                Id = (ushort)nativeHeaderExtension.Id,
+                Encrypted = nativeHeaderExtension.Encrypted
+            };
+
+        public static RTCRtpReceiveParameters FromNativeToReceive(this Webrtc.RtpParameters nativeRtpParameters) =>
+            new RTCRtpReceiveParameters
+            {
+                Codecs = (nativeRtpParameters.Codecs as List<Webrtc.RtpParameters.Codec>)
+                    .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
+                    .Select(headerExtension => headerExtension.FromNative()).ToArray(),
+                Rtcp = null//// TODO: CHECK THIS
+            };
+
+        public static RTCRtpSendParameters FromNativeToSend(this Webrtc.RtpParameters nativeRtpParameters) =>
+            new RTCRtpSendParameters
+            {
+                Codecs = (nativeRtpParameters.Codecs as List<Webrtc.RtpParameters.Codec>)
+                    .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
+                    .Select(headerExtension => headerExtension.FromNative()).ToArray(),
+                Rtcp = null//// TODO: CHECK THIS
+            };
+
+
     }
 }

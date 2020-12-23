@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCRtpEncoodingParameters
+    public class RTCRtpEncodingParameters
     {
         public bool Active { get; set; } = true;
 

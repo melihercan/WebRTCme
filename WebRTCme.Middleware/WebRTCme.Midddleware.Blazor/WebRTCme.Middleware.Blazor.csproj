@@ -5,6 +5,7 @@
     <RazorLangVersion>3.0</RazorLangVersion>
     <RootNamespace>WebRtcMiddlewareBlazor</RootNamespace>
     <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
 

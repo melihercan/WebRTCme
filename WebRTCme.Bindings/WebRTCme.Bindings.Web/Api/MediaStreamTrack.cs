@@ -47,8 +47,6 @@ namespace WebRtcBindingsWeb.Api
 
         public MediaStreamTrackState ReadyState => GetNativeProperty<MediaStreamTrackState>("readyState");
 
-        public bool Remote => GetNativeProperty<bool>("remote");
-
         public event EventHandler OnEnded;
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;

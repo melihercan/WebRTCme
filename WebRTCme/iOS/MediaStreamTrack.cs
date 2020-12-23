@@ -69,8 +69,6 @@ namespace WebRtc.iOS
 
         public MediaStreamTrackState ReadyState => throw new NotImplementedException();
 
-        public bool Remote => throw new NotImplementedException();
-
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
         public event EventHandler OnEnded;

@@ -34,9 +34,9 @@ namespace WebRtc.Android
 
         public ushort? RelatedPort => throw new NotImplementedException();
 
-        public string SdpMid => throw new NotImplementedException();
+        public string SdpMid => ((Webrtc.IceCandidate)NativeObject).SdpMid;
 
-        public ushort? SdpMLineIndex => throw new NotImplementedException();
+        public ushort? SdpMLineIndex => (ushort)((Webrtc.IceCandidate)NativeObject).SdpMLineIndex;
 
         public RTCIceTcpCandidateType TcpType => throw new NotImplementedException();
 

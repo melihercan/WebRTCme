@@ -27,8 +27,6 @@ namespace WebRTCme
 
         public MediaStreamTrackState ReadyState { get; }
         
-        public bool Remote { get; }
-
         public event EventHandler OnEnded;
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;

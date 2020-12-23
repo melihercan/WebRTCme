@@ -5,6 +5,7 @@
     <UserSecretsId>WebRTCme.Signalling-C8EC9BC3-74F3-41AC-9A2F-646CB3D5E504</UserSecretsId>
     <AssemblyName>WebRTCme.Signalling</AssemblyName>
     <RootNamespace>WebRtcSignalling</RootNamespace>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,12 +1,13 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 	
     <PropertyGroup>
-	    <TargetFrameworks>netstandard2.1; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
+	    <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRtcMiddlewareXamarin</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
-    </PropertyGroup>
+		<LangVersion>9.0</LangVersion>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />

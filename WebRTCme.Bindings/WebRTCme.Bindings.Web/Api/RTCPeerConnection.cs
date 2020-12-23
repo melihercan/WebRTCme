@@ -35,6 +35,10 @@ namespace WebRtcBindingsWeb.Api
 
         public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");
 
+        public IRTCSessionDescription CurrentLocalDescription =>
+            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
+                NativeObject, "currentLocalDescription"));
+
         public IRTCSessionDescription CurrentRemoteDescription =>
             RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
                 NativeObject, "currentRemoteDescription"));
