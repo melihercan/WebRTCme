@@ -103,9 +103,25 @@ namespace WebRtc.Android
                     .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
                 HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
                     .Select(headerExtension => headerExtension.FromNative()).ToArray(),
-                Rtcp = null//// TODO: CHECK THIS
+                Rtcp = null,//// TODO: CHECK THIS
+                Encodings = (nativeRtpParameters.Encodings as List<Webrtc.RtpParameters.Encoding>)
+                    .Select(nativeEncoding => nativeEncoding.FromNative()).ToArray(),
+                TransactionId = nativeRtpParameters.TransactionId
             };
 
+        public static RTCRtpEncodingParameters FromNative(this Webrtc.RtpParameters.Encoding nativeEncoding) =>
+            new RTCRtpEncodingParameters
+            {
+                Active = nativeEncoding.Active,
+                CodecPayloadType = 0, //// TODO: CHECK THIS
+                Dtx = RTCDtxStatus.Enabled, //// TODO: CHECK THIS
+                MaxBitrate = (ulong)(int)nativeEncoding.MaxBitrateBps,
+                MaxFramerate = (double)(int)nativeEncoding.MaxFramerate,
+                Ptime = 0, //// TODO: CHECK THIS
+                Rid = nativeEncoding.Rid,
+                ScaleResolutionDownBy = (double)nativeEncoding.ScaleResolutionDownBy
+            };
 
+        p
     }
 }

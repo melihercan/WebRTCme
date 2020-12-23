@@ -21,10 +21,7 @@ namespace WebRtc.Android
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
 
-        public RTCRtpSendParameters GetParameters()
-        {
-            throw new NotImplementedException();
-        }
+        public RTCRtpSendParameters GetParameters() => ((Webrtc.RtpSender)NativeObject).Parameters.FromNativeToSend();
 
         public Task<IRTCStatsReport> GetStats()
         {

@@ -41,6 +41,17 @@ namespace WebRtc.Android
                 RTCRtcpMuxPolicy.Require => Webrtc.PeerConnection.RtcpMuxPolicy.Require
             };
 
+        public static Webrtc.RtpTransceiver.RtpTransceiverDirection ToNative(
+            this RTCRtpTransceiverDirection transceiverDirection) =>
+                transceiverDirection switch
+                {
+                    RTCRtpTransceiverDirection.Sendrecv => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendRecv,
+                    RTCRtpTransceiverDirection.Sendonly => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendOnly,
+                    RTCRtpTransceiverDirection.Recvonly => Webrtc.RtpTransceiver.RtpTransceiverDirection.RecvOnly,
+                    RTCRtpTransceiverDirection.Inactive => Webrtc.RtpTransceiver.RtpTransceiverDirection.Inactive,
+                    _ => throw new NotImplementedException()
+                };
+
         public static RTCPeerConnectionState FromNative(
             this Webrtc.PeerConnection.PeerConnectionState nativePeerConnectionState)
         {
@@ -108,5 +119,31 @@ namespace WebRtc.Android
             throw new ArgumentOutOfRangeException(nameof(nativeSignalingState), nativeSignalingState, null);
         }
 
+        public static RTCRtpTransceiverDirection FromNative(
+            this Webrtc.RtpTransceiver.RtpTransceiverDirection nativeTransceiverDirection)
+        {
+            if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.SendRecv)
+                return RTCRtpTransceiverDirection.Sendrecv;
+            if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.SendOnly)
+                return RTCRtpTransceiverDirection.Sendonly;
+            if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.RecvOnly)
+                return RTCRtpTransceiverDirection.Recvonly;
+            if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.Inactive)
+                return RTCRtpTransceiverDirection.Inactive;
+            throw new ArgumentOutOfRangeException(nameof(nativeTransceiverDirection), nativeTransceiverDirection, null);
+        }
+
+        public static RTCSdpType FromNative(this Webrtc.SessionDescription.Type nativeType)
+        {
+            if (nativeType == Webrtc.SessionDescription.Type.Answer)
+                return RTCSdpType.Answer;
+            if (nativeType == Webrtc.SessionDescription.Type.Offer)
+                return RTCSdpType.Offer;
+            if (nativeType == Webrtc.SessionDescription.Type.Pranswer)
+                return RTCSdpType.Pranswer;
+            if (nativeType == Webrtc.SessionDescription.Type.Rollback)
+                return RTCSdpType.Rollback;
+            throw new ArgumentOutOfRangeException(nameof(nativeType), nativeType, null);
+        }
     }
 }
