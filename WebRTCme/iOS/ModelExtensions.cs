@@ -50,7 +50,7 @@ namespace WebRtc.iOS
             new RTCConfiguration
             {
                 BundlePolicy = nativeConfiguration.BundlePolicy.FromNative(),
-                Certificates = new IRTCCertificate[] 
+                Certificates = new IRTCCertificate[]
                     { RTCCertificate.Create(nativeConfiguration.Certificate) },
                 IceCandidatePoolSize = (byte)nativeConfiguration.IceCandidatePoolSize,
                 IceServers = nativeConfiguration.IceServers.Select(nativeServer => nativeServer.FromNative()).ToArray(),
@@ -67,5 +67,60 @@ namespace WebRtc.iOS
                 Username = nativeIceServer.Username
             };
 
+        public static RTCRtpReceiveParameters FromNativeToReceive(this Webrtc.RTCRtpParameters nativeRtpParameters) =>
+            new RTCRtpReceiveParameters
+            {
+                Codecs = nativeRtpParameters.Codecs.Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = nativeRtpParameters.HeaderExtensions
+                    .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
+                Rtcp = null//// TODO: CHECK THIS
+            };
+
+        public static RTCRtpSendParameters FromNativeToSend(this Webrtc.RTCRtpParameters nativeRtpParameters) =>
+            new RTCRtpSendParameters
+            {
+                Codecs = nativeRtpParameters.Codecs.Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = nativeRtpParameters.HeaderExtensions
+                    .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
+                Rtcp = null,//// TODO: CHECK THIS
+                Encodings = nativeRtpParameters.Encodings.Select(nativeEncoding => nativeEncoding.FromNative())
+                    .ToArray(),
+                TransactionId = nativeRtpParameters.TransactionId
+            };
+
+        public static RTCRtpCodecParameters FromNative(this Webrtc.RTCRtpCodecParameters nativeRtpCodecParameters) =>
+            new RTCRtpCodecParameters
+            {
+                PayloadType = (byte)nativeRtpCodecParameters.PayloadType,
+                MimeType = string.Empty, //// TODO: FIX THIS
+                ClockRate = nativeRtpCodecParameters.ClockRate.UInt64Value,
+                Channels = nativeRtpCodecParameters.NumChannels.UInt16Value,
+                SdpFmtpLine = string.Empty //// TODO: FIX THIS
+            };
+
+        public static RTCRtpHeaderExtensionParameters FromNative(this Webrtc.RTCRtpHeaderExtension
+            nativeRtpHeaderExtension) =>
+            new RTCRtpHeaderExtensionParameters
+            {
+                Uri = nativeRtpHeaderExtension.Uri,
+                Id = (ushort)nativeRtpHeaderExtension.Id,
+                Encrypted = nativeRtpHeaderExtension.Encrypted
+            };
+
+        public static RTCRtpEncodingParameters FromNative(this Webrtc.RTCRtpEncodingParameters nativeEncoding) =>
+            new RTCRtpEncodingParameters
+            {
+                Active = nativeEncoding.IsActive,
+                CodecPayloadType = 0, //// TODO: CHECK THIS
+                Dtx = RTCDtxStatus.Enabled, //// TODO: CHECK THIS
+                MaxBitrate = nativeEncoding.MaxBitrateBps.UInt64Value,
+                MaxFramerate = nativeEncoding.MaxFramerate.DoubleValue,
+                Ptime = 0, //// TODO: CHECK THIS
+                Rid = nativeEncoding.Rid,
+                ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy.DoubleValue
+            };
+
+
     }
+
 }

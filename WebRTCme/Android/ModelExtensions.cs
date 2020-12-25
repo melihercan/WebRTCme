@@ -92,7 +92,7 @@ namespace WebRtc.Android
                 Codecs = (nativeRtpParameters.Codecs as List<Webrtc.RtpParameters.Codec>)
                     .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
                 HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
-                    .Select(headerExtension => headerExtension.FromNative()).ToArray(),
+                    .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
                 Rtcp = null//// TODO: CHECK THIS
             };
 

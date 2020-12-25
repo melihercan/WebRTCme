@@ -35,9 +35,9 @@ namespace WebRtc.iOS
 
         public ushort? RelatedPort => throw new NotImplementedException();
 
-        public string SdpMid => throw new NotImplementedException();
+        public string SdpMid => ((Webrtc.RTCIceCandidate)NativeObject).SdpMid;
 
-        public ushort? SdpMLineIndex => throw new NotImplementedException();
+        public ushort? SdpMLineIndex => (ushort)((Webrtc.RTCIceCandidate)NativeObject).SdpMLineIndex;
 
         public RTCIceTcpCandidateType TcpType => throw new NotImplementedException();
 
