@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Foundation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,17 +14,22 @@ namespace WebRtc.iOS
 
         private RTCRtpTransceiver(Webrtc.RTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
 
-        public RTCRtpTransceiverDirection CurrentDirection => throw new NotImplementedException();
+        public RTCRtpTransceiverDirection CurrentDirection => ((Webrtc.RTCRtpTransceiver)NativeObject).Direction
+            .FromNative();
 
-        public RTCRtpTransceiverDirection Direction { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public RTCRtpTransceiverDirection Direction 
+        { 
+            get => ((Webrtc.RTCRtpTransceiver)NativeObject).Direction.FromNative();
+            set => ((Webrtc.RTCRtpTransceiver)NativeObject).SetDirection(value.ToNative(), out NSError _);
+        }
 
-        public string Mid => throw new NotImplementedException();
+        public string Mid => ((Webrtc.RTCRtpTransceiver)NativeObject).Mid;
 
-        public IRTCRtpReceiver Receiver => throw new NotImplementedException();
+        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(((Webrtc.RTCRtpTransceiver)NativeObject).Receiver);
 
-        public IRTCRtpSender Sender => throw new NotImplementedException();
+        public IRTCRtpSender Sender => RTCRtpSender.Create(((Webrtc.RTCRtpTransceiver)NativeObject).Sender);
 
-        public bool Stopped => throw new NotImplementedException();
+        public bool Stopped => ((Webrtc.RTCRtpTransceiver)NativeObject).IsStopped;
 
 
         public void SetCodecPreferences(RTCRtpCodecCapability[] codecs)
@@ -31,11 +37,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
-
+        public void Stop() => ((Webrtc.RTCRtpTransceiver)NativeObject).StopInternal();
 
     }
 }

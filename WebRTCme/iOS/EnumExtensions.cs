@@ -36,6 +36,16 @@ namespace WebRtc.iOS
                 RTCRtcpMuxPolicy.Require => Webrtc.RTCRtcpMuxPolicy.Require
             };
 
+        public static Webrtc.RTCRtpTransceiverDirection ToNative(this RTCRtpTransceiverDirection direction) =>
+            direction switch
+            {
+                RTCRtpTransceiverDirection.Sendrecv => Webrtc.RTCRtpTransceiverDirection.SendRecv,
+                RTCRtpTransceiverDirection.Sendonly => Webrtc.RTCRtpTransceiverDirection.SendOnly,
+                RTCRtpTransceiverDirection.Recvonly => Webrtc.RTCRtpTransceiverDirection.RecvOnly,
+                RTCRtpTransceiverDirection.Inactive => Webrtc.RTCRtpTransceiverDirection.Inactive
+            };
+
+
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
             nativeBundlePolicy switch
             {
@@ -115,6 +125,16 @@ namespace WebRtc.iOS
                 Webrtc.RTCDataChannelState.Open => RTCDataChannelState.Open,
                 Webrtc.RTCDataChannelState.Closing => RTCDataChannelState.Closing,
                 Webrtc.RTCDataChannelState.Closed => RTCDataChannelState.Closed
+            };
+
+        public static RTCRtpTransceiverDirection FromNative(this Webrtc.RTCRtpTransceiverDirection nativeDirection) =>
+            nativeDirection switch
+            {
+                Webrtc.RTCRtpTransceiverDirection.SendRecv => RTCRtpTransceiverDirection.Sendrecv,
+                Webrtc.RTCRtpTransceiverDirection.SendOnly => RTCRtpTransceiverDirection.Sendonly,
+                Webrtc.RTCRtpTransceiverDirection.RecvOnly => RTCRtpTransceiverDirection.Recvonly,
+                Webrtc.RTCRtpTransceiverDirection.Inactive => RTCRtpTransceiverDirection.Inactive,
+                Webrtc.RTCRtpTransceiverDirection.Stopped => throw new NotImplementedException(),
             };
 
 
