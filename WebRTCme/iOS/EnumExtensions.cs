@@ -108,5 +108,15 @@ namespace WebRtc.iOS
                 Webrtc.RTCRtcpMuxPolicy.Require => RTCRtcpMuxPolicy.Require
             };
 
+        public static RTCDataChannelState FromNative(this Webrtc.RTCDataChannelState nativeDataChannelState) =>
+            nativeDataChannelState switch
+            {
+                Webrtc.RTCDataChannelState.Connecting => RTCDataChannelState.Connecting,
+                Webrtc.RTCDataChannelState.Open => RTCDataChannelState.Open,
+                Webrtc.RTCDataChannelState.Closing => RTCDataChannelState.Closing,
+                Webrtc.RTCDataChannelState.Closed => RTCDataChannelState.Closed
+            };
+
+
     }
 }

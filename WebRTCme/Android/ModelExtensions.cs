@@ -122,6 +122,5 @@ namespace WebRtc.Android
                 ScaleResolutionDownBy = (double)nativeEncoding.ScaleResolutionDownBy
             };
 
-        p
     }
 }
