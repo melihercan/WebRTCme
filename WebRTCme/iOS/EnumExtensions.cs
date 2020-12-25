@@ -137,6 +137,15 @@ namespace WebRtc.iOS
                 Webrtc.RTCRtpTransceiverDirection.Stopped => throw new NotImplementedException(),
             };
 
+        public static RTCSdpType FromNative(this Webrtc.RTCSdpType nativeType) =>
+            nativeType switch
+            {
+                Webrtc.RTCSdpType.Answer => RTCSdpType.Answer,
+                Webrtc.RTCSdpType.Offer => RTCSdpType.Offer,
+                Webrtc.RTCSdpType.PrAnswer => RTCSdpType.Pranswer,
+                Webrtc.RTCSdpType.Rollback => RTCSdpType.Rollback
+            };
+
 
     }
 }

@@ -15,9 +15,9 @@ namespace WebRtc.iOS
         {
         }
 
-        public RTCSdpType Type => throw new NotImplementedException();
+        public RTCSdpType Type => ((Webrtc.RTCSessionDescription)NativeObject).Type.FromNative();
 
-        public string Sdp => throw new NotImplementedException();
+        public string Sdp => ((Webrtc.RTCSessionDescription)NativeObject).Sdp;
 
         public string ToJson()
         {
