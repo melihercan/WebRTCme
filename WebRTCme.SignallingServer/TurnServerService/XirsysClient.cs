@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace WebRTCme.SignallingServer.TurnServerClients
+namespace WebRTCme.SignallingServer.TurnServerService
 {
-    internal class XirsysClient : ITurnServerClient
+    public class XirsysClient : ITurnServerClient
     {
         public XirsysClient()
         {

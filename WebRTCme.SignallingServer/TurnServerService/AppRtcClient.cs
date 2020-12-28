@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 
-namespace WebRTCme.SignallingServer.TurnServerClients
+namespace WebRTCme.SignallingServer.TurnServerService
 {
-    internal class CoturnClient : ITurnServerClient
+    public class AppRtcClient : ITurnServerClient
     {
-        public CoturnClient()
+        public AppRtcClient()
         {
         }
 

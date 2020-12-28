@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRTCme.SignallingServer.TurnServerClients
+namespace WebRTCme.SignallingServer.TurnServerService
 {
-    internal interface ITurnServerClient
+    public interface ITurnServerClient
     {
         Task<RTCIceServer[]> GetIceServers(); 
     }

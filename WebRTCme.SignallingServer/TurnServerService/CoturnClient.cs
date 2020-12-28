@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 
-namespace WebRTCme.SignallingServer.TurnServerClients
+namespace WebRTCme.SignallingServer.TurnServerService
 {
-    internal class TwilioClient : ITurnServerClient
+    public class CoturnClient : ITurnServerClient
     {
-        public TwilioClient()
+        public CoturnClient()
         {
         }
 
