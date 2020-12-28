@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebRTCme.SignallingServer.Data;
+using WebRTCme.SignallingServer.Hubs;
 using WebRTCme.SignallingServer.TurnServerService;
 
 namespace WebRTCme.SignallingServer
@@ -37,6 +38,8 @@ namespace WebRTCme.SignallingServer
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
+
+            services.AddSignalR().AddMessagePackProtocol();
 
             services.AddSingleton<TurnServerClientFactory>();
             services
@@ -79,6 +82,7 @@ namespace WebRTCme.SignallingServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapHub<RoomHub>("/roomhub");
             });
         }
     }

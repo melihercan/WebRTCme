@@ -20,7 +20,7 @@ namespace WebRTCme.SignallingServer.TurnServerService
         public async Task<RTCIceServer[]> GetIceServers()
         {
             var httpClient = _httpClientFactory.CreateClient();
-            httpClient.BaseAddress = new Uri(new Uri(_configuration["TurnServerUrl:Xirsys"]),
+            httpClient.BaseAddress = new Uri(new Uri(_configuration["TurnServerBaseUrl:Xirsys"]),
                 _configuration["TurnServerChannel:Xirsys"]);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Basic", _configuration["TurnServerAuthorization:Xirsys"]);
