@@ -8,7 +8,7 @@ namespace WebRTCme
     {
         public RTCBundlePolicy? BundlePolicy { get; set; }
 
-        public IRTCCertificate[] Certificates { get; set; }
+        public IRTCCertificate[] Certificates { get; init; }
 
         public byte? IceCandidatePoolSize { get; set; }
 

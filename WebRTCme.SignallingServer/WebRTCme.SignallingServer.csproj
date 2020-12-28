@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+  </ItemGroup>
+
 </Project>
