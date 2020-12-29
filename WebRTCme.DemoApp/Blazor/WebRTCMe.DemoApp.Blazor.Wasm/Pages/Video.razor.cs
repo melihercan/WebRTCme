@@ -59,8 +59,6 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
             return Task.CompletedTask;
         }
 
-
-
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             await base.OnAfterRenderAsync(firstRender);
@@ -185,10 +183,11 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                 {
                     return false;
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Failed to connect, trying again in 5000 ms.
                     Debug.Assert(connection.State == HubConnectionState.Disconnected);
+                    Logger.LogInformation($"Connection failed: {ex.Message}");
                     Logger.LogInformation($"Will try to connect to hub again after 5s...");
                     await Task.Delay(5000);
                 }

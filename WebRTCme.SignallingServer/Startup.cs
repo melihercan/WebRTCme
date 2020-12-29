@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,17 @@ namespace WebRTCme.SignallingServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient();
-            
+
+            services.AddCors(policy =>
+            {
+                policy.AddPolicy("CorsPolicy", options => options
+                //.WithOrigins("https://localhost:5001")
+                //.AllowCredentials()
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+            });
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -73,6 +84,8 @@ namespace WebRTCme.SignallingServer
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseCors("CorsPolicy");
 
             app.UseRouting();
 
