@@ -7,7 +7,7 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerClient
     {
-        Task InitializeAsync();
+        Task InitializeAsync(string signallingServerBaseUrl);
         Task CleanupAsync();
 
         Task<RTCIceServer[]> CreateRoomAsync(string roomId, string clientId);

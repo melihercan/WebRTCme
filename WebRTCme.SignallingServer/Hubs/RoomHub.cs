@@ -16,7 +16,7 @@ namespace WebRTCme.SignallingServer.Hubs
             _turnServerClient = turnServerClientFactory.Create(TurnServer.Xirsys);
         }
 
-        public async Task NewRoom(string clientId, string roomId)
+        public async Task CreateRoom(string roomId, string clientId)
         {
             var iceServers = await _turnServerClient.GetIceServers();
         }

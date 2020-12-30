@@ -54,8 +54,12 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
         private Task HubConnection_Closed(Exception arg)
         {
-            // Start connection again without awaiting.
-            _ = ConnectWithRetryAsync(_hubConnection, _cts.Token);
+            if (arg != null)
+            {
+                // arg null means connection is closed either by client or server and NOT due to error or exception.
+                // Start connection again without awaiting in error or exception case.
+                _ = ConnectWithRetryAsync(_hubConnection, _cts.Token);
+            }
             return Task.CompletedTask;
         }
 
