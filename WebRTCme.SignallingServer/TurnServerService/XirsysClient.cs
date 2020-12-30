@@ -21,7 +21,7 @@ namespace WebRTCme.SignallingServer.TurnServerService
             _configuration = configuration;
         }
 
-        public async Task<RTCIceServer[]> GetIceServers()
+        public async Task<RTCIceServer[]> GetIceServersAsync()
         {
             var httpClient = _httpClientFactory.CreateClient();
             httpClient.BaseAddress = new Uri(_configuration["TurnServerBaseUrl:Xirsys"] + "/" +

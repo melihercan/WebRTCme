@@ -8,6 +8,6 @@ namespace WebRTCme.SignallingServer.TurnServerService
 {
     public interface ITurnServerClient
     {
-        Task<RTCIceServer[]> GetIceServers(); 
+        Task<RTCIceServer[]> GetIceServersAsync(); 
     }
 }

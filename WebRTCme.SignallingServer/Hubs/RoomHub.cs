@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Ardalis.Result;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,19 @@ namespace WebRTCme.SignallingServer.Hubs
 
         public async Task CreateRoom(string roomId, string clientId)
         {
-            var iceServers = await _turnServerClient.GetIceServers();
+            Result<RTCIceServer[]> result = null;
+
+            try
+            {
+                var iceServers = await _turnServerClient.GetIceServersAsync();
+                result = Result<RTCIceServer[]>.Success(iceServers);
+            }
+            catch (Exception ex)
+            {
+                result = Result<RTCIceServer[]>.Error(new string[] { ex.Message });
+            }
+            
+            await Clients.Caller.SendAsync("SignallingServerHubCallback_RoomResponse", result);
         }
     }
 }

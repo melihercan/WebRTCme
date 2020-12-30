@@ -8,7 +8,7 @@ namespace WebRTCme.SignallingServer.TurnServerService
         {
         }
 
-        public Task<RTCIceServer[]> GetIceServers()
+        public Task<RTCIceServer[]> GetIceServersAsync()
         {
             throw new System.NotImplementedException();
         }
