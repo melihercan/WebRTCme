@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
+    <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
 
 </Project>

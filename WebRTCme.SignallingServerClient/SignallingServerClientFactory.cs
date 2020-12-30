@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebRTCme.Middleware.SignallingServerClient
+namespace WebRTCme.SignallingServerClient
 {
     public static class SignallingServerClientFactory
     {
