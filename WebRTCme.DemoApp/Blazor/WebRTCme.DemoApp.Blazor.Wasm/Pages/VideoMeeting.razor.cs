@@ -159,7 +159,12 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         }
 
 
-        private async void OnConnect()
+        private async void OnStartCall()
+        {
+            //await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
+        }
+
+        private async void OnJoinCall()
         {
             //await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
         }

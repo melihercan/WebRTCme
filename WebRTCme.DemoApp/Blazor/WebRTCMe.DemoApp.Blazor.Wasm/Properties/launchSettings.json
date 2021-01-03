@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:52077",
-      "sslPort": 44313
+      "applicationUrl": "http://localhost:56091",
+      "sslPort": 44378
     }
   },
   "profiles": {
@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "WebRTCMe.DemoApp.Blazor.Wasm": {
+    "WebRTCme.DemoApp.Blazor.Wasm": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
