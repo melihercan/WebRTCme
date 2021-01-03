@@ -1,4 +1,4 @@
- <Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿ <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1; net5.0</TargetFrameworks>
@@ -12,15 +12,18 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 	<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.10" />
 	<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.10" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-	<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.1" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\WebRTCme.SignallingServerClient\WebRTCme.SignallingServerClient.csproj" />
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 

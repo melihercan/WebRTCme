@@ -5,19 +5,11 @@ using Xamarin.Forms;
 using WebRTCme;
 
 namespace WebRTCme.Middleware.Xamarin
-//namespace WebRtcMiddlewareXamarin
 {
     public class Video : View       
     {
-        //public enum VideoType
-        //{
-        //    Local,
-        //    Remote,
-        //    MP4
-        //}
-
         public static readonly BindableProperty TypeProperty = BindableProperty
-            .Create(nameof(TypeProperty), typeof(VideoType), typeof(Video), VideoType.Local);
+            .Create(nameof(TypeProperty), typeof(VideoType), typeof(Video), VideoType.Camera);
 
         public static readonly BindableProperty SourceProperty = BindableProperty
             .Create(nameof(SourceProperty), typeof(string), typeof(Video), string.Empty);

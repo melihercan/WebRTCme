@@ -8,8 +8,10 @@ namespace WebRTCme
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum VideoType
     {
-        Local,
-        Remote,
-        MP4
+                // Source:
+        Camera, // default, front, rear ...
+        Room,   // Server.RoomId.UserId
+        File,   // file name
+        Url     // URL address
     }
 }

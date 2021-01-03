@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCMe.DemoApp.Blazor.Wasm
+namespace WebRTCme.DemoApp.Blazor.Wasm
 {
     public class Program
     {

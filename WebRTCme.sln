@@ -48,7 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blazor", "Blazor", "{03D858
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Server", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor.Server\WebRTCme.DemoApp.Blazor.Server.csproj", "{8C61814F-89E3-4572-9BD3-81F1BD5B59E2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCMe.DemoApp.Blazor.Wasm", "WebRTCme.DemoApp\Blazor\WebRTCMe.DemoApp.Blazor.Wasm\WebRTCMe.DemoApp.Blazor.Wasm.csproj", "{A05CAB40-F47D-45D9-999D-9D26210EF82A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Wasm", "WebRTCme.DemoApp\Blazor\WebRTCMe.DemoApp.Blazor.Wasm\WebRTCme.DemoApp.Blazor.Wasm.csproj", "{A05CAB40-F47D-45D9-999D-9D26210EF82A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Tests.E2EWebApiTests", "WebRTCme.Tests\WebRTCme.Tests.E2EWebApiTests\WebRTCme.Tests.E2EWebApiTests.csproj", "{2E983BCB-4248-427F-86A0-6C44DE0B8FA6}"
 EndProject

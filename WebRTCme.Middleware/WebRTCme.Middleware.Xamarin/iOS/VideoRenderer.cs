@@ -36,7 +36,7 @@ namespace WebRtcMiddlewareXamarin
                     var source = e.NewElement.Source;
                     UIView view = null;
 
-                    if (type == VideoType.Local)
+                    if (type == VideoType.Camera)
                     {
                         if (string.IsNullOrEmpty(source))
                         {

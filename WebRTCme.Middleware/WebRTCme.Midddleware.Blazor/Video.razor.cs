@@ -1,31 +1,35 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.SignallingServerClient;
 
-//// TODO: TESTING FOR NOW, MOVE ALL WEBRTC CODE to Middleware
-namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
+namespace WebRTCme.Middleware.Blazor
 {
-    partial class Video : IDisposable
+    public partial class Video : IDisposable
     {
-        [Inject]
-        IJSRuntime JsRuntime { get; set; }
+        [Parameter]
+        public VideoType Type { get; set; }
+
+        [Parameter]
+        public string Source { get; set; }
 
         [Inject]
-        IConfiguration Configuration { get; set; }
+        private IJSRuntime JsRuntime { get; set; }
 
         [Inject]
-        ILogger<Video> Logger { get; set; }
+        private IConfiguration Configuration { get; set; }
 
-        private ElementReference _localVideo;
+        private ISignallingServerClient _signallingServerClient;
+
+        private ElementReference _videoElementReference;
 
         private IWindow _window;
         private INavigator _navigator;
@@ -34,34 +38,27 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
         private IRTCPeerConnection _rtcPeerConnection;
         ///private IRTCRtpSender _rtcRtpSender;
 
-        private CancellationTokenSource _cts = new CancellationTokenSource();
-        private HubConnection _hubConnection;
-
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(Configuration["SignallingServer:BaseUrl"] + "/roomhub")
-                .AddMessagePackProtocol()
-                .Build();
-            _hubConnection.Closed += HubConnection_Closed;
+            //// TODO: Get singalling server enum from source.
+            _signallingServerClient = SignallingServerClientFactory.Create(SignallingServer.WebRTCme);
+            await _signallingServerClient.InitializeAsync(Configuration["SignallingServer:BaseUrl"]);
 
-            // Await till connection is made or cancel occured.
-            await ConnectWithRetryAsync(_hubConnection, _cts.Token);
         }
 
-        private Task HubConnection_Closed(Exception arg)
-        {
-            if (arg != null)
-            {
-                // arg null means connection is closed either by client or server and NOT due to error or exception.
-                // Start connection again without awaiting in error or exception case.
-                _ = ConnectWithRetryAsync(_hubConnection, _cts.Token);
-            }
-            return Task.CompletedTask;
-        }
+        //private Task HubConnection_Closed(Exception arg)
+        //{
+        //    if (arg != null)
+        //    {
+        //        // arg null means connection is closed either by client or server and NOT due to error or exception.
+        //        // Start connection again without awaiting in error or exception case.
+        //        _ = ConnectWithRetryAsync(_hubConnection, _cts.Token);
+        //    }
+        //    return Task.CompletedTask;
+        //}
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -69,10 +66,9 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
             if (firstRender)
             {
-                ////WebRtcMiddleware.Initialize();
 
-                var webRtc = CrossWebRtc.Current;
-                _window = webRtc.Window(JsRuntime);
+                ///var webRtc = CrossWebRtc.Current;
+                _window = WebRtcMiddleware.WebRtc.Window(JsRuntime);
                 _navigator = _window.Navigator();
                 _mediaDevices = _navigator.MediaDevices;
                 var mediDeviceInfos = (await _mediaDevices.EnumerateDevices()).ToList();
@@ -88,7 +84,8 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                     }
                 });
 
-                _mediaStream.SetElementReferenceSrcObject(_localVideo);
+                ////_mediaStream.SetElementReferenceSrcObject(_videoElementReference);
+                PlatformSupport.SetVideoSource(JsRuntime, _videoElementReference, _mediaStream);
 
                 var configuration = new RTCConfiguration
                 {
@@ -114,7 +111,7 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
                 //_rtcPeerConnection.AddStream(_mediaStream);
 
                 var mediaStreamTracks = _mediaStream.GetTracks();
-                foreach(var mediaStreamTrack in mediaStreamTracks)
+                foreach (var mediaStreamTrack in mediaStreamTracks)
                 {
                     _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
@@ -130,15 +127,15 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
                 //await _rtcPeerConnection.OnIceCandidate(async rtcPeerConnectionIceEvent =>
                 //{
-                    //// TODO: object != null =>
-                    /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
+                //// TODO: object != null =>
+                /// serverConnection.send(JSON.stringify({'ice': event.candidate, 'uuid': uuid}));
 
-                    ////await Task.CompletedTask;
+                ////await Task.CompletedTask;
                 //});
                 ////await _rtcPeerConnection.OnTrack(async rtcTrackEvent => 
                 ///{
 
-                   //// await Task.CompletedTask;
+                //// await Task.CompletedTask;
                 ////});
 
                 ////var rtcSessionDescription = await _rtcPeerConnection.CreateOffer(new RTCOfferOptions 
@@ -154,12 +151,14 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
 
         private async void Connect()
         {
-            await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
+            //await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
         }
 
         public void Dispose()
         {
-            _cts.Cancel();
+            _signallingServerClient.CleanupAsync();
+            
+            //_cts.Cancel();
 
             if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
             if (_mediaStream != null) _mediaStream.Dispose();
@@ -171,32 +170,32 @@ namespace WebRTCMe.DemoApp.Blazor.Wasm.Pages
         }
 
 
-        private async Task<bool> ConnectWithRetryAsync(HubConnection connection, CancellationToken ct)
-        {
-            // Keep trying until we can start or the token is canceled.
-            while (true)
-            {
-                try
-                {
-                    await connection.StartAsync(ct);
-                    Debug.Assert(connection.State == HubConnectionState.Connected);
-                    Logger.LogInformation($"Connected to hub with ConnectionId: {connection.ConnectionId}");
-                    return true;
-                }
-                catch when (ct.IsCancellationRequested)
-                {
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    // Failed to connect, trying again in 5000 ms.
-                    Debug.Assert(connection.State == HubConnectionState.Disconnected);
-                    Logger.LogInformation($"Connection failed: {ex.Message}");
-                    Logger.LogInformation($"Will try to connect to hub again after 5s...");
-                    await Task.Delay(5000);
-                }
-            }
-        }
+        //private async Task<bool> ConnectWithRetryAsync(HubConnection connection, CancellationToken ct)
+        //{
+        //    // Keep trying until we can start or the token is canceled.
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            await connection.StartAsync(ct);
+        //            Debug.Assert(connection.State == HubConnectionState.Connected);
+        //            Logger.LogInformation($"Connected to hub with ConnectionId: {connection.ConnectionId}");
+        //            return true;
+        //        }
+        //        catch when (ct.IsCancellationRequested)
+        //        {
+        //            return false;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // Failed to connect, trying again in 5000 ms.
+        //            Debug.Assert(connection.State == HubConnectionState.Disconnected);
+        //            Logger.LogInformation($"Connection failed: {ex.Message}");
+        //            Logger.LogInformation($"Will try to connect to hub again after 5s...");
+        //            await Task.Delay(5000);
+        //        }
+        //    }
+        //}
+
     }
 }
-

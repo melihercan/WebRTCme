@@ -38,7 +38,7 @@ namespace WebRtcMiddlewareXamarin
                     var source = e.NewElement.Source;
                     SurfaceView surfaceView = null;
 
-                    if (type == VideoType.Local)
+                    if (type == VideoType.Camera)
                     {
                         if (string.IsNullOrEmpty(source))
                         {
