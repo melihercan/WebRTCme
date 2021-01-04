@@ -14,9 +14,9 @@
 </div>
 
 <div>
-    <input @bind="_server"/> Server: @_server
-    <input @bind="_room"/> Room: @_room
-    <input @bind="_userId"/> User Id: @_userId  
+     TURN server: @_server<input @bind="_server"/>
+    <input @bind="_room"/> Room name: @_room
+    <input @bind="_userId"/> User name: @_userId  
 </div>
 <div>
     <button class="btn btn-primary" @onclick="OnStartCall">Start call</button>

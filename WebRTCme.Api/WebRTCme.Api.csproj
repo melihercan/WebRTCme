@@ -8,14 +8,14 @@
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.10" />
-	  <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
-	  <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
+	<PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
 	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-	  <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-	  <PackageReference Include="System.Text.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+	<PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
 	

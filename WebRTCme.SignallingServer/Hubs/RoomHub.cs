@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebRTCme.Middleware;
 using WebRTCme.SignallingServer.TurnServerService;
 
 namespace WebRTCme.SignallingServer.Hubs
@@ -33,5 +34,18 @@ namespace WebRTCme.SignallingServer.Hubs
             
             await Clients.Caller.SendAsync("SignallingServerHubCallback_RoomResponse", result);
         }
+
+        //public async Task CreateRoomByTurnServerName(TurnServer turnServer, string roomId, string clientId)
+        //{
+
+        //}
+
+  //      public async Task CreateRoomByTurnServerUrlWithRoom(string turnServerUrl, string roomId, string clientId)
+    //    {
+
+      //  }
+
+//        public async Task JoinRoom(string )
+
     }
 }

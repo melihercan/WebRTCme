@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace WebRTCme
+namespace WebRTCme.Middleware
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum VideoType

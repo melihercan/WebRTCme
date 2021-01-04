@@ -12,6 +12,7 @@ using System.Linq;
 using Xamarin.Essentials;
 using Android.Widget;
 using Android.Views;
+using WebRTCme.Middleware;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin

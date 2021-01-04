@@ -6,7 +6,7 @@
     <ContentPage.Content>
         <StackLayout BackgroundColor="Red">
             <Label Text="Welcome to Xamarin.Forms!" BackgroundColor="Green"/>
-            <webRtc:Video Type="Local" Source="{Binding LocalSource}" BackgroundColor="Orange" 
+            <webRtc:Video Type="Camera" Source="{Binding LocalSource}" BackgroundColor="Orange" 
                           VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <!--<webRtc:Video Type="Remote" Source="{Binding RemoteSource}" Options="Option1" BackgroundColor="Orange" 
                         VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"/>-->

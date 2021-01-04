@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\WebRTCme.SignallingServerClient\WebRTCme.SignallingServerClient.csproj" />
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
+    <ProjectReference Include="..\WebRTCme.Middleware.Api\WebRTCme.Middleware.Api.csproj" />
   </ItemGroup>
 
 </Project>

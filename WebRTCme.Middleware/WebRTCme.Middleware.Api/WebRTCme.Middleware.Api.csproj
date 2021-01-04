@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
+	  <RootNamespace>WebRTCme.Middleware</RootNamespace>
+	  <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<PackageReference Include="System.Text.Json" Version="4.7.2" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
+		<PackageReference Include="System.Text.Json" Version="5.0.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
+</Project>
