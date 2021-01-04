@@ -7,6 +7,8 @@ namespace WebRTCme.Middleware
 {
     public interface IRoomService
     {
-        Task CreateRoomAsync();
+        Task CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);
+
+        Task JoinRoomAsync(TurnServer turnServer, string roomId, string clientId);
     }
 }

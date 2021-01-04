@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRtcMiddlewareXamarin;
 
 namespace WebRTCme.Middleware.Xamarin
 {
@@ -13,6 +14,11 @@ namespace WebRTCme.Middleware.Xamarin
         public static void Initialize()
         {
             WebRtc = CrossWebRtc.Current;
+        }
+
+        public static IRoomService CreateRoomService()
+        {
+            return new RoomService();
         }
 
         public static void Cleanup()
