@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Middleware;
 using WebRTCme.Middleware.Blazor;
 
 //// TODO: TESTING FOR NOW, MOVE ALL WEBRTC CODE to Middleware
@@ -30,6 +31,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private string _room;
         private string _userId;
 
+
+
         //private ElementReference _localVideo;
 
         //private IWindow _window;
@@ -42,12 +45,16 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         //private CancellationTokenSource _cts = new CancellationTokenSource();
         //private HubConnection _hubConnection;
 
+        private IRoomService _roomService;
+
+        private RoomParameters _roomParameters = new RoomParameters();
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
             WebRtcMiddleware.Initialize();
+            _roomService = WebRtcMiddleware.CreateRoomService();
 
             //_hubConnection = new HubConnectionBuilder()
             //    .WithUrl(Configuration["SignallingServer:BaseUrl"] + "/roomhub")
@@ -158,10 +165,19 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             }
         }
 
+        private async void HandleValidSubmit()
+        {
+            if (_roomParameters.IsJoin)
+                await _roomService.CreateRoomAsync(
+                    _roomParameters.TurnServer, _roomParameters.RoomId, _roomParameters.UserId);
+            else
+                await _roomService.JoinRoomAsync(
+                    _roomParameters.TurnServer, _roomParameters.RoomId, _roomParameters.UserId);
+        }
 
         private async void OnStartCall()
         {
-            //await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
+            await _roomService.CreateRoomAsync(/*_server*/TurnServer.Xirsys, _room, _userId);
         }
 
         private async void OnJoinCall()
