@@ -3,44 +3,52 @@
 <h1>Video</h1>
 
 @*<div>
-    <video autoplay @ref=_localVideo></video>
+<video autoplay @ref=_localVideo></video>
 </div>
 
 
 *@
 
 <div>
-    <Video Type="VideoType.Camera" Source="Default"/>
+    <Video Type="VideoType.Camera" Source="Default" />
 </div>
 
 @*<div>
-     TURN server: @_server<input @bind="_server"/>
-    <input @bind="_room"/> Room name: @_room
-    <input @bind="_userId"/> User name: @_userId  
+TURN server: @_server<input @bind="_server"/>
+<input @bind="_room"/> Room name: @_room
+<input @bind="_userId"/> User name: @_userId
 </div>
 <div>
-    <button class="btn btn-primary" @onclick="OnStartCall">Start call</button>
-    <button class="btn btn-primary" @onclick="OnJoinCall">Join call</button>
+<button class="btn btn-primary" @onclick="OnStartCall">Start call</button>
+<button class="btn btn-primary" @onclick="OnJoinCall">Join call</button>
 </div>
 *@
 <EditForm Model="@_roomParameters" OnValidSubmit="@HandleValidSubmit">
-   <DataAnnotationsValidator />
+    <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <label>TURN server:</label>
-    <InputSelect @bind-Value="_roomParameters.TurnServer">
-        @foreach (var server in Enum.GetValues(typeof(TurnServer)))
-        {
+    <div>
+        <label>TURN server:</label>
+        <InputSelect @bind-Value="_roomParameters.TurnServer">
+            @foreach (var server in Enum.GetValues(typeof(TurnServer)))
+                    {
             <option value="@server">@server.ToString()</option>
-        }
-    </InputSelect>
+            }
+        </InputSelect>
+    </div>
 
-    <label>Room name:</label>
-    <InputText id="roomId" @bind-Value="_roomParameters.RoomId" />    
- 
-    <label>User name:</label>
-    <InputText id="userId" @bind-Value="_roomParameters.UserId" />    
+    <div>
+        <label>Room name:</label>
+        <InputText id="roomId" placeholder="enter room name" @bind-Value="_roomParameters.RoomId" />
+    </div>
 
-    <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = false)">Start call</button>
-    <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = true)">Join call</button>
+    <div>
+        <label>User name:</label>
+        <InputText id="userId" placeholder="enter user name" @bind-Value="_roomParameters.UserId" />
+    </div>
+
+    <div>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = false)">Start call</button>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = true)">Join call</button>
+    </div>
 </EditForm>
