@@ -20,7 +20,8 @@ namespace DemoApp
 
         protected override void OnStart()
         {
-            WebRtcMiddleware.Initialize();
+            // TODO: Move URL to a config file.
+            WebRtcMiddleware.Initialize("https://localhost:5051");
         }
 
         protected override void OnSleep()

@@ -17,11 +17,17 @@ namespace WebRTCme.SignallingServerClient
         private HubConnection _hubConnection;
         private TaskCompletionSource<RTCIceServer[]> _roomTcs;
 
+        private readonly string _signallingServerBaseUrl;
 
-        public Task InitializeAsync(string signallingServerBaseUrl)
+        public WebRTCmeClient(string signallingServerBaseUrl)
+        {
+            _signallingServerBaseUrl = signallingServerBaseUrl;
+        }
+
+        public Task InitializeAsync()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(signallingServerBaseUrl + "/roomhub")
+                .WithUrl(_signallingServerBaseUrl + "/roomhub")
                 .AddMessagePackProtocol()
                 .Build();
             _hubConnection.Closed += HubConnection_Closed;

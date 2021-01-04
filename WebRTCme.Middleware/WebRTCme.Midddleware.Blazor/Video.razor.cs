@@ -44,8 +44,9 @@ namespace WebRTCme.Middleware.Blazor
             await base.OnInitializedAsync();
 
             //// TODO: Get singalling server enum from source.
-            _signallingServerClient = SignallingServerClientFactory.Create(SignallingServer.WebRTCme);
-            await _signallingServerClient.InitializeAsync(Configuration["SignallingServer:BaseUrl"]);
+            ///
+            _signallingServerClient = SignallingServerClientFactory.Create(WebRtcMiddleware.SignallingServerBaseUrl/*SignallingServer.WebRTCme*/);
+            await _signallingServerClient.InitializeAsync(/*WebRtcMiddleware.SignallingServerBaseUrl*//****Configuration["SignallingServer:BaseUrl"]****/);
 
         }
 

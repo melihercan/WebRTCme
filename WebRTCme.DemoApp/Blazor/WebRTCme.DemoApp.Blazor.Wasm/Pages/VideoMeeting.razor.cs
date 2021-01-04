@@ -53,7 +53,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
 
-            WebRtcMiddleware.Initialize();
+            WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
             _roomService = WebRtcMiddleware.CreateRoomService();
 
             //_hubConnection = new HubConnectionBuilder()
