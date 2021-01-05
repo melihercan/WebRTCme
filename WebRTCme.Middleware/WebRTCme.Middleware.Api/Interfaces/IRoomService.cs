@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
-    public interface IRoomService
+    public interface IRoomService : IAsyncDisposable
     {
-        Task CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);
+        Task CreateRoomAsync(RoomParameters roomParameters);
 
-        Task JoinRoomAsync(TurnServer turnServer, string roomId, string clientId);
+        Task JoinRoomAsync(RoomParameters roomParameters);
     }
 }

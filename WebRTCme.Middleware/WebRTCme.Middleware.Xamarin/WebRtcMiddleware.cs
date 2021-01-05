@@ -19,9 +19,9 @@ namespace WebRTCme.Middleware.Xamarin
             SignallingServerBaseUrl = signallingServerBaseUrl;
         }
 
-        public static IRoomService CreateRoomService()
+        public static Task<IRoomService> CreateRoomServiceAsync()
         {
-            return new RoomService();
+            return RoomService.CreateAsync();
         }
 
         public static void Cleanup()

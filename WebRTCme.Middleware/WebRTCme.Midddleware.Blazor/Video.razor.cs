@@ -27,7 +27,6 @@ namespace WebRTCme.Middleware.Blazor
         [Inject]
         private IConfiguration Configuration { get; set; }
 
-        private ISignallingServerClient _signallingServerClient;
 
         private ElementReference _videoElementReference;
 
@@ -43,10 +42,6 @@ namespace WebRTCme.Middleware.Blazor
         {
             await base.OnInitializedAsync();
 
-            //// TODO: Get singalling server enum from source.
-            ///
-            _signallingServerClient = SignallingServerClientFactory.Create(WebRtcMiddleware.SignallingServerBaseUrl/*SignallingServer.WebRTCme*/);
-            await _signallingServerClient.InitializeAsync(/*WebRtcMiddleware.SignallingServerBaseUrl*//****Configuration["SignallingServer:BaseUrl"]****/);
 
         }
 
@@ -157,7 +152,6 @@ namespace WebRTCme.Middleware.Blazor
 
         public void Dispose()
         {
-            _signallingServerClient.CleanupAsync();
             
             //_cts.Cancel();
 

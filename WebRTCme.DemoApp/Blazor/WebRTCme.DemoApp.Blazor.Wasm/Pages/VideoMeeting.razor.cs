@@ -54,7 +54,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             await base.OnInitializedAsync();
 
             WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
-            _roomService = WebRtcMiddleware.CreateRoomService();
+            _roomService = await WebRtcMiddleware.CreateRoomServiceAsync();
 
             //_hubConnection = new HubConnectionBuilder()
             //    .WithUrl(Configuration["SignallingServer:BaseUrl"] + "/roomhub")
@@ -168,21 +168,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private async void HandleValidSubmit()
         {
             if (_roomParameters.IsJoin)
-                await _roomService.CreateRoomAsync(
-                    _roomParameters.TurnServer, _roomParameters.RoomId, _roomParameters.UserId);
+                await _roomService.CreateRoomAsync(_roomParameters);
             else
-                await _roomService.JoinRoomAsync(
-                    _roomParameters.TurnServer, _roomParameters.RoomId, _roomParameters.UserId);
-        }
-
-        private async void OnStartCall()
-        {
-            await _roomService.CreateRoomAsync(/*_server*/TurnServer.Xirsys, _room, _userId);
-        }
-
-        private async void OnJoinCall()
-        {
-            //await _hubConnection.SendAsync("NewRoom", "MyClient", "MyRoom");
+                await _roomService.JoinRoomAsync(_roomParameters);
         }
 
         public void Dispose()
