@@ -80,7 +80,7 @@
         https://docs.microsoft.com/dotnet/api/xamarin.forms.shellgroupitem.flyoutdisplayoptions?view=xamarin-forms
     -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
-        <ShellContent Title="Video" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:VideoPage}" />
+        <ShellContent Title="Video" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:VideoMeetingPage}" />
         <ShellContent Title="About" Icon="tab_about.png" Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
         <ShellContent Title="Browse" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:ItemsPage}" />
     </FlyoutItem>

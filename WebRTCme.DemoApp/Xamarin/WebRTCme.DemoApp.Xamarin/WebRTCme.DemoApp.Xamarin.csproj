@@ -6,8 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.8.0.1560" />  
-    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="appsettings.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="4.8.0.1821" />  
+    <PackageReference Include="Xamarin.Essentials" Version="1.6.0" />  
+    <PackageReference Include="Xamarinme.Configuration" Version="1.0.1" />  
+    <PackageReference Include="Xamarinme.PageLifecycle" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,7 +28,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Views\VideoPage.xaml">
+    <Compile Update="Views\VideoMeetingPage.xaml.cs">
+      <DependentUpon>VideoMeetingPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Views\VideoMeetingPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

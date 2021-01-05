@@ -183,6 +183,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             //if (_navigator != null) _navigator.Dispose();
             //if (_window != null) _window.Dispose();
 
+            //// TODO: How to call async in Dispose??? Currently fire and forget!!!
+            ///
+            Task.Run(async () => await _roomService.DisposeAsync());
             WebRtcMiddleware.Cleanup();
         }
 
