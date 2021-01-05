@@ -55,11 +55,13 @@ namespace DemoApp.ViewModels
 
         public ICommand StartCallCommand => new Command(async () =>
         {
+            _roomParameters.IsJoin = false;
             await _roomService.CreateRoomAsync(_roomParameters);
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
+            _roomParameters.IsJoin = true;
             await _roomService.JoinRoomAsync(_roomParameters);
         });
 

@@ -77,33 +77,6 @@ namespace WebRTCme.SignallingServerClient
             return Task.CompletedTask;
         }
 
-        //private async Task<bool> ConnectWithRetryAsync(bool keepTrying = true)
-        //{
-        //    const int TimeoutMs = 1000;
-
-        //    // Keep trying until we can start or the token is canceled.
-        //    while (keepTrying)
-        //    {
-        //        try
-        //        {
-        //            await _hubConnection.StartAsync(_cts.Token);
-        //            return true;
-        //        }
-        //        catch when (_cts.Token.IsCancellationRequested)
-        //        {
-        //            return false;
-        //        }
-        //        catch 
-        //        {
-        //            if (!keepTrying)
-        //                // Failed to connect, trying again in TimeoutMs if not overriden by keepTrying flag.
-        //                await Task.Delay(TimeoutMs);
-        //        }
-        //    }
-
-        //    return false;
-        //}
-
         private async Task ConnectWithRetryAsync()
         {
             const int TimeoutMs = 1000;
