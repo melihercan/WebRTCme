@@ -25,12 +25,7 @@ namespace WebRtcMiddlewareBlazor
 
         }
 
-        public Task CreateRoomAsync(RoomParameters roomParameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task JoinRoomAsync(RoomParameters roomParameters)
+        public Task HandleRoomAsync(RoomParameters roomParameters)
         {
             throw new NotImplementedException();
         }

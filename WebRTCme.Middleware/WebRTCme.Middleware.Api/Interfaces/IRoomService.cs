@@ -7,8 +7,6 @@ namespace WebRTCme.Middleware
 {
     public interface IRoomService : IAsyncDisposable
     {
-        Task CreateRoomAsync(RoomParameters roomParameters);
-
-        Task JoinRoomAsync(RoomParameters roomParameters);
+        Task HandleRoomAsync(RoomParameters roomParameters);
     }
 }

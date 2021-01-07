@@ -45,10 +45,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private async void HandleValidSubmit()
         {
-            if (_roomParameters.IsJoin)
-                await _roomService.CreateRoomAsync(_roomParameters);
-            else
-                await _roomService.JoinRoomAsync(_roomParameters);
+            await _roomService.HandleRoomAsync(_roomParameters);
         }
 
         public void Dispose()

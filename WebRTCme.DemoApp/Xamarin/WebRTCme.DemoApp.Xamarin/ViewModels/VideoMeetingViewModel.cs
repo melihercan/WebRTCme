@@ -59,16 +59,20 @@ namespace DemoApp.ViewModels
         public ICommand StartCallCommand => new Command(async () =>
         {
             RoomParameters.IsJoin = false;
-            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            await _roomService.CreateRoomAsync(RoomParameters);
+            await HandleRoomAsync();
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
             RoomParameters.IsJoin = true;
-            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            await _roomService.JoinRoomAsync(RoomParameters);
+            await HandleRoomAsync();
         });
+
+        private Task HandleRoomAsync()
+        {
+            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
+            return _roomService.HandleRoomAsync(RoomParameters);
+        }
 
     }
 }

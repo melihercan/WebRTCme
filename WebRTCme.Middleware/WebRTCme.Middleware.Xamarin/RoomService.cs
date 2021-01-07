@@ -25,7 +25,7 @@ namespace WebRtcMiddlewareXamarin
 
         }
 
-        public Task CreateRoomAsync(RoomParameters roomParameters)
+        public Task HandleRoomAsync(RoomParameters roomParameters)
         {
             throw new NotImplementedException();
         }
