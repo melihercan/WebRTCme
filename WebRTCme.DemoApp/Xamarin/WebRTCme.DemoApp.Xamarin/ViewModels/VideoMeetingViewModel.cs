@@ -12,13 +12,13 @@ using Xamarinme;
 
 namespace DemoApp.ViewModels
 {
-    public class VideoMeetingViewModel : INotifyPropertyChanged, IPageLifecycle
+    public class VideoMeetingViewModel : /*INotifyPropertyChanged,*/ IPageLifecycle
     {
         private IRoomService _roomService;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) => 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        //public event PropertyChangedEventHandler PropertyChanged;
+        //private void OnPropertyChanged([CallerMemberName] string name = null) => 
+          //  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public async Task OnPageAppearing()
         {
@@ -30,39 +30,44 @@ namespace DemoApp.ViewModels
             await _roomService.DisposeAsync();
         }
 
-        private string _cameraSource = "Default";
-        public string CameraSource
-        {
-            get => _cameraSource;
-            set
-            {
-                _cameraSource = value;
-                OnPropertyChanged();
-            }
-        }
+        //private string _cameraSource = "Default";
+        public string CameraSource { get; set; } = "Default";
+        //{
+          //  get => _cameraSource;
+            //set
+            //{
+              //  _cameraSource = value;
+                //OnPropertyChanged();
+            //}
+        //}
+
+        public IList<string> TurnServers => Enum.GetNames(typeof(TurnServer));
+        public string SelectedTurnServer { get; set; }
 
 
-        private RoomParameters _roomParameters = new RoomParameters();
-        public RoomParameters RoomParameters 
-        { 
-            get => _roomParameters;
-            set
-            {
-                _roomParameters = value;
-                OnPropertyChanged();
-            }
-        }
+        //private RoomParameters _roomParameters = new RoomParameters();
+        public RoomParameters RoomParameters { get; set; } = new RoomParameters();
+        //{ 
+          //  get => _roomParameters;
+            //set
+            //{
+              //  _roomParameters = value;
+                //OnPropertyChanged();
+            //}
+        //}
 
         public ICommand StartCallCommand => new Command(async () =>
         {
-            _roomParameters.IsJoin = false;
-            await _roomService.CreateRoomAsync(_roomParameters);
+            RoomParameters.IsJoin = false;
+            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
+            await _roomService.CreateRoomAsync(RoomParameters);
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
-            _roomParameters.IsJoin = true;
-            await _roomService.JoinRoomAsync(_roomParameters);
+            RoomParameters.IsJoin = true;
+            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
+            await _roomService.JoinRoomAsync(RoomParameters);
         });
 
     }

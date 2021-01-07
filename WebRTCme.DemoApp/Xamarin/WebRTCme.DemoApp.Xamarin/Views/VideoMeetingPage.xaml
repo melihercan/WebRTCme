@@ -6,6 +6,7 @@
     <ContentPage.Content>
         <StackLayout BackgroundColor="LightGray">
             <Label Text="Video meeting"/>
+            <Picker Title="select TURN server" ItemsSource="{Binding TurnServers}" SelectedItem="{Binding SelectedTurnServer}"/>
             <Entry Placeholder="enter room name" Text="{Binding RoomParameters.RoomId}"/>
             <Entry Placeholder="enter user name" Text="{Binding RoomParameters.UserId}"/>
             <StackLayout Orientation="Horizontal">
