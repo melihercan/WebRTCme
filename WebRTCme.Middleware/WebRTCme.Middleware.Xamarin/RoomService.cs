@@ -20,19 +20,13 @@ namespace WebRtcMiddlewareXamarin
             return self;
         }
 
-        private RoomService()
-        {
+        private RoomService() { }
 
-        }
-
-        public Task HandleRoomAsync(RoomParameters roomParameters)
+        public async Task HandleRoomAsync(RoomParameters roomParameters)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task JoinRoomAsync(RoomParameters roomParameters)
-        {
-            throw new NotImplementedException();
+            var iceServers = await (roomParameters.IsJoin ?
+                _signallingServerClient.JoinRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId) :
+                _signallingServerClient.CreateRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId));
         }
 
 

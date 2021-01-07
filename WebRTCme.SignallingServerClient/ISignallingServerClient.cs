@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebRTCme.Middleware;
 
 namespace WebRTCme.SignallingServerClient
 {
@@ -10,8 +11,8 @@ namespace WebRTCme.SignallingServerClient
         Task InitializeAsync();
         Task CleanupAsync();
 
-        Task<RTCIceServer[]> CreateRoomAsync(string roomId, string clientId);
-        Task<RTCIceServer[]> JoinRoomAsync(string roomId, string clientId);
+        Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);
+        Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string clientId);
 
 
     }

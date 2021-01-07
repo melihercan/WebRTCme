@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebRTCme.Middleware;
 
 namespace WebRTCme.SignallingServerClient
 {
@@ -51,16 +52,16 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        public async Task<RTCIceServer[]> CreateRoomAsync(string roomId, string clientId)
+        public async Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId)
         {
             _roomTcs = new TaskCompletionSource<RTCIceServer[]>();
-            await _hubConnection.SendAsync("CreateRoom", roomId, clientId);
+            await _hubConnection.SendAsync("CreateRoom", turnServer, roomId, clientId);
             var iceServers = await _roomTcs.Task;
             return iceServers;
         }
 
 
-        public Task<RTCIceServer[]> JoinRoomAsync(string roomId, string clientId)
+        public Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string clientId)
         {
             throw new NotImplementedException();
         }

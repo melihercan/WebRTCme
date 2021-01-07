@@ -11,16 +11,19 @@ namespace WebRTCme.SignallingServer.Hubs
 {
     public class RoomHub : Hub
     {
-        private readonly ITurnServerClient _turnServerClient;
+        private TurnServerClientFactory _turnServerClientFactory;
+        private ITurnServerClient _turnServerClient;
 
         public RoomHub(TurnServerClientFactory turnServerClientFactory)
         {
-            _turnServerClient = turnServerClientFactory.Create(TurnServer.Xirsys);
+            _turnServerClientFactory = turnServerClientFactory;
         }
 
-        public async Task CreateRoom(string roomId, string clientId)
+        public async Task CreateRoom(TurnServer turnServer, string roomId, string clientId)
         {
             Result<RTCIceServer[]> result = null;
+
+            _turnServerClient = _turnServerClientFactory.Create(turnServer);
 
             try
             {
