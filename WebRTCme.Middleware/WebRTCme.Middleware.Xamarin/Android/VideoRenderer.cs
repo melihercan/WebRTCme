@@ -41,7 +41,7 @@ namespace WebRtcMiddlewareXamarin
 
                     if (type == VideoType.Camera)
                     {
-                        if (string.IsNullOrEmpty(source))
+                        ////if (string.IsNullOrEmpty(source))
                         {
                             // Default devices.
                             var window = WebRtcMiddleware.WebRtc.Window();

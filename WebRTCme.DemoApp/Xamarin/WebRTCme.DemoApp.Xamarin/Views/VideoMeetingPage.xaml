@@ -4,18 +4,18 @@
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware.Xamarin;assembly=WebRTCme.Middleware.Xamarin"
              x:Class="DemoApp.Views.VideoMeetingPage">
     <ContentPage.Content>
-        <StackLayout BackgroundColor="Red">
-            <Label Text="Video meeting" BackgroundColor="Green"/>
-            <webRtc:Video Type="Camera" Source="{Binding CameraSource}" BackgroundColor="Orange" 
-                          VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
-
-
+        <StackLayout BackgroundColor="LightGray">
+            <Label Text="Video meeting"/>
             <Entry Placeholder="enter room name" Text="{Binding RoomParameters.RoomId}"/>
             <Entry Placeholder="enter user name" Text="{Binding RoomParameters.UserId}"/>
             <StackLayout Orientation="Horizontal">
                 <Button Text="Start call" Command="{Binding StartCallCommand}"/>
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
             </StackLayout>
+            <webRtc:Video Type="Camera" Source="{Binding CameraSource}" BackgroundColor="Orange" 
+                          VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+
+
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
