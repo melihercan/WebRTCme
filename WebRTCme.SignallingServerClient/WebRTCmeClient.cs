@@ -94,8 +94,9 @@ namespace WebRTCme.SignallingServerClient
                 {
                     break;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine("====> EXCEPTION: " + ex.Message);
                     // Failed to connect, trying again in TimeoutMs if not overriden by keepTrying flag.
                     await Task.Delay(TimeoutMs);
                 }

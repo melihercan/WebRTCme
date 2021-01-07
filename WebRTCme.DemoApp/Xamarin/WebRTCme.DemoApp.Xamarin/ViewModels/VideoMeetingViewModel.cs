@@ -22,12 +22,14 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
+            WebRtcMiddleware.Initialize(App.Configuration["SignallingServer:BaseUrl"]);
             _roomService = await WebRtcMiddleware.CreateRoomServiceAsync();
         }
 
         public async Task OnPageDisappearing()
         {
             await _roomService.DisposeAsync();
+            WebRtcMiddleware.Cleanup();
         }
 
         //private string _cameraSource = "Default";
@@ -59,19 +61,19 @@ namespace DemoApp.ViewModels
         public ICommand StartCallCommand => new Command(async () =>
         {
             RoomParameters.IsJoin = false;
-            await HandleRoomAsync();
+            await ConnectRoomAsync();
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
             RoomParameters.IsJoin = true;
-            await HandleRoomAsync();
+            await ConnectRoomAsync();
         });
 
-        private Task HandleRoomAsync()
+        private Task ConnectRoomAsync()
         {
             RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            return _roomService.HandleRoomAsync(RoomParameters);
+            return _roomService.ConnectRoomAsync(RoomParameters);
         }
 
     }

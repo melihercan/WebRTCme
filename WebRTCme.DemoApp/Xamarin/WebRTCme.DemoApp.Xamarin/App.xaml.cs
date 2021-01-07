@@ -31,8 +31,7 @@ namespace DemoApp
 
         protected override void OnStart()
         {
-            // TODO: Move URL to a config file.
-            WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
+////            WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
         }
 
         protected override void OnSleep()
@@ -45,7 +44,7 @@ namespace DemoApp
 
         protected override void CleanUp()
         {
-            WebRtcMiddleware.Cleanup();
+////            WebRtcMiddleware.Cleanup();
             base.CleanUp();
         }
     }

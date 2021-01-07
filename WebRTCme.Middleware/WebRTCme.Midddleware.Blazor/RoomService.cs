@@ -22,7 +22,7 @@ namespace WebRtcMiddlewareBlazor
 
         private RoomService() { }
 
-        public async Task HandleRoomAsync(RoomParameters roomParameters)
+        public async Task ConnectRoomAsync(RoomParameters roomParameters)
         {
             var iceServers = await (roomParameters.IsJoin ?
                 _signallingServerClient.JoinRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId) :
