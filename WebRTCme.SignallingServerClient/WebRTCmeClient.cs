@@ -26,21 +26,22 @@ namespace WebRTCme.SignallingServerClient
             _signallingServerBaseUrl = signallingServerBaseUrl;
         }
 
-        public Task InitializeAsync()
+        public Task InitializeAsync(bool bypassSslCertificateError = false)
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_signallingServerBaseUrl + "/roomhub"
-                //// TODO: APPLY THIS ONLY FOR ANDROID
-                , (opts) =>
+                .WithUrl(_signallingServerBaseUrl + "/roomhub", (opts) =>
                 {
-                    opts.HttpMessageHandlerFactory = (message) =>
+                    if (bypassSslCertificateError)
                     {
-                        if (message is HttpClientHandler clientHandler)
+                        opts.HttpMessageHandlerFactory = (message) =>
+                        {
+                            if (message is HttpClientHandler clientHandler)
                             // Bypass SSL certificate.
                             clientHandler.ServerCertificateCustomValidationCallback +=
-                                (sender, certificate, chain, sslPolicyErrors) => { return true; };
-                        return message;
-                    };
+                                    (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                            return message;
+                        };
+                    }
                 })
                 .AddMessagePackProtocol()
                 .Build();

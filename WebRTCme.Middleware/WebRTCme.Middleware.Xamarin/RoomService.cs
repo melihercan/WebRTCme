@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using WebRTCme.Middleware;
 using WebRTCme.Middleware.Xamarin;
 using WebRTCme.SignallingServerClient;
+using Xamarin.Forms;
 
 namespace WebRtcMiddlewareXamarin
 {
@@ -16,7 +17,7 @@ namespace WebRtcMiddlewareXamarin
         {
             var self = new RoomService();
             self._signallingServerClient = SignallingServerClientFactory.Create(WebRtcMiddleware.SignallingServerBaseUrl);
-            await self._signallingServerClient.InitializeAsync();
+            await self._signallingServerClient.InitializeAsync(Device.RuntimePlatform == Device.Android ? true : false);
             return self;
         }
 
