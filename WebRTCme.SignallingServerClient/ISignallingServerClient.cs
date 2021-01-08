@@ -14,6 +14,7 @@ namespace WebRTCme.SignallingServerClient
         Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);
         Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string clientId);
 
+        public Task<string> ExecuteEchoToCaller(string message);
 
     }
 }

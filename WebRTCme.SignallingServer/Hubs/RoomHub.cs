@@ -19,6 +19,11 @@ namespace WebRTCme.SignallingServer.Hubs
             _turnServerClientFactory = turnServerClientFactory;
         }
 
+        public async Task EchoToCaller(string message)
+        {
+            await Clients.Caller.SendAsync("EchoToCallerResponse", message);
+        }
+
         public async Task CreateRoom(TurnServer turnServer, string roomId, string clientId)
         {
             Result<RTCIceServer[]> result = null;
@@ -34,8 +39,8 @@ namespace WebRTCme.SignallingServer.Hubs
             {
                 result = Result<RTCIceServer[]>.Error(new string[] { ex.Message });
             }
-            
-            await Clients.Caller.SendAsync("SignallingServerHubCallback_RoomResponse", result);
+
+            await Clients.Caller.SendAsync("RoomResponse", result);
         }
 
         //public async Task CreateRoomByTurnServerName(TurnServer turnServer, string roomId, string clientId)
@@ -43,12 +48,12 @@ namespace WebRTCme.SignallingServer.Hubs
 
         //}
 
-  //      public async Task CreateRoomByTurnServerUrlWithRoom(string turnServerUrl, string roomId, string clientId)
-    //    {
+        //      public async Task CreateRoomByTurnServerUrlWithRoom(string turnServerUrl, string roomId, string clientId)
+        //    {
 
-      //  }
+        //  }
 
-//        public async Task JoinRoom(string )
+        //        public async Task JoinRoom(string )
 
     }
 }

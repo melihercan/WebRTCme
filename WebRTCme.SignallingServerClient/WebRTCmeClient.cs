@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -43,8 +44,21 @@ namespace WebRTCme.SignallingServerClient
                         };
                     }
                 })
+                .ConfigureLogging(logging =>
+                {
+                    // Log to output window.
+                    logging.AddDebug();
+
+                    // This will set ALL logging to Debug level
+                    logging.SetMinimumLevel(LogLevel.Debug);
+                })
                 .AddMessagePackProtocol()
                 .Build();
+
+            // Handlers called by hub.
+            _hubConnection.On<string>("EchoToCallerResponse", EchoToCallerResponse);
+            _hubConnection.On<Result<RTCIceServer[]>>("RoomResponse", RoomResponse);
+
             _hubConnection.Closed += HubConnection_Closed;
 
             // Start connection without waiting.
@@ -119,14 +133,33 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        #region SignallingServerHubCallbacks
-        public void SignallingServerHubCallback_RoomResponse(Result<RTCIceServer[]> result)
+        #region SignallingServerResponseHandlers
+
+        // For echo testing.
+        private TaskCompletionSource<string> _echoTcs;
+
+        public async Task<string> ExecuteEchoToCaller(string message)
+        {
+            _echoTcs = new TaskCompletionSource<string>();
+            await _hubConnection.SendAsync("EchoToCaller", message);
+            var result = await _echoTcs.Task;
+            return result;
+
+        }
+        public void EchoToCallerResponse(string message)
+        {
+            _echoTcs.SetResult(message);
+        }
+
+        public void RoomResponse(Result<RTCIceServer[]> result)
         {
             if (result.Status == ResultStatus.Ok)
                 _roomTcs.SetResult(result.Value);
             else
                 _roomTcs.SetException(new Exception(string.Join("-", result.Errors.ToArray())));
         }
+
+
         #endregion
     }
 }
