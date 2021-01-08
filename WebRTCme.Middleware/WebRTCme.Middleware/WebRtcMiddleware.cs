@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRtcMiddlewareBlazor;
+using WebRtcMiddleware;
 
-namespace WebRTCme.Middleware.Blazor
+namespace WebRTCme.Middleware
 {
     public static class WebRtcMiddleware
     {
-        internal static IWebRtc WebRtc { get; private set; }
+        public static IWebRtc WebRtc { get; private set; }
+
         internal static string SignallingServerBaseUrl { get; private set; }
 
         public static void Initialize(string signallingServerBaseUrl)

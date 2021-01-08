@@ -44,7 +44,7 @@ namespace WebRtcMiddlewareXamarin
                         ////if (string.IsNullOrEmpty(source))
                         {
                             // Default devices.
-                            var window = WebRtcMiddleware.WebRtc.Window();
+                            var window = WebRTCme.Middleware.WebRtcMiddleware.WebRtc.Window();
                             var navigator = window.Navigator();
                             var mediaDevices = navigator.MediaDevices;
                             var mediaDevicesInfo = await mediaDevices.EnumerateDevices();

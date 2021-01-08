@@ -63,7 +63,6 @@ namespace WebRTCme.Middleware.Blazor
             if (firstRender)
             {
 
-                ///var webRtc = CrossWebRtc.Current;
                 _window = WebRtcMiddleware.WebRtc.Window(JsRuntime);
                 _navigator = _window.Navigator();
                 _mediaDevices = _navigator.MediaDevices;

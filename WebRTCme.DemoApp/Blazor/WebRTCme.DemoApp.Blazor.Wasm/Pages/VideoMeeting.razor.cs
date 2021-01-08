@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
-using WebRTCme.Middleware.Blazor;
 
 //// TODO: TESTING FOR NOW, MOVE ALL WEBRTC CODE to Middleware
 namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
@@ -39,8 +38,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
 
-            WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
-            _roomService = await WebRtcMiddleware.CreateRoomServiceAsync();
+            Middleware.WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
+            _roomService = await Middleware.WebRtcMiddleware.CreateRoomServiceAsync();
         }
 
         private async void HandleValidSubmit()
@@ -53,7 +52,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
             ///
             Task.Run(async () => await _roomService.DisposeAsync());
-            WebRtcMiddleware.Cleanup();
+            Middleware.WebRtcMiddleware.Cleanup();
         }
     }
 }

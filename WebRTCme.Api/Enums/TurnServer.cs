@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Middleware
+namespace WebRTCme
 {
     public enum TurnServer
     {

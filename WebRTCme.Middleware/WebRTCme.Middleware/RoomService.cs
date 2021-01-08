@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme.Middleware;
-using WebRTCme.Middleware.Blazor;
 using WebRTCme.SignallingServerClient;
 
-namespace WebRtcMiddlewareBlazor
+namespace WebRtcMiddleware
 {
     internal class RoomService : IRoomService
     {
@@ -15,7 +14,8 @@ namespace WebRtcMiddlewareBlazor
         static public async Task<IRoomService> CreateAsync()
         {
             var self = new RoomService();
-            self._signallingServerClient = SignallingServerClientFactory.Create(WebRtcMiddleware.SignallingServerBaseUrl);
+            self._signallingServerClient = SignallingServerClientFactory.Create(
+                WebRTCme.Middleware.WebRtcMiddleware.SignallingServerBaseUrl);
             await self._signallingServerClient.InitializeAsync();
             return self;
         }

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using WebRTCme;
 using WebRTCme.Middleware;
 using WebRTCme.Middleware.Xamarin;
 using Xamarin.Forms;
@@ -22,14 +23,14 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-            WebRtcMiddleware.Initialize(App.Configuration["SignallingServer:BaseUrl"]);
-            _roomService = await WebRtcMiddleware.CreateRoomServiceAsync();
+             WebRTCme.Middleware.WebRtcMiddleware.Initialize(App.Configuration["SignallingServer:BaseUrl"]);
+            _roomService = await WebRTCme.Middleware.WebRtcMiddleware.CreateRoomServiceAsync();
         }
 
         public async Task OnPageDisappearing()
         {
             await _roomService.DisposeAsync();
-            WebRtcMiddleware.Cleanup();
+            WebRTCme.Middleware.WebRtcMiddleware.Cleanup();
         }
 
         //private string _cameraSource = "Default";
