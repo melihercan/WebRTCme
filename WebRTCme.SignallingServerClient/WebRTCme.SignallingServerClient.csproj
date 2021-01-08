@@ -16,7 +16,7 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
-    <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.Api\WebRTCme.Middleware.Api.csproj" />
+    <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
   </ItemGroup>
 
 </Project>

@@ -62,9 +62,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.SignallingServerCl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Wasm", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor.Wasm\WebRTCme.DemoApp.Blazor.Wasm.csproj", "{11DC1BF4-2C88-4225-A4DA-CE71E55815DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Api", "WebRTCme.Middleware\WebRTCme.Middleware.Api\WebRTCme.Middleware.Api.csproj", "{83F339B2-8815-4479-ABA0-866962D44B10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware", "WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj", "{83F339B2-8815-4479-ABA0-866962D44B10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Tests.SignallingServerTests", "WebRTCme.Tests\WebRTCme.Tests.SignallingServerTests\WebRTCme.Tests.SignallingServerTests.csproj", "{F60F90E5-CAD0-4791-9256-871CB8E132C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Tests.SignallingServerTests", "WebRTCme.Tests\WebRTCme.Tests.SignallingServerTests\WebRTCme.Tests.SignallingServerTests.csproj", "{F60F90E5-CAD0-4791-9256-871CB8E132C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
