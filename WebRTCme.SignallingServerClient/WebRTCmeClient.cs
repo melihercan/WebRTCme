@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,19 @@ namespace WebRTCme.SignallingServerClient
         public Task InitializeAsync()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_signallingServerBaseUrl + "/roomhub")
+                .WithUrl(_signallingServerBaseUrl + "/roomhub"
+                //// TODO: APPLY THIS ONLY FOR ANDROID
+                , (opts) =>
+                {
+                    opts.HttpMessageHandlerFactory = (message) =>
+                    {
+                        if (message is HttpClientHandler clientHandler)
+                            // Bypass SSL certificate.
+                            clientHandler.ServerCertificateCustomValidationCallback +=
+                                (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                        return message;
+                    };
+                })
                 .AddMessagePackProtocol()
                 .Build();
             _hubConnection.Closed += HubConnection_Closed;
@@ -88,6 +101,7 @@ namespace WebRTCme.SignallingServerClient
                 try
                 {
                     await _hubConnection.StartAsync(_cts.Token);
+                    Debug.WriteLine("#### Connected to Signalling Server...");
                     break;
                 }
                 catch when (_cts.Token.IsCancellationRequested)
