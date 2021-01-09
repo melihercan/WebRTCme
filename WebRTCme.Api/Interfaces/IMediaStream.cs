@@ -30,9 +30,7 @@ namespace WebRTCme
         void RemoveTrack(IMediaStreamTrack track);
 
         
-        
-        // Custom APIs.
-        void SetElementReferenceSrcObject(object media);
+       
     }
 
 }

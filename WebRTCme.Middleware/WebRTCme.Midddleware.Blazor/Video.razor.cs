@@ -30,12 +30,6 @@ namespace WebRTCme.Middleware.Blazor
 
         private ElementReference _videoElementReference;
 
-        private IWindow _window;
-        private INavigator _navigator;
-        private IMediaDevices _mediaDevices;
-        private IMediaStream _mediaStream;
-        private IRTCPeerConnection _rtcPeerConnection;
-        ///private IRTCRtpSender _rtcRtpSender;
 
 
         protected override async Task OnInitializedAsync()
@@ -62,26 +56,14 @@ namespace WebRTCme.Middleware.Blazor
 
             if (firstRender)
             {
-
-                _window = WebRtcMiddleware.WebRtc.Window(JsRuntime);
-                _navigator = _window.Navigator();
-                _mediaDevices = _navigator.MediaDevices;
-                var mediDeviceInfos = (await _mediaDevices.EnumerateDevices()).ToList();
-                _mediaStream = await _mediaDevices.GetUserMedia(new MediaStreamConstraints
+                if (Type == VideoType.Camera)
                 {
-                    Audio = new MediaStreamContraintsUnion
-                    {
-                        Value = true
-                    },
-                    Video = new MediaStreamContraintsUnion
-                    {
-                        Value = true
-                    }
-                });
+                    var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync(JsRuntime);
+                    var mediaStream = await mediaStreamService.GetCameraStreamAsync(Source);
+                    PlatformSupport.SetVideoSource(JsRuntime, _videoElementReference, mediaStream);
+                }
 
-                ////_mediaStream.SetElementReferenceSrcObject(_videoElementReference);
-                PlatformSupport.SetVideoSource(JsRuntime, _videoElementReference, _mediaStream);
-
+#if false
                 var configuration = new RTCConfiguration
                 {
                     IceServers = new RTCIceServer[]
@@ -110,7 +92,7 @@ namespace WebRTCme.Middleware.Blazor
                 {
                     _rtcPeerConnection.AddTrack(mediaStreamTrack, _mediaStream);
                 }
-
+#endif
                 //var state = _rtcPeerConnection.ConnectionState;
                 //var json = JsonSerializer.Serialize(state);
                 //var str = JsonSerializer.Deserialize<RTCIceConnectionState>(json);
@@ -151,16 +133,6 @@ namespace WebRTCme.Middleware.Blazor
 
         public void Dispose()
         {
-            
-            //_cts.Cancel();
-
-            if (_rtcPeerConnection != null) _rtcPeerConnection.Dispose();
-            if (_mediaStream != null) _mediaStream.Dispose();
-            if (_mediaDevices != null) _mediaDevices.Dispose();
-            if (_navigator != null) _navigator.Dispose();
-            if (_window != null) _window.Dispose();
-
-            ////            WebRtcMiddleware.Cleanup();
         }
 
 

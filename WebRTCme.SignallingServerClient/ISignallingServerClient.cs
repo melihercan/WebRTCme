@@ -7,7 +7,7 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerClient
     {
-        Task InitializeAsync(bool bypassSslCertificateError = false);
+        Task InitializeAsync();
         Task CleanupAsync();
 
         Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);

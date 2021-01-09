@@ -71,23 +71,5 @@ namespace WebRtcBindingsWeb.Api
 
         public void RemoveTrack(IMediaStreamTrack track) =>
             JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack", track.NativeObject);
-
-
-
-        public void SetElementReferenceSrcObject(object/*ElementReference*/ elementReference)
-        {
-            JsRuntime.SetJsProperty(elementReference, "srcObject", NativeObject);
-
-            //await JsRuntime.InvokeVoidAsync(
-            //    "objectRef.set",
-            //    new object[]
-            //    {
-            //        elementReference,
-            //        "srcObject",
-            //        JsObjectRef
-            //    });
-
-        }
-
     }
 }

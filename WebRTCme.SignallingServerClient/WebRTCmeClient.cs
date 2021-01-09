@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace WebRTCme.SignallingServerClient
 {
@@ -26,8 +27,10 @@ namespace WebRTCme.SignallingServerClient
             _signallingServerBaseUrl = signallingServerBaseUrl;
         }
 
-        public Task InitializeAsync(bool bypassSslCertificateError = false)
+        public Task InitializeAsync()
         {
+            bool bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
+
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(_signallingServerBaseUrl + "/roomhub", (opts) =>
                 {

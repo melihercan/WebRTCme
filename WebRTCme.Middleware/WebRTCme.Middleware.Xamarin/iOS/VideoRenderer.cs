@@ -41,22 +41,22 @@ namespace WebRtcMiddlewareXamarin
                     {
                         ///if (string.IsNullOrEmpty(source))
                         {
-                            // Default devices.
-                            var window = WebRTCme.Middleware.WebRtcMiddleware.WebRtc.Window();
-                            var navigator = window.Navigator();
-                            var mediaDevices = navigator.MediaDevices;
-                            var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
-                            var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
-                            {
-                                Audio = new MediaStreamContraintsUnion { Value = true },
-                                Video = new MediaStreamContraintsUnion { Value = true }
-                            });
+                            //var window = WebRtcMiddleware.WebRtc.Window();
+                            //var navigator = window.Navigator();
+                            //var mediaDevices = navigator.MediaDevices;
+                            //var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
+                            //var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
+                            //{
+                            //    Audio = new MediaStreamContraintsUnion { Value = true },
+                            //    Video = new MediaStreamContraintsUnion { Value = true }
+                            //});
+                            var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
+                            var mediaStream = await mediaStreamService.GetCameraStreamAsync(source);
                             var videoTrack = mediaStream.GetVideoTracks().First();
-                            //view = videoTrack.GetView() as UIView;
                             view = PlatformSupport.CreateCameraView(videoTrack);
 
 
-
+#if false
                             //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
                             ///
                             var configuration = new RTCConfiguration
@@ -74,6 +74,7 @@ namespace WebRtcMiddlewareXamarin
                                 }
                             };
                             var peerConnection = window.RTCPeerConnection(configuration);
+#endif
                         }
                     }
 

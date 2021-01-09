@@ -114,9 +114,5 @@ namespace WebRtc.iOS
             };
         }
 
-        public void SetElementReferenceSrcObject(object media)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

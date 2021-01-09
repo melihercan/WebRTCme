@@ -126,11 +126,5 @@ namespace WebRtc.Android
                     break;
             };
         }
-
-        public void SetElementReferenceSrcObject(object media)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }

@@ -30,6 +30,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private string _room;
         private string _userId;
 
+        private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
 
         private RoomParameters _roomParameters = new RoomParameters();
@@ -38,8 +39,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
 
-            Middleware.WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
-            _roomService = await Middleware.WebRtcMiddleware.CreateRoomServiceAsync();
+            _webRtcMiddleware = CrossWebRtcMiddleware.Current;
+            //webRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
+            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], JsRuntime);
         }
 
         private async void HandleValidSubmit()
@@ -52,7 +54,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
             ///
             Task.Run(async () => await _roomService.DisposeAsync());
-            Middleware.WebRtcMiddleware.Cleanup();
+            _webRtcMiddleware.Dispose();
+            //WebRtcMiddleware.Cleanup();
         }
     }
 }

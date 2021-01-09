@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using WebRTCme;
 using WebRTCme.Middleware;
-using WebRTCme.Middleware.Xamarin;
 using Xamarin.Forms;
 using Xamarinme;
 
@@ -15,6 +14,7 @@ namespace DemoApp.ViewModels
 {
     public class VideoMeetingViewModel : /*INotifyPropertyChanged,*/ IPageLifecycle
     {
+        private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
 
         //public event PropertyChangedEventHandler PropertyChanged;
@@ -23,14 +23,16 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-             WebRTCme.Middleware.WebRtcMiddleware.Initialize(App.Configuration["SignallingServer:BaseUrl"]);
-            _roomService = await WebRTCme.Middleware.WebRtcMiddleware.CreateRoomServiceAsync();
+            _webRtcMiddleware = CrossWebRtcMiddleware.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
+            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
         }
 
         public async Task OnPageDisappearing()
         {
             await _roomService.DisposeAsync();
-            WebRTCme.Middleware.WebRtcMiddleware.Cleanup();
+            _webRtcMiddleware.Dispose();
+
+            //WebRtcMiddleware.Cleanup();
         }
 
         //private string _cameraSource = "Default";
