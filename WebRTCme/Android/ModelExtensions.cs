@@ -51,8 +51,10 @@ namespace WebRtc.Android
             Webrtc.PeerConnection.IceServer.InvokeBuilder(iceServer.Urls)
                 .SetTlsCertPolicy(iceServer.CredentialType?.ToNative() ??
                     Webrtc.PeerConnection.TlsCertPolicy.TlsCertPolicySecure)
-                .SetUsername(iceServer.Username)
-                .SetPassword(iceServer.Credential)
+                ////.SetUsername(iceServer.Username)
+                .If(iceServer.Username != null, builder => builder.SetUsername(iceServer.Username))
+                ////.SetPassword(iceServer.Credential)
+                .If(iceServer.Credential != null, builder => builder.SetPassword(iceServer.Credential))
                 .CreateIceServer();
 
 

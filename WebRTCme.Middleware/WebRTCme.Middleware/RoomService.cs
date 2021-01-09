@@ -25,7 +25,7 @@ namespace WebRtcMeMiddleware
 
         private RoomService() { }
 
-        public async Task ConnectRoomAsync(RoomParameters roomParameters)
+        public async Task<IMediaStream> ConnectRoomAsync(RoomParameters roomParameters)
         {
             var iceServers = await (roomParameters.IsJoin ?
                 _signallingServerClient.JoinRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId) :
@@ -37,6 +37,8 @@ namespace WebRtcMeMiddleware
                 PeerIdentity = roomParameters.RoomId
             };
             var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+
+            return null;
         }
 
         public ValueTask DisposeAsync()
