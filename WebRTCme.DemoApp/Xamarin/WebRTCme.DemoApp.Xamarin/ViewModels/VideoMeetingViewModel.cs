@@ -12,18 +12,22 @@ using Xamarinme;
 
 namespace DemoApp.ViewModels
 {
-    public class VideoMeetingViewModel : /*INotifyPropertyChanged,*/ IPageLifecycle
+    public class VideoMeetingViewModel : INotifyPropertyChanged, IPageLifecycle
     {
         private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
+        private IMediaStreamService _mediaStreamService;
 
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //private void OnPropertyChanged([CallerMemberName] string name = null) => 
-          //  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = null) => 
+          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public async Task OnPageAppearing()
         {
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
+            _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync();
+            Stream = await _mediaStreamService.GetCameraStreamAsync(Source);
+
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
         }
 
@@ -35,16 +39,38 @@ namespace DemoApp.ViewModels
             //WebRtcMiddleware.Cleanup();
         }
 
-        //private string _cameraSource = "Default";
-        public string CameraSource { get; set; } = "Default";
-        //{
-          //  get => _cameraSource;
-            //set
-            //{
-              //  _cameraSource = value;
-                //OnPropertyChanged();
-            //}
-        //}
+        private VideoType _type = VideoType.Camera;
+        public VideoType Type 
+        {
+            get => _type;
+            set
+            {
+                _type = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _source = "Default";
+        public string Source
+        {
+            get => _source;
+            set
+            {
+                _source = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private IMediaStream _stream;
+        public IMediaStream Stream 
+        { 
+            get => _stream; 
+            set
+            {
+                _stream = value;
+                OnPropertyChanged();
+            }
+        }
 
         public IList<string> TurnServers => Enum.GetNames(typeof(TurnServer));
         public string SelectedTurnServer { get; set; }

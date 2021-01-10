@@ -21,23 +21,25 @@ namespace WebRTCme.Middleware.Blazor
         [Parameter]
         public string Source { get; set; }
 
+        [Parameter]
+        public IMediaStream Stream { get; set; }
+
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
 
         [Inject]
         private IConfiguration Configuration { get; set; }
 
-
-        private ElementReference _videoElementReference;
-
+        private ElementReference VideoElementReference { get; set; }
 
 
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
+
+        //protected override async Task OnInitializedAsync()
+        //{
+          //  await base.OnInitializedAsync();
 
 
-        }
+        //}
 
         //private Task HubConnection_Closed(Exception arg)
         //{
@@ -50,18 +52,18 @@ namespace WebRTCme.Middleware.Blazor
         //    return Task.CompletedTask;
         //}
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            await base.OnAfterRenderAsync(firstRender);
+        //protected override async Task OnAfterRenderAsync(bool firstRender)
+        //{
+            //await base.OnAfterRenderAsync(firstRender);
 
-            if (firstRender)
-            {
-                if (Type == VideoType.Camera)
-                {
-                    var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync(JsRuntime);
-                    var mediaStream = await mediaStreamService.GetCameraStreamAsync(Source);
-                    PlatformSupport.SetVideoSource(JsRuntime, _videoElementReference, mediaStream);
-                }
+            //if (firstRender)
+            //{
+                //if (Type == VideoType.Camera)
+                //{
+                    //var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync(JsRuntime);
+                    //var mediaStream = await mediaStreamService.GetCameraStreamAsync(Source);
+                    //PlatformSupport.SetVideoSource(JsRuntime, _videoElementReference, mediaStream);
+                //}
 
 #if false
                 var configuration = new RTCConfiguration
@@ -122,9 +124,16 @@ namespace WebRTCme.Middleware.Blazor
 
 
                 //            StateHasChanged();
-            }
-        }
+            //}
+       // }
 
+        protected override Task OnParametersSetAsync()
+        {
+            if (Stream is not null)
+                PlatformSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
+
+            return base.OnParametersSetAsync();
+        }
 
         private async void Connect()
         {

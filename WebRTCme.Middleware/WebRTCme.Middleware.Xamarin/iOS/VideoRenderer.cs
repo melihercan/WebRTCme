@@ -16,6 +16,10 @@ namespace WebRtcMiddlewareXamarin
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {
 
+        private VideoType Type { get; set; }
+        private string Source { get; set; }
+        private IMediaStream Stream { get; set; }
+
         private VideoView _videoView;
 
         public VideoRenderer() { }
@@ -33,11 +37,13 @@ namespace WebRtcMiddlewareXamarin
             {
                 if (Control == null)
                 {
-                    var type = e.NewElement.Type;
-                    var source = e.NewElement.Source;
+                    Type = e.NewElement.Type;
+                    Source = e.NewElement.Source;
+                    Stream = e.NewElement.Stream;
+                    
                     UIView view = null;
 
-                    if (type == VideoType.Camera)
+                    //if (Type == VideoType.Camera)
                     {
                         ///if (string.IsNullOrEmpty(source))
                         {
@@ -50,9 +56,9 @@ namespace WebRtcMiddlewareXamarin
                             //    Audio = new MediaStreamContraintsUnion { Value = true },
                             //    Video = new MediaStreamContraintsUnion { Value = true }
                             //});
-                            var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
-                            var mediaStream = await mediaStreamService.GetCameraStreamAsync(source);
-                            var videoTrack = mediaStream.GetVideoTracks().First();
+                            //var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
+                            //var mediaStream = await mediaStreamService.GetCameraStreamAsync(source);
+                            var videoTrack = Stream.GetVideoTracks().First();
                             view = PlatformSupport.CreateCameraView(videoTrack);
 
 

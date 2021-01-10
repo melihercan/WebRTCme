@@ -13,6 +13,7 @@ using Xamarin.Essentials;
 using Android.Widget;
 using Android.Views;
 using WebRTCme.Middleware;
+using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
@@ -20,6 +21,13 @@ namespace WebRtcMiddlewareXamarin
 
     public class VideoRenderer : ViewRenderer<Video, VideoView>
     {
+        private VideoType Type { get; set; }
+        private string Source { get; set; }
+        private IMediaStream Stream { get; set; }
+        
+        private VideoView _videoView;
+
+
         public VideoRenderer(Context context) : base(context) { }
 
         protected override async void OnElementChanged(ElementChangedEventArgs<Video> e)
@@ -35,11 +43,13 @@ namespace WebRtcMiddlewareXamarin
             {
                 if (Control == null)
                 {
-                    var type = e.NewElement.Type;
-                    var source = e.NewElement.Source;
+                    Type = e.NewElement.Type;
+                    Source = e.NewElement.Source;
+                    Stream = e.NewElement.Stream;
+
                     SurfaceView surfaceView = null;
 
-                    if (type == VideoType.Camera)
+                    //if (Type == VideoType.Camera)
                     {
                         ////if (string.IsNullOrEmpty(source))
                         {
@@ -53,9 +63,9 @@ namespace WebRtcMiddlewareXamarin
                             //    Audio = new MediaStreamContraintsUnion { Value = true },
                             //    Video = new MediaStreamContraintsUnion { Value = true }
                             //});
-                            var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
-                            var mediaStream = await mediaStreamService.GetCameraStreamAsync(source);
-                            var videoTrack = mediaStream.GetVideoTracks().First();
+                            //var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
+                            //var mediaStream = await mediaStreamService.GetCameraStreamAsync(Source);
+                            var videoTrack = Stream.GetVideoTracks().First();
 
                             var permission = await Permissions.RequestAsync<Permissions.Camera>();
                             if (permission != PermissionStatus.Granted)
@@ -69,15 +79,26 @@ namespace WebRtcMiddlewareXamarin
 
                             // Instantiate the native control and assign it to the Control property with
                             // the SetNativeControl method
-                            var videoView = new VideoView(Context, surfaceView);
-                            SetNativeControl(videoView);
+                            _videoView = new VideoView(Context, surfaceView);
+                            SetNativeControl(_videoView);
                         }
 
                         // Configure the control and subscribe to event handlers
+
                     }
                 }
             }
         }
+
+        //private void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        //{
+        //    if (e.PropertyName == "Stream" && Stream is not null)
+        //    {
+        //        var videoTrack = Stream.GetVideoTracks().First();
+        //        var surfaceView = PlatformSupport.CreateCameraView(videoTrack);
+        //        SetNativeControl(_videoView);
+        //    }
+        //}
     }
 }
 #if false

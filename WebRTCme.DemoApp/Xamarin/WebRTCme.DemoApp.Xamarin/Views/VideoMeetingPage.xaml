@@ -13,8 +13,8 @@
                 <Button Text="Start call" Command="{Binding StartCallCommand}"/>
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
             </StackLayout>
-            <webRtc:Video Type="Camera" Source="{Binding CameraSource}" BackgroundColor="Orange" 
-                          VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+            <webRtc:Video Type="{Binding Type}" Source="{Binding Source}" Stream="{Binding Stream}" 
+                          BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
 
 
         </StackLayout>

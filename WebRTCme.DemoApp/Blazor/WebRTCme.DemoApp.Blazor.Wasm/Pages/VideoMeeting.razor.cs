@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
+using WebRTCme.Middleware.Blazor;
 
 //// TODO: TESTING FOR NOW, MOVE ALL WEBRTC CODE to Middleware
 namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
@@ -23,15 +24,19 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         [Inject]
         IConfiguration Configuration { get; set; }
 
-        [Inject]
-        ILogger<VideoMeeting> Logger { get; set; }
 
-        private string _server;
-        private string _room;
-        private string _userId;
+        VideoType Type { get; set; } = VideoType.Camera;
+
+        string Source { get; set; } = "Default";
+        
+        IMediaStream Stream { get; set; }
+
+        //Video Camera { get; set; }
+
 
         private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
+        private IMediaStreamService _mediaStreamService;
 
         private RoomParameters _roomParameters = new RoomParameters();
 
@@ -40,8 +45,11 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             await base.OnInitializedAsync();
 
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;
-            //webRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
-            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], JsRuntime);
+            _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
+            Stream = await _mediaStreamService.GetCameraStreamAsync(Source);
+
+            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
+                JsRuntime);
         }
 
         private async void HandleValidSubmit()
@@ -52,10 +60,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         public void Dispose()
         {
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
-            ///
             Task.Run(async () => await _roomService.DisposeAsync());
             _webRtcMiddleware.Dispose();
-            //WebRtcMiddleware.Cleanup();
         }
     }
 }
