@@ -38,6 +38,51 @@ namespace WebRtcMeMiddleware
             };
             var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
 
+
+            peerConnection.OnConnectionStateChanged += (s, e) => 
+            { 
+            };
+            peerConnection.OnDataChannel += (s, e) =>
+            {
+            };
+            peerConnection.OnIceCandidate += (s, e) =>
+            {
+            };
+            peerConnection.OnIceConnectionStateChange += (s, e) =>
+            {
+            };
+            peerConnection.OnIceGatheringStateChange += (s, e) =>
+            {
+            };
+            peerConnection.OnNegotiationNeeded += (s, e) =>
+            {
+            };
+            peerConnection.OnSignallingStateChange += (s, e) =>
+            {
+            };
+            peerConnection.OnTrack += (s, e) =>
+            {
+            };
+
+            if (!roomParameters.IsJoin)
+            {
+                var offerDescription = await peerConnection.CreateOffer();
+                var offerDescriptionJson = offerDescription.ToJson();
+                var sdp = offerDescription.Sdp;
+                var type = offerDescription.Type; 
+
+
+                await peerConnection.SetLocalDescription(offerDescription);
+
+                var localDescription = peerConnection.LocalDescription;
+                var localDescriptionJson = localDescription.ToJson();
+
+                //// TODO Send offer message to signalling servewr to be broadcasted
+                ///  _signallingServerClient.SendOfferMessage(localDescriptionJson);
+
+            }
+
+
             return null;
         }
 

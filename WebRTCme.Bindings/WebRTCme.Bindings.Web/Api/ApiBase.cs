@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebRtcBindingsWeb.Extensions;
 using WebRtcBindingsWeb.Interops;
@@ -17,9 +18,11 @@ namespace WebRtcBindingsWeb.Api
             NativeObject = jsObjectRef;
         }
 
+        [JsonIgnore]
         public IJSRuntime JsRuntime { get; }
         
         private object _nativeObject;
+        [JsonIgnore]
         public object NativeObject// { get; protected set; }
         {
             get => _nativeObject;
@@ -30,8 +33,10 @@ namespace WebRtcBindingsWeb.Api
             }
         }
 
+        [JsonIgnore]
         public List<JsObjectRef> JsObjects { get; set; } = new List<JsObjectRef>();
 
+        [JsonIgnore]
         public List<IDisposable> JsEvents { get; set; } = new List<IDisposable>();
         
 

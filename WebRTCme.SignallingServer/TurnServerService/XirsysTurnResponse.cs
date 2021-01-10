@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-        //[JsonConverter(typeof(JsonStringEnumConverter))JsonNamingPolicy.CamelCase)))]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum XirsysTurnStatusResponse
     {

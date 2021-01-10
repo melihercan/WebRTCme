@@ -302,7 +302,7 @@
         let methodObject = getPropertyObject(parentObject, method);
         let ret = methodObject.apply(parentObject, args);
         if (ret != undefined) {
-            if (typeof (ret) === 'object') {
+            if (ret !== null && typeof (ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;
             } else {
@@ -326,7 +326,7 @@
         let methodObject = getPropertyObject(parentObject, method);
         let ret = await methodObject.apply(parentObject, args);
         if (ret != undefined) {
-            if (typeof (ret) === 'object') {
+            if (ret !== null && typeof (ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;
             } else {
