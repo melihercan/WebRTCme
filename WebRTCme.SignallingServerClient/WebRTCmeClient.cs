@@ -96,6 +96,12 @@ namespace WebRTCme.SignallingServerClient
             throw new NotImplementedException();
         }
 
+        public Task SendSdpOfferAsync(string sdp)
+        {
+            return _hubConnection.SendAsync("SendSdpOffer", sdp);
+        }
+
+
         private Task HubConnection_Closed(Exception arg)
         {
             if (arg != null)

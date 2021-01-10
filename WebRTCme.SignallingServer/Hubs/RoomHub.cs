@@ -42,6 +42,11 @@ namespace WebRTCme.SignallingServer.Hubs
             await Clients.Caller.SendAsync("RoomResponse", result);
         }
 
+        public async Task SendSdpOffer(string sdp)
+        {
+            await Clients.Others.SendAsync("OnSdpOffer", sdp);
+        }
+
         //public async Task CreateRoomByTurnServerName(TurnServer turnServer, string roomId, string clientId)
         //{
 
