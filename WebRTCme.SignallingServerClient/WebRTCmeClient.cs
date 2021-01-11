@@ -18,7 +18,6 @@ namespace WebRTCme.SignallingServerClient
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
-        private TaskCompletionSource<RTCIceServer[]> _roomTcs;
 
         private readonly string _signallingServerBaseUrl;
 
@@ -57,9 +56,8 @@ namespace WebRTCme.SignallingServerClient
                 .AddMessagePackProtocol()
                 .Build();
 
-            // Handlers called by hub.
+            // Register handlers called by hub.
             _hubConnection.On<string>("EchoToCallerResponse", EchoToCallerResponse);
-            _hubConnection.On<Result<RTCIceServer[]>>("RoomResponse", RoomResponse);
 
             _hubConnection.Closed += HubConnection_Closed;
 
@@ -82,16 +80,20 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        public async Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId)
+        public async Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string userId)
         {
-            _roomTcs = new TaskCompletionSource<RTCIceServer[]>();
-            await _hubConnection.SendAsync("CreateRoom", turnServer, roomId, clientId);
-            var iceServers = await _roomTcs.Task;
-            return iceServers;
+            var result = await _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("CreateRoom", turnServer, roomId, userId);
+            if (result.Status == ResultStatus.Ok)
+            {
+                var iceServers = result.Value;
+                return iceServers;
+            }
+            else
+                throw new Exception(string.Join("-", result.Errors.ToArray()));
         }
 
 
-        public Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string clientId)
+        public Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string userId)
         {
             throw new NotImplementedException();
         }
@@ -158,15 +160,6 @@ namespace WebRTCme.SignallingServerClient
         {
             _echoTcs.SetResult(message);
         }
-
-        public void RoomResponse(Result<RTCIceServer[]> result)
-        {
-            if (result.Status == ResultStatus.Ok)
-                _roomTcs.SetResult(result.Value);
-            else
-                _roomTcs.SetException(new Exception(string.Join("-", result.Errors.ToArray())));
-        }
-
 
         #endregion
     }

@@ -77,7 +77,7 @@ namespace DemoApp.ViewModels
 
 
         //private RoomParameters _roomParameters = new RoomParameters();
-        public RoomParameters RoomParameters { get; set; } = new RoomParameters();
+        public RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
         //{ 
           //  get => _roomParameters;
             //set
@@ -89,20 +89,21 @@ namespace DemoApp.ViewModels
 
         public ICommand StartCallCommand => new Command(async () =>
         {
-            RoomParameters.IsJoin = false;
+            RoomRequestParameters.IsJoin = false;
             await ConnectRoomAsync();
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
-            RoomParameters.IsJoin = true;
+            RoomRequestParameters.IsJoin = true;
             await ConnectRoomAsync();
         });
 
         private Task ConnectRoomAsync()
         {
-            RoomParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            return _roomService.ConnectRoomAsync(RoomParameters);
+            RoomRequestParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
+            RoomRequestParameters.LocalStream = Stream;
+            return _roomService.ConnectRoomAsync(RoomRequestParameters);
         }
 
     }

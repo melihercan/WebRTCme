@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class RoomParameters
+    public class RoomRequestParameters
     {
         public bool IsJoin { get; set; }
 
@@ -13,5 +13,7 @@ namespace WebRTCme.Middleware
         public string RoomId { get; set; }
 
         public string UserId { get; set; }
+
+        public IMediaStream LocalStream { get; set; }
     }
 }

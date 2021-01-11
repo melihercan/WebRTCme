@@ -38,7 +38,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IRoomService _roomService;
         private IMediaStreamService _mediaStreamService;
 
-        private RoomParameters _roomParameters = new RoomParameters();
+        private RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
 
         protected override async Task OnInitializedAsync()
         {
@@ -54,7 +54,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private async void HandleValidSubmit()
         {
-            await _roomService.ConnectRoomAsync(_roomParameters);
+            RoomRequestParameters.LocalStream = Stream;
+            await _roomService.ConnectRoomAsync(RoomRequestParameters);
         }
 
         public void Dispose()

@@ -1,6 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
@@ -25,19 +26,18 @@ namespace WebRtcMeMiddleware
 
         private RoomService() { }
 
-        public async Task<IMediaStream> ConnectRoomAsync(RoomParameters roomParameters)
+        public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {
-            var iceServers = await (roomParameters.IsJoin ?
-                _signallingServerClient.JoinRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId) :
-                _signallingServerClient.CreateRoomAsync(roomParameters.TurnServer, roomParameters.RoomId, roomParameters.UserId));
+            var iceServers = await (roomRequestParameters.IsJoin ?
+                _signallingServerClient.JoinRoomAsync(roomRequestParameters.TurnServer, roomRequestParameters.RoomId, roomRequestParameters.UserId) :
+                _signallingServerClient.CreateRoomAsync(roomRequestParameters.TurnServer, roomRequestParameters.RoomId, roomRequestParameters.UserId));
 
             var configuration = new RTCConfiguration
             {
                 IceServers = iceServers,
-                PeerIdentity = roomParameters.RoomId
+                PeerIdentity = roomRequestParameters.RoomId
             };
             var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
-
 
             peerConnection.OnConnectionStateChanged += (s, e) => 
             { 
@@ -64,7 +64,10 @@ namespace WebRtcMeMiddleware
             {
             };
 
-            if (!roomParameters.IsJoin)
+            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetVideoTracks().First(), roomRequestParameters.LocalStream);
+            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetAudioTracks().First(), roomRequestParameters.LocalStream);
+
+            if (!roomRequestParameters.IsJoin)
             {
                 var offerDescription = await peerConnection.CreateOffer();
                 var offerDescriptionJson = offerDescription.ToJson();

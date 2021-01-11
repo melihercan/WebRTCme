@@ -10,8 +10,8 @@ namespace WebRTCme.SignallingServerClient
         Task InitializeAsync();
         Task CleanupAsync();
 
-        Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string clientId);
-        Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string clientId);
+        Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string userId);
+        Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string userId);
 
 
         Task SendSdpOfferAsync(string sdp);

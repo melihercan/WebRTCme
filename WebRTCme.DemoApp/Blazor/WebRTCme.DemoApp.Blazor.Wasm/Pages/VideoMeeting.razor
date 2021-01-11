@@ -23,13 +23,13 @@ TURN server: @_server<input @bind="_server"/>
 <button class="btn btn-primary" @onclick="OnJoinCall">Join call</button>
 </div>
 *@
-<EditForm Model="@_roomParameters" OnValidSubmit="@HandleValidSubmit">
+<EditForm Model="@RoomRequestParameters" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div>
         <label>TURN server:</label>
-        <InputSelect @bind-Value="_roomParameters.TurnServer">
+        <InputSelect @bind-Value="RoomRequestParameters.TurnServer">
             @foreach (var server in Enum.GetValues(typeof(TurnServer)))
                     {
             <option value="@server">@server.ToString()</option>
@@ -39,16 +39,16 @@ TURN server: @_server<input @bind="_server"/>
 
     <div>
         <label>Room name:</label>
-        <InputText id="roomId" placeholder="enter room name" @bind-Value="_roomParameters.RoomId" />
+        <InputText id="roomId" placeholder="enter room name" @bind-Value="RoomRequestParameters.RoomId" />
     </div>
 
     <div>
         <label>User name:</label>
-        <InputText id="userId" placeholder="enter user name" @bind-Value="_roomParameters.UserId" />
+        <InputText id="userId" placeholder="enter user name" @bind-Value="RoomRequestParameters.UserId" />
     </div>
 
     <div>
-        <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = false)">Start call</button>
-        <button class="btn btn-primary" type="submit" @onclick="@(() => _roomParameters.IsJoin = true)">Join call</button>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsJoin = false)">Start call</button>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsJoin = true)">Join call</button>
     </div>
 </EditForm>
