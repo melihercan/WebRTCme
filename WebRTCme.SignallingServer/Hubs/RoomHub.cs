@@ -40,7 +40,16 @@ namespace WebRTCme.SignallingServer.Hubs
 
         public Task<Result<RTCIceServer[]>> JoinRoom(TurnServer turnServer, string roomId, string userId)
         {
-            return HandleRoomRequest(false, turnServer, roomId, userId);
+            var filteredClients = _clients.Where(client => client.TurnServer == turnServer && client.RoomId == roomId);
+            if (filteredClients.Count() == 0)
+                return Task.FromResult(Result<RTCIceServer[]>.Error(
+                    new string[] { $"TURN server {turnServer} has no room {roomId}" }));
+
+            if(filteredClients.Any(client => client.UserId == userId))
+                return Task.FromResult(Result<RTCIceServer[]>.Error(
+                    new string[] { $"User {userId} has already connected to TURN server:{turnServer} room:{roomId}" }));
+
+           return HandleRoomRequest(false, turnServer, roomId, userId);
         }
 
 
