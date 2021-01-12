@@ -80,24 +80,22 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        public async Task<RTCIceServer[]> StartRoomAsync(string roomName, string userName, TurnServer turnServer)
+        public Task JoinRoomAsync(string roomName, string userName)
         {
-            var result = await _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("StartRoom", roomName, 
+            return _hubConnection.SendAsync("JoinRoom", roomName, userName);
+        }
+
+        public async Task StartRoomAsync(string roomName, string userName, TurnServer turnServer)
+        {
+            await JoinRoomAsync(roomName, userName);
+
+            var result = await _hubConnection.InvokeAsync<Result<object>>("StartRoom", roomName, 
                 userName, turnServer);
-            if (result.Status == ResultStatus.Ok)
-            {
-                var iceServers = result.Value;
-                return iceServers;
-            }
-            else
+            if (result.Status != ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
         }
 
 
-        public Task<RTCIceServer[]> JoinRoomAsync(string roomName, string userName)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task StartRoomAsync(string roomName, string userName)
         {

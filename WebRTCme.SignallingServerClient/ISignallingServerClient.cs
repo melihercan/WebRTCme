@@ -10,10 +10,8 @@ namespace WebRTCme.SignallingServerClient
         Task InitializeAsync();
         Task CleanupAsync();
 
-        Task<RTCIceServer[]> StartRoomAsync(string roomName, string userName, TurnServer turnServer);
-        Task<RTCIceServer[]> JoinRoomAsync(string roomName, string userName);
-
-        Task StartRoomAsync(string roomName, string userName);
+        Task JoinRoomAsync(string roomName, string userName);
+        Task StartRoomAsync(string roomName, string userName, TurnServer turnServer);
 
         Task LeaveRoomAsync(string roomName, string userName);
 

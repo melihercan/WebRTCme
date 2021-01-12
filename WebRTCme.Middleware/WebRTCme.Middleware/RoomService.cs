@@ -28,13 +28,13 @@ namespace WebRtcMeMiddleware
 
         public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {
-            var iceServers = await (roomRequestParameters.IsJoin ?
+            /*var iceServers =*/ await (roomRequestParameters.IsJoin ?
                 _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId) :
                 _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId, roomRequestParameters.TurnServer));
 
             var configuration = new RTCConfiguration
             {
-                IceServers = iceServers,
+                //IceServers = iceServers,
                 PeerIdentity = roomRequestParameters.RoomId
             };
             var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
