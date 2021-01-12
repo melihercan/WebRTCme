@@ -7,10 +7,14 @@ namespace WebRTCme.SignallingServer.Models
 {
     public class Room
     {
-        public string RoomId { get; set; }
+        // Unique group name per hub. Set from roomName parameter.
+        public string GroupName { get; set; }
 
-        public Client InitiatiorClient { get; set; }
+        public RTCIceServer[] IceServers { get; set; }
 
-        public IEnumerable<Client> ParticipantClients { get; set; }
+        public string InitiatiorUserName { get; set; }
+
+        //public IEnumerable<Client> ParticipantClients { get; set; }
+        public IEnumerable<Client> Clients { get; set; }
     }
 }

@@ -29,8 +29,8 @@ namespace WebRtcMeMiddleware
         public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {
             var iceServers = await (roomRequestParameters.IsJoin ?
-                _signallingServerClient.JoinRoomAsync(roomRequestParameters.TurnServer, roomRequestParameters.RoomId, roomRequestParameters.UserId) :
-                _signallingServerClient.CreateRoomAsync(roomRequestParameters.TurnServer, roomRequestParameters.RoomId, roomRequestParameters.UserId));
+                _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId) :
+                _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId, roomRequestParameters.TurnServer));
 
             var configuration = new RTCConfiguration
             {

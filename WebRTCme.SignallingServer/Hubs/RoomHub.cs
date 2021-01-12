@@ -14,7 +14,8 @@ namespace WebRTCme.SignallingServer.Hubs
         private TurnServerClientFactory _turnServerClientFactory;
         private ITurnServerClient _turnServerClient;
 
-        private static List<Client> _clients = new();
+        private static List<Room> _rooms = new();
+        private static List<Client> _awaitingClients = new(); 
 
         public RoomHub(TurnServerClientFactory turnServerClientFactory)
         {
@@ -26,66 +27,78 @@ namespace WebRTCme.SignallingServer.Hubs
             await Clients.Caller.SendAsync("EchoToCallerResponse", message);
         }
 
-        public Task<Result<RTCIceServer[]>> CreateRoom(TurnServer turnServer, string roomId, string userId)
+        public async Task JoinRoom(string roomName, string userName)
         {
-            if (_clients.Any(client => client.TurnServer == turnServer && client.RoomId == roomId))
+            var client = new Client
             {
-                // Room already exist on this server.
-                return Task.FromResult(Result<RTCIceServer[]>.Error(
-                    new string[] { $"Room:{roomId} has already been created on {turnServer} TURN server" }));
+                ConnectionId = Context.ConnectionId,
+                RoomName = roomName,
+                UserName = userName
+            };
+            var room = _rooms.Find(room => room.GroupName == roomName);
+            if (room is null)
+                // Room has not been started yet. Queue the client in waiting list.
+                _awaitingClients.Add(client);
+            else
+            {
+                // Room has been started. Add this client to room, send IceServer list and notify all other clients
+                // in the group.
+                room.Clients.ToList().Add(client);
+                await Clients.Caller.SendAsync("OnIceServers", room.IceServers);
+                await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientReady", userName);
             }
 
-            return HandleRoomRequest(true, turnServer, roomId, userId);
-        }
 
-        public Task<Result<RTCIceServer[]>> JoinRoom(TurnServer turnServer, string roomId, string userId)
-        {
-            var filteredClients = _clients.Where(client => client.TurnServer == turnServer && client.RoomId == roomId);
-            if (filteredClients.Count() == 0)
-                return Task.FromResult(Result<RTCIceServer[]>.Error(
-                    new string[] { $"TURN server {turnServer} has no room {roomId}" }));
+            //var filteredClients = _rooms.Where(client => client.TurnServer == turnServer && client.GroupName == roomName);
+            //if (filteredClients.Count() == 0)
+            //    return Task.FromResult(Result<RTCIceServer[]>.Error(
+            //        new string[] { $"TURN server {turnServer} has no room {roomName}" }));
 
-            if(filteredClients.Any(client => client.UserId == userId))
-                return Task.FromResult(Result<RTCIceServer[]>.Error(
-                    new string[] { $"User {userId} has already connected to TURN server:{turnServer} room:{roomId}" }));
+            //if (filteredClients.Any(client => client.UserId == userName))
+            //    return Task.FromResult(Result<RTCIceServer[]>.Error(
+            //        new string[] { $"User {userName} has already connected to TURN server:{turnServer} room:{roomName}" }));
 
-           return HandleRoomRequest(false, turnServer, roomId, userId);
+            //return HandleRoomRequest(false, turnServer, roomName, userName);
         }
 
 
-        private async Task<Result<RTCIceServer[]>> HandleRoomRequest(bool isInitiator, TurnServer turnServer, 
-            string roomId, string userId)
+        public async Task<Result<object>> StartRoom(string roomName, string userName, TurnServer turnServer)
         {
-            if (_clients.Any(client => client.TurnServer == turnServer && client.RoomId == roomId))
-            {
-                // Room already exist on this server.
-                return Result<RTCIceServer[]>.Error(new string[] { $"Room:{roomId} has already been created on {turnServer} TURN server" });
-            }
-
-            //            var x = _clients
-            //              .Where(client => client.TurnServer == turnServer && client.RoomId == roomId);
-            //.GroupBy(client => new { client.TurnServer, client.RoomId });
+            if (_rooms.Any(room => room.GroupName == roomName))
+                return Result<object>.Error(new string[] { $"Room:{roomName} is in use" });
 
             _turnServerClient = _turnServerClientFactory.Create(turnServer);
 
             try
             {
                 var iceServers = await _turnServerClient.GetIceServersAsync();
-                _clients.Add(new Client
+                var newRoomClients = _awaitingClients.Where(client => client.RoomName == roomName);
+                _awaitingClients.RemoveAll(client => client.RoomName == roomName);
+                var room = new Room
                 {
-                    ClientId = Context.ConnectionId,
-                    IsInitiator = isInitiator,
-                    TurnServer = turnServer,
-                    RoomId = roomId,
-                    UserId = userId
-                });
-                return Result<RTCIceServer[]>.Success(iceServers);
+                    GroupName = roomName,
+                    IceServers = iceServers,
+                    InitiatiorUserName = userName,
+                    Clients = newRoomClients
+                };
+                _rooms.Add(room);
+                await Clients.Group(roomName).SendAsync("OnIceServers", room.IceServers);
+
+                var except = new List<string>();
+                foreach (var client in newRoomClients)
+                {
+                    except.Add(client.ConnectionId);
+                    await Clients.GroupExcept(roomName, except).SendAsync("OnClientReady", client.UserName);
+                }
+
+                return Result<object>.Success(null);
             }
             catch (Exception ex)
             {
-                return Result<RTCIceServer[]>.Error(new string[] { ex.Message });
+                return Result<object>.Error(new string[] { ex.Message });
             }
         }
+
 
 
         public async Task SendSdpOffer(string sdp)

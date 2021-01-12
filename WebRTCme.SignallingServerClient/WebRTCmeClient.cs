@@ -80,9 +80,10 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        public async Task<RTCIceServer[]> CreateRoomAsync(TurnServer turnServer, string roomId, string userId)
+        public async Task<RTCIceServer[]> StartRoomAsync(string roomName, string userName, TurnServer turnServer)
         {
-            var result = await _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("CreateRoom", turnServer, roomId, userId);
+            var result = await _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("StartRoom", roomName, 
+                userName, turnServer);
             if (result.Status == ResultStatus.Ok)
             {
                 var iceServers = result.Value;
@@ -93,10 +94,21 @@ namespace WebRTCme.SignallingServerClient
         }
 
 
-        public Task<RTCIceServer[]> JoinRoomAsync(TurnServer turnServer, string roomId, string userId)
+        public Task<RTCIceServer[]> JoinRoomAsync(string roomName, string userName)
         {
             throw new NotImplementedException();
         }
+
+        public Task StartRoomAsync(string roomName, string userName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task LeaveRoomAsync(string roomName, string userName)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public Task SendSdpOfferAsync(string sdp)
         {

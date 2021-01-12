@@ -7,15 +7,10 @@ namespace WebRTCme.SignallingServer.Models
 {
     public class Client
     {
-        public string ClientId { get; set; }
+        // From Context.ConnectionId.
+        public string ConnectionId { get; set; }
 
-        public bool IsInitiator { get; set; }
-
-        public TurnServer TurnServer { get; set; }
-
-        public string RoomId { get; set; }
-
-        public string UserId { get; set; }
-
+        public string RoomName { get; set; }
+        public string UserName { get; set; }
     }
 }
