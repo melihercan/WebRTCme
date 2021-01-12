@@ -47,18 +47,6 @@ namespace WebRTCme.SignallingServer.Hubs
                 await Clients.Caller.SendAsync("OnIceServers", room.IceServers);
                 await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientReady", userName);
             }
-
-
-            //var filteredClients = _rooms.Where(client => client.TurnServer == turnServer && client.GroupName == roomName);
-            //if (filteredClients.Count() == 0)
-            //    return Task.FromResult(Result<RTCIceServer[]>.Error(
-            //        new string[] { $"TURN server {turnServer} has no room {roomName}" }));
-
-            //if (filteredClients.Any(client => client.UserId == userName))
-            //    return Task.FromResult(Result<RTCIceServer[]>.Error(
-            //        new string[] { $"User {userName} has already connected to TURN server:{turnServer} room:{roomName}" }));
-
-            //return HandleRoomRequest(false, turnServer, roomName, userName);
         }
 
 
@@ -84,11 +72,12 @@ namespace WebRTCme.SignallingServer.Hubs
                 _rooms.Add(room);
                 await Clients.Group(roomName).SendAsync("OnIceServers", room.IceServers);
 
-                var except = new List<string>();
+                var excepts = new List<string>();
                 foreach (var client in newRoomClients)
                 {
-                    except.Add(client.ConnectionId);
-                    await Clients.GroupExcept(roomName, except).SendAsync("OnClientReady", client.UserName);
+                    excepts.Add(client.ConnectionId);
+                    if (excepts.Count < newRoomClients.Count())
+                        await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientReady", client.UserName);
                 }
 
                 return Result<object>.Success(null);
