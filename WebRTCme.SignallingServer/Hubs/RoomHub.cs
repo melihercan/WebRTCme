@@ -7,10 +7,11 @@ using System.Reactive;
 using System.Threading.Tasks;
 using WebRTCme.SignallingServer.Models;
 using WebRTCme.SignallingServer.TurnServerService;
+using WebRTCme.SignallingServerClient;
 
 namespace WebRTCme.SignallingServer.Hubs
 {
-    public class RoomHub : Hub
+    public class RoomHub : Hub<ISignallingServerCallbacks>
     {
         private TurnServerClientFactory _turnServerClientFactory;
         private ITurnServerClient _turnServerClient;
@@ -21,11 +22,6 @@ namespace WebRTCme.SignallingServer.Hubs
         public RoomHub(TurnServerClientFactory turnServerClientFactory)
         {
             _turnServerClientFactory = turnServerClientFactory;
-        }
-
-        public async Task EchoToCaller(string message)
-        {
-            await Clients.Caller.SendAsync("EchoToCallerResponse", message);
         }
 
         public async Task<Result<Unit>> JoinRoom(string roomName, string userName)
@@ -49,8 +45,8 @@ namespace WebRTCme.SignallingServer.Hubs
                 // Room has been started. Add this client to room, send IceServer list and notify all other clients
                 // in the group.
                 room.Clients.ToList().Add(client);
-                await Clients.Caller.SendAsync("OnRoomStarted", room.GroupName, room.IceServers);
-                await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientJoined", roomName, userName);
+                await Clients.Caller.OnRoomStarted(room.GroupName, room.IceServers);
+                await Clients.GroupExcept(roomName, Context.ConnectionId).OnRoomJoined(roomName, userName);
             }
             return Result<Unit>.Success(Unit.Default);
         }
@@ -70,7 +66,7 @@ namespace WebRTCme.SignallingServer.Hubs
             else
                 return Result<Unit>.Error(new string[] { $"User {userName} not found in room {roomName}" });
 
-            await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientLeft", roomName, userName);
+            await Clients.GroupExcept(roomName, Context.ConnectionId).OnRoomLeft(roomName, userName);
             return Result<Unit>.Success(Unit.Default);
 
         }
@@ -96,15 +92,14 @@ namespace WebRTCme.SignallingServer.Hubs
                     Clients = newRoomClients
                 };
                 _rooms.Add(room);
-                await Clients.Group(roomName).SendAsync("OnRoomStarted", room.GroupName, room.IceServers);
+                await Clients.Group(roomName).OnRoomStarted(room.GroupName, room.IceServers);
 
                 var excepts = new List<string>();
                 foreach (var client in newRoomClients)
                 {
                     excepts.Add(client.ConnectionId);
                     if (excepts.Count < newRoomClients.Count())
-                        await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientJoined", client.RoomName, 
-                            client.UserName);
+                        await Clients.GroupExcept(roomName, excepts).OnRoomJoined(client.RoomName, client.UserName);
                 }
 
                 return Result<Unit>.Success(Unit.Default);
@@ -130,31 +125,40 @@ namespace WebRTCme.SignallingServer.Hubs
             {
                 excepts.Add(client.ConnectionId);
                 if (excepts.Count < room.Clients.Count())
-                    await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientLeft", client.RoomName,
-                        client.UserName);
+                    await Clients.GroupExcept(roomName, excepts).OnRoomLeft(client.RoomName, client.UserName);
             }
-            await Clients.Group(roomName).SendAsync("OnRoomStopped", room.IceServers);
+            await Clients.Group(roomName).OnRoomStopped(room.GroupName);
             _rooms.Remove(room);
 
             return Result<Unit>.Success(Unit.Default);
         }
 
-        public async Task SendSdpOffer(string sdp)
+        public async Task<Result<Unit>> SdpOffer(string roomName, string pairUserName, string sdp)
         {
-            await Clients.Others.SendAsync("OnSdpOffer", sdp);
+            var room = _rooms.Find(room => room.GroupName == roomName);
+
+            if (room is null)
+                return Result<Unit>.Error(new string[] { $"{roomName} room not found" });
+
+            var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
+            var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId; 
+
+            await Clients.Client(pairConnectionId).OnSdpOffered(roomName, userName, sdp);
+            return Result<Unit>.Success(Unit.Default);
         }
 
-        //public async Task CreateRoomByTurnServerName(TurnServer turnServer, string roomId, string clientId)
-        //{
+        public async Task<Result<Unit>> SdpAnswer(string roomName, string pairUserName, string sdp)
+        {
+            var room = _rooms.Find(room => room.GroupName == roomName);
 
-        //}
+            if (room is null)
+                return Result<Unit>.Error(new string[] { $"{roomName} room not found" });
 
-        //      public async Task CreateRoomByTurnServerUrlWithRoom(string turnServerUrl, string roomId, string clientId)
-        //    {
+            var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
+            var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId;
 
-        //  }
-
-        //        public async Task JoinRoom(string )
-
+            await Clients.Client(pairConnectionId).OnSdpAnswered(roomName, userName, sdp);
+            return Result<Unit>.Success(Unit.Default);
+        }
     }
 }

@@ -64,8 +64,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Was
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware", "WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj", "{83F339B2-8815-4479-ABA0-866962D44B10}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Tests.SignallingServerTests", "WebRTCme.Tests\WebRTCme.Tests.SignallingServerTests\WebRTCme.Tests.SignallingServerTests.csproj", "{F60F90E5-CAD0-4791-9256-871CB8E132C2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -309,18 +307,6 @@ Global
 		{83F339B2-8815-4479-ABA0-866962D44B10}.Release|iPhone.Build.0 = Release|Any CPU
 		{83F339B2-8815-4479-ABA0-866962D44B10}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{83F339B2-8815-4479-ABA0-866962D44B10}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|iPhone.Build.0 = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -344,7 +330,6 @@ Global
 		{B828BC93-F0B8-4F75-9EFA-66D39C3733FD} = {9260AB56-054A-49D1-8354-F98AE59E5261}
 		{11DC1BF4-2C88-4225-A4DA-CE71E55815DE} = {03D85822-0AE1-4257-87CA-0616A6BD3298}
 		{83F339B2-8815-4479-ABA0-866962D44B10} = {1B143511-677C-4946-A201-C8D429A563A5}
-		{F60F90E5-CAD0-4791-9256-871CB8E132C2} = {2A778CE8-B41B-4AE0-A512-FB929E299FF4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FC3188C-A3C9-42FC-AF35-0CDCE91C707A}

@@ -14,7 +14,7 @@ using Xamarin.Essentials;
 
 namespace WebRTCme.SignallingServerClient
 {
-    internal class WebRTCmeClient : ISignallingServerClient
+    internal class WebRTCmeClient : ISignallingServerClient, ISignallingServerCallbacks
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
@@ -56,8 +56,13 @@ namespace WebRTCme.SignallingServerClient
                 .AddMessagePackProtocol()
                 .Build();
 
-            // Register handlers called by hub.
-            _hubConnection.On<string>("EchoToCallerResponse", EchoToCallerResponse);
+            // Register callback handlers invoked by server hub.
+            _hubConnection.On<string,string>("OnRoomJoined", OnRoomJoined);
+            _hubConnection.On<string, string>("OnRoomLeft", OnRoomLeft);
+            _hubConnection.On<string, RTCIceServer[]>("OnRoomStarted", OnRoomStarted);
+            _hubConnection.On<string>("OnRoomStopped", OnRoomStopped);
+            _hubConnection.On<string, string, string>("OnSdpOffered", OnSdpOffered);
+            _hubConnection.On<string, string, string>("OnSdpAnswered", OnSdpAnswered);
 
             _hubConnection.Closed += HubConnection_Closed;
 
@@ -85,6 +90,11 @@ namespace WebRTCme.SignallingServerClient
             return _hubConnection.SendAsync("JoinRoom", roomName, userName);
         }
 
+        public Task LeaveRoomAsync(string roomName, string userName)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task StartRoomAsync(string roomName, string userName, TurnServer turnServer)
         {
             var result = await _hubConnection.InvokeAsync<Result<object>>("StartRoom", roomName, 
@@ -93,24 +103,21 @@ namespace WebRTCme.SignallingServerClient
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
         }
 
-
-
-        public Task StartRoomAsync(string roomName, string userName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task LeaveRoomAsync(string roomName, string userName)
+        public Task StopRoomAsync(string roomName, string userName)
         {
             throw new NotImplementedException();
         }
 
 
-        public Task SendSdpOfferAsync(string sdp)
+        public Task SdpOfferAsync(string roomName, string pairUserName, string sdp)
         {
-            return _hubConnection.SendAsync("SendSdpOffer", sdp);
+            throw new NotImplementedException();
         }
 
+        public Task SdpAnswerAsync(string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
 
         private Task HubConnection_Closed(Exception arg)
         {
@@ -151,23 +158,41 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        #region SignallingServerResponseHandlers
 
-        // For echo testing.
-        private TaskCompletionSource<string> _echoTcs;
-
-        public async Task<string> ExecuteEchoToCaller(string message)
+        #region SignallingServerCallbacks
+        public Task OnRoomJoined(string roomName, string userName)
         {
-            _echoTcs = new TaskCompletionSource<string>();
-            await _hubConnection.SendAsync("EchoToCaller", message);
-            var result = await _echoTcs.Task;
-            return result;
+            throw new NotImplementedException();
+        }
 
-        }
-        public void EchoToCallerResponse(string message)
+        public Task OnRoomLeft(string roomName, string userName)
         {
-            _echoTcs.SetResult(message);
+            throw new NotImplementedException();
         }
+
+        public Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnRoomStopped(string roomName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnSdpOffered(string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnSdpAnswered(string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
 
         #endregion
     }
