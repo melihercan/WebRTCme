@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Threading.Tasks;
 using WebRTCme.SignallingServer.Models;
 using WebRTCme.SignallingServer.TurnServerService;
@@ -27,8 +28,12 @@ namespace WebRTCme.SignallingServer.Hubs
             await Clients.Caller.SendAsync("EchoToCallerResponse", message);
         }
 
-        public async Task JoinRoom(string roomName, string userName)
+        public async Task<Result<Unit>> JoinRoom(string roomName, string userName)
         {
+            if (_rooms.Any(room => room.GroupName == roomName && room.Clients.Any(Client => Client.UserName == userName)) ||
+                _awaitingClients.Any(client => client.RoomName == roomName && client.UserName == userName))
+                return Result<Unit>.Error(new string[] { $"User {userName} has already joined to room {roomName}" });
+
             var client = new Client
             {
                 ConnectionId = Context.ConnectionId,
@@ -44,16 +49,37 @@ namespace WebRTCme.SignallingServer.Hubs
                 // Room has been started. Add this client to room, send IceServer list and notify all other clients
                 // in the group.
                 room.Clients.ToList().Add(client);
-                await Clients.Caller.SendAsync("OnIceServers", room.IceServers);
-                await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientReady", userName);
+                await Clients.Caller.SendAsync("OnRoomStarted", room.GroupName, room.IceServers);
+                await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientJoined", roomName, userName);
             }
+            return Result<Unit>.Success(Unit.Default);
+        }
+
+        public async Task<Result<Unit>> LeaveRoom(string roomName, string userName)
+        {
+            var client = new Client
+            {
+                ConnectionId = Context.ConnectionId,
+                RoomName = roomName,
+                UserName = userName
+            };
+            if (_rooms.Any(room => room.GroupName == roomName && room.Clients.Any(Client => Client.UserName == userName)))
+                _rooms.Find(room => room.GroupName == roomName).Clients.ToList().Remove(client);
+            else if (_awaitingClients.Any(client => client.RoomName == roomName && client.UserName == userName))
+                _awaitingClients.Remove(client);
+            else
+                return Result<Unit>.Error(new string[] { $"User {userName} not found in room {roomName}" });
+
+            await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("OnClientLeft", roomName, userName);
+            return Result<Unit>.Success(Unit.Default);
+
         }
 
 
-        public async Task<Result<object>> StartRoom(string roomName, string userName, TurnServer turnServer)
+        public async Task<Result<Unit>> StartRoom(string roomName, string userName, TurnServer turnServer)
         {
             if (_rooms.Any(room => room.GroupName == roomName))
-                return Result<object>.Error(new string[] { $"Room:{roomName} is in use" });
+                return Result<Unit>.Error(new string[] { $"Room:{roomName} is in use" });
 
             _turnServerClient = _turnServerClientFactory.Create(turnServer);
 
@@ -70,25 +96,48 @@ namespace WebRTCme.SignallingServer.Hubs
                     Clients = newRoomClients
                 };
                 _rooms.Add(room);
-                await Clients.Group(roomName).SendAsync("OnIceServers", room.IceServers);
+                await Clients.Group(roomName).SendAsync("OnRoomStarted", room.GroupName, room.IceServers);
 
                 var excepts = new List<string>();
                 foreach (var client in newRoomClients)
                 {
                     excepts.Add(client.ConnectionId);
                     if (excepts.Count < newRoomClients.Count())
-                        await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientReady", client.UserName);
+                        await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientJoined", client.RoomName, 
+                            client.UserName);
                 }
 
-                return Result<object>.Success(null);
+                return Result<Unit>.Success(Unit.Default);
             }
             catch (Exception ex)
             {
-                return Result<object>.Error(new string[] { ex.Message });
+                return Result<Unit>.Error(new string[] { ex.Message });
             }
         }
 
+        public async Task<Result<Unit>> StopRoom(string roomName, string userName)
+        {
+            var room = _rooms.Find(room => room.GroupName == roomName);
 
+            if (room is null)
+                return Result<Unit>.Error(new string[] { $"{roomName} room not found" });
+
+            if (room.InitiatiorUserName != userName)
+                return Result<Unit>.Error(new string[] { $"User {userName} has no authority to stop room {roomName}" });
+
+            var excepts = new List<string>();
+            foreach (var client in room.Clients)
+            {
+                excepts.Add(client.ConnectionId);
+                if (excepts.Count < room.Clients.Count())
+                    await Clients.GroupExcept(roomName, excepts).SendAsync("OnClientLeft", client.RoomName,
+                        client.UserName);
+            }
+            await Clients.Group(roomName).SendAsync("OnRoomStopped", room.IceServers);
+            _rooms.Remove(room);
+
+            return Result<Unit>.Success(Unit.Default);
+        }
 
         public async Task SendSdpOffer(string sdp)
         {

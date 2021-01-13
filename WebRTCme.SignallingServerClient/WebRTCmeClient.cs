@@ -87,8 +87,6 @@ namespace WebRTCme.SignallingServerClient
 
         public async Task StartRoomAsync(string roomName, string userName, TurnServer turnServer)
         {
-            await JoinRoomAsync(roomName, userName);
-
             var result = await _hubConnection.InvokeAsync<Result<object>>("StartRoom", roomName, 
                 userName, turnServer);
             if (result.Status != ResultStatus.Ok)

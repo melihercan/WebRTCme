@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.1" />
+    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
