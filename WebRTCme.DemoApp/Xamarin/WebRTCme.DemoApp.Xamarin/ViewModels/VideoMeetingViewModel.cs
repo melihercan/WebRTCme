@@ -89,13 +89,13 @@ namespace DemoApp.ViewModels
 
         public ICommand StartCallCommand => new Command(async () =>
         {
-            RoomRequestParameters.IsJoin = false;
+            RoomRequestParameters.IsInitiator = true;
             await ConnectRoomAsync();
         });
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
-            RoomRequestParameters.IsJoin = true;
+            RoomRequestParameters.IsInitiator = false;
             await ConnectRoomAsync();
         });
 

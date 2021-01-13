@@ -7,10 +7,11 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerClient
     {
-        Task InitializeAsync();
+        Task InitializeAsync(ISignallingServerCallbacks signallingServerCallbacks);
         Task CleanupAsync();
 
         Task JoinRoomAsync(string roomName, string userName);
+        
         Task LeaveRoomAsync(string roomName, string userName);
 
         Task StartRoomAsync(string roomName, string userName, TurnServer turnServer);

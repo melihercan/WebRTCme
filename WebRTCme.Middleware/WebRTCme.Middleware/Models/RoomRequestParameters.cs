@@ -6,7 +6,7 @@ namespace WebRTCme.Middleware
 {
     public class RoomRequestParameters
     {
-        public bool IsJoin { get; set; }
+        public bool IsInitiator { get; set; }
 
         public TurnServer TurnServer { get; set; }
 

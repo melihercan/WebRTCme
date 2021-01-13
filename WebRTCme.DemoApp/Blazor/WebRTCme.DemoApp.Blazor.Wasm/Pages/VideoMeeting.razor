@@ -48,7 +48,7 @@ TURN server: @_server<input @bind="_server"/>
     </div>
 
     <div>
-        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsJoin = false)">Start call</button>
-        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsJoin = true)">Join call</button>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsInitiator = true)">Start call</button>
+        <button class="btn btn-primary" type="submit" @onclick="@(() => RoomRequestParameters.IsInitiator = false)">Join call</button>
     </div>
 </EditForm>

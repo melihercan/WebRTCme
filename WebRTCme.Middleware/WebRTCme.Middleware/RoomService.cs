@@ -10,7 +10,7 @@ using WebRTCme.SignallingServerClient;
 
 namespace WebRtcMeMiddleware
 {
-    internal class RoomService : IRoomService
+    internal class RoomService : IRoomService, ISignallingServerCallbacks
     {
         private ISignallingServerClient _signallingServerClient;
         private IJSRuntime _jsRuntime;
@@ -19,7 +19,7 @@ namespace WebRtcMeMiddleware
         {
             var self = new RoomService();
             self._signallingServerClient = SignallingServerClientFactory.Create(signallingServerBaseUrl);
-            await self._signallingServerClient.InitializeAsync();
+            await self._signallingServerClient.InitializeAsync(self);
             self._jsRuntime = jsRuntime;
             return self;
         }
@@ -28,9 +28,11 @@ namespace WebRtcMeMiddleware
 
         public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {
-            /*var iceServers =*/ await (roomRequestParameters.IsJoin ?
-                _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId) :
-                _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId, roomRequestParameters.TurnServer));
+            await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId);
+
+            if (roomRequestParameters.IsInitiator)
+                await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId, 
+                    roomRequestParameters.TurnServer);
 
             var configuration = new RTCConfiguration
             {
@@ -67,7 +69,7 @@ namespace WebRtcMeMiddleware
             peerConnection.AddTrack(roomRequestParameters.LocalStream.GetVideoTracks().First(), roomRequestParameters.LocalStream);
             peerConnection.AddTrack(roomRequestParameters.LocalStream.GetAudioTracks().First(), roomRequestParameters.LocalStream);
 
-            if (!roomRequestParameters.IsJoin)
+            if (roomRequestParameters.IsInitiator)
             {
                 var offerDescription = await peerConnection.CreateOffer();
                 var offerDescriptionJson = offerDescription.ToJson();
@@ -89,10 +91,49 @@ namespace WebRtcMeMiddleware
             return null;
         }
 
+        public Task DisconnectRoomAsync(RoomRequestParameters roomRequestParameters)
+        {
+            throw new NotImplementedException();
+        }
+
         public ValueTask DisposeAsync()
         {
             return new ValueTask(_signallingServerClient.CleanupAsync());
         }
+
+        #region SignallingServerCallbacks
+        public Task OnRoomJoined(string roomName, string userName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnRoomLeft(string roomName, string userName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnRoomStopped(string roomName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnSdpOffered(string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnSdpAnswered(string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
 
     }
 }

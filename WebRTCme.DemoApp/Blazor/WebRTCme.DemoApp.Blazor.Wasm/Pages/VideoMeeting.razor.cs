@@ -38,7 +38,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IRoomService _roomService;
         private IMediaStreamService _mediaStreamService;
 
-        private RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
+        private RoomRequestParameters RoomRequestParameters { get; set; } = new();
 
         protected override async Task OnInitializedAsync()
         {
