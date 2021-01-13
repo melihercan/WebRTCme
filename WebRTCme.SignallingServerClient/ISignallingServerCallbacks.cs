@@ -7,9 +7,9 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerCallbacks
     {
-        Task OnRoomJoined(string roomName, string userName);
+        Task OnRoomJoined(string roomName, string pairUserName);
 
-        Task OnRoomLeft(string roomName, string userName);
+        Task OnRoomLeft(string roomName, string pairUserName);
 
         Task OnRoomStarted(string roomName, RTCIceServer[] iceServers);
 

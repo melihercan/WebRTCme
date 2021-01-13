@@ -14,6 +14,7 @@ namespace WebRtcMeMiddleware
     {
         private ISignallingServerClient _signallingServerClient;
         private IJSRuntime _jsRuntime;
+        private List<RoomContext> _roomContexts = new();
 
         static public async Task<IRoomService> CreateAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
         {
@@ -28,6 +29,13 @@ namespace WebRtcMeMiddleware
 
         public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {
+            var roomContext = new RoomContext
+            {
+                RoomState = RoomState.Idle,
+                RoomRequestParameters = roomRequestParameters
+            };
+            _roomContexts.Add(roomContext);
+
             await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomId, roomRequestParameters.UserId);
 
             if (roomRequestParameters.IsInitiator)
@@ -66,8 +74,10 @@ namespace WebRtcMeMiddleware
             {
             };
 
-            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetVideoTracks().First(), roomRequestParameters.LocalStream);
-            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetAudioTracks().First(), roomRequestParameters.LocalStream);
+            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetVideoTracks().First(), 
+                roomRequestParameters.LocalStream);
+            peerConnection.AddTrack(roomRequestParameters.LocalStream.GetAudioTracks().First(), 
+                roomRequestParameters.LocalStream);
 
             if (roomRequestParameters.IsInitiator)
             {
@@ -102,12 +112,12 @@ namespace WebRtcMeMiddleware
         }
 
         #region SignallingServerCallbacks
-        public Task OnRoomJoined(string roomName, string userName)
+        public Task OnRoomJoined(string roomName, string pairUserName)
         {
             throw new NotImplementedException();
         }
 
-        public Task OnRoomLeft(string roomName, string userName)
+        public Task OnRoomLeft(string roomName, string pairUserName)
         {
             throw new NotImplementedException();
         }
