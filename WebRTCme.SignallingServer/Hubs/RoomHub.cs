@@ -46,7 +46,7 @@ namespace WebRTCme.SignallingServer.Hubs
                 // in the group.
                 room.Clients.ToList().Add(client);
                 await Clients.Caller.OnRoomStarted(room.GroupName, room.IceServers);
-                await Clients.GroupExcept(roomName, Context.ConnectionId).OnRoomJoined(roomName, userName);
+                await Clients.GroupExcept(roomName, Context.ConnectionId).OnPeerJoined(roomName, userName);
             }
             return Result<Unit>.Success(Unit.Default);
         }
@@ -66,7 +66,7 @@ namespace WebRTCme.SignallingServer.Hubs
             else
                 return Result<Unit>.Error(new string[] { $"User {userName} not found in room {roomName}" });
 
-            await Clients.GroupExcept(roomName, Context.ConnectionId).OnRoomLeft(roomName, userName);
+            await Clients.GroupExcept(roomName, Context.ConnectionId).OnPeerLeft(roomName, userName);
             return Result<Unit>.Success(Unit.Default);
 
         }
@@ -99,7 +99,7 @@ namespace WebRTCme.SignallingServer.Hubs
                 {
                     excepts.Add(client.ConnectionId);
                     if (excepts.Count < newRoomClients.Count())
-                        await Clients.GroupExcept(roomName, excepts).OnRoomJoined(client.RoomName, client.UserName);
+                        await Clients.GroupExcept(roomName, excepts).OnPeerJoined(client.RoomName, client.UserName);
                 }
 
                 return Result<Unit>.Success(Unit.Default);
@@ -125,7 +125,7 @@ namespace WebRTCme.SignallingServer.Hubs
             {
                 excepts.Add(client.ConnectionId);
                 if (excepts.Count < room.Clients.Count())
-                    await Clients.GroupExcept(roomName, excepts).OnRoomLeft(client.RoomName, client.UserName);
+                    await Clients.GroupExcept(roomName, excepts).OnPeerLeft(client.RoomName, client.UserName);
             }
             await Clients.Group(roomName).OnRoomStopped(room.GroupName);
             _rooms.Remove(room);
@@ -143,7 +143,7 @@ namespace WebRTCme.SignallingServer.Hubs
             var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
             var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId; 
 
-            await Clients.Client(pairConnectionId).OnSdpOffered(roomName, userName, sdp);
+            await Clients.Client(pairConnectionId).OnPeerSdpOffered(roomName, userName, sdp);
             return Result<Unit>.Success(Unit.Default);
         }
 
@@ -157,7 +157,7 @@ namespace WebRTCme.SignallingServer.Hubs
             var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
             var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId;
 
-            await Clients.Client(pairConnectionId).OnSdpAnswered(roomName, userName, sdp);
+            await Clients.Client(pairConnectionId).OnPeerSdpAnswered(roomName, userName, sdp);
             return Result<Unit>.Success(Unit.Default);
         }
     }

@@ -58,12 +58,12 @@ namespace WebRTCme.SignallingServerClient
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            _hubConnection.On<string, string>("OnRoomJoined", signallingServerCallbacks.OnRoomJoined);
-            _hubConnection.On<string, string>("OnRoomLeft", signallingServerCallbacks.OnRoomLeft);
             _hubConnection.On<string, RTCIceServer[]>("OnRoomStarted", signallingServerCallbacks.OnRoomStarted);
             _hubConnection.On<string>("OnRoomStopped", signallingServerCallbacks.OnRoomStopped);
-            _hubConnection.On<string, string, string>("OnSdpOffered", signallingServerCallbacks.OnSdpOffered);
-            _hubConnection.On<string, string, string>("OnSdpAnswered", signallingServerCallbacks.OnSdpAnswered);
+            _hubConnection.On<string, string>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
+            _hubConnection.On<string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
+            _hubConnection.On<string, string, string>("OnPeerSdpOffered", signallingServerCallbacks.OnPeerSdpOffered);
+            _hubConnection.On<string, string, string>("OnPeerSdpAnswered", signallingServerCallbacks.OnPeerSdpAnswered);
 
             _hubConnection.Closed += HubConnection_Closed;
 
