@@ -45,6 +45,14 @@ namespace WebRtc.iOS
                 RTCRtpTransceiverDirection.Inactive => Webrtc.RTCRtpTransceiverDirection.Inactive
             };
 
+        public static Webrtc.RTCSdpType ToNative(this RTCSdpType type) =>
+            type switch
+            {
+                RTCSdpType.Answer => Webrtc.RTCSdpType.Answer,
+                RTCSdpType.Offer => Webrtc.RTCSdpType.Offer,
+                RTCSdpType.Pranswer => Webrtc.RTCSdpType.PrAnswer,
+                RTCSdpType.Rollback => Webrtc.RTCSdpType.Rollback
+            };
 
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
             nativeBundlePolicy switch
@@ -137,7 +145,7 @@ namespace WebRtc.iOS
                 Webrtc.RTCRtpTransceiverDirection.Stopped => throw new NotImplementedException(),
             };
 
-        public static RTCSdpType FromNative(this Webrtc.RTCSdpType nativeType) =>
+        public static RTCSdpType FromNative(this Webrtc.RTCSessionDescription.Type nativeType) =>
             nativeType switch
             {
                 Webrtc.RTCSdpType.Answer => RTCSdpType.Answer,
@@ -145,7 +153,5 @@ namespace WebRtc.iOS
                 Webrtc.RTCSdpType.PrAnswer => RTCSdpType.Pranswer,
                 Webrtc.RTCSdpType.Rollback => RTCSdpType.Rollback
             };
-
-
     }
 }

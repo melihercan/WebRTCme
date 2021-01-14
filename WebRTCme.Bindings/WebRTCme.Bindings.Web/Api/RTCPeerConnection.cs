@@ -35,39 +35,33 @@ namespace WebRtcBindingsWeb.Api
 
         public RTCPeerConnectionState ConnectionState => GetNativeProperty<RTCPeerConnectionState>("connectionState");
 
-        public IRTCSessionDescription CurrentLocalDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "currentLocalDescription"));
+        public RTCSessionDescriptionInit CurrentLocalDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("currentLocalDescription");
 
-        public IRTCSessionDescription CurrentRemoteDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "currentRemoteDescription"));
+        public RTCSessionDescriptionInit CurrentRemoteDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("currentRemoteDescription");
 
         public RTCIceConnectionState IceConnectionState => 
             GetNativeProperty<RTCIceConnectionState>("iceConnectionState");
 
         public RTCIceGatheringState IceGatheringState => GetNativeProperty<RTCIceGatheringState>("iceGatheringState");
 
-        public IRTCSessionDescription LocalDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "localDescription"));
+        public RTCSessionDescriptionInit LocalDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("localDescription");
 
         public Task<IRTCIdentityAssertion> PeerIdentity => GetPeerIdentity();
         private async Task<IRTCIdentityAssertion> GetPeerIdentity() => 
             await Task.FromResult(RTCIdentityAssertion.Create(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
                 NativeObject, "peerIdentity")));
 
-        public IRTCSessionDescription PendingLocalDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "pendingLocalDescription"));
+        public RTCSessionDescriptionInit PendingLocalDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("pendingLocalDescription");
 
-        public IRTCSessionDescription PendingRemoteDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "pendingRemoteDescription"));
+        public RTCSessionDescriptionInit PendingRemoteDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("pendingRemoteDescription");
 
-        public IRTCSessionDescription RemoteDescription =>
-            RTCSessionDescription.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(
-                NativeObject, "remoteDescription"));
+        public RTCSessionDescriptionInit RemoteDescription =>
+            GetNativeProperty<RTCSessionDescriptionInit>("remoteDescription");
 
         public IRTCSctpTransport Sctp =>
             RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
@@ -113,10 +107,9 @@ namespace WebRtcBindingsWeb.Api
 
         public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 
-        public async Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null) =>
-            await Task.FromResult(RTCSessionDescription.Create(
-                JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                    NativeObject, "createAnswer", options)));
+        public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null) =>
+            await Task.FromResult(await JsRuntime.CallJsMethodAsync<RTCSessionDescriptionInit> (
+                    NativeObject, "createAnswer", options));
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null) =>
             RTCDataChannel.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "createDataChannel",
@@ -126,11 +119,9 @@ namespace WebRtcBindingsWeb.Api
                     options
                 }));
 
-        public async Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options) =>
-            await Task.FromResult(RTCSessionDescription.Create(
-                JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                    NativeObject, "createOffer", options)));
-
+        public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options) =>
+            await Task.FromResult(await JsRuntime.CallJsMethodAsync<RTCSessionDescriptionInit>(
+                    NativeObject, "createOffer", options));
 
         /*static*/
         public async Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
@@ -197,12 +188,12 @@ namespace WebRtcBindingsWeb.Api
                     userName
                 });
 
-        public Task SetLocalDescription(IRTCSessionDescription sessionDescription) =>
-            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription", sessionDescription.NativeObject)
+        public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription", sessionDescription)
             .AsTask();
 
-        public Task SetRemoteDescription(IRTCSessionDescription sessionDescription) =>
-            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setRemoteDescription", sessionDescription.NativeObject)
+        public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setRemoteDescription", sessionDescription)
             .AsTask();
     }
 }

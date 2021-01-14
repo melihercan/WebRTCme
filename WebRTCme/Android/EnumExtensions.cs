@@ -38,7 +38,8 @@ namespace WebRtc.Android
             rtcpMuxPolicy switch
             {
                 RTCRtcpMuxPolicy.Negotiate => Webrtc.PeerConnection.RtcpMuxPolicy.Negotiate,
-                RTCRtcpMuxPolicy.Require => Webrtc.PeerConnection.RtcpMuxPolicy.Require
+                RTCRtcpMuxPolicy.Require => Webrtc.PeerConnection.RtcpMuxPolicy.Require,
+                _ => throw new NotImplementedException()
             };
 
         public static Webrtc.RtpTransceiver.RtpTransceiverDirection ToNative(
@@ -51,6 +52,16 @@ namespace WebRtc.Android
                     RTCRtpTransceiverDirection.Inactive => Webrtc.RtpTransceiver.RtpTransceiverDirection.Inactive,
                     _ => throw new NotImplementedException()
                 };
+
+        public static Webrtc.SessionDescription.Type ToNative(this RTCSdpType type) =>
+            type switch
+            {
+                RTCSdpType.Answer => Webrtc.SessionDescription.Type.Answer,
+                RTCSdpType.Offer => Webrtc.SessionDescription.Type.Offer,
+                RTCSdpType.Pranswer => Webrtc.SessionDescription.Type.Pranswer,
+                RTCSdpType.Rollback => Webrtc.SessionDescription.Type.Rollback,
+                _ => throw new NotImplementedException()
+            };
 
         public static RTCPeerConnectionState FromNative(
             this Webrtc.PeerConnection.PeerConnectionState nativePeerConnectionState)

@@ -13,23 +13,23 @@ namespace WebRTCme
 
         RTCPeerConnectionState ConnectionState { get; }
 
-        IRTCSessionDescription CurrentLocalDescription { get; }
+        RTCSessionDescriptionInit CurrentLocalDescription { get; }
 
-        IRTCSessionDescription CurrentRemoteDescription { get; }
+        RTCSessionDescriptionInit CurrentRemoteDescription { get; }
 
         RTCIceConnectionState IceConnectionState { get; }
 
         RTCIceGatheringState IceGatheringState { get; }
 
-        IRTCSessionDescription LocalDescription { get; }
+        RTCSessionDescriptionInit LocalDescription { get; }
 
         Task<IRTCIdentityAssertion> PeerIdentity { get; }
 
-        IRTCSessionDescription PendingLocalDescription { get; }
+        RTCSessionDescriptionInit PendingLocalDescription { get; }
 
-        IRTCSessionDescription PendingRemoteDescription { get; }
+        RTCSessionDescriptionInit PendingRemoteDescription { get; }
 
-        IRTCSessionDescription RemoteDescription { get; }
+        RTCSessionDescriptionInit RemoteDescription { get; }
 
         IRTCSctpTransport Sctp { get; }
 
@@ -53,11 +53,11 @@ namespace WebRTCme
 
         void Close();
 
-        Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options = null);
+        Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null);
 
         IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null);
 
-        Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options = null);
+        Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options = null);
 
         /*static*/ Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm);
 
@@ -81,9 +81,9 @@ namespace WebRTCme
 
         void SetIdentityProvider(string domainName, string protocol = null, string userName = null);
 
-        Task SetLocalDescription(IRTCSessionDescription sessionDescription);
+        Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription);
 
-        Task SetRemoteDescription(IRTCSessionDescription sessionDescription);
+        Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription);
     }
 
 }

@@ -46,6 +46,9 @@ namespace WebRtc.iOS
                 StreamId = dataChannelInit.Id ?? 0
             };
 
+        public static Webrtc.RTCSessionDescription ToNative(this RTCSessionDescriptionInit description) =>
+            new Webrtc.RTCSessionDescription(description.Type.ToNative(), description.Sdp);
+
         public static RTCConfiguration FromNative(this Webrtc.RTCConfiguration nativeConfiguration) =>
             new RTCConfiguration
             {
@@ -120,7 +123,12 @@ namespace WebRtc.iOS
                 ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy.DoubleValue
             };
 
-
+        public static RTCSessionDescriptionInit FromNative(this Webrtc.RTCSessionDescription nativeDescription) =>
+            new RTCSessionDescriptionInit
+            {
+                Type = nativeDescription.Type.FromNative(),
+                Sdp = nativeDescription.Sdp
+            };
     }
 
 }

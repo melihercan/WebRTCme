@@ -46,11 +46,11 @@ namespace WebRtc.Android
         public RTCPeerConnectionState ConnectionState =>
             ((Webrtc.PeerConnection)NativeObject).ConnectionState().FromNative();
 
-        public IRTCSessionDescription CurrentLocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit CurrentLocalDescription =>
+            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
 
-        public IRTCSessionDescription CurrentRemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit CurrentRemoteDescription =>
+            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
 
         public RTCIceConnectionState IceConnectionState =>
             ((Webrtc.PeerConnection)NativeObject).InvokeIceConnectionState().FromNative();
@@ -58,19 +58,19 @@ namespace WebRtc.Android
         public RTCIceGatheringState IceGatheringState =>
             ((Webrtc.PeerConnection)NativeObject).InvokeIceGatheringState().FromNative();
 
-        public IRTCSessionDescription LocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit LocalDescription =>
+            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
-        public IRTCSessionDescription PendingLocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit PendingLocalDescription =>
+            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
 
-        public IRTCSessionDescription PendingRemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection)NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit PendingRemoteDescription =>
+            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
 
-        public IRTCSessionDescription RemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.PeerConnection) NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit RemoteDescription =>
+            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
@@ -103,9 +103,9 @@ namespace WebRtc.Android
 
         public void Close() => ((Webrtc.PeerConnection)NativeObject).Close();
 
-        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
+        public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
-            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.PeerConnection)NativeObject).CreateAnswer(
                 new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
             return tcs.Task;
@@ -114,9 +114,9 @@ namespace WebRtc.Android
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
             RTCDataChannel.Create(((Webrtc.PeerConnection)NativeObject).CreateDataChannel(label, options.ToNative()));
 
-        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
+        public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
-            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.PeerConnection)NativeObject).CreateOffer(
                 new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
             return tcs.Task;
@@ -172,19 +172,19 @@ namespace WebRtc.Android
             throw new NotImplementedException();
         }
 
-        public Task SetLocalDescription(IRTCSessionDescription sessionDescription)
+        public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
             ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
-                new SdpObserverProxy(tcs), sessionDescription.NativeObject as Webrtc.SessionDescription);
+                new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
-        public Task SetRemoteDescription(IRTCSessionDescription sessionDescription)
+        public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
             ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
-                new SdpObserverProxy(tcs), sessionDescription.NativeObject as Webrtc.SessionDescription);
+                new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
@@ -239,17 +239,17 @@ namespace WebRtc.Android
         #region SdpObserver
         private class SdpObserverProxy : Java.Lang.Object, Webrtc.ISdpObserver
         {
-            private readonly TaskCompletionSource<IRTCSessionDescription> _tcsCreate;
+            private readonly TaskCompletionSource<RTCSessionDescriptionInit> _tcsCreate;
             private readonly TaskCompletionSource<object> _tcsSet;
 
-            public SdpObserverProxy(TaskCompletionSource<IRTCSessionDescription> tcs) => _tcsCreate = tcs;
+            public SdpObserverProxy(TaskCompletionSource<RTCSessionDescriptionInit> tcs) => _tcsCreate = tcs;
 
             public SdpObserverProxy(TaskCompletionSource<object> tcs) => _tcsSet = tcs;
 
             public void OnCreateFailure(string p0) => _tcsCreate?.SetException(new Exception($"{p0}"));
 
             public void OnCreateSuccess(SessionDescription p0) => 
-                _tcsCreate?.SetResult(RTCSessionDescription.Create(p0));
+                _tcsCreate?.SetResult(p0.FromNative());
 
             public void OnSetFailure(string p0) => _tcsSet?.SetException(new Exception($"{p0}"));
 

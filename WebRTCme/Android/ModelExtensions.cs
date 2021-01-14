@@ -69,6 +69,9 @@ namespace WebRtc.Android
                 Id = dataChannelInit.Id ?? 0
             };
 
+        public static Webrtc.SessionDescription ToNative(this RTCSessionDescriptionInit description) =>
+            new Webrtc.SessionDescription(description.Type.ToNative(), description.Sdp);
+
         public static RTCRtpCodecParameters FromNative(this Webrtc.RtpParameters.Codec nativeCodecParameters) =>
             new RTCRtpCodecParameters
             {
@@ -122,6 +125,13 @@ namespace WebRtc.Android
                 Ptime = 0, //// TODO: CHECK THIS
                 Rid = nativeEncoding.Rid,
                 ScaleResolutionDownBy = (double)nativeEncoding.ScaleResolutionDownBy
+            };
+
+        public static RTCSessionDescriptionInit FromNative(this Webrtc.SessionDescription nativeDescription) =>
+            new RTCSessionDescriptionInit
+            {
+                Type = nativeDescription.Type.FromNative(),
+                Sdp = nativeDescription.Description
             };
 
     }

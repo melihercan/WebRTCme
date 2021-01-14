@@ -50,11 +50,11 @@ namespace WebRtc.iOS
         public RTCPeerConnectionState ConnectionState =>
             ((Webrtc.RTCPeerConnection)NativeObject).ConnectionState.FromNative();
 
-        public IRTCSessionDescription CurrentLocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit CurrentLocalDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
 
-        public IRTCSessionDescription CurrentRemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit CurrentRemoteDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
 
         public RTCIceConnectionState IceConnectionState =>
             ((Webrtc.RTCPeerConnection)NativeObject).IceConnectionState.FromNative();
@@ -62,19 +62,19 @@ namespace WebRtc.iOS
         public RTCIceGatheringState IceGatheringState =>
             ((Webrtc.RTCPeerConnection)NativeObject).IceGatheringState.FromNative();
 
-        public IRTCSessionDescription LocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit LocalDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
-        public IRTCSessionDescription PendingLocalDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).LocalDescription);
+        public RTCSessionDescriptionInit PendingLocalDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
 
-        public IRTCSessionDescription PendingRemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit PendingRemoteDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
 
-        public IRTCSessionDescription RemoteDescription =>
-            RTCSessionDescription.Create(((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription);
+        public RTCSessionDescriptionInit RemoteDescription =>
+            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
 
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
@@ -108,9 +108,9 @@ namespace WebRtc.iOS
 
         public void Close() => ((Webrtc.RTCPeerConnection)NativeObject).Close();
 
-        public Task<IRTCSessionDescription> CreateAnswer(RTCAnswerOptions options)
+        public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
-            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, err) => 
                 { 
@@ -118,7 +118,7 @@ namespace WebRtc.iOS
                     {
                         tcs.SetException(new Exception($"{err.LocalizedDescription}"));
                     }
-                    tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
+                    tcs.SetResult(nativeSessionDescription.FromNative());
                 });
             return tcs.Task;
         }
@@ -128,9 +128,9 @@ namespace WebRtc.iOS
             RTCDataChannel.Create(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
                 (Webrtc.RTCPeerConnection)NativeObject, label, options.ToNative()));
 
-        public Task<IRTCSessionDescription> CreateOffer(RTCOfferOptions options)
+        public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
-            var tcs = new TaskCompletionSource<IRTCSessionDescription>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, nsError) =>
                 {
@@ -138,7 +138,7 @@ namespace WebRtc.iOS
                     {
                         tcs.SetException(new Exception($"{nsError.LocalizedDescription}"));
                     }
-                    tcs.SetResult(RTCSessionDescription.Create(nativeSessionDescription));
+                    tcs.SetResult(nativeSessionDescription.FromNative());
                 });
             return tcs.Task;
         }
@@ -191,11 +191,11 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public Task SetLocalDescription(IRTCSessionDescription sessionDescription) 
+        public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) 
         {
             var tcs = new TaskCompletionSource<object>();
             ((Webrtc.RTCPeerConnection)NativeObject).SetLocalDescription(
-                sessionDescription.NativeObject as Webrtc.RTCSessionDescription,
+                sessionDescription.ToNative(),
                 (nsError) =>
                 {
                     if (nsError != null)
@@ -207,11 +207,11 @@ namespace WebRtc.iOS
             return tcs.Task;
         }
 
-        public Task SetRemoteDescription(IRTCSessionDescription sessionDescription)
+        public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
             ((Webrtc.RTCPeerConnection)NativeObject).SetRemoteDescription(
-                sessionDescription.NativeObject as Webrtc.RTCSessionDescription,
+                sessionDescription.ToNative(),
                 (nsError) =>
                 {
                     if (nsError != null)
