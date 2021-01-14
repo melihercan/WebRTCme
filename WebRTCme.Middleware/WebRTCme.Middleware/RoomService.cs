@@ -60,12 +60,12 @@ namespace WebRtcMeMiddleware
             {
                 var taskArray = new Task<RoomResponseParameters>[]
                 {
-                RoomContext.RoomStarted.Task,
-                RoomContext.RoomStopped.Task,
-                RoomContext.PeerJoined.Task,
-                RoomContext.PeerLeft.Task,
-                RoomContext.PeerSdpOffered.Task,
-                RoomContext.PeerSdpAnswered.Task
+                    RoomContext.RoomStarted.Task,
+                    RoomContext.RoomStopped.Task,
+                    RoomContext.PeerJoined.Task,
+                    RoomContext.PeerLeft.Task,
+                    RoomContext.PeerSdpOffered.Task,
+                    RoomContext.PeerSdpAnswered.Task
                 };
 
                 while (!ct.IsCancellationRequested)
@@ -99,45 +99,8 @@ namespace WebRtcMeMiddleware
                         throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
                             $"is in wrong state {roomContext.RoomState}");
 
-                    var configuration = new RTCConfiguration
-                    {
-                        IceServers = response.IceServers,
-                        PeerIdentity = response.RoomName
-                    };
-                    var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
-
-                    peerConnection.OnConnectionStateChanged += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnDataChannel += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnIceCandidate += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnIceConnectionStateChange += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnIceGatheringStateChange += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnNegotiationNeeded += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnSignallingStateChange += (s, e) =>
-                    {
-                    };
-                    peerConnection.OnTrack += (s, e) =>
-                    {
-                    };
-
-                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
-                        roomContext.RoomRequestParameters.LocalStream);
-                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
-                        roomContext.RoomRequestParameters.LocalStream);
-
-
-
+                    roomContext.IceServers = response.IceServers;
+                    roomContext.RoomState = RoomState.Connected;
                 }
                 catch (Exception ex)
                 {
@@ -169,10 +132,65 @@ namespace WebRtcMeMiddleware
                 {
                     if (roomContext.RoomState == RoomState.Error)
                         return;
+                    if (roomContext.RoomState != RoomState.Connected)
+                        throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                            $"is in wrong state {roomContext.RoomState}");
+
+                    var configuration = new RTCConfiguration
+                    {
+                        IceServers = response.IceServers,
+                        PeerIdentity = response.RoomName
+                    };
+                    var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+                    roomContext.PeerConnections.Add(response.PeerUserName, peerConnection);
+
+                    peerConnection.OnConnectionStateChanged += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnDataChannel += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceCandidate += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceConnectionStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceGatheringStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnNegotiationNeeded += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnSignallingStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnTrack += (s, e) =>
+                    {
+                    };
+
+                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
+                        roomContext.RoomRequestParameters.LocalStream);
+                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
+                        roomContext.RoomRequestParameters.LocalStream);
+
+                    var offerDescription = await peerConnection.CreateOffer();
+                    var offerDescriptionJson = offerDescription.ToJson();
+                    var sdp = offerDescription.Sdp;
+                    var type = offerDescription.Type;
+
+
+                    await peerConnection.SetLocalDescription(offerDescription);
+
+                    var localDescription = peerConnection.LocalDescription;
+                    var localDescriptionJson = localDescription.ToJson();
+
+                    await _signallingServerClient.SdpOfferAsync(response.RoomName, response.PeerUserName, 
+                        offerDescriptionJson);
                 }
                 catch (Exception ex)
                 {
-
+                    await AbortConnectionAsync(roomContext, ex.Message);
                 }
             }
 
@@ -217,6 +235,16 @@ namespace WebRtcMeMiddleware
                 {
                     if (roomContext.RoomState == RoomState.Error)
                         return;
+
+                    if (roomContext.RoomState != RoomState.Connected)
+                        throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                            $"is in wrong state {roomContext.RoomState}");
+
+                    var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == response.PeerUserName)
+                        .Value;
+                    //peerConnection.SetRemoteDescription()
+
+
 
                 }
                 catch (Exception ex)
