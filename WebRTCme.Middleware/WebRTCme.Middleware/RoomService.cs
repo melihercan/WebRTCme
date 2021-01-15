@@ -20,6 +20,12 @@ namespace WebRtcMeMiddleware
         private static List<RoomContext> _roomContexts = new();
         private CancellationTokenSource _cts = new();
 
+        private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
         static public async Task<IRoomService> CreateAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
         {
             var self = new RoomService();
@@ -140,12 +146,11 @@ namespace WebRtcMeMiddleware
 
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = response.IceServers,
+                        IceServers = roomContext.IceServers,
                         PeerIdentity = response.RoomName
                     };
                     var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
                     roomContext.PeerConnections.Add(response.PeerUserName, peerConnection);
-
                     peerConnection.OnConnectionStateChanged += (s, e) =>
                     {
                     };
@@ -170,28 +175,15 @@ namespace WebRtcMeMiddleware
                     peerConnection.OnTrack += (s, e) =>
                     {
                     };
-
                     peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
                         roomContext.RoomRequestParameters.LocalStream);
                     peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
                         roomContext.RoomRequestParameters.LocalStream);
 
                     var offerDescription = await peerConnection.CreateOffer();
-                    //var sdp = offerDescription.Sdp;
-                    //var type = offerDescription.Type;
-
-
                     await peerConnection.SetLocalDescription(offerDescription);
-
-                    //var localDescription = peerConnection.LocalDescription;
-                    //var localDescriptionJson = localDescription.ToJson();
-
                     await _signallingServerClient.SdpOfferAsync(response.RoomName, response.PeerUserName,
-                        JsonSerializer.Serialize(offerDescription, new JsonSerializerOptions
-                        {
-                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-                        }));
+                        JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
                 }
                 catch (Exception ex)
                 {
@@ -225,10 +217,58 @@ namespace WebRtcMeMiddleware
                     if (roomContext.RoomState == RoomState.Error)
                         return;
 
+                    if (roomContext.RoomState != RoomState.Connected)
+                        throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                            $"is in wrong state {roomContext.RoomState}");
+
+                    var configuration = new RTCConfiguration
+                    {
+                        IceServers = roomContext.IceServers,
+                        PeerIdentity = response.RoomName
+                    };
+                    var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+                    roomContext.PeerConnections.Add(response.PeerUserName, peerConnection);
+                    peerConnection.OnConnectionStateChanged += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnDataChannel += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceCandidate += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceConnectionStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnIceGatheringStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnNegotiationNeeded += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnSignallingStateChange += (s, e) =>
+                    {
+                    };
+                    peerConnection.OnTrack += (s, e) =>
+                    {
+                    };
+                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
+                        roomContext.RoomRequestParameters.LocalStream);
+                    peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
+                        roomContext.RoomRequestParameters.LocalStream);
+
+                    var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(response.PeerSdp,
+                        _jsonSerializerOptions);
+                    await peerConnection.SetRemoteDescription(offerDescription);
+
+                    var answerDescription = await peerConnection.CreateAnswer();
+                    await peerConnection.SetLocalDescription(answerDescription);
+                    await _signallingServerClient.SdpAnswerAsync(response.RoomName, response.PeerUserName,
+                        JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions));
                 }
                 catch (Exception ex)
                 {
-
+                    await AbortConnectionAsync(roomContext, ex.Message);
                 }
             }
 
@@ -245,12 +285,11 @@ namespace WebRtcMeMiddleware
                         throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
                             $"is in wrong state {roomContext.RoomState}");
 
+                    var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(response.PeerSdp,
+                        _jsonSerializerOptions);
                     var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == response.PeerUserName)
                         .Value;
-                    //peerConnection.SetRemoteDescription()
-
-
-
+                    await peerConnection.SetRemoteDescription(answerDescription);
                 }
                 catch (Exception ex)
                 {
