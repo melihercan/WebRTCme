@@ -130,7 +130,7 @@ namespace WebRtc.Android
         public static RTCSessionDescriptionInit FromNative(this Webrtc.SessionDescription nativeDescription) =>
             new RTCSessionDescriptionInit
             {
-                Type = nativeDescription.Type.FromNative(),
+                //// TODO: No way to get Type, it is class!!!! Type = nativeDescription.Type.FromNative(),
                 Sdp = nativeDescription.Description
             };
 

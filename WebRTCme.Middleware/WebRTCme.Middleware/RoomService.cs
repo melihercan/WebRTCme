@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
@@ -175,18 +177,21 @@ namespace WebRtcMeMiddleware
                         roomContext.RoomRequestParameters.LocalStream);
 
                     var offerDescription = await peerConnection.CreateOffer();
-                    var offerDescriptionJson = offerDescription.ToJson();
-                    var sdp = offerDescription.Sdp;
-                    var type = offerDescription.Type;
+                    //var sdp = offerDescription.Sdp;
+                    //var type = offerDescription.Type;
 
 
                     await peerConnection.SetLocalDescription(offerDescription);
 
-                    var localDescription = peerConnection.LocalDescription;
-                    var localDescriptionJson = localDescription.ToJson();
+                    //var localDescription = peerConnection.LocalDescription;
+                    //var localDescriptionJson = localDescription.ToJson();
 
-                    await _signallingServerClient.SdpOfferAsync(response.RoomName, response.PeerUserName, 
-                        offerDescriptionJson);
+                    await _signallingServerClient.SdpOfferAsync(response.RoomName, response.PeerUserName,
+                        JsonSerializer.Serialize(offerDescription, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                        }));
                 }
                 catch (Exception ex)
                 {
