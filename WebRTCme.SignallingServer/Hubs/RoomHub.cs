@@ -45,6 +45,7 @@ namespace WebRTCme.SignallingServer.Hubs
                 // Room has been started. Add this client to room, send IceServer list and notify all other clients
                 // in the group.
                 room.Clients.ToList().Add(client);
+                await Groups.AddToGroupAsync(client.ConnectionId, roomName);
                 await Clients.Caller.OnRoomStarted(room.GroupName, room.IceServers);
                 await Clients.GroupExcept(roomName, Context.ConnectionId).OnPeerJoined(roomName, userName);
             }
@@ -62,7 +63,10 @@ namespace WebRTCme.SignallingServer.Hubs
             if (_rooms.Any(room => room.GroupName == roomName && room.Clients.Any(Client => Client.UserName == userName)))
                 _rooms.Find(room => room.GroupName == roomName).Clients.ToList().Remove(client);
             else if (_awaitingClients.Any(client => client.RoomName == roomName && client.UserName == userName))
+            {
+                await Groups.RemoveFromGroupAsync(client.ConnectionId, roomName);
                 _awaitingClients.Remove(client);
+            }
             else
                 return Result<Unit>.Error(new string[] { $"User {userName} not found in room {roomName}" });
 
@@ -81,8 +85,8 @@ namespace WebRTCme.SignallingServer.Hubs
 
             try
             {
-                var iceServers = await _turnServerClient.GetIceServersAsync();
-                var newRoomClients = _awaitingClients.Where(client => client.RoomName == roomName);
+                var iceServers = new RTCIceServer[] { };// await _turnServerClient.GetIceServersAsync();
+                var newRoomClients = _awaitingClients.Where(client => client.RoomName == roomName).ToList();
                 _awaitingClients.RemoveAll(client => client.RoomName == roomName);
                 var room = new Room
                 {
@@ -92,6 +96,7 @@ namespace WebRTCme.SignallingServer.Hubs
                     Clients = newRoomClients
                 };
                 _rooms.Add(room);
+                await Task.WhenAll(room.Clients.Select(client => Groups.AddToGroupAsync(client.ConnectionId, roomName)));
                 await Clients.Group(roomName).OnRoomStarted(room.GroupName, room.IceServers);
 
                 var excepts = new List<string>();
@@ -128,6 +133,7 @@ namespace WebRTCme.SignallingServer.Hubs
                     await Clients.GroupExcept(roomName, excepts).OnPeerLeft(client.RoomName, client.UserName);
             }
             await Clients.Group(roomName).OnRoomStopped(room.GroupName);
+            await Task.WhenAll(room.Clients.Select(client => Groups.RemoveFromGroupAsync(client.ConnectionId, roomName)));
             _rooms.Remove(room);
 
             return Result<Unit>.Success(Unit.Default);

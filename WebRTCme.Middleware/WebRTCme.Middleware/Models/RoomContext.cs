@@ -20,13 +20,5 @@ namespace WebRtcMeMiddleware
         public TaskCompletionSource<IMediaStream> ConnectTcs { get; set; } = new();
 
         public TaskCompletionSource<Unit> DisconnectTcs { get; set; } = new();
-
-        public static TaskCompletionSource<RoomResponseParameters> RoomStarted { get; set; } = new();
-        public static TaskCompletionSource<RoomResponseParameters> RoomStopped { get; set; } = new();
-        public static TaskCompletionSource<RoomResponseParameters> PeerJoined { get; set; } = new();
-        public static TaskCompletionSource<RoomResponseParameters> PeerLeft { get; set; } = new();
-        public static TaskCompletionSource<RoomResponseParameters> PeerSdpOffered { get; set; } = new();
-        public static TaskCompletionSource<RoomResponseParameters> PeerSdpAnswered { get; set; } = new();
-
     }
 }
