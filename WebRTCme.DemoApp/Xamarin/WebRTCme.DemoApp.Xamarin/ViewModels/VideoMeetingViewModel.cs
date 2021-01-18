@@ -76,16 +76,7 @@ namespace DemoApp.ViewModels
         public string SelectedTurnServer { get; set; }
 
 
-        //private RoomParameters _roomParameters = new RoomParameters();
         public RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
-        //{ 
-          //  get => _roomParameters;
-            //set
-            //{
-              //  _roomParameters = value;
-                //OnPropertyChanged();
-            //}
-        //}
 
         public ICommand StartCallCommand => new Command(async () =>
         {

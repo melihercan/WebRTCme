@@ -48,14 +48,15 @@ namespace WebRtcMeMiddleware
             };
             _roomContexts.Add(roomContext);
 
+            roomContext.RoomState = RoomState.Connecting;
+            Console.WriteLine("#### Connecting...");
+            System.Diagnostics.Debug.WriteLine("#### Connecting...");
             await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
-
             if (roomRequestParameters.IsInitiator)
                 await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
                     roomRequestParameters.UserName, roomRequestParameters.TurnServer);
 
 
-            roomContext.RoomState = RoomState.Connecting;
 
             return await roomContext.ConnectTcs.Task;
         }

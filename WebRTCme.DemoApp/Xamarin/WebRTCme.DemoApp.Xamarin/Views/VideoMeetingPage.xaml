@@ -7,8 +7,8 @@
         <StackLayout BackgroundColor="LightGray">
             <Label Text="Video meeting"/>
             <Picker Title="select TURN server" ItemsSource="{Binding TurnServers}" SelectedItem="{Binding SelectedTurnServer}"/>
-            <Entry Placeholder="enter room name" Text="{Binding RoomParameters.RoomId}"/>
-            <Entry Placeholder="enter user name" Text="{Binding RoomParameters.UserId}"/>
+            <Entry Placeholder="enter room name" Text="{Binding RoomRequestParameters.RoomName}"/>
+            <Entry Placeholder="enter user name" Text="{Binding RoomRequestParameters.UserName}"/>
             <StackLayout Orientation="Horizontal">
                 <Button Text="Start call" Command="{Binding StartCallCommand}"/>
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
