@@ -85,7 +85,7 @@ namespace WebRTCme.SignallingServer.Hubs
 
             try
             {
-                var iceServers = new RTCIceServer[] { };// await _turnServerClient.GetIceServersAsync();
+                var iceServers = /*new RTCIceServer[] { };*/ await _turnServerClient.GetIceServersAsync();
                 var newRoomClients = _awaitingClients.Where(client => client.RoomName == roomName).ToList();
                 _awaitingClients.RemoveAll(client => client.RoomName == roomName);
                 var room = new Room
