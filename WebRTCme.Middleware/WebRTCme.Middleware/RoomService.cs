@@ -98,6 +98,7 @@ namespace WebRtcMeMiddleware
         #region SignallingServerCallbacks
         //// TODO: NOT a good idea to run async ops on callbacks, especially on iOS. Callbacks returning tsks will not be
         /// handled correctly. Create a separate task and schedule callbacks there!!!
+        /// Use Task.Channels to create a pipeline. CallbackPipeline.
         public async Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
         {
             var roomContext = RoomContextFromName(roomName);
