@@ -44,7 +44,7 @@ namespace WebRTCme.SignallingServer.Hubs
             {
                 // Room has been started. Add this client to room, send IceServer list and notify all other clients
                 // in the group.
-                room.Clients.ToList().Add(client);
+                room.Clients = room.Clients.Append(client);
                 await Groups.AddToGroupAsync(client.ConnectionId, roomName);
                 await Clients.Caller.OnRoomStarted(room.GroupName, room.IceServers);
                 await Clients.GroupExcept(roomName, Context.ConnectionId).OnPeerJoined(roomName, userName);

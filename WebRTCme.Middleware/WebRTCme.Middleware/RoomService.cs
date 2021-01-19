@@ -203,7 +203,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-
+                await AbortConnectionAsync(roomContext, ex.Message);
             }
         }
 
@@ -291,7 +291,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-
+                await AbortConnectionAsync(roomContext, ex.Message);
             }
         }
 
