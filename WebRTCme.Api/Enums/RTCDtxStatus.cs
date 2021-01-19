@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
     public enum RTCDtxStatus
     {
         Disabled,

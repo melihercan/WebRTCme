@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme.Middleware
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
     public enum VideoType
     {
                 // Source:
