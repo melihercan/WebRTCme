@@ -14,7 +14,7 @@ namespace WebRtc.Android
         {
         }
 
-        public string Candidate => throw new NotImplementedException();
+        public string Candidate => ((Webrtc.IceCandidate)NativeObject).Sdp;
 
         public string Component => throw new NotImplementedException();
 

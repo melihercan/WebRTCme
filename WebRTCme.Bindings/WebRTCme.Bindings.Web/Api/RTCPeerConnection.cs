@@ -94,8 +94,8 @@ namespace WebRtcBindingsWeb.Api
         }
 
 
-        public Task AddIceCandidate(IRTCIceCandidate candidate) =>
-            JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate.NativeObject).AsTask(); 
+        public Task AddIceCandidate(RTCIceCandidateInit candidate) =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate/*.NativeObject*/).AsTask(); 
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",

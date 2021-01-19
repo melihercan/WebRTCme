@@ -61,6 +61,13 @@ namespace WebRtc.iOS
                 RtcpMuxPolicy = nativeConfiguration.RtcpMuxPolicy.FromNative()
             };
 
+        public static Webrtc.RTCIceCandidate ToNative(this RTCIceCandidateInit iceCandidateInit) =>
+            new Webrtc.RTCIceCandidate(iceCandidateInit.Candidate, (int)iceCandidateInit.SdpMLineIndex, 
+                iceCandidateInit.SdpMid)
+            {
+                ///ServerUrl = ???
+            };
+
         public static RTCIceServer FromNative(this Webrtc.RTCIceServer nativeIceServer) =>
             new RTCIceServer
             {
@@ -129,6 +136,16 @@ namespace WebRtc.iOS
                 Type = nativeDescription.Type.FromNative(),
                 Sdp = nativeDescription.Sdp
             };
+
+        public static RTCIceCandidateInit FromNative(this Webrtc.RTCIceCandidate nativeIceCandidate) =>
+            new RTCIceCandidateInit
+            {
+                Candidate = nativeIceCandidate.Sdp,
+                SdpMid = nativeIceCandidate.SdpMid,
+                SdpMLineIndex = (ushort)nativeIceCandidate.SdpMLineIndex,
+                //UsernameFragment = ???
+            };
+
     }
 
 }

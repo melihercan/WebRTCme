@@ -18,8 +18,11 @@ namespace WebRTCme.SignallingServerClient
 
         Task StopRoomAsync(string roomName, string userName);
 
-        Task SdpOfferAsync(string roomName, string pairUserName, string sdp);
+        Task OfferSdpAsync(string roomName, string pairUserName, string sdp);
 
-        Task SdpAnswerAsync(string roomName, string pairUserName, string sdp);
+        Task AnswerSdpAsync(string roomName, string pairUserName, string sdp);
+
+        Task IceCandidateAsync(string roomName, string pairUserName, string ice);
+
     }
 }

@@ -90,9 +90,9 @@ namespace WebRtc.Android
             throw new NotImplementedException();
 
 
-        public Task AddIceCandidate(IRTCIceCandidate candidate)
+        public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
-            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(candidate.NativeObject as Webrtc.IceCandidate);
+            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(candidate.ToNative());
             return Task.CompletedTask;
         }
 

@@ -19,5 +19,6 @@ namespace WebRTCme.SignallingServerClient
 
         Task OnPeerSdpAnswered(string roomName, string peerUserName, string peerSdp);
 
+        Task OnPeerIceCandidate(string roomName, string peerUserName, string peerIce);
     }
 }

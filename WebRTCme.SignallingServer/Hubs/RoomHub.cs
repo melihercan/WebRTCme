@@ -139,7 +139,7 @@ namespace WebRTCme.SignallingServer.Hubs
             return Result<Unit>.Success(Unit.Default);
         }
 
-        public async Task<Result<Unit>> SdpOffer(string roomName, string pairUserName, string sdp)
+        public async Task<Result<Unit>> OfferSdp(string roomName, string pairUserName, string sdp)
         {
             var room = _rooms.Find(room => room.GroupName == roomName);
 
@@ -153,7 +153,7 @@ namespace WebRTCme.SignallingServer.Hubs
             return Result<Unit>.Success(Unit.Default);
         }
 
-        public async Task<Result<Unit>> SdpAnswer(string roomName, string pairUserName, string sdp)
+        public async Task<Result<Unit>> AnswerSdp(string roomName, string pairUserName, string sdp)
         {
             var room = _rooms.Find(room => room.GroupName == roomName);
 
@@ -164,6 +164,20 @@ namespace WebRTCme.SignallingServer.Hubs
             var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId;
 
             await Clients.Client(pairConnectionId).OnPeerSdpAnswered(roomName, userName, sdp);
+            return Result<Unit>.Success(Unit.Default);
+        }
+
+        public async Task<Result<Unit>> IceCandidate(string roomName, string pairUserName, string ice)
+        {
+            var room = _rooms.Find(room => room.GroupName == roomName);
+
+            if (room is null)
+                return Result<Unit>.Error(new string[] { $"{roomName} room not found" });
+
+            var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
+            var pairConnectionId = room.Clients.Single(client => client.UserName == pairUserName).ConnectionId;
+
+            await Clients.Client(pairConnectionId).OnPeerIceCandidate(roomName, userName, ice);
             return Result<Unit>.Success(Unit.Default);
         }
     }

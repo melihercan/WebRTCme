@@ -33,7 +33,6 @@ namespace WebRTCme
 
         ushort? SdpMLineIndex { get; }
 
-
         RTCIceTcpCandidateType TcpType { get; }
 
         string Type { get; set; }

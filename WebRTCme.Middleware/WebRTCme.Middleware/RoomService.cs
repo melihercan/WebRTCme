@@ -158,8 +158,17 @@ namespace WebRtcMeMiddleware
                 peerConnection.OnDataChannel += (s, e) =>
                 {
                 };
-                peerConnection.OnIceCandidate += (s, e) =>
+                peerConnection.OnIceCandidate += async (s, e) =>
                 {
+                    var iceCandidate = new RTCIceCandidateInit
+                    {
+                        Candidate = e.Candidate.Candidate,
+                        SdpMid = e.Candidate.SdpMid,
+                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
+                        //UsernameFragment = ???
+                    };
+                    await _signallingServerClient.IceCandidateAsync(roomName, peerUserName,
+                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
                 };
                 peerConnection.OnIceConnectionStateChange += (s, e) =>
                 {
@@ -183,7 +192,7 @@ namespace WebRtcMeMiddleware
 
                 var offerDescription = await peerConnection.CreateOffer();
                 await peerConnection.SetLocalDescription(offerDescription);
-                await _signallingServerClient.SdpOfferAsync(roomName, peerUserName,
+                await _signallingServerClient.OfferSdpAsync(roomName, peerUserName,
                     JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
             }
             catch (Exception ex)
@@ -233,8 +242,17 @@ namespace WebRtcMeMiddleware
                 peerConnection.OnDataChannel += (s, e) =>
                 {
                 };
-                peerConnection.OnIceCandidate += (s, e) =>
+                peerConnection.OnIceCandidate += async (s, e) =>
                 {
+                    var iceCandidate = new RTCIceCandidateInit
+                    {
+                        Candidate = e.Candidate.Candidate,
+                        SdpMid = e.Candidate.SdpMid,
+                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
+                        //UsernameFragment = ???
+                    };
+                    await _signallingServerClient.IceCandidateAsync(roomName, peerUserName,
+                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
                 };
                 peerConnection.OnIceConnectionStateChange += (s, e) =>
                 {
@@ -262,7 +280,7 @@ namespace WebRtcMeMiddleware
 
                 var answerDescription = await peerConnection.CreateAnswer();
                 await peerConnection.SetLocalDescription(answerDescription);
-                await _signallingServerClient.SdpAnswerAsync(roomName, peerUserName,
+                await _signallingServerClient.AnswerSdpAsync(roomName, peerUserName,
                     JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions));
             }
             catch (Exception ex)
@@ -295,7 +313,38 @@ namespace WebRtcMeMiddleware
             }
         }
 
+        public async Task OnPeerIceCandidate(string roomName, string peerUserName, string peerIce)
+        {
+            var roomContext = RoomContextFromName(roomName);
+            try
+            {
+                if (roomContext.RoomState == RoomState.Error)
+                    return;
+
+                if (roomContext.RoomState != RoomState.Connected)
+                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                        $"is in wrong state {roomContext.RoomState}");
+
+                var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
+                    _jsonSerializerOptions);
+                var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName)
+                    .Value;
+                await peerConnection.AddIceCandidate(iceCandidate);
+            }
+            catch (Exception ex)
+            {
+                await AbortConnectionAsync(roomContext, ex.Message);
+            }
+        }
+
+
         #endregion
+
+        private static void DebugPrint(string message)
+        {
+            Console.WriteLine(message);
+            System.Diagnostics.Debug.WriteLine(message);
+        }
 
 
     }

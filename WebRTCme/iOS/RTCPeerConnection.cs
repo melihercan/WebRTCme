@@ -96,9 +96,9 @@ namespace WebRtc.iOS
                 .Select(nativeIceServer => nativeIceServer.FromNative())
                 .ToArray();
 
-        public Task AddIceCandidate(IRTCIceCandidate candidate)
+        public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
-            ((Webrtc.RTCPeerConnection)NativeObject).AddIceCandidate(candidate.NativeObject as Webrtc.RTCIceCandidate);
+            ((Webrtc.RTCPeerConnection)NativeObject).AddIceCandidate(candidate.ToNative());
             return Task.CompletedTask;
         }
 

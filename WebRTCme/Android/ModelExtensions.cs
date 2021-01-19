@@ -72,6 +72,15 @@ namespace WebRtc.Android
         public static Webrtc.SessionDescription ToNative(this RTCSessionDescriptionInit description) =>
             new Webrtc.SessionDescription(description.Type.ToNative(), description.Sdp);
 
+        public static Webrtc.IceCandidate ToNative(this RTCIceCandidateInit iceCandidateInit) =>
+            new Webrtc.IceCandidate(iceCandidateInit.Candidate, (int)iceCandidateInit.SdpMLineIndex, 
+                iceCandidateInit.SdpMid)
+            {
+                //AdapterType = Webrtc.PeerConnection.AdapterType.AdapterTypeAny,
+                ////ServerUrl = ???
+            };
+          
+
         public static RTCRtpCodecParameters FromNative(this Webrtc.RtpParameters.Codec nativeCodecParameters) =>
             new RTCRtpCodecParameters
             {
@@ -133,6 +142,16 @@ namespace WebRtc.Android
                 //// TODO: No way to get Type, it is class!!!! Type = nativeDescription.Type.FromNative(),
                 Sdp = nativeDescription.Description
             };
+
+        public static RTCIceCandidateInit FromNative(this Webrtc.IceCandidate nativeIceCandidate) =>
+            new RTCIceCandidateInit
+            {
+                Candidate = nativeIceCandidate.Sdp,
+                SdpMid = nativeIceCandidate.SdpMid,
+                SdpMLineIndex = (ushort)nativeIceCandidate.SdpMLineIndex,
+                //UsernameFragment = ???
+            };
+
 
     }
 }

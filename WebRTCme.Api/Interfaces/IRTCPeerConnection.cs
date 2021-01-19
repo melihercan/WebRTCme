@@ -47,7 +47,7 @@ namespace WebRTCme
 
         RTCIceServer[] GetDefaultIceServers();
         
-        Task AddIceCandidate(IRTCIceCandidate candidate);
+        Task AddIceCandidate(RTCIceCandidateInit candidate);
 
         IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
 

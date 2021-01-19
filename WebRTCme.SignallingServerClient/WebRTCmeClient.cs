@@ -115,16 +115,23 @@ namespace WebRTCme.SignallingServerClient
         }
 
 
-        public async Task SdpOfferAsync(string roomName, string pairUserName, string sdp)
+        public async Task OfferSdpAsync(string roomName, string pairUserName, string sdp)
         {
-            var result = await _hubConnection.InvokeAsync<Result<Unit>>("SdpOffer", roomName, pairUserName, sdp);
+            var result = await _hubConnection.InvokeAsync<Result<Unit>>("OfferSdp", roomName, pairUserName, sdp);
             if (result.Status != ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
         }
 
-        public async Task SdpAnswerAsync(string roomName, string pairUserName, string sdp)
+        public async Task AnswerSdpAsync(string roomName, string pairUserName, string sdp)
         {
-            var result = await _hubConnection.InvokeAsync<Result<Unit>>("SdpAnswer", roomName, pairUserName, sdp);
+            var result = await _hubConnection.InvokeAsync<Result<Unit>>("AnswerSdp", roomName, pairUserName, sdp);
+            if (result.Status != ResultStatus.Ok)
+                throw new Exception(string.Join("-", result.Errors.ToArray()));
+        }
+
+        public async Task IceCandidateAsync(string roomName, string pairUserName, string ice)
+        {
+            var result = await _hubConnection.InvokeAsync<Result<Unit>>("IceCandidate", roomName, pairUserName, ice);
             if (result.Status != ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
         }
