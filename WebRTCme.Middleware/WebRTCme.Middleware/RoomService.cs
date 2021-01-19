@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,6 +37,48 @@ namespace WebRtcMeMiddleware
         }
 
         private RoomService() { }
+
+
+        private Subject<RoomEvent> RoomEvent { get; } = new Subject<RoomEvent>();
+
+        public IObservable<RoomEvent> RoomRequest(RoomRequestParameters roomRequestParameters)
+        {
+
+
+            return Observable.Create<RoomEvent>(async observer => 
+            {
+                var roomEvent = RoomEvent
+                    .AsObservable()
+                    .Subscribe(observer.OnNext);
+
+                if (RoomContextFromName(roomRequestParameters.RoomName) is not null)
+                    observer.OnError(/*throw*/ new Exception($"Room {roomRequestParameters.RoomName} is in use"));
+
+                var roomContext = new RoomContext
+                {
+                    RoomState = RoomState.Idle,
+                    RoomRequestParameters = roomRequestParameters
+                };
+                _roomContexts.Add(roomContext);
+
+                roomContext.RoomState = RoomState.Connecting;
+                Console.WriteLine("#### Connecting...");
+                System.Diagnostics.Debug.WriteLine("#### Connecting...");
+                await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
+                if (roomRequestParameters.IsInitiator)
+                    await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
+                        roomRequestParameters.UserName, roomRequestParameters.TurnServer);
+
+
+
+
+                return () =>
+                {
+                    //// TODO: DISPOSE AND DISCONNECT HERE: roomEvent....
+                };
+            });
+        }
+
 
         public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
         {

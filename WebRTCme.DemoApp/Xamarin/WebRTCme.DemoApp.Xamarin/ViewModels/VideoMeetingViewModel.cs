@@ -26,7 +26,7 @@ namespace DemoApp.ViewModels
         {
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync();
-            Stream = await _mediaStreamService.GetCameraStreamAsync(Source);
+            LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
         }
@@ -39,38 +39,73 @@ namespace DemoApp.ViewModels
             //WebRtcMiddleware.Cleanup();
         }
 
-        private VideoType _type = VideoType.Camera;
-        public VideoType Type 
+        private VideoType _localType = VideoType.Camera;
+        public VideoType LocalType 
         {
-            get => _type;
+            get => _localType;
             set
             {
-                _type = value;
+                _localType = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _source = "Default";
-        public string Source
+        private string _localSource = "Default";
+        public string LocalSource
         {
-            get => _source;
+            get => _localSource;
             set
             {
-                _source = value;
+                _localSource = value;
                 OnPropertyChanged();
             }
         }
 
-        private IMediaStream _stream;
-        public IMediaStream Stream 
+        private IMediaStream _localStream;
+        public IMediaStream LocalStream 
         { 
-            get => _stream; 
+            get => _localStream; 
             set
             {
-                _stream = value;
+                _localStream = value;
                 OnPropertyChanged();
             }
         }
+
+
+        private VideoType _remote1Type = VideoType.Room;
+        public VideoType Remote1Type
+        {
+            get => _remote1Type;
+            set
+            {
+                _remote1Type = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _remote1Source;
+        public string Remote1Source
+        {
+            get => _remote1Source;
+            set
+            {
+                _remote1Source = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private IMediaStream _remote1Stream;
+        public IMediaStream Remote1Stream
+        {
+            get => _remote1Stream;
+            set
+            {
+                _remote1Stream = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         public IList<string> TurnServers => Enum.GetNames(typeof(TurnServer));
         public string SelectedTurnServer { get; set; }
@@ -78,23 +113,29 @@ namespace DemoApp.ViewModels
 
         public RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
 
-        public ICommand StartCallCommand => new Command(async () =>
+        public ICommand StartCallCommand => new Command(/*async*/ () =>
         {
             RoomRequestParameters.IsInitiator = true;
-            await ConnectRoomAsync();
+            /*await*/ ConnectRoomAsync();
         });
 
-        public ICommand JoinCallCommand => new Command(async () =>
+        public ICommand JoinCallCommand => new Command(/*async*/ () =>
         {
             RoomRequestParameters.IsInitiator = false;
-            await ConnectRoomAsync();
+            /*await*/ ConnectRoomAsync();
         });
 
-        private Task ConnectRoomAsync()
+        private void /*Task*/ ConnectRoomAsync()
         {
             RoomRequestParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            RoomRequestParameters.LocalStream = Stream;
-            return _roomService.ConnectRoomAsync(RoomRequestParameters);
+            RoomRequestParameters.LocalStream = LocalStream;
+            //return _roomService.ConnectRoomAsync(RoomRequestParameters);
+            var roomEventUnsubscriber = _roomService.RoomRequest(RoomRequestParameters).Subscribe
+                (
+                (roomEvent) => { },
+                (exception) => { }
+                );
+
         }
 
     }

@@ -43,45 +43,22 @@ namespace WebRtcMiddlewareXamarin
                     
                     UIView view = null;
 
-                    //if (Type == VideoType.Camera)
+                    switch (Type)
                     {
+                        case VideoType.Camera:
                         ///if (string.IsNullOrEmpty(source))
                         {
-                            //var window = WebRtcMiddleware.WebRtc.Window();
-                            //var navigator = window.Navigator();
-                            //var mediaDevices = navigator.MediaDevices;
-                            //var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
-                            //var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
-                            //{
-                            //    Audio = new MediaStreamContraintsUnion { Value = true },
-                            //    Video = new MediaStreamContraintsUnion { Value = true }
-                            //});
-                            //var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
-                            //var mediaStream = await mediaStreamService.GetCameraStreamAsync(source);
                             var videoTrack = Stream.GetVideoTracks().First();
                             view = PlatformSupport.CreateCameraView(videoTrack);
-
-
-#if false
-                            //// TESTING FOR NOW, MOVE THIS TO CONNECTION CODE
-                            ///
-                            var configuration = new RTCConfiguration
-                            { 
-                                IceServers = new RTCIceServer[]
-                                {
-                                    new RTCIceServer
-                                    {
-                                        Urls = new string[]
-                                        {
-                                            "stun:stun.stunprotocol.org:3478",
-                                            "stun:stun.l.google.com:19302"
-                                        }
-                                    }
-                                }
-                            };
-                            var peerConnection = window.RTCPeerConnection(configuration);
-#endif
                         }
+                        break;
+
+                        case VideoType.Room:
+                            return;
+                        //break;
+
+                        default:
+                            return;
                     }
 
                     // Instantiate the native control and assign it to the Control property with
@@ -90,7 +67,6 @@ namespace WebRtcMiddlewareXamarin
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers.
-
             }
         }
 

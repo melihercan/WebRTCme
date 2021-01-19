@@ -25,13 +25,18 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         IConfiguration Configuration { get; set; }
 
 
-        VideoType Type { get; set; } = VideoType.Camera;
+        VideoType LocalType { get; set; } = VideoType.Camera;
 
-        string Source { get; set; } = "Default";
+        string LocalSource { get; set; } = "Default";
         
-        IMediaStream Stream { get; set; }
+        IMediaStream LocalStream { get; set; }
 
-        //Video Camera { get; set; }
+        VideoType Remote1Type { get; set; } = VideoType.Room;
+
+        string Remote1Source { get; set; }
+
+        IMediaStream Remote1Stream { get; set; }
+
 
 
         private IWebRtcMiddleware _webRtcMiddleware;
@@ -46,16 +51,21 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
-            Stream = await _mediaStreamService.GetCameraStreamAsync(Source);
+            LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);
         }
 
-        private async void HandleValidSubmit()
+        private /*async*/ void HandleValidSubmit()
         {
-            RoomRequestParameters.LocalStream = Stream;
-            await _roomService.ConnectRoomAsync(RoomRequestParameters);
+            RoomRequestParameters.LocalStream = LocalStream;
+            //await _roomService.ConnectRoomAsync(RoomRequestParameters);
+            var roomEventUnsubscriber = _roomService.RoomRequest(RoomRequestParameters).Subscribe
+                (
+                (roomEvent) => { },
+                (exception) => { }
+                );
         }
 
         public void Dispose()

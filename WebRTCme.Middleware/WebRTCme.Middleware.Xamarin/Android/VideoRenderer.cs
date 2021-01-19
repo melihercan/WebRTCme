@@ -49,22 +49,11 @@ namespace WebRtcMiddlewareXamarin
 
                     SurfaceView surfaceView = null;
 
-                    //if (Type == VideoType.Camera)
+                    switch (Type)
                     {
+                        case VideoType.Camera:
                         ////if (string.IsNullOrEmpty(source))
                         {
-                            // Default devices.
-                            //var window = WebRtcMiddleware.WebRtc.Window();
-                            //var navigator = window.Navigator();
-                            //var mediaDevices = navigator.MediaDevices;
-                            //var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
-                            //var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
-                            //{
-                            //    Audio = new MediaStreamContraintsUnion { Value = true },
-                            //    Video = new MediaStreamContraintsUnion { Value = true }
-                            //});
-                            //var mediaStreamService = await CrossWebRtcMiddleware.Current.CreateMediaStreamServiceAsync();
-                            //var mediaStream = await mediaStreamService.GetCameraStreamAsync(Source);
                             var videoTrack = Stream.GetVideoTracks().First();
 
                             var permission = await Permissions.RequestAsync<Permissions.Camera>();
@@ -77,16 +66,23 @@ namespace WebRtcMiddlewareXamarin
 
                             surfaceView = PlatformSupport.CreateCameraView(videoTrack);
 
-                            // Instantiate the native control and assign it to the Control property with
-                            // the SetNativeControl method
-                            _videoView = new VideoView(Context, surfaceView);
-                            SetNativeControl(_videoView);
                         }
+                        break;
 
-                        // Configure the control and subscribe to event handlers
+                        case VideoType.Room:
+                            //break;
+                            return;
 
+                        default:
+                            return;
                     }
+
+                    // Instantiate the native control and assign it to the Control property with
+                    // the SetNativeControl method
+                    _videoView = new VideoView(Context, surfaceView);
+                    SetNativeControl(_videoView);
                 }
+                // Configure the control and subscribe to event handlers
             }
         }
 
