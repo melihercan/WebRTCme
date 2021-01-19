@@ -201,19 +201,15 @@
      *                      JS object first.
      * @param {string} property: String specifying the property to get. If 'null', parent object will be returned.
      */
-    public.getPropertyObjectRef = function (parent, property/*, contentSpec*/) {
+    public.getPropertyObjectRef = function (parent, property) {
         let parentObject = getParentObject(parent);
 
         let propertyObject = getPropertyObject(parentObject, property);
-        if (typeof (propertyObject) === 'object' /*&& contentSpec === null*/) {
+        if (typeof (propertyObject) === 'object') {
             let objectRef = addObjectRef(propertyObject);
             return objectRef;
-//        }
-//        else if (typeof (propertyObject) === 'object' && contentSpec != null) {
-  //          let content = getObjectContent(propertyObject, [], contentSpec);
-    //        return content;
         } else {
-            return null;//propertyObject;
+            return null;
         }
     }
 

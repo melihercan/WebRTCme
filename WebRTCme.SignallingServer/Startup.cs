@@ -54,6 +54,9 @@ namespace WebRTCme.SignallingServer
 
             services.AddSingleton<TurnServerClientFactory>();
             services
+                .AddSingleton<StunOnlyClient>()
+                .AddSingleton<ITurnServerClient, StunOnlyClient>(service => service.GetService<StunOnlyClient>());
+            services
                 .AddSingleton<XirsysClient>()
                 .AddSingleton<ITurnServerClient, XirsysClient>(service => service.GetService<XirsysClient>());
             services

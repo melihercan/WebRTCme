@@ -14,6 +14,7 @@ namespace WebRTCme.SignallingServer.TurnServerService
         public ITurnServerClient Create(TurnServer turnServer) =>
             turnServer switch
             {
+                TurnServer.StunOnly => _serviceProvider.GetService(typeof(StunOnlyClient)) as ITurnServerClient,
                 TurnServer.Xirsys => _serviceProvider.GetService(typeof(XirsysClient)) as ITurnServerClient,
                 TurnServer.Coturn => _serviceProvider.GetService(typeof(CoturnClient)) as ITurnServerClient,
                 TurnServer.AppRct => _serviceProvider.GetService(typeof(AppRtcClient)) as ITurnServerClient,

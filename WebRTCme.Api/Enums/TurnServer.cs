@@ -6,6 +6,7 @@ namespace WebRTCme
 {
     public enum TurnServer
     {
+        StunOnly,
         Xirsys,
         Coturn,
         AppRct,

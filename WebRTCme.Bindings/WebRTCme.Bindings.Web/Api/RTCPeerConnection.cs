@@ -107,9 +107,14 @@ namespace WebRtcBindingsWeb.Api
 
         public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 
-        public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null) =>
-            await Task.FromResult(await JsRuntime.CallJsMethodAsync<RTCSessionDescriptionInit> (
-                    NativeObject, "createAnswer", options));
+        public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null)
+        {
+            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject,
+                "createAnswer", options);
+        var descriptor = JsRuntime.GetJsPropertyValue<RTCSessionDescriptionInit>(jsObjectRef, null);
+        JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            return descriptor;
+        }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null) =>
             RTCDataChannel.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "createDataChannel",
@@ -119,9 +124,14 @@ namespace WebRtcBindingsWeb.Api
                     options
                 }));
 
-        public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options) =>
-            await Task.FromResult(await JsRuntime.CallJsMethodAsync<RTCSessionDescriptionInit>(
-                    NativeObject, "createOffer", options));
+        public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
+        {
+            var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, 
+                "createOffer", options);
+            var descriptor = JsRuntime.GetJsPropertyValue<RTCSessionDescriptionInit>(jsObjectRef, null);
+            JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            return descriptor;
+        }
 
         /*static*/
         public async Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
