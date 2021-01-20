@@ -39,20 +39,20 @@ namespace WebRtcMeMiddleware
         private RoomService() { }
 
 
-        private Subject<RoomEvent> RoomEventSubject { get; } = new Subject<RoomEvent>();
+        private Subject<RoomCallbackParameters> RoomCallbackSubject { get; } = new Subject<RoomCallbackParameters>();
 
-        public IObservable<RoomEvent> RoomRequest(RoomRequestParameters roomRequestParameters)
+        public IObservable<RoomCallbackParameters> RoomRequest(RoomRequestParameters roomRequestParameters)
         {
-            return Observable.Create<RoomEvent>(async observer => 
+            return Observable.Create<RoomCallbackParameters>(async observer => 
             {
-                IDisposable roomEvent = null;
+                IDisposable roomCallbackDisposer = null;
                 RoomContext roomContext = null;
                 bool isJoined = false;
                 bool isStarted = false;
 
                 try
                 {
-                    roomEvent = RoomEventSubject
+                    roomCallbackDisposer = RoomCallbackSubject
                         .AsObservable()
                         .Subscribe(observer.OnNext);
 
@@ -85,7 +85,7 @@ namespace WebRtcMeMiddleware
 
                 return async () =>
                 {
-                    roomEvent.Dispose();
+                    roomCallbackDisposer.Dispose();
                     try
                     {
                         if (isJoined)
@@ -169,16 +169,16 @@ namespace WebRtcMeMiddleware
                 roomContext.IceServers = iceServers;
                 roomContext.RoomState = RoomState.Connected;
                 
-                RoomEventSubject.OnNext(new RoomEvent 
+                RoomCallbackSubject.OnNext(new RoomCallbackParameters 
                 { 
-                    Code = RoomEventCode.RoomStarted,
+                    Code = RoomCallbackCode.RoomStarted,
                     RoomName = roomName
                 });
             }
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
             return Task.CompletedTask;
         }
@@ -198,17 +198,17 @@ namespace WebRtcMeMiddleware
                         $"is in wrong state {roomContext.RoomState}");
 
                 roomContext.RoomState = RoomState.Disconnected;
-                RoomEventSubject.OnNext(new RoomEvent 
+                RoomCallbackSubject.OnNext(new RoomCallbackParameters 
                 { 
-                    Code = RoomEventCode.RoomStopped,
+                    Code = RoomCallbackCode.RoomStopped,
                     RoomName = roomName
                 });
-                RoomEventSubject.OnCompleted();
+                RoomCallbackSubject.OnCompleted();
             }
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
             return Task.CompletedTask;
         }
@@ -297,7 +297,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
         }
 
@@ -313,7 +313,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
         }
 
@@ -404,7 +404,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
         }
 
@@ -429,7 +429,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
         }
 
@@ -454,7 +454,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomEventSubject.OnError(ex);
+                RoomCallbackSubject.OnError(ex);
             }
         }
 

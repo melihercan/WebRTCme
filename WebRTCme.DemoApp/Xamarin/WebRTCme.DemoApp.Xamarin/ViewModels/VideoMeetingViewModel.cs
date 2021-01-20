@@ -113,28 +113,32 @@ namespace DemoApp.ViewModels
 
         public RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
 
-        public ICommand StartCallCommand => new Command(/*async*/ () =>
+        public ICommand StartCallCommand => new Command( () =>
         {
             RoomRequestParameters.IsInitiator = true;
-            /*await*/ ConnectRoomAsync();
+            RoomRequest();
         });
 
-        public ICommand JoinCallCommand => new Command(/*async*/ () =>
+        public ICommand JoinCallCommand => new Command( () =>
         {
             RoomRequestParameters.IsInitiator = false;
-            /*await*/ ConnectRoomAsync();
+            RoomRequest();
         });
 
-        private void /*Task*/ ConnectRoomAsync()
+        private void RoomRequest()
         {
             RoomRequestParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
             RoomRequestParameters.LocalStream = LocalStream;
-            //return _roomService.ConnectRoomAsync(RoomRequestParameters);
-            var roomEventUnsubscriber = _roomService.RoomRequest(RoomRequestParameters).Subscribe
-                (
-                (roomEvent) => { },
-                (exception) => { }
-                );
+            var roomCallbackDisposer = _roomService.RoomRequest(RoomRequestParameters).Subscribe(
+                onNext: (roomCallbackParameters) => 
+                { 
+                },
+                onError: (exception) => 
+                { 
+                },
+                onCompleted: () => 
+                { 
+                });
 
         }
 

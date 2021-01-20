@@ -57,15 +57,19 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 JsRuntime);
         }
 
-        private /*async*/ void HandleValidSubmit()
+        private void HandleValidSubmit()
         {
             RoomRequestParameters.LocalStream = LocalStream;
-            //await _roomService.ConnectRoomAsync(RoomRequestParameters);
-            var roomEventUnsubscriber = _roomService.RoomRequest(RoomRequestParameters).Subscribe
-                (
-                (roomEvent) => { },
-                (exception) => { }
-                );
+            var roomCallbackDisposer = _roomService.RoomRequest(RoomRequestParameters).Subscribe(
+                onNext: (roomCallbackParameters) => 
+                { 
+                },
+                onError: (exception) => 
+                { 
+                },
+                onCompleted: () => 
+                { 
+                });
         }
 
         public void Dispose()

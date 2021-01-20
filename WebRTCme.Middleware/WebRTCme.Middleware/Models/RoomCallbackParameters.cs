@@ -4,9 +4,9 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class RoomEvent
+    public class RoomCallbackParameters
     {
-        public RoomEventCode Code { get; init; }
+        public RoomCallbackCode Code { get; init; }
 
         public string RoomName { get; init; }
 
