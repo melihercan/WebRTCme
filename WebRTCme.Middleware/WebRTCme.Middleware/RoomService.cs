@@ -43,38 +43,61 @@ namespace WebRtcMeMiddleware
 
         public IObservable<RoomEvent> RoomRequest(RoomRequestParameters roomRequestParameters)
         {
-
-
             return Observable.Create<RoomEvent>(async observer => 
             {
-                var roomEvent = RoomEvent
-                    .AsObservable()
-                    .Subscribe(observer.OnNext);
+                IDisposable roomEvent = null;
+                RoomContext roomContext = null;
+                bool isJoined = false;
+                bool isStarted = false;
 
-                if (RoomContextFromName(roomRequestParameters.RoomName) is not null)
-                    observer.OnError(/*throw*/ new Exception($"Room {roomRequestParameters.RoomName} is in use"));
-
-                var roomContext = new RoomContext
+                try
                 {
-                    RoomState = RoomState.Idle,
-                    RoomRequestParameters = roomRequestParameters
-                };
-                _roomContexts.Add(roomContext);
+                    roomEvent = RoomEvent
+                        .AsObservable()
+                        .Subscribe(observer.OnNext);
 
-                roomContext.RoomState = RoomState.Connecting;
-                Console.WriteLine("#### Connecting...");
-                System.Diagnostics.Debug.WriteLine("#### Connecting...");
-                await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
-                if (roomRequestParameters.IsInitiator)
-                    await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
-                        roomRequestParameters.UserName, roomRequestParameters.TurnServer);
+                    if (RoomContextFromName(roomRequestParameters.RoomName) is not null)
+                        observer.OnError(/*throw*/ new Exception($"Room {roomRequestParameters.RoomName} is in use"));
 
+                    roomContext = new RoomContext
+                    {
+                        RoomState = RoomState.Idle,
+                        RoomRequestParameters = roomRequestParameters
+                    };
+                    _roomContexts.Add(roomContext);
 
-
-
-                return () =>
+                    roomContext.RoomState = RoomState.Connecting;
+                    Console.WriteLine("#### Connecting...");
+                    System.Diagnostics.Debug.WriteLine("#### Connecting...");
+                    await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
+                    isJoined = true;
+                    if (roomRequestParameters.IsInitiator)
+                    {
+                        await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
+                            roomRequestParameters.UserName, roomRequestParameters.TurnServer);
+                        isStarted = true;
+                    }
+                }
+                catch (Exception ex)
                 {
-                    //// TODO: DISPOSE AND DISCONNECT HERE: roomEvent....
+                    observer.OnError(ex);
+                }
+
+                return async () =>
+                {
+                    roomEvent.Dispose();
+                    try
+                    {
+                        if (isJoined)
+                            await _signallingServerClient.LeaveRoomAsync(roomRequestParameters.RoomName,
+                                roomRequestParameters.UserName);
+                        if (isStarted)
+                            await _signallingServerClient.StopRoomAsync(roomRequestParameters.RoomName,
+                                roomRequestParameters.UserName);
+                        if (roomContext is not null)
+                            _roomContexts.Remove(roomContext);
+                    }
+                    catch { };
                 };
             });
         }
@@ -166,6 +189,8 @@ namespace WebRtcMeMiddleware
         public async Task OnRoomStopped(string roomName)
         {
             var roomContext = RoomContextFromName(roomName);
+            if (roomContext is null)
+                return;
             try
             {
                 if (roomContext.RoomState == RoomState.Error)
