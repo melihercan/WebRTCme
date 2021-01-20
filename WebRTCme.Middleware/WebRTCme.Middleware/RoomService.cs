@@ -157,6 +157,8 @@ namespace WebRtcMeMiddleware
         /// Use Task.Channels to create a pipeline. CallbackPipeline.
         public Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
         {
+            DebugPrint($"====> OnRoomStarted - room:{roomName}");
+
             var roomContext = RoomContextFromName(roomName);
             try
             {
@@ -215,6 +217,7 @@ namespace WebRtcMeMiddleware
 
         public async Task OnPeerJoined(string roomName, string peerUserName)
         {
+            DebugPrint($"====> OnPeerJoined - room:{roomName} peerUser:{peerUserName}");
             var roomContext = RoomContextFromName(roomName);
             try
             {
@@ -261,13 +264,17 @@ namespace WebRtcMeMiddleware
                 {
                     DebugPrint($"====> OnPeerJoined.OnIceGatheringStateChange - room:{roomName} peerUser:{peerUserName}");
                 };
-                peerConnection.OnNegotiationNeeded += (s, e) =>
+                peerConnection.OnNegotiationNeeded += async (s, e) =>
                 {
                     DebugPrint($"====> OnPeerJoined.OnNegotiationNeeded - room:{roomName} peerUser:{peerUserName}");
+                    //var offerDescription = await peerConnection.CreateOffer();
+                    //await peerConnection.SetLocalDescription(offerDescription);
+                    //await _signallingServerClient.OfferSdpAsync(roomName, peerUserName,
+                    //    JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
                 };
                 peerConnection.OnSignallingStateChange += (s, e) =>
                 {
-                    DebugPrint($"====> OnPeerJoined.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}");
+                    DebugPrint($"====> OnPeerSdpOffered.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}, signallingState:{ peerConnection.SignalingState }");
 
                     //RoomEventSubject.OnNext(new RoomEvent
                     //{
@@ -292,7 +299,6 @@ namespace WebRtcMeMiddleware
                 await peerConnection.SetLocalDescription(offerDescription);
                 await _signallingServerClient.OfferSdpAsync(roomName, peerUserName,
                     JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
-
             }
             catch (Exception ex)
             {
@@ -320,6 +326,8 @@ namespace WebRtcMeMiddleware
 
         public async Task OnPeerSdpOffered(string roomName, string peerUserName, string peerSdp)
         {
+            DebugPrint($"====> OnPeerSdpOffered - room:{roomName} peerUser:{peerUserName}");
+
             var roomContext = RoomContextFromName(roomName);
             try
             {
@@ -373,7 +381,7 @@ namespace WebRtcMeMiddleware
                 };
                 peerConnection.OnSignallingStateChange += (s, e) =>
                 {
-                    DebugPrint($"====> OnPeerSdpOffered.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}");
+                    DebugPrint($"====> OnPeerSdpOffered.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}, signallingState:{ peerConnection.SignalingState }");
                     //RoomEventSubject.OnNext(new RoomEvent
                     //{
                     //    Code = RoomEventCode.PeerJoined,
@@ -384,9 +392,11 @@ namespace WebRtcMeMiddleware
                 };
                 peerConnection.OnTrack += (s, e) =>
                 {
-                    DebugPrint($"====> OnPeerJoined.OnTrack - room:{roomName} peerUser:{peerUserName}");
+                    DebugPrint($"====> OnPeerSdpOffered.OnTrack - room:{roomName} peerUser:{peerUserName}");
                     mediaStream.AddTrack(e.Track);
+                    ////roomContext.RoomRequestParameters.LocalStream.AddTrack(e.Track);
                 };
+
                 peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
                     roomContext.RoomRequestParameters.LocalStream);
                 peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
@@ -410,6 +420,8 @@ namespace WebRtcMeMiddleware
 
         public async Task OnPeerSdpAnswered(string roomName, string peerUserName, string peerSdp)
         {
+            DebugPrint($"====> OnPeerSdpAnswered - room:{roomName} peerUser:{peerUserName}");
+
             var roomContext = RoomContextFromName(roomName);
             try
             {
@@ -435,6 +447,8 @@ namespace WebRtcMeMiddleware
 
         public async Task OnPeerIceCandidate(string roomName, string peerUserName, string peerIce)
         {
+            DebugPrint($"====> OnPeerIceCandidate - room:{roomName} peerUser:{peerUserName}");
+
             var roomContext = RoomContextFromName(roomName);
             try
             {

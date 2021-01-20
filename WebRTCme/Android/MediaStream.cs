@@ -16,7 +16,8 @@ namespace WebRtc.Android
 
         public static IMediaStream Create()
         {
-            var nativeMediaStream = new Webrtc.MediaStream(WebRTCme.WebRtc.Id);
+            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             return self;
         }
@@ -28,7 +29,8 @@ namespace WebRtc.Android
 
         public static IMediaStream Create(IMediaStreamTrack[] tracks)
         {
-            var nativeMediaStream = new Webrtc.MediaStream(WebRTCme.WebRtc.Id);
+            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in tracks)
                 self.AddTrack(track);

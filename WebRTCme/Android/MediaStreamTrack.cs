@@ -55,7 +55,11 @@ namespace WebRtc.Android
         { }
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool Enabled 
+        { 
+            get => ((Webrtc.MediaStreamTrack)NativeObject).Enabled();
+            set => ((Webrtc.MediaStreamTrack)NativeObject).SetEnabled(value);
+        }
 
         public string Id => ((Webrtc.MediaStreamTrack)NativeObject).Id();
 
