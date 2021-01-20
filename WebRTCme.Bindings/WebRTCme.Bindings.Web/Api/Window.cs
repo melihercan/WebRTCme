@@ -19,6 +19,8 @@ namespace WebRtcBindingsWeb.Api
 
         public INavigator Navigator() => Api.Navigator.Create(JsRuntime);
 
+        public IMediaStream MediaStream() =>   Api.MediaStream.Create(JsRuntime);
+
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Api.RTCPeerConnection.Create(JsRuntime, configuration);
 

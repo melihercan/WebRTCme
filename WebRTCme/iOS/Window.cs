@@ -12,6 +12,8 @@ namespace WebRtc.iOS
 
         public INavigator Navigator() => iOS.Navigator.Create();
 
+        public IMediaStream MediaStream() => iOS.MediaStream.Create();
+
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);
     }

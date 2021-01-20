@@ -12,7 +12,10 @@ namespace WebRtc.iOS
     {
         public static IMediaStream Create()
         {
-            throw new NotImplementedException();
+            var nativeMediaStream =
+                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}");
+            var self = new MediaStream(nativeMediaStream);
+            return self;
         }
 
         public static IMediaStream Create(IMediaStream stream)

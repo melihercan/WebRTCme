@@ -10,7 +10,7 @@ namespace WebRTCme
         INavigator Navigator();
 
 
-        //IMediaStream MediaStream();
+        IMediaStream MediaStream();
         //IMediaStream MediaStream(IMediaStream stream);
         //IMediaStream MediaStream(IMediaStreamTrack[] tracks);
 
