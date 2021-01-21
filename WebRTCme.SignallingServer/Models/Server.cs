@@ -6,15 +6,12 @@ using WebRTCme.SignallingServer.Enums;
 
 namespace WebRTCme.SignallingServer.Models
 {
-    public class Client
+    public class Server
     {
-        // From Context.ConnectionId.
-        public string ConnectionId { get; set; }
-
         public TurnServer TurnServer { get; set; }
-        
-        public string RoomName { get; set; }
 
-        public string UserName { get; set; }
+        public RTCIceServer[] IceServers { get; set; }
+
+        public List<Room> Rooms { get; set; }
     }
 }

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace WebRTCme
+namespace WebRTCme.SignallingServer.Enums
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
     public enum TurnServer
     {
         StunOnly,
