@@ -115,24 +115,26 @@ namespace WebRTCme.SignallingServer.Hubs
                     if (room.IsReserved)
                     {
                         // Reserved room. Update client's ConnectionId.
-                        var client = room.Clients
-                        room.Clients.Add(new Client
-                        {
-                            ConnectionId = Context.ConnectionId,
-                            TurnServer = turnServer,
-                            RoomName = roomName,
-                            UserName = userName
-                        });
-                        await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
+                        room.Clients
+                            .Single(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
+                            .ConnectionId = Context.ConnectionId;
 
                         if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
                         {
-                            // Admin joined. 
+                            // Admin joined. Take action.
+                            var excepts = new List<string>();
+                            foreach (var client in room.Clients)
+                            {
+                                excepts.Add(client.ConnectionId);
+                                await Clients.GroupExcept(roomName, excepts)
+                                    .OnPeerJoined(turnServer.ToString(), client.RoomName, client.UserName, 
+                                        server.IceServers);
+                            }
                         }
-                        else
-                        {
-                            // Participant joined.
-                        }
+                        //else
+                        //{
+                        // Participant joined.
+                        //}
 
                     }
                     else
@@ -149,25 +151,6 @@ namespace WebRTCme.SignallingServer.Hubs
                         // Notify others.
                         await Clients.GroupExcept(roomName, Context.ConnectionId)
                             .OnPeerJoined(turnServer.ToString(), roomName, userName, server.IceServers);
-                    }
-
-
-
-                    // Add user.
-                    room.Clients.Add(new Client
-                    {
-                        ConnectionId = Context.ConnectionId,
-                        TurnServer = turnServer,
-                        RoomName = roomName,
-                        UserName = userName
-                    });
-                    await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-
-                    if (room.IsReserved && room.AdminUserName == userName)
-                    {
-                        // Room is reserved and reserver joined, notify all parties about each other.
-                        room.Clients.Select(client => Clients.GroupExcept(room.GroupName, client.ConnectionId)
-                        .OnPeerJoined(turnServer.ToString()roomName, userName, )
                     }
                 }
                 else
@@ -323,7 +306,6 @@ namespace WebRTCme.SignallingServer.Hubs
                 return Result<Unit>.Error(new string[] { ex.Message });
             }
         }
-#endif
 
         public async Task<Result<Unit>> JoinRoom(TurnServer turnServer, string roomName, string userName)
         {
@@ -520,6 +502,7 @@ namespace WebRTCme.SignallingServer.Hubs
             await Clients.Client(pairConnectionId).OnPeerIceCandidate(roomName, userName, ice);
             return Result<Unit>.Success(Unit.Default);
         }
+#endif
 
     }
 }
