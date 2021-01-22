@@ -57,6 +57,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);
             _turnServerNames = await _roomService.GetTurnServerNames();
+            if (_turnServerNames is not null)
+                JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
         private void HandleValidSubmit()

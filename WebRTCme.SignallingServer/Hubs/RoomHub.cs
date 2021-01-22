@@ -126,7 +126,7 @@ namespace WebRTCme.SignallingServer.Hubs
                             foreach (var client in room.Clients)
                             {
                                 excepts.Add(client.ConnectionId);
-                                await Clients.GroupExcept(roomName, excepts)
+                                await Clients.GroupExcept(room.GroupName, excepts)
                                     .OnPeerJoined(turnServer.ToString(), client.RoomName, client.UserName, 
                                         server.IceServers);
                             }
@@ -149,7 +149,7 @@ namespace WebRTCme.SignallingServer.Hubs
                         });
                         await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
                         // Notify others.
-                        await Clients.GroupExcept(roomName, Context.ConnectionId)
+                        await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
                             .OnPeerJoined(turnServer.ToString(), roomName, userName, server.IceServers);
                     }
                 }
@@ -167,7 +167,7 @@ namespace WebRTCme.SignallingServer.Hubs
                         };
                         Servers.Add(server);
                     }
-                    var groupName = "{turnServer}.{roomName}";
+                    var groupName = $"{turnServer}.{roomName}";
                     var room = new Room
                     {
                         RoomName = roomName,
