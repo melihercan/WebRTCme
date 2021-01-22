@@ -30,7 +30,7 @@ namespace DemoApp.ViewModels
             LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList(); ;
+            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
         }
 
         public async Task OnPageDisappearing()
@@ -122,9 +122,14 @@ namespace DemoApp.ViewModels
         }
 
         public string SelectedTurnServerName { get; set; }
+    //// Useful during development. DELETE THIS LATER!!! WILL NOT BE VISIBLE ON SCREEN
+    = "StunOnly";
+        
 
-
-        public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new JoinRoomRequestParameters();
+        public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new JoinRoomRequestParameters()
+     //// Useful during development. DELETE THIS LATER!!!
+     { RoomName = "hello",  UserName="delya"}
+            ;
 
 
         public ICommand JoinCallCommand => new Command( () =>
