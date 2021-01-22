@@ -62,7 +62,7 @@ namespace WebRTCme.SignallingServerClient
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            self._hubConnection.On<string, string, string, RTCIceServer[]>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
+            self._hubConnection.On<string, string, string>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
             self._hubConnection.On<string, string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
             self._hubConnection.On<string, string, string, string>("OnPeerSdpOffered", signallingServerCallbacks.OnPeerSdpOffered);
             self._hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", signallingServerCallbacks.OnPeerSdpAnswered);
@@ -92,6 +92,8 @@ namespace WebRTCme.SignallingServerClient
         public Task<Result<string[]>> GetTurnServerNames() => 
             _hubConnection.InvokeAsync<Result<string[]>>("GetTurnServerNames");
 
+        public Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName) =>
+            _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("GetIceServers", turnServerName);
 
         public Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName,
             string[] participantUserNames) =>

@@ -40,6 +40,21 @@ namespace WebRTCme.SignallingServer.Hubs
         public Task<Result<string[]>> GetTurnServerNames() =>
             Task.FromResult(Result<string[]>.Success(Enum.GetNames(typeof(TurnServer))));
 
+        public async Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName)
+        {
+            try
+            {
+                var turnServer = GetTurnServerFromName(turnServerName);
+                return Result<RTCIceServer[]>.Success(await GetTurnServerClient(turnServer).GetIceServersAsync());
+
+            }
+            catch (Exception ex)
+            {
+                return Result<RTCIceServer[]>.Error(new string[] { ex.Message });
+            }
+        }
+
+
         public async Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName, 
             string[] participantUserNames)
         {
@@ -127,8 +142,7 @@ namespace WebRTCme.SignallingServer.Hubs
                             {
                                 excepts.Add(client.ConnectionId);
                                 await Clients.GroupExcept(room.GroupName, excepts)
-                                    .OnPeerJoined(turnServer.ToString(), client.RoomName, client.UserName, 
-                                        server.IceServers);
+                                    .OnPeerJoined(turnServer.ToString(), client.RoomName, client.UserName); 
                             }
                         }
                         //else
@@ -150,7 +164,7 @@ namespace WebRTCme.SignallingServer.Hubs
                         await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
                         // Notify others.
                         await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
-                            .OnPeerJoined(turnServer.ToString(), roomName, userName, server.IceServers);
+                            .OnPeerJoined(turnServer.ToString(), roomName, userName);
                     }
                 }
                 else

@@ -187,8 +187,7 @@ namespace WebRtcMeMiddleware
             return Task.CompletedTask;
         }
 #endif
-        public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName, 
-            RTCIceServer[] iceServers)
+        public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
             DebugPrint($"====> OnPeerJoined - turn:{turnServerName} room:{roomName} peerUser:{peerUserName}");
             var roomContext = GetRoomContext(turnServerName, roomName);
@@ -204,7 +203,7 @@ namespace WebRtcMeMiddleware
 
                 var configuration = new RTCConfiguration
                 {
-                    IceServers = roomContext.IceServers,
+                    IceServers = await _signallingServerClient.GetIceServers(turnServerName),
                     PeerIdentity = roomName
                 };
                 var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
@@ -315,7 +314,7 @@ namespace WebRtcMeMiddleware
 
                 var configuration = new RTCConfiguration
                 {
-                    IceServers = roomContext.IceServers,
+                    IceServers = roomContext.IceServers ?? await _signallingServerClient.GetIceServers(turnServerName),
                     PeerIdentity = roomName
                 };
                 var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);

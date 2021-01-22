@@ -25,7 +25,7 @@ namespace WebRTCme.SignallingServerClient
 
 
 
-        Task OnPeerJoined(string turnServerName, string roomName, string peerUserName, RTCIceServer[] iceServers);
+        Task OnPeerJoined(string turnServerName, string roomName, string peerUserName);
 
         Task OnPeerLeft(string turnServerName, string roomName, string peerUserName);
 

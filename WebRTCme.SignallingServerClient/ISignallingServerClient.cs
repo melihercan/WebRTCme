@@ -11,6 +11,8 @@ namespace WebRTCme.SignallingServerClient
     {
         Task<Result<string[]>> GetTurnServerNames();
 
+        Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName);
+
         Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName, 
             string[] participantUserNames);
 
