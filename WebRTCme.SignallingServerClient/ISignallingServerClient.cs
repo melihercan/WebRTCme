@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Ardalis.Result;
+using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -7,22 +9,25 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerClient
     {
-        Task InitializeAsync(ISignallingServerCallbacks signallingServerCallbacks);
-        Task CleanupAsync();
+        Task<Result<string[]>> GetTurnServerNames();
 
-        Task JoinRoomAsync(string roomName, string userName);
+        Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName, 
+            string[] participantUserNames);
+
+        Task<Result<Unit>> FreeRoom(string turnServerName, string roomName, string adminUserName);
+
+        Task<Result<Unit>> AddParticipant(string turnServerName, string roomName, string participantUserName);
+
+        Task<Result<Unit>> RemoveParticipant(string turnServerName, string roomName, string participantUserName);
+
+        Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName);
         
-        Task LeaveRoomAsync(string roomName, string userName);
+        Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName);
 
-        Task StartRoomAsync(string roomName, string userName, TurnServer turnServer);
+        Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string pairUserName, string sdp);
 
-        Task StopRoomAsync(string roomName, string userName);
+        Task<Result<Unit>> AnswerSdp(string turnServerName, string roomName, string pairUserName, string sdp);
 
-        Task OfferSdpAsync(string roomName, string pairUserName, string sdp);
-
-        Task AnswerSdpAsync(string roomName, string pairUserName, string sdp);
-
-        Task IceCandidateAsync(string roomName, string pairUserName, string ice);
-
+        Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string pairUserName, string ice);
     }
 }

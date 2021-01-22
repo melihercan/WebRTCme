@@ -12,7 +12,7 @@ using WebRTCme.SignallingServerClient;
 
 namespace WebRTCme.SignallingServer.Hubs
 {
-    public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerRequests
+    public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerClient
     {
         private readonly TurnServerClientFactory _turnServerClientFactory;
 
@@ -81,7 +81,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public Task<Result<Unit>> FreeRoom(string turnServerName, string roomName)
+        public Task<Result<Unit>> FreeRoom(string turnServerName, string roomName, string adminUserName)
         {
             throw new NotImplementedException();
         }
@@ -191,6 +191,11 @@ namespace WebRTCme.SignallingServer.Hubs
             {
                 return Result<Unit>.Error(new string[] { ex.Message });
             }
+        }
+
+        public Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string pairUserName, 
