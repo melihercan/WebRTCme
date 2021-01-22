@@ -190,82 +190,12 @@ namespace WebRtcMeMiddleware
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
             DebugPrint($"====> OnPeerJoined - turn:{turnServerName} room:{roomName} peerUser:{peerUserName}");
-            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-//                if (roomContext.RoomState == RoomState.Error)
-  //                  return;
-    //            if (roomContext.RoomState != RoomState.Connected)
-      //              throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-        //                $"is in wrong state {roomContext.RoomState}");
+                var roomContext = GetRoomContext(turnServerName, roomName);
 
-                var mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
-
-                var configuration = new RTCConfiguration
-                {
-                    IceServers = await _signallingServerClient.GetIceServers(turnServerName),
-                    PeerIdentity = roomName
-                };
-                var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
-                roomContext.PeerConnections.Add(peerUserName, peerConnection);
-                peerConnection.OnConnectionStateChanged += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnConnectionStateChanged - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnDataChannel += (s, e) =>
-                {
-                };
-                peerConnection.OnIceCandidate += async (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnIceCandidate - room:{roomName} peerUser:{peerUserName}");
-                    var iceCandidate = new RTCIceCandidateInit
-                    {
-                        Candidate = e.Candidate.Candidate,
-                        SdpMid = e.Candidate.SdpMid,
-                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
-                        //UsernameFragment = ???
-                    };
-                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
-                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
-                };
-                peerConnection.OnIceConnectionStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnIceConnectionStateChange - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnIceGatheringStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnIceGatheringStateChange - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnNegotiationNeeded += async (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnNegotiationNeeded - room:{roomName} peerUser:{peerUserName}");
-                    //var offerDescription = await peerConnection.CreateOffer();
-                    //await peerConnection.SetLocalDescription(offerDescription);
-                    //await _signallingServerClient.OfferSdpAsync(roomName, peerUserName,
-                    //    JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
-                };
-                peerConnection.OnSignallingStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}, signallingState:{ peerConnection.SignalingState }");
-
-                    //RoomEventSubject.OnNext(new RoomEvent
-                    //{
-                    //    Code = RoomEventCode.PeerJoined,
-                    //    RoomName = roomName,
-                    //    PeerUserName = peerUserName,
-                    //    MediaStream = mediaStream
-                    //});
-
-                };
-                peerConnection.OnTrack += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerJoined.OnTrack - room:{roomName} peerUser:{peerUserName}");
-                    mediaStream.AddTrack(e.Track);
-                };
-                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetVideoTracks().First(),
-                    roomContext.JoinRoomRequestParameters.LocalStream);
-                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetAudioTracks().First(),
-                    roomContext.JoinRoomRequestParameters.LocalStream);
+                await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName);
+                var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName).Value;
 
                 var offerDescription = await peerConnection.CreateOffer();
                 await peerConnection.SetLocalDescription(offerDescription);
@@ -274,7 +204,6 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                //roomContext.RoomState = RoomState.Error;
                 PeerCallbackSubject.OnError(ex);
             }
         }
@@ -290,7 +219,6 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-    //            roomContext.RoomState = RoomState.Error;
                 PeerCallbackSubject.OnError(ex);
             }
         }
@@ -300,79 +228,15 @@ namespace WebRtcMeMiddleware
         {
             DebugPrint($"====> OnPeerSdpOffered - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                //if (roomContext.RoomState == RoomState.Error)
-                  //  return;
-
-                //if (roomContext.RoomState != RoomState.Connected)
-                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-                    //    $"is in wrong state {roomContext.RoomState}");
-
-                var mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
-
-                var configuration = new RTCConfiguration
+                var roomContext = GetRoomContext(turnServerName, roomName);
+                var peerConnection = roomContext.PeerConnections.FirstOrDefault(peer => peer.Key == peerUserName).Value;
+                if (peerConnection is null)
                 {
-                    IceServers = roomContext.IceServers ?? await _signallingServerClient.GetIceServers(turnServerName),
-                    PeerIdentity = roomName
-                };
-                var peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
-                roomContext.PeerConnections.Add(peerUserName, peerConnection);
-                peerConnection.OnConnectionStateChanged += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnConnectionStateChanged - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnDataChannel += (s, e) =>
-                {
-                };
-                peerConnection.OnIceCandidate += async (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnIceCandidate - room:{roomName} peerUser:{peerUserName}");
-                    var iceCandidate = new RTCIceCandidateInit
-                    {
-                        Candidate = e.Candidate.Candidate,
-                        SdpMid = e.Candidate.SdpMid,
-                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
-                        //UsernameFragment = ???
-                    };
-                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
-                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
-                };
-                peerConnection.OnIceConnectionStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnIceConnectionStateChange - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnIceGatheringStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnIceGatheringStateChange - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnNegotiationNeeded += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnNegotiationNeeded - room:{roomName} peerUser:{peerUserName}");
-                };
-                peerConnection.OnSignallingStateChange += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}, signallingState:{ peerConnection.SignalingState }");
-                    //RoomEventSubject.OnNext(new RoomEvent
-                    //{
-                    //    Code = RoomEventCode.PeerJoined,
-                    //    RoomName = roomName,
-                    //    PeerUserName = peerUserName,
-                    //    MediaStream = mediaStream
-                    //});
-                };
-                peerConnection.OnTrack += (s, e) =>
-                {
-                    DebugPrint($"====> OnPeerSdpOffered.OnTrack - room:{roomName} peerUser:{peerUserName}");
-                    mediaStream.AddTrack(e.Track);
-                    ////roomContext.JoinRoomRequestParameters.LocalStream.AddTrack(e.Track);
-                };
-
-                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetVideoTracks().First(),
-                    roomContext.JoinRoomRequestParameters.LocalStream);
-                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetAudioTracks().First(),
-                    roomContext.JoinRoomRequestParameters.LocalStream);
+                    await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName);
+                    peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName).Value;
+                }
 
                 var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -390,19 +254,14 @@ namespace WebRtcMeMiddleware
             }
         }
 
-        public async Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, string peerSdp)
+        public async Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, 
+            string peerSdp)
         {
             DebugPrint($"====> OnPeerSdpAnswered - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                //if (roomContext.RoomState == RoomState.Error)
-                  //  return;
-
-                //if (roomContext.RoomState != RoomState.Connected)
-                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-                    //    $"is in wrong state {roomContext.RoomState}");
+                var roomContext = GetRoomContext(turnServerName, roomName);
 
                 var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -417,24 +276,18 @@ namespace WebRtcMeMiddleware
             }
         }
 
-        public async Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, string peerIce)
+        public async Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, 
+            string peerIce)
         {
             DebugPrint($"====> OnPeerIceCandidate - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                //if (roomContext.RoomState == RoomState.Error)
-                  //  return;
-
-                //if (roomContext.RoomState != RoomState.Connected)
-                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-                    //    $"is in wrong state {roomContext.RoomState}");
+                var roomContext = GetRoomContext(turnServerName, roomName);
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
                     _jsonSerializerOptions);
-                var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName)
-                    .Value;
+                var peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName).Value;
                 await peerConnection.AddIceCandidate(iceCandidate);
             }
             catch (Exception ex)
@@ -446,6 +299,117 @@ namespace WebRtcMeMiddleware
 
 
 #endregion
+
+        private async Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName, 
+            string peerUserName, bool isDelete = false)
+        {
+            try
+            {
+                IRTCPeerConnection peerConnection = null;
+                IMediaStream mediaStream = null;
+
+                var roomContext = GetRoomContext(turnServerName, roomName);
+                
+                if (isDelete)
+                {
+                    peerConnection = roomContext.PeerConnections.Single(peer => peer.Key == peerUserName).Value;
+
+                    peerConnection.OnConnectionStateChanged -= OnConnectionStateChanged;
+                    peerConnection.OnDataChannel -= OnDataChannel;
+                    peerConnection.OnIceCandidate -= OnIceCandidate;
+                    peerConnection.OnIceConnectionStateChange -= OnIceConnectionStateChange;
+                    peerConnection.OnIceGatheringStateChange -= OnIceGatheringStateChange;
+                    peerConnection.OnNegotiationNeeded -= OnNegotiationNeeded;
+                    peerConnection.OnSignallingStateChange -= OnSignallingStateChange;
+                    peerConnection.OnTrack -= OnTrack;
+
+                    roomContext.PeerConnections.Remove(peerUserName);
+                }
+                else
+                {
+                    mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
+
+                    var configuration = new RTCConfiguration
+                    {
+                        IceServers = roomContext.IceServers ?? await _signallingServerClient
+                            .GetIceServers(turnServerName),
+                        PeerIdentity = roomName
+                    };
+                    peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+                    roomContext.PeerConnections.Add(peerUserName, peerConnection);
+
+                    peerConnection.OnConnectionStateChanged += OnConnectionStateChanged;
+                    peerConnection.OnDataChannel += OnDataChannel;
+                    peerConnection.OnIceCandidate += OnIceCandidate;
+                    peerConnection.OnIceConnectionStateChange += OnIceConnectionStateChange;
+                    peerConnection.OnIceGatheringStateChange += OnIceGatheringStateChange;
+                    peerConnection.OnNegotiationNeeded += OnNegotiationNeeded;
+                    peerConnection.OnSignallingStateChange += OnSignallingStateChange;
+                    peerConnection.OnTrack += OnTrack;
+
+                    peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetVideoTracks().First(),
+                        roomContext.JoinRoomRequestParameters.LocalStream);
+                    peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetAudioTracks().First(),
+                        roomContext.JoinRoomRequestParameters.LocalStream);
+                }
+
+                void OnConnectionStateChanged(object s, EventArgs e)
+                {
+                    DebugPrint($"====> OnConnectionStateChanged - room:{roomName} peerUser:{peerUserName}");
+                }
+                void OnDataChannel(object s, IRTCDataChannelEvent e)
+                {
+                }
+                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                {
+                    DebugPrint($"====> OnIceCandidate - room:{roomName} peerUser:{peerUserName}");
+                    var iceCandidate = new RTCIceCandidateInit
+                    {
+                        Candidate = e.Candidate.Candidate,
+                        SdpMid = e.Candidate.SdpMid,
+                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
+                        //UsernameFragment = ???
+                    };
+                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
+                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
+                }
+                void OnIceConnectionStateChange(object s, EventArgs e)
+                {
+                    DebugPrint($"====> OnIceConnectionStateChange - room:{roomName} peerUser:{peerUserName}");
+                }
+                void OnIceGatheringStateChange(object s, EventArgs e)
+                {
+                    DebugPrint($"====> OnIceGatheringStateChange - room:{roomName} peerUser:{peerUserName}");
+                }
+                void OnNegotiationNeeded(object s, EventArgs e)
+                {
+                    DebugPrint($"====> OnNegotiationNeeded - room:{roomName} peerUser:{peerUserName}");
+                }
+                void OnSignallingStateChange(object s, EventArgs e)
+                {
+                    DebugPrint($"====> OnSignallingStateChange - room:{roomName} peerUser:{peerUserName}, " +
+                        $"signallingState:{ peerConnection.SignalingState }");
+                    //RoomEventSubject.OnNext(new RoomEvent
+                    //{
+                    //    Code = RoomEventCode.PeerJoined,
+                    //    RoomName = roomName,
+                    //    PeerUserName = peerUserName,
+                    //    MediaStream = mediaStream
+                    //});
+                }
+                void OnTrack(object s, IRTCTrackEvent e)
+                {
+                    DebugPrint($"====> OnTrack - room:{roomName} peerUser:{peerUserName}");
+                    mediaStream.AddTrack(e.Track);
+                }
+            }
+            catch (Exception ex)
+            {
+                //roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
+            }
+
+        }
 
         private static void DebugPrint(string message)
         {
