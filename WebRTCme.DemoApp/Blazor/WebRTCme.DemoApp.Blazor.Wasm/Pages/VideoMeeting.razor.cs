@@ -42,8 +42,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
         private IMediaStreamService _mediaStreamService;
+        private string[] _turnServerNames;
 
-        private RoomRequestParameters RoomRequestParameters { get; set; } = new();
+        private JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -55,12 +56,13 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);
+            _turnServerNames = await _roomService.GetTurnServerNames();
         }
 
         private void HandleValidSubmit()
         {
-            RoomRequestParameters.LocalStream = LocalStream;
-            var roomCallbackDisposer = _roomService.RoomRequest(RoomRequestParameters).Subscribe(
+            JoinRoomRequestParameters.LocalStream = LocalStream;
+            var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
                 onNext: (roomCallbackParameters) => 
                 { 
                 },

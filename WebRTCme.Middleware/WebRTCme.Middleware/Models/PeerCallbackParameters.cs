@@ -4,10 +4,12 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class RoomCallbackParameters
+    public class PeerCallbackParameters
     {
-        public RoomCallbackCode Code { get; init; }
+        public PeerCallbackCode Code { get; init; }
 
+        public string TurnServerName { get; init; }
+        
         public string RoomName { get; init; }
 
         public string PeerUserName { get; init; }

@@ -4,11 +4,9 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class RoomRequestParameters
+    public class JoinRoomRequestParameters
     {
-        public bool IsInitiator { get; set; }
-
-        public TurnServer TurnServer { get; set; }
+        public string TurnServerName { get; set; }
 
         public string RoomName { get; set; }
 

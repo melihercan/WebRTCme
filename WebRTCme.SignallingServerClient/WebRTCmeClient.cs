@@ -20,19 +20,23 @@ namespace WebRTCme.SignallingServerClient
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
 
-        private readonly string _signallingServerBaseUrl;
+        private string _signallingServerBaseUrl;
 
-        public WebRTCmeClient(string signallingServerBaseUrl)
+        private WebRTCmeClient()
         {
-            _signallingServerBaseUrl = signallingServerBaseUrl;
         }
 
-        public Task InitializeAsync(ISignallingServerCallbacks signallingServerCallbacks)
+        public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
+            ISignallingServerCallbacks signallingServerCallbacks)
         {
+            var self = new WebRTCmeClient();
+
+            self._signallingServerBaseUrl = signallingServerBaseUrl;
+
             bool bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_signallingServerBaseUrl + "/roomhub", (opts) =>
+            self._hubConnection = new HubConnectionBuilder()
+                .WithUrl(signallingServerBaseUrl + "/roomhub", (opts) =>
                 {
                     if (bypassSslCertificateError)
                     {
@@ -58,21 +62,21 @@ namespace WebRTCme.SignallingServerClient
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            _hubConnection.On<string, string, string, RTCIceServer[]>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
-            _hubConnection.On<string, string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
-            _hubConnection.On<string, string, string, string>("OnPeerSdpOffered", signallingServerCallbacks.OnPeerSdpOffered);
-            _hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", signallingServerCallbacks.OnPeerSdpAnswered);
-            _hubConnection.On<string, string, string, string>("OnPeerIceCandidate", signallingServerCallbacks.OnPeerIceCandidate);
+            self._hubConnection.On<string, string, string, RTCIceServer[]>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
+            self._hubConnection.On<string, string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
+            self._hubConnection.On<string, string, string, string>("OnPeerSdpOffered", signallingServerCallbacks.OnPeerSdpOffered);
+            self._hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", signallingServerCallbacks.OnPeerSdpAnswered);
+            self._hubConnection.On<string, string, string, string>("OnPeerIceCandidate", signallingServerCallbacks.OnPeerIceCandidate);
 
-            _hubConnection.Closed += HubConnection_Closed;
+            self._hubConnection.Closed += self.HubConnection_Closed;
 
             // Start connection without waiting.
-            _ = ConnectWithRetryAsync();
+            _ = self.ConnectWithRetryAsync();
 
-            return Task.CompletedTask;
+            return Task.FromResult(self as ISignallingServerClient);
         }
 
-        public async Task CleanupAsync()
+        public async ValueTask DisposeAsync()
         {
             _cts.Cancel();
             if (_hubConnection.State != HubConnectionState.Disconnected)
@@ -163,5 +167,6 @@ namespace WebRTCme.SignallingServerClient
                 }
             }
         }
+
     }
 }

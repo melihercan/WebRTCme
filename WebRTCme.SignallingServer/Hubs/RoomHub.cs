@@ -277,6 +277,11 @@ namespace WebRTCme.SignallingServer.Hubs
 
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            //throw new NotImplementedException();
+        }
+
 
 #if false
         public async Task<Result<Unit>> ReserveRoom(TurnServer turnServer, string roomName, string userName)

@@ -8,12 +8,11 @@ namespace WebRTCme.Middleware
 {
     public interface IRoomService : IAsyncDisposable
     {
-        IObservable<RoomCallbackParameters> RoomRequest(RoomRequestParameters request);
+        Task<string[]> GetTurnServerNames();
 
-        Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters);
 
-        Task DisconnectRoomAsync(RoomRequestParameters roomRequestParameters);
-
+        IObservable<PeerCallbackParameters> JoinRoomRequest(JoinRoomRequestParameters request);
+      
 
     }
 }

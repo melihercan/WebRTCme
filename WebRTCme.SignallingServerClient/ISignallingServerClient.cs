@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServerClient
 {
-    public interface ISignallingServerClient
+    public interface ISignallingServerClient : IAsyncDisposable
     {
         Task<Result<string[]>> GetTurnServerNames();
 

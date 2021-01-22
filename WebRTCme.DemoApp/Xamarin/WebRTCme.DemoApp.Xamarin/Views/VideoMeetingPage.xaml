@@ -6,11 +6,10 @@
     <ContentPage.Content>
         <StackLayout BackgroundColor="LightGray">
             <Label Text="Video meeting"/>
-            <Picker Title="select TURN server" ItemsSource="{Binding TurnServers}" SelectedItem="{Binding SelectedTurnServer}"/>
-            <Entry Placeholder="enter room name" Text="{Binding RoomRequestParameters.RoomName}"/>
-            <Entry Placeholder="enter user name" Text="{Binding RoomRequestParameters.UserName}"/>
+            <Picker Title="select TURN server" ItemsSource="{Binding TurnServerNames}" SelectedItem="{Binding SelectedTurnServerName}"/>
+            <Entry Placeholder="enter room name" Text="{Binding JoinRoomRequestParameters.RoomName}"/>
+            <Entry Placeholder="enter user name" Text="{Binding JoinRoomRequestParameters.UserName}"/>
             <StackLayout Orientation="Horizontal">
-                <Button Text="Start call" Command="{Binding StartCallCommand}"/>
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
             </StackLayout>
             <webRtc:Video Type="{Binding LocalType}" Source="{Binding LocalSource}" Stream="{Binding LocalStream}" 

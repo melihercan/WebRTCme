@@ -7,10 +7,8 @@ using WebRTCme;
 namespace WebRTCme.Middleware
 {
     [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
-    public enum RoomCallbackCode
+    public enum PeerCallbackCode
     {
-        RoomStarted,
-        RoomStopped,
         PeerJoined,
         PeerLeft
     }

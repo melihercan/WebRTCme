@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace DemoApp.ViewModels
             LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList(); ;
         }
 
         public async Task OnPageDisappearing()
@@ -107,40 +109,39 @@ namespace DemoApp.ViewModels
         }
 
 
-        public IList<string> TurnServers => Enum.GetNames(typeof(TurnServer));
-        public string SelectedTurnServer { get; set; }
-
-
-        public RoomRequestParameters RoomRequestParameters { get; set; } = new RoomRequestParameters();
-
-        public ICommand StartCallCommand => new Command( () =>
+        private List<string> _turnServerNames;
+        public List<string> TurnServerNames
         {
-            RoomRequestParameters.IsInitiator = true;
-            RoomRequest();
-        });
+            get => _turnServerNames;
+            set
+            {
+                _turnServerNames = value;
+                OnPropertyChanged();
+            }
+
+        }
+
+        public string SelectedTurnServerName { get; set; }
+
+
+        public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new JoinRoomRequestParameters();
+
 
         public ICommand JoinCallCommand => new Command( () =>
         {
-            RoomRequestParameters.IsInitiator = false;
-            RoomRequest();
-        });
-
-        private void RoomRequest()
-        {
-            RoomRequestParameters.TurnServer = (TurnServer)Enum.Parse(typeof(TurnServer), SelectedTurnServer);
-            RoomRequestParameters.LocalStream = LocalStream;
-            var roomCallbackDisposer = _roomService.RoomRequest(RoomRequestParameters).Subscribe(
-                onNext: (roomCallbackParameters) => 
-                { 
+            JoinRoomRequestParameters.TurnServerName = SelectedTurnServerName;
+            JoinRoomRequestParameters.LocalStream = LocalStream;
+            var roomCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
+                onNext: (roomCallbackParameters) =>
+                {
                 },
-                onError: (exception) => 
-                { 
+                onError: (exception) =>
+                {
                 },
-                onCompleted: () => 
-                { 
+                onCompleted: () =>
+                {
                 });
-
-        }
+        });
 
     }
 }

@@ -30,8 +30,8 @@ namespace WebRtcMeMiddleware
         static public async Task<IRoomService> CreateAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
         {
             var self = new RoomService();
-            self._signallingServerClient = SignallingServerClientFactory.Create(signallingServerBaseUrl);
-            await self._signallingServerClient.InitializeAsync(self);
+            self._signallingServerClient = await SignallingServerClientFactory.CreateAsync(signallingServerBaseUrl, 
+                self);
             self._jsRuntime = jsRuntime;
             return self;
         }
@@ -39,44 +39,47 @@ namespace WebRtcMeMiddleware
         private RoomService() { }
 
 
-        private Subject<RoomCallbackParameters> RoomCallbackSubject { get; } = new Subject<RoomCallbackParameters>();
-
-        public IObservable<RoomCallbackParameters> RoomRequest(RoomRequestParameters roomRequestParameters)
+        public async Task<string[]> GetTurnServerNames()
         {
-            return Observable.Create<RoomCallbackParameters>(async observer => 
+            var result = await _signallingServerClient.GetTurnServerNames();
+            if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                throw new Exception(string.Join("-", result.Errors.ToArray()));
+            return result.Value;
+        }
+
+        private Subject<PeerCallbackParameters> PeerCallbackSubject { get; } = new Subject<PeerCallbackParameters>();
+
+        public IObservable<PeerCallbackParameters> JoinRoomRequest(JoinRoomRequestParameters joinRoomRequestParameters)
+        {
+            return Observable.Create<PeerCallbackParameters>(async observer => 
             {
-                IDisposable roomCallbackDisposer = null;
+                IDisposable peerCallbackDisposer = null;
                 RoomContext roomContext = null;
                 bool isJoined = false;
-                bool isStarted = false;
 
                 try
                 {
-                    roomCallbackDisposer = RoomCallbackSubject
+                    peerCallbackDisposer = PeerCallbackSubject
                         .AsObservable()
                         .Subscribe(observer.OnNext);
 
-                    if (RoomContextFromName(roomRequestParameters.RoomName) is not null)
-                        observer.OnError(/*throw*/ new Exception($"Room {roomRequestParameters.RoomName} is in use"));
+                    if (GetRoomContext(joinRoomRequestParameters.TurnServerName, joinRoomRequestParameters.RoomName) 
+                            is not null)
+                           observer.OnError(new Exception($"Room {joinRoomRequestParameters.RoomName} is in use"));
 
                     roomContext = new RoomContext
                     {
-                        RoomState = RoomState.Idle,
-                        RoomRequestParameters = roomRequestParameters
+                        //RoomState = RoomState.Idle,
+                        JoinRoomRequestParameters = joinRoomRequestParameters
                     };
                     _roomContexts.Add(roomContext);
 
-                    roomContext.RoomState = RoomState.Connecting;
-                    Console.WriteLine("#### Connecting...");
-                    System.Diagnostics.Debug.WriteLine("#### Connecting...");
-                    await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
+                    //roomContext.RoomState = RoomState.Connecting;
+                    //Console.WriteLine("#### Connecting...");
+
+                    await _signallingServerClient.JoinRoom(joinRoomRequestParameters.TurnServerName,
+                        joinRoomRequestParameters.RoomName, joinRoomRequestParameters.UserName);
                     isJoined = true;
-                    if (roomRequestParameters.IsInitiator)
-                    {
-                        await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
-                            roomRequestParameters.UserName, roomRequestParameters.TurnServer);
-                        isStarted = true;
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -85,53 +88,18 @@ namespace WebRtcMeMiddleware
 
                 return async () =>
                 {
-                    roomCallbackDisposer.Dispose();
+                    peerCallbackDisposer.Dispose();
                     try
                     {
                         if (isJoined)
-                            await _signallingServerClient.LeaveRoomAsync(roomRequestParameters.RoomName,
-                                roomRequestParameters.UserName);
-                        if (isStarted)
-                            await _signallingServerClient.StopRoomAsync(roomRequestParameters.RoomName,
-                                roomRequestParameters.UserName);
+                            await _signallingServerClient.LeaveRoom(joinRoomRequestParameters.TurnServerName,
+                                joinRoomRequestParameters.RoomName, joinRoomRequestParameters.UserName);
                         if (roomContext is not null)
                             _roomContexts.Remove(roomContext);
                     }
                     catch { };
                 };
             });
-        }
-
-
-        public async Task<IMediaStream> ConnectRoomAsync(RoomRequestParameters roomRequestParameters)
-        {
-            if (RoomContextFromName(roomRequestParameters.RoomName) is not null)
-                throw new Exception($"Room {roomRequestParameters.RoomName} is in use");
-
-            var roomContext = new RoomContext
-            {
-                RoomState = RoomState.Idle,
-                RoomRequestParameters = roomRequestParameters
-            };
-            _roomContexts.Add(roomContext);
-
-            roomContext.RoomState = RoomState.Connecting;
-            Console.WriteLine("#### Connecting...");
-            System.Diagnostics.Debug.WriteLine("#### Connecting...");
-            await _signallingServerClient.JoinRoomAsync(roomRequestParameters.RoomName, roomRequestParameters.UserName);
-            if (roomRequestParameters.IsInitiator)
-                await _signallingServerClient.StartRoomAsync(roomRequestParameters.RoomName,
-                    roomRequestParameters.UserName, roomRequestParameters.TurnServer);
-
-
-
-            return await roomContext.ConnectTcs.Task;
-        }
-
-
-        public Task DisconnectRoomAsync(RoomRequestParameters roomRequestParameters)
-        {
-            throw new NotImplementedException();
         }
 
         private async Task FatalErrorAsync(string message)
@@ -142,19 +110,23 @@ namespace WebRtcMeMiddleware
         }
 
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return new ValueTask(_signallingServerClient.CleanupAsync());
+            await _signallingServerClient.DisposeAsync();
         }
 
-        private RoomContext RoomContextFromName(string roomName) =>
-            _roomContexts.FirstOrDefault(context => context.RoomRequestParameters.RoomName == roomName);
+        private RoomContext GetRoomContext(string turnServerName, string roomName) =>
+            _roomContexts.FirstOrDefault(context =>
+                context.JoinRoomRequestParameters.TurnServerName
+                    .Equals(turnServerName, StringComparison.OrdinalIgnoreCase) &&
+                context.JoinRoomRequestParameters.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
 
 
         #region SignallingServerCallbacks
         //// TODO: NOT a good idea to run async ops on callbacks, especially on iOS. Callbacks returning tsks will not be
         /// handled correctly. Create a separate task and schedule callbacks there!!!
         /// Use Task.Channels to create a pipeline. CallbackPipeline.
+#if false
         public Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
         {
             DebugPrint($"====> OnRoomStarted - room:{roomName}");
@@ -165,22 +137,22 @@ namespace WebRtcMeMiddleware
                 if (roomContext.RoomState == RoomState.Error)
                     return Task.CompletedTask;
                 if (roomContext.RoomState != RoomState.Connecting)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                    throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
                         $"is in wrong state {roomContext.RoomState}");
 
                 roomContext.IceServers = iceServers;
                 roomContext.RoomState = RoomState.Connected;
                 
-                RoomCallbackSubject.OnNext(new RoomCallbackParameters 
+                PeerCallbackSubject.OnNext(new PeerCallbackParameters 
                 { 
-                    Code = RoomCallbackCode.RoomStarted,
+                    Code = PeerCallbackCode.RoomStarted,
                     RoomName = roomName
                 });
             }
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                PeerCallbackSubject.OnError(ex);
             }
             return Task.CompletedTask;
         }
@@ -196,36 +168,37 @@ namespace WebRtcMeMiddleware
                     return Task.CompletedTask;
 
                 if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
+                    throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
                         $"is in wrong state {roomContext.RoomState}");
 
                 roomContext.RoomState = RoomState.Disconnected;
-                RoomCallbackSubject.OnNext(new RoomCallbackParameters 
+                PeerCallbackSubject.OnNext(new PeerCallbackParameters 
                 { 
-                    Code = RoomCallbackCode.RoomStopped,
+                    Code = PeerCallbackCode.RoomStopped,
                     RoomName = roomName
                 });
-                RoomCallbackSubject.OnCompleted();
+                PeerCallbackSubject.OnCompleted();
             }
             catch (Exception ex)
             {
                 roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                PeerCallbackSubject.OnError(ex);
             }
             return Task.CompletedTask;
         }
-
-        public async Task OnPeerJoined(string roomName, string peerUserName)
+#endif
+        public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName, 
+            RTCIceServer[] iceServers)
         {
-            DebugPrint($"====> OnPeerJoined - room:{roomName} peerUser:{peerUserName}");
-            var roomContext = RoomContextFromName(roomName);
+            DebugPrint($"====> OnPeerJoined - turn:{turnServerName} room:{roomName} peerUser:{peerUserName}");
+            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                if (roomContext.RoomState == RoomState.Error)
-                    return;
-                if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
+//                if (roomContext.RoomState == RoomState.Error)
+  //                  return;
+    //            if (roomContext.RoomState != RoomState.Connected)
+      //              throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
+        //                $"is in wrong state {roomContext.RoomState}");
 
                 var mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
 
@@ -253,7 +226,7 @@ namespace WebRtcMeMiddleware
                         SdpMLineIndex = e.Candidate.SdpMLineIndex,
                         //UsernameFragment = ???
                     };
-                    await _signallingServerClient.IceCandidateAsync(roomName, peerUserName,
+                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
                         JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
                 };
                 peerConnection.OnIceConnectionStateChange += (s, e) =>
@@ -290,53 +263,53 @@ namespace WebRtcMeMiddleware
                     DebugPrint($"====> OnPeerJoined.OnTrack - room:{roomName} peerUser:{peerUserName}");
                     mediaStream.AddTrack(e.Track);
                 };
-                peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
-                    roomContext.RoomRequestParameters.LocalStream);
-                peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
-                    roomContext.RoomRequestParameters.LocalStream);
+                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetVideoTracks().First(),
+                    roomContext.JoinRoomRequestParameters.LocalStream);
+                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetAudioTracks().First(),
+                    roomContext.JoinRoomRequestParameters.LocalStream);
 
                 var offerDescription = await peerConnection.CreateOffer();
                 await peerConnection.SetLocalDescription(offerDescription);
-                await _signallingServerClient.OfferSdpAsync(roomName, peerUserName,
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName,
                     JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
             }
             catch (Exception ex)
             {
-                roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                //roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
             }
         }
 
-        public async Task OnPeerLeft(string roomName, string peerUserName)
+        public async Task OnPeerLeft(string turnServerName, string roomName, string peerUserName)
         {
-            var roomContext = RoomContextFromName(roomName);
+            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                if (roomContext.RoomState == RoomState.Error)
-                    return;
+//                if (roomContext.RoomState == RoomState.Error)
+  //                  return;
 
             }
             catch (Exception ex)
             {
-                roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+    //            roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
             }
         }
 
 
-        public async Task OnPeerSdpOffered(string roomName, string peerUserName, string peerSdp)
+        public async Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
             DebugPrint($"====> OnPeerSdpOffered - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = RoomContextFromName(roomName);
+            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                if (roomContext.RoomState == RoomState.Error)
-                    return;
+                //if (roomContext.RoomState == RoomState.Error)
+                  //  return;
 
-                if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
+                //if (roomContext.RoomState != RoomState.Connected)
+                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
+                    //    $"is in wrong state {roomContext.RoomState}");
 
                 var mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
 
@@ -364,7 +337,7 @@ namespace WebRtcMeMiddleware
                         SdpMLineIndex = e.Candidate.SdpMLineIndex,
                         //UsernameFragment = ???
                     };
-                    await _signallingServerClient.IceCandidateAsync(roomName, peerUserName,
+                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
                         JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
                 };
                 peerConnection.OnIceConnectionStateChange += (s, e) =>
@@ -394,13 +367,13 @@ namespace WebRtcMeMiddleware
                 {
                     DebugPrint($"====> OnPeerSdpOffered.OnTrack - room:{roomName} peerUser:{peerUserName}");
                     mediaStream.AddTrack(e.Track);
-                    ////roomContext.RoomRequestParameters.LocalStream.AddTrack(e.Track);
+                    ////roomContext.JoinRoomRequestParameters.LocalStream.AddTrack(e.Track);
                 };
 
-                peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetVideoTracks().First(),
-                    roomContext.RoomRequestParameters.LocalStream);
-                peerConnection.AddTrack(roomContext.RoomRequestParameters.LocalStream.GetAudioTracks().First(),
-                    roomContext.RoomRequestParameters.LocalStream);
+                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetVideoTracks().First(),
+                    roomContext.JoinRoomRequestParameters.LocalStream);
+                peerConnection.AddTrack(roomContext.JoinRoomRequestParameters.LocalStream.GetAudioTracks().First(),
+                    roomContext.JoinRoomRequestParameters.LocalStream);
 
                 var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -408,29 +381,29 @@ namespace WebRtcMeMiddleware
 
                 var answerDescription = await peerConnection.CreateAnswer();
                 await peerConnection.SetLocalDescription(answerDescription);
-                await _signallingServerClient.AnswerSdpAsync(roomName, peerUserName,
+                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName,
                     JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions));
             }
             catch (Exception ex)
             {
-                roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                //roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
             }
         }
 
-        public async Task OnPeerSdpAnswered(string roomName, string peerUserName, string peerSdp)
+        public async Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
             DebugPrint($"====> OnPeerSdpAnswered - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = RoomContextFromName(roomName);
+            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                if (roomContext.RoomState == RoomState.Error)
-                    return;
+                //if (roomContext.RoomState == RoomState.Error)
+                  //  return;
 
-                if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
+                //if (roomContext.RoomState != RoomState.Connected)
+                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
+                    //    $"is in wrong state {roomContext.RoomState}");
 
                 var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -440,24 +413,24 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                //roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
             }
         }
 
-        public async Task OnPeerIceCandidate(string roomName, string peerUserName, string peerIce)
+        public async Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, string peerIce)
         {
             DebugPrint($"====> OnPeerIceCandidate - room:{roomName} peerUser:{peerUserName}");
 
-            var roomContext = RoomContextFromName(roomName);
+            var roomContext = GetRoomContext(turnServerName, roomName);
             try
             {
-                if (roomContext.RoomState == RoomState.Error)
-                    return;
+                //if (roomContext.RoomState == RoomState.Error)
+                  //  return;
 
-                if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.RoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
+                //if (roomContext.RoomState != RoomState.Connected)
+                  //  throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
+                    //    $"is in wrong state {roomContext.RoomState}");
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
                     _jsonSerializerOptions);
@@ -467,13 +440,13 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                roomContext.RoomState = RoomState.Error;
-                RoomCallbackSubject.OnError(ex);
+                //roomContext.RoomState = RoomState.Error;
+                PeerCallbackSubject.OnError(ex);
             }
         }
 
 
-        #endregion
+#endregion
 
         private static void DebugPrint(string message)
         {

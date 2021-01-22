@@ -5,7 +5,8 @@ namespace WebRTCme.SignallingServerClient
 {
     public static class SignallingServerClientFactory
     {
-        public static ISignallingServerClient Create(string signallingServerBaseUrl) =>
-            new WebRTCmeClient(signallingServerBaseUrl);
+        public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl,
+            ISignallingServerCallbacks signallingServerCallbacks) =>
+                WebRTCmeClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks);
     }
 }
