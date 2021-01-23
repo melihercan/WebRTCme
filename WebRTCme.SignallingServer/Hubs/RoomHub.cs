@@ -255,7 +255,8 @@ namespace WebRTCme.SignallingServer.Hubs
                     .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerSdpAnswered(turnServer.ToString(), roomName, userName, sdp);
+                await Clients.Client(pairConnectionId).OnPeerSdpAnswered(turnServer.ToString(), roomName, userName, 
+                    sdp);
                 return Result<Unit>.Success(Unit.Default);
             }
             catch (Exception ex)
@@ -281,7 +282,8 @@ namespace WebRTCme.SignallingServer.Hubs
                     .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerSdpOffered(turnServer.ToString(), roomName, userName, ice);
+                await Clients.Client(pairConnectionId).OnPeerIceCandidate(turnServer.ToString(), roomName, userName, 
+                    ice);
                 return Result<Unit>.Success(Unit.Default);
             }
             catch (Exception ex)

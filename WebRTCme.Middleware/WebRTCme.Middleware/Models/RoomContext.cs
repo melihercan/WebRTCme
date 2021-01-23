@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware
+namespace WebRtcMeMiddleware.Models
 {
-    public class RoomContext
+    internal class RoomContext
     {
-        //public RoomState RoomState { get; set; }
-
         public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; }
 
-        public Dictionary<string /*peerUserName*/, IRTCPeerConnection> PeerConnections { get; set; } = new();
+////        public Dictionary<string /*peerUserName*/, IRTCPeerConnection> PeerConnectionContexts { get; set; } = new();
+
+        public List<PeerConnectionContext> PeerConnectionContexts { get; set; } = new();
 
         public RTCIceServer[] IceServers { get; set; }
     }
