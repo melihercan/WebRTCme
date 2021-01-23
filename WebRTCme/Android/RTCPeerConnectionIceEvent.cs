@@ -14,7 +14,9 @@ namespace WebRtc.Android
         private RTCPeerConnectionIceEvent(Webrtc.IceCandidate nativeIceCandidate) =>
             _nativeIceCandidate = nativeIceCandidate;
 
-        public IRTCIceCandidate Candidate => RTCIceCandidate.Create(_nativeIceCandidate);
+        // 'null' is valid and indicates end of ICE gathering process.
+        public IRTCIceCandidate Candidate => _nativeIceCandidate == null ? null : 
+            RTCIceCandidate.Create(_nativeIceCandidate);
 
     }
 }
