@@ -20,7 +20,7 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListenerForValue("onstatechange", OnStateChange);
+            AddNativeEventListenerForValue<RTCSctpTransportState>("statechange", (s, e) => OnStateChange?.Invoke(s, e));
         }
 
         public int MaxChannels => GetNativeProperty<int>("maxChannels");

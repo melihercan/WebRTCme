@@ -35,7 +35,7 @@
                 if (!value.getJsObjectRef) {
                     for (let index = 0; index < arguments.length; index++) {
                         const element = arguments[index];
-                        if (typeof (element) === 'object' && contentSpec != null) {
+                        if (typeof (element) === 'object' && value.contentSpec !== null) {
                             args.push(getObjectContent(element, [], value.contentSpec));
                         } else {
                             args.push(element);
@@ -69,6 +69,10 @@
     }
 
     addObjectRef = function (object) {
+
+ if (object === null) {
+     let x = object;
+     }
         let id = objectRefId++;
         objectRefs[id] = object;
         let objectRef = {};
@@ -103,10 +107,10 @@
         if (!accumulatedContent) {
             accumulatedContent = [];
         }
-        if (typeof object == "undefined" || object === null) {
+        if (typeof object === "undefined" || object === null) {
             return null;
         }
-        if (typeof object === "number" || typeof object === "string" || typeof object == "boolean") {
+        if (typeof object === "number" || typeof object === "string" || typeof object === "boolean") {
             return object;
         }
         let content = (Array.isArray(object)) ? [] : {};
@@ -119,7 +123,7 @@
                 continue;
             }
             let currentMemberSpec;
-            if (contentSpec != "*") {
+            if (contentSpec !== "*") {
                 currentMemberSpec = Array.isArray(object) ? contentSpec : contentSpec[i];
                 if (!currentMemberSpec) {
                     continue;
@@ -205,7 +209,7 @@
         let parentObject = getParentObject(parent);
 
         let propertyObject = getPropertyObject(parentObject, property);
-        if (typeof (propertyObject) === 'object') {
+        if (typeof (propertyObject) === 'object' && propertyObject !== null) {
             let objectRef = addObjectRef(propertyObject);
             return objectRef;
         } else {
@@ -228,7 +232,7 @@
         let parentObject = getParentObject(parent);
 
         let propertyObject = getPropertyObject(parentObject, property);
-        if (typeof (propertyObject) === 'object' && contentSpec != null) {
+        if (typeof (propertyObject) === 'object' && contentSpec !== null) {
             let value = getObjectContent(propertyObject, [], contentSpec);
             return value;
         } else {
@@ -297,7 +301,7 @@
         let parentObject = getParentObject(parent);
         let methodObject = getPropertyObject(parentObject, method);
         let ret = methodObject.apply(parentObject, args);
-        if (ret != undefined) {
+        if (ret !== undefined) {
             if (ret !== null && typeof (ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;
@@ -321,7 +325,7 @@
         let parentObject = getParentObject(parent);
         let methodObject = getPropertyObject(parentObject, method);
         let ret = await methodObject.apply(parentObject, args);
-        if (ret != undefined) {
+        if (ret !== undefined) {
             if (ret !== null && typeof (ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;

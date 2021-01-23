@@ -21,14 +21,17 @@ namespace WebRtcBindingsWeb.Api
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration)
             : base(jsRuntime, jsObjectRef)
         {
-            AddNativeEventListener("onconnectionstatechanged", OnConnectionStateChanged);
-            AddNativeEventListenerForObjectRef("ondatachannel", OnDataChannel, RTCDataChannelEvent.Create);
-            AddNativeEventListenerForObjectRef("onicecandidate", OnIceCandidate, RTCPeerConnectionIceEvent.Create);
-            AddNativeEventListener("oniceconnectionstatechange", OnIceConnectionStateChange);
-            AddNativeEventListener("onicegatheringstatechange", OnIceGatheringStateChange);
-            AddNativeEventListener("onnegotiationneeded", OnNegotiationNeeded);
-            AddNativeEventListener("onsignallingstatechange", OnSignallingStateChange);
-            AddNativeEventListenerForObjectRef("onconnectionstatechanged", OnTrack, RTCTrackEvent.Create);
+            AddNativeEventListener("connectionstatechanged", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
+            AddNativeEventListenerForObjectRef("datachannel", (s, e) => OnDataChannel?.Invoke(s, e), 
+                RTCDataChannelEvent.Create);
+            AddNativeEventListenerForObjectRef("icecandidate", (s, e) => OnIceCandidate?.Invoke(s, e), 
+                RTCPeerConnectionIceEvent.Create);
+            AddNativeEventListener("iceconnectionstatechange", (s, e) => OnIceConnectionStateChange?.Invoke(s, e));
+            AddNativeEventListener("icegatheringstatechange", (s, e) => OnIceGatheringStateChange?.Invoke(s, e));
+            AddNativeEventListener("negotiationneeded", (s,e) => OnNegotiationNeeded?.Invoke(s, e));
+            AddNativeEventListener("signallingstatechange", (s, e) => OnSignallingStateChange?.Invoke(s, e));
+            AddNativeEventListenerForObjectRef("connectionstatechanged", (s, e) => OnTrack?.Invoke(s, e), 
+                RTCTrackEvent.Create);
         }
 
         public bool CanTrickleIceCandidates => GetNativeProperty<bool>("canTrickleIceCandidates");

@@ -17,7 +17,7 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCDTMFSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListener("ontonechange", OnToneChange);
+            AddNativeEventListener("tonechange", (s, e) => OnToneChange?.Invoke(s, e));
         }
 
         public string ToneBuffer => GetNativeProperty<string>("toneBuffer");

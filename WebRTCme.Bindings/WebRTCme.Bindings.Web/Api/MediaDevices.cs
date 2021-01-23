@@ -16,7 +16,8 @@ namespace WebRtcBindingsWeb.Api
 
         private MediaDevices(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListenerForObjectRef("ondevicechange", OnDeviceChange, MediaStreamTrackEvent.Create);
+            AddNativeEventListenerForObjectRef("devicechange", (s, e) => OnDeviceChange?.Invoke(s, e), 
+                MediaStreamTrackEvent.Create);
         }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;

@@ -11,8 +11,8 @@ namespace WebRtcBindingsWeb.Api
 {
     internal class RTCIceCandidate : ApiBase, IRTCIceCandidate
     {
-        public static IRTCIceCandidate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) =>
-            new RTCIceCandidate(jsRuntime, jsObjectRefRtcStatsReport);
+        public static IRTCIceCandidate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) =>
+            new RTCIceCandidate(jsRuntime, jsObjectRef);
 
         private RTCIceCandidate(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 

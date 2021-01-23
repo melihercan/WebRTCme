@@ -16,9 +16,9 @@ namespace WebRtcBindingsWeb.Api
             
         private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListener("onended", OnEnded);
-            AddNativeEventListener("onmute", OnMute);
-            AddNativeEventListener("onunmute", OnUnmute);
+            AddNativeEventListener("ended", (s, e) => OnEnded?.Invoke(s, e));
+            AddNativeEventListener("mute", (s, e) => OnMute?.Invoke(s, e));
+            AddNativeEventListener("unmute", (s, e) => OnUnmute?.Invoke(s, e));
         }
 
         public string ContentHint 

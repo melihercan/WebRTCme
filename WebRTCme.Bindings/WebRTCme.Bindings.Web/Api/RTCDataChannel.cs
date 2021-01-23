@@ -18,12 +18,12 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCDataChannel(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListener("onbufferedamountlow", OnBufferedAmountLow);
-            AddNativeEventListener("onclose", OnClose);
-            AddNativeEventListener("onclosing", OnClosing);
-            AddNativeEventListenerForObjectRef("onerror", OnError, ErrorEvent.Create);
-            AddNativeEventListenerForObjectRef("onmessage", OnMessage, MessageEvent.Create);
-            AddNativeEventListener("onpen", OnOpen);
+            AddNativeEventListener("bufferedamountlow", (s, e) => OnBufferedAmountLow?.Invoke(s, e));
+            AddNativeEventListener("close", (s, e) => OnClose?.Invoke(s, e));
+            AddNativeEventListener("closing", (s, e) => OnClosing?.Invoke(s, e));
+            AddNativeEventListenerForObjectRef("error", (s, e) => OnError?.Invoke(s, e), ErrorEvent.Create);
+            AddNativeEventListenerForObjectRef("message", (s, e) => OnMessage?.Invoke(s, e), MessageEvent.Create);
+            AddNativeEventListener("open", (s, e) => OnOpen?.Invoke(s, e));
         }
 
         public BinaryType BinaryType 

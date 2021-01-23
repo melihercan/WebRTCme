@@ -69,13 +69,9 @@ namespace WebRtcMeMiddleware
 
                     roomContext = new RoomContext
                     {
-                        //RoomState = RoomState.Idle,
                         JoinRoomRequestParameters = joinRoomRequestParameters
                     };
                     _roomContexts.Add(roomContext);
-
-                    //roomContext.RoomState = RoomState.Connecting;
-                    //Console.WriteLine("#### Connecting...");
 
                     await _signallingServerClient.JoinRoom(joinRoomRequestParameters.TurnServerName,
                         joinRoomRequestParameters.RoomName, joinRoomRequestParameters.UserName);
@@ -197,10 +193,10 @@ namespace WebRtcMeMiddleware
                 var peerConnection = roomContext.PeerConnections
                     .Single(peer => peer.Key.Equals(peerUserName, StringComparison.OrdinalIgnoreCase)).Value;
 
-                //var offerDescription = await peerConnection.CreateOffer();
-                //await peerConnection.SetLocalDescription(offerDescription);
-                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName,
-                //    JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
+                var offerDescription = await peerConnection.CreateOffer();
+                await peerConnection.SetLocalDescription(offerDescription);
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName,
+                    JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions));
             }
             catch (Exception ex)
             {
@@ -363,15 +359,20 @@ namespace WebRtcMeMiddleware
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
                     DebugPrint($"====> OnIceCandidate - room:{roomName} peerUser:{peerUserName}");
-                    var iceCandidate = new RTCIceCandidateInit
+
+                    // 'null' is valid and indicates end of ICE gathering process.
+                    if (e.Candidate is not null)
                     {
-                        Candidate = e.Candidate.Candidate,
-                        SdpMid = e.Candidate.SdpMid,
-                        SdpMLineIndex = e.Candidate.SdpMLineIndex,
-                        //UsernameFragment = ???
-                    };
-                    await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
-                        JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
+                        var iceCandidate = new RTCIceCandidateInit
+                        {
+                            Candidate = e.Candidate.Candidate,
+                            SdpMid = e.Candidate.SdpMid,
+                            SdpMLineIndex = e.Candidate.SdpMLineIndex,
+                            //UsernameFragment = ???
+                        };
+                        await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName,
+                            JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions));
+                    }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {

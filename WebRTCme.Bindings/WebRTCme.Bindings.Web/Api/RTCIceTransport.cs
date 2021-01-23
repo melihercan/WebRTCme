@@ -18,9 +18,10 @@ namespace WebRtcBindingsWeb.Api
 
         private RTCIceTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListener("ongatheringstatechange", OnGatheringStateChange);
-            AddNativeEventListener("onselectedcandidatepairchange", OnSelectedCandidatePairChange);
-            AddNativeEventListener("onstatechange", OnStateChange);
+            AddNativeEventListener("gatheringstatechange", (s, e) => OnGatheringStateChange?.Invoke(s, e));
+            AddNativeEventListener("selectedcandidatepairchange", (s, e) => 
+                OnSelectedCandidatePairChange?.Invoke(s, e));
+            AddNativeEventListener("statechange", (s, e) => OnStateChange?.Invoke(s, e));
         }
 
         public RTCIceComponent Component => GetNativeProperty<RTCIceComponent>("component");

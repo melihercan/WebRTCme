@@ -22,8 +22,10 @@ namespace WebRtcBindingsWeb.Api
 
         private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
-            AddNativeEventListenerForObjectRef("onaddtrack", OnAddTrack, MediaStreamTrackEvent.Create);
-            AddNativeEventListenerForObjectRef("onremovetrack", OnRemoveTrack, MediaStreamTrackEvent.Create);
+            AddNativeEventListenerForObjectRef("addtrack", (s, e) => OnAddTrack?.Invoke(s, e), 
+                MediaStreamTrackEvent.Create);
+            AddNativeEventListenerForObjectRef("removetrack", (s, e) => OnRemoveTrack?.Invoke(s, e), 
+                MediaStreamTrackEvent.Create);
         }
 
         public bool Active => GetNativeProperty<bool>("active");
