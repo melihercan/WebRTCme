@@ -366,12 +366,13 @@ namespace WebRtcMeMiddleware
                 void OnConnectionStateChanged(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnConnectionStateChanged - room:{roomName} " +
-                        $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                        $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} " +
+                        $"connectionState:{peerConnection.ConnectionState}");
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
                 }
-                /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
                     DebugPrint($"====> OnIceCandidate - room:{roomName} " +
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
@@ -389,8 +390,7 @@ namespace WebRtcMeMiddleware
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                         DebugPrint($"######## Sending ICE Candidate - room:{roomName} " +
                             $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} ice:{ice}");
-                        /*await*/
-                        _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice) .Wait();
+                        await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
 
                     }
                 }
@@ -398,7 +398,7 @@ namespace WebRtcMeMiddleware
                 {
                     DebugPrint($"====> OnIceConnectionStateChange - room:{roomName} " +
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} " +
-                        $"connectionState:{peerConnection.ConnectionState}");
+                        $"iceConnectionState:{peerConnection.IceConnectionState}");
                 }
                 void OnIceGatheringStateChange(object s, EventArgs e)
                 {
@@ -406,7 +406,7 @@ namespace WebRtcMeMiddleware
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"iceGatheringState: {peerConnection.IceGatheringState}");
                 }
-                /*async*/ void OnNegotiationNeeded(object s, EventArgs e)
+                async void OnNegotiationNeeded(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnNegotiationNeeded - room:{roomName} " +
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
@@ -414,12 +414,12 @@ namespace WebRtcMeMiddleware
                     
                     if (peerConnectionContext.IsInitiator)
                     {
-                        var offerDescription = /*await*/ peerConnection.CreateOffer() .Result;
-                        /*await*/ peerConnection.SetLocalDescription(offerDescription)   .Wait();
+                        var offerDescription = await peerConnection.CreateOffer();
+                        await peerConnection.SetLocalDescription(offerDescription);
                         var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                         DebugPrint($"######## Sending Offer - room:{roomName} " +
                             $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} sdp:{sdp}");
-                        /*await*/ _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp) .Wait();
+                        await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
                     }
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
