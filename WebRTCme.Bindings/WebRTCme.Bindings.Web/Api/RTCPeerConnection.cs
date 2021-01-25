@@ -21,7 +21,7 @@ namespace WebRtcBindingsWeb.Api
         private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration)
             : base(jsRuntime, jsObjectRef)
         {
-            AddNativeEventListener("connectionstatechanged", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
+            AddNativeEventListener("connectionstatechange", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
             AddNativeEventListenerForObjectRef("datachannel", (s, e) => OnDataChannel?.Invoke(s, e), 
                 RTCDataChannelEvent.Create);
             AddNativeEventListenerForObjectRef("icecandidate", (s, e) => OnIceCandidate?.Invoke(s, e), 
@@ -30,7 +30,7 @@ namespace WebRtcBindingsWeb.Api
             AddNativeEventListener("icegatheringstatechange", (s, e) => OnIceGatheringStateChange?.Invoke(s, e));
             AddNativeEventListener("negotiationneeded", (s,e) => OnNegotiationNeeded?.Invoke(s, e));
             AddNativeEventListener("signallingstatechange", (s, e) => OnSignallingStateChange?.Invoke(s, e));
-            AddNativeEventListenerForObjectRef("connectionstatechanged", (s, e) => OnTrack?.Invoke(s, e), 
+            AddNativeEventListenerForObjectRef("track", (s, e) => OnTrack?.Invoke(s, e), 
                 RTCTrackEvent.Create);
         }
 
