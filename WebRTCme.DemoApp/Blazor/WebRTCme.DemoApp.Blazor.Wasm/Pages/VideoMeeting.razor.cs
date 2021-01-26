@@ -31,12 +31,15 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         
         IMediaStream LocalStream { get; set; }
 
+        string LocalLabel { get; set; } 
+
         VideoType Remote1Type { get; set; } = VideoType.Room;
 
         string Remote1Source { get; set; }
 
         IMediaStream Remote1Stream { get; set; }
 
+        string Remote1Label { get; set; }
 
 
         private IWebRtcMiddleware _webRtcMiddleware;
@@ -67,6 +70,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private void HandleValidSubmit()
         {
             JoinRoomRequestParameters.LocalStream = LocalStream;
+            LocalLabel = JoinRoomRequestParameters.UserName;
             var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) => 
                 { 
@@ -74,7 +78,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                     {
                         case PeerCallbackCode.PeerJoined:
                             Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Source = peerCallbackParameters.PeerUserName;
+                            Remote1Source = "Remote";
+                            Remote1Label = peerCallbackParameters.PeerUserName;
                             StateHasChanged();
                             break;
 

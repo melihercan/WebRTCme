@@ -24,6 +24,9 @@ namespace WebRTCme.Middleware.Blazor
         [Parameter]
         public IMediaStream Stream { get; set; }
 
+        [Parameter]
+        public string Label { get; set; }
+
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
 
