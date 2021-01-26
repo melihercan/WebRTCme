@@ -74,6 +74,18 @@ namespace DemoApp.ViewModels
             }
         }
 
+        private string _localLabel;
+        public string LocalLabel
+        {
+            get => _localLabel;
+            set
+            {
+                _localLabel = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         private VideoType _remote1Type = VideoType.Room;
         public VideoType Remote1Type
@@ -108,6 +120,16 @@ namespace DemoApp.ViewModels
             }
         }
 
+        private string _remote1Label;
+        public string Remote1Label
+        {
+            get => _remote1Label;
+            set
+            {
+                _remote1Label = value;
+                OnPropertyChanged();
+            }
+        }
 
         private List<string> _turnServerNames;
         public List<string> TurnServerNames
@@ -136,9 +158,24 @@ namespace DemoApp.ViewModels
         {
             JoinRoomRequestParameters.TurnServerName = SelectedTurnServerName;
             JoinRoomRequestParameters.LocalStream = LocalStream;
-            var roomCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
-                onNext: (roomCallbackParameters) =>
+            var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
+                onNext: (peerCallbackParameters) =>
                 {
+                    switch (peerCallbackParameters.Code)
+                    {
+                        case PeerCallbackCode.PeerJoined:
+                            Remote1Stream = peerCallbackParameters.MediaStream;
+                            Remote1Source = "Remote";
+                            Remote1Label = peerCallbackParameters.PeerUserName;
+                            break;
+
+                        case PeerCallbackCode.PeerModified:
+                            break;
+
+                        default:
+                            break;
+                    }
+
                 },
                 onError: (exception) =>
                 {

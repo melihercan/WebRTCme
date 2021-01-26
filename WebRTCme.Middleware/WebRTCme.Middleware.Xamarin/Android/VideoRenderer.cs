@@ -25,6 +25,8 @@ namespace WebRtcMiddlewareXamarin
         private string Source { get; set; }
         private IMediaStream Stream { get; set; }
         
+        private string Label { get; set; }
+
         private VideoView _videoView;
 
 
@@ -37,6 +39,7 @@ namespace WebRtcMiddlewareXamarin
             if (e.OldElement != null)
             {
                 // Unsubscribe from event handlers and cleanup any resources.
+                //e.OldElement.PropertyChanged -= OnPropertyChanged;
             }
 
             if (e.NewElement != null)
@@ -46,16 +49,16 @@ namespace WebRtcMiddlewareXamarin
                     Type = e.NewElement.Type;
                     Source = e.NewElement.Source;
                     Stream = e.NewElement.Stream;
+                    Label = e.NewElement.Label;
 
                     SurfaceView surfaceView = null;
+                    var videoTrack = Stream?.GetVideoTracks().First();
 
                     switch (Type)
                     {
                         case VideoType.Camera:
                         ////if (string.IsNullOrEmpty(source))
                         {
-                            var videoTrack = Stream.GetVideoTracks().First();
-
                             var permission = await Permissions.RequestAsync<Permissions.Camera>();
                             if (permission != PermissionStatus.Granted)
                             {
@@ -65,13 +68,15 @@ namespace WebRtcMiddlewareXamarin
                             }
 
                             surfaceView = PlatformSupport.CreateCameraView(videoTrack);
-
                         }
                         break;
 
                         case VideoType.Room:
-                            //break;
-                            return;
+                            if (videoTrack is null)
+                                return;
+                            
+                            surfaceView = PlatformSupport.CreateRoomView(videoTrack);
+                            break;
 
                         default:
                             return;
@@ -83,10 +88,26 @@ namespace WebRtcMiddlewareXamarin
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers
+                //e.NewElement.PropertyChanged += OnPropertyChanged;
             }
         }
 
-        //private void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            base.OnElementPropertyChanged(sender, args);
+
+            
+            if (args.PropertyName == Video.StreamProperty.PropertyName)
+            {
+
+            }
+            else if (args.PropertyName == Video.LabelProperty.PropertyName)
+            {
+
+            }
+        }
+
+        //private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         //{
         //    if (e.PropertyName == "Stream" && Stream is not null)
         //    {

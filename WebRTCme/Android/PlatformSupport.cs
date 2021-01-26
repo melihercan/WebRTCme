@@ -36,6 +36,12 @@ namespace WebRTCme
             nativeVideoTrack.AddSink(nativeSurfaceViewRenderer);
             return nativeSurfaceViewRenderer;
         }
+
+        public static SurfaceView CreateRoomView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
+        {
+            return null;
+        }
+
     }
 }
 

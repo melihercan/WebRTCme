@@ -20,6 +20,8 @@ namespace WebRtcMiddlewareXamarin
         private string Source { get; set; }
         private IMediaStream Stream { get; set; }
 
+        private string Label { get; set; }
+
         private VideoView _videoView;
 
         public VideoRenderer() { }
@@ -40,6 +42,7 @@ namespace WebRtcMiddlewareXamarin
                     Type = e.NewElement.Type;
                     Source = e.NewElement.Source;
                     Stream = e.NewElement.Stream;
+                    Label = e.NewElement.Label;
                     
                     UIView view = null;
 

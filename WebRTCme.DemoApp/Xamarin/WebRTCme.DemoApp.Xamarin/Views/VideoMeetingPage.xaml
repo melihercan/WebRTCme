@@ -12,9 +12,11 @@
             <StackLayout Orientation="Horizontal">
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
             </StackLayout>
-            <webRtc:Video Type="{Binding LocalType}" Source="{Binding LocalSource}" Stream="{Binding LocalStream}" 
+            <webRtc:Video Type="{Binding LocalType}" Source="{Binding LocalSource}" Stream="{Binding LocalStream}"
+                          Label="{Binding LocalLabel}"
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <webRtc:Video Type="{Binding Remote1Type}" Source="{Binding Remote1Source}" Stream="{Binding Remote1Stream}" 
+                          Label="{Binding Remote1Label}"
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
 
 
