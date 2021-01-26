@@ -68,8 +68,22 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             JoinRoomRequestParameters.LocalStream = LocalStream;
             var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
-                onNext: (roomCallbackParameters) => 
+                onNext: (peerCallbackParameters) => 
                 { 
+                    switch (peerCallbackParameters.Code)
+                    {
+                        case PeerCallbackCode.PeerJoined:
+                            Remote1Stream = peerCallbackParameters.MediaStream;
+                            Remote1Source = peerCallbackParameters.PeerUserName;
+                            StateHasChanged();
+                            break;
+
+                        case PeerCallbackCode.PeerModified:
+                            break;
+
+                        default:
+                            break;
+                    }
                 },
                 onError: (exception) => 
                 { 

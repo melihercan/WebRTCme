@@ -10,6 +10,7 @@ namespace WebRTCme.Middleware
     public enum PeerCallbackCode
     {
         PeerJoined,
+        PeerModified,
         PeerLeft
     }
 }

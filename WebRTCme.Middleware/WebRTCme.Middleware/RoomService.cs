@@ -368,6 +368,17 @@ namespace WebRtcMeMiddleware
                     DebugPrint($"====> OnConnectionStateChanged - room:{roomName} " +
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
+                    if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
+                        PeerCallbackSubject.OnNext(new PeerCallbackParameters
+                        {
+                            Code = PeerCallbackCode.PeerJoined,
+                            TurnServerName = turnServerName,
+                            RoomName = roomName,
+                            PeerUserName = peerUserName,
+                            MediaStream = mediaStream
+                        });
+                    else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
+                        PeerCallbackSubject.OnCompleted();
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
