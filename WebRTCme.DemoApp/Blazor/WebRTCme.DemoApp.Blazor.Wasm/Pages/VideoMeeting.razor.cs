@@ -49,7 +49,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new()
         //// Useful during development. DELETE THIS LATER!!!
-   { TurnServerName="StunOnly", RoomName="hello", UserName="melih"}
+   { TurnServerName="StunOnly", RoomName="hello", UserName="melik"}
             ;
 
         protected override async Task OnInitializedAsync()
