@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
@@ -197,30 +198,89 @@ namespace WebRtc.Android
             // Depreceted.
         }
 
-        public void OnAddTrack(RtpReceiver p0, Webrtc.MediaStream[] p1) => 
+        public void OnAddTrack(Webrtc.RtpReceiver p0, Webrtc.MediaStream[] p1) => 
             OnTrack?.Invoke(this, RTCTrackEvent.Create(p0, p1));
 
-        void Webrtc.PeerConnection.IObserver.OnDataChannel(DataChannel p0) =>
+        void Webrtc.PeerConnection.IObserver.OnDataChannel(Webrtc.DataChannel p0) =>
             OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(p0));
 
-        void Webrtc.PeerConnection.IObserver.OnIceCandidate(IceCandidate p0)
+        void Webrtc.PeerConnection.IObserver.OnIceCandidate(Webrtc.IceCandidate p0)
         {
             OnIceCandidate?.Invoke(this, RTCPeerConnectionIceEvent.Create(p0));
         }
 
-        public void OnIceCandidatesRemoved(IceCandidate[] p0)
+        public void OnIceCandidatesRemoved(Webrtc.IceCandidate[] p0)
         {
         }
 
-        public void OnIceConnectionChange(PeerConnection.IceConnectionState p0) =>
+        public void OnIceConnectionChange(Webrtc.PeerConnection.IceConnectionState p0)
+        {
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
+
+            // !!! I don't know why Android DOES NOT provide Connection State Change event???
+            // I drive this event from Ice Connection State Change event here for now.
+            if (p0 == Webrtc.PeerConnection.IceConnectionState.New)
+            {
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Checking)
+            {
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Connected)
+            {
+                Timer timer = null;
+                int count = 5;
+
+                // Make sure that state is connected with several attempsts.
+                timer = new Timer(new TimerCallback((state) => 
+                {
+                    if (((Webrtc.PeerConnection)NativeObject).ConnectionState() == 
+                        Webrtc.PeerConnection.PeerConnectionState.Connected || --count == 0)
+                    {
+                        timer.Dispose();
+                        OnConnectionStateChanged(this, EventArgs.Empty);
+                        return;
+                    }
+                }), null, 10, 50);
+                return;
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Completed)
+            {
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Failed)
+            {
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Disconnected)
+            {
+                Timer timer = null;
+                int count = 5;
+
+                // Make sure that state is disconnected with several attempsts.
+                timer = new Timer(new TimerCallback((state) =>
+                {
+                    if (((Webrtc.PeerConnection)NativeObject).ConnectionState() ==
+                        Webrtc.PeerConnection.PeerConnectionState.Disconnected || --count == 0)
+                    {
+                        timer.Dispose();
+                        OnConnectionStateChanged(this, EventArgs.Empty);
+                        return;
+                    }
+                }), null, 10, 50);
+
+                return;
+            }
+            else if (p0 == Webrtc.PeerConnection.IceConnectionState.Closed)
+            {
+            }
+
+            OnConnectionStateChanged(this, EventArgs.Empty);
+        }
 
         public void OnIceConnectionReceivingChange(bool p0)
         {
 
         }
 
-        public void OnIceGatheringChange(PeerConnection.IceGatheringState p0) =>
+        public void OnIceGatheringChange(Webrtc.PeerConnection.IceGatheringState p0) =>
             OnIceGatheringStateChange?.Invoke(this, EventArgs.Empty);
 
         public void OnRemoveStream(Webrtc.MediaStream p0)
@@ -230,7 +290,7 @@ namespace WebRtc.Android
 
         public void OnRenegotiationNeeded() => OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
 
-        public void OnSignalingChange(PeerConnection.SignalingState p0) =>
+        public void OnSignalingChange(Webrtc.PeerConnection.SignalingState p0) =>
             OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
         
         #endregion
@@ -248,7 +308,7 @@ namespace WebRtc.Android
 
             public void OnCreateFailure(string p0) => _tcsCreate?.SetException(new Exception($"{p0}"));
 
-            public void OnCreateSuccess(SessionDescription p0) => 
+            public void OnCreateSuccess(Webrtc.SessionDescription p0) => 
                 _tcsCreate?.SetResult(p0.FromNative());
 
             public void OnSetFailure(string p0) => _tcsSet?.SetException(new Exception($"{p0}"));
