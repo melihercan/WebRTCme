@@ -39,7 +39,16 @@ namespace WebRTCme
 
         public static SurfaceView CreateRoomView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            return null;
+            var context = Platform.CurrentActivity.ApplicationContext;
+
+            var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
+            var nativeSurfaceViewRenderer = new Webrtc.SurfaceViewRenderer(context);
+            nativeSurfaceViewRenderer.SetMirror(true);
+            nativeSurfaceViewRenderer.Init(eglBaseContext, null);
+
+            var nativeVideoTrack = track.NativeObject as Webrtc.VideoTrack;
+            nativeVideoTrack.AddSink(nativeSurfaceViewRenderer);
+            return nativeSurfaceViewRenderer;
         }
 
     }

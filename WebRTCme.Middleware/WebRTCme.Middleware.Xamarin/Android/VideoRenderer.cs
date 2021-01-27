@@ -99,7 +99,13 @@ namespace WebRtcMiddlewareXamarin
             
             if (args.PropertyName == Video.StreamProperty.PropertyName)
             {
-
+                var videoTrack = Stream?.GetVideoTracks().First();
+                var surfaceView = PlatformSupport.CreateRoomView(videoTrack);
+                if (_videoView == null)
+                {
+                    _videoView = new VideoView(Context, surfaceView);
+                    SetNativeControl(_videoView);
+                }
             }
             else if (args.PropertyName == Video.LabelProperty.PropertyName)
             {
