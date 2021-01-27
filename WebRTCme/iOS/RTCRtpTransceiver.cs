@@ -9,27 +9,27 @@ namespace WebRtc.iOS
 {
     internal class RTCRtpTransceiver : ApiBase, IRTCRtpTransceiver
     {
-        public static IRTCRtpTransceiver Create(Webrtc.RTCRtpTransceiver nativeRtpTransceiver) => 
+        public static IRTCRtpTransceiver Create(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) => 
             new RTCRtpTransceiver(nativeRtpTransceiver);
 
-        private RTCRtpTransceiver(Webrtc.RTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
+        private RTCRtpTransceiver(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
 
-        public RTCRtpTransceiverDirection CurrentDirection => ((Webrtc.RTCRtpTransceiver)NativeObject).Direction
+        public RTCRtpTransceiverDirection CurrentDirection => ((Webrtc.IRTCRtpTransceiver)NativeObject).Direction
             .FromNative();
 
         public RTCRtpTransceiverDirection Direction 
         { 
-            get => ((Webrtc.RTCRtpTransceiver)NativeObject).Direction.FromNative();
-            set => ((Webrtc.RTCRtpTransceiver)NativeObject).SetDirection(value.ToNative(), out NSError _);
+            get => ((Webrtc.IRTCRtpTransceiver)NativeObject).Direction.FromNative();
+            set => ((Webrtc.IRTCRtpTransceiver)NativeObject).SetDirection(value.ToNative(), out NSError _);
         }
 
-        public string Mid => ((Webrtc.RTCRtpTransceiver)NativeObject).Mid;
+        public string Mid => ((Webrtc.IRTCRtpTransceiver)NativeObject).Mid;
 
-        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(((Webrtc.RTCRtpTransceiver)NativeObject).Receiver);
+        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(((Webrtc.IRTCRtpTransceiver)NativeObject).Receiver);
 
-        public IRTCRtpSender Sender => RTCRtpSender.Create(((Webrtc.RTCRtpTransceiver)NativeObject).Sender);
+        public IRTCRtpSender Sender => RTCRtpSender.Create(((Webrtc.IRTCRtpTransceiver)NativeObject).Sender);
 
-        public bool Stopped => ((Webrtc.RTCRtpTransceiver)NativeObject).IsStopped;
+        public bool Stopped => ((Webrtc.IRTCRtpTransceiver)NativeObject).IsStopped;
 
 
         public void SetCodecPreferences(RTCRtpCodecCapability[] codecs)
@@ -37,7 +37,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public void Stop() => ((Webrtc.RTCRtpTransceiver)NativeObject).StopInternal();
+        public void Stop() => ((Webrtc.IRTCRtpTransceiver)NativeObject).StopInternal();
 
     }
 }

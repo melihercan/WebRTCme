@@ -17,7 +17,8 @@ namespace WebRtc.iOS
             _nativeIceCandidate = nativeIceCandidate;
         }
 
-        public IRTCIceCandidate Candidate => throw new NotImplementedException();
+        public IRTCIceCandidate Candidate =>
+            RTCIceCandidate.Create(_nativeIceCandidate);
 
     }
 }

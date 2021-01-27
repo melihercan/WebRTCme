@@ -15,7 +15,7 @@ namespace WebRtc.iOS
 
         private RTCIceCandidate(Webrtc.RTCIceCandidate nativeIceCandidate) : base(nativeIceCandidate) { }
 
-        public string Candidate => throw new NotImplementedException();
+        public string Candidate => ((Webrtc.RTCIceCandidate)NativeObject).Sdp;
 
         public string Component => throw new NotImplementedException();
 

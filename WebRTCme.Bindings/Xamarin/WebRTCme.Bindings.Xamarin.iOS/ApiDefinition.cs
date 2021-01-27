@@ -2135,12 +2135,12 @@ namespace Webrtc
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver streams:(NSArray<RTCMediaStream *> * _Nonnull)mediaStreams;
 	[Abstract]
 		[Export("peerConnection:didAddReceiver:streams:")]
-		void /****PeerConnection****/DidAddReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver, RTCMediaStream[] mediaStreams);
+		void /****PeerConnection****/DidAddReceiver(RTCPeerConnection peerConnection, IRTCRtpReceiver rtpReceiver, RTCMediaStream[] mediaStreams);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver;
 	[Abstract]
 		[Export("peerConnection:didRemoveReceiver:")]
-		void /****PeerConnection****/DidRemoveReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver);
+		void /****PeerConnection****/DidRemoveReceiver(RTCPeerConnection peerConnection, IRTCRtpReceiver rtpReceiver);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeLocalCandidate:(RTCIceCandidate * _Nonnull)local remoteCandidate:(RTCIceCandidate * _Nonnull)remote lastReceivedMs:(int)lastDataReceivedMs changeReason:(NSString * _Nonnull)reason;
 	[Abstract]
@@ -2195,15 +2195,15 @@ namespace Webrtc
 
 		// @property (readonly, nonatomic) NSArray<RTCRtpSender *> * _Nonnull senders;
 		[Export("senders")]
-		RTCRtpSender[] Senders { get; }
+		IRTCRtpSender[] Senders { get; }
 
 		// @property (readonly, nonatomic) NSArray<RTCRtpReceiver *> * _Nonnull receivers;
 		[Export("receivers")]
-		RTCRtpReceiver[] Receivers { get; }
+		IRTCRtpReceiver[] Receivers { get; }
 
 		// @property (readonly, nonatomic) NSArray<RTCRtpTransceiver *> * _Nonnull transceivers;
 		[Export("transceivers")]
-		RTCRtpTransceiver[] Transceivers { get; }
+		IRTCRtpTransceiver[] Transceivers { get; }
 
 		// -(BOOL)setConfiguration:(RTCConfiguration * _Nonnull)configuration;
 		[Export("setConfiguration:")]
@@ -2231,27 +2231,27 @@ namespace Webrtc
 
 		// -(RTCRtpSender * _Nonnull)addTrack:(RTCMediaStreamTrack * _Nonnull)track streamIds:(NSArray<NSString *> * _Nonnull)streamIds;
 		[Export("addTrack:streamIds:")]
-		RTCRtpSender AddTrack(RTCMediaStreamTrack track, string[] streamIds);
+		IRTCRtpSender AddTrack(RTCMediaStreamTrack track, string[] streamIds);
 
 		// -(BOOL)removeTrack:(RTCRtpSender * _Nonnull)sender;
 		[Export("removeTrack:")]
-		bool RemoveTrack(RTCRtpSender sender);
+		bool RemoveTrack(IRTCRtpSender sender);
 
 		// -(RTCRtpTransceiver * _Nonnull)addTransceiverWithTrack:(RTCMediaStreamTrack * _Nonnull)track;
 		[Export("addTransceiverWithTrack:")]
-		RTCRtpTransceiver AddTransceiverWithTrack(RTCMediaStreamTrack track);
+		IRTCRtpTransceiver AddTransceiverWithTrack(RTCMediaStreamTrack track);
 
 		// -(RTCRtpTransceiver * _Nonnull)addTransceiverWithTrack:(RTCMediaStreamTrack * _Nonnull)track init:(RTCRtpTransceiverInit * _Nonnull)init;
 		[Export("addTransceiverWithTrack:init:")]
-		RTCRtpTransceiver AddTransceiverWithTrack(RTCMediaStreamTrack track, RTCRtpTransceiverInit init);
+		IRTCRtpTransceiver AddTransceiverWithTrack(RTCMediaStreamTrack track, RTCRtpTransceiverInit init);
 
 		// -(RTCRtpTransceiver * _Nonnull)addTransceiverOfType:(RTCRtpMediaType)mediaType;
 		[Export("addTransceiverOfType:")]
-		RTCRtpTransceiver AddTransceiverOfType(RTCRtpMediaType mediaType);
+		IRTCRtpTransceiver AddTransceiverOfType(RTCRtpMediaType mediaType);
 
 		// -(RTCRtpTransceiver * _Nonnull)addTransceiverOfType:(RTCRtpMediaType)mediaType init:(RTCRtpTransceiverInit * _Nonnull)init;
 		[Export("addTransceiverOfType:init:")]
-		RTCRtpTransceiver AddTransceiverOfType(RTCRtpMediaType mediaType, RTCRtpTransceiverInit init);
+		IRTCRtpTransceiver AddTransceiverOfType(RTCRtpMediaType mediaType, RTCRtpTransceiverInit init);
 
 		// -(void)offerForConstraints:(RTCMediaConstraints * _Nonnull)constraints completionHandler:(void (^ _Nullable)(RTCSessionDescription * _Nullable, NSError * _Nullable))completionHandler;
 		[Export("offerForConstraints:completionHandler:")]
@@ -2624,6 +2624,8 @@ namespace Webrtc
 		void DidReceiveFirstPacketForMediaType(RTCRtpReceiver rtpReceiver, RTCRtpMediaType mediaType);
 	}
 
+	public interface IRTCRtpReceiver { }
+
 	// @protocol RTCRtpReceiver <NSObject>
 	/*
 	  Check whether adding [Model] to this declaration is appropriate.
@@ -2635,8 +2637,9 @@ namespace Webrtc
 	  be used.
 	*/
 	////[Protocol]
-		[Protocol, Model]
+	[Protocol, Model]
 	[BaseType(typeof(NSObject))]
+	[DisableDefaultCtor]
 	interface RTCRtpReceiver
 	{
 		// @required @property (readonly, nonatomic) NSString * _Nonnull receiverId;
@@ -2715,6 +2718,9 @@ namespace Webrtc
 		double InterToneGap { get; }
 	}
 
+
+	public interface IRTCRtpSender { }
+
 	// @protocol RTCRtpSender <NSObject>
 	/*
 	  Check whether adding [Model] to this declaration is appropriate.
@@ -2725,7 +2731,7 @@ namespace Webrtc
 	  protocol, then [Model] is redundant and will generate code that will never
 	  be used.
 	*/
-	[Protocol]
+	[Protocol, Model]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpSender
 	{
@@ -2788,6 +2794,8 @@ namespace Webrtc
 		RTCRtpEncodingParameters[] SendEncodings { get; set; }
 	}
 
+	public interface IRTCRtpTransceiver { }
+
 	// @protocol RTCRtpTransceiver <NSObject>
 	/*
 	  Check whether adding [Model] to this declaration is appropriate.
@@ -2798,7 +2806,7 @@ namespace Webrtc
 	  protocol, then [Model] is redundant and will generate code that will never
 	  be used.
 	*/
-	[Protocol]
+	[Protocol, Model]
 	[BaseType(typeof(NSObject))]
 	interface RTCRtpTransceiver
 	{

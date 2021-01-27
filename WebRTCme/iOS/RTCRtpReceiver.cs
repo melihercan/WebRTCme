@@ -8,11 +8,11 @@ namespace WebRtc.iOS
 {
     internal class RTCRtpReceiver : ApiBase, IRTCRtpReceiver
     {
-        public static IRTCRtpReceiver Create(Webrtc.RTCRtpReceiver nativeRtpReceiver) => new RTCRtpReceiver(nativeRtpReceiver);
+        public static IRTCRtpReceiver Create(Webrtc.IRTCRtpReceiver nativeRtpReceiver) => new RTCRtpReceiver(nativeRtpReceiver);
 
-        private RTCRtpReceiver(Webrtc.RTCRtpReceiver nativeRtpReceiver) : base(nativeRtpReceiver)  { }
+        private RTCRtpReceiver(Webrtc.IRTCRtpReceiver nativeRtpReceiver) : base(nativeRtpReceiver)  { }
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.RTCRtpReceiver)NativeObject).Track);
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.IRTCRtpReceiver)NativeObject).Track);
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
@@ -22,7 +22,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public RTCRtpReceiveParameters GetParameters() => ((Webrtc.RTCRtpReceiver)NativeObject).Parameters
+        public RTCRtpReceiveParameters GetParameters() => ((Webrtc.IRTCRtpReceiver)NativeObject).Parameters
             .FromNativeToReceive();
 
         public Task<IRTCStatsReport> GetStats()

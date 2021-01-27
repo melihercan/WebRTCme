@@ -291,13 +291,13 @@ namespace WebRtc.iOS
 
         }
 
-        public void DidAddReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCRtpReceiver rtpReceiver,
+        public void DidAddReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.IRTCRtpReceiver rtpReceiver,
             Webrtc.RTCMediaStream[] mediaStreams)
         {
 
         }
 
-        public void DidRemoveReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCRtpReceiver rtpReceiver)
+        public void DidRemoveReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.IRTCRtpReceiver rtpReceiver)
         {
 
         }

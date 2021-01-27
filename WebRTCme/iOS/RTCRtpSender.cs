@@ -8,15 +8,15 @@ namespace WebRtc.iOS
 {
     internal class RTCRtpSender : ApiBase, IRTCRtpSender
     {
-        public static IRTCRtpSender Create(Webrtc.RTCRtpSender nativeRtpSender) => new RTCRtpSender(nativeRtpSender);
+        public static IRTCRtpSender Create(Webrtc.IRTCRtpSender nativeRtpSender) => new RTCRtpSender(nativeRtpSender);
 
-        private RTCRtpSender(Webrtc.RTCRtpSender nativeRtpSender) : base(nativeRtpSender)
+        private RTCRtpSender(Webrtc.IRTCRtpSender nativeRtpSender) : base(nativeRtpSender)
         {
         }
 
-        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(((Webrtc.RTCRtpSender)NativeObject).DtmfSender);
+        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(((Webrtc.IRTCRtpSender)NativeObject).DtmfSender);
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.RTCRtpSender)NativeObject).Track);
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.IRTCRtpSender)NativeObject).Track);
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
@@ -25,7 +25,7 @@ namespace WebRtc.iOS
             throw new NotImplementedException();
         }
 
-        public RTCRtpSendParameters GetParameters() => ((Webrtc.RTCRtpSender)NativeObject).Parameters
+        public RTCRtpSendParameters GetParameters() => ((Webrtc.IRTCRtpSender)NativeObject).Parameters
             .FromNativeToSend();
 
         public Task<IRTCStatsReport> GetStats()
