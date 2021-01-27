@@ -1,4 +1,6 @@
 ﻿using AVFoundation;
+using CoreGraphics;
+using Foundation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +37,29 @@ namespace WebRTCme
                     maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
 
                 return (int)Math.Min(maxSupportedFps, _frameRateLimit);
+            }
+        }
+
+        public static UIView CreateRoomView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
+        {
+            var remoteView = new Webrtc.RTCEAGLVideoView
+            {
+                Delegate = new VideoViewDelegate()
+            };
+
+
+
+            var nativeVideoTrack = track.NativeObject as Webrtc.RTCVideoTrack;
+            nativeVideoTrack.AddRenderer(remoteView);
+
+            return remoteView;
+        }
+
+        internal class VideoViewDelegate : NSObject, Webrtc.IRTCVideoViewDelegate
+        {
+            void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
+            {
+
             }
         }
     }

@@ -24,11 +24,9 @@ namespace WebRtcMiddlewareXamarin
         private VideoType Type { get; set; }
         private string Source { get; set; }
         private IMediaStream Stream { get; set; }
-        
         private string Label { get; set; }
 
         private VideoView _videoView;
-
 
         public VideoRenderer(Context context) : base(context) { }
 
@@ -39,7 +37,6 @@ namespace WebRtcMiddlewareXamarin
             if (e.OldElement != null)
             {
                 // Unsubscribe from event handlers and cleanup any resources.
-                //e.OldElement.PropertyChanged -= OnPropertyChanged;
             }
 
             if (e.NewElement != null)
@@ -88,14 +85,12 @@ namespace WebRtcMiddlewareXamarin
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers
-                //e.NewElement.PropertyChanged += OnPropertyChanged;
             }
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             base.OnElementPropertyChanged(sender, args);
-
             
             if (args.PropertyName == Video.StreamProperty.PropertyName)
             {
@@ -113,6 +108,17 @@ namespace WebRtcMiddlewareXamarin
 
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Control.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
 
         //private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         //{
@@ -212,15 +218,6 @@ namespace WebRtcMiddlewareXamarin
 
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Control.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
     }
 #endif
 

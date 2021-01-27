@@ -9,6 +9,7 @@ using Xamarin.Forms.Platform.iOS;
 using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
 using WebRTCme.Middleware;
+using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
@@ -19,7 +20,6 @@ namespace WebRtcMiddlewareXamarin
         private VideoType Type { get; set; }
         private string Source { get; set; }
         private IMediaStream Stream { get; set; }
-
         private string Label { get; set; }
 
         private VideoView _videoView;
@@ -45,19 +45,23 @@ namespace WebRtcMiddlewareXamarin
                     Label = e.NewElement.Label;
                     
                     UIView view = null;
+                    var videoTrack = Stream?.GetVideoTracks().First();
 
                     switch (Type)
                     {
                         case VideoType.Camera:
                         ///if (string.IsNullOrEmpty(source))
                         {
-                            var videoTrack = Stream.GetVideoTracks().First();
                             view = PlatformSupport.CreateCameraView(videoTrack);
                         }
                         break;
 
                         case VideoType.Room:
-                            return;
+                            if (videoTrack is null)
+                                return;
+
+                            view = PlatformSupport.CreateRoomView(videoTrack);
+                            break;
                         //break;
 
                         default:
@@ -70,6 +74,27 @@ namespace WebRtcMiddlewareXamarin
                     SetNativeControl(_videoView);
                 }
                 // Configure the control and subscribe to event handlers.
+            }
+        }
+
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            base.OnElementPropertyChanged(sender, args);
+
+            if (args.PropertyName == Video.StreamProperty.PropertyName)
+            {
+                Stream = Element.Stream;
+                var videoTrack = Stream?.GetVideoTracks().First();
+                var view = PlatformSupport.CreateRoomView(videoTrack);
+                if (_videoView == null)
+                {
+                    _videoView = new VideoView(view);
+                    SetNativeControl(_videoView);
+                }
+            }
+            else if (args.PropertyName == Video.LabelProperty.PropertyName)
+            {
+
             }
         }
 
