@@ -22,6 +22,7 @@ namespace WebRtc.Android
         }
 
         public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(_nativeRtpReceiver);
+
         public IMediaStream[] Streams =>
             _nativeMediaStreams.Select(nativeMediaStream => MediaStream.Create(nativeMediaStream)).ToArray();
 

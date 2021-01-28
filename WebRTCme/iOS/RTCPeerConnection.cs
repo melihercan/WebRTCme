@@ -233,7 +233,11 @@ namespace WebRtc.iOS
 
         public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
         {
-            // Depreceted.
+            // Depreceted. Convert to OnTrack.
+            foreach (var track in stream.VideoTracks)
+                OnTrack?.Invoke(this, RTCTrackEvent.Create(track));
+            foreach (var track in stream.AudioTracks)
+                OnTrack?.Invoke(this, RTCTrackEvent.Create(track));
         }
 
         public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
