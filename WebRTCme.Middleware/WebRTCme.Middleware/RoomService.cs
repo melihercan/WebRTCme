@@ -223,7 +223,7 @@ namespace WebRtcMeMiddleware
             {
                 var roomContext = GetRoomContext(turnServerName, roomName);
                 DebugPrint($">>>>>>>> OnPeerSdpOffered - turn:{turnServerName} room:{roomName} " +
-                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} peedSdp:{/*peerSdp*/}");
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}"); //peedSdp:{peerSdp}");
                 var peerConnection = roomContext.PeerConnectionContexts.Count == 0 ? null : 
                     roomContext.PeerConnectionContexts.FirstOrDefault(context => context.PeerUserName
                         .Equals(peerUserName, StringComparison.OrdinalIgnoreCase)).PeerConnection;
@@ -245,7 +245,7 @@ namespace WebRtcMeMiddleware
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 DebugPrint($"######## Sending Answer - room:{roomName} " +
-                    $"user:{roomContext.JoinRoomRequestParameters.UserName}  peerUser:{peerUserName} sdp:{/*sdp*/}");
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName}  peerUser:{peerUserName}");// sdp:{sdp}");
             }
             catch (Exception ex)
             {
@@ -261,7 +261,7 @@ namespace WebRtcMeMiddleware
             {
                 var roomContext = GetRoomContext(turnServerName, roomName);
                 DebugPrint($">>>>>>>> OnPeerSdpAnswered - turn:{turnServerName} room:{roomName} " +
-                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} peerSdp:{/*peerSdp*/}");
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// peerSdp:{peerSdp}");
 
                 var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -429,7 +429,7 @@ namespace WebRtcMeMiddleware
                         await peerConnection.SetLocalDescription(offerDescription);
                         var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                         DebugPrint($"######## Sending Offer - room:{roomName} " +
-                            $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName} sdp:{/*sdp*/}");
+                            $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
                         await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
                     }
                 }
