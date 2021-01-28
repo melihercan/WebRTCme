@@ -42,10 +42,11 @@ namespace WebRTCme
 
         public static UIView CreateRoomView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            var remoteView = new Webrtc.RTCEAGLVideoView
-            {
-                Delegate = new VideoViewDelegate()
-            };
+            var remoteView = new RemoteView();
+            //    new Webrtc.RTCEAGLVideoView
+            //{
+            //    Delegate = new VideoViewDelegate()
+            //};
 
 
 
@@ -60,6 +61,19 @@ namespace WebRTCme
             void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
             {
 
+            }
+        }
+
+        internal class RemoteView : Webrtc.RTCEAGLVideoView, Webrtc.IRTCVideoViewDelegate
+        {
+            public RemoteView()
+            {
+                Delegate = this;
+            }
+
+            [Export("videoView:didChangeVideoSize:")]
+            void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
+            {
             }
         }
     }
