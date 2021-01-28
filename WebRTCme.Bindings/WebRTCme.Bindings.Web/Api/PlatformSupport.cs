@@ -15,6 +15,11 @@ namespace WebRTCme
             IMediaStream mediaStream)
         {
             jsRuntime.SetJsProperty(videoElementReference, "srcObject", mediaStream.NativeObject);
+
+            //jsRuntime.SetJsProperty(videoElementReference, "autoplay", true);
+            //jsRuntime.SetJsProperty(videoElementReference, "playsInline", true);
+            //jsRuntime.SetJsProperty(videoElementReference, "muted", true);
+
         }
     }
 }
