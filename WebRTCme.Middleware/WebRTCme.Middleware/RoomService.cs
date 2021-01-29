@@ -196,6 +196,22 @@ namespace WebRtcMeMiddleware
                 var peerConnection = roomContext.PeerConnectionContexts
                     .Single(context => context.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
                     .PeerConnection;
+
+
+#if true
+                var offerDescription = await peerConnection.CreateOffer();
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                // Android DOES NOT expose 'Type'!!! I set it manually here. 
+                if (DeviceInfo.Platform == DevicePlatform.Android)
+                    offerDescription.Type = RTCSdpType.Offer;
+                await peerConnection.SetLocalDescription(offerDescription);
+                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                DebugPrint($"######## Sending Offer - room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+#endif
+
             }
             catch (Exception ex)
             {
@@ -434,7 +450,8 @@ namespace WebRtcMeMiddleware
                     DebugPrint($"====> OnNegotiationNeeded - room:{roomName} " +
                         $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                     //// TODO: WHAT IF Not initiator adds track (which trigggers this event)???
-                    
+
+#if false
                     if (peerConnectionContext.IsInitiator)
                     {
                         var offerDescription = await peerConnection.CreateOffer();
@@ -449,6 +466,7 @@ namespace WebRtcMeMiddleware
                             $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
                         await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
                     }
+#endif
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
                 {
