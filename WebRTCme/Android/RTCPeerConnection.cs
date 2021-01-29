@@ -175,6 +175,10 @@ namespace WebRtc.Android
 
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
+            // Hack: It is not possible to get 'Type' in Android!!!
+            // I set 'Offer' manually here.
+            sessionDescription.Type = RTCSdpType.Offer;
+
             var tcs = new TaskCompletionSource<object>();
             ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
                 new SdpObserverProxy(tcs), sessionDescription.ToNative());
