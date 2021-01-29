@@ -268,6 +268,8 @@ namespace WebRtcMeMiddleware
                 var peerConnection = roomContext.PeerConnectionContexts
                     .Single(peer => peer.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
                     .PeerConnection;
+                DebugPrint($"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(answerDescription);
             }
             catch (Exception ex)
@@ -290,6 +292,8 @@ namespace WebRtcMeMiddleware
                 var peerConnection = roomContext.PeerConnectionContexts
                     .Single(context => context.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
                     .PeerConnection;
+                DebugPrint($"**** AddIceCandidate - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.AddIceCandidate(iceCandidate);
             }
             catch (Exception ex)
