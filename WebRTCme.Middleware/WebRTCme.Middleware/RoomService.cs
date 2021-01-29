@@ -13,6 +13,7 @@ using WebRTCme;
 using WebRTCme.Middleware;
 using WebRTCme.SignallingServerClient;
 using WebRtcMeMiddleware.Models;
+using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware
 {
@@ -245,6 +246,9 @@ namespace WebRtcMeMiddleware
                 var answerDescription = await peerConnection.CreateAnswer();
                 DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                     $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                // Android DOES NOT expose 'Type'!!! I set it manually here. 
+                if (DeviceInfo.Platform == DevicePlatform.Android)
+                    offerDescription.Type = RTCSdpType.Answer;
                 await peerConnection.SetLocalDescription(answerDescription);
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
@@ -436,6 +440,9 @@ namespace WebRtcMeMiddleware
                         var offerDescription = await peerConnection.CreateOffer();
                         DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                             $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                        // Android DOES NOT expose 'Type'!!! I set it manually here. 
+                        if (DeviceInfo.Platform == DevicePlatform.Android)
+                            offerDescription.Type = RTCSdpType.Offer;
                         await peerConnection.SetLocalDescription(offerDescription);
                         var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                         DebugPrint($"######## Sending Offer - room:{roomName} " +
