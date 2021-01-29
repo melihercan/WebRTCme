@@ -237,10 +237,14 @@ namespace WebRtcMeMiddleware
 
                 var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
+                DebugPrint($"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(offerDescription);
 
 
                 var answerDescription = await peerConnection.CreateAnswer();
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
@@ -430,6 +434,8 @@ namespace WebRtcMeMiddleware
                     if (peerConnectionContext.IsInitiator)
                     {
                         var offerDescription = await peerConnection.CreateOffer();
+                        DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                            $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                         await peerConnection.SetLocalDescription(offerDescription);
                         var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                         DebugPrint($"######## Sending Offer - room:{roomName} " +
