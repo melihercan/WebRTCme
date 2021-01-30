@@ -5,10 +5,10 @@ namespace WebRtc.iOS
 {
     internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
     {
-        public static IRTCDTMFSender Create(Webrtc.RTCDtmfSender nativeDtmfSender) =>
+        public static IRTCDTMFSender Create(Webrtc.IRTCDtmfSender nativeDtmfSender) =>
             new RTCDTMFSender(nativeDtmfSender);
 
-        public RTCDTMFSender(Webrtc.RTCDtmfSender nativeDtmfSender) : base(nativeDtmfSender)
+        public RTCDTMFSender(Webrtc.IRTCDtmfSender nativeDtmfSender) : base(nativeDtmfSender)
         {
         }
 

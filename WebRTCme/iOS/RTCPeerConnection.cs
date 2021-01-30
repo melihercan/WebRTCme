@@ -245,7 +245,7 @@ namespace WebRtc.iOS
             // Depreceted.
         }
 
-        public void PeerConnectionShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)
+        public void ShouldNegotiate(Webrtc.RTCPeerConnection peerConnection)
         {
             OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
         }

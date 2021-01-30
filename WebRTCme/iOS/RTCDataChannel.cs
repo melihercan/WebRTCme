@@ -46,7 +46,7 @@ namespace WebRtc.iOS
         public void Send() => throw new NotImplementedException();
 
         #region NativeEvents
-        public void DidChangeState(Webrtc.RTCDataChannel dataChannel)
+        public void DataChannelDidChangeState(Webrtc.RTCDataChannel dataChannel)
         {
             switch (ReadyState)
             {

@@ -56,13 +56,13 @@ namespace WebRTCme
             return remoteView;
         }
 
-        internal class VideoViewDelegate : NSObject, Webrtc.IRTCVideoViewDelegate
-        {
-            void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
-            {
+        //internal class VideoViewDelegate : NSObject, Webrtc.IRTCVideoViewDelegate
+        //{
+        //    void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
+        //    {
 
-            }
-        }
+        //    }
+        //}
 
         internal class RemoteView : Webrtc.RTCEAGLVideoView, Webrtc.IRTCVideoViewDelegate
         {
@@ -72,9 +72,10 @@ namespace WebRTCme
             }
 
             [Export("videoView:didChangeVideoSize:")]
-            void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
+            public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
             {
             }
+
         }
     }
 }

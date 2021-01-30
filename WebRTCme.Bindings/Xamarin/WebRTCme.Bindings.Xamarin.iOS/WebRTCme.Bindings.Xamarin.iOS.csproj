@@ -7,7 +7,7 @@
     <ProjectGuid>{25994A74-2A57-46DC-B6CA-999F9C5885A1}</ProjectGuid>
     <TemplateGuid>{b6f3ff35-79b2-4f25-a2fc-60a7cf61013b}</TemplateGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>WebRtcBindingsXamarinIos</RootNamespace>
+    <RootNamespace>WebRtcmeBindingsXamarinIos</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>WebRTCme.Bindings.Xamarin.iOS</AssemblyName>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
@@ -39,17 +39,16 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingCoreSource Include="Structs.cs" />
+    <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="Native References/WebRTC.framework">
+    <NativeReference Include="WebRTC.framework">
       <Kind>Framework</Kind>
     </NativeReference>
   </ItemGroup>
