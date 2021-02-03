@@ -21,7 +21,7 @@ namespace WebRtc.Android
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
-            var activity = Platform.CurrentActivity;
+            var activity = Xamarin.Essentials.Platform.CurrentActivity;
             var context = activity.ApplicationContext;
 
             var camera2Enumerator = new Webrtc.Camera2Enumerator(context);

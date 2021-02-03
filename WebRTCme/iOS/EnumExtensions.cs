@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVFoundation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
@@ -52,6 +53,15 @@ namespace WebRtc.iOS
                 RTCSdpType.Offer => Webrtc.RTCSdpType.Offer,
                 RTCSdpType.Pranswer => Webrtc.RTCSdpType.PrAnswer,
                 RTCSdpType.Rollback => Webrtc.RTCSdpType.Rollback
+            };
+
+        public static AVCaptureDevicePosition ToNative(this CameraType cameraType) =>
+            cameraType switch
+            {
+                CameraType.Default => AVCaptureDevicePosition.Unspecified,
+                CameraType.Back => AVCaptureDevicePosition.Back,
+                CameraType.Front => AVCaptureDevicePosition.Front,
+                _ => throw new NotSupportedException()
             };
 
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>

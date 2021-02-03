@@ -18,6 +18,7 @@ namespace DemoApp.ViewModels
         private IWebRtcMiddleware _webRtcMiddleware;
         private IRoomService _roomService;
         private IMediaStreamService _mediaStreamService;
+        private ILocalMediaStreamService _localMediaStreamService;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
@@ -25,12 +26,21 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
+#if true
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync();
             LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
-            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
+            _localMediaStreamService = await _webRtcMiddleware.CreateLocalMediaStreamServiceAsync();
+//            LocalStream = await _localMediaStreamService.GetCameraStreamAsync();
+            //LocalTrack = await _localMediaStreamService.GetCameraTrackAsync();
+            //LocalView = _localMediaStreamService.GetCameraView();
+            //LocalRenderer = _localMediaStreamService.GetCameraRenderer();
+            //LocalCapturer = _localMediaStreamService.GetCameraCapturer();
+
+            ////_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            ////TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
+#endif            
         }
 
         public async Task OnPageDisappearing()
@@ -40,6 +50,51 @@ namespace DemoApp.ViewModels
 
             //WebRtcMiddleware.Cleanup();
         }
+
+        private IMediaStreamTrack _localTrack;
+        public IMediaStreamTrack LocalTrack
+        {
+            get => _localTrack;
+            set
+            {
+                _localTrack = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private IVideoView _localView;
+        public IVideoView LocalView
+        {
+            get => _localView;
+            set
+            {
+                _localView = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private IVideoRenderer _localRenderer;
+        public IVideoRenderer LocalRenderer
+        {
+            get => _localRenderer;
+            set
+            {
+                _localRenderer = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private IVideoCapturer _localCapturer;
+        public IVideoCapturer LocalCapturer
+        {
+            get => _localCapturer;
+            set
+            {
+                _localCapturer = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private VideoType _localType = VideoType.Camera;
         public VideoType LocalType 

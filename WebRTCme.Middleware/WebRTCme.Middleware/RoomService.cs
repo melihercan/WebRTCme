@@ -200,16 +200,21 @@ namespace WebRtcMeMiddleware
 
 #if true
                 var offerDescription = await peerConnection.CreateOffer();
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
-                await peerConnection.SetLocalDescription(offerDescription);
+                
+////                await peerConnection.SetLocalDescription(offerDescription);
+                
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                 DebugPrint($"######## Sending Offer - room:{roomName} " +
                     $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
                 await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                await peerConnection.SetLocalDescription(offerDescription);
+
 #endif
 
             }
@@ -258,18 +263,21 @@ namespace WebRtcMeMiddleware
                     $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(offerDescription);
 
-
                 var answerDescription = await peerConnection.CreateAnswer();
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
-                await peerConnection.SetLocalDescription(answerDescription);
+
+//                await peerConnection.SetLocalDescription(answerDescription);
+
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 DebugPrint($"######## Sending Answer - room:{roomName} " +
                     $"user:{roomContext.JoinRoomRequestParameters.UserName}  peerUser:{peerUserName}");// sdp:{sdp}");
+
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
+                await peerConnection.SetLocalDescription(answerDescription);
             }
             catch (Exception ex)
             {

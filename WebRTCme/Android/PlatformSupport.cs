@@ -12,9 +12,13 @@ namespace WebRTCme
 {
     public static class PlatformSupport
     {
+        public static void SetCameraCapturer(IMediaStreamTrack videoTrack)
+        {
+        }
+
         public static SurfaceView CreateCameraView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            var context = Platform.CurrentActivity.ApplicationContext;
+            var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
             var nativeVideoTrack = track.NativeObject as Webrtc.VideoTrack;
 
             var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
@@ -39,7 +43,7 @@ namespace WebRTCme
 
         public static SurfaceView CreateRoomView(IMediaStreamTrack track, MediaTrackConstraints constraints = null)
         {
-            var context = Platform.CurrentActivity.ApplicationContext;
+            var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
 
             var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
             var nativeSurfaceViewRenderer = new Webrtc.SurfaceViewRenderer(context);

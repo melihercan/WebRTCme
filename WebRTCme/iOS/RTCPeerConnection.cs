@@ -37,12 +37,26 @@ namespace WebRtc.iOS
 
         private RTCPeerConnection(RTCConfiguration configuration)
         {
+            var rtcConfig = new Webrtc.RTCConfiguration();
+            rtcConfig.IceServers = new Webrtc.RTCIceServer[]
+            {
+                new Webrtc.RTCIceServer(new [] 
+                {
+                    "stun:stun.stunprotocol.org:3478",
+                    "stun:stun.l.google.com:19302"
+                })
+            };
+            var mediaConstraints = new Webrtc.RTCMediaConstraints(null, null);
+            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(rtcConfig, mediaConstraints, this);
+
+#if false
             var nativeConfiguration = configuration.ToNative();
             var nativeConstraints = NativeDefaultRTCMediaConstraints;
             NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
                 nativeConfiguration,
                 nativeConstraints,
                 this);
+#endif
         }
 
         public bool CanTrickleIceCandidates => throw new NotSupportedException();
@@ -104,7 +118,7 @@ namespace WebRtc.iOS
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTrack(
-                track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] {stream.Id}));
+                track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] {track.Id}));
 
         public void Close() => ((Webrtc.RTCPeerConnection)NativeObject).Close();
 
@@ -224,7 +238,7 @@ namespace WebRtc.iOS
         }
         
         
-        #region NativeEvents
+#region NativeEvents
         public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCSignalingState stateChanged)
         {
@@ -250,10 +264,16 @@ namespace WebRtc.iOS
             OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
         }
 
+        // This event is optional in iOS. Decide about the connection in 'DidChangeIceConnectionState'.
         public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceConnectionState newState)
         {
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
+
+            if (newState == Webrtc.RTCIceConnectionState.Connected || 
+                newState == Webrtc.RTCIceConnectionState.Disconnected)
+                    OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+
         }
 
         public void DidChangeIceGatheringState(Webrtc.RTCPeerConnection peerConnection, 
@@ -283,10 +303,11 @@ namespace WebRtc.iOS
 
         }
 
+        // This event is optional in iOS. Decide about the connection in 'DidChangeIceConnectionState'.
         public void DidChangeConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCPeerConnectionState newState)
         {
-            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+////            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidStartReceivingOnTransceiver(Webrtc.RTCPeerConnection peerConnection,
@@ -312,6 +333,6 @@ namespace WebRtc.iOS
 
         }
 
-        #endregion
+#endregion
     }
 }

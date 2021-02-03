@@ -11,5 +11,7 @@ namespace WebRTCme.Middleware
         Task<IRoomService> CreateRoomServiceAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime = null);
 
         Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime = null);
+
+        Task<ILocalMediaStreamService> CreateLocalMediaStreamServiceAsync(IJSRuntime jsRuntime = null);
     }
 }

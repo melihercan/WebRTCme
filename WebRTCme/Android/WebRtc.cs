@@ -24,7 +24,7 @@ namespace WebRTCme
 
         private WebRtc()
         {
-            var context = Platform.CurrentActivity.ApplicationContext;
+            var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
 
             var options = Webrtc.PeerConnectionFactory.InitializationOptions
                     .InvokeBuilder(context)

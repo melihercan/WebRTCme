@@ -15,11 +15,11 @@ using WebRTCme.Middleware;
 namespace WebRtcMiddlewareXamarin
 {
 
-    public class VideoView : UIView
+    public class MediaView : UIView
     {
         public UIView LocalVideoView { get; }
 
-        public VideoView(UIView view)
+        public MediaView(UIView view)
         {
             LocalVideoView = view;
             AddSubview(LocalVideoView);
@@ -36,12 +36,12 @@ namespace WebRtcMiddlewareXamarin
 
 #if false
 
-    public class VideoView : UIView , Webrtc.IRTCVideoViewDelegate
+    public class MediaView : UIView , Webrtc.IRTCVideoViewDelegate
     {
 
         //public UIView LocalVideoView { get; }
 
-        //public VideoView(UIView view)
+        //public MediaView(UIView view)
         //{
         //    LocalVideoView = view;
         //    AddSubview(LocalVideoView);
@@ -69,7 +69,7 @@ namespace WebRtcMiddlewareXamarin
 
         private Webrtc.RTCPeerConnectionFactory _peerConnectionFactory;
 
-        public VideoView(IMediaStreamTrack track, IVideoView view, IVideoRenderer renderer, IVideoCapturer capturer)
+        public MediaView(IMediaStreamTrack track, IVideoView view, IVideoRenderer renderer, IVideoCapturer capturer)
         {
 
             //// TESTING by using RTCEAGLVideoView

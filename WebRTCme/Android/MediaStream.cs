@@ -39,7 +39,7 @@ namespace WebRtc.Android
 
         public static IMediaStream Create(MediaStreamConstraints constraints)
         {
-            var activity = Platform.CurrentActivity;
+            var activity = Xamarin.Essentials.Platform.CurrentActivity;
             var context = activity.ApplicationContext;
 
             var mediaStreamTracks = new List<IMediaStreamTrack>();

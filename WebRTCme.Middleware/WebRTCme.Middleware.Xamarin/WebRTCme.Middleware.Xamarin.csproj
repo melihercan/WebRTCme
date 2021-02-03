@@ -33,9 +33,20 @@
 	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.1931" />
 	</ItemGroup>
 	
+	
+	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+	</ItemGroup>
+	
+	
+	
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="iOS\MediaRenderer.cs" />
+	  <UpToDateCheckInput Remove="iOS\MediaView.cs" />
+	  <UpToDateCheckInput Remove="iOS\RendererView.cs" />
+	  <UpToDateCheckInput Remove="Media.cs" />
 	</ItemGroup>
 
 </Project>
