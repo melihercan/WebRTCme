@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+#if false
 namespace WebRtcMiddlewareXamarin
 {
     public class VideoView : ViewGroup
@@ -65,3 +66,4 @@ namespace WebRtcMiddlewareXamarin
     }
 #endif
 }
+#endif

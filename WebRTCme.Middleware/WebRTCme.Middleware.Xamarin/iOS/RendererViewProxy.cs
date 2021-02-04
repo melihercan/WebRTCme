@@ -11,25 +11,25 @@ using AVFoundation;
 
 namespace WebRtcMiddlewareXamarin
 {
-    public class RendererView : NSObject, Webrtc.IRTCVideoViewDelegate
+    public class RendererViewProxy : NSObject, Webrtc.IRTCVideoViewDelegate
     {
         private readonly IMediaStreamTrack _track;
         private readonly Webrtc.RTCVideoTrack _nativeTrack;
 
-        public RendererView(IMediaStreamTrack track)
+        public RendererViewProxy(IMediaStreamTrack track)
         {
             _track = track;
             _nativeTrack = track.NativeObject as Webrtc.RTCVideoTrack;
         }
 
-        public Webrtc.RTCEAGLVideoView NativeView
+        public Webrtc.RTCEAGLVideoView RendererView
         {
             get
             {
-                var nativeView = new Webrtc.RTCEAGLVideoView();
-                nativeView.Delegate = this;
-                _nativeTrack.AddRenderer(nativeView);
-                return nativeView;
+                var rendererView = new Webrtc.RTCEAGLVideoView();
+                rendererView.Delegate = this;
+                _nativeTrack.AddRenderer(rendererView);
+                return rendererView;
             }
         }
 

@@ -15,6 +15,7 @@ using Android.Views;
 using WebRTCme.Middleware;
 using System.ComponentModel;
 
+#if false
 [assembly: ExportRenderer(typeof(Video), typeof(VideoRenderer))]
 namespace WebRtcMiddlewareXamarin
 {
@@ -221,3 +222,4 @@ namespace WebRtcMiddlewareXamarin
     }
 #endif
 
+#endif

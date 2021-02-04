@@ -1,23 +1,24 @@
-﻿using System;
+﻿using Android.Content;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
-using UIKit;
-using WebRTCme;
 using Xamarin.Forms;
-using Xamarin.Forms.Platform.iOS;
+using Xamarin.Forms.Platform.Android;
 using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
+using WebRTCme;
+using System.Linq;
+using Xamarin.Essentials;
+using Android.Widget;
+using Android.Views;
 using WebRTCme.Middleware;
 using System.ComponentModel;
-using Cirrious.FluentLayouts.Touch;
-using CoreMedia;
-using Foundation;
-using CoreGraphics;
 
 [assembly: ExportRenderer(typeof(Media), typeof(MediaRenderer))]
 namespace WebRtcMiddlewareXamarin
 {
+
     public class MediaRenderer : ViewRenderer<Media, MediaView>
     {
         private IMediaStream Stream { get; set; }
@@ -28,9 +29,9 @@ namespace WebRtcMiddlewareXamarin
         private IMediaStreamTrack AudioTrack { get; set; }
 
 
+        public MediaRenderer(Context context) : base(context) { }
 
-
-        protected override void OnElementChanged(ElementChangedEventArgs<Media> e)
+        protected override async void OnElementChanged(ElementChangedEventArgs<Media> e)
         {
             base.OnElementChanged(e);
 
@@ -54,16 +55,12 @@ namespace WebRtcMiddlewareXamarin
                     VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
                     AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
 
+
                     // Instantiate the native control and assign it to the Control property with
-                    // the SetNativeControl method.
-                    var rendererViewProxy = new RendererViewProxy(VideoTrack);
-                    var mediaView = new MediaView(rendererViewProxy.RendererView);
-                    SetNativeControl(mediaView);
-
+                    // the SetNativeControl method
                 }
-                // Configure the control and subscribe to event handlers.
+                // Configure the control and subscribe to event handlers
             }
-
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -72,25 +69,21 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
-                Stream = Element.Stream;
-                VideoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
-                AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
-
-                // Instantiate the native control and assign it to the Control property with
-                // the SetNativeControl method.
-                var rendererView = new RendererViewProxy(VideoTrack);
-                var mediaView = new MediaView(rendererView.RendererView);
-                SetNativeControl(mediaView);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {
+
             }
-            else if (args.PropertyName == Media.VideoMutedProperty.PropertyName)
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
             {
+                Control.Dispose();
             }
-            else if (args.PropertyName == Media.AudioMutedProperty.PropertyName)
-            {
-            }
+
+            base.Dispose(disposing);
         }
     }
 }

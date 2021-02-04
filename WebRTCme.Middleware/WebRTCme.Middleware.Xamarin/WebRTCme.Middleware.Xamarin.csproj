@@ -43,9 +43,11 @@
 	
 	
 	<ItemGroup>
+	  <UpToDateCheckInput Remove="Android\MediaRenderer.cs" />
+	  <UpToDateCheckInput Remove="Android\MediaView.cs" />
 	  <UpToDateCheckInput Remove="iOS\MediaRenderer.cs" />
 	  <UpToDateCheckInput Remove="iOS\MediaView.cs" />
-	  <UpToDateCheckInput Remove="iOS\RendererView.cs" />
+	  <UpToDateCheckInput Remove="iOS\RendererViewProxy.cs" />
 	  <UpToDateCheckInput Remove="Media.cs" />
 	</ItemGroup>
 
