@@ -48,6 +48,9 @@ namespace WebRtcMiddlewareXamarin
                     VideoMuted = e.NewElement.VideoMuted;
                     AudioMuted = e.NewElement.AudioMuted;
 
+                    if (Stream is null)
+                        return;
+
                     VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
                     AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
 
@@ -69,6 +72,15 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
+                Stream = Element.Stream;
+                VideoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
+                AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
+
+                // Instantiate the native control and assign it to the Control property with
+                // the SetNativeControl method.
+                var rendererView = new RendererView(VideoTrack);
+                var mediaView = new MediaView(rendererView.NativeView);
+                SetNativeControl(mediaView);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {

@@ -18,6 +18,6 @@ namespace WebRtc.Android
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Android.RTCPeerConnection.Create(configuration);
 
-        public IPlatform Platform() => Android.Platform.Create();
+        public IApiExtensions ApiExtensions() => Android.ApiExtensions.Create();
     }
 }

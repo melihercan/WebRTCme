@@ -12,12 +12,12 @@
             <StackLayout Orientation="Horizontal">
                 <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
             </StackLayout>
-            <webRtc:Video Track="{Binding LocalTrack}"  View="{Binding LocalView}" 
-                          Renderer="{Binding LocalRenderer}" Capturer="{Binding LocalCapturer}}"
+            <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
+                          VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}"
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
-            <!--<webRtc:Video Type="{Binding Remote1Type}" Source="{Binding Remote1Source}" Stream="{Binding Remote1Stream}" 
-                          Label="{Binding Remote1Label}"
-                          BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />-->
+            <webRtc:Media Stream="{Binding Remote1Stream}" Label="{Binding Remote1Label}"
+                          VideoMuted="{Binding Remote1VideoMuted}" AudioMuted="{Binding Remote1AudioMuted}"
+                          BackgroundColor="Navy" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
 
 
         </StackLayout>

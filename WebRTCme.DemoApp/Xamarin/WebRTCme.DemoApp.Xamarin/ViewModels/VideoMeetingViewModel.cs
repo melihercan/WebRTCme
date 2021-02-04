@@ -28,18 +28,18 @@ namespace DemoApp.ViewModels
         {
 #if true
             _webRtcMiddleware = CrossWebRtcMiddleware.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
-            _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync();
-            LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
+            //_mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync();
+            //LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
 
             _localMediaStreamService = await _webRtcMiddleware.CreateLocalMediaStreamServiceAsync();
-//            LocalStream = await _localMediaStreamService.GetCameraStreamAsync();
-            //LocalTrack = await _localMediaStreamService.GetCameraTrackAsync();
+            LocalStream = await _localMediaStreamService.GetCameraMediaStreamAsync();
+            //LocalTrack = LocalStream.GetVideoTracks().Single();//  await _localMediaStreamService.GetCameraTrackAsync();
             //LocalView = _localMediaStreamService.GetCameraView();
             //LocalRenderer = _localMediaStreamService.GetCameraRenderer();
             //LocalCapturer = _localMediaStreamService.GetCameraCapturer();
 
-            ////_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            ////TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
+            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
 #endif            
         }
 
@@ -51,75 +51,9 @@ namespace DemoApp.ViewModels
             //WebRtcMiddleware.Cleanup();
         }
 
-        private IMediaStreamTrack _localTrack;
-        public IMediaStreamTrack LocalTrack
-        {
-            get => _localTrack;
-            set
-            {
-                _localTrack = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IVideoView _localView;
-        public IVideoView LocalView
-        {
-            get => _localView;
-            set
-            {
-                _localView = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IVideoRenderer _localRenderer;
-        public IVideoRenderer LocalRenderer
-        {
-            get => _localRenderer;
-            set
-            {
-                _localRenderer = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IVideoCapturer _localCapturer;
-        public IVideoCapturer LocalCapturer
-        {
-            get => _localCapturer;
-            set
-            {
-                _localCapturer = value;
-                OnPropertyChanged();
-            }
-        }
-
-
-        private VideoType _localType = VideoType.Camera;
-        public VideoType LocalType 
-        {
-            get => _localType;
-            set
-            {
-                _localType = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _localSource = "Default";
-        public string LocalSource
-        {
-            get => _localSource;
-            set
-            {
-                _localSource = value;
-                OnPropertyChanged();
-            }
-        }
 
         private IMediaStream _localStream;
-        public IMediaStream LocalStream 
+        public IMediaStream LocalStream
         { 
             get => _localStream; 
             set
@@ -140,29 +74,28 @@ namespace DemoApp.ViewModels
             }
         }
 
-
-
-        private VideoType _remote1Type = VideoType.Room;
-        public VideoType Remote1Type
+        private bool _localVideoMuted;
+        public bool LocalVideoMuted
         {
-            get => _remote1Type;
+            get => _localVideoMuted;
             set
             {
-                _remote1Type = value;
+                _localVideoMuted = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _remote1Source;
-        public string Remote1Source
+        private bool _localAudioMuted;
+        public bool LocalAudioMuted
         {
-            get => _remote1Source;
+            get => _localAudioMuted;
             set
             {
-                _remote1Source = value;
+                _localAudioMuted = value;
                 OnPropertyChanged();
             }
         }
+
 
         private IMediaStream _remote1Stream;
         public IMediaStream Remote1Stream
@@ -182,6 +115,28 @@ namespace DemoApp.ViewModels
             set
             {
                 _remote1Label = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _remote1VideoMuted;
+        public bool Remote1VideoMuted
+        {
+            get => _remote1VideoMuted;
+            set
+            {
+                _remote1VideoMuted = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _remote1AudioMuted;
+        public bool Remote1AudioMuted
+        {
+            get => _remote1AudioMuted;
+            set
+            {
+                _remote1AudioMuted = value;
                 OnPropertyChanged();
             }
         }
@@ -220,7 +175,6 @@ namespace DemoApp.ViewModels
                     {
                         case PeerCallbackCode.PeerJoined:
                             Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Source = "Remote";
                             Remote1Label = peerCallbackParameters.PeerUserName;
                             break;
 

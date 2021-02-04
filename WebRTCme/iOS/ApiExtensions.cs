@@ -12,15 +12,18 @@ using CoreMedia;
 
 namespace WebRtc.iOS
 {
-    internal class Platform : ApiBase, IPlatform//, Webrtc.IRTCVideoViewDelegate
+    internal class ApiExtensions : ApiBase, IApiExtensions
     {
-        public static IPlatform Create() => new Platform();
+        public static IApiExtensions Create() => new ApiExtensions();
 
-        private Platform() { }
+        private ApiExtensions() { }
 
-        public IVideoCapturer StartCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
+        public void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
             MediaStreamConstraints mediaStreamConstraints = null)
         {
+            if (cameraType == CameraType.Default)
+                cameraType = CameraType.Front;
+
             var nativeTrack = cameraVideoTrack.NativeObject as Webrtc.RTCVideoTrack;
             var videoSource = nativeTrack.Source;
 
@@ -51,27 +54,10 @@ namespace WebRtc.iOS
             var fps = 30;
             videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
 
-            return VideoCapturer.Create(videoCapturer);
+            //return VideoCapturer.Create(videoCapturer);
         }
 
 
-        public IVideoView GetCameraView()
-        {
-            var videoView = new UIView();
-            return VideoView.Create(videoView);
-        }
-
-        public IVideoRenderer GetCameraRenderer()
-        {
-            var videoRenderer = new Webrtc.RTCEAGLVideoView();
-            return VideoRenderer.Create(videoRenderer);
-        }
-
-        public IVideoCapturer GetCameraCapturer()
-        {
-            var videoCapturer = new Webrtc.RTCCameraVideoCapturer();
-            return VideoCapturer.Create(videoCapturer);
-        }
 
 
 

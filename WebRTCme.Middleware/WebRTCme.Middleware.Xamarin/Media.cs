@@ -15,10 +15,10 @@ namespace WebRTCme.Middleware.Xamarin
             .Create(nameof(LabelProperty), typeof(string), typeof(Media), string.Empty);
 
         public static readonly BindableProperty VideoMutedProperty = BindableProperty
-            .Create(nameof(VideoMutedProperty), typeof(bool), typeof(Media), string.Empty);
+            .Create(nameof(VideoMutedProperty), typeof(bool), typeof(Media), false);
 
         public static readonly BindableProperty AudioMutedProperty = BindableProperty
-            .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), string.Empty);
+            .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
 
         public IMediaStream Stream
         {
