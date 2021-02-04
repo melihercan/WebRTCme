@@ -27,6 +27,10 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="CrossWebRtcMiddlewareXamarin.cs" />
+	</ItemGroup>
+
 	
 	<ItemGroup>
 	  <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
@@ -40,5 +44,6 @@
 	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
 	</ItemGroup>
 	
+
 
 </Project>

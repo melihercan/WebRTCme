@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
+using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware
 {
@@ -32,6 +33,14 @@ namespace WebRtcMeMiddleware
         public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default, 
             MediaStreamConstraints mediaStreamConstraints = null)
         {
+            var permission = await Permissions.RequestAsync<Permissions.Camera>();
+            if (permission != PermissionStatus.Granted)
+            {
+                throw new Exception("No Video permission was granted");
+            }
+////            var micStatus = await Permissions.RequestAsync<Permissions.Microphone>();
+
+
             var navigator = _window.Navigator();
             var mediaDevices = navigator.MediaDevices;
             var mediaStream = await mediaDevices.GetUserMedia(mediaStreamConstraints ?? new MediaStreamConstraints

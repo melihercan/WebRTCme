@@ -4,13 +4,17 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public static class CrossWebRtcMiddleware
+    public static class CrossWebRtcMiddlewareXamarin
     {
         public static IWebRtcMiddleware Current => _webRtcMiddleware.Value;
 
         private static readonly Lazy<IWebRtcMiddleware> _webRtcMiddleware = new Lazy<IWebRtcMiddleware>(() => 
             CreateWebRtcMiddleware());
 
-        private static IWebRtcMiddleware CreateWebRtcMiddleware() => new WebRtcMiddleware();
+        private static IWebRtcMiddleware CreateWebRtcMiddleware()
+        {// => new WebRtcMiddleware();
+            var webRtc = CrossWebRtc.Current;
+            return new WebRtcMiddleware(webRtc);
+        }
     }
 }

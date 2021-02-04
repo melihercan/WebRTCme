@@ -8,6 +8,7 @@ using System.Text;
 using UIKit;
 using WebRTCme;
 using CoreMedia;
+using System.Threading.Tasks;
 
 namespace WebRtc.iOS
 {
@@ -52,8 +53,6 @@ namespace WebRtc.iOS
             var capturerSize = new CGSize(capturerDimensions.Width, capturerDimensions.Height);
             var fps = 30;
             videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
-
-            //return VideoCapturer.Create(videoCapturer);
         }
 
 

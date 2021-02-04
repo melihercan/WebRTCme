@@ -15,9 +15,9 @@ namespace WebRTCme.Middleware
 ////        internal static string SignallingServerBaseUrl { get; private set; }
 
 
-        public WebRtcMiddleware()
+        public WebRtcMiddleware(IWebRtc webRtc)
         {
-            WebRtc = CrossWebRtc.Current;
+            WebRtc = webRtc;// CrossWebRtc.Current;
 ////            SignallingServerBaseUrl = signallingServerBaseUrl;
         }
 

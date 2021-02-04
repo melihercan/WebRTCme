@@ -1,10 +1,13 @@
 ﻿using Android.Views;
+using Android.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WebRtc.Android;
 using WebRTCme;
+using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
 
 namespace WebRtc.Android
@@ -35,7 +38,6 @@ namespace WebRtc.Android
                 context,
                 videoSource.CapturerObserver);
             videoCapturer.StartCapture(480, 640, 30);
-
         }
     }
 }

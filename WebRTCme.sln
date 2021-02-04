@@ -12,10 +12,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Api", "WebRTCme.Api\WebRTCme.Api.csproj", "{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Bindings", "WebRTCme.Bindings", "{761DF7FB-69F0-441D-B18F-B9803E48F6A5}"
-	ProjectSection(SolutionItems) = preProject
-		README_BuildBindings.txt = README_BuildBindings.txt
-		README_NativeSdkVersions.txt = README_NativeSdkVersions.txt
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{A957C062-0BC5-42F0-86F9-4D04AD9E6BBD}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,6 +19,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{A957C062
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin", "Xamarin", "{5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87}"
+	ProjectSection(SolutionItems) = preProject
+		WebRTCme.Bindings\Xamarin\README_BuildBindings.txt = WebRTCme.Bindings\Xamarin\README_BuildBindings.txt
+		WebRTCme.Bindings\Xamarin\README_NativeSdkVersions.txt = WebRTCme.Bindings\Xamarin\README_NativeSdkVersions.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware", "WebRTCme.Middleware", "{1B143511-677C-4946-A201-C8D429A563A5}"
 EndProject
