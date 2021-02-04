@@ -38,7 +38,6 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
-		<PackageReference Include="Cirrious.FluentLayout" Version="2.9.0" />
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 

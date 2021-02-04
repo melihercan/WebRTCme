@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using Cirrious.FluentLayouts.Touch;
 using WebRTCme;
 using CoreMedia;
 
@@ -19,7 +18,7 @@ namespace WebRtc.iOS
         private ApiExtensions() { }
 
         public void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
-            MediaStreamConstraints mediaStreamConstraints = null)
+            MediaStreamConstraints mediaStreamConstraints)
         {
             if (cameraType == CameraType.Default)
                 cameraType = CameraType.Front;

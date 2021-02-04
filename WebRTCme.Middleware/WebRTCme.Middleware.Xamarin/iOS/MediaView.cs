@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using Cirrious.FluentLayouts;
-using Cirrious.FluentLayouts.Touch;
 using WebRTCme;
 using CoreMedia;
 using WebRTCme.Middleware;

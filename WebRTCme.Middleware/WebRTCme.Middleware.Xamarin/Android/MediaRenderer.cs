@@ -55,9 +55,12 @@ namespace WebRtcMiddlewareXamarin
                     VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
                     AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
 
-
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method
+                    var rendererViewProxy = new RendererViewProxy(VideoTrack);
+                    var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
+                    var mediaView = new MediaView(context, rendererViewProxy.RendererView);
+                    SetNativeControl(mediaView);
                 }
                 // Configure the control and subscribe to event handlers
             }
@@ -69,6 +72,13 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
+                Stream = Element.Stream;
+                VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
+                AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
+                var rendererViewProxy = new RendererViewProxy(VideoTrack);
+                var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
+                var mediaView = new MediaView(context, rendererViewProxy.RendererView);
+                SetNativeControl(mediaView);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {

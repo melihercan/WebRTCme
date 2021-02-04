@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UIKit;
-using Cirrious.FluentLayouts.Touch;
 
 namespace WebRTCme
 {
@@ -144,40 +143,40 @@ namespace WebRTCme
             [Export("videoView:didChangeVideoSize:")]
             public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
             {
-                if (videoView is Webrtc.RTCEAGLVideoView rendererView &&
-                    rendererView.Superview is UIView parentView)
-                {
-                    var constraints = parentView.Constraints
-                        .Where(lc => lc.SecondAttribute == NSLayoutAttribute.Width ||
-                                     lc.SecondAttribute == NSLayoutAttribute.Height)
-                        .ToArray();
-                    parentView.RemoveConstraints(constraints);
+                //if (videoView is Webrtc.RTCEAGLVideoView rendererView &&
+                //    rendererView.Superview is UIView parentView)
+                //{
+                //    var constraints = parentView.Constraints
+                //        .Where(lc => lc.SecondAttribute == NSLayoutAttribute.Width ||
+                //                     lc.SecondAttribute == NSLayoutAttribute.Height)
+                //        .ToArray();
+                //    parentView.RemoveConstraints(constraints);
 
-                    var isLandscape = size.Width > size.Height;
+                //    var isLandscape = size.Width > size.Height;
 
-                    if (isLandscape)
-                    {
-                        parentView.AddConstraints(new[]
-                        {
-                            rendererView.WithSameWidth(parentView),
-                            rendererView.Height()
-                                .EqualTo()
-                                .WidthOf(parentView)
-                                .WithMultiplier(size.Height / size.Width)
-                        });
-                    }
-                    else
-                    {
-                        parentView.AddConstraints(new[]
-                        {
-                            rendererView.Width()
-                                .EqualTo()
-                                .HeightOf(parentView)
-                                .WithMultiplier(size.Width / size.Height),
-                            rendererView.WithSameHeight(parentView)
-                        });
-                    }
-                }
+                //    if (isLandscape)
+                //    {
+                //        parentView.AddConstraints(new[]
+                //        {
+                //            rendererView.WithSameWidth(parentView),
+                //            rendererView.Height()
+                //                .EqualTo()
+                //                .WidthOf(parentView)
+                //                .WithMultiplier(size.Height / size.Width)
+                //        });
+                //    }
+                //    else
+                //    {
+                //        parentView.AddConstraints(new[]
+                //        {
+                //            rendererView.Width()
+                //                .EqualTo()
+                //                .HeightOf(parentView)
+                //                .WithMultiplier(size.Width / size.Height),
+                //            rendererView.WithSameHeight(parentView)
+                //        });
+                //    }
+                //}
             }
         }
 

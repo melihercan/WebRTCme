@@ -10,7 +10,6 @@ using WebRTCme.Middleware.Xamarin;
 using WebRtcMiddlewareXamarin;
 using WebRTCme.Middleware;
 using System.ComponentModel;
-using Cirrious.FluentLayouts.Touch;
 using CoreMedia;
 using Foundation;
 using CoreGraphics;
@@ -75,9 +74,6 @@ namespace WebRtcMiddlewareXamarin
                 Stream = Element.Stream;
                 VideoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
                 AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
-
-                // Instantiate the native control and assign it to the Control property with
-                // the SetNativeControl method.
                 var rendererView = new RendererViewProxy(VideoTrack);
                 var mediaView = new MediaView(rendererView.RendererView);
                 SetNativeControl(mediaView);
