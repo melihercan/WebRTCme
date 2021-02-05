@@ -55,6 +55,8 @@ namespace WebRtc.iOS
             videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
         }
 
+        public IEglBaseContext GetEglBaseContext() =>
+            throw new NotSupportedException("EGL base context is not supported");
 
 
 

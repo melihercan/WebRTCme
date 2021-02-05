@@ -10,6 +10,6 @@ namespace WebRTCme
         void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null);
 
-
+        IEglBaseContext GetEglBaseContext();
     }
 }

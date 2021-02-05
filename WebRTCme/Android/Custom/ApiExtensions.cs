@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRtc.Android;
 using WebRTCme;
-using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
 
 namespace WebRtc.Android
@@ -16,7 +15,9 @@ namespace WebRtc.Android
     {
         public static IApiExtensions Create() => new ApiExtensions();
 
-        private ApiExtensions() { }
+        private ApiExtensions() 
+        {
+        }
 
 
         public void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
@@ -27,17 +28,26 @@ namespace WebRtc.Android
 
             var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
             var nativeTrack = cameraVideoTrack.NativeObject as Webrtc.VideoTrack;
-            var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
+            var eglBaseContext = WebRTCme.WebRtc.NativeEglBase.EglBaseContext;// EglBaseHelper.Create().EglBaseContext;
             var videoSource = cameraVideoTrack.GetNativeMediaSource() as Webrtc.VideoSource;
 
-            var cameraEnumerator = new Webrtc.Camera2Enumerator(context);
-            var videoCapturer = cameraEnumerator.CreateCapturer(cameraVideoTrack.Id, null);
-            videoCapturer.Initialize(Webrtc.SurfaceTextureHelper.Create(
-                "CameraVideoCapturerThread",
-                eglBaseContext),
+            var cameraEnum = new Webrtc.Camera2Enumerator(context);
+            //var deviceNames = cameraEnum.GetDeviceNames();
+            //var cameraName = deviceNames.First(dn => Xamarin.Essentials.DeviceInfo.DeviceType == 
+            //        Xamarin.Essentials.DeviceType.Virtual
+            //    ? cameraEnum.IsBackFacing(dn)
+            //    : cameraEnum.IsFrontFacing(dn));
+            var videoCapturer = cameraEnum.CreateCapturer(/*cameraName*/cameraVideoTrack.Id, null);
+            videoCapturer.Initialize(
+                Webrtc.SurfaceTextureHelper.Create(
+                    "CameraVideoCapturerThread",
+                    eglBaseContext),
                 context,
                 videoSource.CapturerObserver);
             videoCapturer.StartCapture(480, 640, 30);
         }
+
+        public IEglBaseContext GetEglBaseContext() =>
+             EglBaseContext.Create(WebRTCme.WebRtc.NativeEglBase.EglBaseContext);
     }
 }

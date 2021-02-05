@@ -31,7 +31,7 @@ namespace WebRtc.Android
                     nativeMediaSource = nativeAudioSource;
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
                         .CreateAudioTrack(id, nativeAudioSource);
-                    break;
+                break;
 
                 case MediaStreamTrackKind.Video:
                     var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);

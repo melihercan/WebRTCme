@@ -22,5 +22,9 @@ namespace WebRtcBindingsWeb.Api
         {
             throw new NotImplementedException();
         }
+
+        public IEglBaseContext GetEglBaseContext() => 
+            throw new NotSupportedException("EGL base context is not supported");
+
     }
 }

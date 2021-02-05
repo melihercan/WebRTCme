@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRtc.Android;
-using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme
@@ -16,6 +15,7 @@ namespace WebRTCme
     internal class WebRtc : IWebRtc
     {
         public static Webrtc.PeerConnectionFactory NativePeerConnectionFactory { get; private set; }
+        public static Webrtc.IEglBase NativeEglBase { get; private set; }
 
         private static int _id = 1000;
         public static int Id => Interlocked.Increment(ref _id);
@@ -29,23 +29,27 @@ namespace WebRTCme
             var options = Webrtc.PeerConnectionFactory.InitializationOptions
                     .InvokeBuilder(context)
                     //.SetFieldTrials("")
-                    .SetEnableInternalTracer(true);
-            Webrtc.PeerConnectionFactory.Initialize(options.CreateInitializationOptions());
+                    //.SetEnableInternalTracer(true)
+                    .CreateInitializationOptions();
+            Webrtc.PeerConnectionFactory.Initialize(options);
 
 
-            //var eglBaseContext = EglBaseHelper.Create().EglBaseContext;
-            var adm = CreateJavaAudioDevice(context);
-            //var encoderFactory = new Webrtc.DefaultVideoEncoderFactory(eglBaseContext, true, true);
-            var encoderFactory = new Webrtc.SoftwareVideoEncoderFactory();
-            //var decoderFactory = new Webrtc.DefaultVideoDecoderFactory(eglBaseContext);
-            var decoderFactory = new Webrtc.SoftwareVideoDecoderFactory();
-            var factory = Webrtc.PeerConnectionFactory.InvokeBuilder()
-                .SetAudioDeviceModule(adm)
+            ///// TODO: INVESTIGATE WHY Webrtc.EglBase.Create() FAILS
+            NativeEglBase = /*Webrtc.EglBase.Create();*/ EglBaseHelper.Create();
+
+            var eglBaseContext = NativeEglBase.EglBaseContext;
+            //var adm = CreateJavaAudioDevice(context);
+            var encoderFactory = new Webrtc.DefaultVideoEncoderFactory(eglBaseContext, true, true);
+            //var encoderFactory = new Webrtc.SoftwareVideoEncoderFactory();
+            var decoderFactory = new Webrtc.DefaultVideoDecoderFactory(eglBaseContext);
+            //var decoderFactory = new Webrtc.SoftwareVideoDecoderFactory();
+            NativePeerConnectionFactory = Webrtc.PeerConnectionFactory.InvokeBuilder()
+                //.SetAudioDeviceModule(adm)
                 .SetVideoEncoderFactory(encoderFactory)
                 .SetVideoDecoderFactory(decoderFactory)
+                .SetOptions(new Webrtc.PeerConnectionFactory.Options())
                 .CreatePeerConnectionFactory();
-            adm.Release();
-            NativePeerConnectionFactory = factory;
+            //adm.Release();
         }
 
         public void Cleanup() 
