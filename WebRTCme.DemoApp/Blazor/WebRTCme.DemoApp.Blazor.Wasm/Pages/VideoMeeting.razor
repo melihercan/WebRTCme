@@ -2,31 +2,14 @@
 
 <h1>Video meeting</h1>
 
-@*<div>
-<video autoplay @ref=_localVideo></video>
-</div>
-
-
-*@
-
 <div>
-    <Video Type="@LocalType" Source="@LocalSource" Stream="@LocalStream" Label="@LocalLabel" />
+    <Media Stream="@LocalStream" Label="@LocalLabel" VideoMuted="@LocalVideoMuted" AudioMuted="@LocalAudioMuted" />
 </div>
 
 <div>
-    <Video Type="@Remote1Type" Source="@Remote1Source" Stream="@Remote1Stream" Label="@Remote1Label" />
+    <Media Stream="@Remote1Stream" Label="@Remote1Label" VideoMuted="@Remote1VideoMuted" AudioMuted="@Remote1AudioMuted" />
 </div>
 
-@*<div>
-TURN server: @_server<input @bind="_server"/>
-<input @bind="_room"/> Room name: @_room
-<input @bind="_userId"/> User name: @_userId
-</div>
-<div>
-<button class="btn btn-primary" @onclick="OnStartCall">Start call</button>
-<button class="btn btn-primary" @onclick="OnJoinCall">Join call</button>
-</div>
-*@
 <EditForm Model="@JoinRoomRequestParameters" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />

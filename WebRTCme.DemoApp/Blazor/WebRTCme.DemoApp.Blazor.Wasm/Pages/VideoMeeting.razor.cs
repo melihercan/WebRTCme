@@ -24,22 +24,21 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         [Inject]
         IConfiguration Configuration { get; set; }
 
-
-        VideoType LocalType { get; set; } = VideoType.Camera;
-
-        string LocalSource { get; set; } = "Default";
-        
         IMediaStream LocalStream { get; set; }
 
         string LocalLabel { get; set; } 
 
-        VideoType Remote1Type { get; set; } = VideoType.Room;
+        bool LocalVideoMuted { get; set; }
 
-        string Remote1Source { get; set; }
+        bool LocalAudioMuted { get; set; }
 
         IMediaStream Remote1Stream { get; set; }
 
         string Remote1Label { get; set; }
+
+        bool Remote1VideoMuted { get; set; }
+
+        bool Remote1AudioMuted { get; set; }
 
 
         private IWebRtcMiddleware _webRtcMiddleware;
@@ -58,7 +57,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
             _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
-            LocalStream = await _mediaStreamService.GetCameraStreamAsync(LocalSource);
+            LocalStream = await _mediaStreamService.GetCameraStreamAsync(string.Empty);
 
             _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);
@@ -78,7 +77,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                     {
                         case PeerCallbackCode.PeerJoined:
                             Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Source = "Remote";
                             Remote1Label = peerCallbackParameters.PeerUserName;
                             StateHasChanged();
                             break;
