@@ -26,15 +26,13 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-#if true
             _webRtcMiddleware = CrossWebRtcMiddlewareXamarin.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
 
             _localMediaStreamService = await _webRtcMiddleware.CreateLocalMediaStreamServiceAsync();
             LocalStream = await _localMediaStreamService.GetCameraMediaStreamAsync();
 
-            //_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            //TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
-#endif            
+            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
         }
 
         public async Task OnPageDisappearing()
