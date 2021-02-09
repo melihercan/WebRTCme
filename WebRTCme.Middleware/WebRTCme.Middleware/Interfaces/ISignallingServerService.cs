@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
-    public interface IRoomService : IAsyncDisposable
+    public interface ISignallingServerService : IAsyncDisposable
     {
         Task<string[]> GetTurnServerNames();
 
 
-        IObservable<PeerCallbackParameters> JoinRoomRequest(JoinRoomRequestParameters request);
+        IObservable<PeerCallbackParameters> JoinRoomRequest(JoinCallRequestParameters request);
       
 
     }

@@ -8,6 +8,7 @@ namespace WebRTCme.Middleware
 {
     public interface IMediaStreamService
     {
-        Task<IMediaStream> GetCameraStreamAsync(string source);
+        Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
+            MediaStreamConstraints mediaStreamConstraints = null);
     }
 }

@@ -21,7 +21,8 @@ namespace WebRtc.iOS
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(null);
+                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(
+                        /*null*/new Webrtc.RTCMediaConstraints(null, null));
                     nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
                         .AudioTrackWithSource(nativeAudioSource, id);
                     break;

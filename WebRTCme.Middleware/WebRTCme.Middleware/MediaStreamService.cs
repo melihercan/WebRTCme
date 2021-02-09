@@ -1,6 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
@@ -10,31 +11,47 @@ namespace WebRtcMeMiddleware
 {
     internal class MediaStreamService : IMediaStreamService
     {
-        private IJSRuntime _jsRuntime;
+        private readonly IJSRuntime _jsRuntime;
+        private readonly IWindow _window;
+        private readonly IApiExtensions _apiExtensions;
+
 
         static public IMediaStreamService Create(IJSRuntime jsRuntime = null)
         {
-            var self = new MediaStreamService();
-            self._jsRuntime = jsRuntime;
+            var self = new MediaStreamService(jsRuntime);
             return self;
         }
 
-        private MediaStreamService()
+
+        private MediaStreamService(IJSRuntime jsRuntime)
         {
+            _jsRuntime = jsRuntime;
+            _window = WebRtcMiddleware.WebRtc.Window();
+            _apiExtensions = _window.ApiExtensions();
+
         }
 
-        public async Task<IMediaStream> GetCameraStreamAsync(string source)
+        public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
+            MediaStreamConstraints mediaStreamConstraints = null)
         {
-            var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
-            var navigator = window.Navigator();
+            var permission = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
+            if (permission != Xamarin.Essentials.PermissionStatus.Granted)
+            {
+                throw new Exception("No Video permission was granted");
+            }
+            var micStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Microphone>();
+
+
+            var navigator = _window.Navigator();
             var mediaDevices = navigator.MediaDevices;
-            var mediaDevicesInfo = await mediaDevices.EnumerateDevices();
-            var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
+            var mediaStream = await mediaDevices.GetUserMedia(mediaStreamConstraints ?? new MediaStreamConstraints
             {
                 Audio = new MediaStreamContraintsUnion { Value = true },
                 Video = new MediaStreamContraintsUnion { Value = true }
             });
+            _apiExtensions.SetCameraVideoCapturer(mediaStream.GetVideoTracks().Single());
             return mediaStream;
         }
+
     }
 }

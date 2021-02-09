@@ -7,12 +7,17 @@ using WebRTCme.Middleware.Xamarin;
 using Microsoft.Extensions.Configuration;
 using Xamarinme;
 using System.Reflection;
+using WebRTCme.Middleware;
 
 namespace DemoApp
 {
     public partial class App : Application
     {
         public static IConfiguration Configuration { get; private set; }
+        public static IWebRtcMiddleware WebRtcMiddleware { get; private set; }
+        public static ISignallingServerService SignallingServerService { get; private set; }
+        public static IMediaStreamService MediaStreamService { get; private set; }
+
         public App()
         {
             Configuration = new ConfigurationBuilder()
@@ -29,9 +34,13 @@ namespace DemoApp
             MainPage = new AppShell();
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
-////            WebRtcMiddleware.Initialize(Configuration["SignallingServer:BaseUrl"]);
+            var WebRtcMiddlevare = CrossWebRtcMiddlewareXamarin.Current;
+            SignallingServerService = await WebRtcMiddlevare
+                .CreateSignallingServerServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            MediaStreamService = await WebRtcMiddlevare
+                .CreateMediaStreamServiceAsync();
         }
 
         protected override void OnSleep()
@@ -42,9 +51,13 @@ namespace DemoApp
         {
         }
 
-        protected override void CleanUp()
+        protected override /*async*/ void CleanUp()
         {
-////            WebRtcMiddleware.Cleanup();
+            ////            WebRtcMiddleware.Cleanup();
+            ///
+            //await SignallingServerService.DisposeAsync();
+            //WebRtcMiddleware.Dispose();
+
             base.CleanUp();
         }
     }

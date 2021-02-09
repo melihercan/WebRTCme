@@ -13,12 +13,9 @@ using Xamarinme;
 
 namespace DemoApp.ViewModels
 {
-    public class VideoMeetingViewModel : INotifyPropertyChanged, IPageLifecycle
+    public class VideoCallViewModel : INotifyPropertyChanged, IPageLifecycle
     {
-        private IWebRtcMiddleware _webRtcMiddleware;
-        private IRoomService _roomService;
         private IMediaStreamService _mediaStreamService;
-        private ILocalMediaStreamService _localMediaStreamService;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
@@ -26,21 +23,12 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-            _webRtcMiddleware = CrossWebRtcMiddlewareXamarin.Current;// .Initialize(App.Configuration["SignallingServer:BaseUrl"]);
-
-            _localMediaStreamService = await _webRtcMiddleware.CreateLocalMediaStreamServiceAsync();
-            LocalStream = await _localMediaStreamService.GetCameraMediaStreamAsync();
-
-            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
+            LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
         }
 
-        public async Task OnPageDisappearing()
+        public Task OnPageDisappearing()
         {
-            await _roomService.DisposeAsync();
-            _webRtcMiddleware.Dispose();
-
-            //WebRtcMiddleware.Cleanup();
+            return Task.CompletedTask;
         }
 
 
@@ -133,34 +121,27 @@ namespace DemoApp.ViewModels
             }
         }
 
-        private List<string> _turnServerNames;
-        public List<string> TurnServerNames
-        {
-            get => _turnServerNames;
-            set
-            {
-                _turnServerNames = value;
-                OnPropertyChanged();
-            }
-
-        }
-
         public string SelectedTurnServerName { get; set; }
     //// Useful during development. DELETE THIS LATER!!! WILL NOT BE VISIBLE ON SCREEN
     = "StunOnly";
         
 
-        public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new JoinRoomRequestParameters()
+        public JoinCallRequestParameters JoinCallRequestParameters { get; set; } = new JoinCallRequestParameters()
      //// Useful during development. DELETE THIS LATER!!!
      { RoomName = "hello",  UserName="delya"}
             ;
 
 
-        public ICommand JoinCallCommand => new Command( () =>
+        public ICommand JoinCallCommand => new Command(async () =>
         {
-            JoinRoomRequestParameters.TurnServerName = SelectedTurnServerName;
-            JoinRoomRequestParameters.LocalStream = LocalStream;
-            var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
+
+            //_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+            //TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
+
+
+            JoinCallRequestParameters.TurnServerName = "StunOnly"; // SelectedTurnServerName;
+            JoinCallRequestParameters.LocalStream = LocalStream;
+            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(JoinCallRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) =>
                 {
                     switch (peerCallbackParameters.Code)

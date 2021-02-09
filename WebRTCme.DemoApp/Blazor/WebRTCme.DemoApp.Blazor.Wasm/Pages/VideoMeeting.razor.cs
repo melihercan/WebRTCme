@@ -42,11 +42,11 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
 
         private IWebRtcMiddleware _webRtcMiddleware;
-        private IRoomService _roomService;
+        private ISignallingServerService _roomService;
         private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
-        private JoinRoomRequestParameters JoinRoomRequestParameters { get; set; } = new()
+        private JoinCallRequestParameters JoinRoomRequestParameters { get; set; } = new()
         //// Useful during development. DELETE THIS LATER!!!
    { TurnServerName="StunOnly", RoomName="hello", UserName="melik"}
             ;
@@ -59,15 +59,21 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
             LocalStream = await _mediaStreamService.GetCameraStreamAsync(string.Empty);
 
-            _roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"], 
+            _roomService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);
             _turnServerNames = await _roomService.GetTurnServerNames();
             if (_turnServerNames is not null)
                 JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
-        private void HandleValidSubmit()
+        private /*async*/ void HandleValidSubmit()
         {
+            //_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"],
+            //    JsRuntime);
+            //_turnServerNames = await _roomService.GetTurnServerNames();
+            //if (_turnServerNames is not null)
+            //    JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
+
             JoinRoomRequestParameters.LocalStream = LocalStream;
             LocalLabel = JoinRoomRequestParameters.UserName;
             var peerCallbackDisposer = _roomService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(

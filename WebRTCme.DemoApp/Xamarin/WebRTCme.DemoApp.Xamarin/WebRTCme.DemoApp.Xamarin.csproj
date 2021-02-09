@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.1931" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />  
+    <PackageReference Include="Xamarin.Plugins.FluentValidation" Version="3.0.64" />  
     <PackageReference Include="Xamarinme.Configuration" Version="1.0.1" />  
     <PackageReference Include="Xamarinme.PageLifecycle" Version="1.0.0" />
   </ItemGroup>
@@ -28,13 +29,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\VideoMeetingPage.xaml.cs">
-      <DependentUpon>VideoMeetingPage.xaml</DependentUpon>
+    <Compile Update="Views\CallParametersPage.xaml.cs">
+      <DependentUpon>CallParametersPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\VideoCallPage.xaml.cs">
+      <DependentUpon>VideoCallPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Views\VideoMeetingPage.xaml">
+    <EmbeddedResource Update="Views\InitializingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\VideoCallPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

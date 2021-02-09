@@ -26,7 +26,8 @@ namespace WebRtcMiddlewareXamarin
         private IMediaStreamTrack VideoTrack { get; set; }
         private IMediaStreamTrack AudioTrack { get; set; }
 
-
+        //private bool _isActive = false;
+        private MediaView _mediaView;
 
 
         protected override void OnElementChanged(ElementChangedEventArgs<Media> e)
@@ -47,17 +48,34 @@ namespace WebRtcMiddlewareXamarin
                     VideoMuted = e.NewElement.VideoMuted;
                     AudioMuted = e.NewElement.AudioMuted;
 
-                    if (Stream is null)
-                        return;
+                    //if (Stream is null)
+                    //  return;
 
-                    VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
-                    AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
+                    //if (_isActive)
+                    //{
+                    //  System.Diagnostics.Debug.WriteLine($"------------- ALREADY active");
+                    //return;
+                    //}
+                    //_isActive = true;
+
+
+                    if (Stream is not null)
+                    {
+                        VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
+                        AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
+                    }
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    var rendererViewProxy = new RendererViewProxy(VideoTrack);
-                    var mediaView = new MediaView(rendererViewProxy.RendererView);
-                    SetNativeControl(mediaView);
+                    //var rendererViewProxy = new RendererViewProxy(VideoTrack);
+                    //var mediaView = new MediaView(rendererViewProxy.RendererView);
+
+                    //var mediaView = new MediaView(VideoTrack);
+                    _mediaView = new MediaView();
+                    if (VideoTrack is not null)
+                        _mediaView.SetTrack(VideoTrack);
+                    
+                    SetNativeControl(_mediaView);
 
                 }
                 // Configure the control and subscribe to event handlers.
@@ -71,12 +89,23 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
+//                if (_isActive)
+  //              {
+    //                System.Diagnostics.Debug.WriteLine($"------------- ALREADY active");
+      //              return;
+        //        }
+          //      _isActive = true;
+
                 Stream = Element.Stream;
                 VideoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
                 AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
-                var rendererView = new RendererViewProxy(VideoTrack);
-                var mediaView = new MediaView(rendererView.RendererView);
-                SetNativeControl(mediaView);
+                //var rendererView = new RendererViewProxy(VideoTrack);
+                //var mediaView = new MediaView(rendererView.RendererView);
+
+                //var mediaView = new MediaView(VideoTrack);
+                //SetNativeControl(mediaView);
+
+                _mediaView.SetTrack(VideoTrack);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {

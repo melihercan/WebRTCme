@@ -2,22 +2,18 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware.Xamarin;assembly=WebRTCme.Middleware.Xamarin"
-             x:Class="DemoApp.Views.VideoMeetingPage">
+             x:Class="DemoApp.Views.VideoCallPage">
     <ContentPage.Content>
         <StackLayout BackgroundColor="LightGray">
-            <Label Text="Video meeting"/>
-            <Picker Title="select TURN server" ItemsSource="{Binding TurnServerNames}" SelectedItem="{Binding SelectedTurnServerName}"/>
-            <Entry Placeholder="enter room name" Text="{Binding JoinRoomRequestParameters.RoomName}"/>
-            <Entry Placeholder="enter user name" Text="{Binding JoinRoomRequestParameters.UserName}"/>
-            <StackLayout Orientation="Horizontal">
-                <Button Text="Join call" Command="{Binding JoinCallCommand}"/>
-            </StackLayout>
             <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}"
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <webRtc:Media Stream="{Binding Remote1Stream}" Label="{Binding Remote1Label}"
                           VideoMuted="{Binding Remote1VideoMuted}" AudioMuted="{Binding Remote1AudioMuted}"
                           BackgroundColor="Navy" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+            <StackLayout Orientation="Horizontal">
+                <Button Text="End call" Command="{Binding EndCallCommand}"/>
+            </StackLayout>
 
 
         </StackLayout>

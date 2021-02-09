@@ -24,7 +24,7 @@ namespace WebRTCme
             var nativeCameraVideoCapturer = new Webrtc.RTCCameraVideoCapturer();
 
             // TODO USE constraints to set the below values
-            // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelId from
+            // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelID from
             // RTCCameraVideoCapturer.CaptureDevices list.
             var device = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 .First(capturer => capturer.ModelID == track.Id);

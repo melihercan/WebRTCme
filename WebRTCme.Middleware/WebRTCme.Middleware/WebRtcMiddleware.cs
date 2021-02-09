@@ -25,20 +25,15 @@ namespace WebRTCme.Middleware
         //{
         //}
 
-        public Task<IRoomService> CreateRoomServiceAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime)
+        public Task<ISignallingServerService> CreateSignallingServerServiceAsync(string signallingServerBaseUrl, 
+            IJSRuntime jsRuntime)
         {
-            return RoomService.CreateAsync(signallingServerBaseUrl, jsRuntime);
+            return SignallingServerService.CreateAsync(signallingServerBaseUrl, jsRuntime);
         }
 
         public Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime)
         {
             var service = MediaStreamService.Create(jsRuntime);
-            return Task.FromResult(service);
-        }
-
-        public Task<ILocalMediaStreamService> CreateLocalMediaStreamServiceAsync(IJSRuntime jsRuntime)
-        {
-            var service = LocalMediaStreamService.Create(jsRuntime);
             return Task.FromResult(service);
         }
 

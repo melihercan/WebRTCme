@@ -31,7 +31,10 @@ namespace WebRtc.iOS
             videoCapturer.Delegate = videoSource;
 
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
-                .FirstOrDefault(device => device.Position == cameraType.ToNative());
+                ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
+                // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelID from
+                // RTCCameraVideoCapturer.CaptureDevices list.
+                .Single(device => device.ModelID == cameraVideoTrack.Id);
 
             var formats = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice);
             System.Diagnostics.Debug.WriteLine($"============= Capture Formats =============== ");
@@ -47,7 +50,7 @@ namespace WebRtc.iOS
             }
 
 
-            var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice)[0];
+            var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice)[6/*0*/];
             CMVideoFormatDescription videoFormatDescription = (CMVideoFormatDescription)format.FormatDescription;
             var capturerDimensions = videoFormatDescription.Dimensions;
             var capturerSize = new CGSize(capturerDimensions.Width, capturerDimensions.Height);

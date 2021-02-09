@@ -74,15 +74,16 @@
         </ResourceDictionary>
     </Shell.Resources>
 
+    <ShellContent Route="initializing" ContentTemplate="{DataTemplate local:InitializingPage}"/>
+
     <!-- 
         When the Flyout is visible this defines the content to display in the flyout.
         FlyoutDisplayOptions="AsMultipleItems" will create a separate flyout item for each child element    
         https://docs.microsoft.com/dotnet/api/xamarin.forms.shellgroupitem.flyoutdisplayoptions?view=xamarin-forms
     -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
-        <ShellContent Title="Video" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:VideoMeetingPage}" />
-        <ShellContent Title="About" Icon="tab_about.png" Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
-        <ShellContent Title="Browse" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:ItemsPage}" />
+        <ShellContent Route="CallParametersPage" Title="Call Parameters" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:CallParametersPage}" />
+        <ShellContent Route="AboutPage" Title="About" Icon="tab_about.png" ContentTemplate="{DataTemplate local:AboutPage}" />
     </FlyoutItem>
 
     <!-- When the Flyout is visible this will be a menu item you can tie a click behavior to  -->

@@ -8,9 +8,9 @@ using WebRTCme.Middleware;
 
 namespace WebRtcMeMiddleware.Models
 {
-    internal class RoomContext
+    internal class CallContext
     {
-        public JoinRoomRequestParameters JoinRoomRequestParameters { get; set; }
+        public JoinCallRequestParameters JoinCallRequestParameters { get; set; }
 
 ////        public Dictionary<string /*peerUserName*/, IRTCPeerConnection> PeerConnectionContexts { get; set; } = new();
 
