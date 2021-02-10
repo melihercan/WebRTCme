@@ -42,7 +42,7 @@ namespace DemoApp.ViewModels
         {
             await App.MediaStreamService.SetCameraMediaStreamPermissionsAsync();
             LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
-            App.MediaStreamService.SetCameraMediaStreamCapturer(LocalStream);
+            //App.MediaStreamService.SetCameraMediaStreamCapturer(LocalStream);
             JoinCallRequestParameters.LocalStream = LocalStream;
             JoinCallCommand();
         }
