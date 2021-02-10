@@ -27,7 +27,7 @@ namespace WebRTCme
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());
             ////CFunctionsRTCSetupInternalTracer();
             Webrtc.CFunctions.RTCInitializeSSL();
-            Webrtc.CFunctions.RTCSetMinDebugLogLevel(Webrtc.RTCLoggingSeverity.Verbose/*.Error*/);
+            Webrtc.CFunctions.RTCSetMinDebugLogLevel(Webrtc.RTCLoggingSeverity.Error);
         }
 
         public void Cleanup()
