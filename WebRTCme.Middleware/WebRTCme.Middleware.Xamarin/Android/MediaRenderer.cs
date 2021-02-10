@@ -21,17 +21,17 @@ namespace WebRtcMiddlewareXamarin
 
     public class MediaRenderer : ViewRenderer<Media, MediaView>
     {
-        private IMediaStream Stream { get; set; }
-        private string Label { get; set; }
-        private bool VideoMuted { get; set; }
-        private bool AudioMuted { get; set; }
-        private IMediaStreamTrack VideoTrack { get; set; }
-        private IMediaStreamTrack AudioTrack { get; set; }
-
+        private IMediaStream _stream;
+        private string _label;
+        private bool _videoMuted;
+        private bool _audioMuted;
+        private IMediaStreamTrack _videoTrack;
+        private IMediaStreamTrack _audioTrack;
+        private MediaView _mediaView;
 
         public MediaRenderer(Context context) : base(context) { }
 
-        protected override async void OnElementChanged(ElementChangedEventArgs<Media> e)
+        protected override void OnElementChanged(ElementChangedEventArgs<Media> e)
         {
             base.OnElementChanged(e);
 
@@ -44,25 +44,26 @@ namespace WebRtcMiddlewareXamarin
             {
                 if (Control == null)
                 {
-                    Stream = e.NewElement.Stream;
-                    Label = e.NewElement.Label;
-                    VideoMuted = e.NewElement.VideoMuted;
-                    AudioMuted = e.NewElement.AudioMuted;
+                    _stream = e.NewElement.Stream;
+                    _label = e.NewElement.Label;
+                    _videoMuted = e.NewElement.VideoMuted;
+                    _audioMuted = e.NewElement.AudioMuted;
 
-                    if (Stream is null)
-                        return;
-
-                    VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
-                    AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
+                    if (_stream is not null)
+                    {
+                        _videoTrack = _stream.GetVideoTracks().FirstOrDefault();
+                        _audioTrack = _stream.GetAudioTracks().FirstOrDefault();
+                    }
 
                     // Instantiate the native control and assign it to the Control property with
-                    // the SetNativeControl method
-                    var rendererViewProxy = new RendererViewProxy(VideoTrack);
+                    // the SetNativeControl method.
                     var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
-                    var mediaView = new MediaView(context, rendererViewProxy.RendererView);
-                    SetNativeControl(mediaView);
+                    _mediaView = new MediaView(context);
+                    if (_videoTrack is not null)
+                        _mediaView.SetTrack(_videoTrack);
+                    SetNativeControl(_mediaView);
                 }
-                // Configure the control and subscribe to event handlers
+                // Configure the control and subscribe to event handlers.
             }
         }
 
@@ -72,28 +73,20 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
-                Stream = Element.Stream;
-                VideoTrack = Stream.GetVideoTracks().FirstOrDefault();
-                AudioTrack = Stream.GetAudioTracks().FirstOrDefault();
-                var rendererViewProxy = new RendererViewProxy(VideoTrack);
-                var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
-                var mediaView = new MediaView(context, rendererViewProxy.RendererView);
-                SetNativeControl(mediaView);
+                _stream = Element.Stream;
+                _videoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
+                _audioTrack = _stream.GetAudioTracks().FirstOrDefault();
+                _mediaView.SetTrack(_videoTrack);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {
-
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            else if (args.PropertyName == Media.VideoMutedProperty.PropertyName)
             {
-                Control.Dispose();
             }
-
-            base.Dispose(disposing);
+            else if (args.PropertyName == Media.AudioMutedProperty.PropertyName)
+            {
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ using WebRTCme.Middleware;
 
 namespace WebRtcMiddlewareXamarin
 {
-
     public class MediaView : UIView, Webrtc.IRTCVideoViewDelegate
     {
         private bool _isCamera;
@@ -21,24 +20,6 @@ namespace WebRtcMiddlewareXamarin
 
         public MediaView()
         {
-
-        }
-
-        public MediaView(bool isCamera)
-        {
-            _isCamera = isCamera;
-            if (_isCamera)
-            {
-                _cameraPreview = new Webrtc.RTCCameraPreviewView();
-                AddSubview(_cameraPreview);
-            }
-            else
-            {
-                _rendererView = new Webrtc.RTCEAGLVideoView();
-                _rendererView.Delegate = this;
-                AddSubview(_rendererView);
-            }
-
         }
 
         public void SetTrack(IMediaStreamTrack videoTrack)
@@ -99,22 +80,6 @@ namespace WebRtcMiddlewareXamarin
             SetNeedsLayout();
         }
 
-        public MediaView(Webrtc.RTCEAGLVideoView rendererView)
-        {
-            _rendererView = rendererView;
-            AddSubview(_rendererView);
-        }
-
-        public MediaView(IMediaStreamTrack videoTrack)
-        {
-            var nativeTrack = videoTrack.NativeObject as Webrtc.RTCVideoTrack;
-            _rendererView = new Webrtc.RTCEAGLVideoView();
-            _rendererView.Delegate = this;
-            AddSubview(_rendererView);
-            nativeTrack.AddRenderer(_rendererView);
-        }
-
-
         public override void LayoutSubviews()
         {
             System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
@@ -125,11 +90,6 @@ namespace WebRtcMiddlewareXamarin
             else if (!_isCamera && _rendererView is not null)
                 _rendererView.Frame = Bounds;
         }
-
-
-
-
-
 
         [Export("videoView:didChangeVideoSize:")]
         public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)

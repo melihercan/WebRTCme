@@ -22,18 +22,10 @@ namespace WebRtcMiddlewareXamarin
         private IMediaStream _stream;
         private string _label;
         private bool _videoMuted;
-        private bool _audioMuted { get; set; }
-
-        //// TODO: Get IsCamera from VideoTrack Id by comparing with capture device ModelIds.        
-//        private bool _isCamera;
-
-
+        private bool _audioMuted;
         private IMediaStreamTrack _videoTrack;
         private IMediaStreamTrack _audioTrack;
-
-        //private bool _isActive = false;
         private MediaView _mediaView;
-
 
         protected override void OnElementChanged(ElementChangedEventArgs<Media> e)
         {
@@ -53,43 +45,21 @@ namespace WebRtcMiddlewareXamarin
                     _videoMuted = e.NewElement.VideoMuted;
                     _audioMuted = e.NewElement.AudioMuted;
 
-
-
-                    //if (Stream is null)
-                    //  return;
-
-                    //if (_isActive)
-                    //{
-                    //  System.Diagnostics.Debug.WriteLine($"------------- ALREADY active");
-                    //return;
-                    //}
-                    //_isActive = true;
-
-
                     if (_stream is not null)
                     {
                         _videoTrack = _stream.GetVideoTracks().FirstOrDefault();
                         _audioTrack = _stream.GetAudioTracks().FirstOrDefault();
-                        //var cameraDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
-                        //_isCamera = cameraDevices.Any(device => device.ModelID == _videoTrack.Id);
                     }
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    //var rendererViewProxy = new RendererViewProxy(VideoTrack);
-                    //var mediaView = new MediaView(rendererViewProxy.RendererView);
-
-                    //var mediaView = new MediaView(VideoTrack);
-                    _mediaView = new MediaView(/*_isCamera*/);
+                    _mediaView = new MediaView();
                     if (_videoTrack is not null)
                         _mediaView.SetTrack(_videoTrack);
-                    
                     SetNativeControl(_mediaView);
-
                 }
                 // Configure the control and subscribe to event handlers.
             }
-
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -98,16 +68,9 @@ namespace WebRtcMiddlewareXamarin
 
             if (args.PropertyName == Media.StreamProperty.PropertyName)
             {
-
                 _stream = Element.Stream;
                 _videoTrack = Element.Stream.GetVideoTracks().FirstOrDefault();
                 _audioTrack = _stream.GetAudioTracks().FirstOrDefault();
-                //var rendererView = new RendererViewProxy(VideoTrack);
-                //var mediaView = new MediaView(rendererView.RendererView);
-
-                //var mediaView = new MediaView(VideoTrack);
-                //SetNativeControl(mediaView);
-
                 _mediaView.SetTrack(_videoTrack);
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)

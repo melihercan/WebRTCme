@@ -10,8 +10,13 @@ using Webrtc = Org.Webrtc;
 
 namespace WebRTCme
 {
-    public static class PlatformSupport
+    public static class PlatformSupport // CALL THIS NativeSupport
     {
+        public static Webrtc.VideoSource GetNativeVideoSource(IMediaStreamTrack videoTrack)
+        {
+            return ((MediaStreamTrack)videoTrack).GetNativeMediaSource() as Webrtc.VideoSource;
+        }
+
         public static void SetCameraCapturer(IMediaStreamTrack videoTrack)
         {
         }
