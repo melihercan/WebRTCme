@@ -9,7 +9,7 @@ using WebRtcBindingsWeb.Interops;
 
 namespace WebRTCme
 {
-    public static class PlatformSupport
+    public static class BlazorSupport
     {
         public static void SetVideoSource(IJSRuntime jsRuntime, ElementReference videoElementReference, 
             IMediaStream mediaStream)

@@ -24,7 +24,5 @@ namespace WebRtcBindingsWeb.Api
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Api.RTCPeerConnection.Create(JsRuntime, configuration);
 
-        public IApiExtensions ApiExtensions() => Api.ApiExtensions.Create(JsRuntime);
-
     }
 }

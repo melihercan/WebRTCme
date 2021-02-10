@@ -40,9 +40,8 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-            await App.MediaStreamService.SetCameraMediaStreamPermissionsAsync();
+            await XamarinSupport.SetCameraMediaStreamPermissionsAsync();
             LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
-            //App.MediaStreamService.SetCameraMediaStreamCapturer(LocalStream);
             JoinCallRequestParameters.LocalStream = LocalStream;
             JoinCallCommand();
         }

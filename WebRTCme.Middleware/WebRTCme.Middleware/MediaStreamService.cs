@@ -13,7 +13,6 @@ namespace WebRtcMeMiddleware
     {
         private readonly IJSRuntime _jsRuntime;
         private readonly IWindow _window;
-        private readonly IApiExtensions _apiExtensions;
 
 
         static public IMediaStreamService Create(IJSRuntime jsRuntime = null)
@@ -27,28 +26,11 @@ namespace WebRtcMeMiddleware
         {
             _jsRuntime = jsRuntime;
             _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
-            _apiExtensions = _window.ApiExtensions();
-
-        }
-
-        public async Task SetCameraMediaStreamPermissionsAsync()
-        {
-            var camStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
-            if (camStatus != Xamarin.Essentials.PermissionStatus.Granted)
-            {
-                throw new Exception("No Video permission was granted");
-            }
-            var micStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Microphone>();
-            if (micStatus != Xamarin.Essentials.PermissionStatus.Granted)
-            {
-                throw new Exception("No Mic permission was granted");
-            }
         }
 
         public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null)
         {
-
             var navigator = _window.Navigator();
             var mediaDevices = navigator.MediaDevices;
             var mediaStream = await mediaDevices.GetUserMedia(mediaStreamConstraints ?? new MediaStreamConstraints
@@ -58,11 +40,5 @@ namespace WebRtcMeMiddleware
             });
             return mediaStream;
         }
-
-        public void SetCameraMediaStreamCapturer(IMediaStream mediaStream)
-        {
-            _apiExtensions.SetCameraVideoCapturer(mediaStream.GetVideoTracks().Single());
-        }
-
     }
 }

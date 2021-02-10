@@ -8,11 +8,9 @@
         <StackLayout BackgroundColor="LightGray">
             <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}" 
-                          IsCamera="True"
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <webRtc:Media Stream="{Binding Remote1Stream}" Label="{Binding Remote1Label}"
                           VideoMuted="{Binding Remote1VideoMuted}" AudioMuted="{Binding Remote1AudioMuted}"
-                          IsCamera="False"
                           BackgroundColor="Navy" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <!--<StackLayout Orientation="Horizontal">
                 <Button Text="End call" Command="{Binding EndCallCommand}"/>

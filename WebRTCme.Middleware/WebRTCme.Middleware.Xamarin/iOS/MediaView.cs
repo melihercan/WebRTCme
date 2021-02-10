@@ -16,7 +16,7 @@ namespace WebRtcMiddlewareXamarin
     {
         private bool _isCamera;
         private Webrtc.RTCEAGLVideoView _rendererView;
-        private Webrtc.RTCCameraPreviewView _cameraPreview;
+        private Webrtc.RTCCameraPreviewView _cameraView;
 
         public MediaView()
         {
@@ -27,17 +27,17 @@ namespace WebRtcMiddlewareXamarin
             var cameraDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
             _isCamera = cameraDevices.Any(device => device.ModelID == videoTrack.Id);
 
-            var nativeTrack = videoTrack.NativeObject as Webrtc.RTCVideoTrack;
+            var nativeVideoTrack = videoTrack.NativeObject as Webrtc.RTCVideoTrack;
 
             if (_isCamera)
             {
-                _cameraPreview = new Webrtc.RTCCameraPreviewView();
-                AddSubview(_cameraPreview);
+                _cameraView = new Webrtc.RTCCameraPreviewView();
+                AddSubview(_cameraView);
 
-                var videoSource = nativeTrack.Source;
+                var nativeVideoSource = nativeVideoTrack.Source;
 
                 var videoCapturer = new Webrtc.RTCCameraVideoCapturer();
-                videoCapturer.Delegate = videoSource;
+                videoCapturer.Delegate = nativeVideoSource;
 
                 var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                     ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
@@ -66,7 +66,7 @@ namespace WebRtcMiddlewareXamarin
                 var fps = 30;
                 videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
 
-                _cameraPreview.CaptureSession = videoCapturer.CaptureSession;
+                _cameraView.CaptureSession = videoCapturer.CaptureSession;
             }
             else
             {
@@ -74,7 +74,7 @@ namespace WebRtcMiddlewareXamarin
                 _rendererView.Delegate = this;
                 AddSubview(_rendererView);
 
-                nativeTrack.AddRenderer(_rendererView);
+                nativeVideoTrack.AddRenderer(_rendererView);
             }
 
             SetNeedsLayout();
@@ -85,8 +85,8 @@ namespace WebRtcMiddlewareXamarin
             System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
 
             base.LayoutSubviews();
-            if (_isCamera && _cameraPreview is not null)
-                _cameraPreview.Frame = Bounds;
+            if (_isCamera && _cameraView is not null)
+                _cameraView.Frame = Bounds;
             else if (!_isCamera && _rendererView is not null)
                 _rendererView.Frame = Bounds;
         }

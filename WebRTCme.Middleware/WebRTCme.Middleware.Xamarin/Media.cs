@@ -11,9 +11,6 @@ namespace WebRTCme.Middleware.Xamarin
         public static readonly BindableProperty StreamProperty = BindableProperty
             .Create(nameof(StreamProperty), typeof(IMediaStream), typeof(Media), null);
 
-        public static readonly BindableProperty VideoCapturerProperty = BindableProperty
-            .Create(nameof(VideoCapturerProperty), typeof(IVideoCapturer), typeof(Media), null);
-
         public static readonly BindableProperty LabelProperty = BindableProperty
             .Create(nameof(LabelProperty), typeof(string), typeof(Media), string.Empty);
 
@@ -23,19 +20,10 @@ namespace WebRTCme.Middleware.Xamarin
         public static readonly BindableProperty AudioMutedProperty = BindableProperty
             .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
 
-        public static readonly BindableProperty IsCameraProperty = BindableProperty
-            .Create(nameof(IsCameraProperty), typeof(bool), typeof(Media), false);
-
         public IMediaStream Stream
         {
             get => (IMediaStream)GetValue(StreamProperty);
             set => SetValue(StreamProperty, value);
-        }
-
-        public IVideoCapturer VideoCapturer
-        {
-            get => (IVideoCapturer)GetValue(VideoCapturerProperty);
-            set => SetValue(VideoCapturerProperty, value);
         }
 
         public string Label
@@ -54,12 +42,6 @@ namespace WebRTCme.Middleware.Xamarin
         {
             get => (bool)GetValue(AudioMutedProperty);
             set => SetValue(AudioMutedProperty, value);
-        }
-
-        public bool IsCamera
-        {
-            get => (bool)GetValue(IsCameraProperty);
-            set => SetValue(IsCameraProperty, value);
         }
 
     }

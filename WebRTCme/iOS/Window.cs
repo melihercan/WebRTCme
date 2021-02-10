@@ -17,6 +17,5 @@ namespace WebRtc.iOS
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);
 
-        public IApiExtensions ApiExtensions() => iOS.ApiExtensions.Create();
     }
 }
