@@ -12,6 +12,9 @@ namespace DemoApp
         public AppShell()
         {
             InitializeComponent();
+
+            Routing.RegisterRoute(nameof(VideoCallPage), typeof(VideoCallPage));
+
             Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
             Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
 

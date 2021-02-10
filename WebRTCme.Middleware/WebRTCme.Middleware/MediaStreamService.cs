@@ -26,21 +26,28 @@ namespace WebRtcMeMiddleware
         private MediaStreamService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
-            _window = WebRtcMiddleware.WebRtc.Window();
+            _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
             _apiExtensions = _window.ApiExtensions();
 
+        }
+
+        public async Task SetCameraMediaStreamPermissionsAsync()
+        {
+            var camStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
+            if (camStatus != Xamarin.Essentials.PermissionStatus.Granted)
+            {
+                throw new Exception("No Video permission was granted");
+            }
+            var micStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Microphone>();
+            if (micStatus != Xamarin.Essentials.PermissionStatus.Granted)
+            {
+                throw new Exception("No Mic permission was granted");
+            }
         }
 
         public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null)
         {
-            var permission = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
-            if (permission != Xamarin.Essentials.PermissionStatus.Granted)
-            {
-                throw new Exception("No Video permission was granted");
-            }
-            var micStatus = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Microphone>();
-
 
             var navigator = _window.Navigator();
             var mediaDevices = navigator.MediaDevices;
@@ -49,8 +56,12 @@ namespace WebRtcMeMiddleware
                 Audio = new MediaStreamContraintsUnion { Value = true },
                 Video = new MediaStreamContraintsUnion { Value = true }
             });
-            _apiExtensions.SetCameraVideoCapturer(mediaStream.GetVideoTracks().Single());
             return mediaStream;
+        }
+
+        public void SetCameraMediaStreamCapturer(IMediaStream mediaStream)
+        {
+            _apiExtensions.SetCameraVideoCapturer(mediaStream.GetVideoTracks().Single());
         }
 
     }

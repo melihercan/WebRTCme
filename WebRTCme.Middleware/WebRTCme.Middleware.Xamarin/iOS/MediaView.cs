@@ -15,13 +15,24 @@ namespace WebRtcMiddlewareXamarin
 
     public class MediaView : UIView, Webrtc.IRTCVideoViewDelegate
     {
+        private readonly bool _isCamera;
         private readonly Webrtc.RTCEAGLVideoView _rendererView;
 
-        public MediaView()
+
+        public MediaView(bool isCamera = false)
         {
-            _rendererView = new Webrtc.RTCEAGLVideoView();
-            _rendererView.Delegate = this;
-            AddSubview(_rendererView);
+            _isCamera = isCamera;
+            if (_isCamera)
+            {
+
+            }
+            else
+            {
+                _rendererView = new Webrtc.RTCEAGLVideoView();
+                _rendererView.Delegate = this;
+                AddSubview(_rendererView);
+            }
+
         }
 
         public void SetTrack(IMediaStreamTrack videoTrack)

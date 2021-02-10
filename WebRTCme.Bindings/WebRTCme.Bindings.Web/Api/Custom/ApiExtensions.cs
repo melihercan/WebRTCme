@@ -18,7 +18,7 @@ namespace WebRtcBindingsWeb.Api
         private ApiExtensions(IJSRuntime jsRuntime) : base(jsRuntime) { }
 
 
-        public void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, MediaStreamConstraints mediaStreamConstraints)
+        public IVideoCapturer SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, MediaStreamConstraints mediaStreamConstraints)
         {
             throw new NotImplementedException();
         }

@@ -57,7 +57,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
             _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
             _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
-            LocalStream = await _mediaStreamService.GetCameraStreamAsync(string.Empty);
+            LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
 
             _roomService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(Configuration["SignallingServer:BaseUrl"], 
                 JsRuntime);

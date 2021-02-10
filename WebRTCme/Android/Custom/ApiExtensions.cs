@@ -20,7 +20,7 @@ namespace WebRtc.Android
         }
 
 
-        public void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
+        public IVideoCapturer SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType, 
             MediaStreamConstraints mediaStreamConstraints)
         {
             if (cameraType == CameraType.Default)
@@ -45,6 +45,7 @@ namespace WebRtc.Android
                 context,
                 videoSource.CapturerObserver);
             videoCapturer.StartCapture(480, 640, 30);
+            return VideoCapturer.Create(videoCapturer);
         }
 
         public IEglBaseContext GetEglBaseContext() =>

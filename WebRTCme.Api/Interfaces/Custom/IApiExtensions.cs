@@ -7,7 +7,7 @@ namespace WebRTCme
 {
     public interface IApiExtensions
     {
-        void SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType = CameraType.Default,
+        IVideoCapturer SetCameraVideoCapturer(IMediaStreamTrack cameraVideoTrack, CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null);
 
         IEglBaseContext GetEglBaseContext();

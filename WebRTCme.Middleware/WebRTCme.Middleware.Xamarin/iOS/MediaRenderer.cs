@@ -23,6 +23,11 @@ namespace WebRtcMiddlewareXamarin
         private string Label { get; set; }
         private bool VideoMuted { get; set; }
         private bool AudioMuted { get; set; }
+
+//// TODO: Get IsCamera from VideoTrack Id by comparing with capture device ModelIds.        
+        private bool IsCamera { get; set; }
+
+
         private IMediaStreamTrack VideoTrack { get; set; }
         private IMediaStreamTrack AudioTrack { get; set; }
 
@@ -47,6 +52,7 @@ namespace WebRtcMiddlewareXamarin
                     Label = e.NewElement.Label;
                     VideoMuted = e.NewElement.VideoMuted;
                     AudioMuted = e.NewElement.AudioMuted;
+                    IsCamera = e.NewElement.IsCamera;
 
                     //if (Stream is null)
                     //  return;

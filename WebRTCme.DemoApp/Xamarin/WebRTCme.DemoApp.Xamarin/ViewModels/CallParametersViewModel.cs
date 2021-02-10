@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DemoApp.Views;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -22,10 +23,8 @@ namespace DemoApp.ViewModels
     [QueryProperty(nameof(TurnServerNamesJson), nameof(TurnServerNamesJson))]
     public class CallParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
     {
-        private string _turnServerNamesJson;
         public string TurnServerNamesJson
         {
-            get => _turnServerNamesJson;
             set
             {
                 var turnServerNamesJson = Uri.UnescapeDataString(value);
@@ -63,15 +62,15 @@ namespace DemoApp.ViewModels
 
         public string TurnServerName { get; set; }  
         //// Useful during development. DELETE THIS LATER!!!
-        //= "StunOnly";
+        = "StunOnly";
 
         public ValidatableProperty<string> RoomName { get; set; } = new ValidatableProperty<string>(
         //// Useful during development. DELETE THIS LATER!!!
-        //"hello"
+        "hello"
         );
         public ValidatableProperty<string> UserName { get; set; } = new ValidatableProperty<string>(
         //// Useful during development. DELETE THIS LATER!!!
-        //"delya"
+        "delya"
         );
 
 
@@ -87,7 +86,14 @@ namespace DemoApp.ViewModels
                 var isValid = Validate();
                 if (isValid)
                 {
-
+                    var callParameters = new CallParameters
+                    {
+                        TurnServerName = TurnServerName,
+                        RoomName = RoomName.Value,
+                        UserName = UserName.Value
+                    };
+                    var callParamatersJson = JsonSerializer.Serialize(callParameters);
+                    await Shell.Current.GoToAsync($"{nameof(VideoCallPage)}?CallParametersJson={callParamatersJson}");
                 }
             }
         });
