@@ -8,7 +8,7 @@ namespace WebRTCme.Middleware
 {
     public static class XamarinSupport
     {
-        public static async Task SetCameraMediaStreamPermissionsAsync()
+        public static async Task SetCameraAndMicPermissionsAsync()
         {
             var camStatus = await Permissions.RequestAsync<Permissions.Camera>();
             if (camStatus != PermissionStatus.Granted)
