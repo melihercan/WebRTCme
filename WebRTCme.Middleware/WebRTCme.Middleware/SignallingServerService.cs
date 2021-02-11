@@ -432,7 +432,7 @@ namespace WebRtcMeMiddleware
                             RoomName = roomName,
                             PeerUserName = peerUserName,
                             MediaStream = mediaStream,
-                            DataChannel = dataChannel
+                            DataChannel = isInitiator ? dataChannel : null
                         });
                     else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
                         ConnectionResponseSubject.OnCompleted();
@@ -442,6 +442,14 @@ namespace WebRtcMeMiddleware
                     DebugPrint($"====> OnDataChannel - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                     dataChannel = e.Channel;
+                    ConnectionResponseSubject.OnNext(new ConnectionResponseParameters
+                    {
+                        TurnServerName = turnServerName,
+                        RoomName = roomName,
+                        PeerUserName = peerUserName,
+                        MediaStream = null,
+                        DataChannel = dataChannel
+                    });
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {

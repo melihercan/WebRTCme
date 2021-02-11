@@ -92,11 +92,18 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 .Subscribe(
                     onNext: (connectionResponseParameters) =>
                     {
-                        Remote1Stream = connectionResponseParameters.MediaStream;
-                        Remote1Label = connectionResponseParameters.PeerUserName;
-                        StateHasChanged();
+                        if (connectionResponseParameters.MediaStream is not null)
+                        {
+                            Remote1Stream = connectionResponseParameters.MediaStream;
+                            Remote1Label = connectionResponseParameters.PeerUserName;
+                            StateHasChanged();
+                        }
 
-                        var dataChannel = connectionResponseParameters.DataChannel;
+                        if (connectionResponseParameters.DataChannel is not null)
+                        {
+                            var dataChannel = connectionResponseParameters.DataChannel;
+                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                        }
                     },
                     onError: (exception) =>
                     {
