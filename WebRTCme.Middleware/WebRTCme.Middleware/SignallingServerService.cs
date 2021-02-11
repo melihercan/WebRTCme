@@ -438,6 +438,8 @@ namespace WebRtcMeMiddleware
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
+                    DebugPrint($"====> OnDataChannel - room:{roomName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                     dataChannel = e.Channel;
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
