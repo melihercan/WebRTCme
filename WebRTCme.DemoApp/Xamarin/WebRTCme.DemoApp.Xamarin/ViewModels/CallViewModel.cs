@@ -38,7 +38,6 @@ namespace DemoApp.ViewModels
         {
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
-            ConnectionRequestParameters.LocalStream = LocalStream;
             Connect();
         }
 
@@ -144,12 +143,23 @@ namespace DemoApp.ViewModels
 
         private void Connect()
         {
+   ConnectionRequestParameters.DataChannelName = "hagimokkey";
+            ConnectionRequestParameters.LocalStream = LocalStream;
             var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
-                    onNext: (peerConnectionResponseParameters) =>
+                    onNext: (connectionResponseParameters) =>
                     {
-                        Remote1Stream = peerConnectionResponseParameters.MediaStream;
-                        Remote1Label = peerConnectionResponseParameters.PeerUserName;
+                        if (connectionResponseParameters.MediaStream != null)
+                        {
+                            Remote1Stream = connectionResponseParameters.MediaStream;
+                            Remote1Label = connectionResponseParameters.PeerUserName;
+                        }
+
+                        if (connectionResponseParameters.DataChannel != null)
+                        {
+                            var dataChannel = connectionResponseParameters.DataChannel;
+                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                        }
                     },
                     onError: (exception) =>
                     {

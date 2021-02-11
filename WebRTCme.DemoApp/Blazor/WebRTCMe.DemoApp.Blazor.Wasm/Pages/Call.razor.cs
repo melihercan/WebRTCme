@@ -87,7 +87,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
   ConnectionRequestParameters.DataChannelName = "hagimokkey";
             ConnectionRequestParameters.LocalStream = LocalStream;
-            LocalLabel = ConnectionRequestParameters.UserName;
             var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
                     onNext: (connectionResponseParameters) =>
