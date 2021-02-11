@@ -1,7 +1,6 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using DemoApp.Services;
 using DemoApp.Views;
 using WebRTCme.Middleware.Xamarin;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +29,6 @@ namespace DemoApp
 
             InitializeComponent();
 
-            DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();
         }
 
