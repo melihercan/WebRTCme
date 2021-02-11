@@ -36,7 +36,7 @@ namespace DemoApp.ViewModels
 
         public async Task OnPageAppearing()
         {
-            JoinChatCommand();
+            Connect();
         }
 
         public Task OnPageDisappearing()
@@ -53,31 +53,20 @@ namespace DemoApp.ViewModels
             ;
 
 
-        //public ICommand JoinCallCommand => new Command(async () =>
-        private void JoinChatCommand()
+        private void Connect()
         {
-            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (peerCallbackParameters) =>
-                {
-                    switch (peerCallbackParameters.Code)
+            var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
+                .Subscribe(
+                    onNext: (connectionResponseParameters) =>
                     {
-                        case PeerCallbackCode.PeerJoined:
-                            break;
-
-                        case PeerCallbackCode.PeerModified:
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                },
-                onError: (exception) =>
-                {
-                },
-                onCompleted: () =>
-                {
-                });
+                    },
+                    onError: (exception) =>
+                    {
+                    },
+                    onCompleted: () =>
+                    {
+                    });
         }
+
     }
 }

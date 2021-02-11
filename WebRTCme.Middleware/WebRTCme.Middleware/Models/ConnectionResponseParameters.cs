@@ -4,10 +4,8 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class PeerCallbackParameters
+    public class ConnectionResponseParameters
     {
-        public PeerCallbackCode Code { get; init; }
-
         public string TurnServerName { get; init; }
         
         public string RoomName { get; init; }
@@ -15,5 +13,7 @@ namespace WebRTCme.Middleware
         public string PeerUserName { get; init; }
 
         public IMediaStream MediaStream { get; init; }
+
+        public IRTCDataChannel DataChannel { get; init; }
     }
 }

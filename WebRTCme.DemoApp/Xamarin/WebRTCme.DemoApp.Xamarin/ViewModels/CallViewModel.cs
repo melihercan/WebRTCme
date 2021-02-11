@@ -39,7 +39,7 @@ namespace DemoApp.ViewModels
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
             ConnectionRequestParameters.LocalStream = LocalStream;
-            JoinCallCommand();
+            Connect();
         }
 
         public Task OnPageDisappearing()
@@ -142,32 +142,21 @@ namespace DemoApp.ViewModels
             ;
 
 
-        private void JoinCallCommand()
+        private void Connect()
         {
-            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (peerCallbackParameters) =>
-                {
-                    switch (peerCallbackParameters.Code)
+            var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
+                .Subscribe(
+                    onNext: (peerConnectionResponseParameters) =>
                     {
-                        case PeerCallbackCode.PeerJoined:
-                            Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Label = peerCallbackParameters.PeerUserName;
-                            break;
-
-                        case PeerCallbackCode.PeerModified:
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                },
-                onError: (exception) =>
-                {
-                },
-                onCompleted: () =>
-                {
-                });
+                        Remote1Stream = peerConnectionResponseParameters.MediaStream;
+                        Remote1Label = peerConnectionResponseParameters.PeerUserName;
+                    },
+                    onError: (exception) =>
+                    {
+                    },
+                    onCompleted: () =>
+                    {
+                    });
         }
     }
 }

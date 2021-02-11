@@ -49,34 +49,34 @@ namespace WebRtcMeMiddleware
             return result.Value;
         }
 
-        private Subject<PeerCallbackParameters> PeerCallbackSubject { get; } = new Subject<PeerCallbackParameters>();
+        private Subject<ConnectionResponseParameters> ConnectionResponseSubject { get; } = new Subject<ConnectionResponseParameters>();
 
-        public IObservable<PeerCallbackParameters> JoinRoomRequest(ConnectionRequestParameters joinRoomRequestParameters)
+        public IObservable<ConnectionResponseParameters> ConnectionRequest(ConnectionRequestParameters connectionRequestParameters)
         {
-            return Observable.Create<PeerCallbackParameters>(async observer => 
+            return Observable.Create<ConnectionResponseParameters>(async observer => 
             {
-                IDisposable peerCallbackDisposer = null;
+                IDisposable connectionDisposer = null;
                 ConnectionContext connectionContext = null;
                 bool isJoined = false;
 
                 try
                 {
-                    peerCallbackDisposer = PeerCallbackSubject
+                    connectionDisposer = ConnectionResponseSubject
                         .AsObservable()
                         .Subscribe(observer.OnNext);
 
-                    if (GetConnectionContext(joinRoomRequestParameters.TurnServerName, joinRoomRequestParameters.RoomName) 
+                    if (GetConnectionContext(connectionRequestParameters.TurnServerName, connectionRequestParameters.RoomName) 
                             is not null)
-                           observer.OnError(new Exception($"Room {joinRoomRequestParameters.RoomName} is in use"));
+                           observer.OnError(new Exception($"Room {connectionRequestParameters.RoomName} is in use"));
 
                     connectionContext = new ConnectionContext
                     {
-                        ConnectionRequestParameters = joinRoomRequestParameters
+                        ConnectionRequestParameters = connectionRequestParameters
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await _signallingServerClient.JoinRoom(joinRoomRequestParameters.TurnServerName,
-                        joinRoomRequestParameters.RoomName, joinRoomRequestParameters.UserName);
+                    await _signallingServerClient.JoinRoom(connectionRequestParameters.TurnServerName,
+                        connectionRequestParameters.RoomName, connectionRequestParameters.UserName);
                     isJoined = true;
                 }
                 catch (Exception ex)
@@ -86,12 +86,12 @@ namespace WebRtcMeMiddleware
 
                 return async () =>
                 {
-                    peerCallbackDisposer.Dispose();
+                    connectionDisposer.Dispose();
                     try
                     {
                         if (isJoined)
-                            await _signallingServerClient.LeaveRoom(joinRoomRequestParameters.TurnServerName,
-                                joinRoomRequestParameters.RoomName, joinRoomRequestParameters.UserName);
+                            await _signallingServerClient.LeaveRoom(connectionRequestParameters.TurnServerName,
+                                connectionRequestParameters.RoomName, connectionRequestParameters.UserName);
                         if (connectionContext is not null)
                             _connectionContexts.Remove(connectionContext);
                     }
@@ -220,7 +220,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
         }
 
@@ -233,7 +233,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
         }
 
@@ -281,7 +281,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
         }
 
@@ -306,7 +306,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
         }
 
@@ -330,7 +330,7 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
         }
 
@@ -405,16 +405,15 @@ namespace WebRtcMeMiddleware
                         $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
                     if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
-                        PeerCallbackSubject.OnNext(new PeerCallbackParameters
+                        ConnectionResponseSubject.OnNext(new ConnectionResponseParameters
                         {
-                            Code = PeerCallbackCode.PeerJoined,
                             TurnServerName = turnServerName,
                             RoomName = roomName,
                             PeerUserName = peerUserName,
                             MediaStream = mediaStream
                         });
                     else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
-                        PeerCallbackSubject.OnCompleted();
+                        ConnectionResponseSubject.OnCompleted();
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
@@ -499,7 +498,7 @@ namespace WebRtcMeMiddleware
             catch (Exception ex)
             {
                 //roomContext.RoomState = RoomState.Error;
-                PeerCallbackSubject.OnError(ex);
+                ConnectionResponseSubject.OnError(ex);
             }
 
         }

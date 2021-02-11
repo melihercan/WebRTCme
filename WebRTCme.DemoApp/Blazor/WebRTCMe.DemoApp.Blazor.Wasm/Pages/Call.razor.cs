@@ -87,30 +87,20 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             ConnectionRequestParameters.LocalStream = LocalStream;
             LocalLabel = ConnectionRequestParameters.UserName;
-            var peerCallbackDisposer = _signallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (peerCallbackParameters) => 
-                { 
-                    switch (peerCallbackParameters.Code)
+            var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
+                .Subscribe(
+                    onNext: (connectionResponseParameters) =>
                     {
-                        case PeerCallbackCode.PeerJoined:
-                            Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Label = peerCallbackParameters.PeerUserName;
-                            StateHasChanged();
-                            break;
-
-                        case PeerCallbackCode.PeerModified:
-                            break;
-
-                        default:
-                            break;
-                    }
-                },
-                onError: (exception) => 
-                { 
-                },
-                onCompleted: () => 
-                { 
-                });
+                        Remote1Stream = connectionResponseParameters.MediaStream;
+                        Remote1Label = connectionResponseParameters.PeerUserName;
+                        StateHasChanged();
+                    },
+                    onError: (exception) =>
+                    {
+                    },
+                    onCompleted: () =>
+                    {
+                    });
         }
 
         public void Dispose()

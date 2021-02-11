@@ -50,7 +50,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
-        private ConnectionRequestParameters JoinRoomRequestParameters { get; set; } = new()
+        private ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new()
         //// Useful during development. DELETE THIS LATER!!!
    { TurnServerName="StunOnly", RoomName="hello", UserName="melik"}
             ;
@@ -80,37 +80,27 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             }
 
             if (_turnServerNames is not null)
-                JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
+                ConnectionRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
         private void HandleValidSubmit()
         {
-            JoinRoomRequestParameters.LocalStream = LocalStream;
-            LocalLabel = JoinRoomRequestParameters.UserName;
-            var peerCallbackDisposer = _signallingServerService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
-                onNext: (peerCallbackParameters) => 
-                { 
-                    switch (peerCallbackParameters.Code)
-                    {
-                        case PeerCallbackCode.PeerJoined:
-                            Remote1Stream = peerCallbackParameters.MediaStream;
-                            Remote1Label = peerCallbackParameters.PeerUserName;
-                            StateHasChanged();
-                            break;
-
-                        case PeerCallbackCode.PeerModified:
-                            break;
-
-                        default:
-                            break;
-                    }
-                },
-                onError: (exception) => 
-                { 
-                },
-                onCompleted: () => 
-                { 
-                });
+            ConnectionRequestParameters.LocalStream = LocalStream;
+            LocalLabel = ConnectionRequestParameters.UserName;
+            var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
+                .Subscribe(
+                    onNext: (connectionResponseParameters) => 
+                    { 
+                        Remote1Stream = connectionResponseParameters.MediaStream;
+                        Remote1Label = connectionResponseParameters.PeerUserName;
+                        StateHasChanged();
+                    },
+                    onError: (exception) => 
+                    { 
+                    },
+                    onCompleted: () => 
+                    { 
+                    });
         }
 
         public void Dispose()
