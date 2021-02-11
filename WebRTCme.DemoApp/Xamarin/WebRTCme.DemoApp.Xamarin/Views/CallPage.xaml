@@ -5,7 +5,7 @@
              Shell.NavBarIsVisible="False"
              x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
-        <StackLayout>
+        <StackLayout Spacing="0">
             <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}" 
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
