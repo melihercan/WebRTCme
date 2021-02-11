@@ -32,7 +32,7 @@ namespace DemoApp.ViewModels
         
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
-          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public async Task OnPageAppearing()
         {
@@ -143,7 +143,6 @@ namespace DemoApp.ViewModels
 
         private void Connect()
         {
-   ConnectionRequestParameters.DataChannelName = "hagimokkey";
             ConnectionRequestParameters.LocalStream = LocalStream;
             var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
@@ -153,12 +152,6 @@ namespace DemoApp.ViewModels
                         {
                             Remote1Stream = connectionResponseParameters.MediaStream;
                             Remote1Label = connectionResponseParameters.PeerUserName;
-                        }
-
-                        if (connectionResponseParameters.DataChannel != null)
-                        {
-                            var dataChannel = connectionResponseParameters.DataChannel;
-                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
                         }
                     },
                     onError: (exception) =>

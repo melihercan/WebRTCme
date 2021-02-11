@@ -28,26 +28,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         [CascadingParameter] 
         public IModalService Modal { get; set; }
 
-        IMediaStream LocalStream { get; set; }
-
-        string LocalLabel { get; set; } 
-
-        bool LocalVideoMuted { get; set; }
-
-        bool LocalAudioMuted { get; set; }
-
-        IMediaStream Remote1Stream { get; set; }
-
-        string Remote1Label { get; set; }
-
-        bool Remote1VideoMuted { get; set; }
-
-        bool Remote1AudioMuted { get; set; }
-
 
         private IWebRtcMiddleware _webRtcMiddleware;
         private ISignallingServerService _signallingServerService;
-        private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
         private ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new()
@@ -60,9 +43,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             await base.OnInitializedAsync();
 
             _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
-            _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
-            LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-
             _signallingServerService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(
                 Configuration["SignallingServer:BaseUrl"], JsRuntime);
 
@@ -72,7 +52,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 {
                     _turnServerNames = await _signallingServerService.GetTurnServerNames();
                 }
-                catch (Exception ex)
+                catch
                 {
                     var modal = Modal.Show<SignallingServerDown>("Signalling server is offline");
                     await modal.Result;
@@ -83,16 +63,18 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 ConnectionRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
-        private void HandleValidSubmit()
+        private void Connect()
         {
-            ConnectionRequestParameters.LocalStream = LocalStream;
-            LocalLabel = ConnectionRequestParameters.UserName;
+            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;//"hagimokkey";
             var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
                     onNext: (connectionResponseParameters) => 
-                    { 
-                        Remote1Stream = connectionResponseParameters.MediaStream;
-                        Remote1Label = connectionResponseParameters.PeerUserName;
+                    {
+                        if (connectionResponseParameters.DataChannel is not null)
+                        {
+                            var dataChannel = connectionResponseParameters.DataChannel;
+                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                        }
                         StateHasChanged();
                     },
                     onError: (exception) => 

@@ -2,15 +2,7 @@
 
 <h1>Chat</h1>
 
-<div>
-    <Media Stream="@LocalStream" Label="@LocalLabel" VideoMuted="@LocalVideoMuted" AudioMuted="@LocalAudioMuted" />
-</div>
-
-<div>
-    <Media Stream="@Remote1Stream" Label="@Remote1Label" VideoMuted="@Remote1VideoMuted" AudioMuted="@Remote1AudioMuted" />
-</div>
-
-<EditForm Model="@ConnectionRequestParameters" OnValidSubmit="@HandleValidSubmit">
+<EditForm Model="@ConnectionRequestParameters" OnValidSubmit="@Connect">
     <DataAnnotationsValidator />
     <ValidationSummary />
 

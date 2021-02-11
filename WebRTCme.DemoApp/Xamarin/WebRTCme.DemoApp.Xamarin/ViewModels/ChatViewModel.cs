@@ -32,20 +32,18 @@ namespace DemoApp.ViewModels
         
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
-          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        public async Task OnPageAppearing()
+        public Task OnPageAppearing()
         {
             Connect();
+            return Task.CompletedTask;
         }
 
         public Task OnPageDisappearing()
         {
             return Task.CompletedTask;
         }
-
-
-
 
         public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters()
      //// Useful during development. DELETE THIS LATER!!!
@@ -55,10 +53,16 @@ namespace DemoApp.ViewModels
 
         private void Connect()
         {
+            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;// "hagimokkey";
             var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
                     onNext: (connectionResponseParameters) =>
                     {
+                        if (connectionResponseParameters.DataChannel != null)
+                        {
+                            var dataChannel = connectionResponseParameters.DataChannel;
+                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                        }
                     },
                     onError: (exception) =>
                     {

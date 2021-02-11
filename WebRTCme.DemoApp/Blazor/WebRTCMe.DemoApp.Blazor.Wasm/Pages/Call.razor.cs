@@ -72,7 +72,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 {
                     _turnServerNames = await _signallingServerService.GetTurnServerNames();
                 }
-                catch (Exception ex)
+                catch
                 {
                     var modal = Modal.Show<SignallingServerDown>("Signalling server is offline");
                     await modal.Result;
@@ -83,9 +83,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 ConnectionRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
-        private void HandleValidSubmit()
+        private void Connect()
         {
-  ConnectionRequestParameters.DataChannelName = "hagimokkey";
             ConnectionRequestParameters.LocalStream = LocalStream;
             var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
                 .Subscribe(
@@ -96,12 +95,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                             Remote1Stream = connectionResponseParameters.MediaStream;
                             Remote1Label = connectionResponseParameters.PeerUserName;
                             StateHasChanged();
-                        }
-
-                        if (connectionResponseParameters.DataChannel is not null)
-                        {
-                            var dataChannel = connectionResponseParameters.DataChannel;
-                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
                         }
                     },
                     onError: (exception) =>
