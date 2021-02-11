@@ -24,9 +24,9 @@ namespace DemoApp.ViewModels
             {
                 var connectionParametersJson = Uri.UnescapeDataString(value);
                 var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
-                JoinCallRequestParameters.TurnServerName = connectionParameters.TurnServerName;
-                JoinCallRequestParameters.RoomName = connectionParameters.RoomName;
-                JoinCallRequestParameters.UserName = connectionParameters.UserName;
+                ConnectionRequestParameters.TurnServerName = connectionParameters.TurnServerName;
+                ConnectionRequestParameters.RoomName = connectionParameters.RoomName;
+                ConnectionRequestParameters.UserName = connectionParameters.UserName;
             }
         }
         
@@ -47,7 +47,7 @@ namespace DemoApp.ViewModels
 
 
 
-        public JoinCallRequestParameters JoinCallRequestParameters { get; set; } = new JoinCallRequestParameters()
+        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters()
      //// Useful during development. DELETE THIS LATER!!!
      //{ RoomName = "hello",  UserName="delya"}
             ;
@@ -56,7 +56,7 @@ namespace DemoApp.ViewModels
         //public ICommand JoinCallCommand => new Command(async () =>
         private void JoinChatCommand()
         {
-            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(JoinCallRequestParameters).Subscribe(
+            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) =>
                 {
                     switch (peerCallbackParameters.Code)

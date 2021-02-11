@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class JoinCallRequestParameters
+    public class ConnectionRequestParameters
     {
         public string TurnServerName { get; set; }
 

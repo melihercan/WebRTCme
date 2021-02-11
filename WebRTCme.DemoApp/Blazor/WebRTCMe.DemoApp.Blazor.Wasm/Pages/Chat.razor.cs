@@ -50,7 +50,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
-        private JoinCallRequestParameters JoinRoomRequestParameters { get; set; } = new()
+        private ConnectionRequestParameters JoinRoomRequestParameters { get; set; } = new()
         //// Useful during development. DELETE THIS LATER!!!
    { TurnServerName="StunOnly", RoomName="hello", UserName="melik"}
             ;

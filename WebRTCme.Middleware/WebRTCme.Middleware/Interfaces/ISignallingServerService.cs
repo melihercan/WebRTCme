@@ -11,7 +11,7 @@ namespace WebRTCme.Middleware
         Task<string[]> GetTurnServerNames();
 
 
-        IObservable<PeerCallbackParameters> JoinRoomRequest(JoinCallRequestParameters request);
+        IObservable<PeerCallbackParameters> JoinRoomRequest(ConnectionRequestParameters request);
       
 
     }

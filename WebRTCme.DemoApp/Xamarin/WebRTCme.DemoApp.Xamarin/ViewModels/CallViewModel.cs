@@ -24,9 +24,9 @@ namespace DemoApp.ViewModels
             {
                 var connectionParametersJson = Uri.UnescapeDataString(value);
                 var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
-                JoinCallRequestParameters.TurnServerName = connectionParameters.TurnServerName;
-                JoinCallRequestParameters.RoomName = connectionParameters.RoomName;
-                JoinCallRequestParameters.UserName = connectionParameters.UserName;
+                ConnectionRequestParameters.TurnServerName = connectionParameters.TurnServerName;
+                ConnectionRequestParameters.RoomName = connectionParameters.RoomName;
+                ConnectionRequestParameters.UserName = connectionParameters.UserName;
             }
         }
         
@@ -38,7 +38,7 @@ namespace DemoApp.ViewModels
         {
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
-            JoinCallRequestParameters.LocalStream = LocalStream;
+            ConnectionRequestParameters.LocalStream = LocalStream;
             JoinCallCommand();
         }
 
@@ -136,7 +136,7 @@ namespace DemoApp.ViewModels
             }
         }
 
-        public JoinCallRequestParameters JoinCallRequestParameters { get; set; } = new JoinCallRequestParameters()
+        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters()
      //// Useful during development. DELETE THIS LATER!!!
      //{ RoomName = "hello",  UserName="delya"}
             ;
@@ -144,7 +144,7 @@ namespace DemoApp.ViewModels
 
         private void JoinCallCommand()
         {
-            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(JoinCallRequestParameters).Subscribe(
+            var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) =>
                 {
                     switch (peerCallbackParameters.Code)

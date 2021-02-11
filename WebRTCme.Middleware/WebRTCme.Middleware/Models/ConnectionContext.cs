@@ -8,13 +8,13 @@ using WebRTCme.Middleware;
 
 namespace WebRtcMeMiddleware.Models
 {
-    internal class CallContext
+    internal class ConnectionContext
     {
-        public JoinCallRequestParameters JoinCallRequestParameters { get; set; }
+        public ConnectionRequestParameters ConnectionRequestParameters { get; set; }
 
 ////        public Dictionary<string /*peerUserName*/, IRTCPeerConnection> PeerConnectionContexts { get; set; } = new();
 
-        public List<PeerConnectionContext> PeerConnectionContexts { get; set; } = new();
+        public List<PeerContext> PeerContexts { get; set; } = new();
 
         public RTCIceServer[] IceServers { get; set; }
     }

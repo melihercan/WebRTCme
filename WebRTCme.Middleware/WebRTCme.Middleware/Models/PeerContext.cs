@@ -5,7 +5,7 @@ using WebRTCme;
 
 namespace WebRtcMeMiddleware.Models
 {
-    internal class PeerConnectionContext
+    internal class PeerContext
     {
         public string PeerUserName { get; set; }
         

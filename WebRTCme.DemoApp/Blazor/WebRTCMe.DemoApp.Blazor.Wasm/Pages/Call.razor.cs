@@ -50,7 +50,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
-        private JoinCallRequestParameters JoinRoomRequestParameters { get; set; } = new()
+        private ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new()
         //// Useful during development. DELETE THIS LATER!!!
    { TurnServerName="StunOnly", RoomName="hello", UserName="melik"}
             ;
@@ -80,14 +80,14 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             }
 
             if (_turnServerNames is not null)
-                JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
+                ConnectionRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
         private void HandleValidSubmit()
         {
-            JoinRoomRequestParameters.LocalStream = LocalStream;
-            LocalLabel = JoinRoomRequestParameters.UserName;
-            var peerCallbackDisposer = _signallingServerService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(
+            ConnectionRequestParameters.LocalStream = LocalStream;
+            LocalLabel = ConnectionRequestParameters.UserName;
+            var peerCallbackDisposer = _signallingServerService.JoinRoomRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) => 
                 { 
                     switch (peerCallbackParameters.Code)
