@@ -345,12 +345,13 @@ namespace WebRtcMeMiddleware
                 PeerContext peerConnectionContext = null;
                 IRTCPeerConnection peerConnection = null;
                 IMediaStream mediaStream = null;
+                IRTCDataChannel dataChannel = null;
 
-                var roomContext = GetConnectionContext(turnServerName, roomName);
+                var connectionContext = GetConnectionContext(turnServerName, roomName);
                 
                 if (isDelete)
                 {
-                    peerConnectionContext = roomContext.PeerContexts
+                    peerConnectionContext = connectionContext.PeerContexts
                         .Single(peer => peer.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                     peerConnection = peerConnectionContext.PeerConnection;
 
@@ -363,7 +364,7 @@ namespace WebRtcMeMiddleware
                     peerConnection.OnSignallingStateChange -= OnSignallingStateChange;
                     peerConnection.OnTrack -= OnTrack;
 
-                    roomContext.PeerContexts.Remove(peerConnectionContext);
+                    connectionContext.PeerContexts.Remove(peerConnectionContext);
                 }
                 else
                 {
@@ -371,7 +372,7 @@ namespace WebRtcMeMiddleware
 
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = roomContext.IceServers ?? await _signallingServerClient
+                        IceServers = connectionContext.IceServers ?? await _signallingServerClient
                             .GetIceServers(turnServerName),
                         PeerIdentity = roomName
                     };
@@ -382,7 +383,7 @@ namespace WebRtcMeMiddleware
                         PeerConnection = peerConnection,
                         IsInitiator = isInitiator
                     };
-                    roomContext.PeerContexts.Add(peerConnectionContext);
+                    connectionContext.PeerContexts.Add(peerConnectionContext);
 
                     peerConnection.OnConnectionStateChanged += OnConnectionStateChanged;
                     peerConnection.OnDataChannel += OnDataChannel;
@@ -393,16 +394,35 @@ namespace WebRtcMeMiddleware
                     peerConnection.OnSignallingStateChange += OnSignallingStateChange;
                     peerConnection.OnTrack += OnTrack;
 
-                    peerConnection.AddTrack(roomContext.ConnectionRequestParameters.LocalStream.GetVideoTracks().First(),
-                        roomContext.ConnectionRequestParameters.LocalStream);
-                    peerConnection.AddTrack(roomContext.ConnectionRequestParameters.LocalStream.GetAudioTracks().First(),
-                        roomContext.ConnectionRequestParameters.LocalStream);
+                    
+                    if (connectionContext.ConnectionRequestParameters.DataChannelName is not null && isInitiator)
+                    {
+                        peerConnection.CreateDataChannel(connectionContext.ConnectionRequestParameters.DataChannelName,
+                            new RTCDataChannelInit
+                            { 
+                                Negotiated = false
+                            });
+                    }
+
+                    if (connectionContext.ConnectionRequestParameters.LocalStream is not null)
+                    {
+                        var videoTrack = connectionContext.ConnectionRequestParameters.LocalStream.GetVideoTracks()
+                            .FirstOrDefault();
+                        var audioTrack = connectionContext.ConnectionRequestParameters.LocalStream.GetAudioTracks()
+                            .FirstOrDefault();
+                        if (videoTrack is not null)
+                            peerConnection.AddTrack(videoTrack, 
+                                connectionContext.ConnectionRequestParameters.LocalStream);
+                        if (audioTrack is not null)
+                            peerConnection.AddTrack(audioTrack,
+                                connectionContext.ConnectionRequestParameters.LocalStream);
+                    }
                 }
 
                 void OnConnectionStateChanged(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnConnectionStateChanged - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
                     if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
                         ConnectionResponseSubject.OnNext(new ConnectionResponseParameters
@@ -410,18 +430,20 @@ namespace WebRtcMeMiddleware
                             TurnServerName = turnServerName,
                             RoomName = roomName,
                             PeerUserName = peerUserName,
-                            MediaStream = mediaStream
+                            MediaStream = mediaStream,
+                            DataChannel = dataChannel
                         });
                     else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
                         ConnectionResponseSubject.OnCompleted();
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
+                    dataChannel = e.Channel;
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
                     DebugPrint($"====> OnIceCandidate - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
@@ -435,7 +457,7 @@ namespace WebRtcMeMiddleware
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                         DebugPrint($"######## Sending ICE Candidate - room:{roomName} " +
-                            $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} ice:{ice}");
+                            $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} ice:{ice}");
                         await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
 
                     }
@@ -443,19 +465,19 @@ namespace WebRtcMeMiddleware
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnIceConnectionStateChange - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"iceConnectionState:{peerConnection.IceConnectionState}");
                 }
                 void OnIceGatheringStateChange(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnIceGatheringStateChange - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"iceGatheringState: {peerConnection.IceGatheringState}");
                 }
                 async void OnNegotiationNeeded(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnNegotiationNeeded - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                     //// TODO: WHAT IF Not initiator adds track (which trigggers this event)???
 
 #if false
@@ -478,7 +500,7 @@ namespace WebRtcMeMiddleware
                 void OnSignallingStateChange(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnSignallingStateChange - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}, " +
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}, " +
                         $"signallingState:{ peerConnection.SignalingState }");
                     //RoomEventSubject.OnNext(new RoomEvent
                     //{
@@ -491,7 +513,7 @@ namespace WebRtcMeMiddleware
                 void OnTrack(object s, IRTCTrackEvent e)
                 {
                     DebugPrint($"====> OnTrack - room:{roomName} " +
-                        $"user:{roomContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
+                        $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                     mediaStream.AddTrack(e.Track);
                 }
             }

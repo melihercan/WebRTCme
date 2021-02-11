@@ -85,6 +85,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private void HandleValidSubmit()
         {
+  ConnectionRequestParameters.DataChannelName = "hagimokkey";
             ConnectionRequestParameters.LocalStream = LocalStream;
             LocalLabel = ConnectionRequestParameters.UserName;
             var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
@@ -94,6 +95,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                         Remote1Stream = connectionResponseParameters.MediaStream;
                         Remote1Label = connectionResponseParameters.PeerUserName;
                         StateHasChanged();
+
+                        var dataChannel = connectionResponseParameters.DataChannel;
                     },
                     onError: (exception) =>
                     {
