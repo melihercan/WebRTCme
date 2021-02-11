@@ -29,11 +29,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\CallParametersPage.xaml.cs">
-      <DependentUpon>CallParametersPage.xaml</DependentUpon>
+    <Compile Update="Views\ChatPage.xaml.cs">
+      <DependentUpon>ChatPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\VideoCallPage.xaml.cs">
-      <DependentUpon>VideoCallPage.xaml</DependentUpon>
+    <Compile Update="Views\ConnectionParametersPage.xaml.cs">
+      <DependentUpon>ConnectionParametersPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CallPage.xaml.cs">
+      <DependentUpon>CallPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -41,7 +44,7 @@
     <EmbeddedResource Update="Views\InitializingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Views\VideoCallPage.xaml">
+    <EmbeddedResource Update="Views\CallPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

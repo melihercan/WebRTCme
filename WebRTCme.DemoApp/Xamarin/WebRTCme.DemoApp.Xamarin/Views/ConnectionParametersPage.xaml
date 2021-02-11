@@ -2,14 +2,17 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:validate="clr-namespace:Xamarin.Plugins.UnobtrusiveFluentValidation;assembly=Xamarin.Plugins.FluentValidation"
-             x:Class="DemoApp.Views.CallParametersPage">
+             x:Class="DemoApp.Views.ConnectionParametersPage">
     <ContentPage.Content>
         <StackLayout VerticalOptions="Center" Margin="40,0" Spacing="20">
             <Picker Title="select TURN server" ItemsSource="{Binding TurnServerNames}" 
                     SelectedItem="{Binding TurnServerName}"/>
             <validate:ValidatableEntryControl Placeholder="enter room name" BindingName="RoomName"/>
             <validate:ValidatableEntryControl Placeholder="enter user name" BindingName="UserName"/>
-            <Button Text="Join call" Command="{Binding JoinCallCommand}" Margin="40,40"/>
+            <StackLayout Orientation="Horizontal" Margin="40,40">
+                <Button Text="Join call" Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
+                <Button Text="Join chat" Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
+            </StackLayout>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

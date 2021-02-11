@@ -82,7 +82,7 @@
         https://docs.microsoft.com/dotnet/api/xamarin.forms.shellgroupitem.flyoutdisplayoptions?view=xamarin-forms
     -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
-        <ShellContent Route="CallParametersPage" Title="Call Parameters" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:CallParametersPage}" />
+        <ShellContent Route="ConnectionParametersPage" Title="Connection Parameters" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:ConnectionParametersPage}" />
         <ShellContent Route="AboutPage" Title="About" Icon="tab_about.png" ContentTemplate="{DataTemplate local:AboutPage}" />
     </FlyoutItem>
 

@@ -12,26 +12,26 @@ using Xamarinme;
 namespace DemoApp.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class CallParametersPage : ContentPage
+    public partial class ConnectionParametersPage : ContentPage
     {
-        private readonly CallParametersViewModel _callParametersViewModel;
-        public CallParametersPage()
+        private readonly ConnectionParametersViewModel _connectionParametersViewModel;
+        public ConnectionParametersPage()
         {
             InitializeComponent();
-            _callParametersViewModel = new CallParametersViewModel();
-            BindingContext = _callParametersViewModel;
+            _connectionParametersViewModel = new ConnectionParametersViewModel();
+            BindingContext = _connectionParametersViewModel;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await this.OnPageAppearing(_callParametersViewModel);
+            await this.OnPageAppearing(_connectionParametersViewModel);
         }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
-            await this.OnPageDisappearing(_callParametersViewModel);
+            await this.OnPageDisappearing(_connectionParametersViewModel);
         }
     }
 }

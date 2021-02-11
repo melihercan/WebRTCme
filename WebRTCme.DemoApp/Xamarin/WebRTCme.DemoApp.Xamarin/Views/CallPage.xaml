@@ -3,19 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware.Xamarin;assembly=WebRTCme.Middleware.Xamarin"
              Shell.NavBarIsVisible="False"
-             x:Class="DemoApp.Views.VideoCallPage">
+             x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
-        <StackLayout BackgroundColor="LightGray">
+        <StackLayout>
             <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}" 
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <webRtc:Media Stream="{Binding Remote1Stream}" Label="{Binding Remote1Label}"
                           VideoMuted="{Binding Remote1VideoMuted}" AudioMuted="{Binding Remote1AudioMuted}"
                           BackgroundColor="Navy" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
-            <!--<StackLayout Orientation="Horizontal">
-                <Button Text="End call" Command="{Binding EndCallCommand}"/>
-            </StackLayout>-->
-
 
         </StackLayout>
     </ContentPage.Content>

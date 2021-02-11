@@ -12,26 +12,26 @@ using Xamarinme;
 namespace DemoApp.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class VideoCallPage : ContentPage
+    public partial class CallPage : ContentPage
     {
-        private readonly VideoCallViewModel _videoCallViewModel;
-        public VideoCallPage()
+        private readonly CallViewModel _callViewModel;
+        public CallPage()
         {
             InitializeComponent();
-            _videoCallViewModel = new VideoCallViewModel();
-            BindingContext = _videoCallViewModel;
+            _callViewModel = new CallViewModel();
+            BindingContext = _callViewModel;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await this.OnPageAppearing(_videoCallViewModel);
+            await this.OnPageAppearing(_callViewModel);
         }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
-            await this.OnPageDisappearing(_videoCallViewModel);
+            await this.OnPageDisappearing(_callViewModel);
         }
     }
 }

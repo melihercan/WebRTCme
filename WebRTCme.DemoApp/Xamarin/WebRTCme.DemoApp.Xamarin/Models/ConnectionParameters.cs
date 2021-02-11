@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.DemoApp.Xamarin.Models
 {
-    public class CallParameters
+    public class ConnectionParameters
     {
         public string TurnServerName { get; set; }
 

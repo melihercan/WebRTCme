@@ -15,25 +15,21 @@ using Xamarinme;
 
 namespace DemoApp.ViewModels
 {
-    [QueryProperty(nameof(CallParametersJson), nameof(CallParametersJson))]
-    public class VideoCallViewModel : INotifyPropertyChanged, IPageLifecycle
+    [QueryProperty(nameof(ConnectionParametersJson), nameof(ConnectionParametersJson))]
+    public class CallViewModel : INotifyPropertyChanged, IPageLifecycle
     {
-        public string CallParametersJson
+        public string ConnectionParametersJson
         {
             set
             {
-                var callParametersJson = Uri.UnescapeDataString(value);
-                var callParameters = JsonSerializer.Deserialize<CallParameters>(callParametersJson);
-                JoinCallRequestParameters.TurnServerName = callParameters.TurnServerName;
-                JoinCallRequestParameters.RoomName = callParameters.RoomName;
-                JoinCallRequestParameters.UserName = callParameters.UserName;
+                var connectionParametersJson = Uri.UnescapeDataString(value);
+                var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
+                JoinCallRequestParameters.TurnServerName = connectionParameters.TurnServerName;
+                JoinCallRequestParameters.RoomName = connectionParameters.RoomName;
+                JoinCallRequestParameters.UserName = connectionParameters.UserName;
             }
         }
         
-        private IMediaStreamService _mediaStreamService;
-
-
-
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -96,18 +92,6 @@ namespace DemoApp.ViewModels
             }
         }
 
-        //private bool _localIsCamera;
-        //public bool LocalIsCamera
-        //{
-        //    get => _localIsCamera;
-        //    set
-        //    {
-        //        _localIsCamera = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-
         private IMediaStream _remote1Stream;
         public IMediaStream Remote1Stream
         {
@@ -152,38 +136,14 @@ namespace DemoApp.ViewModels
             }
         }
 
-        //private bool _remote1IsCamera;
-        //public bool Remote1IsCamera
-        //{
-        //    get => _remote1IsCamera;
-        //    set
-        //    {
-        //        _remote1IsCamera = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-        //public string SelectedTurnServerName { get; set; }
-        //// Useful during development. DELETE THIS LATER!!! WILL NOT BE VISIBLE ON SCREEN
-        //= "StunOnly";
-
-
         public JoinCallRequestParameters JoinCallRequestParameters { get; set; } = new JoinCallRequestParameters()
      //// Useful during development. DELETE THIS LATER!!!
      //{ RoomName = "hello",  UserName="delya"}
             ;
 
 
-        //public ICommand JoinCallCommand => new Command(async () =>
         private void JoinCallCommand()
         {
-
-            //_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
-            //TurnServerNames = (await _roomService.GetTurnServerNames()).ToList();
-
-
-            //            JoinCallRequestParameters.TurnServerName = SelectedTurnServerName;
-            //JoinCallRequestParameters.LocalStream = LocalStream;
             var peerCallbackDisposer = App.SignallingServerService.JoinRoomRequest(JoinCallRequestParameters).Subscribe(
                 onNext: (peerCallbackParameters) =>
                 {

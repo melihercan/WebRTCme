@@ -75,7 +75,7 @@ namespace DemoApp.ViewModels
             Message = string.Empty;
 
             var turnServerNamesJson = JsonSerializer.Serialize(turnServerNames);
-            await Shell.Current.GoToAsync($"///{nameof(CallParametersPage)}?TurnServerNamesJson={turnServerNamesJson}");
+            await Shell.Current.GoToAsync($"///{nameof(ConnectionParametersPage)}?TurnServerNamesJson={turnServerNamesJson}");
         }
 
         public Task OnPageDisappearing()

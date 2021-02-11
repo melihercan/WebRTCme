@@ -13,7 +13,8 @@ namespace DemoApp
         {
             InitializeComponent();
 
-            Routing.RegisterRoute(nameof(VideoCallPage), typeof(VideoCallPage));
+            Routing.RegisterRoute(nameof(CallPage), typeof(CallPage));
+            Routing.RegisterRoute(nameof(ChatPage), typeof(ChatPage));
 
             Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
             Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));

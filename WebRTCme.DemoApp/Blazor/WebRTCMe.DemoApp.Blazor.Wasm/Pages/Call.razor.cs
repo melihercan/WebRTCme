@@ -15,10 +15,9 @@ using WebRTCme.DemoApp.Blazor.Wasm.Components;
 using WebRTCme.Middleware;
 using WebRTCme.Middleware.Blazor;
 
-//// TODO: TESTING FOR NOW, MOVE ALL WEBRTC CODE to Middleware
 namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 {
-    partial class VideoMeeting : IDisposable
+    partial class Call : IDisposable
     {
         [Inject]
         IJSRuntime JsRuntime { get; set; }
@@ -84,14 +83,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
         }
 
-        private /*async*/ void HandleValidSubmit()
+        private void HandleValidSubmit()
         {
-            //_roomService = await _webRtcMiddleware.CreateRoomServiceAsync(Configuration["SignallingServer:BaseUrl"],
-            //    JsRuntime);
-            //_turnServerNames = await _roomService.GetTurnServerNames();
-            //if (_turnServerNames is not null)
-            //    JoinRoomRequestParameters.TurnServerName = _turnServerNames[0];
-
             JoinRoomRequestParameters.LocalStream = LocalStream;
             LocalLabel = JoinRoomRequestParameters.UserName;
             var peerCallbackDisposer = _signallingServerService.JoinRoomRequest(JoinRoomRequestParameters).Subscribe(

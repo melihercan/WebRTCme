@@ -21,7 +21,7 @@ namespace DemoApp.ViewModels
 {
     [FluentValidation.Attributes.Validator(typeof(CallParametersValidator))]
     [QueryProperty(nameof(TurnServerNamesJson), nameof(TurnServerNamesJson))]
-    public class CallParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
+    public class ConnectionParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
     {
         public string TurnServerNamesJson
         {
@@ -86,16 +86,41 @@ namespace DemoApp.ViewModels
                 var isValid = Validate();
                 if (isValid)
                 {
-                    var callParameters = new CallParameters
+                    var connectionParameters = new ConnectionParameters
                     {
                         TurnServerName = TurnServerName,
                         RoomName = RoomName.Value,
                         UserName = UserName.Value
                     };
-                    var callParamatersJson = JsonSerializer.Serialize(callParameters);
-                    await Shell.Current.GoToAsync($"{nameof(VideoCallPage)}?CallParametersJson={callParamatersJson}");
+                    var connectionParamatersJson = JsonSerializer.Serialize(connectionParameters);
+                    await Shell.Current.GoToAsync($"{nameof(CallPage)}?ConnectionParametersJson={connectionParamatersJson}");
                 }
             }
+        });
+
+        public ICommand JoinChatCommand => new Command(async () =>
+        {
+            if (TurnServerName is null)
+                await Application.Current.MainPage.DisplayAlert(
+                    "No TURN server selected",
+                    "Make sure a TURN server is selected from the drop down list",
+                    "OK");
+            else
+            {
+                var isValid = Validate();
+                if (isValid)
+                {
+                    var connectionParameters = new ConnectionParameters
+                    {
+                        TurnServerName = TurnServerName,
+                        RoomName = RoomName.Value,
+                        UserName = UserName.Value
+                    };
+                    var connectionParamatersJson = JsonSerializer.Serialize(connectionParameters);
+                    await Shell.Current.GoToAsync($"{nameof(ChatPage)}?ConnectionParametersJson={connectionParamatersJson}");
+                }
+            }
+
         });
 
     }
