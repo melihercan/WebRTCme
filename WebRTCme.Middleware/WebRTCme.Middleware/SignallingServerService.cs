@@ -397,7 +397,8 @@ namespace WebRtcMeMiddleware
                     
                     if (connectionContext.ConnectionRequestParameters.DataChannelName is not null && isInitiator)
                     {
-                        peerConnection.CreateDataChannel(connectionContext.ConnectionRequestParameters.DataChannelName,
+                        dataChannel = peerConnection.CreateDataChannel(
+                            connectionContext.ConnectionRequestParameters.DataChannelName,
                             new RTCDataChannelInit
                             { 
                                 Negotiated = false
