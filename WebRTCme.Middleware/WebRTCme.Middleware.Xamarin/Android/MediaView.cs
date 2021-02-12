@@ -58,6 +58,7 @@ namespace WebRtcMiddlewareXamarin
 
         protected override void OnLayout(bool changed, int l, int t, int r, int b)
         {
+            System.Diagnostics.Debug.WriteLine($"@@@@@@ OnLayout {changed}, {l} , {t}, {r}, {b}");
             _rendererView.Layout(l, t, r, b);
         }
     }

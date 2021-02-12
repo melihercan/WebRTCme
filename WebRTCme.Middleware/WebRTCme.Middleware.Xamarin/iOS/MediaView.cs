@@ -92,17 +92,23 @@ namespace WebRtcMiddlewareXamarin
             {
                 // TODO: HOW TO GET CAMERA VIEW SIZE???
                 // Currenty Portrait 3*4 aspect ratio is hard coded.
+                var cameraSize = new CGSize(480, 640);
+                
+                ////// ASPECT FILL
                 if (Bounds.Width >= Bounds.Height)
                 {
-                    // View is landscape.
-                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Width * (double)(4.0 / 3.0));
+                    // View is landscape. Scale by width.
+                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width,
+                        cameraSize.Height * (Bounds.Width / cameraSize.Width));
                 }
                 else
                 {
-                    // View is portrait.
-                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Height * (double)(3.0 / 4.0), Bounds.Height);
+                    // View is portrait. Scale by height.
+                    frame = new CGRect(Bounds.X, Bounds.Y,
+                        cameraSize.Width * (Bounds.Height / cameraSize.Height), Bounds.Height);
                 }
                 _cameraView.Frame = frame;
+                _cameraView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
                 System.Diagnostics.Debug.WriteLine($"@@@@@@ _cameraView.Frame:{_cameraView.Frame}");
             }
             else if (!_isCamera && _rendererView is not null)
@@ -110,6 +116,9 @@ namespace WebRtcMiddlewareXamarin
                 if (_rendererSize.Width > 0 && _rendererSize.Height > 0)
                 {
                     nfloat scale = 0f;
+
+#if false
+                    ///////// ASPECT FIT
                     frame = Bounds.WithAspectRatio(_rendererSize);
                     if (frame.Width >= frame.Height)
                         // Scale by height.
@@ -118,30 +127,30 @@ namespace WebRtcMiddlewareXamarin
                         // Scale by width.
                         scale = Bounds.Width / frame.Width;
                     frame.Size = new CGSize(frame.Width * scale, frame.Height * scale);
-
-                    //if (Bounds.Width >= Bounds.Height)
-                    //{
-                    //    // View is landscape.
-                    //    if (_rendererSize.Width >= _rendererSize.Height)
-                    //        // Renderer is landscape. Scale by height.
-                    //        scale = Bounds.Height / _rendererSize.Height;
-                    //    else
-                    //        // Renderer is portrait. Scale by width.
-                    //        scale = Bounds.Width / _rendererSize.Width;
-                    //}
-                    //else
-                    //{
-                    //    // View is portrait.
-                    //    if (_rendererSize.Width >= _rendererSize.Height)
-                    //        // Renderer is landscape. Scale by height.
-                    //        scale = Bounds.Height / _rendererSize.Height;
-                    //    else
-                    //        // Renderer is portrait. Scale by width.
-                    //        scale = Bounds.Width / _rendererSize.Width;
-                    //}
-                    //frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width * scale, Bounds.Height * scale);
                     _rendererView.Frame = frame;
                     _rendererView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
+
+#endif
+
+                    /////// ASPECT FILL
+                    if (Bounds.Width >= Bounds.Height)
+                    {
+                        // View is landscape. Scale by width.
+                        frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, 
+                            _rendererSize.Height * (Bounds.Width/_rendererSize.Width));
+                    }
+                    else
+                    {
+                        // View is portrait. Scale by height.
+                        frame = new CGRect(Bounds.X, Bounds.Y, 
+                            _rendererSize.Width * (Bounds.Height / _rendererSize.Height), Bounds.Height);
+                    }
+
+
+
+                    _rendererView.Frame = frame;
+                    _rendererView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
+                    System.Diagnostics.Debug.WriteLine($"@@@@@@ _rendererView.Frame:{_rendererView.Frame}");
                 }
                 else
                     _rendererView.Frame = Bounds;
