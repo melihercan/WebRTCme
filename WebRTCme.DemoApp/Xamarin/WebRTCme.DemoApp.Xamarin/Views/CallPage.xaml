@@ -4,7 +4,7 @@
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware.Xamarin;assembly=WebRTCme.Middleware.Xamarin"
              x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
-        <StackLayout Spacing="0">
+        <StackLayout Spacing="0" Orientation="Horizontal">
             <webRtc:Media Stream="{Binding LocalStream}"  Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}" 
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />

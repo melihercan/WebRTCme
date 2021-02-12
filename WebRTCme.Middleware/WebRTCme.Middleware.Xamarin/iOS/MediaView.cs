@@ -32,10 +32,10 @@ namespace WebRtcMiddlewareXamarin
             if (_isCamera)
             {
                 _cameraView = new Webrtc.RTCCameraPreviewView();
+                _cameraView.BackgroundColor = UIColor.Green; 
                 AddSubview(_cameraView);
 
                 var nativeVideoSource = nativeVideoTrack.Source;
-
                 var videoCapturer = new Webrtc.RTCCameraVideoCapturer();
                 videoCapturer.Delegate = nativeVideoSource;
 
@@ -85,8 +85,23 @@ namespace WebRtcMiddlewareXamarin
             System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
 
             base.LayoutSubviews();
+
             if (_isCamera && _cameraView is not null)
-                _cameraView.Frame = Bounds;
+            {
+                CGRect frame = CGRect.Empty;
+                if (Bounds.Width >= Bounds.Height)
+                {
+                    // Landscape
+                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Width * (double)(4.0/3.0));
+                }
+                else
+                {
+                    // Portrait.
+                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Height * (double)(3.0/4.0), Bounds.Height);
+                }
+                _cameraView.Frame = frame;
+                System.Diagnostics.Debug.WriteLine($"@@@@@@ _cameraView.Frame:{_cameraView.Frame}");
+            }
             else if (!_isCamera && _rendererView is not null)
                 _rendererView.Frame = Bounds;
         }

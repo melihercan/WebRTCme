@@ -61,8 +61,6 @@ namespace DemoApp.ViewModels
         }
 
         public string TurnServerName { get; set; }  
-        //// Useful during development. DELETE THIS LATER!!!
-        = "StunOnly";
 
         public ValidatableProperty<string> RoomName { get; set; } = new ValidatableProperty<string>(
         //// Useful during development. DELETE THIS LATER!!!
@@ -76,6 +74,7 @@ namespace DemoApp.ViewModels
 
         public ICommand JoinCallCommand => new Command(async () =>
         {
+ TurnServerName = "StunOnly";////testing
             if (TurnServerName is null)
                 await Application.Current.MainPage.DisplayAlert(
                     "No TURN server selected",
@@ -100,6 +99,7 @@ namespace DemoApp.ViewModels
 
         public ICommand JoinChatCommand => new Command(async () =>
         {
+ TurnServerName = "StunOnly";////testing
             if (TurnServerName is null)
                 await Application.Current.MainPage.DisplayAlert(
                     "No TURN server selected",
