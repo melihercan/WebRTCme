@@ -17,6 +17,7 @@ namespace WebRtcMiddlewareXamarin
         private bool _isCamera;
         private Webrtc.RTCEAGLVideoView _rendererView;
         private Webrtc.RTCCameraPreviewView _cameraView;
+        private CGSize _rendererSize = CGSize.Empty;
 
         public MediaView()
         {
@@ -86,24 +87,65 @@ namespace WebRtcMiddlewareXamarin
 
             base.LayoutSubviews();
 
+            CGRect frame = CGRect.Empty;
             if (_isCamera && _cameraView is not null)
             {
-                CGRect frame = CGRect.Empty;
+                // TODO: HOW TO GET CAMERA VIEW SIZE???
+                // Currenty Portrait 3*4 aspect ratio is hard coded.
                 if (Bounds.Width >= Bounds.Height)
                 {
-                    // Landscape
-                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Width * (double)(4.0/3.0));
+                    // View is landscape.
+                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Width * (double)(4.0 / 3.0));
                 }
                 else
                 {
-                    // Portrait.
-                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Height * (double)(3.0/4.0), Bounds.Height);
+                    // View is portrait.
+                    frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Height * (double)(3.0 / 4.0), Bounds.Height);
                 }
                 _cameraView.Frame = frame;
                 System.Diagnostics.Debug.WriteLine($"@@@@@@ _cameraView.Frame:{_cameraView.Frame}");
             }
             else if (!_isCamera && _rendererView is not null)
-                _rendererView.Frame = Bounds;
+            {
+                if (_rendererSize.Width > 0 && _rendererSize.Height > 0)
+                {
+                    nfloat scale = 0f;
+                    frame = Bounds.WithAspectRatio(_rendererSize);
+                    if (frame.Width >= frame.Height)
+                        // Scale by height.
+                        scale = Bounds.Height / frame.Height;
+                    else
+                        // Scale by width.
+                        scale = Bounds.Width / frame.Width;
+                    frame.Size = new CGSize(frame.Width * scale, frame.Height * scale);
+
+                    //if (Bounds.Width >= Bounds.Height)
+                    //{
+                    //    // View is landscape.
+                    //    if (_rendererSize.Width >= _rendererSize.Height)
+                    //        // Renderer is landscape. Scale by height.
+                    //        scale = Bounds.Height / _rendererSize.Height;
+                    //    else
+                    //        // Renderer is portrait. Scale by width.
+                    //        scale = Bounds.Width / _rendererSize.Width;
+                    //}
+                    //else
+                    //{
+                    //    // View is portrait.
+                    //    if (_rendererSize.Width >= _rendererSize.Height)
+                    //        // Renderer is landscape. Scale by height.
+                    //        scale = Bounds.Height / _rendererSize.Height;
+                    //    else
+                    //        // Renderer is portrait. Scale by width.
+                    //        scale = Bounds.Width / _rendererSize.Width;
+                    //}
+                    //frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width * scale, Bounds.Height * scale);
+                    _rendererView.Frame = frame;
+                    _rendererView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
+                }
+                else
+                    _rendererView.Frame = Bounds;
+            }
         }
 
         [Export("videoView:didChangeVideoSize:")]
@@ -113,6 +155,8 @@ namespace WebRtcMiddlewareXamarin
             {
                 System.Diagnostics.Debug.WriteLine($"@@@@@@ DidChangeVideoSize renderer.Frame:{renderer.Frame} " +
                     $"size:{size}");
+                _rendererSize = size;
+                SetNeedsLayout();
                 //                parent.Frame = new CGRect(0, 0, size.Width, size.Height);
                 //              parent.SetNeedsLayout();
             }
