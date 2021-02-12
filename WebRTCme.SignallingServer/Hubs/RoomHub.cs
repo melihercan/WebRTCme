@@ -209,7 +209,8 @@ namespace WebRTCme.SignallingServer.Hubs
 
         public Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(Result<Unit>.Success(Unit.Default));
+            //throw new NotImplementedException();
         }
 
         public async Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string pairUserName, 

@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:validate="clr-namespace:Xamarin.Plugins.UnobtrusiveFluentValidation;assembly=Xamarin.Plugins.FluentValidation"
+             Title="Connection Parameters"
              x:Class="DemoApp.Views.ConnectionParametersPage">
     <ContentPage.Content>
         <StackLayout VerticalOptions="Center" Margin="40,0" Spacing="20">
@@ -10,8 +11,10 @@
             <validate:ValidatableEntryControl Placeholder="enter room name" BindingName="RoomName"/>
             <validate:ValidatableEntryControl Placeholder="enter user name" BindingName="UserName"/>
             <StackLayout Orientation="Horizontal" Margin="40,40">
-                <Button Text="Join call" Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
-                <Button Text="Join chat" Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
+                <Button Text="Join call" Padding="10,0"
+                        Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
+                <Button Text="Join chat" Padding="10,0"
+                        Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>

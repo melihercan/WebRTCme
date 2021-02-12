@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware.Xamarin;assembly=WebRTCme.Middleware.Xamarin"
-             Shell.NavBarIsVisible="False"
              x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
         <StackLayout Spacing="0">

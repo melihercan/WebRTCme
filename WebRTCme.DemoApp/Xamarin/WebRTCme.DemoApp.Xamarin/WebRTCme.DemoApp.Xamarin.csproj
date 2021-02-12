@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="Images\me.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,6 +15,7 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Images\me.png" />
   </ItemGroup>
 
   <ItemGroup>

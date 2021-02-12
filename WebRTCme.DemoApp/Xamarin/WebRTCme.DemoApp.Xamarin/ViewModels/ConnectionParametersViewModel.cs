@@ -93,7 +93,7 @@ namespace DemoApp.ViewModels
                         UserName = UserName.Value
                     };
                     var connectionParamatersJson = JsonSerializer.Serialize(connectionParameters);
-                    await Shell.Current.GoToAsync($"///{nameof(CallPage)}?ConnectionParametersJson={connectionParamatersJson}");
+                    await Shell.Current.GoToAsync($"{nameof(CallPage)}?ConnectionParametersJson={connectionParamatersJson}");
                 }
             }
         });
@@ -117,7 +117,7 @@ namespace DemoApp.ViewModels
                         UserName = UserName.Value
                     };
                     var connectionParamatersJson = JsonSerializer.Serialize(connectionParameters);
-                    await Shell.Current.GoToAsync($"///{nameof(ChatPage)}?ConnectionParametersJson={connectionParamatersJson}");
+                    await Shell.Current.GoToAsync($"{nameof(ChatPage)}?ConnectionParametersJson={connectionParamatersJson}");
                 }
             }
 
