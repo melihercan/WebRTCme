@@ -21,6 +21,7 @@ namespace WebRtcMiddlewareXamarin
 
         public MediaView()
         {
+            ClipsToBounds = true;
         }
 
         public void SetTrack(IMediaStreamTrack videoTrack)
