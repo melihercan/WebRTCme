@@ -25,12 +25,14 @@ namespace DemoApp.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            Xamarin.Essentials.DeviceDisplay.KeepScreenOn = true;
             await this.OnPageAppearing(_callViewModel);
         }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
+            Xamarin.Essentials.DeviceDisplay.KeepScreenOn = false;
             await this.OnPageDisappearing(_callViewModel);
         }
     }
