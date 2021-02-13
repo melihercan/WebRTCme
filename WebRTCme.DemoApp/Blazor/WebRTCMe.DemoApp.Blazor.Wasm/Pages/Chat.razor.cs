@@ -19,6 +19,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 {
     partial class Chat : IDisposable
     {
+        private IDisposable _connectionDisposer;
+
         [Inject]
         IJSRuntime JsRuntime { get; set; }
 
@@ -65,28 +67,34 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private void Connect()
         {
-            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;//"hagimokkey";
-            var connectionResponseDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters)
-                .Subscribe(
-                    onNext: (connectionResponseParameters) => 
+            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;
+            _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+                onNext: (connectionResponseParameters) => 
+                {
+                    if (connectionResponseParameters.DataChannel is not null)
                     {
-                        if (connectionResponseParameters.DataChannel is not null)
-                        {
-                            var dataChannel = connectionResponseParameters.DataChannel;
-                            Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
-                        }
-                        StateHasChanged();
-                    },
-                    onError: (exception) => 
-                    { 
-                    },
-                    onCompleted: () => 
-                    { 
-                    });
+                        var dataChannel = connectionResponseParameters.DataChannel;
+                        Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                    }
+                    StateHasChanged();
+                },
+                onError: (exception) => 
+                { 
+                },
+                onCompleted: () => 
+                { 
+                });
+        }
+
+        private void Disconnect()
+        {
+            _connectionDisposer.Dispose();
         }
 
         public void Dispose()
         {
+            Disconnect();
+
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
             Task.Run(async () => await _signallingServerService.DisposeAsync());
             _webRtcMiddleware.Dispose();

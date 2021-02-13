@@ -18,6 +18,8 @@ namespace DemoApp.ViewModels
     [QueryProperty(nameof(ConnectionParametersJson), nameof(ConnectionParametersJson))]
     public class CallViewModel : INotifyPropertyChanged, IPageLifecycle
     {
+        private IDisposable _connectionDisposer;
+
         public string ConnectionParametersJson
         {
             set
@@ -43,6 +45,7 @@ namespace DemoApp.ViewModels
 
         public Task OnPageDisappearing()
         {
+            Disconnect();
             return Task.CompletedTask;
         }
 
@@ -135,31 +138,31 @@ namespace DemoApp.ViewModels
             }
         }
 
-        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters()
-     //// Useful during development. DELETE THIS LATER!!!
-     //{ RoomName = "hello",  UserName="delya"}
-            ;
-
+        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters();
 
         private void Connect()
         {
             ConnectionRequestParameters.LocalStream = LocalStream;
-            var connectionResponseDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters)
-                .Subscribe(
-                    onNext: (connectionResponseParameters) =>
+            _connectionDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+                onNext: (connectionResponseParameters) =>
+                {
+                    if (connectionResponseParameters.MediaStream != null)
                     {
-                        if (connectionResponseParameters.MediaStream != null)
-                        {
-                            Remote1Stream = connectionResponseParameters.MediaStream;
-                            Remote1Label = connectionResponseParameters.PeerUserName;
-                        }
-                    },
-                    onError: (exception) =>
-                    {
-                    },
-                    onCompleted: () =>
-                    {
-                    });
+                        Remote1Stream = connectionResponseParameters.MediaStream;
+                        Remote1Label = connectionResponseParameters.PeerUserName;
+                    }
+                },
+                onError: (exception) =>
+                {
+                },
+                onCompleted: () =>
+                {
+                });
+        }
+
+        private void Disconnect()
+        {
+            _connectionDisposer.Dispose();
         }
     }
 }
