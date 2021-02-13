@@ -19,13 +19,13 @@ namespace WebRTCme.Middleware.Blazor
         public IMediaStream Stream { get; set; }
 
         [Parameter]
-        public string Label { get; set; }
+        public string Label { get; set; } = string.Empty;
 
         [Parameter]
-        public bool VideoMuted { get; set; }
+        public bool VideoMuted { get; set; } = false;
 
         [Parameter]
-        public bool AudioMuted { get; set; }
+        public bool AudioMuted { get; set; } = false;
 
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
