@@ -2108,11 +2108,11 @@ namespace Webrtc
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver streams:(NSArray<RTCMediaStream *> * _Nonnull)mediaStreams;
 		[Export("peerConnection:didAddReceiver:streams:")]
-		void DidAddReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver, RTCMediaStream[] mediaStreams);
+		void DidAddReceiver(RTCPeerConnection peerConnection, IRTCRtpReceiver rtpReceiver, RTCMediaStream[] mediaStreams);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver;
 		[Export("peerConnection:didRemoveReceiver:")]
-		void DidRemoveReceiver(RTCPeerConnection peerConnection, RTCRtpReceiver rtpReceiver);
+		void DidRemoveReceiver(RTCPeerConnection peerConnection, IRTCRtpReceiver rtpReceiver);
 
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeLocalCandidate:(RTCIceCandidate * _Nonnull)local remoteCandidate:(RTCIceCandidate * _Nonnull)remote lastReceivedMs:(int)lastDataReceivedMs changeReason:(NSString * _Nonnull)reason;
 		[Export("peerConnection:didChangeLocalCandidate:remoteCandidate:lastReceivedMs:changeReason:")]
@@ -2170,7 +2170,7 @@ namespace Webrtc
 
 		// @property (readonly, nonatomic) NSArray<RTCRtpReceiver *> * _Nonnull receivers;
 		[Export("receivers")]
-		RTCRtpReceiver[] Receivers { get; }
+		IRTCRtpReceiver[] Receivers { get; }
 
 		// @property (readonly, nonatomic) NSArray<RTCRtpTransceiver *> * _Nonnull transceivers;
 		[Export("transceivers")]

@@ -75,7 +75,8 @@ namespace WebRtcMeMiddleware
 
                     connectionContext = new ConnectionContext
                     {
-                        ConnectionRequestParameters = connectionRequestParameters
+                        ConnectionRequestParameters = connectionRequestParameters,
+                        Observer = observer
                     };
                     _connectionContexts.Add(connectionContext);
 
@@ -211,14 +212,12 @@ namespace WebRtcMeMiddleware
                 subject = peerContext.PeerResponseSubject;
 
 
-#if true
                 var offerDescription = await peerConnection.CreateOffer();
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
                 
-////                await peerConnection.SetLocalDescription(offerDescription);
-                
+               
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                 DebugPrint($"######## Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
@@ -227,7 +226,6 @@ namespace WebRtcMeMiddleware
                 DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
-#endif
             }
             catch (Exception ex)
             {
@@ -425,6 +423,9 @@ namespace WebRtcMeMiddleware
                         .Single(peer => peer.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                     peerConnection = peerContext.PeerConnection;
 
+          var s = peerConnection.GetSenders();
+          var r = peerConnection.GetReceivers();
+
                     peerConnection.OnConnectionStateChanged -= OnConnectionStateChanged;
                     peerConnection.OnDataChannel -= OnDataChannel;
                     peerConnection.OnIceCandidate -= OnIceCandidate;
@@ -434,6 +435,7 @@ namespace WebRtcMeMiddleware
                     peerConnection.OnSignallingStateChange -= OnSignallingStateChange;
                     peerConnection.OnTrack -= OnTrack;
 
+                    
                     //// TODO: REMOVE TRACKS???
 
                     connectionContext.PeerContexts.Remove(peerContext);
