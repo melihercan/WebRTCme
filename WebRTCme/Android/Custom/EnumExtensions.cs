@@ -126,7 +126,7 @@ namespace WebRtc.Android
             if (nativeSignalingState == Webrtc.PeerConnection.SignalingState.HaveRemotePranswer)
                 return RTCSignalingState.HaveRemotePranswer;
             if (nativeSignalingState == Webrtc.PeerConnection.SignalingState.Closed)
-                throw new NotSupportedException();
+                return RTCSignalingState.Closed;
             throw new ArgumentOutOfRangeException(nameof(nativeSignalingState), nativeSignalingState, null);
         }
 

@@ -123,7 +123,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         private void Disconnect()
         {
-            _connectionDisposer.Dispose();
+            _connectionDisposer?.Dispose();
         }
 
         public void Dispose()
