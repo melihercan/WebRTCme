@@ -29,7 +29,8 @@ namespace WebRtcMeMiddleware
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        static public async Task<ISignallingServerService> CreateAsync(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
+        static public async Task<ISignallingServerService> CreateAsync(string signallingServerBaseUrl, 
+            IJSRuntime jsRuntime = null)
         {
             var self = new SignallingServerService();
             self._signallingServerClient = await SignallingServerClientFactory.CreateAsync(signallingServerBaseUrl, 
@@ -49,23 +50,26 @@ namespace WebRtcMeMiddleware
             return result.Value;
         }
 
-        private Subject<ConnectionResponseParameters> ConnectionResponseSubject { get; } = new Subject<ConnectionResponseParameters>();
+////        private Subject<PeerResponseParameters> ConnectionResponseSubject { get; } = 
+  ////          new Subject<PeerResponseParameters>();
 
-        public IObservable<ConnectionResponseParameters> ConnectionRequest(ConnectionRequestParameters connectionRequestParameters)
+        public IObservable<PeerResponseParameters> ConnectionRequest(
+            ConnectionRequestParameters connectionRequestParameters)
         {
-            return Observable.Create<ConnectionResponseParameters>(async observer => 
+            return Observable.Create<PeerResponseParameters>(async observer => 
             {
-                IDisposable connectionDisposer = null;
+                ////IDisposable connectionDisposer = null;
                 ConnectionContext connectionContext = null;
                 bool isJoined = false;
 
                 try
                 {
-                    connectionDisposer = ConnectionResponseSubject
-                        .AsObservable()
-                        .Subscribe(observer.OnNext);
+                    ////connectionDisposer = ConnectionResponseSubject
+                        ////.AsObservable()
+                        ////.Subscribe(observer.OnNext);
 
-                    if (GetConnectionContext(connectionRequestParameters.TurnServerName, connectionRequestParameters.RoomName) 
+                    if (GetConnectionContext(connectionRequestParameters.TurnServerName, 
+                        connectionRequestParameters.RoomName) 
                             is not null)
                            observer.OnError(new Exception($"Room {connectionRequestParameters.RoomName} is in use"));
 
@@ -86,7 +90,6 @@ namespace WebRtcMeMiddleware
 
                 return async () =>
                 {
-                    connectionDisposer.Dispose();
                     try
                     {
                         if (isJoined)
@@ -94,9 +97,14 @@ namespace WebRtcMeMiddleware
                                 connectionRequestParameters.RoomName, connectionRequestParameters.UserName);
 
                         if (connectionContext is not null)
+                        {
+                            foreach (var peerContext in connectionContext.PeerContexts)
+                                peerContext.PeerResponseDisposer.Dispose();
                             _connectionContexts.Remove(connectionContext);
+                        }
                     }
                     catch { };
+                    ////connectionDisposer.Dispose();
                 };
             });
         }
@@ -118,7 +126,8 @@ namespace WebRtcMeMiddleware
             _connectionContexts.FirstOrDefault(connectionContext =>
                 connectionContext.ConnectionRequestParameters.TurnServerName
                     .Equals(turnServerName, StringComparison.OrdinalIgnoreCase) &&
-                connectionContext.ConnectionRequestParameters.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
+                connectionContext.ConnectionRequestParameters.RoomName.Equals(roomName, 
+                    StringComparison.OrdinalIgnoreCase));
 
         #region SignallingServerCallbacks
         //// TODO: NOT a good idea to run async ops on callbacks, especially on iOS. Callbacks returning tsks will not be
@@ -187,6 +196,7 @@ namespace WebRtcMeMiddleware
 #endif
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
@@ -194,9 +204,11 @@ namespace WebRtcMeMiddleware
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
 
                 await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName, isInitiator: true);
-                var peerConnection = connectionContext.PeerContexts
-                    .Single(context => context.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
-                    .PeerConnection;
+                var peerContext = connectionContext.PeerContexts
+                    .Single(context => context.PeerUserName
+                    .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
+                var peerConnection = peerContext.PeerConnection;
+                subject = peerContext.PeerResponseSubject;
 
 
 #if true
@@ -215,52 +227,79 @@ namespace WebRtcMeMiddleware
                 DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
-
 #endif
-
             }
             catch (Exception ex)
             {
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters 
+                { 
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
         }
 
         public async Task OnPeerLeft(string turnServerName, string roomName, string peerUserName)
         {
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                var peerContext = connectionContext.PeerContexts.Single(context => context.PeerUserName
+                DebugPrint($">>>>>>>> OnPeerLeft - turn:{turnServerName} room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
+                var peerContext = connectionContext.PeerContexts
+                    .Single(context => context.PeerUserName
                     .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
+                subject = peerContext.PeerResponseSubject;
+
                 await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName,
                     isInitiator: peerContext.IsInitiator, isDelete: true);
-                ConnectionResponseSubject.OnCompleted();
+
+                subject.OnNext(new PeerResponseParameters 
+                {
+                    Code = PeerResponseCode.PeerLeft,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                });
             }
             catch (Exception ex)
             {
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters
+                {
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
         }
 
 
         public async Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
-
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
                 DebugPrint($">>>>>>>> OnPeerSdpOffered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}"); //peedSdp:{peerSdp}");
-                var peerConnection = connectionContext.PeerContexts.Count == 0 ? null : 
-                    connectionContext.PeerContexts.FirstOrDefault(context => context.PeerUserName
-                        .Equals(peerUserName, StringComparison.OrdinalIgnoreCase)).PeerConnection;
-                if (peerConnection is null)
+                var peerContext = connectionContext.PeerContexts
+                    .FirstOrDefault(context => context.PeerUserName
+                    .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
+                if (peerContext is null)
                 {
                     await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName, isInitiator: false);
-                    peerConnection = connectionContext.PeerContexts
+                    peerContext = connectionContext.PeerContexts
                         .Single(context => context.PeerUserName
-                            .Equals(peerUserName, StringComparison.OrdinalIgnoreCase)).PeerConnection;
+                        .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                 }
+                var peerConnection = peerContext.PeerConnection;
+                subject = peerContext.PeerResponseSubject;
 
                 var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
@@ -273,8 +312,6 @@ namespace WebRtcMeMiddleware
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
 
-//                await peerConnection.SetLocalDescription(answerDescription);
-
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 DebugPrint($"######## Sending Answer - room:{roomName} " +
@@ -286,56 +323,83 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters
+                {
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
         }
 
         public async Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, 
             string peerSdp)
         {
-
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
                 DebugPrint($">>>>>>>> OnPeerSdpAnswered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");// peerSdp:{peerSdp}");
+                var peerContext = connectionContext.PeerContexts
+                    .Single(context => context.PeerUserName
+                    .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
+                var peerConnection = peerContext.PeerConnection;
+                subject = peerContext.PeerResponseSubject;
 
                 var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
-                var peerConnection = connectionContext.PeerContexts
-                    .Single(peer => peer.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
-                    .PeerConnection;
                 DebugPrint($"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(answerDescription);
             }
             catch (Exception ex)
             {
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters
+                {
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
         }
 
         public async Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, 
             string peerIce)
         {
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
                 DebugPrint($">>>>>>>> OnPeerIceCandidate - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} peerIce:{peerIce}");
+                    $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
+                    $"peerIce:{peerIce}");
+                var peerContext = connectionContext.PeerContexts
+                    .Single(context => context.PeerUserName
+                    .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
+                var peerConnection = peerContext.PeerConnection;
+                subject = peerContext.PeerResponseSubject;
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
                     _jsonSerializerOptions);
-                var peerConnection = connectionContext.PeerContexts
-                    .Single(context => context.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
-                    .PeerConnection;
                 DebugPrint($"**** AddIceCandidate - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                 await peerConnection.AddIceCandidate(iceCandidate);
             }
             catch (Exception ex)
             {
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters
+                {
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
         }
 
@@ -345,6 +409,7 @@ namespace WebRtcMeMiddleware
         private async Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName, 
             string peerUserName, bool isInitiator, bool isDelete = false)
         {
+            Subject<PeerResponseParameters> subject = null;
             try
             {
                 PeerContext peerContext = null;
@@ -384,11 +449,16 @@ namespace WebRtcMeMiddleware
                         PeerIdentity = roomName
                     };
                     peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+                    subject = new Subject<PeerResponseParameters>();
                     peerContext = new PeerContext
                     {
                         PeerUserName = peerUserName,
                         PeerConnection = peerConnection,
-                        IsInitiator = isInitiator
+                        IsInitiator = isInitiator,
+                        PeerResponseSubject = subject,
+                        PeerResponseDisposer = subject
+                            .AsObservable()
+                            .Subscribe(connectionContext.Observer.OnNext)
                     };
                     connectionContext.PeerContexts.Add(peerContext);
 
@@ -433,8 +503,9 @@ namespace WebRtcMeMiddleware
                         $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
                     if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
-                        ConnectionResponseSubject.OnNext(new ConnectionResponseParameters
+                        peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
                         {
+                            Code = PeerResponseCode.PeerJoined,
                             TurnServerName = turnServerName,
                             RoomName = roomName,
                             PeerUserName = peerUserName,
@@ -450,8 +521,9 @@ namespace WebRtcMeMiddleware
                     DebugPrint($"====> OnDataChannel - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
                     dataChannel = e.Channel;
-                    ConnectionResponseSubject.OnNext(new ConnectionResponseParameters
+                    peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
                     {
+                        Code = PeerResponseCode.PeerJoined,
                         TurnServerName = turnServerName,
                         RoomName = roomName,
                         PeerUserName = peerUserName,
@@ -476,7 +548,8 @@ namespace WebRtcMeMiddleware
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                         DebugPrint($"######## Sending ICE Candidate - room:{roomName} " +
-                            $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} ice:{ice}");
+                            $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
+                            $"ice:{ice}");
                         await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
 
                     }
@@ -493,7 +566,7 @@ namespace WebRtcMeMiddleware
                         $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName} " +
                         $"iceGatheringState: {peerConnection.IceGatheringState}");
                 }
-                async void OnNegotiationNeeded(object s, EventArgs e)
+                void OnNegotiationNeeded(object s, EventArgs e)
                 {
                     DebugPrint($"====> OnNegotiationNeeded - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.UserName} peerUser:{peerUserName}");
@@ -538,10 +611,15 @@ namespace WebRtcMeMiddleware
             }
             catch (Exception ex)
             {
-                //roomContext.RoomState = RoomState.Error;
-                ConnectionResponseSubject.OnError(ex);
+                subject?.OnNext(new PeerResponseParameters
+                {
+                    Code = PeerResponseCode.PeerError,
+                    TurnServerName = turnServerName,
+                    RoomName = roomName,
+                    PeerUserName = peerUserName,
+                    ErrorMessage = ex.Message
+                });
             }
-
         }
 
         private static void DebugPrint(string message)

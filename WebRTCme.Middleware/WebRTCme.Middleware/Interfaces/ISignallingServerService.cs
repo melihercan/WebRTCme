@@ -11,7 +11,7 @@ namespace WebRTCme.Middleware
         Task<string[]> GetTurnServerNames();
 
 
-        IObservable<ConnectionResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
+        IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
       
 
     }

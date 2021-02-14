@@ -144,12 +144,25 @@ namespace DemoApp.ViewModels
         {
             ConnectionRequestParameters.LocalStream = LocalStream;
             _connectionDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (connectionResponseParameters) =>
+                onNext: (peerResponseParameters) =>
                 {
-                    if (connectionResponseParameters.MediaStream != null)
+                    switch (peerResponseParameters.Code)
                     {
-                        Remote1Stream = connectionResponseParameters.MediaStream;
-                        Remote1Label = connectionResponseParameters.PeerUserName;
+                        case PeerResponseCode.PeerJoined:
+                            if (peerResponseParameters.MediaStream != null)
+                            {
+                                Remote1Stream = peerResponseParameters.MediaStream;
+                                Remote1Label = peerResponseParameters.PeerUserName;
+                            }
+                            break;
+
+                        case PeerResponseCode.PeerLeft:
+                            System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
+                            break;
+
+                        case PeerResponseCode.PeerError:
+                            System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
+                            break;
                     }
                 },
                 onError: (exception) =>

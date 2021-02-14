@@ -89,13 +89,26 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             ConnectionRequestParameters.LocalStream = LocalStream;
             _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (connectionResponseParameters) =>
+                onNext: (peerResponseParameters) =>
                 {
-                    if (connectionResponseParameters.MediaStream is not null)
+                    switch (peerResponseParameters.Code)
                     {
-                        Remote1Stream = connectionResponseParameters.MediaStream;
-                        Remote1Label = connectionResponseParameters.PeerUserName;
-                        StateHasChanged();
+                        case PeerResponseCode.PeerJoined:
+                            if (peerResponseParameters.MediaStream is not null)
+                            {
+                                Remote1Stream = peerResponseParameters.MediaStream;
+                                Remote1Label = peerResponseParameters.PeerUserName;
+                                StateHasChanged();
+                            }
+                            break;
+                        case PeerResponseCode.PeerLeft:
+                            Console.WriteLine($"************* APP PeerLeft");
+                            break;
+
+                        case PeerResponseCode.PeerError:
+                            Console.WriteLine($"************* APP PeerError");
+                            break;
+
                     }
                 },
                 onError: (exception) =>
