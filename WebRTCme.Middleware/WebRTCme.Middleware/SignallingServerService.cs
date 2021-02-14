@@ -423,9 +423,6 @@ namespace WebRtcMeMiddleware
                         .Single(peer => peer.PeerUserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                     peerConnection = peerContext.PeerConnection;
 
-          var s = peerConnection.GetSenders();
-          var r = peerConnection.GetReceivers();
-
                     peerConnection.OnConnectionStateChanged -= OnConnectionStateChanged;
                     peerConnection.OnDataChannel -= OnDataChannel;
                     peerConnection.OnIceCandidate -= OnIceCandidate;
@@ -435,8 +432,11 @@ namespace WebRtcMeMiddleware
                     peerConnection.OnSignallingStateChange -= OnSignallingStateChange;
                     peerConnection.OnTrack -= OnTrack;
 
-                    
-                    //// TODO: REMOVE TRACKS???
+                    // Remove local tracks and close.
+                    var senders = peerConnection.GetSenders();
+                    foreach (var sender in senders)
+                        peerConnection.RemoveTrack(sender);
+                    peerConnection.Close();
 
                     connectionContext.PeerContexts.Remove(peerContext);
                 }

@@ -21,6 +21,8 @@ namespace WebRTCme
         HaveLocalPranswer,
 
         [Description("have-remote-pranswer")]
-        HaveRemotePranswer
+        HaveRemotePranswer,
+
+        Closed
     }
 }

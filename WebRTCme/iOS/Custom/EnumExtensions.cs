@@ -119,7 +119,7 @@ namespace WebRtc.iOS
                 Webrtc.RTCSignalingState.HaveLocalPrAnswer => RTCSignalingState.HaveLocalPranswer,
                 Webrtc.RTCSignalingState.HaveRemoteOffer => RTCSignalingState.HaveRemoteOffer,
                 Webrtc.RTCSignalingState.HaveRemotePrAnswer => RTCSignalingState.HaveRemotePranswer,
-                Webrtc.RTCSignalingState.Closed => throw new NotSupportedException()
+                Webrtc.RTCSignalingState.Closed => RTCSignalingState.Closed
             };
 
         public static RTCIceCredentialType FromNative(this Webrtc.RTCTlsCertPolicy nativeTlsCertPolicy) =>

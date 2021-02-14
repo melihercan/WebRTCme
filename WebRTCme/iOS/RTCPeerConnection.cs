@@ -190,7 +190,7 @@ namespace WebRtc.iOS
                  .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
         public void RemoveTrack(IRTCRtpSender sender) =>
-            ((Webrtc.RTCPeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RTCRtpSender);
+            ((Webrtc.RTCPeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.IRTCRtpSender);
 
         public void RestartIce()
         {
