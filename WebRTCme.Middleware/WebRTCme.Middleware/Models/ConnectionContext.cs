@@ -12,8 +12,6 @@ namespace WebRtcMeMiddleware.Models
     {
         public ConnectionRequestParameters ConnectionRequestParameters { get; set; }
 
-////        public Dictionary<string /*peerUserName*/, IRTCPeerConnection> PeerConnectionContexts { get; set; } = new();
-
         public List<PeerContext> PeerContexts { get; set; } = new();
 
         public RTCIceServer[] IceServers { get; set; }

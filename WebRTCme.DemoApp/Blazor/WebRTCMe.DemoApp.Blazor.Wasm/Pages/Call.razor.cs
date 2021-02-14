@@ -100,9 +100,11 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
                 },
                 onError: (exception) =>
                 {
+                    Console.WriteLine($"************* APP OnError:{exception.Message}");
                 },
                 onCompleted: () =>
                 {
+                    Console.WriteLine($"************* APP OnCompleted");
                 });
         }
 

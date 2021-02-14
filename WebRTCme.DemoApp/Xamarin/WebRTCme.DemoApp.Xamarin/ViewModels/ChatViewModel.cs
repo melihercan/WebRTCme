@@ -64,9 +64,11 @@ namespace DemoApp.ViewModels
                 },
                 onError: (exception) =>
                 {
+                    System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
                 },
                 onCompleted: () =>
                 {
+                    System.Diagnostics.Debug.WriteLine($"************* APP OnCompleted");
                 });
         }
 
