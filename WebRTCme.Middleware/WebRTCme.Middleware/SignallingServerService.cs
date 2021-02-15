@@ -485,7 +485,7 @@ namespace WebRtcMeMiddleware
                             connectionContext.ConnectionRequestParameters.DataChannelName,
                             new RTCDataChannelInit
                             { 
-                                Negotiated = false
+                                Negotiated = false,
                             });
                     }
 

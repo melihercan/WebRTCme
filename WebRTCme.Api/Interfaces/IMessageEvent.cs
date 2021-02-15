@@ -7,14 +7,14 @@ namespace WebRTCme
 {
     public interface IMessageEvent
     {
-        ////object Data { get; }
+        object Data { get; }
 
         string Origin { get; }
 
         string LastEventId { get; }
 
-        ////object Source { get; }
+        object Source { get; }
 
-        /////*MessagePort*/object[] Ports { get; }
+        /*MessagePort*/object[] Ports { get; }
     }
 }

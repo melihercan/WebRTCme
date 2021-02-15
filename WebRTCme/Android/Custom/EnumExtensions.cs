@@ -156,6 +156,19 @@ namespace WebRtc.Android
                 return RTCSdpType.Rollback;
             throw new ArgumentOutOfRangeException(nameof(nativeType), nativeType, null);
         }
+
+        public static RTCDataChannelState FromNative(this Webrtc.DataChannel.State nativeState)
+        {
+            if (nativeState == Webrtc.DataChannel.State.Connecting)
+                return RTCDataChannelState.Connecting;
+            if (nativeState == Webrtc.DataChannel.State.Open)
+                return RTCDataChannelState.Open;
+            if (nativeState == Webrtc.DataChannel.State.Closing)
+                return RTCDataChannelState.Closing;
+            if (nativeState == Webrtc.DataChannel.State.Closed)
+                return RTCDataChannelState.Closed;
+            throw new ArgumentOutOfRangeException(nameof(nativeState), nativeState, null);
+        }
     }
 }
 

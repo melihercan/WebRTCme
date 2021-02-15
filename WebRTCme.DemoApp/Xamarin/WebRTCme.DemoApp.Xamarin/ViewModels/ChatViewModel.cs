@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,7 @@ namespace DemoApp.ViewModels
     public class ChatViewModel : INotifyPropertyChanged, IPageLifecycle
     {
         private IDisposable _connectionDisposer;
+        public ObservableCollection<ChatParameters> Messages { get; set; }
 
         public string ConnectionParametersJson
         {
@@ -35,6 +37,22 @@ namespace DemoApp.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private string _outgoingText = string.Empty;
+
+        public string OutgoingText
+        {
+            get => _outgoingText; 
+            set
+            {
+                _outgoingText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand SendCommand => new Command(async () => 
+        { 
+        });
 
         public Task OnPageAppearing()
         {
@@ -54,13 +72,27 @@ namespace DemoApp.ViewModels
         {
             ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;
             _connectionDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
-                onNext: (connectionResponseParameters) =>
+                onNext: (peerResponseParameters) =>
                 {
-                    if (connectionResponseParameters.DataChannel != null)
+                    switch (peerResponseParameters.Code)
                     {
-                        var dataChannel = connectionResponseParameters.DataChannel;
-                        Console.WriteLine($"--------------- DataChannel: {dataChannel.Label}");
+                        case PeerResponseCode.PeerJoined:
+                            if (peerResponseParameters.DataChannel != null)
+                            {
+                                var dataChannel = peerResponseParameters.DataChannel;
+                                Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} state:{dataChannel.ReadyState}");
+                            }
+                            break;
+
+                        case PeerResponseCode.PeerLeft:
+                            System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
+                            break;
+
+                        case PeerResponseCode.PeerError:
+                            System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
+                            break;
                     }
+
                 },
                 onError: (exception) =>
                 {

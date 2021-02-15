@@ -62,11 +62,11 @@ namespace WebRtc.Android
             new Webrtc.DataChannel.Init
             {
                 Ordered = dataChannelInit.Ordered ?? true,
-                ///// TODO: CHECK THIS!!!! MaxRetransmitTimeMs = dataChannelInit.MaxPacketLifeTime ?? 0,
-                MaxRetransmits = dataChannelInit.MaxRetransmits ?? 0,
-                Protocol = dataChannelInit.Protocol,
+                MaxRetransmitTimeMs = dataChannelInit.MaxPacketLifeTime ?? -1,
+                MaxRetransmits = dataChannelInit.MaxRetransmits ?? -1,
+                Protocol = dataChannelInit.Protocol ?? string.Empty,
                 Negotiated = dataChannelInit.Negotiated ?? false,
-                Id = dataChannelInit.Id ?? 0
+                Id = dataChannelInit.Id ?? WebRTCme.WebRtc.Id
             };
 
         public static Webrtc.SessionDescription ToNative(this RTCSessionDescriptionInit description) =>

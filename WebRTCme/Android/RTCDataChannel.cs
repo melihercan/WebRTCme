@@ -7,7 +7,6 @@ namespace WebRtc.Android
 {
     internal class RTCDataChannel : ApiBase, IRTCDataChannel, Webrtc.DataChannel.IObserver
     {
-
         public static IRTCDataChannel Create(Webrtc.DataChannel nativeDataChannel) =>
             new RTCDataChannel(nativeDataChannel);
 
@@ -35,7 +34,7 @@ namespace WebRtc.Android
 
         public string Protocol => throw new NotImplementedException();
 
-        public RTCDataChannelState ReadyState => throw new NotImplementedException();
+        public RTCDataChannelState ReadyState => ((Webrtc.DataChannel)NativeObject).InvokeState().FromNative();
 
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
@@ -48,23 +47,30 @@ namespace WebRtc.Android
 
         public void Send()
         {
-            throw new NotImplementedException();
+            //((Webrtc.DataChannel)NativeObject).Send();
         }
 
         #region NativeEvents
         public void OnBufferedAmountChange(long p0)
         {
-            throw new NotImplementedException();
+            //if (p0 < ???)
+                //OnBufferedAmountLow?.Invoke(this, EventArgs.Empty);
         }
 
         void DataChannel.IObserver.OnMessage(DataChannel.Buffer p0)
         {
-            throw new NotImplementedException();
+
         }
 
         public void OnStateChange()
         {
-            throw new NotImplementedException();
+            var nativeState = ((Webrtc.DataChannel)NativeObject).InvokeState();
+            if (nativeState == Webrtc.DataChannel.State.Open)
+                OnOpen?.Invoke(this, EventArgs.Empty);
+            else if (nativeState == Webrtc.DataChannel.State.Closing)
+                OnClosing?.Invoke(this, EventArgs.Empty);
+            else if (nativeState == Webrtc.DataChannel.State.Closed)
+                OnClose?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

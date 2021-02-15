@@ -113,7 +113,7 @@ namespace WebRtc.Android
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
-            RTCDataChannel.Create(((Webrtc.PeerConnection)NativeObject).CreateDataChannel(label, options.ToNative()));
+                RTCDataChannel.Create(((Webrtc.PeerConnection)NativeObject).CreateDataChannel(label, options.ToNative()));
 
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
