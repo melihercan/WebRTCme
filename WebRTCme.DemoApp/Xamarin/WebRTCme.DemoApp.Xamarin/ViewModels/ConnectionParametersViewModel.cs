@@ -19,7 +19,7 @@ using Xamarinme;
 
 namespace DemoApp.ViewModels
 {
-    [FluentValidation.Attributes.Validator(typeof(CallParametersValidator))]
+    [FluentValidation.Attributes.Validator(typeof(ConnectionParametersValidator))]
     [QueryProperty(nameof(TurnServerNamesJson), nameof(TurnServerNamesJson))]
     public class ConnectionParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
     {

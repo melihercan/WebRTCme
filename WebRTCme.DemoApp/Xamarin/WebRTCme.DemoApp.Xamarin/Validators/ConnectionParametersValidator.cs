@@ -8,9 +8,9 @@ using Xamarin.Plugins.FluentValidation;
 
 namespace WebRTCme.DemoApp.Xamarin.Validators
 {
-    public class CallParametersValidator : EnhancedAbstractValidator<ConnectionParametersViewModel>
+    public class ConnectionParametersValidator : EnhancedAbstractValidator<ConnectionParametersViewModel>
     {
-        public CallParametersValidator()
+        public ConnectionParametersValidator()
         {
             RuleForProp(prop => prop.RoomName)
                 .NotNull()

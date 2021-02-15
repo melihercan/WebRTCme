@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,9 +41,18 @@
     <Compile Update="Views\CallPage.xaml.cs">
       <DependentUpon>CallPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\SystemChatView.xaml.cs">
+      <DependentUpon>SystemChatView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OutgoingChatView.xaml.cs">
+      <DependentUpon>OutgoingChatView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Views\IncomingChatView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\InitializingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
