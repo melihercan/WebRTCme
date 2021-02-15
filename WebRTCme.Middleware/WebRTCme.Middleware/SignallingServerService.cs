@@ -17,10 +17,11 @@ using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware
 {
-    internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
+    internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks, IAsyncInitialization
     {
+        private readonly IJSRuntime _jsRuntime;
+        private readonly string _signallingServerBaseUrl;
         private ISignallingServerClient _signallingServerClient;
-        private IJSRuntime _jsRuntime;
         private static List<ConnectionContext> _connectionContexts = new();
 
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
@@ -32,15 +33,25 @@ namespace WebRtcMeMiddleware
         static public async Task<ISignallingServerService> CreateAsync(string signallingServerBaseUrl, 
             IJSRuntime jsRuntime = null)
         {
-            var self = new SignallingServerService();
-            self._signallingServerClient = await SignallingServerClientFactory.CreateAsync(signallingServerBaseUrl, 
-                self);
-            self._jsRuntime = jsRuntime;
+            var self = new SignallingServerService(signallingServerBaseUrl, jsRuntime);
+            await self.Initialization;
             return self;
         }
 
-        private SignallingServerService() { }
+        public SignallingServerService(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
+        {
+            _signallingServerBaseUrl = signallingServerBaseUrl;
+            _jsRuntime = jsRuntime;
+            Initialization = InitializeAsync();
+        }
 
+        public Task Initialization { get; private set; }
+
+        private async Task InitializeAsync()
+        {
+            _signallingServerClient = await SignallingServerClientFactory.CreateAsync(_signallingServerBaseUrl,
+                this);
+        }
 
         public async Task<string[]> GetTurnServerNames()
         {
@@ -50,24 +61,16 @@ namespace WebRtcMeMiddleware
             return result.Value;
         }
 
-////        private Subject<PeerResponseParameters> ConnectionResponseSubject { get; } = 
-  ////          new Subject<PeerResponseParameters>();
-
         public IObservable<PeerResponseParameters> ConnectionRequest(
             ConnectionRequestParameters connectionRequestParameters)
         {
             return Observable.Create<PeerResponseParameters>(async observer => 
             {
-                ////IDisposable connectionDisposer = null;
                 ConnectionContext connectionContext = null;
                 bool isJoined = false;
 
                 try
                 {
-                    ////connectionDisposer = ConnectionResponseSubject
-                        ////.AsObservable()
-                        ////.Subscribe(observer.OnNext);
-
                     if (GetConnectionContext(connectionRequestParameters.TurnServerName, 
                         connectionRequestParameters.RoomName) 
                             is not null)
@@ -105,7 +108,6 @@ namespace WebRtcMeMiddleware
                         }
                     }
                     catch { };
-                    ////connectionDisposer.Dispose();
                 };
             });
         }

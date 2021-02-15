@@ -29,6 +29,10 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
             });
             builder.Services.AddBlazoredModal();
 
+
+            ///// TODO: ADD SignallingServerService and MediaStreamService
+
+
             //await builder.Build().RunAsync();
             var host = builder.Build();
 

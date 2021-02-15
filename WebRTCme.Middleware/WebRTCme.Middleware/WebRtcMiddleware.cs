@@ -12,18 +12,10 @@ namespace WebRTCme.Middleware
     {
         public static IWebRtc WebRtc { get; private set; }
 
-////        internal static string SignallingServerBaseUrl { get; private set; }
-
-
         public WebRtcMiddleware(IWebRtc webRtc)
         {
-            WebRtc = webRtc;// CrossWebRtc.Current;
-////            SignallingServerBaseUrl = signallingServerBaseUrl;
+            WebRtc = webRtc;
         }
-
-        //public static void Initialize(string signallingServerBaseUrl)
-        //{
-        //}
 
         public Task<ISignallingServerService> CreateSignallingServerServiceAsync(string signallingServerBaseUrl, 
             IJSRuntime jsRuntime)
@@ -33,16 +25,8 @@ namespace WebRTCme.Middleware
 
         public Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime)
         {
-            var service = MediaStreamService.Create(jsRuntime);
-            return Task.FromResult(service);
+            return MediaStreamService.CreateAsync(jsRuntime);
         }
-
-
-        //public static void Cleanup()
-        //{
-        //  WebRtc.Cleanup();
-        //}
-
 
         #region IDisposable
         private bool _isDisposed = false;
