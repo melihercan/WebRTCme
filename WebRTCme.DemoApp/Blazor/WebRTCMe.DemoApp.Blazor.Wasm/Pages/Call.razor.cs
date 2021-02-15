@@ -22,10 +22,10 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IDisposable _connectionDisposer;
 
         [Inject]
-        IJSRuntime JsRuntime { get; set; }
+        IMediaStreamService MediaStreamService { get; set; }
 
         [Inject]
-        IConfiguration Configuration { get; set; }
+        ISignallingServerService SignallingServerService { get; set; }
 
         [CascadingParameter] 
         public IModalService Modal { get; set; }
@@ -46,10 +46,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         bool Remote1AudioMuted { get; set; }
 
-
-        private IWebRtcMiddleware _webRtcMiddleware;
-        private ISignallingServerService _signallingServerService;
-        private IMediaStreamService _mediaStreamService;
         private string[] _turnServerNames;
 
         private ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new()
@@ -61,18 +57,13 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
 
-            _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
-            _mediaStreamService = await _webRtcMiddleware.CreateMediaStreamServiceAsync(JsRuntime);
-            LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-
-            _signallingServerService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(
-                Configuration/*["SignallingServer:BaseUrl"]*/, JsRuntime);
+            LocalStream = await MediaStreamService.GetCameraMediaStreamAsync();
 
             while (_turnServerNames is null)
             {
                 try
                 {
-                    _turnServerNames = await _signallingServerService.GetTurnServerNames();
+                    _turnServerNames = await SignallingServerService.GetTurnServerNames();
                 }
                 catch
                 {
@@ -88,7 +79,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private void Connect()
         {
             ConnectionRequestParameters.LocalStream = LocalStream;
-            _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+            _connectionDisposer = SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)
@@ -131,8 +122,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             Disconnect();
 
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
-            Task.Run(async () => await _signallingServerService.DisposeAsync());
-            _webRtcMiddleware.Dispose();
+            //Task.Run(async () => await SignallingServerService.DisposeAsync());
+            //_webRtcMiddleware.Dispose();
         }
     }
 }

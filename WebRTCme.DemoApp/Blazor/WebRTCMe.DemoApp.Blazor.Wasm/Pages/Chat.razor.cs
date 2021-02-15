@@ -22,17 +22,11 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private IDisposable _connectionDisposer;
 
         [Inject]
-        IJSRuntime JsRuntime { get; set; }
-
-        [Inject]
-        IConfiguration Configuration { get; set; }
+        ISignallingServerService SignallingServerService { get; set; }
 
         [CascadingParameter] 
         public IModalService Modal { get; set; }
 
-
-        private IWebRtcMiddleware _webRtcMiddleware;
-        private ISignallingServerService _signallingServerService;
         private string[] _turnServerNames;
 
         private ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new()
@@ -44,15 +38,11 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
 
-            _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
-            _signallingServerService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(
-                Configuration/*["SignallingServer:BaseUrl"]*/, JsRuntime);
-
             while (_turnServerNames is null)
             {
                 try
                 {
-                    _turnServerNames = await _signallingServerService.GetTurnServerNames();
+                    _turnServerNames = await SignallingServerService.GetTurnServerNames();
                 }
                 catch
                 {
@@ -68,7 +58,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         private void Connect()
         {
             ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;
-            _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+            _connectionDisposer = SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (connectionResponseParameters) => 
                 {
                     if (connectionResponseParameters.DataChannel is not null)
@@ -98,8 +88,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
             Disconnect();
 
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
-            Task.Run(async () => await _signallingServerService.DisposeAsync());
-            _webRtcMiddleware.Dispose();
+            //Task.Run(async () => await _signallingServerService.DisposeAsync());
+            //_webRtcMiddleware.Dispose();
         }
     }
 }
