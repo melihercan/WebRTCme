@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Wasm
 {
@@ -29,14 +30,18 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
             });
             builder.Services.AddBlazoredModal();
 
-
-            ///// TODO: ADD SignallingServerService and MediaStreamService
-
+            _ = CrossWebRtcMiddlewareBlazor.Current;
+            builder.Services.AddMiddleware();
 
             //await builder.Build().RunAsync();
             var host = builder.Build();
 
             ConfigureProviders(host.Services);
+
+            var mediaStreamService = host.Services.GetService<IMediaStreamService>();
+            await mediaStreamService.Initialization;
+            var signallingServerService = host.Services.GetService<ISignallingServerService>();
+            await signallingServerService.Initialization;
 
             await host.RunAsync();
         }

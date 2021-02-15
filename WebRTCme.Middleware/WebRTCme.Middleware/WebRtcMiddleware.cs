@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,10 +18,11 @@ namespace WebRTCme.Middleware
             WebRtc = webRtc;
         }
 
-        public Task<ISignallingServerService> CreateSignallingServerServiceAsync(string signallingServerBaseUrl, 
+        public Task<ISignallingServerService> CreateSignallingServerServiceAsync(/*string signallingServerBaseUrl*/
+            IConfiguration configuration, 
             IJSRuntime jsRuntime)
         {
-            return SignallingServerService.CreateAsync(signallingServerBaseUrl, jsRuntime);
+            return SignallingServerService.CreateAsync(/*signallingServerBaseUrl*/configuration, jsRuntime);
         }
 
         public Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime)

@@ -46,7 +46,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
             _webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
             _signallingServerService = await _webRtcMiddleware.CreateSignallingServerServiceAsync(
-                Configuration["SignallingServer:BaseUrl"], JsRuntime);
+                Configuration/*["SignallingServer:BaseUrl"]*/, JsRuntime);
 
             while (_turnServerNames is null)
             {

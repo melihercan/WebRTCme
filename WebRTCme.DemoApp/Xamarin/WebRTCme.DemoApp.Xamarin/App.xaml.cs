@@ -36,7 +36,7 @@ namespace DemoApp
         {
             var WebRtcMiddlevare = CrossWebRtcMiddlewareXamarin.Current;
             SignallingServerService = await WebRtcMiddlevare
-                .CreateSignallingServerServiceAsync(App.Configuration["SignallingServer:BaseUrl"]);
+                .CreateSignallingServerServiceAsync(App.Configuration/*["SignallingServer:BaseUrl"]*/);
             MediaStreamService = await WebRtcMiddlevare
                 .CreateMediaStreamServiceAsync();
         }

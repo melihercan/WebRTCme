@@ -9,7 +9,7 @@ using WebRTCme.Middleware;
 
 namespace WebRtcMeMiddleware
 {
-    internal class MediaStreamService : IMediaStreamService, IAsyncInitialization
+    internal class MediaStreamService : IMediaStreamService
     {
         private readonly IJSRuntime _jsRuntime;
         private readonly IWindow _window;

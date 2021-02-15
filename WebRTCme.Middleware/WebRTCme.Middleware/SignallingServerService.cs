@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware
 {
-    internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks, IAsyncInitialization
+    internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
     {
         private readonly IJSRuntime _jsRuntime;
         private readonly string _signallingServerBaseUrl;
@@ -30,17 +31,19 @@ namespace WebRtcMeMiddleware
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        static public async Task<ISignallingServerService> CreateAsync(string signallingServerBaseUrl, 
+        static public async Task<ISignallingServerService> CreateAsync(/*string signallingServerBaseUrl*/
+            IConfiguration configuration, 
             IJSRuntime jsRuntime = null)
         {
-            var self = new SignallingServerService(signallingServerBaseUrl, jsRuntime);
+            var self = new SignallingServerService(/*signallingServerBaseUrl*/configuration, jsRuntime);
             await self.Initialization;
             return self;
         }
 
-        public SignallingServerService(string signallingServerBaseUrl, IJSRuntime jsRuntime = null)
+        public SignallingServerService(/*string signallingServerBaseUrl*/IConfiguration configuration, 
+            IJSRuntime jsRuntime = null)
         {
-            _signallingServerBaseUrl = signallingServerBaseUrl;
+            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];// signallingServerBaseUrl;
             _jsRuntime = jsRuntime;
             Initialization = InitializeAsync();
         }
