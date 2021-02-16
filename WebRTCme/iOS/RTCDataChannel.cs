@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Foundation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
@@ -43,7 +44,19 @@ namespace WebRtc.iOS
 
         public void Close() => ((Webrtc.RTCDataChannel)NativeObject).Close();
 
-        public void Send() => throw new NotImplementedException();
+        public void Send(object data)
+        {
+            Webrtc.RTCDataBuffer buffer = null;
+
+            if (data.GetType() == typeof(byte[]))
+                buffer = new Webrtc.RTCDataBuffer(NSData.FromArray((byte[])data), true);
+            else if (data.GetType() == typeof(string))
+                buffer = new Webrtc.RTCDataBuffer(NSData.FromString((string)data, NSStringEncoding.UTF8), false);
+            else
+                throw new ArgumentException($"{data.GetType()} type is not supported");
+
+            ((Webrtc.RTCDataChannel)NativeObject).SendData(buffer);
+        }
 
         #region NativeEvents
         public void DataChannelDidChangeState(Webrtc.RTCDataChannel dataChannel)
@@ -64,12 +77,20 @@ namespace WebRtc.iOS
 
         public void DidReceiveMessageWithBuffer(Webrtc.RTCDataChannel dataChannel, Webrtc.RTCDataBuffer buffer)
         {
-
+            if (buffer.IsBinary)
+            {
+                OnMessage?.Invoke(this, MessageEvent.Create(buffer.Data.ToArray()));
+            }
+            else
+            {
+                OnMessage?.Invoke(this, MessageEvent.Create(buffer.Data.ToString()));
+            }
         }
 
         public void DidChangeBufferedAmount(Webrtc.RTCDataChannel dataChannel, ulong amount)
         {
-
+            //if (amount < ???)
+            //OnBufferedAmountLow?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion

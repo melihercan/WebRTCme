@@ -38,6 +38,6 @@ namespace WebRTCme
 
         void Close();
 
-        void Send();
+        void Send(object data);
     }
 }

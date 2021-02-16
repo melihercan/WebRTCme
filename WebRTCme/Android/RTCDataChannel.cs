@@ -2,6 +2,7 @@
 using System;
 using WebRTCme;
 using Org.Webrtc;
+using System.Text;
 
 namespace WebRtc.Android
 {
@@ -45,9 +46,19 @@ namespace WebRtc.Android
 
         public void Close() => ((Webrtc.DataChannel)NativeObject).Close();
 
-        public void Send()
+        public void Send(object data)
         {
-            //((Webrtc.DataChannel)NativeObject).Send();
+            Webrtc.DataChannel.Buffer buffer = null;
+
+            if (data.GetType() == typeof(byte[]))
+                buffer = new Webrtc.DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap((byte[])data), true);
+            else if (data.GetType() == typeof(string))
+                buffer = new Webrtc.DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap(
+                    Encoding.UTF8.GetBytes((string)data)), false);
+            else
+                throw new ArgumentException($"{data.GetType()} type is not supported");
+
+            ((Webrtc.DataChannel)NativeObject).Send(buffer);
         }
 
         #region NativeEvents
@@ -59,7 +70,12 @@ namespace WebRtc.Android
 
         void DataChannel.IObserver.OnMessage(DataChannel.Buffer p0)
         {
-
+            var bytes = new byte[p0.Data.Remaining()];
+            p0.Data.Get(bytes);
+            if (p0.Binary)
+                OnMessage?.Invoke(this, MessageEvent.Create(bytes));
+            else
+                OnMessage?.Invoke(this, MessageEvent.Create(Encoding.UTF8.GetString(bytes)));
         }
 
         public void OnStateChange()

@@ -41,11 +41,6 @@
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="Android\Custom\AndroidSupport.cs" />
-	  <UpToDateCheckInput Remove="iOS\Custom\IosSupport.cs" />
-	</ItemGroup>
-
 	
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
@@ -53,7 +48,6 @@
 		<PackageReference Include="Microsoft.JSInterop" Version="5.0.1" Condition="'$(TargetFramework)' == 'net5'" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
 	</ItemGroup>
-
 
 
 </Project>
