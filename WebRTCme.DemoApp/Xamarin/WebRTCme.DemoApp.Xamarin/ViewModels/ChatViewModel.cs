@@ -80,7 +80,8 @@ namespace DemoApp.ViewModels
                             if (peerResponseParameters.DataChannel != null)
                             {
                                 var dataChannel = peerResponseParameters.DataChannel;
-                                Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} state:{dataChannel.ReadyState}");
+                                Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
+                                    $"state:{dataChannel.ReadyState}");
                             }
                             break;
 
@@ -102,7 +103,9 @@ namespace DemoApp.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"************* APP OnCompleted");
                 });
+
         }
+
 
         private void Disconnect()
         {
