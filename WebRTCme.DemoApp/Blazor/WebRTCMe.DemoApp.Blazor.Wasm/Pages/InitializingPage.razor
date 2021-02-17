@@ -1,0 +1,39 @@
+﻿@page "/initializing"
+@layout BlankLayout
+
+<style>
+    body {
+        height: 100vh;
+    }
+
+    #app {
+        height: 100%;
+    }
+</style>
+
+<div class="d-flex h-100 flex-column justify-content-center align-items-center">
+
+        @if (@InitializingViewModel.IsCheckingSignallingServer)
+        {
+        <div>
+            <Circle />
+        </div>
+        }
+
+        <div class="mh-3">
+            <h5 class="text-center font-weight-bold">@InitializingViewModel.Header</h5>
+            <p class="text-center">@InitializingViewModel.Message</p>
+        </div>
+
+        @if (@InitializingViewModel.RetryButtonEnabled)
+        {
+        <div>
+            <button class="btn btn-primary" @onclick="InitializingViewModel.RetryCommand">
+                OK
+            </button>
+        </div>
+        }
+
+</div>
+
+
