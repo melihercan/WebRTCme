@@ -9,14 +9,14 @@ namespace WebRTCme.DemoApp.Xamarin.Services
 {
     public class NavigationService : INavigationService
     {
-        public async Task NavigateToPageAsync(string uri)
+        public async Task NavigateToPageAsync(string prefix, string uri)
         {
-            await Shell.Current.GoToAsync($"/{uri}");
+            await Shell.Current.GoToAsync($"{prefix}{uri}");
         }
 
-        public async Task NavigateToPageAsync(string uri, string queryKey, string queryValue)
+        public async Task NavigateToPageAsync(string prefix, string uri, string queryKey, string queryValue)
         {
-            await Shell.Current.GoToAsync($"/{uri}?{queryKey}={queryValue}");
+            await Shell.Current.GoToAsync($"{prefix}{uri}?{queryKey}={queryValue}");
         }
     }
 

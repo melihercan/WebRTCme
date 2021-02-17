@@ -7,8 +7,8 @@ namespace WebRTCme.Middleware
 {
     public interface INavigationService
     {
-        Task NavigateToPageAsync(string url);
+        Task NavigateToPageAsync(string prefix, string uri);
 
-        Task NavigateToPageAsync(string url, string queryKey, string queryValue);
+        Task NavigateToPageAsync(string prefix, string url, string queryKey, string queryValue);
     }
 }

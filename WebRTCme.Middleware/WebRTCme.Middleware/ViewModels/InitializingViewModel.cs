@@ -123,6 +123,7 @@ namespace WebRTCme.Middleware
         {
             var turnServerNamesJson = JsonSerializer.Serialize(_turnServerNames);
             await _navigationService.NavigateToPageAsync(
+                "///",
                 "ConnectionParametersPage",
                 "TurnServerNamesJson", 
                 turnServerNamesJson);

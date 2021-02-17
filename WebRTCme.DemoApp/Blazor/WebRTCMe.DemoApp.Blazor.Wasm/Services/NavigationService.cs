@@ -16,15 +16,15 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Services
             _navigationManager = navigationManager;
         }
 
-        public Task NavigateToPageAsync(string url)
+        public Task NavigateToPageAsync(string prefix, string uri)
         {
-            _navigationManager.NavigateTo($"/{url}");
+            _navigationManager.NavigateTo($"/{uri}");
             return Task.CompletedTask;
         }
 
-        public Task NavigateToPageAsync(string url, string queryKey, string queryValue)
+        public Task NavigateToPageAsync(string prefix, string uri, string queryKey, string queryValue)
         {
-            _navigationManager.NavigateTo($"/{url}/{queryValue}");
+            _navigationManager.NavigateTo($"/{uri}/{queryValue}");
             return Task.CompletedTask;
         }
     }
