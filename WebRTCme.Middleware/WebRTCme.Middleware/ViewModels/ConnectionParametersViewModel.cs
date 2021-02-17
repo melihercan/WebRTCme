@@ -45,9 +45,13 @@ namespace WebRTCme.Middleware
 
         };
 
+        public bool IsCall { get; set; }
         public async Task Join()
         {
-
+            if (IsCall == true)
+                await JoinCall();
+            else
+                await JoinChat();
         }
 
         public ICommand JoinCallCommand => new AsyncCommand(async () => await JoinCall());

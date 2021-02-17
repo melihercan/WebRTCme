@@ -35,10 +35,10 @@
     </div>
 
     <div>
-        <button class="btn btn-primary" type="submit"> 
+        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = true)"> 
             Join call
         </button>
-        <button class="btn btn-primary" type="submit"> 
+        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = false)"> 
             Join chat
         </button>
     </div>
