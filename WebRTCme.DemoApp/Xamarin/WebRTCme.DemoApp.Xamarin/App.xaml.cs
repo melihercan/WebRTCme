@@ -7,25 +7,29 @@ using Microsoft.Extensions.Configuration;
 using Xamarinme;
 using System.Reflection;
 using WebRTCme.Middleware;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DemoApp
 {
     public partial class App : Application
     {
         public static IConfiguration Configuration { get; private set; }
+        public static IHost Host { get; private set; }
         public static IWebRtcMiddleware WebRtcMiddleware { get; private set; }
         public static ISignallingServerService SignallingServerService { get; private set; }
         public static IMediaStreamService MediaStreamService { get; private set; }
 
         public App()
         {
-            Configuration = new ConfigurationBuilder()
-                .AddEmbeddedResource(new EmbeddedResourceConfigurationOptions 
-                { 
-                    Assembly = Assembly.GetExecutingAssembly(), 
-                    Prefix = "WebRTCme.DemoApp.Xamarin"
-                })
-                .Build();
+            var hostBuilder = XamarinHostBuilder.CreateDefault(new EmbeddedResourceConfigurationOptions
+            {
+                Assembly = Assembly.GetExecutingAssembly(),
+                Prefix = "WebRTCme.DemoApp.Xamarin"
+            });
+            Configuration = hostBuilder.Configuration;
+            hostBuilder.Services.AddMiddleware();
+            Host = hostBuilder.Build();
 
             InitializeComponent();
 

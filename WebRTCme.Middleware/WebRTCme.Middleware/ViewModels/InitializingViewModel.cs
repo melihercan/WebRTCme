@@ -10,6 +10,8 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Input;
+using MvvmHelpers.Commands;
 
 namespace WebRTCme.Middleware
 {
@@ -72,10 +74,12 @@ namespace WebRTCme.Middleware
             _signallingServerService = signallingServerService;
         }
 
-        public async Task RetryCommand()
+        public async Task Retry()
         {
             await ExecuteAsync();
         }
+
+        public ICommand RetryCommand => new AsyncCommand(async () => await Retry());
 
         public async Task ExecuteAsync()
         {

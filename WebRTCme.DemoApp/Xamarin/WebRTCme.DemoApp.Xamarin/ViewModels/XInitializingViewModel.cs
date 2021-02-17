@@ -14,7 +14,7 @@ using DemoApp.Views;
 
 namespace DemoApp.ViewModels
 {
-    public class InitializingViewModel : INotifyPropertyChanged, IPageLifecycle
+    public class XInitializingViewModel : INotifyPropertyChanged, IPageLifecycle
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
