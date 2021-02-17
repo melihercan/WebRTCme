@@ -13,19 +13,23 @@
 
 <div class="d-flex h-100 flex-column justify-content-center align-items-center">
 
-        @if (@InitializingViewModel.IsCheckingSignallingServer)
+@*        @if (@InitializingViewModel.IsCheckingSignallingServer)
         {
         <div>
             <Circle />
         </div>
         }
+*@
+        <div class="@(InitializingViewModel.IsCheckingSignallingServer ? "visible" : "invisible")">
+            <Circle />
+        </div>
 
         <div class="mh-3">
             <h5 class="text-center font-weight-bold">@InitializingViewModel.Header</h5>
             <p class="text-center">@InitializingViewModel.Message</p>
         </div>
 
-        @if (@InitializingViewModel.RetryButtonEnabled)
+@*        @if (@InitializingViewModel.RetryButtonEnabled)
         {
         <div>
             <button class="btn btn-primary" @onclick="InitializingViewModel.RetryCommand">
@@ -33,7 +37,12 @@
             </button>
         </div>
         }
-
+*@
+        <button @onclick="InitializingViewModel.RetryCommand"
+                class="btn btn-primary @(InitializingViewModel.RetryButtonEnabled ? "visible" : "invisible")">
+            OK
+        </button>
+  
 </div>
 
 

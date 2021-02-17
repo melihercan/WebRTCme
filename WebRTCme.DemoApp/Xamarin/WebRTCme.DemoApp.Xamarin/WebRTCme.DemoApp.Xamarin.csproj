@@ -23,7 +23,7 @@
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.1931" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />  
     <PackageReference Include="Xamarin.Plugins.FluentValidation" Version="3.0.64" />  
-    <PackageReference Include="Xamarinme.Configuration" Version="1.0.1" />  
+    <PackageReference Include="Xamarinme.Hosting" Version="1.0.2" />  
     <PackageReference Include="Xamarinme.PageLifecycle" Version="1.0.0" />
   </ItemGroup>
 
