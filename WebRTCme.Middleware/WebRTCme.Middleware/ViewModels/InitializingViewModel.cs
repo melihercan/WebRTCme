@@ -22,6 +22,7 @@ namespace WebRTCme.Middleware
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         private readonly ISignallingServerService _signallingServerService;
+        private readonly INavigationService _navigationService;
         private string[] _turnServerNames;
 
 
@@ -69,9 +70,11 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public InitializingViewModel(ISignallingServerService signallingServerService)
+        public InitializingViewModel(ISignallingServerService signallingServerService, 
+            INavigationService navigationService)
         {
             _signallingServerService = signallingServerService;
+            _navigationService = navigationService;
         }
 
         public async Task Retry()
@@ -119,7 +122,10 @@ namespace WebRTCme.Middleware
         private async Task NavigateToConnectionParametersPage()
         {
             var turnServerNamesJson = JsonSerializer.Serialize(_turnServerNames);
-            //await Shell.Current.GoToAsync($"///{nameof(ConnectionParametersPage)}?TurnServerNamesJson={turnServerNamesJson}");
+            await _navigationService.NavigateToPageAsync(
+                "ConnectionParametersPage",
+                "TurnServerNamesJson", 
+                turnServerNamesJson);
         }
     }
 }
