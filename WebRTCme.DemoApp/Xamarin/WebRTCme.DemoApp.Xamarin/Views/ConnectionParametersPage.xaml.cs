@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-
+using WebRTCme.Middleware;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarinme;
@@ -16,12 +16,12 @@ namespace DemoApp.Views
     [QueryProperty("TurnServerNamesJson", "TurnServerNamesJson")]
     public partial class ConnectionParametersPage : ContentPage
     {
-        private readonly XConnectionParametersViewModel _connectionParametersViewModel;
+        private readonly ConnectionParametersViewModel _connectionParametersViewModel;
 
         public ConnectionParametersPage()
         {
             InitializeComponent();
-            _connectionParametersViewModel = App.Host.Services.GetService<XConnectionParametersViewModel>();
+            _connectionParametersViewModel = App.Host.Services.GetService<ConnectionParametersViewModel>();
             BindingContext = _connectionParametersViewModel;
         }
 
