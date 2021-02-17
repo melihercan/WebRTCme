@@ -9,6 +9,7 @@ using System.Reflection;
 using WebRTCme.Middleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using WebRTCme.DemoApp.Xamarin.Services;
 
 namespace DemoApp
 {
@@ -28,6 +29,7 @@ namespace DemoApp
                 Prefix = "WebRTCme.DemoApp.Xamarin"
             });
             Configuration = hostBuilder.Configuration;
+            hostBuilder.Services.AddSingleton<INavigationService, NavigationService>();
             hostBuilder.Services.AddMiddleware();
             Host = hostBuilder.Build();
 

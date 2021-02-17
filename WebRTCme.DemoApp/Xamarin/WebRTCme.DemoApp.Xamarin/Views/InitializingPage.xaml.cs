@@ -20,22 +20,13 @@ namespace DemoApp.Views
         {
             InitializeComponent();
             _initializingViewModel = App.Host.Services.GetService<InitializingViewModel>();
-///            _initializingViewModel = new InitializingViewModel();
             BindingContext = _initializingViewModel;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            //await this.OnPageAppearing(_initializingViewModel);
             await _initializingViewModel.ExecuteAsync();
         }
-
-        //protected override async void OnDisappearing()
-        //{
-        //    base.OnDisappearing();
-        //    await this.OnPageDisappearing(_initializingViewModel);
-        //}
-
     }
 }
