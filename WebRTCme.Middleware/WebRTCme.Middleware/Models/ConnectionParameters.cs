@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.DemoApp.Xamarin.Models
+namespace WebRTCme.Middleware
 {
     public class ConnectionParameters
     {

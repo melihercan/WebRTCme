@@ -25,6 +25,12 @@ namespace WebRTCme.Middleware
         private readonly INavigationService _navigationService;
         private string[] _turnServerNames;
 
+        public InitializingViewModel(ISignallingServerService signallingServerService,
+            INavigationService navigationService)
+        {
+            _signallingServerService = signallingServerService;
+            _navigationService = navigationService;
+        }
 
         private bool _isCheckingSignallingServer;
         public bool IsCheckingSignallingServer
@@ -70,12 +76,6 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public InitializingViewModel(ISignallingServerService signallingServerService, 
-            INavigationService navigationService)
-        {
-            _signallingServerService = signallingServerService;
-            _navigationService = navigationService;
-        }
 
         public async Task Retry()
         {

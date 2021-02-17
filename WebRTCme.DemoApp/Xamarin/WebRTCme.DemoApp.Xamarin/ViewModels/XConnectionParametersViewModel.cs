@@ -20,17 +20,17 @@ using Xamarinme;
 namespace DemoApp.ViewModels
 {
     [FluentValidation.Attributes.Validator(typeof(ConnectionParametersValidator))]
-    [QueryProperty(nameof(TurnServerNamesJson), nameof(TurnServerNamesJson))]
-    public class ConnectionParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
+//    [QueryProperty(nameof(TurnServerNamesJson), nameof(TurnServerNamesJson))]
+    public class XConnectionParametersViewModel : AbstractValidationViewModel, INotifyPropertyChanged, IPageLifecycle
     {
-        public string TurnServerNamesJson
-        {
-            set
-            {
-                var turnServerNamesJson = Uri.UnescapeDataString(value);
-                TurnServerNames = JsonSerializer.Deserialize<string[]>(turnServerNamesJson).ToList();
-            }
-        }
+        //public string TurnServerNamesJson
+        //{
+        //    set
+        //    {
+        //        var turnServerNamesJson = Uri.UnescapeDataString(value);
+        //        TurnServerNames = JsonSerializer.Deserialize<string[]>(turnServerNamesJson).ToList();
+        //    }
+        //}
 
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -12,26 +13,26 @@ using Xamarinme;
 namespace DemoApp.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
+    [QueryProperty("TurnServerNamesJson", "TurnServerNamesJson")]
     public partial class ConnectionParametersPage : ContentPage
     {
-        private readonly ConnectionParametersViewModel _connectionParametersViewModel;
+        private readonly XConnectionParametersViewModel _connectionParametersViewModel;
+
         public ConnectionParametersPage()
         {
             InitializeComponent();
-            _connectionParametersViewModel = new ConnectionParametersViewModel();
+            _connectionParametersViewModel = App.Host.Services.GetService<XConnectionParametersViewModel>();
             BindingContext = _connectionParametersViewModel;
         }
 
-        protected override async void OnAppearing()
+        public string TurnServerNamesJson
         {
-            base.OnAppearing();
-            await this.OnPageAppearing(_connectionParametersViewModel);
-        }
-
-        protected override async void OnDisappearing()
-        {
-            base.OnDisappearing();
-            await this.OnPageDisappearing(_connectionParametersViewModel);
+            set
+            {
+                var turnServerNamesJson = Uri.UnescapeDataString(value);
+                var turnServerNames = JsonSerializer.Deserialize<string[]>(turnServerNamesJson).ToList();
+                _connectionParametersViewModel.TurnServerNames = turnServerNames;
+            }
         }
     }
 }

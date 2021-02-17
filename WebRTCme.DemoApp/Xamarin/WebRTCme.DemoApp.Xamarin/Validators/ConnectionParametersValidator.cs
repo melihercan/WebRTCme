@@ -8,7 +8,7 @@ using Xamarin.Plugins.FluentValidation;
 
 namespace WebRTCme.DemoApp.Xamarin.Validators
 {
-    public class ConnectionParametersValidator : EnhancedAbstractValidator<ConnectionParametersViewModel>
+    public class ConnectionParametersValidator : EnhancedAbstractValidator<XConnectionParametersViewModel>
     {
         public ConnectionParametersValidator()
         {

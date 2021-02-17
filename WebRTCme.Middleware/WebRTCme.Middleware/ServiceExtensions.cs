@@ -13,6 +13,7 @@ namespace WebRTCme.Middleware
             services.AddSingleton<IMediaStreamService, MediaStreamService>();
             services.AddSingleton<ISignallingServerService, SignallingServerService>();
             services.AddSingleton<InitializingViewModel>();
+            services.AddSingleton<ConnectionParametersViewModel>();
             return services;
         }
     }

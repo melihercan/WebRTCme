@@ -1,7 +1,47 @@
 ﻿@page "/ConnectionParametersPage"
 @page "/ConnectionParametersPage/{TurnServerNamesJson}"
 
-
-
 <h3>ConnectionParametersPage</h3>
+
+<EditForm Model="@ConnectionParametersViewModel.ConnectionParameters" 
+          OnValidSubmit="@ConnectionParametersViewModel.Join">
+    
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>TURN server name:</label>
+        <InputSelect @bind-Value="ConnectionParametersViewModel.ConnectionParameters.TurnServerName">
+            @if (ConnectionParametersViewModel.TurnServerNames is not null)
+            {
+                @foreach (var turnServerName in ConnectionParametersViewModel.TurnServerNames)
+                {
+                    <option value="@turnServerName">@turnServerName</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+    <div>
+        <label>Room name:</label>
+        <InputText id="roomId" placeholder="enter room name" 
+        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.RoomName" />
+    </div>
+
+    <div>
+        <label>User name:</label>
+        <InputText id="userId" placeholder="enter user name" 
+        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.UserName" />
+    </div>
+
+    <div>
+        <button class="btn btn-primary" type="submit"> 
+            Join call
+        </button>
+        <button class="btn btn-primary" type="submit"> 
+            Join chat
+        </button>
+    </div>
+</EditForm>
+
 
