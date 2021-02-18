@@ -22,10 +22,25 @@ namespace WebRTCme.Middleware
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
 
-        public async Task OnPageAppearing()
+        public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService, 
+            INavigationService navigationService)
+        {
+            _mediaStreamService = mediaStreamService;
+            _signallingServerService = signallingServerService;
+            _navigationService = navigationService;
+        }
+
+        public async Task OnPageAppearing(ConnectionParameters connectionParameters)
         {
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-            Connect();
+            var connectionRequestParameters = new ConnectionRequestParameters
+            {
+                TurnServerName = connectionParameters.TurnServerName,
+                RoomName = connectionParameters.RoomName,
+                UserName = connectionParameters.UserName,
+                LocalStream = LocalStream
+            };
+            Connect(connectionRequestParameters);
         }
 
         public Task OnPageDisappearing()
@@ -33,9 +48,6 @@ namespace WebRTCme.Middleware
             Disconnect();
             return Task.CompletedTask;
         }
-
-        public ConnectionParameters ConnectionParameters { get; set; }
-
 
         private IMediaStream _localStream;
         public IMediaStream LocalStream
@@ -115,6 +127,8 @@ namespace WebRTCme.Middleware
         }
 
         private bool _remote1AudioMuted;
+
+
         public bool Remote1AudioMuted
         {
             get => _remote1AudioMuted;
@@ -125,12 +139,9 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters();
-
-        private void Connect()
+        private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            ConnectionRequestParameters.LocalStream = LocalStream;
-            _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+            _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)

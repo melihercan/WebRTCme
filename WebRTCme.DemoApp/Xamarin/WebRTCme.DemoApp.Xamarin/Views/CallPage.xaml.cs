@@ -17,6 +17,7 @@ namespace DemoApp.Views
     public partial class CallPage : ContentPage
     {
         private readonly CallViewModel _callViewModel;
+        private ConnectionParameters _connectionParameters;
 
         public CallPage()
         {
@@ -30,8 +31,7 @@ namespace DemoApp.Views
             set
             {
                 var connectionParametersJson = Uri.UnescapeDataString(value);
-                var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
-                _callViewModel.ConnectionParameters = connectionParameters;
+                _connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
             }
         }
 
@@ -40,7 +40,7 @@ namespace DemoApp.Views
             base.OnAppearing();
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = true;
-            await _callViewModel.OnPageAppearing();
+            await _callViewModel.OnPageAppearing(_connectionParameters);
         }
 
         protected override async void OnDisappearing()
