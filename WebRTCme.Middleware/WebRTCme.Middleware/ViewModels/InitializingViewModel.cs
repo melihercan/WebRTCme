@@ -32,6 +32,12 @@ namespace WebRTCme.Middleware
             _navigationService = navigationService;
         }
 
+        public async Task OnPageAppearingAsync()
+        {
+            if (await GetTurnServerNamesAsync())
+                await NavigateToConnectionParametersPage();
+        }
+
         private bool _isCheckingSignallingServer;
         public bool IsCheckingSignallingServer
         {
@@ -79,16 +85,11 @@ namespace WebRTCme.Middleware
 
         public async Task Retry()
         {
-            await ExecuteAsync();
+            await OnPageAppearingAsync();
         }
 
         public ICommand RetryCommand => new AsyncCommand(async () => await Retry());
 
-        public async Task ExecuteAsync()
-        {
-            if (await GetTurnServerNamesAsync())
-                await NavigateToConnectionParametersPage();
-        }
 
         private async Task<bool> GetTurnServerNamesAsync()
         {

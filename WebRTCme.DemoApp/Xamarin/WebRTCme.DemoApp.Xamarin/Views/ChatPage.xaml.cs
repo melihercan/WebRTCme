@@ -17,6 +17,7 @@ namespace DemoApp.Views
     public partial class ChatPage : ContentPage
     {
         private readonly ChatViewModel _chatViewModel;
+        private ConnectionParameters _connectionParameters;
 
         public ChatPage()
         {
@@ -30,8 +31,7 @@ namespace DemoApp.Views
             set
             {
                 var connectionParametersJson = Uri.UnescapeDataString(value);
-                var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
-                _chatViewModel.ConnectionParameters = connectionParameters;
+                _connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(connectionParametersJson);
             }
         }
 
@@ -40,7 +40,7 @@ namespace DemoApp.Views
             base.OnAppearing();
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = true;
-            await _chatViewModel.OnPageAppearingAsync();
+            await _chatViewModel.OnPageAppearingAsync(_connectionParameters);
         }
 
         protected override async void OnDisappearing()

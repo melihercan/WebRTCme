@@ -29,13 +29,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await ChatViewModel.OnPageAppearingAsync();
-
-            if (ConnectionParametersJson is not null)
-            {
-                var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(ConnectionParametersJson);
-                ChatViewModel.ConnectionParameters = connectionParameters;
-            }
+            var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(ConnectionParametersJson);
+            await ChatViewModel.OnPageAppearingAsync(connectionParameters);
         }
 
 

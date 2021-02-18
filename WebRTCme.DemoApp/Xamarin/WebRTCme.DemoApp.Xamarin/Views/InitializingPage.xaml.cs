@@ -26,7 +26,7 @@ namespace DemoApp.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await _initializingViewModel.ExecuteAsync();
+            await _initializingViewModel.OnPageAppearingAsync();
         }
     }
 }

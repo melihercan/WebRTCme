@@ -17,7 +17,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await InitializingViewModel.ExecuteAsync();
+            await InitializingViewModel.OnPageAppearingAsync();
         }
     }
 }

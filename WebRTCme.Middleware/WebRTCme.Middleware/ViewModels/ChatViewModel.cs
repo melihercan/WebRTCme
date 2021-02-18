@@ -19,16 +19,26 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private readonly IMediaStreamService _mediaStreamService;
         private readonly ISignallingServerService _signallingServerService;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
 
-
-
-        public Task OnPageAppearingAsync()
+        public ChatViewModel(ISignallingServerService signallingServerService, INavigationService navigationService)
         {
-            Connect();
+            _signallingServerService = signallingServerService;
+            _navigationService = navigationService;
+        }
+
+        public Task OnPageAppearingAsync(ConnectionParameters connectionParameters)
+        {
+            var connectionRequestParameters = new ConnectionRequestParameters
+            {
+                TurnServerName = connectionParameters.TurnServerName,
+                RoomName = connectionParameters.RoomName,
+                UserName = connectionParameters.UserName,
+                DataChannelName = connectionParameters.RoomName
+            };
+            Connect(connectionRequestParameters);
             return Task.CompletedTask;
         }
 
@@ -43,6 +53,7 @@ namespace WebRTCme.Middleware
         public ObservableCollection<DataParameters> Messages { get; set; }
 
         private string _outgoingText = string.Empty;
+
 
         public string OutgoingText
         {
@@ -59,12 +70,9 @@ namespace WebRTCme.Middleware
         });
 
 
-        public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters();
-
-        private void Connect()
+        private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;
-            _connectionDisposer = _signallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
+            _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)
