@@ -21,7 +21,7 @@ namespace WebRtcMeMiddleware.Services
             return self;
         }
 
-        public MediaStreamService(IJSRuntime jsRuntime)
+        public MediaStreamService(IJSRuntime jsRuntime = null)
         {
             _jsRuntime = jsRuntime;
             _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
