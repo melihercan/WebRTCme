@@ -21,7 +21,6 @@ namespace WebRTCme.Middleware
 
         private readonly INavigationService _navigationService;
 
-
         private List<string> _turnServerNames;
 
         public ConnectionParametersViewModel(INavigationService navigationService)

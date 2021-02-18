@@ -16,7 +16,7 @@ using WebRTCme.SignallingServerClient;
 using WebRtcMeMiddleware.Models;
 using Xamarin.Essentials;
 
-namespace WebRtcMeMiddleware
+namespace WebRtcMeMiddleware.Services
 {
     internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
     {

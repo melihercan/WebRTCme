@@ -1,0 +1,14 @@
+﻿@page "/CallPage"
+@page "/CallPage/{ConnectionParametersJson}"
+
+<h1>Call</h1>
+
+<div>
+    <Media Stream="@CallViewModel.LocalStream" Label="@CallViewModel.LocalLabel" 
+    VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
+</div>
+
+<div>
+    <Media Stream="@CallViewModel.Remote1Stream" Label="@CallViewModel.Remote1Label" 
+    VideoMuted="@CallViewModel.Remote1VideoMuted" AudioMuted="@CallViewModel.Remote1AudioMuted" />
+</div>

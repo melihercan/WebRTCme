@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -16,9 +17,10 @@ using Xamarinme;
 namespace DemoApp.ViewModels
 {
     [QueryProperty(nameof(ConnectionParametersJson), nameof(ConnectionParametersJson))]
-    public class CallViewModel : INotifyPropertyChanged, IPageLifecycle
+    public class XChatViewModel : INotifyPropertyChanged, IPageLifecycle
     {
         private IDisposable _connectionDisposer;
+        public ObservableCollection<ChatParameters> Messages { get; set; }
 
         public string ConnectionParametersJson
         {
@@ -36,11 +38,26 @@ namespace DemoApp.ViewModels
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        public async Task OnPageAppearing()
+        private string _outgoingText = string.Empty;
+
+        public string OutgoingText
         {
-            await XamarinSupport.SetCameraAndMicPermissionsAsync();
-            LocalStream = await App.MediaStreamService.GetCameraMediaStreamAsync();
+            get => _outgoingText; 
+            set
+            {
+                _outgoingText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand SendCommand => new Command(async () => 
+        { 
+        });
+
+        public Task OnPageAppearing()
+        {
             Connect();
+            return Task.CompletedTask;
         }
 
         public Task OnPageDisappearing()
@@ -49,110 +66,22 @@ namespace DemoApp.ViewModels
             return Task.CompletedTask;
         }
 
-
-        private IMediaStream _localStream;
-        public IMediaStream LocalStream
-        { 
-            get => _localStream; 
-            set
-            {
-                _localStream = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _localLabel;
-        public string LocalLabel
-        {
-            get => _localLabel;
-            set
-            {
-                _localLabel = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _localVideoMuted;
-        public bool LocalVideoMuted
-        {
-            get => _localVideoMuted;
-            set
-            {
-                _localVideoMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _localAudioMuted;
-        public bool LocalAudioMuted
-        {
-            get => _localAudioMuted;
-            set
-            {
-                _localAudioMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IMediaStream _remote1Stream;
-        public IMediaStream Remote1Stream
-        {
-            get => _remote1Stream;
-            set
-            {
-                _remote1Stream = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _remote1Label;
-        public string Remote1Label
-        {
-            get => _remote1Label;
-            set
-            {
-                _remote1Label = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _remote1VideoMuted;
-        public bool Remote1VideoMuted
-        {
-            get => _remote1VideoMuted;
-            set
-            {
-                _remote1VideoMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _remote1AudioMuted;
-        public bool Remote1AudioMuted
-        {
-            get => _remote1AudioMuted;
-            set
-            {
-                _remote1AudioMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
         public ConnectionRequestParameters ConnectionRequestParameters { get; set; } = new ConnectionRequestParameters();
 
         private void Connect()
         {
-            ConnectionRequestParameters.LocalStream = LocalStream;
+            ConnectionRequestParameters.DataChannelName = ConnectionRequestParameters.RoomName;
             _connectionDisposer = App.SignallingServerService.ConnectionRequest(ConnectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)
                     {
                         case PeerResponseCode.PeerJoined:
-                            if (peerResponseParameters.MediaStream != null)
+                            if (peerResponseParameters.DataChannel != null)
                             {
-                                Remote1Stream = peerResponseParameters.MediaStream;
-                                Remote1Label = peerResponseParameters.PeerUserName;
+                                var dataChannel = peerResponseParameters.DataChannel;
+                                Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
+                                    $"state:{dataChannel.ReadyState}");
                             }
                             break;
 
@@ -164,6 +93,7 @@ namespace DemoApp.ViewModels
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
                             break;
                     }
+
                 },
                 onError: (exception) =>
                 {
@@ -173,7 +103,9 @@ namespace DemoApp.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"************* APP OnCompleted");
                 });
+
         }
+
 
         private void Disconnect()
         {
