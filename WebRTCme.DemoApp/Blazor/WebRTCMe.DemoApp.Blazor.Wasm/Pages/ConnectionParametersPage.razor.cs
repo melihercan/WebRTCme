@@ -20,11 +20,9 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             base.OnInitialized();
 
-            if (TurnServerNamesJson is not null)
-            {
-                var turnServerNames = JsonSerializer.Deserialize<string[]>(TurnServerNamesJson).ToList();
-                ConnectionParametersViewModel.TurnServerNames = turnServerNames;
-            }
+            var turnServerNames = TurnServerNamesJson is null ? null : 
+                JsonSerializer.Deserialize<string[]>(TurnServerNamesJson);
+            ConnectionParametersViewModel.OnPageAppearing(turnServerNames);
         }
     }
 }

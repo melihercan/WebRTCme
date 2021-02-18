@@ -40,14 +40,14 @@ namespace DemoApp.Views
             base.OnAppearing();
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = true;
-            await _chatViewModel.OnPageAppearing();
+            await _chatViewModel.OnPageAppearingAsync();
         }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = false;
-            await _chatViewModel.OnPageDisappearing();
+            await _chatViewModel.OnPageDisappearingAsync();
         }
     }
 }

@@ -40,14 +40,14 @@ namespace DemoApp.Views
             base.OnAppearing();
             await XamarinSupport.SetCameraAndMicPermissionsAsync();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = true;
-            await _callViewModel.OnPageAppearing(_connectionParameters);
+            await _callViewModel.OnPageAppearingAsync(_connectionParameters);
         }
 
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
             Xamarin.Essentials.DeviceDisplay.KeepScreenOn = false;
-            await _callViewModel.OnPageDisappearing();
+            await _callViewModel.OnPageDisappearingAsync();
         }
     }
 }

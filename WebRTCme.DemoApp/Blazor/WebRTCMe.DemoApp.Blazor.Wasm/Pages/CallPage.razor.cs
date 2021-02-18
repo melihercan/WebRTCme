@@ -30,12 +30,12 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
             var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(ConnectionParametersJson);
-            await CallViewModel.OnPageAppearing(connectionParameters);
+            await CallViewModel.OnPageAppearingAsync(connectionParameters);
         }
 
         public void Dispose()
         {
-            Task.Run(async () => await CallViewModel.OnPageDisappearing());
+            Task.Run(async () => await CallViewModel.OnPageDisappearingAsync());
 
 
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!

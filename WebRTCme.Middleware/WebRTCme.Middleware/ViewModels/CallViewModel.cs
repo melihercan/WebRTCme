@@ -30,7 +30,7 @@ namespace WebRTCme.Middleware
             _navigationService = navigationService;
         }
 
-        public async Task OnPageAppearing(ConnectionParameters connectionParameters)
+        public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters)
         {
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
             var connectionRequestParameters = new ConnectionRequestParameters
@@ -43,7 +43,7 @@ namespace WebRTCme.Middleware
             Connect(connectionRequestParameters);
         }
 
-        public Task OnPageDisappearing()
+        public Task OnPageDisappearingAsync()
         {
             Disconnect();
             return Task.CompletedTask;

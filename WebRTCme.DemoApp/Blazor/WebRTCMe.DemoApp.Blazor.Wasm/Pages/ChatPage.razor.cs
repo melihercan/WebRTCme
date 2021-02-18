@@ -29,7 +29,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await ChatViewModel.OnPageAppearing();
+            await ChatViewModel.OnPageAppearingAsync();
 
             if (ConnectionParametersJson is not null)
             {
@@ -41,7 +41,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 
         public void Dispose()
         {
-            Task.Run(async () => await ChatViewModel.OnPageDisappearing());
+            Task.Run(async () => await ChatViewModel.OnPageDisappearingAsync());
 
             //// TODO: How to call async in Dispose??? Currently fire and forget!!!
             //Task.Run(async () => await _signallingServerService.DisposeAsync());

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme.Middleware;
 using Xamarin.Forms;
@@ -17,6 +18,10 @@ namespace DemoApp.Views
     public partial class ConnectionParametersPage : ContentPage
     {
         private readonly ConnectionParametersViewModel _connectionParametersViewModel;
+        private string[] _turnServerNames;
+
+        // To solve the race condition between 'QueryProperty' and 'OnAppearing'.
+        private SemaphoreSlim _sem = new SemaphoreSlim(0);
 
         public ConnectionParametersPage()
         {
@@ -30,9 +35,17 @@ namespace DemoApp.Views
             set
             {
                 var turnServerNamesJson = Uri.UnescapeDataString(value);
-                var turnServerNames = JsonSerializer.Deserialize<string[]>(turnServerNamesJson).ToList();
-                _connectionParametersViewModel.TurnServerNames = turnServerNames;
+                _turnServerNames = JsonSerializer.Deserialize<string[]>(turnServerNamesJson);
+                _sem.Release();
             }
         }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await _sem.WaitAsync(10);
+            _connectionParametersViewModel.OnPageAppearing(_turnServerNames);
+        }
+
     }
 }

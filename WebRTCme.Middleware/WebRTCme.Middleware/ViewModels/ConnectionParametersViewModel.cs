@@ -28,6 +28,12 @@ namespace WebRTCme.Middleware
             _navigationService = navigationService;
         }
 
+        public void OnPageAppearing(string[] turnServerNames)
+        {
+            if (turnServerNames is not null)
+                TurnServerNames = turnServerNames.ToList();
+        }
+
         public List<string> TurnServerNames
         {
             get => _turnServerNames;

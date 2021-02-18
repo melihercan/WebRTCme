@@ -26,13 +26,13 @@ namespace WebRTCme.Middleware
 
 
 
-        public Task OnPageAppearing()
+        public Task OnPageAppearingAsync()
         {
             Connect();
             return Task.CompletedTask;
         }
 
-        public Task OnPageDisappearing()
+        public Task OnPageDisappearingAsync()
         {
             Disconnect();
             return Task.CompletedTask;
