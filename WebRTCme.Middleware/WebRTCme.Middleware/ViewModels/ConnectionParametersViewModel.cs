@@ -47,7 +47,9 @@ namespace WebRTCme.Middleware
         public ConnectionParameters ConnectionParameters { get; set; } = new ConnectionParameters()
         //// FOR TESTING
         {
-
+            TurnServerName = "StunOnly",
+            RoomName = "hello",
+            UserName = "x"
         };
 
         public bool IsCall { get; set; }

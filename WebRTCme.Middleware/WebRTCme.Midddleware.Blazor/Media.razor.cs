@@ -13,10 +13,21 @@ using WebRTCme.SignallingServerClient;
 
 namespace WebRTCme.Middleware.Blazor
 {
+
     public partial class Media : IDisposable
     {
+        private IMediaStream _stream;
         [Parameter]
-        public IMediaStream Stream { get; set; }
+        public IMediaStream Stream
+        {
+            get => _stream;
+            set
+            {
+                _stream = value;
+                if (_stream is not null)
+                    BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, _stream);
+            }
+        }
 
         [Parameter]
         public string Label { get; set; } = string.Empty;
@@ -37,8 +48,8 @@ namespace WebRTCme.Middleware.Blazor
 
         protected override Task OnParametersSetAsync()
         {
-            if (Stream is not null)
-                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
+            //if (Stream is not null)
+              //  BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
 
             return base.OnParametersSetAsync();
         }

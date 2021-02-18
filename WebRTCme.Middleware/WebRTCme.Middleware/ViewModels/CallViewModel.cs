@@ -21,6 +21,7 @@ namespace WebRTCme.Middleware
         private readonly ISignallingServerService _signallingServerService;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
+        private Action _reRender;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService, 
             INavigationService navigationService)
@@ -30,15 +31,17 @@ namespace WebRTCme.Middleware
             _navigationService = navigationService;
         }
 
-        public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters)
+        public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
+            _reRender = reRender;
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
+            LocalLabel = connectionParameters.UserName;
             var connectionRequestParameters = new ConnectionRequestParameters
             {
                 TurnServerName = connectionParameters.TurnServerName,
                 RoomName = connectionParameters.RoomName,
                 UserName = connectionParameters.UserName,
-                LocalStream = LocalStream
+                LocalStream = LocalStream,
             };
             Connect(connectionRequestParameters);
         }
@@ -151,6 +154,8 @@ namespace WebRTCme.Middleware
                             {
                                 Remote1Stream = peerResponseParameters.MediaStream;
                                 Remote1Label = peerResponseParameters.PeerUserName;
+
+                                _reRender?.Invoke();
                             }
                             break;
 
