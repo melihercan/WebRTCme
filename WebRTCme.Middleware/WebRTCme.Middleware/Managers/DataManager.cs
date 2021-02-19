@@ -31,9 +31,7 @@ namespace WebRtcMeMiddleware.Managers
         {
             DataParametersList.Add(new DataParameters
             {
-                From = DataFromType.System,
-                PeerUserName = string.Empty,
-                PeerUserNameTextColor = "#000000",
+                From = DataFromType.Outgoing,
                 Time = DateTime.Now.ToString("HH:mm"),
                 Bytes = data
             });
@@ -48,9 +46,7 @@ namespace WebRtcMeMiddleware.Managers
         {
             DataParametersList.Add(new DataParameters
             {
-                From = DataFromType.System,
-                PeerUserName = string.Empty,
-                PeerUserNameTextColor = "#000000",
+                From = DataFromType.Outgoing,
                 Time = DateTime.Now.ToString("HH:mm"),
                 Message = message
             });
@@ -74,7 +70,6 @@ namespace WebRtcMeMiddleware.Managers
                 {
                     From = DataFromType.System,
                     PeerUserName = peerUserName,
-                    PeerUserNameTextColor = "#222222",
                     Time = DateTime.Now.ToString("HH:mm"),
                     Message = $"User {peerUserName} has left the room"
                 });
@@ -92,7 +87,6 @@ namespace WebRtcMeMiddleware.Managers
                 {
                     From = DataFromType.System,
                     PeerUserName = peerUserName,
-                    PeerUserNameTextColor = "#222222",
                     Time = DateTime.Now.ToString("HH:mm"),
                     Message = $"User {peerUserName} has joined the room"
                 });

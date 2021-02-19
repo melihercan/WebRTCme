@@ -19,7 +19,8 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
+        // A reference is required here. otherwise binding does not work.
+        public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
         private readonly ISignallingServerService _signallingServerService;
         public readonly IDataManager DataManager;
@@ -31,6 +32,7 @@ namespace WebRTCme.Middleware
         {
             _signallingServerService = signallingServerService;
              DataManager = dataManager;
+            DataParametersList = dataManager.DataParametersList;
             _navigationService = navigationService;
         }
 
@@ -70,6 +72,7 @@ namespace WebRTCme.Middleware
         private void Send()
         {
             DataManager.SendString(OutgoingText);
+            OutgoingText = string.Empty;
         }
 
         public ICommand SendCommand => new AsyncCommand(() => 
@@ -94,14 +97,14 @@ namespace WebRTCme.Middleware
                                     $"state:{dataChannel.ReadyState}");
 
 
-                                DataParametersList.Add(new DataParameters
-                                {
-                                    From = DataFromType.System,
-                                    PeerUserName = string.Empty,
-                                    PeerUserNameTextColor = "#000000",
-                                    Time = DateTime.Now.ToString("HH:mm"),
-                                    Message = "Hade ya"
-                                });
+                                //DataParametersList.Add(new DataParameters
+                                //{
+                                //    From = DataFromType.System,
+                                //    PeerUserName = string.Empty,
+                                //    PeerUserNameTextColor = "#000000",
+                                //    Time = DateTime.Now.ToString("HH:mm"),
+                                //    Message = "Hade ya"
+                                //});
 
 
                                 DataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
