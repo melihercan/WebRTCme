@@ -6,11 +6,7 @@ namespace WebRTCme.Middleware
 {
     public class ConnectionRequestParameters
     {
-        public string TurnServerName { get; set; }
-
-        public string RoomName { get; set; }
-
-        public string UserName { get; set; }
+        public ConnectionParameters ConnectionParameters { get; set; }
 
         // If null, no streaming will take place.
         public IMediaStream LocalStream { get; set; }

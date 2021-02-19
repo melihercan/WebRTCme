@@ -9,7 +9,7 @@ namespace WebRtcMeMiddleware.Models
 {
     internal class PeerContext
     {
-        public string PeerUserName { get; set; }
+        public PeerParameters PeerParameters { get; set; }
         
         public IRTCPeerConnection PeerConnection { get; set; }
 

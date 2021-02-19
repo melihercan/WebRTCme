@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -38,9 +39,7 @@ namespace WebRTCme.Middleware
             LocalLabel = connectionParameters.UserName;
             var connectionRequestParameters = new ConnectionRequestParameters
             {
-                TurnServerName = connectionParameters.TurnServerName,
-                RoomName = connectionParameters.RoomName,
-                UserName = connectionParameters.UserName,
+                ConnectionParameters = connectionParameters,
                 LocalStream = LocalStream,
             };
             Connect(connectionRequestParameters);

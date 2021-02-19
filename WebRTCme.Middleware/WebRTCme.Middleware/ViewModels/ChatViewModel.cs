@@ -33,9 +33,7 @@ namespace WebRTCme.Middleware
         {
             var connectionRequestParameters = new ConnectionRequestParameters
             {
-                TurnServerName = connectionParameters.TurnServerName,
-                RoomName = connectionParameters.RoomName,
-                UserName = connectionParameters.UserName,
+                ConnectionParameters = connectionParameters,
                 DataChannelName = connectionParameters.RoomName
             };
             Connect(connectionRequestParameters);
@@ -50,7 +48,6 @@ namespace WebRTCme.Middleware
 
         public ConnectionParameters ConnectionParameters { get; set; }
 
-        public ObservableCollection<DataParameters> Messages { get; set; }
 
         private string _outgoingText = string.Empty;
 

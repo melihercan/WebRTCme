@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DemoApp.ViewModels;
 using DemoApp.Views;
 using Xamarin.Forms;
 using WebRTCme;
