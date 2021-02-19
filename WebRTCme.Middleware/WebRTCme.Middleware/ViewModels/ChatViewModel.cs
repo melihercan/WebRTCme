@@ -20,12 +20,15 @@ namespace WebRTCme.Middleware
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         private readonly ISignallingServerService _signallingServerService;
+        private readonly IDataManager _dataManager;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
 
-        public ChatViewModel(ISignallingServerService signallingServerService, INavigationService navigationService)
+        public ChatViewModel(ISignallingServerService signallingServerService, IDataManager dataManager, 
+            INavigationService navigationService)
         {
             _signallingServerService = signallingServerService;
+            _dataManager = dataManager;
             _navigationService = navigationService;
         }
 
@@ -62,8 +65,15 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public ICommand SendCommand => new AsyncCommand(async () => 
-        { 
+        private void Send(string message)
+        {
+            _dataManager.SendString(message);
+        }
+
+        public ICommand SendCommand => new AsyncCommand<string>((message) => 
+        {
+            Send(message);
+            return Task.CompletedTask;
         });
 
 
@@ -80,11 +90,13 @@ namespace WebRTCme.Middleware
                                 var dataChannel = peerResponseParameters.DataChannel;
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
+                                _dataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
                             }
                             break;
 
                         case PeerResponseCode.PeerLeft:
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
+                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
                             break;
 
                         case PeerResponseCode.PeerError:
