@@ -19,8 +19,10 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+        public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
+
         private readonly ISignallingServerService _signallingServerService;
-        private readonly IDataManager _dataManager;
+        public readonly IDataManager DataManager;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
 
@@ -28,7 +30,7 @@ namespace WebRTCme.Middleware
             INavigationService navigationService)
         {
             _signallingServerService = signallingServerService;
-            _dataManager = dataManager;
+             DataManager = dataManager;
             _navigationService = navigationService;
         }
 
@@ -65,14 +67,14 @@ namespace WebRTCme.Middleware
             }
         }
 
-        private void Send(string message)
+        private void Send()
         {
-            _dataManager.SendString(message);
+            DataManager.SendString(OutgoingText);
         }
 
-        public ICommand SendCommand => new AsyncCommand<string>((message) => 
+        public ICommand SendCommand => new AsyncCommand(() => 
         {
-            Send(message);
+            Send();
             return Task.CompletedTask;
         });
 
@@ -90,13 +92,25 @@ namespace WebRTCme.Middleware
                                 var dataChannel = peerResponseParameters.DataChannel;
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
-                                _dataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
+
+
+                                DataParametersList.Add(new DataParameters
+                                {
+                                    From = DataFromType.System,
+                                    PeerUserName = string.Empty,
+                                    PeerUserNameTextColor = "#000000",
+                                    Time = DateTime.Now.ToString("HH:mm"),
+                                    Message = "Hade ya"
+                                });
+
+
+                                DataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
                             }
                             break;
 
                         case PeerResponseCode.PeerLeft:
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
-                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
+                            DataManager.RemovePeer(peerResponseParameters.PeerUserName);
                             break;
 
                         case PeerResponseCode.PeerError:

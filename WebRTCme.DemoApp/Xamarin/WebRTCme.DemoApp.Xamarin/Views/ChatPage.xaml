@@ -13,7 +13,7 @@
     <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="*,Auto">
         <CollectionView x:Name="MessagesCollectionView" 
 			            ItemTemplate="{StaticResource ChatDataTemplateSelector}" 
-			            ItemsSource="{Binding Messages}" />
+			            ItemsSource="{Binding DataParametersList}" />
 
         <StackLayout Orientation="Horizontal" Grid.Row="1" Padding="10" BackgroundColor="#EFEFEF">
             <Entry HorizontalOptions="FillAndExpand" HeightRequest="25" Placeholder="Message" 

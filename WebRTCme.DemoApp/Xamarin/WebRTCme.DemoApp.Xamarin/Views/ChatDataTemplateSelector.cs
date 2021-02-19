@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme.DemoApp.Xamarin.Enums;
-using WebRTCme.DemoApp.Xamarin.Models;
+using WebRTCme.Middleware;
 using Xamarin.Forms;
 
 namespace WebRTCme.DemoApp.Xamarin.Views
@@ -14,14 +14,14 @@ namespace WebRTCme.DemoApp.Xamarin.Views
         private readonly DataTemplate _systemChatView = new DataTemplate(typeof(SystemChatView));
         protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
         {
-            var chatParameters = item as ChatParameters;
-            if (chatParameters is null)
+            var dataParameters = item as DataParameters;
+            if (dataParameters is null)
                 return null;
-            return chatParameters.ChatMessageType switch
+            return dataParameters.From switch
             {
-                ChatMessageType.System => _systemChatView,
-                ChatMessageType.Incoming => _incomingChatView,
-                ChatMessageType.Outgoing => _outputChatView,
+                DataFromType.System => _systemChatView,
+                DataFromType.Incoming => _incomingChatView,
+                DataFromType.Outgoing => _outputChatView,
                 _ => throw new NotSupportedException()
             };
         }
