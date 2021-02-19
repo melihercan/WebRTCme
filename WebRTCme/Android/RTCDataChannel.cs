@@ -58,7 +58,8 @@ namespace WebRtc.Android
             else
                 throw new ArgumentException($"{data.GetType()} type is not supported");
 
-            ((Webrtc.DataChannel)NativeObject).Send(buffer);
+       var state = ((Webrtc.DataChannel)NativeObject).InvokeState();
+            var result = ((Webrtc.DataChannel)NativeObject).Send(buffer);
         }
 
         #region NativeEvents

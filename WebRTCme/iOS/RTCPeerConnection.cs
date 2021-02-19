@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
 
@@ -264,16 +265,51 @@ namespace WebRtc.iOS
             OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
         }
 
-        // This event is optional in iOS. Decide about the connection in 'DidChangeIceConnectionState'.
         public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceConnectionState newState)
         {
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
-            if (newState == Webrtc.RTCIceConnectionState.Connected || 
-                newState == Webrtc.RTCIceConnectionState.Disconnected)
-                    OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+            // Make sure that state is connected with several attempts.
+            if (newState == Webrtc.RTCIceConnectionState.Connected)
+            {
+                Timer timer = null;
+                int count = 5;
 
+                System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState.Connected");
+
+                // Make sure that state is connected with several attempts.
+                timer = new Timer(new TimerCallback((state) =>
+                {
+                    if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState == 
+                        Webrtc.RTCPeerConnectionState.Connected || --count == 0)
+                    {
+                        timer.Dispose();
+                        System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED {count}");
+                        OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+                        return;
+                    }
+                }), null, 10, 50);
+                return;
+            }
+            else if (newState == Webrtc.RTCIceConnectionState.Disconnected)
+            {
+                Timer timer = null;
+                int count = 5;
+
+                // Make sure that state is disconnected with several attempsts.
+                timer = new Timer(new TimerCallback((state) =>
+                {
+                    if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState ==
+                        Webrtc.RTCPeerConnectionState.Disconnected || --count == 0)
+                    {
+                        timer.Dispose();
+                        OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+                        return;
+                    }
+                }), null, 10, 50);
+                return;
+            }
         }
 
         public void DidChangeIceGatheringState(Webrtc.RTCPeerConnection peerConnection, 

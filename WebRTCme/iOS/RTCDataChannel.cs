@@ -55,7 +55,8 @@ namespace WebRtc.iOS
             else
                 throw new ArgumentException($"{data.GetType()} type is not supported");
 
-            ((Webrtc.RTCDataChannel)NativeObject).SendData(buffer);
+      var state = ((Webrtc.RTCDataChannel)NativeObject).ReadyState;
+            var result = ((Webrtc.RTCDataChannel)NativeObject).SendData(buffer);
         }
 
         #region NativeEvents

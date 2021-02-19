@@ -230,17 +230,15 @@ namespace WebRtc.Android
                 Timer timer = null;
                 int count = 5;
 
-                System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState.Connected");
-
-                // Make sure that state is connected with several attempsts.
+                // Make sure that state is connected with several attempts.
                 timer = new Timer(new TimerCallback((state) => 
                 {
                     if (((Webrtc.PeerConnection)NativeObject).ConnectionState() == 
                         Webrtc.PeerConnection.PeerConnectionState.Connected || --count == 0)
                     {
                         timer.Dispose();
-                        System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED");
-                        OnConnectionStateChanged(this, EventArgs.Empty);
+                        System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED {count}");
+                        OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
                         return;
                     }
                 }), null, 10, 50);
@@ -264,7 +262,7 @@ namespace WebRtc.Android
                         Webrtc.PeerConnection.PeerConnectionState.Disconnected || --count == 0)
                     {
                         timer.Dispose();
-                        OnConnectionStateChanged(this, EventArgs.Empty);
+                        OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
                         return;
                     }
                 }), null, 10, 50);
