@@ -10,7 +10,7 @@ namespace WebRTCme.Middleware
 
         public string PeerUserName { get; set; }
 
-        string PeerUserNameTextColor { get; set; } 
+        public string PeerUserNameTextColor { get; set; } 
 
         public string Time { get; set; }
 
