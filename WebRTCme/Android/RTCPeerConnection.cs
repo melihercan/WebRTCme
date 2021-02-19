@@ -230,6 +230,8 @@ namespace WebRtc.Android
                 Timer timer = null;
                 int count = 5;
 
+                System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState.Connected");
+
                 // Make sure that state is connected with several attempsts.
                 timer = new Timer(new TimerCallback((state) => 
                 {
@@ -237,6 +239,7 @@ namespace WebRtc.Android
                         Webrtc.PeerConnection.PeerConnectionState.Connected || --count == 0)
                     {
                         timer.Dispose();
+                        System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED");
                         OnConnectionStateChanged(this, EventArgs.Empty);
                         return;
                     }
@@ -271,13 +274,11 @@ namespace WebRtc.Android
             else if (p0 == Webrtc.PeerConnection.IceConnectionState.Closed)
             {
             }
-
-            OnConnectionStateChanged(this, EventArgs.Empty);
         }
 
         public void OnIceConnectionReceivingChange(bool p0)
         {
-
+            System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO OnIceConnectionReceivingChange:{p0}");
         }
 
         public void OnIceGatheringChange(Webrtc.PeerConnection.IceGatheringState p0) =>

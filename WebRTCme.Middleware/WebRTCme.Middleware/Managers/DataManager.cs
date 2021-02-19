@@ -100,14 +100,18 @@ namespace WebRtcMeMiddleware.Managers
 
             void DataChannel_OnOpen(object sender, EventArgs e)
             {
+                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnOpen");
             }
 
             void DataChannel_OnClose(object sender, EventArgs e)
             {
+                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnClose");
             }
 
             void DataChannel_OnMessage(object sender, IMessageEvent e)
             {
+                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnMessage");
+
                 var dataParameters = new DataParameters
                 {
                     From = DataFromType.Incoming,
@@ -128,6 +132,7 @@ namespace WebRtcMeMiddleware.Managers
 
             void DataChannel_OnError(object sender, IErrorEvent e)
             {
+                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnError");
                 throw new NotImplementedException();
             }
         }
