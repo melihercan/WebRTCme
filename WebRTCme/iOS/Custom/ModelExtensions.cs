@@ -39,11 +39,10 @@ namespace WebRtc.iOS
             new Webrtc.RTCDataChannelConfiguration
             {
                 IsOrdered = dataChannelInit.Ordered ?? true,
-                MaxPacketLifeTime = dataChannelInit.MaxPacketLifeTime ?? -1,
                 MaxRetransmits = dataChannelInit.MaxRetransmits ?? -1,
                 Protocol = dataChannelInit.Protocol ?? string.Empty,
                 IsNegotiated = dataChannelInit.Negotiated ?? false,
-                StreamId = dataChannelInit.Id ?? WebRTCme.WebRtc.Id
+                ChannelId = dataChannelInit.Id ?? WebRTCme.WebRtc.Id
             };
 
         public static Webrtc.RTCSessionDescription ToNative(this RTCSessionDescriptionInit description) =>

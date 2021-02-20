@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using WebRTCme;
 using WebRTCme.Middleware;
+using Xamarin.Essentials;
 
 namespace WebRTCme.Middleware
 {
@@ -23,9 +24,23 @@ namespace WebRTCme.Middleware
 
         private List<string> _turnServerNames;
 
+
         public ConnectionParametersViewModel(INavigationService navigationService)
         {
             _navigationService = navigationService;
+
+
+            // Default values for debugging.
+            var platformName = string.Empty;
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+                platformName = "Android";
+            else if (DeviceInfo.Platform == DevicePlatform.iOS)
+                platformName = "iOS";
+            else
+                platformName = "Blazor";
+            ConnectionParameters.TurnServerName = "StunOnly";
+            ConnectionParameters.RoomName = "hello";
+            ConnectionParameters.UserName = platformName;
         }
 
         public void OnPageAppearing(string[] turnServerNames)
@@ -44,15 +59,10 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public ConnectionParameters ConnectionParameters { get; set; } = new ConnectionParameters()
-        //// FOR TESTING
-        {
-            TurnServerName = "StunOnly",
-            RoomName = "hello",
-            UserName = "x"
-        };
+        public ConnectionParameters ConnectionParameters { get; set; } = new ConnectionParameters();
 
         public bool IsCall { get; set; }
+
         public async Task Join()
         {
             if (IsCall == true)
@@ -65,6 +75,9 @@ namespace WebRTCme.Middleware
 
         public async Task JoinCall()
         {
+/// TESTING
+ConnectionParameters.TurnServerName = "StunOnly";
+
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigationService.NavigateToPageAsync(
                 "",
@@ -77,6 +90,8 @@ namespace WebRTCme.Middleware
 
         public async Task JoinChat()
         {
+/// TESTING
+ConnectionParameters.TurnServerName = "StunOnly";
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigationService.NavigateToPageAsync(
                 "",
