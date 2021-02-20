@@ -268,6 +268,8 @@ namespace WebRtc.iOS
         public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceConnectionState newState)
         {
+            //System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState: {newState}");
+
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
             // Make sure that state is connected with several attempts.
@@ -276,7 +278,6 @@ namespace WebRtc.iOS
                 Timer timer = null;
                 int count = 5;
 
-                System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState.Connected");
 
                 // Make sure that state is connected with several attempts.
                 timer = new Timer(new TimerCallback((state) =>
@@ -343,7 +344,8 @@ namespace WebRtc.iOS
         public void DidChangeConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCPeerConnectionState newState)
         {
-////            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+            System.Diagnostics.Debug.WriteLine($"=============================== PeerConnection.RTCPeerConnectionState: {newState}");
+            ////            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidStartReceivingOnTransceiver(Webrtc.RTCPeerConnection peerConnection,

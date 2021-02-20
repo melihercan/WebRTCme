@@ -2098,6 +2098,7 @@ namespace Webrtc
 		[Export("peerConnection:didChangeStandardizedIceConnectionState:")]
 		void DidChangeStandardizedIceConnectionState(RTCPeerConnection peerConnection, RTCIceConnectionState newState);
 
+		[Abstract]
 		// @optional -(void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeConnectionState:(RTCPeerConnectionState)newState;
 		[Export("peerConnection:didChangeConnectionState:")]
 		void DidChangeConnectionState(RTCPeerConnection peerConnection, RTCPeerConnectionState newState);
