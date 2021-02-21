@@ -227,18 +227,23 @@ namespace WebRtcMeMiddleware.Services
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
-                
-               
+
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");
+                await peerConnection.SetLocalDescription(offerDescription);
+
+
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                 DebugPrint($"######## Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
                 await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
 
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
-                await peerConnection.SetLocalDescription(offerDescription);
+                //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
+                //await peerConnection.SetLocalDescription(offerDescription);
             }
             catch (Exception ex)
             {
@@ -326,16 +331,21 @@ namespace WebRtcMeMiddleware.Services
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
 
+                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");
+                await peerConnection.SetLocalDescription(answerDescription);
+
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 DebugPrint($"######## Sending Answer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
 
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
-                await peerConnection.SetLocalDescription(answerDescription);
+                //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
+                //await peerConnection.SetLocalDescription(answerDescription);
             }
             catch (Exception ex)
             {
