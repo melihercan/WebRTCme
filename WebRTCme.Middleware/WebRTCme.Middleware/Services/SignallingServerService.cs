@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace WebRtcMeMiddleware.Services
     internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
     {
         private readonly IJSRuntime _jsRuntime;
+        private readonly ILogger<SignallingServerService> _logger;
         private readonly string _signallingServerBaseUrl;
         private ISignallingServerClient _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
@@ -141,79 +143,16 @@ namespace WebRtcMeMiddleware.Services
                     StringComparison.OrdinalIgnoreCase));
 
         #region SignallingServerCallbacks
-        //// TODO: NOT a good idea to run async ops on callbacks, especially on iOS. Callbacks returning tsks will not be
-        /// handled correctly. Create a separate task and schedule callbacks there!!!
-        /// Use Task.Channels to create a pipeline. CallbackPipeline.
-#if false
-        public Task OnRoomStarted(string roomName, RTCIceServer[] iceServers)
-        {
-            DebugPrint($"====> OnRoomStarted - room:{roomName}");
-
-            var roomContext = RoomContextFromName(roomName);
-            try
-            {
-                if (roomContext.RoomState == RoomState.Error)
-                    return Task.CompletedTask;
-                if (roomContext.RoomState != RoomState.Connecting)
-                    throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
-
-                roomContext.IceServers = iceServers;
-                roomContext.RoomState = RoomState.Connected;
-                
-                PeerCallbackSubject.OnNext(new PeerCallbackParameters 
-                { 
-                    Code = PeerCallbackCode.RoomStarted,
-                    RoomName = roomName
-                });
-            }
-            catch (Exception ex)
-            {
-                roomContext.RoomState = RoomState.Error;
-                PeerCallbackSubject.OnError(ex);
-            }
-            return Task.CompletedTask;
-        }
-
-        public Task OnRoomStopped(string roomName)
-        {
-            var roomContext = RoomContextFromName(roomName);
-            if (roomContext is null)
-                return Task.CompletedTask;
-            try
-            {
-                if (roomContext.RoomState == RoomState.Error)
-                    return Task.CompletedTask;
-
-                if (roomContext.RoomState != RoomState.Connected)
-                    throw new Exception($"Room {roomContext.JoinRoomRequestParameters.RoomName} " +
-                        $"is in wrong state {roomContext.RoomState}");
-
-                roomContext.RoomState = RoomState.Disconnected;
-                PeerCallbackSubject.OnNext(new PeerCallbackParameters 
-                { 
-                    Code = PeerCallbackCode.RoomStopped,
-                    RoomName = roomName
-                });
-                PeerCallbackSubject.OnCompleted();
-            }
-            catch (Exception ex)
-            {
-                roomContext.RoomState = RoomState.Error;
-                PeerCallbackSubject.OnError(ex);
-            }
-            return Task.CompletedTask;
-        }
-#endif
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
             Subject<PeerResponseParameters> subject = null;
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                DebugPrint($">>>>>>>> OnPeerJoined - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $">>>>>>>> OnPeerJoined - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
 
                 await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName, isInitiator: true);
                 var peerContext = connectionContext.PeerContexts
@@ -228,16 +167,18 @@ namespace WebRtcMeMiddleware.Services
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
 
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
 
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                DebugPrint($"######## Sending Offer - room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //_logger.LogInformation(
+                //    $"######## Sending Offer - room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
                 await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
 
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -264,9 +205,10 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                DebugPrint($">>>>>>>> OnPeerLeft - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $">>>>>>>> OnPeerLeft - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 var peerContext = connectionContext.PeerContexts
                     .Single(context => context.PeerParameters.PeerUserName
                     .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
@@ -303,7 +245,8 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                DebugPrint($">>>>>>>> OnPeerSdpOffered - turn:{turnServerName} room:{roomName} " +
+                _logger.LogDebug(
+                    $"<-------- OnPeerSdpOffered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}"); //peedSdp:{peerSdp}");
                 var peerContext = connectionContext.PeerContexts
@@ -321,9 +264,10 @@ namespace WebRtcMeMiddleware.Services
 
                 var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
-                DebugPrint($"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(offerDescription);
 
                 var answerDescription = await peerConnection.CreateAnswer();
@@ -331,16 +275,18 @@ namespace WebRtcMeMiddleware.Services
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
 
-                DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
 
                 var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-                DebugPrint($"######## Sending Answer - room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //_logger.LogInformation(
+                //    $"######## Sending Answer - room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
+                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
 
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -367,7 +313,8 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                DebugPrint($">>>>>>>> OnPeerSdpAnswered - turn:{turnServerName} room:{roomName} " +
+                _logger.LogDebug(
+                    $"<-------- OnPeerSdpAnswered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// peerSdp:{peerSdp}");
                 var peerContext = connectionContext.PeerContexts
@@ -378,9 +325,10 @@ namespace WebRtcMeMiddleware.Services
 
                 var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
                     _jsonSerializerOptions);
-                DebugPrint($"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 await peerConnection.SetRemoteDescription(answerDescription);
             }
             catch (Exception ex)
@@ -403,7 +351,8 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                DebugPrint($">>>>>>>> OnPeerIceCandidate - turn:{turnServerName} room:{roomName} " +
+                _logger.LogDebug(
+                    $"<-------- OnPeerIceCandidate - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName} " +
                     $"peerIce:{peerIce}");
@@ -415,9 +364,10 @@ namespace WebRtcMeMiddleware.Services
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
                     _jsonSerializerOptions);
-                DebugPrint($"**** AddIceCandidate - turn:{turnServerName} room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");
+                //_logger.LogInformation(
+                //    $"**** AddIceCandidate - turn:{turnServerName} room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");
                 await peerConnection.AddIceCandidate(iceCandidate);
             }
             catch (Exception ex)
@@ -539,7 +489,8 @@ namespace WebRtcMeMiddleware.Services
 
                 void OnConnectionStateChanged(object s, EventArgs e)
                 {
-                    DebugPrint($"====> OnConnectionStateChanged - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnConnectionStateChanged - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
@@ -559,9 +510,11 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
-                    DebugPrint($"====> OnDataChannel - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnDataChannel - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        $"peerUser:{peerUserName}");
+                        $"peerUser:{peerUserName} " +
+                        $"state:{e.Channel.ReadyState}");
                     dataChannel = e.Channel;
                     peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
                     {
@@ -575,9 +528,10 @@ namespace WebRtcMeMiddleware.Services
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-                    DebugPrint($"====> OnIceCandidate - room:{roomName} " +
-                        $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        $"peerUser:{peerUserName}");
+                    //_logger.LogInformation(
+                    //    $"====> OnIceCandidate - room:{roomName} " +
+                    //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    //    $"peerUser:{peerUserName}");
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
@@ -590,55 +544,43 @@ namespace WebRtcMeMiddleware.Services
                             //UsernameFragment = ???
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
-                        DebugPrint($"######## Sending ICE Candidate - room:{roomName} " +
-                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                            $"peerUser:{peerUserName} " +
-                            $"ice:{ice}");
+                        //_logger.LogInformation(
+                        //    $"######## Sending ICE Candidate - room:{roomName} " +
+                        //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                        //    $"peerUser:{peerUserName} " +
+                        //    $"ice:{ice}");
                         await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
 
                     }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
-                    DebugPrint($"====> OnIceConnectionStateChange - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnIceConnectionStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
                         $"iceConnectionState:{peerConnection.IceConnectionState}");
                 }
                 void OnIceGatheringStateChange(object s, EventArgs e)
                 {
-                    DebugPrint($"====> OnIceGatheringStateChange - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnIceGatheringStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
                         $"iceGatheringState: {peerConnection.IceGatheringState}");
                 }
                 void OnNegotiationNeeded(object s, EventArgs e)
                 {
-                    DebugPrint($"====> OnNegotiationNeeded - room:{roomName} " +
-                        $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        $"peerUser:{peerUserName}");
+                    //_logger.LogInfo(
+                    //    $"######## OnNegotiationNeeded - room:{roomName} " +
+                    //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    //    $"peerUser:{peerUserName}");
                     //// TODO: WHAT IF Not initiator adds track (which trigggers this event)???
-
-#if false
-                    if (peerConnectionContext.IsInitiator)
-                    {
-                        var offerDescription = await peerConnection.CreateOffer();
-                        DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                            $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");
-                        // Android DOES NOT expose 'Type'!!! I set it manually here. 
-                        if (DeviceInfo.Platform == DevicePlatform.Android)
-                            offerDescription.Type = RTCSdpType.Offer;
-                        await peerConnection.SetLocalDescription(offerDescription);
-                        var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                        DebugPrint($"######## Sending Offer - room:{roomName} " +
-                            $"user:{roomContext.JoinRoomRequestParameters.UserName} peerUser:{peerUserName}");// sdp:{sdp}");
-                        await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
-                    }
-#endif
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
                 {
-                    DebugPrint($"====> OnSignallingStateChange - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnSignallingStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName}, " +
                         $"signallingState:{ peerConnection.SignalingState }");
@@ -652,7 +594,8 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnTrack(object s, IRTCTrackEvent e)
                 {
-                    DebugPrint($"====> OnTrack - room:{roomName} " +
+                    _logger.LogDebug(
+                        $"######## OnTrack - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName}");
                     mediaStream.AddTrack(e.Track);
@@ -670,13 +613,5 @@ namespace WebRtcMeMiddleware.Services
                 });
             }
         }
-
-        private static void DebugPrint(string message)
-        {
-            Console.WriteLine(message);
-            //System.Diagnostics.Debug.WriteLine(message);
-        }
-
-
     }
 }
