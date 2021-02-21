@@ -95,7 +95,7 @@ namespace WebRTCme.Middleware
             }
         }
 
-        private void Send()
+        public void Send()
         {
             DataManager.SendString(OutgoingText);
             OutgoingText = string.Empty;

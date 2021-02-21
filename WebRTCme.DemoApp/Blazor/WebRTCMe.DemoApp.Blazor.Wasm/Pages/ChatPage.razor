@@ -1,5 +1,16 @@
 ﻿@page "/ChatPage"
 @page "/ChatPage/{ConnectionParametersJson}"
+@layout BlankLayout
+
+<style>
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4rem; 
+  }
+</style>
+
 
 
 <h1>Chat</h1>
@@ -11,4 +22,15 @@
 }
 </div>
 
+<div class="footer d-flex bg-primary px-4 py-2 align-items-center">
+    <div class="flex-grow-1 bg-warning">
+        <EditForm Model="@ChatViewModel.OutgoingText">
+            <InputText @bind-Value="ChatViewModel.OutgoingText"/>
+        </EditForm>
+    </div> 
+    <button class="btn btn-primary ml-auto" @onclick="ChatViewModel.Send">
+        Send
+    </button>
+
+</div>
 
