@@ -63,7 +63,7 @@ namespace WebRtcMeMiddleware.Managers
                 dataChannel.OnOpen -= DataChannel_OnOpen;
                 dataChannel.OnClose -= DataChannel_OnClose;
                 dataChannel.OnError -= DataChannel_OnError;
-                //dataChannel.OnMessage -= DataChannel_OnMessage;
+                dataChannel.OnMessage -= DataChannel_OnMessage;
                 _peers.Remove(peerUserName);
 
                 DataParametersList.Add(new DataParameters
@@ -94,17 +94,17 @@ namespace WebRtcMeMiddleware.Managers
 
             void DataChannel_OnOpen(object sender, EventArgs e)
             {
-                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnOpen");
+                Console.WriteLine($"************* DataChannel_OnOpen");
             }
 
             void DataChannel_OnClose(object sender, EventArgs e)
             {
-                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnClose");
+                Console.WriteLine($"************* DataChannel_OnClose");
             }
 
             void DataChannel_OnMessage(object sender, IMessageEvent e)
             {
-                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnMessage");
+                Console.WriteLine($"************* DataChannel_OnMessage");
 
                 var dataParameters = new DataParameters
                 {
@@ -126,7 +126,7 @@ namespace WebRtcMeMiddleware.Managers
 
             void DataChannel_OnError(object sender, IErrorEvent e)
             {
-                System.Diagnostics.Debug.WriteLine($"************* DataChannel_OnError");
+                Console.WriteLine($"************* DataChannel_OnError");
                 throw new NotImplementedException();
             }
         }
