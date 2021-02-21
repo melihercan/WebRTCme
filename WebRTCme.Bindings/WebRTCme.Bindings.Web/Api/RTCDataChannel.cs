@@ -65,7 +65,7 @@ namespace WebRtcBindingsWeb.Api
 
         public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 
-        public void Send(object data) => JsRuntime.CallJsMethodVoid(NativeObject, "send");
+        public void Send(object data) => JsRuntime.CallJsMethodVoid(NativeObject, "send", data);
 
     }
 }
