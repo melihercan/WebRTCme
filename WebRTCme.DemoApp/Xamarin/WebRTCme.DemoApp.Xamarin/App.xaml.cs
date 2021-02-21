@@ -1,6 +1,5 @@
 ﻿using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 using DemoApp.Views;
 using WebRTCme.Middleware.Xamarin;
 using Microsoft.Extensions.Configuration;
@@ -15,11 +14,7 @@ namespace DemoApp
 {
     public partial class App : Application
     {
-        public static IConfiguration Configuration { get; private set; }
         public static IHost Host { get; private set; }
-        public static IWebRtcMiddleware WebRtcMiddleware { get; private set; }
-        public static ISignallingServerService SignallingServerService { get; private set; }
-        public static IMediaStreamService MediaStreamService { get; private set; }
 
         public App()
         {
@@ -28,7 +23,8 @@ namespace DemoApp
                 Assembly = Assembly.GetExecutingAssembly(),
                 Prefix = "WebRTCme.DemoApp.Xamarin"
             });
-            Configuration = hostBuilder.Configuration;
+
+            _ = CrossWebRtcMiddlewareXamarin.Current;
             hostBuilder.Services.AddSingleton<INavigationService, NavigationService>();
             hostBuilder.Services.AddMiddleware();
             Host = hostBuilder.Build();
@@ -40,11 +36,10 @@ namespace DemoApp
 
         protected override async void OnStart()
         {
-            var WebRtcMiddlevare = CrossWebRtcMiddlewareXamarin.Current;
-            SignallingServerService = await WebRtcMiddlevare
-                .CreateSignallingServerServiceAsync(App.Configuration/*["SignallingServer:BaseUrl"]*/);
-            MediaStreamService = await WebRtcMiddlevare
-                .CreateMediaStreamServiceAsync();
+            var mediaStreamService = Host.Services.GetService<IMediaStreamService>();
+            await mediaStreamService.Initialization;
+            var signallingServerService = Host.Services.GetService<ISignallingServerService>();
+            await signallingServerService.Initialization;
         }
 
         protected override void OnSleep()

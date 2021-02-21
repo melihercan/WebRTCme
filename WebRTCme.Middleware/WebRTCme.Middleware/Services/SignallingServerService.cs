@@ -22,7 +22,7 @@ namespace WebRtcMeMiddleware.Services
     internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
     {
         private readonly IJSRuntime _jsRuntime;
-        private readonly ILogger<SignallingServerService> _logger;
+        private readonly ILogger<ISignallingServerService> _logger;
         private readonly string _signallingServerBaseUrl;
         private ISignallingServerClient _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
@@ -33,19 +33,21 @@ namespace WebRtcMeMiddleware.Services
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        static public async Task<ISignallingServerService> CreateAsync(/*string signallingServerBaseUrl*/
-            IConfiguration configuration, 
+        static public async Task<ISignallingServerService> CreateAsync(
+            IConfiguration configuration,
+            ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null)
         {
-            var self = new SignallingServerService(/*signallingServerBaseUrl*/configuration, jsRuntime);
+            var self = new SignallingServerService(configuration, logger, jsRuntime);
             await self.Initialization;
             return self;
         }
 
-        public SignallingServerService(/*string signallingServerBaseUrl*/IConfiguration configuration, 
+        public SignallingServerService(IConfiguration configuration, ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null)
         {
-            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];// signallingServerBaseUrl;
+            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
+            _logger = logger;
             _jsRuntime = jsRuntime;
             Initialization = InitializeAsync();
         }

@@ -29,13 +29,19 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
             { 
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
             });
+
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+
             builder.Services.AddBlazoredModal();
 
             _ = CrossWebRtcMiddlewareBlazor.Current;
             builder.Services.AddSingleton<INavigationService, NavigationService>();
             builder.Services.AddMiddleware();
 
-            //await builder.Build().RunAsync();
+            ///if (builder.HostEnvironment.IsDevelopment())
+               // Console.WriteLine($"ENV IS:DEVELOPMENT");
+
             var host = builder.Build();
 
             ConfigureProviders(host.Services);

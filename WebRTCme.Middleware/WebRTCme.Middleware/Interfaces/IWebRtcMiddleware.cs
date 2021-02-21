@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,8 @@ namespace WebRTCme.Middleware
     public interface IWebRtcMiddleware : IDisposable
     {
         Task<ISignallingServerService> CreateSignallingServerServiceAsync(/*string signallingServerBaseUrl*/
-            IConfiguration configuration, 
+            IConfiguration configuration,
+            ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null);
 
         Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime = null);
