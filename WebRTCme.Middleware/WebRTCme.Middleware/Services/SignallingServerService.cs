@@ -247,7 +247,7 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                _logger.LogDebug(
+                _logger.LogInformation(
                     $"<-------- OnPeerSdpOffered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}"); //peedSdp:{peerSdp}");
@@ -315,7 +315,7 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                _logger.LogDebug(
+                _logger.LogInformation(
                     $"<-------- OnPeerSdpAnswered - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// peerSdp:{peerSdp}");
@@ -353,7 +353,7 @@ namespace WebRtcMeMiddleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                _logger.LogDebug(
+                _logger.LogInformation(
                     $"<-------- OnPeerIceCandidate - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName} " +
@@ -491,7 +491,7 @@ namespace WebRtcMeMiddleware.Services
 
                 void OnConnectionStateChanged(object s, EventArgs e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnConnectionStateChanged - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
@@ -512,7 +512,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnDataChannel - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
@@ -557,7 +557,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnIceConnectionStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
@@ -565,7 +565,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnIceGatheringStateChange(object s, EventArgs e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnIceGatheringStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
@@ -573,7 +573,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnNegotiationNeeded(object s, EventArgs e)
                 {
-                    //_logger.LogInfo(
+                    //_logger.LogInformation(
                     //    $"######## OnNegotiationNeeded - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
@@ -581,7 +581,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnSignallingStateChange - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName}, " +
@@ -596,7 +596,7 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnTrack(object s, IRTCTrackEvent e)
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         $"######## OnTrack - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName}");

@@ -30,7 +30,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
             });
 
-            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+            //builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
 
             builder.Services.AddBlazoredModal();
