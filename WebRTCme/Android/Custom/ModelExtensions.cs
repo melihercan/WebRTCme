@@ -66,7 +66,7 @@ namespace WebRtc.Android
                 MaxRetransmits = dataChannelInit.MaxRetransmits ?? -1,
                 Protocol = dataChannelInit.Protocol ?? string.Empty,
                 Negotiated = dataChannelInit.Negotiated ?? false,
-                Id = dataChannelInit.Id ?? WebRTCme.WebRtc.Id
+                Id = dataChannelInit.Id ?? 1//WebRTCme.WebRtc.Id
             };
 
         public static Webrtc.SessionDescription ToNative(this RTCSessionDescriptionInit description) =>

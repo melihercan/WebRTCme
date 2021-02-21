@@ -42,7 +42,7 @@ namespace WebRtc.iOS
                 MaxRetransmits = dataChannelInit.MaxRetransmits ?? -1,
                 Protocol = dataChannelInit.Protocol ?? string.Empty,
                 IsNegotiated = dataChannelInit.Negotiated ?? false,
-                ChannelId = dataChannelInit.Id ?? WebRTCme.WebRtc.Id
+                ChannelId = dataChannelInit.Id ?? 1//WebRTCme.WebRtc.Id
             };
 
         public static Webrtc.RTCSessionDescription ToNative(this RTCSessionDescriptionInit description) =>

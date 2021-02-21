@@ -154,13 +154,16 @@ namespace WebRtc.iOS
             //System.Diagnostics.Debug.WriteLine($"Protocol{config.Protocol}");
 
 
+            var nativeOptions = options.ToNative();
+
             var dataChannel =
             RTCDataChannel.Create(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
               (Webrtc.RTCPeerConnection)NativeObject,
     //            RTCDataChannel.Create(((Webrtc.RTCPeerConnection)NativeObject).DataChannelForLabel(
     label,
 //    config
-    options.ToNative()
+    //options.ToNative()
+    nativeOptions
     ));
 
 

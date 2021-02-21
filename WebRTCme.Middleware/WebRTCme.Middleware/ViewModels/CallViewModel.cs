@@ -143,6 +143,7 @@ namespace WebRTCme.Middleware
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
+ ////connectionRequestParameters.DataChannelName = "Testing";
             _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
@@ -156,6 +157,14 @@ namespace WebRTCme.Middleware
 
                                 _reRender?.Invoke();
                             }
+                            
+                            //if (peerResponseParameters.DataChannel != null)
+                            //{
+                            //    var dataChannel = peerResponseParameters.DataChannel;
+                            //    Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
+                            //        $"state:{dataChannel.ReadyState}");
+                            //}
+
                             break;
 
                         case PeerResponseCode.PeerLeft:

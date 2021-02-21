@@ -62,6 +62,8 @@ namespace WebRtc.iOS
         #region NativeEvents
         public void DataChannelDidChangeState(Webrtc.RTCDataChannel dataChannel)
         {
+            System.Diagnostics.Debug.WriteLine($"%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RTCDataChannelState: {ReadyState}");
+
             switch (ReadyState)
             {
                 case RTCDataChannelState.Open:

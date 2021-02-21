@@ -213,12 +213,16 @@ namespace WebRtc.Android
         {
         }
 
+        private bool _isConnected;
         public void OnIceConnectionChange(Webrtc.PeerConnection.IceConnectionState p0)
         {
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
             // !!! I don't know why Android DOES NOT provide Connection State Change event???
             // I drive this event from Ice Connection State Change event here for now.
+
+#if false
+
             if (p0 == Webrtc.PeerConnection.IceConnectionState.New)
             {
             }
@@ -272,11 +276,27 @@ namespace WebRtc.Android
             else if (p0 == Webrtc.PeerConnection.IceConnectionState.Closed)
             {
             }
+#endif
+
+            if (p0 == PeerConnection.IceConnectionState.Connected || p0 == PeerConnection.IceConnectionState.Completed)
+            {
+                if (!_isConnected)
+                {
+                    _isConnected = true;
+                    OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+            else if (_isConnected)
+            {
+                _isConnected = false;
+                OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+
         }
 
         public void OnIceConnectionReceivingChange(bool p0)
         {
-            System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO OnIceConnectionReceivingChange:{p0}");
         }
 
         public void OnIceGatheringChange(Webrtc.PeerConnection.IceGatheringState p0) =>
@@ -292,10 +312,10 @@ namespace WebRtc.Android
         public void OnSignalingChange(Webrtc.PeerConnection.SignalingState p0) =>
             OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
         
-        #endregion
+#endregion
 
 
-        #region SdpObserver
+#region SdpObserver
         private class SdpObserverProxy : Java.Lang.Object, Webrtc.ISdpObserver
         {
             private readonly TaskCompletionSource<RTCSessionDescriptionInit> _tcsCreate;
@@ -314,7 +334,7 @@ namespace WebRtc.Android
 
             public void OnSetSuccess() => _tcsSet?.SetResult(null);
         }
-        #endregion
+#endregion
 
     }
 

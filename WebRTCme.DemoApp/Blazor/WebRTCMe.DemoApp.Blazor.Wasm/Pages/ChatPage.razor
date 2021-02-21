@@ -4,3 +4,11 @@
 
 <h1>Chat</h1>
 
+<div class="list-group">
+@foreach (var dataParameters in ChatViewModel.DataParametersList)
+{
+    <h5>@dataParameters.Message</h5>
+}
+</div>
+
+
