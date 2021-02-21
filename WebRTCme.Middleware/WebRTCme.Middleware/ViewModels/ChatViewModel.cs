@@ -26,6 +26,7 @@ namespace WebRTCme.Middleware
         public readonly IDataManager DataManager;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
+        private Action _reRender;
 
         public ChatViewModel(ISignallingServerService signallingServerService, IDataManager dataManager, 
             INavigationService navigationService)
@@ -36,8 +37,12 @@ namespace WebRTCme.Middleware
             _navigationService = navigationService;
         }
 
-        public Task OnPageAppearingAsync(ConnectionParameters connectionParameters)
+        public Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
+            _reRender = reRender;
+            if (_reRender is not null)
+                AddOrRemoveReRenderNotification();
+
             var connectionRequestParameters = new ConnectionRequestParameters
             {
                 ConnectionParameters = connectionParameters,
@@ -50,8 +55,29 @@ namespace WebRTCme.Middleware
         public Task OnPageDisappearingAsync()
         {
             Disconnect();
+            if (_reRender is not null)
+                AddOrRemoveReRenderNotification(true);
             return Task.CompletedTask;
         }
+
+        private void AddOrRemoveReRenderNotification(bool isRemove = false)
+        {
+            if (isRemove)
+            {
+                DataParametersList.CollectionChanged -= DataParametersList_CollectionChanged;
+            }
+            else
+            {
+                DataParametersList.CollectionChanged += DataParametersList_CollectionChanged;
+            }
+            
+            void DataParametersList_CollectionChanged(object sender, 
+                System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+            {
+                _reRender();
+            }
+        }
+
 
         public ConnectionParameters ConnectionParameters { get; set; }
 
@@ -95,17 +121,6 @@ namespace WebRTCme.Middleware
                                 var dataChannel = peerResponseParameters.DataChannel;
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
-
-
-                                //DataParametersList.Add(new DataParameters
-                                //{
-                                //    From = DataFromType.System,
-                                //    PeerUserName = string.Empty,
-                                //    PeerUserNameTextColor = "#000000",
-                                //    Time = DateTime.Now.ToString("HH:mm"),
-                                //    Message = "Hade ya"
-                                //});
-
 
                                 DataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
                             }

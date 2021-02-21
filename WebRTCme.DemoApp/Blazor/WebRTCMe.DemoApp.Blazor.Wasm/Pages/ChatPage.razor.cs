@@ -30,9 +30,13 @@ namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
         {
             await base.OnInitializedAsync();
             var connectionParameters = JsonSerializer.Deserialize<ConnectionParameters>(ConnectionParametersJson);
-            await ChatViewModel.OnPageAppearingAsync(connectionParameters);
+            await ChatViewModel.OnPageAppearingAsync(connectionParameters, ReRender);
         }
 
+        private void ReRender()
+        {
+            StateHasChanged();
+        }
 
         public void Dispose()
         {
