@@ -151,7 +151,6 @@ namespace WebRtcMeMiddleware.Services
 
         #region SignallingServerCallbacks
 
-private string sdpTesting;
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
             Subject<PeerResponseParameters> subject = null;
@@ -184,13 +183,12 @@ private string sdpTesting;
 
 
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"-------> Sending Offer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
- sdpTesting = sdp;
-
+                _logger.LogInformation(
+                    $"-------> Sending Offer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+ 
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
@@ -542,17 +540,6 @@ private string sdpTesting;
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
-
-  if (sdpTesting is not null)
-                    {
-                        _logger.LogInformation(
-                            $"-------> Sending Offer - room:{roomName} " +
-                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                            $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdpTesting);
-                        sdpTesting = null;
-                    }
-
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
