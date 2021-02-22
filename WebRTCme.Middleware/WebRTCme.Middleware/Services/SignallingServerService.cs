@@ -178,7 +178,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
-                ////await peerConnection.SetLocalDescription(offerDescription);
+                await peerConnection.SetLocalDescription(offerDescription);
 
 
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
@@ -191,7 +191,7 @@ namespace WebRtcMeMiddleware.Services
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
-                await peerConnection.SetLocalDescription(offerDescription);
+                //await peerConnection.SetLocalDescription(offerDescription);
             }
             catch (Exception ex)
             {
@@ -391,7 +391,7 @@ namespace WebRtcMeMiddleware.Services
         }
 
 
-#endregion
+        #endregion
 
         private async Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName, 
             string peerUserName, bool isInitiator, bool isDelete = false)
@@ -535,10 +535,10 @@ namespace WebRtcMeMiddleware.Services
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-                    _logger.LogInformation(
-                        $"######## OnIceCandidate - room:{roomName} " +
-                        $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        $"peerUser:{peerUserName}");
+                    //_logger.LogInformation(
+                    //    $"######## OnIceCandidate - room:{roomName} " +
+                    //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    //    $"peerUser:{peerUserName}");
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
@@ -551,11 +551,11 @@ namespace WebRtcMeMiddleware.Services
                             //UsernameFragment = ???
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
-                        //_logger.LogInformation(
-                        //    $"######## Sending ICE Candidate - room:{roomName} " +
-                        //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        //    $"peerUser:{peerUserName} " +
-                        //    $"ice:{ice}");
+                        _logger.LogInformation(
+                            $"######## Sending ICE Candidate - room:{roomName} " +
+                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                            $"peerUser:{peerUserName} " +
+                            $"ice:{ice}");
                         await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
 
                     }

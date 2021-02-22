@@ -26,14 +26,14 @@ namespace WebRTCme
 
             ////CFunctions.InitFieldTrialDictionary(new Dictionary<string, string>());
             ////CFunctionsRTCSetupInternalTracer();
-            Webrtc.CFunctions.RTCInitializeSSL();
-            Webrtc.CFunctions.RTCSetMinDebugLogLevel(Webrtc.RTCLoggingSeverity.Error);
+            //Webrtc.CFunctions.RTCInitializeSSL();
+            Webrtc.CFunctions.RTCSetMinDebugLogLevel(Webrtc.RTCLoggingSeverity./*Verbose*/Error);
         }
 
         public void Cleanup()
         {
             ////CFunctions.RTCShutdownInternalTracer();
-            Webrtc.CFunctions.RTCCleanupSSL();
+            //Webrtc.CFunctions.RTCCleanupSSL();
         }
 
         public IWindow Window(IJSRuntime jsRuntime) => global::WebRtc.iOS.Window.Create();

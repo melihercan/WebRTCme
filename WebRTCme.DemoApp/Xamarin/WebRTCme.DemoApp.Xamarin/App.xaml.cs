@@ -24,6 +24,7 @@ namespace DemoApp
                 Prefix = "WebRTCme.DemoApp.Xamarin"
             });
 
+
             _ = CrossWebRtcMiddlewareXamarin.Current;
             hostBuilder.Services.AddSingleton<INavigationService, NavigationService>();
             hostBuilder.Services.AddMiddleware();
