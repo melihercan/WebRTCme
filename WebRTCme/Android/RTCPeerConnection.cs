@@ -108,7 +108,8 @@ namespace WebRtc.Android
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.PeerConnection)NativeObject).CreateAnswer(
-                new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
+                new SdpObserverProxy(tcs), 
+                new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             return tcs.Task;
         }
 
@@ -119,7 +120,8 @@ namespace WebRtc.Android
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
             ((Webrtc.PeerConnection)NativeObject).CreateOffer(
-                new SdpObserverProxy(tcs), NativeDefaultMediaConstraints);
+                new SdpObserverProxy(tcs), 
+                new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             return tcs.Task;
         }
 

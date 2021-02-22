@@ -96,6 +96,11 @@ namespace WebRtcMeMiddleware.Services
                         connectionRequestParameters.ConnectionParameters.RoomName, 
                         connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
+////  await OnPeerJoined(
+////    connectionRequestParameters.ConnectionParameters.TurnServerName,
+////   connectionRequestParameters.ConnectionParameters.RoomName,
+////     "Android"
+  ////);
                 }
                 catch (Exception ex)
                 {
@@ -173,20 +178,20 @@ namespace WebRtcMeMiddleware.Services
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
-                await peerConnection.SetLocalDescription(offerDescription);
+                ////await peerConnection.SetLocalDescription(offerDescription);
 
 
                 var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"######## Sending Offer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                _logger.LogInformation(
+                    $"-------> Sending Offer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
                 await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
 
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
-                //await peerConnection.SetLocalDescription(offerDescription);
+                await peerConnection.SetLocalDescription(offerDescription);
             }
             catch (Exception ex)
             {
@@ -530,10 +535,10 @@ namespace WebRtcMeMiddleware.Services
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-                    //_logger.LogInformation(
-                    //    $"====> OnIceCandidate - room:{roomName} " +
-                    //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    //    $"peerUser:{peerUserName}");
+                    _logger.LogInformation(
+                        $"######## OnIceCandidate - room:{roomName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                        $"peerUser:{peerUserName}");
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
@@ -573,11 +578,11 @@ namespace WebRtcMeMiddleware.Services
                 }
                 void OnNegotiationNeeded(object s, EventArgs e)
                 {
-                    //_logger.LogInformation(
-                    //    $"######## OnNegotiationNeeded - room:{roomName} " +
-                    //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    //    $"peerUser:{peerUserName}");
-                    //// TODO: WHAT IF Not initiator adds track (which trigggers this event)???
+                    _logger.LogInformation(
+                        $"######## OnNegotiationNeeded - room:{roomName} " +
+                        $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                        $"peerUser:{peerUserName}");
+                    // TODO: WHAT IF Not initiator adds track (which trigggers this event)???
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
                 {

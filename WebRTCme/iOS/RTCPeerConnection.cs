@@ -127,7 +127,8 @@ namespace WebRtc.iOS
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(NativeDefaultRTCMediaConstraints,
+            ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(
+                new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, err) => 
                 { 
                     if(err != null)
@@ -174,7 +175,8 @@ namespace WebRtc.iOS
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(NativeDefaultRTCMediaConstraints,
+            ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(
+                new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, nsError) =>
                 {
                     if (nsError != null)
