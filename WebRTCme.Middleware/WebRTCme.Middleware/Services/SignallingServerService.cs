@@ -539,7 +539,7 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                         DataChannel = dataChannel
                     });
                 }
-                /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
 _logger.LogInformation("++++");
 
@@ -555,8 +555,9 @@ if (offerDescriptionTest is not null)
                             $"-------> Sending Offer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        var task = Task.Run(async () => await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp));
-                        task.Wait();
+                        await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                        //var task = Task.Run(async () => await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp));
+                        //task.Wait();
                         offerDescriptionTest = null;
                     }
 
@@ -567,8 +568,9 @@ if (answerDescriptionTest is not null)
                             $"-------> Sending Answer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        var task = Task.Run(async () => await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp));
-                        task.Wait();
+                        await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                        //var task = Task.Run(async () => await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp));
+                        //task.Wait();
                         answerDescriptionTest = null;
                     }
 
@@ -589,8 +591,9 @@ if (answerDescriptionTest is not null)
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        var task = Task.Run(async () => await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice));
-                        task.Wait();
+                        await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        //var task = Task.Run(async () => await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice));
+                        //task.Wait();
 
 _logger.LogInformation("----");
 
