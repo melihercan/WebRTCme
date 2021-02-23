@@ -151,6 +151,8 @@ namespace WebRtcMeMiddleware.Services
 
         #region SignallingServerCallbacks
 
+private RTCSessionDescriptionInit offerDescriptionTest;
+
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
             Subject<PeerResponseParameters> subject = null;
@@ -174,6 +176,7 @@ namespace WebRtcMeMiddleware.Services
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
+offerDescriptionTest = offerDescription;
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -182,12 +185,12 @@ namespace WebRtcMeMiddleware.Services
                 await peerConnection.SetLocalDescription(offerDescription);
 
 
-                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                _logger.LogInformation(
-                    $"-------> Sending Offer - room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                //var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                //_logger.LogInformation(
+                //    $"-------> Sending Offer - room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
  
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -534,12 +537,29 @@ namespace WebRtcMeMiddleware.Services
                         DataChannel = dataChannel
                     });
                 }
-                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
+Console.WriteLine("++++");
+
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
+
+if (offerDescriptionTest is not null)
+                    {
+                        var sdp = JsonSerializer.Serialize(offerDescriptionTest, _jsonSerializerOptions);
+                        _logger.LogInformation(
+                            $"-------> Sending Offer - room:{roomName} " +
+                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                            $"peerUser:{peerUserName}");// sdp:{sdp}");
+                        var task = _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                        task.Wait();
+                        offerDescriptionTest = null;
+                    }
+
+
+
 
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
@@ -557,7 +577,10 @@ namespace WebRtcMeMiddleware.Services
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        var task = _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        task.Wait();
+
+Console.WriteLine("----");
 
                     }
                 }
