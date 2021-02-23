@@ -502,7 +502,7 @@ namespace WebRtcMeMiddleware.Services
                             RoomName = roomName,
                             PeerUserName = peerUserName,
                             MediaStream = mediaStream,
-                            DataChannel = isInitiator ? dataChannel : null
+                            //DataChannel = isInitiator ? dataChannel : null
                         });
                     //// WILL BE HANDLED BY PEER LEFT
                     //else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
