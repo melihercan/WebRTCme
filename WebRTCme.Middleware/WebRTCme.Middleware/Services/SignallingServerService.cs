@@ -249,6 +249,7 @@ offerDescriptionTest = offerDescription;
             }
         }
 
+private RTCSessionDescriptionInit answerDescriptionTest;
 
         public async Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
@@ -285,6 +286,7 @@ offerDescriptionTest = offerDescription;
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
+     answerDescriptionTest = answerDescription;
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -292,12 +294,12 @@ offerDescriptionTest = offerDescription;
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
 
-                var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
-                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                //var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 //_logger.LogInformation(
-                //    $"######## Sending Answer - room:{roomName} " +
+                //    $"-------> Sending Answer - room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                 //    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
 
                 //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -558,7 +560,17 @@ if (offerDescriptionTest is not null)
                         offerDescriptionTest = null;
                     }
 
-
+if (answerDescriptionTest is not null)
+                    {
+                        var sdp = JsonSerializer.Serialize(answerDescriptionTest, _jsonSerializerOptions);
+                        _logger.LogInformation(
+                            $"-------> Sending Answer - room:{roomName} " +
+                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
+                            $"peerUser:{peerUserName}");// sdp:{sdp}");
+                        var task = _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                        task.Wait();
+                        answerDescriptionTest = null;
+                    }
 
 
                     // 'null' is valid and indicates end of ICE gathering process.
