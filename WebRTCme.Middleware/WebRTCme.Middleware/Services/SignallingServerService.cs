@@ -541,7 +541,7 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 }
                 /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-Console.WriteLine("++++");
+_logger.LogInformation("++++");
 
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
@@ -555,7 +555,7 @@ if (offerDescriptionTest is not null)
                             $"-------> Sending Offer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        var task = _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                        var task = Task.Run(async () => await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp));
                         task.Wait();
                         offerDescriptionTest = null;
                     }
@@ -567,7 +567,7 @@ if (answerDescriptionTest is not null)
                             $"-------> Sending Answer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        var task = _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                        var task = Task.Run(async () => await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp));
                         task.Wait();
                         answerDescriptionTest = null;
                     }
@@ -589,10 +589,10 @@ if (answerDescriptionTest is not null)
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        var task = _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        var task = Task.Run(async () => await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice));
                         task.Wait();
 
-Console.WriteLine("----");
+_logger.LogInformation("----");
 
                     }
                 }
