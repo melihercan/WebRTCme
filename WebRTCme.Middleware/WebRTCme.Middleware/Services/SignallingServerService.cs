@@ -185,17 +185,12 @@ offerDescriptionTest = offerDescription;
                 await peerConnection.SetLocalDescription(offerDescription);
 
 
-                //var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"-------> Sending Offer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
- 
-                //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");
-                //await peerConnection.SetLocalDescription(offerDescription);
+                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                _logger.LogInformation(
+                    $"-------> Sending Offer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -294,17 +289,12 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
 
-                //var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"-------> Sending Answer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-
-                //DebugPrint($"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");
-                //await peerConnection.SetLocalDescription(answerDescription);
+                var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
+                _logger.LogInformation(
+                    $"-------> Sending Answer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -411,11 +401,11 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 IRTCDataChannel dataChannel = null;
 
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                
+
                 if (isDelete)
                 {
                     peerContext = connectionContext.PeerContexts
-                        .Single(context => context.PeerParameters.PeerUserName.Equals(peerUserName, 
+                        .Single(context => context.PeerParameters.PeerUserName.Equals(peerUserName,
                             StringComparison.OrdinalIgnoreCase));
                     peerConnection = peerContext.PeerConnection;
 
@@ -474,13 +464,13 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                     peerConnection.OnSignallingStateChange += OnSignallingStateChange;
                     peerConnection.OnTrack += OnTrack;
 
-                    
+
                     if (connectionContext.ConnectionRequestParameters.DataChannelName is not null && isInitiator)
                     {
                         dataChannel = peerConnection.CreateDataChannel(
                             connectionContext.ConnectionRequestParameters.DataChannelName,
                             new RTCDataChannelInit
-                            { 
+                            {
                                 Negotiated = false,
                             });
                     }
@@ -492,7 +482,7 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                         var audioTrack = connectionContext.ConnectionRequestParameters.LocalStream.GetAudioTracks()
                             .FirstOrDefault();
                         if (videoTrack is not null)
-                            peerConnection.AddTrack(videoTrack, 
+                            peerConnection.AddTrack(videoTrack,
                                 connectionContext.ConnectionRequestParameters.LocalStream);
                         if (audioTrack is not null)
                             peerConnection.AddTrack(audioTrack,
@@ -519,7 +509,7 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                         });
                     //// WILL BE HANDLED BY PEER LEFT
                     //else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
-                        //ConnectionResponseSubject.OnCompleted();
+                    //ConnectionResponseSubject.OnCompleted();
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
@@ -541,14 +531,14 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-_logger.LogInformation("++++");
+_logger.LogInformation(">>>>");
 
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
-
-if (offerDescriptionTest is not null)
+#if false
+                    if (offerDescriptionTest is not null)
                     {
                         var sdp = JsonSerializer.Serialize(offerDescriptionTest, _jsonSerializerOptions);
                         _logger.LogInformation(
@@ -573,8 +563,7 @@ if (answerDescriptionTest is not null)
                         //task.Wait();
                         answerDescriptionTest = null;
                     }
-
-
+#endif
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
                     {
@@ -587,17 +576,13 @@ if (answerDescriptionTest is not null)
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                         _logger.LogInformation(
-                            $"######## Sending ICE Candidate - room:{roomName} " +
+                            $"--------> Sending ICE Candidate - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
                         await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
-                        //var task = Task.Run(async () => await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice));
-                        //task.Wait();
-
-_logger.LogInformation("----");
-
                     }
+      _logger.LogInformation("<<<<");
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
