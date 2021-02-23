@@ -27,6 +27,10 @@ namespace WebRtcMeMiddleware.Services
         private ISignallingServerClient _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
+        private RTCSessionDescriptionInit _offerDescriptionCache;
+        private RTCSessionDescriptionInit _answerDescriptionCache;
+        private bool _isAsyncCall = false;
+
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -49,6 +53,8 @@ namespace WebRtcMeMiddleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
+            if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
+                _isAsyncCall = true;
             Initialization = InitializeAsync();
         }
 
@@ -96,11 +102,6 @@ namespace WebRtcMeMiddleware.Services
                         connectionRequestParameters.ConnectionParameters.RoomName, 
                         connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
-////  await OnPeerJoined(
-////    connectionRequestParameters.ConnectionParameters.TurnServerName,
-////   connectionRequestParameters.ConnectionParameters.RoomName,
-////     "Android"
-  ////);
                 }
                 catch (Exception ex)
                 {
@@ -151,7 +152,6 @@ namespace WebRtcMeMiddleware.Services
 
         #region SignallingServerCallbacks
 
-private RTCSessionDescriptionInit offerDescriptionTest;
 
         public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
         {
@@ -176,7 +176,7 @@ private RTCSessionDescriptionInit offerDescriptionTest;
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
-offerDescriptionTest = offerDescription;
+                _offerDescriptionCache = offerDescription;
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -184,13 +184,12 @@ offerDescriptionTest = offerDescription;
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-
-                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                _logger.LogInformation(
-                    $"-------> Sending Offer - room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                //var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                //_logger.LogInformation(
+                //    $"-------> Sending Offer - room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -244,8 +243,6 @@ offerDescriptionTest = offerDescription;
             }
         }
 
-private RTCSessionDescriptionInit answerDescriptionTest;
-
         public async Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
             Subject<PeerResponseParameters> subject = null;
@@ -281,7 +278,7 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
-     answerDescriptionTest = answerDescription;
+                _answerDescriptionCache = answerDescription;
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -289,12 +286,12 @@ private RTCSessionDescriptionInit answerDescriptionTest;
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
 
-                var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
-                _logger.LogInformation(
-                    $"-------> Sending Answer - room:{roomName} " +
-                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                //var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
+                //_logger.LogInformation(
+                //    $"-------> Sending Answer - room:{roomName} " +
+                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
+                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -537,33 +534,33 @@ _logger.LogInformation(">>>>");
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
-#if false
-                    if (offerDescriptionTest is not null)
+                    if (_offerDescriptionCache is not null)
                     {
-                        var sdp = JsonSerializer.Serialize(offerDescriptionTest, _jsonSerializerOptions);
+                        var sdp = JsonSerializer.Serialize(_offerDescriptionCache, _jsonSerializerOptions);
                         _logger.LogInformation(
                             $"-------> Sending Offer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
-                        //var task = Task.Run(async () => await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp));
-                        //task.Wait();
-                        offerDescriptionTest = null;
+                        if (_isAsyncCall)
+                            await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                        else
+                            _signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
+                        _offerDescriptionCache = null;
                     }
 
-if (answerDescriptionTest is not null)
+                    if (_answerDescriptionCache is not null)
                     {
-                        var sdp = JsonSerializer.Serialize(answerDescriptionTest, _jsonSerializerOptions);
+                        var sdp = JsonSerializer.Serialize(_answerDescriptionCache, _jsonSerializerOptions);
                         _logger.LogInformation(
                             $"-------> Sending Answer - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                             $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-                        //var task = Task.Run(async () => await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp));
-                        //task.Wait();
-                        answerDescriptionTest = null;
+                        if (_isAsyncCall)
+                            await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                        else
+                            _signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
+                        _answerDescriptionCache = null;
                     }
-#endif
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
                     {
@@ -580,7 +577,10 @@ if (answerDescriptionTest is not null)
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        if (_isAsyncCall)
+                            await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                        else
+                            _signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
       _logger.LogInformation("<<<<");
                 }

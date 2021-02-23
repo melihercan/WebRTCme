@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -64,20 +65,27 @@ namespace WebRTCme.SignallingServerClient
             // Register callback handlers invoked by server hub.
             self._hubConnection.On<string, string, string>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
             self._hubConnection.On<string, string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
-            self._hubConnection.On<string, string, string, string>("OnPeerSdpOffered", signallingServerCallbacks.OnPeerSdpOffered);
-            self._hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", signallingServerCallbacks.OnPeerSdpAnswered);
-            self._hubConnection.On<string, string, string, string>("OnPeerIceCandidate", signallingServerCallbacks.OnPeerIceCandidate);
+            self._hubConnection.On<string, string, string, string>("OnPeerSdpOffered", 
+                signallingServerCallbacks.OnPeerSdpOffered);
+            self._hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", 
+                signallingServerCallbacks.OnPeerSdpAnswered);
+            self._hubConnection.On<string, string, string, string>("OnPeerIceCandidate", 
+                signallingServerCallbacks.OnPeerIceCandidate);
 
             self._hubConnection.Closed += self.HubConnection_Closed;
 
+            self.SyncInitialize();
+
             // Start connection without waiting.
             _ = self.ConnectWithRetryAsync();
+
 
             return Task.FromResult(self as ISignallingServerClient);
         }
 
         public async ValueTask DisposeAsync()
         {
+            SyncCleanup();
             _cts.Cancel();
             if (_hubConnection.State != HubConnectionState.Disconnected)
             {
@@ -170,5 +178,111 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
+        #region Sync 
+
+        internal class Data
+        {
+            public string MethodName { get; set; }
+            public string TurnServerName { get; set; }
+            public string RoomName { get; set; }
+            public string PairUserName { get; set; }
+            public string SdpOrIce { get; set; }
+        }
+
+        private BlockingCollection<Data> _collection = new();
+        private CancellationTokenSource _ctsSync = new(); 
+
+        private void SyncInitialize()
+        {
+            try
+            {
+                // This will fail on BlazorWasm. Async calls are used for it.
+                new Thread(ThreadExecute).Start();
+            }
+            catch
+            { }
+        }
+
+        private void ThreadExecute(object arg)
+        {
+
+            while (!_ctsSync.Token.IsCancellationRequested)
+            {
+                Data data = null;
+                try
+                {
+                    data = _collection.Take(_ctsSync.Token);
+                }
+                catch
+                {  }
+
+                if (data is not null)
+                {
+                    switch (data.MethodName)
+                    {
+                        case nameof(OfferSdpSync):
+                            _ = OfferSdp(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
+                                .GetAwaiter().GetResult();
+                            break;
+
+                        case nameof(AnswerSdpSync):
+                            _ = AnswerSdp(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
+                                .GetAwaiter().GetResult();
+                            break;
+
+                        case nameof(IceCandidateSync):
+                            _ = IceCandidate(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
+                                .GetAwaiter().GetResult();
+                            break;
+                    }
+                }
+            }
+        }
+
+        private void SyncCleanup()
+        {
+            _ctsSync.Cancel();
+        }
+
+        public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
+        {
+            _collection.Add(new Data 
+            { 
+                MethodName = nameof(OfferSdpSync),
+                TurnServerName = turnServerName,
+                RoomName = roomName,
+                PairUserName = pairUserName,
+                SdpOrIce = sdp
+            });
+            return Unit.Default;
+        }
+
+        public Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
+        {
+            _collection.Add(new Data
+            {
+                MethodName = nameof(AnswerSdpSync),
+                TurnServerName = turnServerName,
+                RoomName = roomName,
+                PairUserName = pairUserName,
+                SdpOrIce = sdp
+            });
+            return Unit.Default;
+        }
+
+        public Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice)
+        {
+            _collection.Add(new Data
+            {
+                MethodName = nameof(IceCandidateSync),
+                TurnServerName = turnServerName,
+                RoomName = roomName,
+                PairUserName = pairUserName,
+                SdpOrIce = ice
+            });
+            return Unit.Default;
+        }
+
+        #endregion
     }
 }

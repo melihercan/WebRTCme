@@ -31,5 +31,12 @@ namespace WebRTCme.SignallingServerClient
         Task<Result<Unit>> AnswerSdp(string turnServerName, string roomName, string pairUserName, string sdp);
 
         Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string pairUserName, string ice);
+
+        // Sync calls.
+        Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp);
+
+        Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string pairUserName, string sdp);
+
+        Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice);
     }
 }

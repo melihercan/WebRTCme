@@ -356,5 +356,19 @@ namespace WebRTCme.SignallingServer.Hubs
             //throw new NotImplementedException();
         }
 
+        public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
