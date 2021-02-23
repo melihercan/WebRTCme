@@ -462,7 +462,7 @@ namespace WebRtcMeMiddleware.Services
                     peerConnection.OnTrack += OnTrack;
 
 
-                    if (connectionContext.ConnectionRequestParameters.DataChannelName is not null && isInitiator)
+                    if (connectionContext.ConnectionRequestParameters.DataChannelName is not null/* && isInitiator*/)
                     {
                         dataChannel = peerConnection.CreateDataChannel(
                             connectionContext.ConnectionRequestParameters.DataChannelName,
@@ -515,6 +515,10 @@ namespace WebRtcMeMiddleware.Services
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                         $"peerUser:{peerUserName} " +
                         $"state:{e.Channel.ReadyState}");
+
+                    dataChannel?.Close();
+                    dataChannel?.Dispose();
+
                     dataChannel = e.Channel;
                     peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
                     {
