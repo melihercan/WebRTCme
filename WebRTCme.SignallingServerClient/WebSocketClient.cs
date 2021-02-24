@@ -26,22 +26,17 @@ namespace WebRTCme.SignallingServerClient
         private WebSocket _ws;
         //private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public static async Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
+        public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
             ISignallingServerCallbacks signallingServerCallbacks)
         {
             var self = new WebSocketClient(signallingServerBaseUrl, signallingServerCallbacks);
-            await self.Initialization;
-            return self;
+            return Task.FromResult(self as ISignallingServerClient);
         }
 
         private WebSocketClient(string signallingServerBaseUrl, ISignallingServerCallbacks signallingServerCallbacks)
         {
             _signallingServerCallbacks = signallingServerCallbacks;
-        }
-        private Task Initialization { get; set; }
 
-        private async Task InitializeAsync()
-        {
             // For now hard coded.
             _ws = new WebSocket("ws://192.168.1.48:8080");
             _ws.OnMessage += WebSocket_OnMessage;
