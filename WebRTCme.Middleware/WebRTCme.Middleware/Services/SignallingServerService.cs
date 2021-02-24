@@ -469,7 +469,7 @@ namespace WebRtcMeMiddleware.Services
                     peerConnection.OnTrack += OnTrack;
 
 
-                    if (connectionContext.ConnectionRequestParameters.DataChannelName is not null/* && isInitiator*/)
+                    if (connectionContext.ConnectionRequestParameters.DataChannelName is not null && isInitiator)
                     {
                         dataChannel = peerConnection.CreateDataChannel(
                             connectionContext.ConnectionRequestParameters.DataChannelName,
@@ -509,7 +509,7 @@ namespace WebRtcMeMiddleware.Services
                             RoomName = roomName,
                             PeerUserName = peerUserName,
                             MediaStream = mediaStream,
-                            //DataChannel = isInitiator ? dataChannel : null
+                            DataChannel = isInitiator ? dataChannel : null
                         });
                     //// WILL BE HANDLED BY PEER LEFT
                     //else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
