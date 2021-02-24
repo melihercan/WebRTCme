@@ -28,6 +28,12 @@ namespace WebRTCme.SignallingServerClient
         private string _userName;
         private string _peerUserName;
 
+        private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
         public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
             ISignallingServerCallbacks signallingServerCallbacks)
         {
@@ -48,45 +54,45 @@ namespace WebRTCme.SignallingServerClient
         private async void WebSocket_OnMessage(object sender, MessageEventArgs e)
         {
             var jsonMessage = e.Data;
-            var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage);
+            var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage, _jsonSerializerOptions);
 
             if (signallingMessage.Type.Equals(nameof(JoinRoom)))
             {
-                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
+                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 _peerUserName = data.Name;
                 await _signallingServerCallbacks.OnPeerJoined(data.TurnServerName, data.RoomName,
                     data.Name);
             }
             else if (signallingMessage.Type.Equals(nameof(LeaveRoom)))
             {
-                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
+                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerLeft(data.TurnServerName, data.RoomName,
                     data.Name);
             }
             else if (signallingMessage.Type
                 .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
+                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
                     _peerUserName, signallingMessage.Sdp);
             }
             else if (signallingMessage.Type
                 .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
+                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpAnswered(data.TurnServerName, data.RoomName,
                     _peerUserName, signallingMessage.Sdp);
             }
             else if (signallingMessage.Candidate is not null)
             {
-                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Sdp);
+                var data = JsonSerializer.Deserialize<Data>(signallingMessage.Sdp, _jsonSerializerOptions);
                 var iceCandidate = new RTCIceCandidateInit
                 {
                     Candidate = signallingMessage.Candidate.Sdp,
                     SdpMLineIndex = (ushort)signallingMessage.Candidate.SdpMLineIndex,
                     SdpMid = signallingMessage.Candidate.SdpMid
                 };
-                var ice = JsonSerializer.Serialize(iceCandidate);
+                var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerIceCandidate(data.TurnServerName, data.RoomName,
                     _peerUserName, ice);
             }
@@ -142,7 +148,7 @@ namespace WebRTCme.SignallingServerClient
                 Type = nameof(JoinRoom),
                 Candidate = new Candidate
                 {
-                    Sdp = JsonSerializer.Serialize(data)
+                    Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions)
                 }
             };
             Send(signallingMessage);
@@ -162,7 +168,7 @@ namespace WebRTCme.SignallingServerClient
                 Type = nameof(LeaveRoom),
                 Candidate = new Candidate
                 {
-                    Sdp = JsonSerializer.Serialize(data)
+                    Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions)
                 }
             };
             Send(signallingMessage);
@@ -185,7 +191,7 @@ namespace WebRTCme.SignallingServerClient
                 Sdp = sdp,
                 Candidate = new Candidate
                 {
-                    Sdp = JsonSerializer.Serialize(data)
+                    Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions)
                 }
             };
             Send(signallingMessage);
@@ -208,7 +214,7 @@ namespace WebRTCme.SignallingServerClient
                 Sdp = sdp,
                 Candidate = new Candidate
                 {
-                    Sdp = JsonSerializer.Serialize(data)
+                    Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions)
                 }
             };
             Send(signallingMessage);
@@ -218,7 +224,7 @@ namespace WebRTCme.SignallingServerClient
         public Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string pairUserName,
             string ice)
         {
-            var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(ice);
+            var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(ice, _jsonSerializerOptions);
 
             var data = new Data
             {
@@ -229,7 +235,7 @@ namespace WebRTCme.SignallingServerClient
 
             var signallingMessage = new SignallingMessage
             {
-                Sdp = JsonSerializer.Serialize(data),
+                Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions),
                 Candidate = new Candidate
                 {
                     Sdp = iceCandidate.Candidate,
@@ -244,7 +250,7 @@ namespace WebRTCme.SignallingServerClient
 
         private void Send(SignallingMessage signallingMessage)
         {
-            var jsonMessage = JsonSerializer.Serialize(signallingMessage);
+            var jsonMessage = JsonSerializer.Serialize(signallingMessage, _jsonSerializerOptions);
             _ws.Send(jsonMessage);
         }
 
