@@ -56,28 +56,28 @@ namespace WebRTCme.SignallingServerClient
             var jsonMessage = e.Data;
             var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage, _jsonSerializerOptions);
 
-            if (signallingMessage.Type.Equals(nameof(JoinRoom)))
+            if (signallingMessage.Type?.Equals(nameof(JoinRoom)) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 _peerUserName = data.Name;
                 await _signallingServerCallbacks.OnPeerJoined(data.TurnServerName, data.RoomName,
                     data.Name);
             }
-            else if (signallingMessage.Type.Equals(nameof(LeaveRoom)))
+            else if (signallingMessage.Type?.Equals(nameof(LeaveRoom)) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerLeft(data.TurnServerName, data.RoomName,
                     data.Name);
             }
-            else if (signallingMessage.Type
-                .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase))
+            else if (signallingMessage.Type?
+                .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
                     _peerUserName, signallingMessage.Sdp);
             }
-            else if (signallingMessage.Type
-                .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase))
+            else if (signallingMessage.Type?
+                .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpAnswered(data.TurnServerName, data.RoomName,

@@ -541,8 +541,6 @@ namespace WebRtcMeMiddleware.Services
                 }
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
-_logger.LogInformation(">>>>");
-
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -599,7 +597,6 @@ _logger.LogInformation(">>>>");
                         //else
                             //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
-      _logger.LogInformation("<<<<");
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
