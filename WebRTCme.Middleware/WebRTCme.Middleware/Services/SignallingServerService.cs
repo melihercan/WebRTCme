@@ -182,10 +182,10 @@ namespace WebRtcMeMiddleware.Services
                     $"-------> Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
-                if (_isAsyncCall)
+                //if (_isAsyncCall)
                     await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
-                else
-                    _signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
+                //else
+                    //_signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -288,10 +288,10 @@ namespace WebRtcMeMiddleware.Services
                     $"-------> Sending Answer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
-                if (_isAsyncCall)
+                //if (_isAsyncCall)
                     await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-                else
-                    _signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
+                //else
+                    //_signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -592,10 +592,10 @@ _logger.LogInformation(">>>>");
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        if (_isAsyncCall)
+                        //if (_isAsyncCall)
                             await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
-                        else
-                            _signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
+                        //else
+                            //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
       _logger.LogInformation("<<<<");
                 }
