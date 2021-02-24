@@ -27,8 +27,6 @@ namespace WebRtcMeMiddleware.Services
         private ISignallingServerClient _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
-        private RTCSessionDescriptionInit _offerDescriptionCache;
-        private RTCSessionDescriptionInit _answerDescriptionCache;
         private bool _isAsyncCall = false;
 
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
@@ -176,20 +174,24 @@ namespace WebRtcMeMiddleware.Services
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Offer;
-                _offerDescriptionCache = offerDescription;
+
+                // Send offer before setting local description to avoid race condition with ice candidates.
+                // Setting local description triggers ice candidate packets.
+                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                _logger.LogInformation(
+                    $"-------> Sending Offer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                if (_isAsyncCall)
+                    await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                else
+                    _signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
-
-                //var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"-------> Sending Offer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -278,7 +280,18 @@ namespace WebRtcMeMiddleware.Services
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                     offerDescription.Type = RTCSdpType.Answer;
-                _answerDescriptionCache = answerDescription;
+
+                // Send offer before setting local description to avoid race condition with ice candidates.
+                // Setting local description triggers ice candidate packets.
+                var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
+                _logger.LogInformation(
+                    $"-------> Sending Answer - room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
+                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                if (_isAsyncCall)
+                    await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                else
+                    _signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -286,12 +299,6 @@ namespace WebRtcMeMiddleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
 
-                //var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
-                //_logger.LogInformation(
-                //    $"-------> Sending Answer - room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                //    $"peerUser:{peerUserName}");// sdp:{sdp}");
-                //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -538,6 +545,8 @@ _logger.LogInformation(">>>>");
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
+
+#if false
                     if (_offerDescriptionCache is not null)
                     {
                         var sdp = JsonSerializer.Serialize(_offerDescriptionCache, _jsonSerializerOptions);
@@ -565,6 +574,8 @@ _logger.LogInformation(">>>>");
                             _signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
                         _answerDescriptionCache = null;
                     }
+#endif
+
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
                     {
