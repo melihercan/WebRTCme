@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.SignallingServerClient
 {
-    public enum SignallingServerClient
+    public enum SignallingServerClientType
     {
         WebRtcMe,
         WebSocket

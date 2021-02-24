@@ -5,12 +5,12 @@ namespace WebRTCme.SignallingServerClient
 {
     public static class SignallingServerClientFactory
     {
-        public static Task<ISignallingServerClient> CreateAsync(SignallingServerClient client, string signallingServerBaseUrl,
+        public static Task<ISignallingServerClient> CreateAsync(SignallingServerClientType client, string signallingServerBaseUrl,
             ISignallingServerCallbacks signallingServerCallbacks) =>
                 client switch
                 {
-                    SignallingServerClient.WebRtcMe => WebRTCmeClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks),
-                    SignallingServerClient.WebSocket => WebSocketClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks)
+                    SignallingServerClientType.WebRtcMe => WebRTCmeClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks),
+                    SignallingServerClientType.WebSocket => WebSocketClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks)
                 };
     }
 }

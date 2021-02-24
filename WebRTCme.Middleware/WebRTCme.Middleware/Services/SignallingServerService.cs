@@ -61,7 +61,9 @@ namespace WebRtcMeMiddleware.Services
         private async Task InitializeAsync()
         {
             _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
-                SignallingServerClient.WebRtcMe, _signallingServerBaseUrl, this);
+                //SignallingServerClientType.WebRtcMe, 
+                SignallingServerClientType.WebSocket,
+                _signallingServerBaseUrl, this);
         }
 
         public async Task<string[]> GetTurnServerNames()
