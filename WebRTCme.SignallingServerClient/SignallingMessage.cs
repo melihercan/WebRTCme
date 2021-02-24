@@ -23,7 +23,7 @@ namespace WebRTCme.SignallingServerClient
     {
         public string TurnServerName { get; set; }
         public string RoomName { get; set; }
-        public string UserName { get; set; }
+        public string Name { get; set; }
     }
 
 }

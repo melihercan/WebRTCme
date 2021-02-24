@@ -10,7 +10,7 @@ namespace WebRTCme.SignallingServerClient
                 client switch
                 {
                     SignallingServerClientType.WebRtcMe => WebRTCmeClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks),
-                    SignallingServerClientType.WebSocket => WebSocketClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks)
+                    SignallingServerClientType.WebSocket => SinglePeerClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks)
                 };
     }
 }

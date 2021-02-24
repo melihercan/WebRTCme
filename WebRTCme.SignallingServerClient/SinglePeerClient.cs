@@ -19,21 +19,23 @@ using Xamarin.Essentials;
 
 namespace WebRTCme.SignallingServerClient
 {
-    internal class WebSocketClient : ISignallingServerClient
+    internal class SinglePeerClient : ISignallingServerClient
     {
         private readonly string _signallingServerBaseUrl;
         private readonly ISignallingServerCallbacks _signallingServerCallbacks;
         private WebSocket _ws;
         //private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private string _userName;
+        private string _peerUserName;
 
         public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
             ISignallingServerCallbacks signallingServerCallbacks)
         {
-            var self = new WebSocketClient(signallingServerBaseUrl, signallingServerCallbacks);
+            var self = new SinglePeerClient(signallingServerBaseUrl, signallingServerCallbacks);
             return Task.FromResult(self as ISignallingServerClient);
         }
 
-        private WebSocketClient(string signallingServerBaseUrl, ISignallingServerCallbacks signallingServerCallbacks)
+        private SinglePeerClient(string signallingServerBaseUrl, ISignallingServerCallbacks signallingServerCallbacks)
         {
             _signallingServerCallbacks = signallingServerCallbacks;
 
@@ -48,31 +50,32 @@ namespace WebRTCme.SignallingServerClient
             var jsonMessage = e.Data;
             var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage);
 
-            if (signallingMessage.Type.Equals(nameof(_signallingServerCallbacks.OnPeerJoined)))
+            if (signallingMessage.Type.Equals(nameof(JoinRoom)))
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
+                _peerUserName = data.Name;
                 await _signallingServerCallbacks.OnPeerJoined(data.TurnServerName, data.RoomName,
-                    data.UserName);
+                    data.Name);
             }
-            else if (signallingMessage.Type.Equals(nameof(_signallingServerCallbacks.OnPeerLeft)))
+            else if (signallingMessage.Type.Equals(nameof(LeaveRoom)))
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
                 await _signallingServerCallbacks.OnPeerLeft(data.TurnServerName, data.RoomName,
-                    data.UserName);
+                    data.Name);
             }
             else if (signallingMessage.Type
                 .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
-                    data.UserName, signallingMessage.Sdp);
+                    _peerUserName, signallingMessage.Sdp);
             }
             else if (signallingMessage.Type
                 .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp);
                 await _signallingServerCallbacks.OnPeerSdpAnswered(data.TurnServerName, data.RoomName,
-                    data.UserName, signallingMessage.Sdp);
+                    _peerUserName, signallingMessage.Sdp);
             }
             else if (signallingMessage.Candidate is not null)
             {
@@ -85,7 +88,7 @@ namespace WebRTCme.SignallingServerClient
                 };
                 var ice = JsonSerializer.Serialize(iceCandidate);
                 await _signallingServerCallbacks.OnPeerIceCandidate(data.TurnServerName, data.RoomName,
-                    data.UserName, ice);
+                    _peerUserName, ice);
             }
         }
 
@@ -127,15 +130,16 @@ namespace WebRTCme.SignallingServerClient
 
         public Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName)
         {
+            _userName = userName;
             var data = new Data
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                UserName = userName
+                Name = userName
             };
             var signallingMessage = new SignallingMessage
             {
-                Type = nameof(_signallingServerCallbacks.OnPeerJoined),
+                Type = nameof(JoinRoom),
                 Candidate = new Candidate
                 {
                     Sdp = JsonSerializer.Serialize(data)
@@ -151,11 +155,11 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                UserName = userName
+                Name = userName
             };
             var signallingMessage = new SignallingMessage
             {
-                Type = nameof(_signallingServerCallbacks.OnPeerLeft),
+                Type = nameof(LeaveRoom),
                 Candidate = new Candidate
                 {
                     Sdp = JsonSerializer.Serialize(data)
@@ -172,7 +176,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                UserName = pairUserName
+                Name = pairUserName
             };
 
             var signallingMessage = new SignallingMessage
@@ -195,7 +199,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                UserName = pairUserName
+                Name = pairUserName
             };
 
             var signallingMessage = new SignallingMessage
@@ -220,7 +224,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                UserName = pairUserName
+                Name = pairUserName
             };
 
             var signallingMessage = new SignallingMessage
