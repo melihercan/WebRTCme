@@ -551,36 +551,6 @@ namespace WebRtcMeMiddleware.Services
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
 
-#if false
-                    if (_offerDescriptionCache is not null)
-                    {
-                        var sdp = JsonSerializer.Serialize(_offerDescriptionCache, _jsonSerializerOptions);
-                        _logger.LogInformation(
-                            $"-------> Sending Offer - room:{roomName} " +
-                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                            $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        if (_isAsyncCall)
-                            await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
-                        else
-                            _signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
-                        _offerDescriptionCache = null;
-                    }
-
-                    if (_answerDescriptionCache is not null)
-                    {
-                        var sdp = JsonSerializer.Serialize(_answerDescriptionCache, _jsonSerializerOptions);
-                        _logger.LogInformation(
-                            $"-------> Sending Answer - room:{roomName} " +
-                            $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                            $"peerUser:{peerUserName}");// sdp:{sdp}");
-                        if (_isAsyncCall)
-                            await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-                        else
-                            _signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
-                        _answerDescriptionCache = null;
-                    }
-#endif
-
                     // 'null' is valid and indicates end of ICE gathering process.
                     if (e.Candidate is not null)
                     {

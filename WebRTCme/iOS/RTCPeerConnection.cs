@@ -375,7 +375,7 @@ namespace WebRtc.iOS
         public void DidChangeConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCPeerConnectionState newState)
         {
-            System.Diagnostics.Debug.WriteLine($"=============================== PeerConnection.RTCPeerConnectionState: {newState}");
+            //System.Diagnostics.Debug.WriteLine($"=============================== PeerConnection.RTCPeerConnectionState: {newState}");
             OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
