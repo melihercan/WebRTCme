@@ -102,6 +102,9 @@ namespace WebRtcMeMiddleware.Services
                         connectionRequestParameters.ConnectionParameters.RoomName, 
                         connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
+
+ //await OnPeerJoined("StunOnly", "hello", "Android");
+
                 }
                 catch (Exception ex)
                 {
@@ -194,6 +197,9 @@ namespace WebRtcMeMiddleware.Services
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
+
+                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+
             }
             catch (Exception ex)
             {
@@ -300,7 +306,6 @@ namespace WebRtcMeMiddleware.Services
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
-
             }
             catch (Exception ex)
             {
