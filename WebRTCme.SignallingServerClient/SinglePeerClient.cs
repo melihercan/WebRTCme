@@ -268,7 +268,27 @@ namespace WebRTCme.SignallingServerClient
 
         public Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice)
         {
-            throw new NotImplementedException();
+            var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(ice, _jsonSerializerOptions);
+
+            var data = new Data
+            {
+                TurnServerName = turnServerName,
+                RoomName = roomName,
+                Name = pairUserName
+            };
+
+            var signallingMessage = new SignallingMessage
+            {
+                Sdp = JsonSerializer.Serialize(data, _jsonSerializerOptions),
+                Candidate = new Candidate
+                {
+                    Sdp = iceCandidate.Candidate,
+                    SdpMLineIndex = (int)iceCandidate.SdpMLineIndex,
+                    SdpMid = iceCandidate.SdpMid
+                }
+            };
+            Send(signallingMessage);
+            return Result<Unit>.Success(Unit.Default);
         }
     }
 }

@@ -539,7 +539,7 @@ namespace WebRtcMeMiddleware.Services
                         DataChannel = dataChannel
                     });
                 }
-                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
@@ -593,9 +593,9 @@ namespace WebRtcMeMiddleware.Services
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
                         //if (_isAsyncCall)
-                            await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                            //await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
                         //else
-                            //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
+                            _signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
