@@ -73,6 +73,7 @@ namespace WebRTCme.SignallingServerClient
                 .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
+                _peerUserName = data.Name;
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
                     _peerUserName, signallingMessage.Sdp);
             }
@@ -182,7 +183,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                Name = pairUserName
+                Name = _userName
             };
 
             var signallingMessage = new SignallingMessage
