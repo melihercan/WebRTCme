@@ -33,7 +33,7 @@ namespace WebRTCme
                     .CreateInitializationOptions();
             Webrtc.PeerConnectionFactory.Initialize(options);
 
-            Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity.LsVerbose);
+            Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity.LsError/*.LsVerbose*/);
 
             ///// TODO: INVESTIGATE WHY Webrtc.EglBase.Create() FAILS
             NativeEglBase = /*Webrtc.EglBase.Create();*/ EglBaseHelper.Create();
