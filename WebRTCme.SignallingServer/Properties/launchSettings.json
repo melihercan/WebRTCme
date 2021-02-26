@@ -1,10 +1,10 @@
-﻿{
+{
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:64935",
-      "sslPort": 44353
+      "applicationUrl": "http://localhost:58442/",
+      "sslPort": 44355
     }
   },
   "profiles": {
@@ -17,12 +17,12 @@
     },
     "WebRTCme.SignallingServer": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
       "launchBrowser": true,
-      "applicationUrl": "https://192.168.1.48:5051;http://192.168.1.48:5050",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "https://192.168.1.48:5051;http://192.168.1.48:5050"
     }
   }
 }

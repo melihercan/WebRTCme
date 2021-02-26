@@ -115,7 +115,8 @@ namespace WebRtc.iOS
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
-            ((Webrtc.RTCPeerConnection)NativeObject).AddIceCandidate(candidate.ToNative());
+            var x = candidate.ToNative();
+            ((Webrtc.RTCPeerConnection)NativeObject).AddIceCandidate(x/*candidate.ToNative()*/);
             return Task.CompletedTask;
         }
 

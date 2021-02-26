@@ -55,6 +55,10 @@ namespace WebRTCme.SignallingServerClient
         {
             var jsonMessage = e.Data;
             var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage, _jsonSerializerOptions);
+//            if (signallingMessage.Type is null && signallingMessage.Sdp is null && signallingMessage.Candidate is null)
+  //          {
+    //            signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage);
+      //      }
 
             if (signallingMessage.Type?.Equals(nameof(JoinRoom)) == true)
             {

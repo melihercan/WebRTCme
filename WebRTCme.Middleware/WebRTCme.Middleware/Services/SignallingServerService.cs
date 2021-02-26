@@ -188,7 +188,7 @@ namespace WebRtcMeMiddleware.Services
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
                 //if (_isAsyncCall)
-                    await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                    //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
                 //else
                     //_signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
 
@@ -198,7 +198,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
 
             }
             catch (Exception ex)
@@ -297,7 +297,7 @@ namespace WebRtcMeMiddleware.Services
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                     $"peerUser:{peerUserName}");// sdp:{sdp}");
                 //if (_isAsyncCall)
-                    await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                    //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 //else
                     //_signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
 
@@ -306,6 +306,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
+                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -445,7 +446,7 @@ namespace WebRtcMeMiddleware.Services
                     {
                         IceServers = connectionContext.IceServers ?? await _signallingServerClient
                             .GetIceServers(turnServerName),
-                        PeerIdentity = roomName
+                        PeerIdentity = peerUserName
                     };
                     peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
                     subject = new Subject<PeerResponseParameters>();
