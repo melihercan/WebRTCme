@@ -73,8 +73,8 @@ namespace WebRtc.Android
             new Webrtc.SessionDescription(description.Type.ToNative(), description.Sdp);
 
         public static Webrtc.IceCandidate ToNative(this RTCIceCandidateInit iceCandidateInit) =>
-            new Webrtc.IceCandidate(iceCandidateInit.Candidate, (int)iceCandidateInit.SdpMLineIndex, 
-                iceCandidateInit.SdpMid)
+            new Webrtc.IceCandidate(iceCandidateInit.SdpMid, (int)iceCandidateInit.SdpMLineIndex,
+                iceCandidateInit.Candidate)
             {
                 //AdapterType = Webrtc.PeerConnection.AdapterType.AdapterTypeAny,
                 ////ServerUrl = ???
