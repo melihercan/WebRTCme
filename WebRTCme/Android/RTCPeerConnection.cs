@@ -93,8 +93,7 @@ namespace WebRtc.Android
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
-            var c = candidate.ToNative();
-            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(c/*candidate.ToNative()*/);
+            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(candidate.ToNative());
             return Task.CompletedTask;
         }
 
