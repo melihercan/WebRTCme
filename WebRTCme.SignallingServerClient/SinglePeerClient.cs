@@ -277,7 +277,7 @@ namespace WebRTCme.SignallingServerClient
         }
 
 
-            public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
+        public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
         {
             throw new NotImplementedException();
 
@@ -296,7 +296,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                Name = pairUserName
+                Name = _userName
             };
 
             var signallingMessage = new SignallingMessage

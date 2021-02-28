@@ -182,11 +182,11 @@ namespace WebRtcMeMiddleware.Services
 
                 // Send offer before setting local description to avoid race condition with ice candidates.
                 // Setting local description triggers ice candidate packets.
-                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                //var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
                 _logger.LogInformation(
                     $"-------> Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                    $"peerUser:{peerUserName}");// sdp:{offerDescription.Sdp}");
                 //if (_isAsyncCall)
                     //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
                 //else
@@ -198,7 +198,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
+                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, offerDescription.Sdp);
 
             }
             catch (Exception ex)
@@ -291,22 +291,22 @@ namespace WebRtcMeMiddleware.Services
 
                 // Send offer before setting local description to avoid race condition with ice candidates.
                 // Setting local description triggers ice candidate packets.
-                var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
+                //var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
                 _logger.LogInformation(
                     $"-------> Sending Answer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
-                    $"peerUser:{peerUserName}");// sdp:{sdp}");
+                    $"peerUser:{peerUserName}");// sdp:{answerDescription.Sdp}");
                 //if (_isAsyncCall)
-                    //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
                 //else
-                    //_signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
+                //_signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
-                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
+                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, answerDescription.Sdp);
             }
             catch (Exception ex)
             {
@@ -446,7 +446,7 @@ namespace WebRtcMeMiddleware.Services
                     {
                         IceServers = connectionContext.IceServers ?? await _signallingServerClient
                             .GetIceServers(turnServerName),
-                        PeerIdentity = peerUserName
+                        //PeerIdentity = peerUserName
                     };
                     peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
                     subject = new Subject<PeerResponseParameters>();

@@ -96,7 +96,8 @@ namespace WebRtc.Android
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
-            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(candidate.ToNative());
+            var x = candidate.ToNative();
+            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(x);
             return Task.CompletedTask;
         }
 
@@ -181,16 +182,18 @@ namespace WebRtc.Android
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
+            var x = sessionDescription.ToNative();
             ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
-                new SdpObserverProxy(tcs), sessionDescription.ToNative());
+                new SdpObserverProxy(tcs), x);
             return tcs.Task;
         }
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
+            var x = sessionDescription.ToNative();
             ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
-                new SdpObserverProxy(tcs), sessionDescription.ToNative());
+                new SdpObserverProxy(tcs), x);
             return tcs.Task;
         }
 
