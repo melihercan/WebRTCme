@@ -26,7 +26,7 @@ namespace WebRTCme.SignallingServerClient
         private WebSocket _ws;
         //private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private string _userName;
-        private string _peerUserName;
+        private bool _isConnectIssued;
 
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -53,17 +53,19 @@ namespace WebRTCme.SignallingServerClient
 
         private async void WebSocket_OnMessage(object sender, MessageEventArgs e)
         {
+            if (!_isConnectIssued)
+                return;
+
             var jsonMessage = e.Data;
             var signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage, _jsonSerializerOptions);
-//            if (signallingMessage.Type is null && signallingMessage.Sdp is null && signallingMessage.Candidate is null)
-  //          {
-    //            signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage);
-      //      }
+            //            if (signallingMessage.Type is null && signallingMessage.Sdp is null && signallingMessage.Candidate is null)
+            //          {
+            //            signallingMessage = JsonSerializer.Deserialize<SignallingMessage>(jsonMessage);
+            //      }
 
             if (signallingMessage.Type?.Equals(nameof(JoinRoom)) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
-                _peerUserName = data.Name;
                 await _signallingServerCallbacks.OnPeerJoined(data.TurnServerName, data.RoomName,
                     data.Name);
             }
@@ -77,16 +79,27 @@ namespace WebRTCme.SignallingServerClient
                 .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
-                _peerUserName = data.Name;
+                var descriptionInit = new RTCSessionDescriptionInit
+                {
+                    Type = RTCSdpType.Offer,
+                    Sdp = signallingMessage.Sdp
+                };
+                var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
-                    _peerUserName, signallingMessage.Sdp);
+                    data.Name,  sdp);
             }
             else if (signallingMessage.Type?
                 .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
+                var descriptionInit = new RTCSessionDescriptionInit
+                {
+                    Type = RTCSdpType.Answer,
+                    Sdp = signallingMessage.Sdp
+                };
+                var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpAnswered(data.TurnServerName, data.RoomName,
-                    _peerUserName, signallingMessage.Sdp);
+                    data.Name, sdp);
             }
             else if (signallingMessage.Candidate is not null)
             {
@@ -99,7 +112,7 @@ namespace WebRTCme.SignallingServerClient
                 };
                 var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerIceCandidate(data.TurnServerName, data.RoomName,
-                    _peerUserName, ice);
+                    data.Name, ice);
             }
         }
 
@@ -141,6 +154,8 @@ namespace WebRTCme.SignallingServerClient
 
         public Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName)
         {
+            _isConnectIssued = true;
+
             _userName = userName;
             var data = new Data
             {
@@ -162,6 +177,8 @@ namespace WebRTCme.SignallingServerClient
 
         public Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName)
         {
+            _isConnectIssued = false;
+
             var data = new Data
             {
                 TurnServerName = turnServerName,
@@ -210,7 +227,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                Name = pairUserName
+                Name = _userName
             };
 
             var signallingMessage = new SignallingMessage
@@ -235,7 +252,7 @@ namespace WebRTCme.SignallingServerClient
             {
                 TurnServerName = turnServerName,
                 RoomName = roomName,
-                Name = pairUserName
+                Name = _userName
             };
 
             var signallingMessage = new SignallingMessage

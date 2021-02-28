@@ -38,9 +38,12 @@ namespace WebRtc.Android
         public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(RTCConfiguration configuration) => 
+        private RTCPeerConnection(RTCConfiguration configuration) //=> 
+        {
+            var x = configuration.ToNative();
             NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                .CreatePeerConnection(configuration.ToNative(), this);
+                .CreatePeerConnection(x, this);
+        }
 
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
