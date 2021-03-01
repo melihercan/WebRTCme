@@ -11,7 +11,10 @@ namespace WebRtc.iOS
         public static IRTCDataChannel Create(Webrtc.RTCDataChannel nativeDataChannel) => 
             new RTCDataChannel(nativeDataChannel);
 
-        private RTCDataChannel(Webrtc.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) { }
+        private RTCDataChannel(Webrtc.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) 
+        {
+            nativeDataChannel.Delegate = this;
+        }
 
         public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
