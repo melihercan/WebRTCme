@@ -12,6 +12,12 @@ using Webrtc = Org.Webrtc;
 
 namespace WebRTCme
 {
+    //// FOR TESTING, REMOVE THIS LATER
+    public static class ConnFact
+    {
+        public static Webrtc.PeerConnectionFactory PeerConnectionFactory { get; set; }
+    }
+
     internal class WebRtc : IWebRtc
     {
         public static Webrtc.PeerConnectionFactory NativePeerConnectionFactory { get; private set; }
@@ -33,10 +39,10 @@ namespace WebRTCme
                     .CreateInitializationOptions();
             Webrtc.PeerConnectionFactory.Initialize(options);
 
-     //Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity.LsWarning/*LsError.LsVerbose*/);
+     //Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity./*LsInfo*//*LsError*//*LsWarning*/LsVerbose);
 
             ///// TODO: INVESTIGATE WHY Webrtc.EglBase.Create() FAILS
-            NativeEglBase = /*Webrtc.EglBase.Create();*/ EglBaseHelper.Create();
+            NativeEglBase = Webrtc.EglBase.Create();// EglBaseHelper.Create();
 
             var eglBaseContext = NativeEglBase.EglBaseContext;
             //var adm = CreateJavaAudioDevice(context);
@@ -50,6 +56,7 @@ namespace WebRTCme
                 .SetVideoDecoderFactory(decoderFactory)
                 .SetOptions(new Webrtc.PeerConnectionFactory.Options())
                 .CreatePeerConnectionFactory();
+ ConnFact.PeerConnectionFactory = NativePeerConnectionFactory;
             //adm.Release();
         }
 

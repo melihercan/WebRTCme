@@ -287,7 +287,7 @@ namespace WebRtcMeMiddleware.Services
                 var answerDescription = await peerConnection.CreateAnswer();
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
                 if (DeviceInfo.Platform == DevicePlatform.Android)
-                    offerDescription.Type = RTCSdpType.Answer;
+                    answerDescription.Type = RTCSdpType.Answer;
 
                 // Send offer before setting local description to avoid race condition with ice candidates.
                 // Setting local description triggers ice candidate packets.

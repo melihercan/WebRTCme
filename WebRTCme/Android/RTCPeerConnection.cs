@@ -97,6 +97,7 @@ namespace WebRtc.Android
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
             var x = candidate.ToNative();
+            System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET ICE: {x.AdapterType} {x.Sdp} {x.SdpMid} {x.SdpMLineIndex} {x.ServerUrl}");
             ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(x);
             return Task.CompletedTask;
         }
@@ -183,6 +184,7 @@ namespace WebRtc.Android
         {
             var tcs = new TaskCompletionSource<object>();
             var x = sessionDescription.ToNative();
+            System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET LOCAL: {x.Description}");
             ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
                 new SdpObserverProxy(tcs), x);
             return tcs.Task;
@@ -192,6 +194,7 @@ namespace WebRtc.Android
         {
             var tcs = new TaskCompletionSource<object>();
             var x = sessionDescription.ToNative();
+            System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET REMOTE: {x.Description}");
             ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
                 new SdpObserverProxy(tcs), x);
             return tcs.Task;

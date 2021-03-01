@@ -13,6 +13,7 @@ namespace WebRtc.Android
 
         private RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
         {
+            nativeDataChannel.RegisterObserver(this);
         }
 
         public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
