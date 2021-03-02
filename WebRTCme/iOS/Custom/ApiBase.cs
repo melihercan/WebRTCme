@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
-    public abstract class ApiBase : NSObject, INativeObject
+    internal abstract class ApiBase : NSObject, INativeObject
     {
         protected ApiBase() { }
 

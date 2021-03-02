@@ -8,7 +8,7 @@ using Android.Hardware.Camera2;
 using Xamarin.Essentials;
 using System.Linq;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class MediaStream : ApiBase, IMediaStream
     {

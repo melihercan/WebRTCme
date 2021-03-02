@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
     internal class RTCPeerConnectionIceEvent : ApiBase, IRTCPeerConnectionIceEvent
     {

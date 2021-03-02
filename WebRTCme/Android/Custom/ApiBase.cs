@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
-    public abstract class ApiBase : Java.Lang.Object, INativeObject
+    internal abstract class ApiBase : Java.Lang.Object, INativeObject
     {
         protected ApiBase() { }
 

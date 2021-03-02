@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class MessageEvent : ApiBase, IMessageEvent
     {

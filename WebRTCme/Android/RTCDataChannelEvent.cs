@@ -2,7 +2,7 @@
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
     {

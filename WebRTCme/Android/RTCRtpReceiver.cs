@@ -4,7 +4,7 @@ using WebRTCme;
 using Org.Webrtc;
 using System.Threading.Tasks;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class RTCRtpReceiver : ApiBase, IRTCRtpReceiver
     {

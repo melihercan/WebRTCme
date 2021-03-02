@@ -3,7 +3,7 @@ using System;
 using WebRTCme;
 using System.Threading.Tasks;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class RTCRtpSender : ApiBase, IRTCRtpSender
     {

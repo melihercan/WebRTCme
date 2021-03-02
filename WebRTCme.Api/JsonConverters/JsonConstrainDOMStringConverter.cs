@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WebRTCme.JsonConverters
+namespace WebRTCme
 {
     public class JsonConstrainDOMStringConverter : JsonConverter<ConstrainDOMString>
     {

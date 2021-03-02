@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.PeerConnection.IObserver
     {

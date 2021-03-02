@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
     internal class RTCIceCandidate : ApiBase, IRTCIceCandidate
     {

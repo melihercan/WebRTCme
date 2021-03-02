@@ -5,7 +5,7 @@ using System.Text;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal static class ModelExtensions
     {

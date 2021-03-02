@@ -4,7 +4,7 @@ using WebRTCme;
 using Org.Webrtc;
 using System.Linq;
 
-namespace WebRtc.Android
+namespace WebRtcMe.Android
 {
     internal class RTCTrackEvent : ApiBase, IRTCTrackEvent
     {

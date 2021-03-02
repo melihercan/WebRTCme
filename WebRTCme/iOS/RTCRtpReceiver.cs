@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
     internal class RTCRtpReceiver : ApiBase, IRTCRtpReceiver
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
     internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
     {

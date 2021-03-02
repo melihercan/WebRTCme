@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtc.iOS
+namespace WebRtcMe.iOS
 {
     internal class RTCDataChannel : ApiBase, IRTCDataChannel, Webrtc.IRTCDataChannelDelegate
     {
