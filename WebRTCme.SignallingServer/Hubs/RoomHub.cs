@@ -55,61 +55,61 @@ namespace WebRTCme.SignallingServer.Hubs
         }
 
 
-        public async Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName, 
-            string[] participantUserNames)
-        {
-            try
-            {
-                var turnServer = GetTurnServerFromName(turnServerName);
+        //public async Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName, 
+        //    string[] participantUserNames)
+        //{
+        //    try
+        //    {
+        //        var turnServer = GetTurnServerFromName(turnServerName);
 
-                if (Servers.Any(server => server.TurnServer == turnServer &&
-                    server.Rooms.Any(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase))))
-                        throw new Exception($"TURN Server:{turnServer} Room:{roomName} is in use");
+        //        if (Servers.Any(server => server.TurnServer == turnServer &&
+        //            server.Rooms.Any(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase))))
+        //                throw new Exception($"TURN Server:{turnServer} Room:{roomName} is in use");
 
-                var iceServers = await GetTurnServerClient(turnServer).GetIceServersAsync();
-                var rooms = new List<Room>();
-                rooms.Add(new Room
-                {
-                    RoomName = roomName,
-                    GroupName = $"{turnServer}.{roomName}",
-                    IsReserved = true,
-                    AdminUserName = adminUserName,
-                    Clients = participantUserNames.Select(name => new Client 
-                    { 
-                        // ConnectionId = will be set in 'JoinRoom' call
-                        TurnServer = turnServer,
-                        RoomName = roomName,
-                        UserName = name
-                    }).ToList()
-                });
-                Servers.Add(new Server
-                {
-                    TurnServer = turnServer,
-                    IceServers = iceServers,
-                    Rooms = rooms
-                });
-                return Result<Unit>.Success(Unit.Default);
-            }
-            catch (Exception ex)
-            {
-                return Result<Unit>.Error(new string[] { ex.Message });
-            }
-        }
+        //        var iceServers = await GetTurnServerClient(turnServer).GetIceServersAsync();
+        //        var rooms = new List<Room>();
+        //        rooms.Add(new Room
+        //        {
+        //            RoomName = roomName,
+        //            GroupName = $"{turnServer}.{roomName}",
+        //            IsReserved = true,
+        //            AdminUserName = adminUserName,
+        //            Clients = participantUserNames.Select(name => new Client 
+        //            { 
+        //                // ConnectionId = will be set in 'JoinRoom' call
+        //                TurnServer = turnServer,
+        //                RoomName = roomName,
+        //                UserName = name
+        //            }).ToList()
+        //        });
+        //        Servers.Add(new Server
+        //        {
+        //            TurnServer = turnServer,
+        //            IceServers = iceServers,
+        //            Rooms = rooms
+        //        });
+        //        return Result<Unit>.Success(Unit.Default);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Result<Unit>.Error(new string[] { ex.Message });
+        //    }
+        //}
 
-        public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, string participantUserName)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, string participantUserName)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName, string participantUserName)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName, string participantUserName)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public async Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName)
         {
@@ -127,31 +127,31 @@ namespace WebRTCme.SignallingServer.Hubs
                     if (room.Clients.Any(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)))
                         throw new Exception($"TURN Server:{turnServer} Room:{roomName} User:{userName} has already joined");
 
-                    if (room.IsReserved)
-                    {
-                        // Reserved room. Update client's ConnectionId.
-                        room.Clients
-                            .Single(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
-                            .ConnectionId = Context.ConnectionId;
+                    //if (room.IsReserved)
+                    //{
+                    //    // Reserved room. Update client's ConnectionId.
+                    //    room.Clients
+                    //        .Single(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
+                    //        .ConnectionId = Context.ConnectionId;
 
-                        if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Admin joined. Take action.
-                            var excepts = new List<string>();
-                            foreach (var client in room.Clients)
-                            {
-                                excepts.Add(client.ConnectionId);
-                                await Clients.GroupExcept(room.GroupName, excepts)
-                                    .OnPeerJoinedAsync(turnServer.ToString(), client.RoomName, client.UserName); 
-                            }
-                        }
-                        //else
-                        //{
-                        // Participant joined.
-                        //}
+                    //    if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
+                    //    {
+                    //        // Admin joined. Take action.
+                    //        var excepts = new List<string>();
+                    //        foreach (var client in room.Clients)
+                    //        {
+                    //            excepts.Add(client.ConnectionId);
+                    //            await Clients.GroupExcept(room.GroupName, excepts)
+                    //                .OnPeerJoinedAsync(turnServer.ToString(), client.RoomName, client.UserName); 
+                    //        }
+                    //    }
+                    //    //else
+                    //    //{
+                    //    // Participant joined.
+                    //    //}
 
-                    }
-                    else
+                    //}
+                    //else
                     {
                         // Non-reserved room.
                         room.Clients.Add(new Client
@@ -222,19 +222,19 @@ namespace WebRTCme.SignallingServer.Hubs
                         .Single(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
                     if (room.Clients.Any(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)))
                     {
-                        if (room.IsReserved)
-                        {
-                            if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Admin left. Terminate all connections.
-                                //// TODO: COmplete
-                            }
-                            else
-                            {
-                                //// TODO: COmplete
-                            }
-                        }
-                        else
+                        //if (room.IsReserved)
+                        //{
+                        //    if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
+                        //    {
+                        //        // Admin left. Terminate all connections.
+                        //        //// TODO: COmplete
+                        //    }
+                        //    else
+                        //    {
+                        //        //// TODO: COmplete
+                        //    }
+                        //}
+                        //else
                         {
                             // Non-reserved room peer left.
                             var client = room.Clients.Single(client => client.UserName.Equals(

@@ -107,23 +107,23 @@ namespace WebRTCme.SignallingServerClient
         public Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName) =>
             _hubConnection.InvokeAsync<Result<RTCIceServer[]>>(nameof(GetIceServersAsync), turnServerName);
 
-        public Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName,
-            string[] participantUserNames) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(ReserveRoomAsync), turnServerName, roomName, 
-                    adminUserName, participantUserNames);
+        //public Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName,
+        //    string[] participantUserNames) =>
+        //        _hubConnection.InvokeAsync<Result<Unit>>(nameof(ReserveRoomAsync), turnServerName, roomName, 
+        //            adminUserName, participantUserNames);
 
-        public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(FreeRoomAsync), turnServerName, roomName, adminUserName);
+        //public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName) =>
+        //    _hubConnection.InvokeAsync<Result<Unit>>(nameof(FreeRoomAsync), turnServerName, roomName, adminUserName);
 
-        public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, 
-            string participantUserName) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(AddParticipantAsync), turnServerName, roomName, 
-                    participantUserName);
+        //public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, 
+        //    string participantUserName) =>
+        //        _hubConnection.InvokeAsync<Result<Unit>>(nameof(AddParticipantAsync), turnServerName, roomName, 
+        //            participantUserName);
 
-        public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName,
-            string participantUserName) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(RemoveParticipantAsync), turnServerName, roomName,
-                    participantUserName);
+        //public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName,
+        //    string participantUserName) =>
+        //        _hubConnection.InvokeAsync<Result<Unit>>(nameof(RemoveParticipantAsync), turnServerName, roomName,
+        //            participantUserName);
 
         public Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName) =>
             _hubConnection.InvokeAsync<Result<Unit>>(nameof(JoinRoomAsync), turnServerName, roomName, userName);
