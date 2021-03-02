@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,25 +13,33 @@ using System.Reactive;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebRTCme;
+using WebRTCme.SignallingServerClient;
 using Xamarin.Essentials;
 
-namespace WebRTCme.SignallingServerClient
+namespace WebRtcMeSignallingServerClient
 {
-    internal class WebRTCmeClient : ISignallingServerClient
+    internal class SignallingServerClient : ISignallingServerClient
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
 
         private string _signallingServerBaseUrl;
 
-        private WebRTCmeClient()
+        public SignallingServerClient(IConfiguration configuration, 
+            ISignallingServerCallbacks signallingServerCallbacks)
+        {
+
+        }
+
+        private SignallingServerClient()
         {
         }
 
         public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
             ISignallingServerCallbacks signallingServerCallbacks)
         {
-            var self = new WebRTCmeClient();
+            var self = new SignallingServerClient();
 
             self._signallingServerBaseUrl = signallingServerBaseUrl;
 

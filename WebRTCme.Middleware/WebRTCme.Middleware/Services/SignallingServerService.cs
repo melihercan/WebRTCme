@@ -65,7 +65,7 @@ namespace WebRtcMeMiddleware.Services
                 _signallingServerBaseUrl, this);
         }
 
-        public async Task<string[]> GetTurnServerNames()
+        public async Task<string[]> GetTurnServerNamesAsync()
         {
             var result = await _signallingServerClient.GetTurnServerNamesAsync();
             if (result.Status != Ardalis.Result.ResultStatus.Ok)

@@ -100,7 +100,7 @@ namespace WebRTCme.Middleware
                 Message = $"Getting TURN server list from signalling server...";
                 RetryButtonEnabled = false;
 
-                _turnServerNames = await _signallingServerService.GetTurnServerNames();
+                _turnServerNames = await _signallingServerService.GetTurnServerNamesAsync();
 
                 IsCheckingSignallingServer = false;
                 Header = string.Empty;

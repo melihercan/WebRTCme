@@ -8,7 +8,7 @@ namespace WebRTCme.Middleware
 {
     public interface ISignallingServerService : IAsyncInitialization, IAsyncDisposable
     {
-        Task<string[]> GetTurnServerNames();
+        Task<string[]> GetTurnServerNamesAsync();
 
         IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
       
