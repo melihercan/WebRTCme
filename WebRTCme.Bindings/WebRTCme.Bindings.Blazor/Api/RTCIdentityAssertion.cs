@@ -5,10 +5,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Interops;
 using WebRTCme;
 
-namespace WebRtcBindingsBlazor.Api
+namespace WebRtcMeBindingsBlazor.Api
 {
     internal class RTCIdentityAssertion : ApiBase, IRTCIdentityAssertion
     {

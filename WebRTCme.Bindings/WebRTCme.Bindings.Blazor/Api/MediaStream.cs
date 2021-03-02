@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Extensions;
-using WebRtcBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Extensions;
+using WebRtcMeBindingsBlazor.Interops;
 using WebRTCme;
 
-namespace WebRtcBindingsBlazor.Api
+namespace WebRtcMeBindingsBlazor.Api
 {
     internal class MediaStream : ApiBase, IMediaStream
     {

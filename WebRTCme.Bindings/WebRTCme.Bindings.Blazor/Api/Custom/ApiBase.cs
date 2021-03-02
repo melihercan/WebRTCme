@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Extensions;
-using WebRtcBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Extensions;
+using WebRtcMeBindingsBlazor.Interops;
 using WebRTCme;
 
-namespace WebRtcBindingsBlazor.Api
+namespace WebRtcMeBindingsBlazor.Api
 {
     public abstract class ApiBase : INativeObject
     {

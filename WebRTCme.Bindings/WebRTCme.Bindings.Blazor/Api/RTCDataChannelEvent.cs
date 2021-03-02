@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Interops;
-using WebRtcBindingsBlazor.Extensions;
+using WebRtcMeBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Extensions;
 using WebRTCme;
 
-namespace WebRtcBindingsBlazor.Api
+namespace WebRtcMeBindingsBlazor.Api
 {
     internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
     {

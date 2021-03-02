@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="Web\**\*.cs" />
+		<UpToDateCheckInput Include="Blazor\**\*.cs" />
 		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -21,17 +21,16 @@
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<Compile Include="Web\**\*.cs" />
+		<Compile Include="Blazor\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<Compile Include="Web\**\*.cs" />
+		<Compile Include="Blazor\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
@@ -45,8 +44,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="3.1.10" Condition="'$(TargetFramework)' != 'net5'" />
-		<PackageReference Include="Microsoft.JSInterop" Version="5.0.1" Condition="'$(TargetFramework)' == 'net5'" />
+		<PackageReference Include="Microsoft.JSInterop" Version="3.1.12" Condition="'$(TargetFramework)' != 'net5'" />
+		<PackageReference Include="Microsoft.JSInterop" Version="5.0.3" Condition="'$(TargetFramework)' == 'net5'" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
 	</ItemGroup>
 

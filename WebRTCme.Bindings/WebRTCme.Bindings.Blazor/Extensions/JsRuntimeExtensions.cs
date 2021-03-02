@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Interops;
 
-namespace WebRtcBindingsBlazor.Extensions
+namespace WebRtcMeBindingsBlazor.Extensions
 {
     public static class JsRuntimeExtensions
     {

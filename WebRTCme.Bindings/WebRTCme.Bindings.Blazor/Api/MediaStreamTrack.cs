@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcBindingsBlazor.Extensions;
-using WebRtcBindingsBlazor.Interops;
+using WebRtcMeBindingsBlazor.Extensions;
+using WebRtcMeBindingsBlazor.Interops;
 using WebRTCme;
 
-namespace WebRtcBindingsBlazor.Api
+namespace WebRtcMeBindingsBlazor.Api
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {

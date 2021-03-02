@@ -3,7 +3,7 @@
     <PropertyGroup>
 	    <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-		<RootNamespace>WebRtcMiddlewareXamarin</RootNamespace>
+		<RootNamespace>WebRtcMeMiddlewareXamarin</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
 		<LangVersion>9.0</LangVersion>

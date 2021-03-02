@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace WebRtcBindingsBlazor.Interops
+namespace WebRtcMeBindingsBlazor.Interops
 {
     public class JsEventHandler
     {

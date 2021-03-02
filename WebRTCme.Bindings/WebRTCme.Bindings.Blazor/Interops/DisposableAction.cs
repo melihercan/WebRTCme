@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace WebRtcBindingsBlazor.Interops
+namespace WebRtcMeBindingsBlazor.Interops
 {
     internal class DisposableAction : IDisposable
     {

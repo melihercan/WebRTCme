@@ -1,22 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
     <RootNamespace>WebRrtcMeApi</RootNamespace>
 	<LangVersion>9.0</LangVersion>
+	<UserSecretsId>a419948c-ce76-4240-bd44-60047b666b15</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.10" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
-	<PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.12" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-	<PackageReference Include="System.Text.Json" Version="5.0.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.3" />
   </ItemGroup>
 
-	
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+	<PackageReference Include="System.Text.Json" Version="5.0.1" />
+  </ItemGroup>
+
+
 </Project>
