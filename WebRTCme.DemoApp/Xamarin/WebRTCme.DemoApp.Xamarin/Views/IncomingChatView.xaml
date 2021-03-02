@@ -8,7 +8,7 @@
             <BoxView CornerRadius="10" BackgroundColor="#e6e6f0" HorizontalOptions="FillAndExpand"/>
             <StackLayout VerticalOptions="FillAndExpand" Padding="10" Spacing="0">
                 <Label Text="{Binding PeerUserName}" TextColor="{Binding PeerUserNameTextColor}"
-                       FontSize="Large" FontAttributes="Italic"/>
+                       FontSize="Caption" FontAttributes="Italic"/>
                 <Label Margin="0,5,0,0" Text="{Binding Message}"/>
                 <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="Micro" FontAttributes="Italic"/>
             </StackLayout>
