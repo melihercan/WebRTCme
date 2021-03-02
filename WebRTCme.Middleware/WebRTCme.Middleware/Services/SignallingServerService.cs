@@ -276,8 +276,13 @@ namespace WebRtcMeMiddleware.Services
                 var peerConnection = peerContext.PeerConnection;
                 subject = peerContext.PeerResponseSubject;
 
-                var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
-                    _jsonSerializerOptions);
+                //var offerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
+                //_jsonSerializerOptions);
+                var offerDescription = new RTCSessionDescriptionInit 
+                {
+                    Type = RTCSdpType.Offer,
+                    Sdp = peerSdp
+                };
                 //_logger.LogInformation(
                 //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -338,8 +343,13 @@ namespace WebRtcMeMiddleware.Services
                 var peerConnection = peerContext.PeerConnection;
                 subject = peerContext.PeerResponseSubject;
 
-                var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
-                    _jsonSerializerOptions);
+                //var answerDescription = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
+                //_jsonSerializerOptions);
+                var answerDescription = new RTCSessionDescriptionInit 
+                {
+                    Type = RTCSdpType.Answer,
+                    Sdp = peerSdp
+                };
                 //_logger.LogInformation(
                 //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +

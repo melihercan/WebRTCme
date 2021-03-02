@@ -51,14 +51,14 @@ namespace WebRTCme.SignallingServerClient
                         };
                     }
                 })
-                .ConfigureLogging(logging =>
-                {
-                    // Log to output window.
-                    logging.AddDebug();
+                //.ConfigureLogging(logging =>
+                //{
+                //    // Log to output window.
+                //    logging.AddDebug();
 
-                    // This will set ALL logging to Debug level
-                    logging.SetMinimumLevel(LogLevel.Debug);
-                })
+                //    // This will set logging level
+                //    logging.SetMinimumLevel(LogLevel.Error/*Debug*/);
+                //})
                 .AddMessagePackProtocol()
                 .Build();
 
