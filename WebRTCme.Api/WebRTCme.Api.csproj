@@ -18,9 +18,5 @@
 	<PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Custom\" />
-  </ItemGroup>
-
 	
 </Project>
