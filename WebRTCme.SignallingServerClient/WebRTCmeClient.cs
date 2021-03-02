@@ -63,18 +63,23 @@ namespace WebRTCme.SignallingServerClient
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            self._hubConnection.On<string, string, string>("OnPeerJoined", signallingServerCallbacks.OnPeerJoined);
-            self._hubConnection.On<string, string, string>("OnPeerLeft", signallingServerCallbacks.OnPeerLeft);
-            self._hubConnection.On<string, string, string, string>("OnPeerSdpOffered", 
-                signallingServerCallbacks.OnPeerSdpOffered);
-            self._hubConnection.On<string, string, string, string>("OnPeerSdpAnswered", 
-                signallingServerCallbacks.OnPeerSdpAnswered);
-            self._hubConnection.On<string, string, string, string>("OnPeerIceCandidate", 
-                signallingServerCallbacks.OnPeerIceCandidate);
+            self._hubConnection.On<string, string, string>(
+                nameof(signallingServerCallbacks.OnPeerJoinedAsync), 
+                signallingServerCallbacks.OnPeerJoinedAsync);
+            self._hubConnection.On<string, string, string>(
+                nameof(signallingServerCallbacks.OnPeerLeftAsync), 
+                signallingServerCallbacks.OnPeerLeftAsync);
+            self._hubConnection.On<string, string, string, string>(
+                nameof(signallingServerCallbacks.OnPeerSdpOfferedAsync), 
+                signallingServerCallbacks.OnPeerSdpOfferedAsync);
+            self._hubConnection.On<string, string, string, string>(
+                nameof(signallingServerCallbacks.OnPeerSdpAnsweredAsync), 
+                signallingServerCallbacks.OnPeerSdpAnsweredAsync);
+            self._hubConnection.On<string, string, string, string>(
+                nameof(signallingServerCallbacks.OnPeerIceCandidateAsync), 
+                signallingServerCallbacks.OnPeerIceCandidateAsync);
 
             self._hubConnection.Closed += self.HubConnection_Closed;
-
-            self.SyncInitialize();
 
             // Start connection without waiting.
             _ = self.ConnectWithRetryAsync();
@@ -85,7 +90,6 @@ namespace WebRTCme.SignallingServerClient
 
         public async ValueTask DisposeAsync()
         {
-            SyncCleanup();
             _cts.Cancel();
             if (_hubConnection.State != HubConnectionState.Disconnected)
             {
@@ -97,47 +101,49 @@ namespace WebRTCme.SignallingServerClient
             }
         }
 
-        public Task<Result<string[]>> GetTurnServerNames() => 
-            _hubConnection.InvokeAsync<Result<string[]>>("GetTurnServerNames");
+        public Task<Result<string[]>> GetTurnServerNamesAsync() => 
+            _hubConnection.InvokeAsync<Result<string[]>>(nameof(GetTurnServerNamesAsync));
 
-        public Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName) =>
-            _hubConnection.InvokeAsync<Result<RTCIceServer[]>>("GetIceServers", turnServerName);
+        public Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName) =>
+            _hubConnection.InvokeAsync<Result<RTCIceServer[]>>(nameof(GetIceServersAsync), turnServerName);
 
-        public Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName,
+        public Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName,
             string[] participantUserNames) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("ReserveRoom", turnServerName, roomName, adminUserName,
-                    participantUserNames);
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(ReserveRoomAsync), turnServerName, roomName, 
+                    adminUserName, participantUserNames);
 
-        public Task<Result<Unit>> FreeRoom(string turnServerName, string roomName, string adminUserName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>("FreeRoom", turnServerName, roomName, adminUserName);
+        public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName) =>
+            _hubConnection.InvokeAsync<Result<Unit>>(nameof(FreeRoomAsync), turnServerName, roomName, adminUserName);
 
-        public Task<Result<Unit>> AddParticipant(string turnServerName, string roomName, 
+        public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, 
             string participantUserName) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("AddParticipant", turnServerName, roomName, 
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(AddParticipantAsync), turnServerName, roomName, 
                     participantUserName);
 
-        public Task<Result<Unit>> RemoveParticipant(string turnServerName, string roomName,
+        public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName,
             string participantUserName) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("RemoveParticipant", turnServerName, roomName,
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(RemoveParticipantAsync), turnServerName, roomName,
                     participantUserName);
 
-        public Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>("JoinRoom", turnServerName, roomName, userName);
+        public Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync<Result<Unit>>(nameof(JoinRoomAsync), turnServerName, roomName, userName);
 
-        public Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>("LeaveRoom", turnServerName, roomName, userName);
+        public Task<Result<Unit>> LeaveRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync<Result<Unit>>(nameof(LeaveRoomAsync), turnServerName, roomName, userName);
 
-        public Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string pairUserName, 
+        public Task<Result<Unit>> OfferSdpAsync(string turnServerName, string roomName, string pairUserName, 
             string sdp) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("OfferSdp", turnServerName, roomName, pairUserName, sdp);
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(OfferSdpAsync), turnServerName, roomName, pairUserName, 
+                    sdp);
 
-        public Task<Result<Unit>> AnswerSdp(string turnServerName, string roomName, string pairUserName,
+        public Task<Result<Unit>> AnswerSdpAsync(string turnServerName, string roomName, string pairUserName,
             string sdp) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("AnswerSdp", turnServerName, roomName, pairUserName, sdp);
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(AnswerSdpAsync), turnServerName, roomName, pairUserName, 
+                    sdp);
 
-        public Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string pairUserName,
+        public Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string pairUserName,
             string ice) =>
-                _hubConnection.InvokeAsync<Result<Unit>>("IceCandidate", turnServerName, roomName, pairUserName, ice);
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(IceCandidateAsync), turnServerName, roomName, pairUserName, ice);
 
         private Task HubConnection_Closed(Exception arg)
         {
@@ -177,112 +183,5 @@ namespace WebRTCme.SignallingServerClient
                 }
             }
         }
-
-        #region Sync 
-
-        internal class Data
-        {
-            public string MethodName { get; set; }
-            public string TurnServerName { get; set; }
-            public string RoomName { get; set; }
-            public string PairUserName { get; set; }
-            public string SdpOrIce { get; set; }
-        }
-
-        private BlockingCollection<Data> _collection = new();
-        private CancellationTokenSource _ctsSync = new(); 
-
-        private void SyncInitialize()
-        {
-            try
-            {
-                // This will fail on BlazorWasm. Async calls are used for it.
-                new Thread(ThreadExecute).Start();
-            }
-            catch
-            { }
-        }
-
-        private void ThreadExecute(object arg)
-        {
-
-            while (!_ctsSync.Token.IsCancellationRequested)
-            {
-                Data data = null;
-                try
-                {
-                    data = _collection.Take(_ctsSync.Token);
-                }
-                catch
-                {  }
-
-                if (data is not null)
-                {
-                    switch (data.MethodName)
-                    {
-                        case nameof(OfferSdpSync):
-                            _ = OfferSdp(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
-                                .GetAwaiter().GetResult();
-                            break;
-
-                        case nameof(AnswerSdpSync):
-                            _ = AnswerSdp(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
-                                .GetAwaiter().GetResult();
-                            break;
-
-                        case nameof(IceCandidateSync):
-                            _ = IceCandidate(data.TurnServerName, data.RoomName, data.PairUserName, data.SdpOrIce)
-                                .GetAwaiter().GetResult();
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void SyncCleanup()
-        {
-            _ctsSync.Cancel();
-        }
-
-        public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
-        {
-            _collection.Add(new Data 
-            { 
-                MethodName = nameof(OfferSdpSync),
-                TurnServerName = turnServerName,
-                RoomName = roomName,
-                PairUserName = pairUserName,
-                SdpOrIce = sdp
-            });
-            return Unit.Default;
-        }
-
-        public Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
-        {
-            _collection.Add(new Data
-            {
-                MethodName = nameof(AnswerSdpSync),
-                TurnServerName = turnServerName,
-                RoomName = roomName,
-                PairUserName = pairUserName,
-                SdpOrIce = sdp
-            });
-            return Unit.Default;
-        }
-
-        public Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice)
-        {
-            _collection.Add(new Data
-            {
-                MethodName = nameof(IceCandidateSync),
-                TurnServerName = turnServerName,
-                RoomName = roomName,
-                PairUserName = pairUserName,
-                SdpOrIce = ice
-            });
-            return Unit.Default;
-        }
-
-        #endregion
     }
 }

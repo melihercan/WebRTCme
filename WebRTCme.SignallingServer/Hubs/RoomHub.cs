@@ -37,10 +37,10 @@ namespace WebRTCme.SignallingServer.Hubs
         private TurnServer GetTurnServerFromName(string turnServerName) =>
             (TurnServer)Enum.Parse(typeof(TurnServer), turnServerName, true);
 
-        public Task<Result<string[]>> GetTurnServerNames() =>
+        public Task<Result<string[]>> GetTurnServerNamesAsync() =>
             Task.FromResult(Result<string[]>.Success(Enum.GetNames(typeof(TurnServer))));
 
-        public async Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName)
+        public async Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace WebRTCme.SignallingServer.Hubs
         }
 
 
-        public async Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName, 
+        public async Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName, 
             string[] participantUserNames)
         {
             try
@@ -96,22 +96,22 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public Task<Result<Unit>> FreeRoom(string turnServerName, string roomName, string adminUserName)
+        public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<Unit>> AddParticipant(string turnServerName, string roomName, string participantUserName)
+        public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, string participantUserName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<Unit>> RemoveParticipant(string turnServerName, string roomName, string participantUserName)
+        public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName, string participantUserName)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName)
+        public async Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName)
         {
             try
             {
@@ -142,7 +142,7 @@ namespace WebRTCme.SignallingServer.Hubs
                             {
                                 excepts.Add(client.ConnectionId);
                                 await Clients.GroupExcept(room.GroupName, excepts)
-                                    .OnPeerJoined(turnServer.ToString(), client.RoomName, client.UserName); 
+                                    .OnPeerJoinedAsync(turnServer.ToString(), client.RoomName, client.UserName); 
                             }
                         }
                         //else
@@ -164,7 +164,7 @@ namespace WebRTCme.SignallingServer.Hubs
                         await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
                         // Notify others.
                         await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
-                            .OnPeerJoined(turnServer.ToString(), roomName, userName);
+                            .OnPeerJoinedAsync(turnServer.ToString(), roomName, userName);
                     }
                 }
                 else
@@ -207,7 +207,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName)
+        public async Task<Result<Unit>> LeaveRoomAsync(string turnServerName, string roomName, string userName)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace WebRTCme.SignallingServer.Hubs
                                 Servers.Remove(server);
                             // Notify others.
                             await Clients.GroupExcept(groupName, connectionId)
-                                .OnPeerLeft(turnServer.ToString(), roomName, userName);
+                                .OnPeerLeftAsync(turnServer.ToString(), roomName, userName);
                             await Groups.RemoveFromGroupAsync(connectionId, groupName);
                         }
                     }
@@ -270,7 +270,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string pairUserName, 
+        public async Task<Result<Unit>> OfferSdpAsync(string turnServerName, string roomName, string pairUserName, 
             string sdp)
         {
             try
@@ -287,7 +287,7 @@ namespace WebRTCme.SignallingServer.Hubs
                     .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerSdpOffered(turnServer.ToString(), roomName, userName, sdp);
+                await Clients.Client(pairConnectionId).OnPeerSdpOfferedAsync(turnServer.ToString(), roomName, userName, sdp);
                 return Result<Unit>.Success(Unit.Default);
             }
             catch (Exception ex)
@@ -296,7 +296,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> AnswerSdp(string turnServerName, string roomName, string pairUserName, 
+        public async Task<Result<Unit>> AnswerSdpAsync(string turnServerName, string roomName, string pairUserName, 
             string sdp)
         {
             try
@@ -313,7 +313,7 @@ namespace WebRTCme.SignallingServer.Hubs
                     .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerSdpAnswered(turnServer.ToString(), roomName, userName, 
+                await Clients.Client(pairConnectionId).OnPeerSdpAnsweredAsync(turnServer.ToString(), roomName, userName, 
                     sdp);
                 return Result<Unit>.Success(Unit.Default);
             }
@@ -323,7 +323,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string pairUserName, 
+        public async Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string pairUserName, 
             string ice)
         {
             try
@@ -340,7 +340,7 @@ namespace WebRTCme.SignallingServer.Hubs
                     .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerIceCandidate(turnServer.ToString(), roomName, userName, 
+                await Clients.Client(pairConnectionId).OnPeerIceCandidateAsync(turnServer.ToString(), roomName, userName, 
                     ice);
                 return Result<Unit>.Success(Unit.Default);
             }
@@ -356,19 +356,5 @@ namespace WebRTCme.SignallingServer.Hubs
             //throw new NotImplementedException();
         }
 
-        public Result<Unit> OfferSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string pairUserName, string sdp)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Result<Unit> IceCandidateSync(string turnServerName, string roomName, string pairUserName, string ice)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -62,13 +62,12 @@ namespace WebRtcMeMiddleware.Services
         {
             _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
                 SignallingServerClientType.WebRtcMe, 
-                //SignallingServerClientType.WebSocket,
                 _signallingServerBaseUrl, this);
         }
 
         public async Task<string[]> GetTurnServerNames()
         {
-            var result = await _signallingServerClient.GetTurnServerNames();
+            var result = await _signallingServerClient.GetTurnServerNamesAsync();
             if (result.Status != Ardalis.Result.ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
             return result.Value;
@@ -97,7 +96,7 @@ namespace WebRtcMeMiddleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await _signallingServerClient.JoinRoom(
+                    await _signallingServerClient.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName, 
                         connectionRequestParameters.ConnectionParameters.UserName);
@@ -116,7 +115,7 @@ namespace WebRtcMeMiddleware.Services
                     try
                     {
                         if (isJoined)
-                            await _signallingServerClient.LeaveRoom(
+                            await _signallingServerClient.LeaveRoomAsync(
                                 connectionRequestParameters.ConnectionParameters.TurnServerName,
                                 connectionRequestParameters.ConnectionParameters.RoomName, 
                                 connectionRequestParameters.ConnectionParameters.UserName);
@@ -156,7 +155,7 @@ namespace WebRtcMeMiddleware.Services
         #region SignallingServerCallbacks
 
 
-        public async Task OnPeerJoined(string turnServerName, string roomName, string peerUserName) 
+        public async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName) 
         {
             Subject<PeerResponseParameters> subject = null;
             try
@@ -198,7 +197,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, offerDescription.Sdp);
+                await _signallingServerClient.OfferSdpAsync(turnServerName, roomName, peerUserName, offerDescription.Sdp);
 
             }
             catch (Exception ex)
@@ -214,7 +213,7 @@ namespace WebRtcMeMiddleware.Services
             }
         }
 
-        public async Task OnPeerLeft(string turnServerName, string roomName, string peerUserName)
+        public async Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName)
         {
             Subject<PeerResponseParameters> subject = null;
             try
@@ -253,7 +252,7 @@ namespace WebRtcMeMiddleware.Services
             }
         }
 
-        public async Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp)
+        public async Task OnPeerSdpOfferedAsync(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
             Subject<PeerResponseParameters> subject = null;
             try
@@ -311,7 +310,7 @@ namespace WebRtcMeMiddleware.Services
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(answerDescription);
-                await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, answerDescription.Sdp);
+                await _signallingServerClient.AnswerSdpAsync(turnServerName, roomName, peerUserName, answerDescription.Sdp);
             }
             catch (Exception ex)
             {
@@ -326,7 +325,7 @@ namespace WebRtcMeMiddleware.Services
             }
         }
 
-        public async Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, 
+        public async Task OnPeerSdpAnsweredAsync(string turnServerName, string roomName, string peerUserName, 
             string peerSdp)
         {
             Subject<PeerResponseParameters> subject = null;
@@ -369,7 +368,7 @@ namespace WebRtcMeMiddleware.Services
             }
         }
 
-        public async Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, 
+        public async Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName, 
             string peerIce)
         {
             Subject<PeerResponseParameters> subject = null;
@@ -455,7 +454,7 @@ namespace WebRtcMeMiddleware.Services
                     var configuration = new RTCConfiguration
                     {
                         IceServers = connectionContext.IceServers ?? await _signallingServerClient
-                            .GetIceServers(turnServerName),
+                            .GetIceServersAsync(turnServerName),
                         //PeerIdentity = peerUserName
                     };
                     peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
@@ -555,7 +554,7 @@ namespace WebRtcMeMiddleware.Services
                         DataChannel = dataChannel
                     });
                 }
-                /*async*/ void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
+                async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
@@ -579,9 +578,9 @@ namespace WebRtcMeMiddleware.Services
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
                         //if (_isAsyncCall)
-                            //await _signallingServerClient.IceCandidate(turnServerName, roomName, peerUserName, ice);
+                            await _signallingServerClient.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
                         //else
-                            _signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
+                            //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)

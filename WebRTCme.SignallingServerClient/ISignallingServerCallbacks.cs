@@ -25,15 +25,15 @@ namespace WebRTCme.SignallingServerClient
 
 
 
-        Task OnPeerJoined(string turnServerName, string roomName, string peerUserName);
+        Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName);
 
-        Task OnPeerLeft(string turnServerName, string roomName, string peerUserName);
+        Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName);
 
-        Task OnPeerSdpOffered(string turnServerName, string roomName, string peerUserName, string peerSdp);
+        Task OnPeerSdpOfferedAsync(string turnServerName, string roomName, string peerUserName, string peerSdp);
 
-        Task OnPeerSdpAnswered(string turnServerName, string roomName, string peerUserName, string peerSdp);
+        Task OnPeerSdpAnsweredAsync(string turnServerName, string roomName, string peerUserName, string peerSdp);
 
-        Task OnPeerIceCandidate(string turnServerName, string roomName, string peerUserName, string peerIce);
+        Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName, string peerIce);
 
     }
 }

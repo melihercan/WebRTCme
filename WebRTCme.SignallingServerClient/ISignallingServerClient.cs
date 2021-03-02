@@ -9,34 +9,28 @@ namespace WebRTCme.SignallingServerClient
 {
     public interface ISignallingServerClient : IAsyncDisposable
     {
-        Task<Result<string[]>> GetTurnServerNames();
+        Task<Result<string[]>> GetTurnServerNamesAsync();
 
-        Task<Result<RTCIceServer[]>> GetIceServers(string turnServerName);
+        Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName);
 
-        Task<Result<Unit>> ReserveRoom(string turnServerName, string roomName, string adminUserName, 
+        Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName, 
             string[] participantUserNames);
 
-        Task<Result<Unit>> FreeRoom(string turnServerName, string roomName, string adminUserName);
+        Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName);
 
-        Task<Result<Unit>> AddParticipant(string turnServerName, string roomName, string participantUserName);
+        Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, string participantUserName);
 
-        Task<Result<Unit>> RemoveParticipant(string turnServerName, string roomName, string participantUserName);
+        Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName, string participantUserName);
 
-        Task<Result<Unit>> JoinRoom(string turnServerName, string roomName, string userName);
+        Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName);
         
-        Task<Result<Unit>> LeaveRoom(string turnServerName, string roomName, string userName);
+        Task<Result<Unit>> LeaveRoomAsync(string turnServerName, string roomName, string userName);
 
-        Task<Result<Unit>> OfferSdp(string turnServerName, string roomName, string peerUserName, string sdp);
+        Task<Result<Unit>> OfferSdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
 
-        Task<Result<Unit>> AnswerSdp(string turnServerName, string roomName, string peerUserName, string sdp);
+        Task<Result<Unit>> AnswerSdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
 
-        Task<Result<Unit>> IceCandidate(string turnServerName, string roomName, string peerUserName, string ice);
+        Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
 
-        // Sync calls.
-        Result<Unit> OfferSdpSync(string turnServerName, string roomName, string peerUserName, string sdp);
-
-        Result<Unit> AnswerSdpSync(string turnServerName, string roomName, string peerUserName, string sdp);
-
-        Result<Unit> IceCandidateSync(string turnServerName, string roomName, string peerUserName, string ice);
     }
 }

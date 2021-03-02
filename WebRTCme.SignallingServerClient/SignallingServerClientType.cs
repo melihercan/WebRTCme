@@ -7,6 +7,5 @@ namespace WebRTCme.SignallingServerClient
     public enum SignallingServerClientType
     {
         WebRtcMe,
-        WebSocket
     }
 }

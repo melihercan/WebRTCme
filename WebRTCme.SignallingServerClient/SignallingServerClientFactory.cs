@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServerClient
 {
+    //// TODO: NO NEED FOR FACTORY, REMOVE THIS
     public static class SignallingServerClientFactory
     {
         public static Task<ISignallingServerClient> CreateAsync(SignallingServerClientType client, string signallingServerBaseUrl,
@@ -10,7 +11,6 @@ namespace WebRTCme.SignallingServerClient
                 client switch
                 {
                     SignallingServerClientType.WebRtcMe => WebRTCmeClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks),
-                    SignallingServerClientType.WebSocket => SinglePeerClient.CreateAsync(signallingServerBaseUrl, signallingServerCallbacks)
                 };
     }
 }
