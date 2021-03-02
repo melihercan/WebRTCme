@@ -20,12 +20,12 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Web\WebRTCme.Bindings.Web.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Web\WebRTCme.Bindings.Web.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<Compile Include="Web\**\*.cs" />
 	</ItemGroup>
 
