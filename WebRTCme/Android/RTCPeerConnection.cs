@@ -206,7 +206,7 @@ namespace WebRtc.Android
         #region NativeEvents
         public void OnAddStream(Webrtc.MediaStream p0)
         {
-            // Depreceted.
+            // Depreceted. Convert to OnTrack.
         }
 
         public void OnAddTrack(Webrtc.RtpReceiver p0, Webrtc.MediaStream[] p1) => 

@@ -79,27 +79,27 @@ namespace WebRTCme.SignallingServerClient
                 .Equals(RTCSdpType.Offer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
-                var descriptionInit = new RTCSessionDescriptionInit
-                {
-                    Type = RTCSdpType.Offer,
-                    Sdp = signallingMessage.Sdp
-                };
-                var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
+                //var descriptionInit = new RTCSessionDescriptionInit
+                //{
+                    //Type = RTCSdpType.Offer,
+                    //Sdp = signallingMessage.Sdp
+                //};
+                //var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpOffered(data.TurnServerName, data.RoomName,
-                    data.Name,  sdp);
+                    data.Name,  /*sdp*/signallingMessage.Sdp);
             }
             else if (signallingMessage.Type?
                 .Equals(RTCSdpType.Answer.ToString(), StringComparison.OrdinalIgnoreCase) == true)
             {
                 var data = JsonSerializer.Deserialize<Data>(signallingMessage.Candidate.Sdp, _jsonSerializerOptions);
-                var descriptionInit = new RTCSessionDescriptionInit
-                {
-                    Type = RTCSdpType.Answer,
-                    Sdp = signallingMessage.Sdp
-                };
-                var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
+                //var descriptionInit = new RTCSessionDescriptionInit
+                //{
+                    //Type = RTCSdpType.Answer,
+                    //Sdp = signallingMessage.Sdp
+                //};
+                //var sdp = JsonSerializer.Serialize(descriptionInit, _jsonSerializerOptions);
                 await _signallingServerCallbacks.OnPeerSdpAnswered(data.TurnServerName, data.RoomName,
-                    data.Name, sdp);
+                    data.Name, /*sdp*/signallingMessage.Sdp);
             }
             else if (signallingMessage.Candidate is not null)
             {

@@ -628,7 +628,8 @@ namespace WebRtcMeMiddleware.Services
                     _logger.LogInformation(
                         $"######## OnTrack - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                        $"peerUser:{peerUserName}");
+                        $"peerUser:{peerUserName} " +
+                        $"trackType:{e.Track.Kind}");
                     mediaStream.AddTrack(e.Track);
                 }
             }

@@ -18,6 +18,7 @@ namespace WebRtcMiddlewareXamarin
         private Webrtc.RTCEAGLVideoView _rendererView;
         private Webrtc.RTCCameraPreviewView _cameraView;
         private CGSize _rendererSize = CGSize.Empty;
+        private Webrtc.RTCCameraVideoCapturer _videoCapturer;   // make this private not to be GC collected
 
         public MediaView()
         {
@@ -38,8 +39,8 @@ namespace WebRtcMiddlewareXamarin
                 AddSubview(_cameraView);
 
                 var nativeVideoSource = nativeVideoTrack.Source;
-                var videoCapturer = new Webrtc.RTCCameraVideoCapturer();
-                videoCapturer.Delegate = nativeVideoSource;
+                /*var*/ _videoCapturer = new Webrtc.RTCCameraVideoCapturer();
+                _videoCapturer.Delegate = nativeVideoSource;
 
                 var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                     ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
@@ -66,9 +67,9 @@ namespace WebRtcMiddlewareXamarin
                 var capturerDimensions = videoFormatDescription.Dimensions;
                 var capturerSize = new CGSize(capturerDimensions.Width, capturerDimensions.Height);
                 var fps = 30;
-                videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
+                _videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
 
-                _cameraView.CaptureSession = videoCapturer.CaptureSession;
+                _cameraView.CaptureSession = _videoCapturer.CaptureSession;
             }
             else
             {
