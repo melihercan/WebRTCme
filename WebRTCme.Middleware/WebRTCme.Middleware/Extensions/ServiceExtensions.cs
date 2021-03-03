@@ -12,6 +12,8 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddMiddleware(this IServiceCollection services)
         {
+            services.AddSignallingServerClient();
+            
             services.AddSingleton<IMediaStreamService, MediaStreamService>();
 
             //services.AddSingleton<ISignallingServerService, SignallingServerService>();

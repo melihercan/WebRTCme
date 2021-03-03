@@ -18,8 +18,4 @@
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Managers\" />
-	</ItemGroup>
-
 </Project>
