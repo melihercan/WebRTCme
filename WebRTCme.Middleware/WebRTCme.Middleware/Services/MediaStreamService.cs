@@ -11,31 +11,13 @@ namespace WebRtcMeMiddleware.Services
 {
     internal class MediaStreamService : IMediaStreamService
     {
-        private readonly IJSRuntime _jsRuntime;
         private readonly IWindow _window;
 
-        static public async Task<IMediaStreamService> CreateAsync(IJSRuntime jsRuntime = null)
-        {
-            var self = new MediaStreamService(jsRuntime);
-            await self.Initialization;
-            return self;
-        }
 
         public MediaStreamService(IJSRuntime jsRuntime = null)
         {
-            _jsRuntime = jsRuntime;
             _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
-            Initialization = InitializeAsync();
         }
-
-        public Task Initialization { get; private set; }
-
-
-        private Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
 
         public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null)
