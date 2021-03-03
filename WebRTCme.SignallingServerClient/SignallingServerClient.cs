@@ -19,33 +19,21 @@ using Xamarin.Essentials;
 
 namespace WebRtcMeSignallingServerClient
 {
-    internal class SignallingServerClient : ISignallingServerClient
+    public class SignallingServerClient : ISignallingServerClient
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
 
         private string _signallingServerBaseUrl;
 
-        public SignallingServerClient(IConfiguration configuration, 
+        public SignallingServerClient(string signallingServerBaseUrl,
             ISignallingServerCallbacks signallingServerCallbacks)
         {
+            _signallingServerBaseUrl = signallingServerBaseUrl;
 
-        }
+            var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
-        private SignallingServerClient()
-        {
-        }
-
-        public static Task<ISignallingServerClient> CreateAsync(string signallingServerBaseUrl, 
-            ISignallingServerCallbacks signallingServerCallbacks)
-        {
-            var self = new SignallingServerClient();
-
-            self._signallingServerBaseUrl = signallingServerBaseUrl;
-
-            bool bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
-
-            self._hubConnection = new HubConnectionBuilder()
+            _hubConnection = new HubConnectionBuilder()
                 .WithUrl(signallingServerBaseUrl + "/roomhub", (opts) =>
                 {
                     if (bypassSslCertificateError)
@@ -53,48 +41,37 @@ namespace WebRtcMeSignallingServerClient
                         opts.HttpMessageHandlerFactory = (message) =>
                         {
                             if (message is HttpClientHandler clientHandler)
-                            // Bypass SSL certificate.
-                            clientHandler.ServerCertificateCustomValidationCallback +=
-                                    (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                                // Bypass SSL certificate.
+                                clientHandler.ServerCertificateCustomValidationCallback +=
+                                        (sender, certificate, chain, sslPolicyErrors) => { return true; };
                             return message;
                         };
                     }
                 })
-                //.ConfigureLogging(logging =>
-                //{
-                //    // Log to output window.
-                //    logging.AddDebug();
-
-                //    // This will set logging level
-                //    logging.SetMinimumLevel(LogLevel.Error/*Debug*/);
-                //})
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddDebug();
+                    logging.SetMinimumLevel(LogLevel.Error/*Debug*/);
+                })
                 .AddMessagePackProtocol()
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            self._hubConnection.On<string, string, string>(
-                nameof(signallingServerCallbacks.OnPeerJoinedAsync), 
+            _hubConnection.On<string, string, string>(nameof(signallingServerCallbacks.OnPeerJoinedAsync),
                 signallingServerCallbacks.OnPeerJoinedAsync);
-            self._hubConnection.On<string, string, string>(
-                nameof(signallingServerCallbacks.OnPeerLeftAsync), 
+            _hubConnection.On<string, string, string>(nameof(signallingServerCallbacks.OnPeerLeftAsync),
                 signallingServerCallbacks.OnPeerLeftAsync);
-            self._hubConnection.On<string, string, string, string>(
-                nameof(signallingServerCallbacks.OnPeerSdpOfferedAsync), 
+            _hubConnection.On<string, string, string, string>(nameof(signallingServerCallbacks.OnPeerSdpOfferedAsync),
                 signallingServerCallbacks.OnPeerSdpOfferedAsync);
-            self._hubConnection.On<string, string, string, string>(
-                nameof(signallingServerCallbacks.OnPeerSdpAnsweredAsync), 
+            _hubConnection.On<string, string, string, string>(nameof(signallingServerCallbacks.OnPeerSdpAnsweredAsync),
                 signallingServerCallbacks.OnPeerSdpAnsweredAsync);
-            self._hubConnection.On<string, string, string, string>(
-                nameof(signallingServerCallbacks.OnPeerIceCandidateAsync), 
+            _hubConnection.On<string, string, string, string>(nameof(signallingServerCallbacks.OnPeerIceCandidateAsync),
                 signallingServerCallbacks.OnPeerIceCandidateAsync);
 
-            self._hubConnection.Closed += self.HubConnection_Closed;
+            _hubConnection.Closed += HubConnection_Closed;
 
             // Start connection without waiting.
-            _ = self.ConnectWithRetryAsync();
-
-
-            return Task.FromResult(self as ISignallingServerClient);
+            _ = ConnectWithRetryAsync();
         }
 
         public async ValueTask DisposeAsync()

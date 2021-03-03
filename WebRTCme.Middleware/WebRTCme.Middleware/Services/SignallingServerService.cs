@@ -15,6 +15,7 @@ using WebRTCme;
 using WebRTCme.Middleware;
 using WebRTCme.SignallingServerClient;
 using WebRtcMeMiddleware.Models;
+using WebRtcMeSignallingServerClient;
 using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware.Services
@@ -27,7 +28,7 @@ namespace WebRtcMeMiddleware.Services
         private ISignallingServerClient _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
-        private bool _isAsyncCall = false;
+//        private bool _isAsyncCall = false;
 
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -51,19 +52,20 @@ namespace WebRtcMeMiddleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
-                _isAsyncCall = true;
-            _ /*Initialization*/ = InitializeAsync();
+            _signallingServerClient = new SignallingServerClient(_signallingServerBaseUrl, this);
+            //if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
+                //_isAsyncCall = true;
+            //_ /*Initialization*/ //= InitializeAsync();
         }
 
         //public Task Initialization { get; private set; }
 
-        private async Task InitializeAsync()
-        {
-            _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
-                SignallingServerClientType.WebRtcMe, 
-                _signallingServerBaseUrl, this);
-        }
+        //private async Task InitializeAsync()
+        //{
+        //    _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
+        //        SignallingServerClientType.WebRtcMe, 
+        //        _signallingServerBaseUrl, this);
+        //}
 
         public async Task<string[]> GetTurnServerNamesAsync()
         {
