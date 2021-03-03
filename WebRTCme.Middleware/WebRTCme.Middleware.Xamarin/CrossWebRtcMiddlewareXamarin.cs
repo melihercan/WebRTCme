@@ -12,7 +12,7 @@ namespace WebRTCme.Middleware
             CreateWebRtcMiddleware());
 
         private static IWebRtcMiddleware CreateWebRtcMiddleware()
-        {// => new WebRtcMiddleware();
+        {
             var webRtc = CrossWebRtc.Current;
             return new WebRtcMiddleware(webRtc);
         }

@@ -4,9 +4,9 @@ using System.Collections.ObjectModel;
 using System.Text;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware.Managers
+namespace WebRtcMeMiddleware.Services
 {
-    public class MediaManager : IMediaManager
+    public class MediaManagerService : IMediaManagerService
     {
         // Will be used as 'ItemsSource'. 
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; } = new();

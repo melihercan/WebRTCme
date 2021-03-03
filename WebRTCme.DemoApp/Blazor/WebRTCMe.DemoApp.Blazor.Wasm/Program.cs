@@ -46,10 +46,10 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
 
             ConfigureProviders(host.Services);
 
-            var mediaStreamService = host.Services.GetService<IMediaStreamService>();
-            await mediaStreamService.Initialization;
-            var signallingServerService = host.Services.GetService<ISignallingServerService>();
-            await signallingServerService.Initialization;
+            //var mediaStreamService = host.Services.GetService<IMediaStreamService>();
+            //await mediaStreamService.Initialization;
+            //var signallingServerService = host.Services.GetService<ISignallingServerService>();
+            //await signallingServerService.Initialization;
 
             await host.RunAsync();
         }

@@ -7,9 +7,9 @@ using System.Text;
 using WebRTCme;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware.Managers
+namespace WebRtcMeMiddleware.Services
 {
-    public class DataManager : IDataManager
+    public class DataManagerService : IDataManagerService
     {
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();

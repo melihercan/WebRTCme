@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public interface IMediaManager
+    public interface IMediaManagerService
     {
         ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 

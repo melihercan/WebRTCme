@@ -20,18 +20,6 @@ namespace WebRTCme.Middleware
             WebRtc = webRtc;
         }
 
-        public Task<ISignallingServerService> CreateSignallingServerServiceAsync(/*string signallingServerBaseUrl*/
-            IConfiguration configuration,
-            ILogger<ISignallingServerService> logger,
-            IJSRuntime jsRuntime)
-        {
-            return SignallingServerService.CreateAsync(/*signallingServerBaseUrl*/configuration, logger, jsRuntime);
-        }
-
-        public Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime)
-        {
-            return MediaStreamService.CreateAsync(jsRuntime);
-        }
 
         #region IDisposable
         private bool _isDisposed = false;

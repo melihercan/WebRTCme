@@ -10,12 +10,5 @@ namespace WebRTCme.Middleware
 {
     public interface IWebRtcMiddleware : IDisposable
     {
-        Task<ISignallingServerService> CreateSignallingServerServiceAsync(/*string signallingServerBaseUrl*/
-            IConfiguration configuration,
-            ILogger<ISignallingServerService> logger,
-            IJSRuntime jsRuntime = null);
-
-        Task<IMediaStreamService> CreateMediaStreamServiceAsync(IJSRuntime jsRuntime = null);
-
     }
 }

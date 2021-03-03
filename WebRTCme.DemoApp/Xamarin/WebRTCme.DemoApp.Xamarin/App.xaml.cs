@@ -37,10 +37,10 @@ namespace DemoApp
 
         protected override async void OnStart()
         {
-            var mediaStreamService = Host.Services.GetService<IMediaStreamService>();
-            await mediaStreamService.Initialization;
-            var signallingServerService = Host.Services.GetService<ISignallingServerService>();
-            await signallingServerService.Initialization;
+            //var mediaStreamService = Host.Services.GetService<IMediaStreamService>();
+            //await mediaStreamService.Initialization;
+            //var signallingServerService = Host.Services.GetService<ISignallingServerService>();
+            //await signallingServerService.Initialization;
         }
 
         protected override void OnSleep()

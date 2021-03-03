@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public interface IDataManager
+    public interface IDataManagerService
     {
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
