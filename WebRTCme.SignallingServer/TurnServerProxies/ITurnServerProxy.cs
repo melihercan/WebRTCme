@@ -6,7 +6,7 @@ using WebRTCme;
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-    public interface ITurnServerClient
+    public interface ITurnServerProxy
     {
         Task<RTCIceServer[]> GetIceServersAsync(); 
     }

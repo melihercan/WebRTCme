@@ -14,20 +14,20 @@ namespace WebRTCme.SignallingServer.Hubs
 {
     public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerProxy
     {
-        private readonly TurnServerClientFactory _turnServerClientFactory;
+        private readonly TurnServerProxyFactory _turnServerClientFactory;
 
         private static List<Server> Servers = new();
 
 //        private static List<Room> _rooms = new();
   //      private static List<Client> AwaitingClients = new();
-        private static Dictionary<TurnServer, ITurnServerClient> TurnServerClients = new();
+        private static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
 
-        public RoomHub(TurnServerClientFactory turnServerClientFactory)
+        public RoomHub(TurnServerProxyFactory turnServerClientFactory)
         {
             _turnServerClientFactory = turnServerClientFactory;
         }
 
-        private ITurnServerClient GetTurnServerClient(TurnServer turnServer)
+        private ITurnServerProxy GetTurnServerClient(TurnServer turnServer)
         {
             if (!TurnServerClients.ContainsKey(turnServer))
                 TurnServerClients.Add(turnServer, _turnServerClientFactory.Create(turnServer));

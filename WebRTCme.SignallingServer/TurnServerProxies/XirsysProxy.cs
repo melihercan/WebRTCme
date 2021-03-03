@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-    public class XirsysClient : ITurnServerClient
+    public class XirsysProxy : ITurnServerProxy
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
 
-        public XirsysClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public XirsysProxy(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;

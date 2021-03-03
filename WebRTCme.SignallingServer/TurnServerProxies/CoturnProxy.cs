@@ -2,9 +2,9 @@
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-    public class CoturnClient : ITurnServerClient
+    public class CoturnProxy : ITurnServerProxy
     {
-        public CoturnClient()
+        public CoturnProxy()
         {
         }
 

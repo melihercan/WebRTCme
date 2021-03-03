@@ -52,22 +52,22 @@ namespace WebRTCme.SignallingServer
 
             services.AddSignalR().AddMessagePackProtocol();
 
-            services.AddSingleton<TurnServerClientFactory>();
+            services.AddSingleton<TurnServerProxyFactory>();
             services
-                .AddSingleton<StunOnlyClient>()
-                .AddSingleton<ITurnServerClient, StunOnlyClient>(service => service.GetService<StunOnlyClient>());
+                .AddSingleton<StunOnlyProxy>()
+                .AddSingleton<ITurnServerProxy, StunOnlyProxy>(service => service.GetService<StunOnlyProxy>());
             services
-                .AddSingleton<XirsysClient>()
-                .AddSingleton<ITurnServerClient, XirsysClient>(service => service.GetService<XirsysClient>());
+                .AddSingleton<XirsysProxy>()
+                .AddSingleton<ITurnServerProxy, XirsysProxy>(service => service.GetService<XirsysProxy>());
             services
-                .AddSingleton<CoturnClient>()
-                .AddSingleton<ITurnServerClient, CoturnClient>(service => service.GetService<CoturnClient>());
+                .AddSingleton<CoturnProxy>()
+                .AddSingleton<ITurnServerProxy, CoturnProxy>(service => service.GetService<CoturnProxy>());
             services
-                .AddSingleton<AppRtcClient>()
-                .AddSingleton<ITurnServerClient, AppRtcClient>(service => service.GetService<AppRtcClient>());
+                .AddSingleton<AppRtcProxy>()
+                .AddSingleton<ITurnServerProxy, AppRtcProxy>(service => service.GetService<AppRtcProxy>());
             services
-                .AddSingleton<TwilioClient>()
-                .AddSingleton<ITurnServerClient, TwilioClient>(service => service.GetService<TwilioClient>());
+                .AddSingleton<TwilioProxy>()
+                .AddSingleton<ITurnServerProxy, TwilioProxy>(service => service.GetService<TwilioProxy>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

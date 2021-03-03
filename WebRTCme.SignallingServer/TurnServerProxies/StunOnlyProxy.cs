@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-    public class StunOnlyClient : ITurnServerClient
+    public class StunOnlyProxy : ITurnServerProxy
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
 
-        public StunOnlyClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public StunOnlyProxy(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;

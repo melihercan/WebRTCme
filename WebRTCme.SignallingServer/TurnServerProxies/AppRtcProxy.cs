@@ -2,9 +2,9 @@
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
-    public class TwilioClient : ITurnServerClient
+    public class AppRtcProxy : ITurnServerProxy
     {
-        public TwilioClient()
+        public AppRtcProxy()
         {
         }
 
