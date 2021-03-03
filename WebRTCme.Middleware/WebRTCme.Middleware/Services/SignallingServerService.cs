@@ -35,15 +35,15 @@ namespace WebRtcMeMiddleware.Services
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        static public async Task<ISignallingServerService> CreateAsync(
-            IConfiguration configuration,
-            ILogger<ISignallingServerService> logger,
-            IJSRuntime jsRuntime = null)
-        {
-            var self = new SignallingServerService(configuration, logger, jsRuntime);
-            await self.Initialization;
-            return self;
-        }
+        //static public async Task<ISignallingServerService> CreateAsync(
+        //    IConfiguration configuration,
+        //    ILogger<ISignallingServerService> logger,
+        //    IJSRuntime jsRuntime = null)
+        //{
+        //    var self = new SignallingServerService(configuration, logger, jsRuntime);
+        //    await self.Initialization;
+        //    return self;
+        //}
 
         public SignallingServerService(IConfiguration configuration, ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null)
@@ -53,10 +53,10 @@ namespace WebRtcMeMiddleware.Services
             _jsRuntime = jsRuntime;
             if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
                 _isAsyncCall = true;
-            Initialization = InitializeAsync();
+            _ /*Initialization*/ = InitializeAsync();
         }
 
-        public Task Initialization { get; private set; }
+        //public Task Initialization { get; private set; }
 
         private async Task InitializeAsync()
         {
