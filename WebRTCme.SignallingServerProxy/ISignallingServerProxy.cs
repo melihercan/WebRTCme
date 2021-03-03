@@ -5,9 +5,9 @@ using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.SignallingServerClient
+namespace WebRTCme.SignallingServerProxy
 {
-    public interface ISignallingServerClient : IAsyncDisposable
+    public interface ISignallingServerProxy : IAsyncDisposable
     {
         Task<Result<string[]>> GetTurnServerNamesAsync();
 

@@ -14,20 +14,20 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRTCme.SignallingServerClient;
+using WebRTCme.SignallingServerProxy;
 using Xamarin.Essentials;
 
-namespace WebRtcMeSignallingServerClient
+namespace WebRTCme.SignallingServerProxy
 {
-    public class SignallingServerClient : ISignallingServerClient
+    public class SignallingServerProxy : ISignallingServerProxy
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private HubConnection _hubConnection;
 
         private string _signallingServerBaseUrl;
 
-        public SignallingServerClient(string signallingServerBaseUrl,
-            ISignallingServerCallbacks signallingServerCallbacks)
+        public SignallingServerProxy(string signallingServerBaseUrl,
+                    ISignallingServerCallbacks signallingServerCallbacks)
         {
             _signallingServerBaseUrl = signallingServerBaseUrl;
 
@@ -73,7 +73,6 @@ namespace WebRtcMeSignallingServerClient
             // Start connection without waiting.
             _ = ConnectWithRetryAsync();
         }
-
         public async ValueTask DisposeAsync()
         {
             _cts.Cancel();

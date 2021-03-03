@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRTCme.SignallingServerClient;
+using WebRTCme.SignallingServerProxy;
 using WebRtcMeMiddleware;
 using WebRtcMeMiddleware.Services;
 

@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebRTCme.SignallingServerClient\WebRTCme.SignallingServerClient.csproj" />
+    <ProjectReference Include="..\WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj" />
   </ItemGroup>
 
 </Project>

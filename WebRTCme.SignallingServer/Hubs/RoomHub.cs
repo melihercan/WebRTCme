@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using WebRTCme.SignallingServer.Enums;
 using WebRTCme.SignallingServer.Models;
 using WebRTCme.SignallingServer.TurnServerService;
-using WebRTCme.SignallingServerClient;
+using WebRTCme.SignallingServerProxy;
 
 namespace WebRTCme.SignallingServer.Hubs
 {
-    public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerClient
+    public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerProxy
     {
         private readonly TurnServerClientFactory _turnServerClientFactory;
 

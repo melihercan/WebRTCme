@@ -46,7 +46,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.SignallingServer", "WebRTCme.SignallingServer\WebRTCme.SignallingServer.csproj", "{9A7FDC23-8453-4A6F-ADEF-BB321D80D5E4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.SignallingServerClient", "WebRTCme.SignallingServerClient\WebRTCme.SignallingServerClient.csproj", "{BC93F6DE-DB0B-40C2-8B72-4F75C25AE908}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.SignallingServerProxy", "WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj", "{BC93F6DE-DB0B-40C2-8B72-4F75C25AE908}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor.Wasm", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor.Wasm\WebRTCme.DemoApp.Blazor.Wasm.csproj", "{11DC1BF4-2C88-4225-A4DA-CE71E55815DE}"
 EndProject

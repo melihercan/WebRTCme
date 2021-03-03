@@ -13,9 +13,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
-using WebRTCme.SignallingServerClient;
+using WebRTCme.SignallingServerProxy;
 using WebRtcMeMiddleware.Models;
-using WebRtcMeSignallingServerClient;
 using Xamarin.Essentials;
 
 namespace WebRtcMeMiddleware.Services
@@ -25,7 +24,7 @@ namespace WebRtcMeMiddleware.Services
         private readonly IJSRuntime _jsRuntime;
         private readonly ILogger<ISignallingServerService> _logger;
         private readonly string _signallingServerBaseUrl;
-        private ISignallingServerClient _signallingServerClient;
+        private ISignallingServerProxy _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
 //        private bool _isAsyncCall = false;
@@ -52,7 +51,7 @@ namespace WebRtcMeMiddleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            _signallingServerClient = new SignallingServerClient(_signallingServerBaseUrl, this);
+            _signallingServerClient = new SignallingServerProxy(_signallingServerBaseUrl, this);
             //if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
                 //_isAsyncCall = true;
             //_ /*Initialization*/ //= InitializeAsync();

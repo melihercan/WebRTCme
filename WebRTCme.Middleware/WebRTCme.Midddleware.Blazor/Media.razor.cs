@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRTCme.SignallingServerClient;
+using WebRTCme.SignallingServerProxy;
 
 namespace WebRTCme.Middleware.Blazor
 {
