@@ -53,13 +53,13 @@ namespace Webrtc
 		public static extern unsafe NSString RTCFileName(sbyte* filePath);
 
 		[DllImport("__Internal")]
-		public static extern void RTCInitFieldTrialDictionary(NSDictionary<NSString, NSString> fieldTrials);
+		public static extern void RTCInitFieldTrialDictionary(NSDictionary<NSString, NSString> fieldTrials);                 
 
 		[DllImport("__Internal")]
 		public static extern void RTCEnableMetrics();
 
 		[DllImport("__Internal")]
-		static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
+		/*public*/ static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
 
 		[DllImport("__Internal")]
 		public static extern bool RTCInitializeSSL();
