@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebRTCme.SignallingServer.Data;
 using WebRTCme.SignallingServer.Hubs;
 using WebRTCme.SignallingServer.TurnServerService;
 
@@ -42,12 +41,7 @@ namespace WebRTCme.SignallingServer
                 .AllowAnyMethod());
             });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            
             services.AddRazorPages();
 
             services.AddSignalR().AddMessagePackProtocol();
@@ -76,7 +70,6 @@ namespace WebRTCme.SignallingServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
             }
             else
             {
@@ -92,7 +85,6 @@ namespace WebRTCme.SignallingServer
 
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
