@@ -35,7 +35,7 @@ namespace DemoApp
             MainPage = new AppShell();
         }
 
-        protected override async void OnStart()
+        protected override void OnStart()
         {
             //var mediaStreamService = Host.Services.GetService<IMediaStreamService>();
             //await mediaStreamService.Initialization;

@@ -270,7 +270,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> OfferSdpAsync(string turnServerName, string roomName, string pairUserName, 
+        public async Task<Result<Unit>> SdpAsync(string turnServerName, string roomName, string peerUserName,
             string sdp)
         {
             try
@@ -283,11 +283,11 @@ namespace WebRTCme.SignallingServer.Hubs
                     throw new Exception($"TURN Server:{turnServer} Room:{roomName} is not found");
 
                 var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
-                var pairConnectionId = room.Clients
-                    .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
+                var peerConnectionId = room.Clients
+                    .Single(client => client.UserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerSdpOfferedAsync(turnServer.ToString(), roomName, userName, sdp);
+                await Clients.Client(peerConnectionId).OnPeerSdpAsync(turnServer.ToString(), roomName, userName, sdp);
                 return Result<Unit>.Success(Unit.Default);
             }
             catch (Exception ex)
@@ -296,34 +296,8 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-        public async Task<Result<Unit>> AnswerSdpAsync(string turnServerName, string roomName, string pairUserName, 
-            string sdp)
-        {
-            try
-            {
-                var turnServer = GetTurnServerFromName(turnServerName);
-                var room = Servers
-                    .Find(server => server.TurnServer == turnServer)
-                    .Rooms.Find(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
-                if (room is null)
-                    throw new Exception($"TURN Server:{turnServer} Room:{roomName} is not found");
-
-                var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
-                var pairConnectionId = room.Clients
-                    .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
-                    .ConnectionId;
-
-                await Clients.Client(pairConnectionId).OnPeerSdpAnsweredAsync(turnServer.ToString(), roomName, userName, 
-                    sdp);
-                return Result<Unit>.Success(Unit.Default);
-            }
-            catch (Exception ex)
-            {
-                return Result<Unit>.Error(new string[] { ex.Message });
-            }
-        }
-
-        public async Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string pairUserName, 
+       
+        public async Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, 
             string ice)
         {
             try
@@ -336,11 +310,11 @@ namespace WebRTCme.SignallingServer.Hubs
                     throw new Exception($"TURN Server:{turnServer} Room:{roomName} is not found");
 
                 var userName = room.Clients.Single(client => client.ConnectionId == Context.ConnectionId).UserName;
-                var pairConnectionId = room.Clients
-                    .Single(client => client.UserName.Equals(pairUserName, StringComparison.OrdinalIgnoreCase))
+                var peerConnectionId = room.Clients
+                    .Single(client => client.UserName.Equals(peerUserName, StringComparison.OrdinalIgnoreCase))
                     .ConnectionId;
 
-                await Clients.Client(pairConnectionId).OnPeerIceCandidateAsync(turnServer.ToString(), roomName, userName, 
+                await Clients.Client(peerConnectionId).OnPeerIceCandidateAsync(turnServer.ToString(), roomName, userName, 
                     ice);
                 return Result<Unit>.Success(Unit.Default);
             }
