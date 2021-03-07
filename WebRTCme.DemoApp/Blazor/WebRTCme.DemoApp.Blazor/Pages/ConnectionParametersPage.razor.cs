@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme.Middleware;
 
-namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
+namespace WebRTCme.DemoApp.Blazor.Pages
 {
     public partial class ConnectionParametersPage
     {

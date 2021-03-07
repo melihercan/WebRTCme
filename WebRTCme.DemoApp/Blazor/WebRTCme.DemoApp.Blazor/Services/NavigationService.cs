@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebRTCme.Middleware;
 
-namespace WebRTCme.DemoApp.Blazor.Wasm.Services
+namespace WebRTCme.DemoApp.Blazor.Services
 {
     public class NavigationService : INavigationService
     {

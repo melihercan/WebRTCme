@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebRTCme.Middleware;
 using Blazored.Modal.Services;
-using WebRTCme.DemoApp.Blazor.Wasm.Components;
+using WebRTCme.DemoApp.Blazor.Components;
 
-namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
+namespace WebRTCme.DemoApp.Blazor.Pages
 {
     public partial class InitializingPage
     {

@@ -11,7 +11,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using WebRTCme.DemoApp.Blazor.Wasm.Services;
+using WebRTCme.DemoApp.Blazor.Extensions;
+using WebRTCme.DemoApp.Blazor.Services;
 using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Wasm
@@ -30,27 +31,12 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
             });
 
-            //builder.Logging.SetMinimumLevel(LogLevel.Debug);
-
-
-            builder.Services.AddBlazoredModal();
-
             _ = CrossWebRtcMiddlewareBlazor.Current;
-            builder.Services.AddSingleton<INavigationService, NavigationService>();
-            builder.Services.AddMiddleware();
 
-            ///if (builder.HostEnvironment.IsDevelopment())
-               // Console.WriteLine($"ENV IS:DEVELOPMENT");
+            builder.Services.AddAppServices();
 
             var host = builder.Build();
-
             ConfigureProviders(host.Services);
-
-            //var mediaStreamService = host.Services.GetService<IMediaStreamService>();
-            //await mediaStreamService.Initialization;
-            //var signallingServerService = host.Services.GetService<ISignallingServerService>();
-            //await signallingServerService.Initialization;
-
             await host.RunAsync();
         }
 

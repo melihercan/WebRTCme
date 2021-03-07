@@ -12,10 +12,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRTCme.DemoApp.Blazor.Wasm.Components;
 using WebRTCme.Middleware;
 
-namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
+namespace WebRTCme.DemoApp.Blazor.Pages
 {
     partial class CallPage : IDisposable
     {
