@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme.SignallingServerProxy;
-using WebRtcMeMiddleware;
-using WebRtcMeMiddleware.Services;
+using WebRTCme.Middleware;
+using WebRTCme.Middleware.Services;
 
 namespace WebRTCme.Middleware
 {

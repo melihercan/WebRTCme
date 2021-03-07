@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace WebRTCme.SignallingServer.Models
 {
     public class Room
     {
-
         public string RoomName { get; set; }
 
         // Unique group name per hub. Set from "turnServer".roomName parameter.

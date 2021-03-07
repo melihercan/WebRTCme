@@ -2,7 +2,7 @@
 using System;
 using WebRTCme;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class RTCCertificate : ApiBase, IRTCCertificate
     {

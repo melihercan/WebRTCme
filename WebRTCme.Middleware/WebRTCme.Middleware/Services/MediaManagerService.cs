@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware.Services
+namespace WebRTCme.Middleware.Services
 {
     public class MediaManagerService : IMediaManagerService
     {

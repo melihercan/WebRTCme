@@ -5,7 +5,7 @@
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>9.0</LangVersion>		
-        <RootNamespace>WebRtcMe</RootNamespace>
+        <RootNamespace>WebRTCme</RootNamespace>
     </PropertyGroup>
 
 	<ItemGroup>

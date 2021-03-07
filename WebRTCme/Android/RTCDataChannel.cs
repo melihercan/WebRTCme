@@ -4,7 +4,7 @@ using WebRTCme;
 using Org.Webrtc;
 using System.Text;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class RTCDataChannel : ApiBase, IRTCDataChannel, Webrtc.DataChannel.IObserver
     {

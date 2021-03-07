@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtcMe.iOS
+namespace WebRTCme.iOS
 {
     internal static class ModelExtensions
     {

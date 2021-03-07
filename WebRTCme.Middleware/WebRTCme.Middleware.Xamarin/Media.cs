@@ -4,7 +4,7 @@ using System.Text;
 using Xamarin.Forms;
 using WebRTCme;
 
-namespace WebRTCme.Middleware.Xamarin
+namespace WebRTCme.Middleware
 {
     public class Media : View       
     {

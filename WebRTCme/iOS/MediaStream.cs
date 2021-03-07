@@ -6,7 +6,7 @@ using System.Linq;
 using AVFoundation;
 using System.Threading.Tasks;
 
-namespace WebRtcMe.iOS
+namespace WebRTCme.iOS
 {
     internal class MediaStream : ApiBase, IMediaStream
     {

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using WebRtcMe.Android;
+using WebRTCme.Android;
 using WebRTCme;
 using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;

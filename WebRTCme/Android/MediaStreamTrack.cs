@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
     {

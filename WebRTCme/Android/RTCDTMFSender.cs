@@ -3,7 +3,7 @@ using System;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
     {

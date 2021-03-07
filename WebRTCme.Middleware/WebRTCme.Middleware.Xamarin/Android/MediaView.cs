@@ -10,7 +10,7 @@ using WebRTCme;
 using WebRTCme.Middleware;
 using Webrtc = Org.Webrtc;
 
-namespace WebRtcMiddlewareXamarin
+namespace WebRTCme.Middleware
 {
     public class MediaView : ViewGroup
     {

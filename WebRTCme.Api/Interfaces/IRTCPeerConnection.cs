@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-
     public interface IRTCPeerConnection : INativeObject
     {
         bool CanTrickleIceCandidates { get; }

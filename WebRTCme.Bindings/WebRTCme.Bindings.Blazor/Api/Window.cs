@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRtcMeBindingsBlazor.Extensions;
-using WebRtcMeBindingsBlazor.Interops;
+using WebRTCme.Bindings.Blazor.Extensions;
+using WebRTCme.Bindings.Blazor.Interops;
 using WebRTCme;
 
-namespace WebRtcMeBindingsBlazor.Api
+namespace WebRTCme.Bindings.Blazor.Api
 {
     public class Window : ApiBase, IWindow
     {

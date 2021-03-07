@@ -4,7 +4,7 @@ using System.Text;
 using Webrtc = Org.Webrtc;
 using WebRTCme;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal static class InterfaceExtensions
     {

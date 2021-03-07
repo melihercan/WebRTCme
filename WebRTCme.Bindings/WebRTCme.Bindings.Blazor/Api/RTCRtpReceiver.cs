@@ -5,12 +5,12 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WebRtcMeBindingsBlazor.Interops;
-using WebRtcMeBindingsBlazor.Extensions;
+using WebRTCme.Bindings.Blazor.Interops;
+using WebRTCme.Bindings.Blazor.Extensions;
 using WebRTCme;
 using System.Linq;
 
-namespace WebRtcMeBindingsBlazor.Api
+namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCRtpReceiver : ApiBase, IRTCRtpReceiver
     {

@@ -9,7 +9,7 @@ using Webrtc = Org.Webrtc;
 //using Android.Hardware.Camera2;
 using Android.Media;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {

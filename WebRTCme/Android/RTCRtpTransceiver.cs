@@ -3,7 +3,7 @@ using System;
 using WebRTCme;
 using Org.Webrtc;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
     internal class RTCRtpTransceiver : ApiBase, IRTCRtpTransceiver
     {

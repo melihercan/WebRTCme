@@ -3,8 +3,8 @@ using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRtcMeBindingsBlazor.Extensions;
-using WebRtcMeBindingsBlazor.Interops;
+using WebRTCme.Bindings.Blazor.Extensions;
+using WebRTCme.Bindings.Blazor.Interops;
 
 
 namespace WebRTCme

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WebRtcMe.Android;
+using WebRTCme.Android;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme
@@ -63,7 +63,7 @@ namespace WebRTCme
         { 
         }
 
-        public IWindow Window(IJSRuntime jsRuntime) => global::WebRtcMe.Android.Window.Create();
+        public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.Android.Window.Create();
 
         private static IAudioDeviceModule CreateJavaAudioDevice(Context context)
         {

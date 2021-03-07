@@ -1,20 +1,13 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Reactive;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WebRTCme;
-using WebRTCme.SignallingServerProxy;
 using Xamarin.Essentials;
 
 namespace WebRTCme.SignallingServerProxy
@@ -27,7 +20,7 @@ namespace WebRTCme.SignallingServerProxy
         private string _signallingServerBaseUrl;
 
         public SignallingServerProxy(string signallingServerBaseUrl,
-                    ISignallingServerCallbacks signallingServerCallbacks)
+            ISignallingServerCallbacks signallingServerCallbacks)
         {
             _signallingServerBaseUrl = signallingServerBaseUrl;
 
@@ -71,6 +64,7 @@ namespace WebRTCme.SignallingServerProxy
             // Start connection without waiting.
             _ = ConnectWithRetryAsync();
         }
+        
         public async ValueTask DisposeAsync()
         {
             _cts.Cancel();
@@ -127,17 +121,14 @@ namespace WebRTCme.SignallingServerProxy
                 try
                 {
                     await _hubConnection.StartAsync(_cts.Token);
-                    Debug.WriteLine("#### Connected to Signalling Server...");
                     break;
                 }
                 catch when (_cts.Token.IsCancellationRequested)
                 {
                     break;
                 }
-                catch (Exception ex)
+                catch 
                 {
-                    Debug.WriteLine("====> EXCEPTION: " + ex.Message);
-                    ////throw ex;
                     // Failed to connect, trying again in TimeoutMs if not overriden by keepTrying flag.
                     await Task.Delay(TimeoutMs);
                 }

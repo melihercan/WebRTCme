@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WebRtcMe.iOS;
+using WebRTCme.iOS;
 
 namespace WebRTCme
 {
@@ -36,6 +36,6 @@ namespace WebRTCme
             //Webrtc.CFunctions.RTCCleanupSSL();
         }
 
-        public IWindow Window(IJSRuntime jsRuntime) => global::WebRtcMe.iOS.Window.Create();
+        public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.iOS.Window.Create();
     }
 }

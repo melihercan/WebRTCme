@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware.Services
+namespace WebRTCme.Middleware.Services
 {
     internal class MediaStreamService : IMediaStreamService
     {

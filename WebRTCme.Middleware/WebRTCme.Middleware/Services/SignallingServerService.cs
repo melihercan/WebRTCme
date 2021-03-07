@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
 using WebRTCme.SignallingServerProxy;
-using WebRtcMeMiddleware.Models;
+using WebRTCme.Middleware.Models;
 using Xamarin.Essentials;
 
-namespace WebRtcMeMiddleware.Services
+namespace WebRTCme.Middleware.Services
 {
     internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
     {
@@ -51,7 +51,7 @@ namespace WebRtcMeMiddleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            _signallingServerClient = new SignallingServerProxy(_signallingServerBaseUrl, this);
+            _signallingServerClient = new SignallingServerProxy.SignallingServerProxy(_signallingServerBaseUrl, this);
             //if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
                 //_isAsyncCall = true;
             //_ /*Initialization*/ //= InitializeAsync();
@@ -62,7 +62,7 @@ namespace WebRtcMeMiddleware.Services
         //private async Task InitializeAsync()
         //{
         //    _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
-        //        SignallingServerClientType.WebRtcMe, 
+        //        SignallingServerClientType.WebRTCme, 
         //        _signallingServerBaseUrl, this);
         //}
 

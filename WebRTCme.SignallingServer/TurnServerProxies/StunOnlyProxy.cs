@@ -1,24 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServer.TurnServerService
 {
     public class StunOnlyProxy : ITurnServerProxy
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
-
-        public StunOnlyProxy(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public StunOnlyProxy()
         {
-            _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
         }
 
         public Task<RTCIceServer[]> GetIceServersAsync()

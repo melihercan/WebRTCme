@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
 
-namespace WebRtcMeMiddleware.Models
+namespace WebRTCme.Middleware.Models
 {
     internal class ConnectionContext
     {

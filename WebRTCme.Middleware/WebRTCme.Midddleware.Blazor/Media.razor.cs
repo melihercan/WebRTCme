@@ -11,9 +11,8 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.SignallingServerProxy;
 
-namespace WebRTCme.Middleware.Blazor
+namespace WebRTCme.Middleware
 {
-
     public partial class Media : IDisposable
     {
         private IMediaStream _stream;

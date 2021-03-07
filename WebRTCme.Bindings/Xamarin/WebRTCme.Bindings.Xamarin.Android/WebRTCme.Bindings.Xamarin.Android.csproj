@@ -10,7 +10,7 @@
     <TemplateGuid>{77efb91c-a7e9-4b0e-a7c5-31eeec3c6d46}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebRtcBindingsXamarinAndroid</RootNamespace>
+    <RootNamespace>WebRTCme.Bindings.Xamarin.Android</RootNamespace>
     <AssemblyName>WebRTCme.Bindings.Xamarin.Android</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>True</Deterministic>

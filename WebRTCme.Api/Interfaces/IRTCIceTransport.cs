@@ -26,9 +26,5 @@ namespace WebRTCme
         RTCIceParameters GetRemoteParameters();
 
         IRTCIceCandidatePair GetSelectedCandidatePair();
-
-
-
-
     }
 }

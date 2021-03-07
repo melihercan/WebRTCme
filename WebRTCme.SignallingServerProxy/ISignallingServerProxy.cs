@@ -1,8 +1,6 @@
 ﻿using Ardalis.Result;
 using System;
-using System.Collections.Generic;
 using System.Reactive;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServerProxy
@@ -22,6 +20,5 @@ namespace WebRTCme.SignallingServerProxy
 
         // ice is JSON of RTCIceCandidateInit.
         Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
-
     }
 }

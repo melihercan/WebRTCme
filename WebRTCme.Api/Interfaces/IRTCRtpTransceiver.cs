@@ -21,6 +21,5 @@ namespace WebRTCme
         void SetCodecPreferences(RTCRtpCodecCapability[] codecs);
 
         void Stop();
-
     }
 }

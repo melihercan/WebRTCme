@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
-    <RootNamespace>WebRrtcMeApi</RootNamespace>
+    <RootNamespace>WebRTCme</RootNamespace>
 	<LangVersion>9.0</LangVersion>
 	<UserSecretsId>a419948c-ce76-4240-bd44-60047b666b15</UserSecretsId>
   </PropertyGroup>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace WebRTCme.SignallingServerProxy
 {
@@ -16,6 +13,5 @@ namespace WebRTCme.SignallingServerProxy
 
         // peerIce is JSON of RTCIceCandidateInit.
         Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName, string peerIce);
-
     }
 }

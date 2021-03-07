@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtcMe.iOS
+namespace WebRTCme.iOS
 {
     internal class Window : ApiBase, IWindow
     {

@@ -10,7 +10,7 @@ using WebRTCme;
 using CoreMedia;
 using WebRTCme.Middleware;
 
-namespace WebRtcMiddlewareXamarin
+namespace WebRTCme.Middleware
 {
     public class MediaView : UIView, Webrtc.IRTCVideoViewDelegate
     {

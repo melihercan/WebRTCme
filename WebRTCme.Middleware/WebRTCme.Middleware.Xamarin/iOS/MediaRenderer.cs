@@ -6,8 +6,6 @@ using UIKit;
 using WebRTCme;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
-using WebRTCme.Middleware.Xamarin;
-using WebRtcMiddlewareXamarin;
 using WebRTCme.Middleware;
 using System.ComponentModel;
 using CoreMedia;
@@ -15,7 +13,7 @@ using Foundation;
 using CoreGraphics;
 
 [assembly: ExportRenderer(typeof(Media), typeof(MediaRenderer))]
-namespace WebRtcMiddlewareXamarin
+namespace WebRTCme.Middleware
 {
     public class MediaRenderer : ViewRenderer<Media, MediaView>
     {

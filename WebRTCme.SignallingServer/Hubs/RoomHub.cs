@@ -18,14 +18,10 @@ namespace WebRTCme.SignallingServer.Hubs
 
         private static List<Server> Servers = new();
 
-//        private static List<Room> _rooms = new();
-  //      private static List<Client> AwaitingClients = new();
         private static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
 
-        public RoomHub(TurnServerProxyFactory turnServerClientFactory)
-        {
+        public RoomHub(TurnServerProxyFactory turnServerClientFactory) => 
             _turnServerClientFactory = turnServerClientFactory;
-        }
 
         private ITurnServerProxy GetTurnServerClient(TurnServer turnServer)
         {
@@ -54,63 +50,6 @@ namespace WebRTCme.SignallingServer.Hubs
             }
         }
 
-
-        //public async Task<Result<Unit>> ReserveRoomAsync(string turnServerName, string roomName, string adminUserName, 
-        //    string[] participantUserNames)
-        //{
-        //    try
-        //    {
-        //        var turnServer = GetTurnServerFromName(turnServerName);
-
-        //        if (Servers.Any(server => server.TurnServer == turnServer &&
-        //            server.Rooms.Any(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase))))
-        //                throw new Exception($"TURN Server:{turnServer} Room:{roomName} is in use");
-
-        //        var iceServers = await GetTurnServerClient(turnServer).GetIceServersAsync();
-        //        var rooms = new List<Room>();
-        //        rooms.Add(new Room
-        //        {
-        //            RoomName = roomName,
-        //            GroupName = $"{turnServer}.{roomName}",
-        //            IsReserved = true,
-        //            AdminUserName = adminUserName,
-        //            Clients = participantUserNames.Select(name => new Client 
-        //            { 
-        //                // ConnectionId = will be set in 'JoinRoom' call
-        //                TurnServer = turnServer,
-        //                RoomName = roomName,
-        //                UserName = name
-        //            }).ToList()
-        //        });
-        //        Servers.Add(new Server
-        //        {
-        //            TurnServer = turnServer,
-        //            IceServers = iceServers,
-        //            Rooms = rooms
-        //        });
-        //        return Result<Unit>.Success(Unit.Default);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<Unit>.Error(new string[] { ex.Message });
-        //    }
-        //}
-
-        //public Task<Result<Unit>> FreeRoomAsync(string turnServerName, string roomName, string adminUserName)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<Result<Unit>> AddParticipantAsync(string turnServerName, string roomName, string participantUserName)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public Task<Result<Unit>> RemoveParticipantAsync(string turnServerName, string roomName, string participantUserName)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public async Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName)
         {
             try
@@ -124,52 +63,26 @@ namespace WebRTCme.SignallingServer.Hubs
                     var server = Servers.Single(server => server.TurnServer == turnServer);
                     var room = server.Rooms
                         .Single(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
-                    if (room.Clients.Any(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)))
-                        throw new Exception($"TURN Server:{turnServer} Room:{roomName} User:{userName} has already joined");
+                    if (room.Clients.Any(client => client.UserName.Equals(userName, 
+                        StringComparison.OrdinalIgnoreCase)))
+                            throw new Exception($"TURN Server:{turnServer} Room:{roomName} User:{userName} " +
+                                $"has already joined");
 
-                    //if (room.IsReserved)
-                    //{
-                    //    // Reserved room. Update client's ConnectionId.
-                    //    room.Clients
-                    //        .Single(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
-                    //        .ConnectionId = Context.ConnectionId;
-
-                    //    if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
-                    //    {
-                    //        // Admin joined. Take action.
-                    //        var excepts = new List<string>();
-                    //        foreach (var client in room.Clients)
-                    //        {
-                    //            excepts.Add(client.ConnectionId);
-                    //            await Clients.GroupExcept(room.GroupName, excepts)
-                    //                .OnPeerJoinedAsync(turnServer.ToString(), client.RoomName, client.UserName); 
-                    //        }
-                    //    }
-                    //    //else
-                    //    //{
-                    //    // Participant joined.
-                    //    //}
-
-                    //}
-                    //else
+                    room.Clients.Add(new Client
                     {
-                        // Non-reserved room.
-                        room.Clients.Add(new Client
-                        {
-                            ConnectionId = Context.ConnectionId,
-                            TurnServer = turnServer,
-                            RoomName = roomName,
-                            UserName = userName
-                        });
-                        await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
-                        // Notify others.
-                        await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
-                            .OnPeerJoinedAsync(turnServer.ToString(), roomName, userName);
-                    }
+                        ConnectionId = Context.ConnectionId,
+                        TurnServer = turnServer,
+                        RoomName = roomName,
+                        UserName = userName
+                    });
+                    await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
+                    // Notify others.
+                    await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
+                        .OnPeerJoinedAsync(turnServer.ToString(), roomName, userName);
                 }
                 else
                 {
-                    // First user of non-reserved room.
+                    // First user.
                     var server = Servers.Find(server => server.TurnServer == turnServer);
                     if (server is null)
                     {
@@ -220,37 +133,23 @@ namespace WebRTCme.SignallingServer.Hubs
                     var server = Servers.Single(server => server.TurnServer == turnServer);
                     var room = server.Rooms
                         .Single(room => room.RoomName.Equals(roomName, StringComparison.OrdinalIgnoreCase));
-                    if (room.Clients.Any(client => client.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)))
+                    if (room.Clients.Any(client => client.UserName.Equals(userName, 
+                        StringComparison.OrdinalIgnoreCase)))
                     {
-                        //if (room.IsReserved)
-                        //{
-                        //    if (userName.Equals(room.AdminUserName, StringComparison.OrdinalIgnoreCase))
-                        //    {
-                        //        // Admin left. Terminate all connections.
-                        //        //// TODO: COmplete
-                        //    }
-                        //    else
-                        //    {
-                        //        //// TODO: COmplete
-                        //    }
-                        //}
-                        //else
-                        {
-                            // Non-reserved room peer left.
-                            var client = room.Clients.Single(client => client.UserName.Equals(
-                                userName, StringComparison.OrdinalIgnoreCase));
-                            var groupName = room.GroupName;
-                            var connectionId = client.ConnectionId;
-                            room.Clients.Remove(client);
-                            if (room.Clients.Count == 0)
-                                server.Rooms.Remove(room);
-                            if (server.Rooms.Count == 0)
-                                Servers.Remove(server);
-                            // Notify others.
-                            await Clients.GroupExcept(groupName, connectionId)
-                                .OnPeerLeftAsync(turnServer.ToString(), roomName, userName);
-                            await Groups.RemoveFromGroupAsync(connectionId, groupName);
-                        }
+                        // Peer left.
+                        var client = room.Clients.Single(client => client.UserName.Equals(
+                            userName, StringComparison.OrdinalIgnoreCase));
+                        var groupName = room.GroupName;
+                        var connectionId = client.ConnectionId;
+                        room.Clients.Remove(client);
+                        if (room.Clients.Count == 0)
+                            server.Rooms.Remove(room);
+                        if (server.Rooms.Count == 0)
+                            Servers.Remove(server);
+                        // Notify others.
+                        await Clients.GroupExcept(groupName, connectionId)
+                            .OnPeerLeftAsync(turnServer.ToString(), roomName, userName);
+                        await Groups.RemoveFromGroupAsync(connectionId, groupName);
                     }
                     else
                     {
@@ -295,7 +194,6 @@ namespace WebRTCme.SignallingServer.Hubs
                 return Result<Unit>.Error(new string[] { ex.Message });
             }
         }
-
        
         public async Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, 
             string ice)
@@ -325,9 +223,9 @@ namespace WebRTCme.SignallingServer.Hubs
 
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            //throw new NotImplementedException();
+            return ValueTask.CompletedTask;
         }
 
     }

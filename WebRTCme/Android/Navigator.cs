@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRtcMe.Android
+namespace WebRTCme.Android
 {
 
     internal class Navigator : ApiBase, INavigator

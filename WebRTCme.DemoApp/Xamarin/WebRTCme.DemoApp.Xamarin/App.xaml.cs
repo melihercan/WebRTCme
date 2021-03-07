@@ -1,11 +1,10 @@
 ﻿using System;
 using Xamarin.Forms;
 using DemoApp.Views;
-using WebRTCme.Middleware.Xamarin;
+using WebRTCme.Middleware;
 using Microsoft.Extensions.Configuration;
 using Xamarinme;
 using System.Reflection;
-using WebRTCme.Middleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using WebRTCme.DemoApp.Xamarin.Services;

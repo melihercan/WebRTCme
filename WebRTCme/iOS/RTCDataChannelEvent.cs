@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
 
-namespace WebRtcMe.iOS
+namespace WebRTCme.iOS
 {
     internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
     {

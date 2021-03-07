@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
     <RazorLangVersion>3.0</RazorLangVersion>
     <AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
-    <RootNamespace>WebRtcMeBindingsBlazor</RootNamespace>
+    <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 

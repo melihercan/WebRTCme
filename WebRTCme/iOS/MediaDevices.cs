@@ -6,7 +6,7 @@ using WebRTCme;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace WebRtcMe.iOS
+namespace WebRTCme.iOS
 {
     internal class MediaDevices : ApiBase, IMediaDevices
     {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
-	  <RootNamespace>WebRtcMeMiddleware</RootNamespace>
+	  <RootNamespace>WebRTCme.Middleware</RootNamespace>
 	  <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
@@ -11,7 +11,8 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
 		<PackageReference Include="System.Text.Json" Version="5.0.1" />
-	</ItemGroup>
+    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+  </ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj" />

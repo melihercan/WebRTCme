@@ -18,6 +18,6 @@ namespace WebRTCme
 
         public void Cleanup() { }
 
-        public IWindow Window(IJSRuntime jsRuntime) => WebRtcMeBindingsBlazor.Api.Window.Create(jsRuntime);
+        public IWindow Window(IJSRuntime jsRuntime) => WebRTCme.Bindings.Blazor.Api.Window.Create(jsRuntime);
     }
 }

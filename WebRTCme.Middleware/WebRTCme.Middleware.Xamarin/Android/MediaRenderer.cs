@@ -5,8 +5,6 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using WebRTCme.Middleware.Xamarin;
-using WebRtcMiddlewareXamarin;
 using WebRTCme;
 using System.Linq;
 using Xamarin.Essentials;
@@ -16,9 +14,8 @@ using WebRTCme.Middleware;
 using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(Media), typeof(MediaRenderer))]
-namespace WebRtcMiddlewareXamarin
+namespace WebRTCme.Middleware
 {
-
     public class MediaRenderer : ViewRenderer<Media, MediaView>
     {
         private IMediaStream _stream;

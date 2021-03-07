@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-using WebRtcMeMiddleware;
-using WebRtcMeMiddleware.Services;
+using WebRTCme.Middleware;
+using WebRTCme.Middleware.Services;
 
 namespace WebRTCme.Middleware
 {

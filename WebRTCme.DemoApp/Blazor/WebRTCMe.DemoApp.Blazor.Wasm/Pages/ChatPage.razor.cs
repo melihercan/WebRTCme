@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.DemoApp.Blazor.Wasm.Components;
 using WebRTCme.Middleware;
-using WebRTCme.Middleware.Blazor;
 
 namespace WebRTCme.DemoApp.Blazor.Wasm.Pages
 {

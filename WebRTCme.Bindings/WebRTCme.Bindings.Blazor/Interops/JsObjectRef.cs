@@ -2,9 +2,9 @@ using Microsoft.JSInterop;
 using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WebRtcMeBindingsBlazor.Extensions;
+using WebRTCme.Bindings.Blazor.Extensions;
 
-namespace WebRtcMeBindingsBlazor.Interops
+namespace WebRTCme.Bindings.Blazor.Interops
 {
     public class JsObjectRef
     {
