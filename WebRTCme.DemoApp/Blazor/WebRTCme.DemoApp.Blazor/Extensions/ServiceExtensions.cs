@@ -1,5 +1,6 @@
 ﻿using Blazored.Modal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,13 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
     {
         public static IServiceCollection AddAppServices(this IServiceCollection services)
         {
+            var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
+
             services.AddBlazoredModal();
-            services.AddSingleton<INavigationService, NavigationService>();
+            if (jsRuntime is not null && jsRuntime is not IJSInProcessRuntime)
+                services.AddScoped<INavigationService, NavigationService>();
+            else
+                services.AddSingleton<INavigationService, NavigationService>();
             services.AddMiddleware();
 
             return services;

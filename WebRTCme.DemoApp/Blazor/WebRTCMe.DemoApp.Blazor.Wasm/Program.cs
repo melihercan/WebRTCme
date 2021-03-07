@@ -26,7 +26,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
 
             ConfigureServices(builder.Services);
 
-            builder.Services.AddScoped(sp => new HttpClient 
+            builder.Services.AddSingleton/*AddScoped*/(sp => new HttpClient 
             { 
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
             });

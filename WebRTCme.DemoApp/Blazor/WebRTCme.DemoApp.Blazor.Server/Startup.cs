@@ -8,8 +8,10 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using WebRTCme.DemoApp.Blazor.Server.Data;
+using WebRTCme.DemoApp.Blazor.Extensions;
+using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Server
 {
@@ -26,14 +28,22 @@ namespace WebRTCme.DemoApp.Blazor.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped(sp => sp
+                .GetRequiredService<IHttpClientFactory>()
+                .CreateClient());
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+
+            _ = CrossWebRtcMiddlewareBlazor.Current;
+
+            services.AddAppServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
