@@ -27,23 +27,11 @@ namespace WebRTCme.Middleware.Services
         private ISignallingServerProxy _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
-//        private bool _isAsyncCall = false;
-
         private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
-
-        //static public async Task<ISignallingServerService> CreateAsync(
-        //    IConfiguration configuration,
-        //    ILogger<ISignallingServerService> logger,
-        //    IJSRuntime jsRuntime = null)
-        //{
-        //    var self = new SignallingServerService(configuration, logger, jsRuntime);
-        //    await self.Initialization;
-        //    return self;
-        //}
 
         public SignallingServerService(IConfiguration configuration, ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null)
@@ -52,19 +40,7 @@ namespace WebRTCme.Middleware.Services
             _logger = logger;
             _jsRuntime = jsRuntime;
             _signallingServerClient = new SignallingServerProxy.SignallingServerProxy(_signallingServerBaseUrl, this);
-            //if (jsRuntime is not null && jsRuntime is IJSInProcessRuntime)
-                //_isAsyncCall = true;
-            //_ /*Initialization*/ //= InitializeAsync();
         }
-
-        //public Task Initialization { get; private set; }
-
-        //private async Task InitializeAsync()
-        //{
-        //    _signallingServerClient = await SignallingServerClientFactory.CreateAsync(
-        //        SignallingServerClientType.WebRTCme, 
-        //        _signallingServerBaseUrl, this);
-        //}
 
         public async Task<string[]> GetTurnServerNamesAsync()
         {
@@ -155,7 +131,6 @@ namespace WebRTCme.Middleware.Services
 
         #region SignallingServerCallbacks
 
-
         public async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName) 
         {
             Subject<PeerResponseParameters> subject = null;
@@ -186,10 +161,6 @@ namespace WebRTCme.Middleware.Services
                     $"-------> Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     $"peerUser:{peerUserName}");// sdp:{offerDescription.Sdp}");
-                //if (_isAsyncCall)
-                    //await _signallingServerClient.OfferSdp(turnServerName, roomName, peerUserName, sdp);
-                //else
-                    //_signallingServerClient.OfferSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                 //_logger.LogInformation(
                 //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +
@@ -279,11 +250,6 @@ namespace WebRTCme.Middleware.Services
                 var peerConnection = peerContext.PeerConnection;
                 subject = peerContext.PeerResponseSubject;
 
-                //var offerDescription = new RTCSessionDescriptionInit
-                //{
-                    //Type = RTCSdpType.Offer,
-                    //Sdp = peerSdp
-                //};
                 //_logger.LogInformation(
                 //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -304,10 +270,6 @@ namespace WebRTCme.Middleware.Services
                         $"-------> Sending Answer - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
                         $"peerUser:{peerUserName}");// sdp:{answerDescription.Sdp}");
-                                                    //if (_isAsyncCall)
-                                                    //await _signallingServerClient.AnswerSdp(turnServerName, roomName, peerUserName, sdp);
-                                                    //else
-                                                    //_signallingServerClient.AnswerSdpSync(turnServerName, roomName, peerUserName, sdp);
 
                     //_logger.LogInformation(
                     //    $"**** SetLocalDescription - turn:{turnServerName} room:{roomName} " +

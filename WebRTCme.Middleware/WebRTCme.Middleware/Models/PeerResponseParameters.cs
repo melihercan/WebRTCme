@@ -17,6 +17,7 @@ namespace WebRTCme.Middleware
         public IMediaStream MediaStream { get; init; }
 
         public IRTCDataChannel DataChannel { get; init; }
+
         public string ErrorMessage { get; init; }
     }
 }
