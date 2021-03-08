@@ -202,15 +202,18 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             }
             else
             {
-                // TODO: INVESTIGATE IF IT IS POSSIBLE TO RUN SERVER SIDE CODE SYNCHRONOUSLY
-                //          IF NOT, CREATE ALL AYNC API
-                // !!! Blocking UI thread !!!
-                //return Task.Run(async () =>
-                //{
-                //return await jsRuntime.InvokeAsync<TValue>(identifier, args);
-                //}).Result;
+                // Sync call to JSInterop is not possible.
+                // Blocking current thread with any kind of Wait throws:
+                //   Exception thrown: 'System.Threading.Tasks.TaskCanceledException' in System.Private.CoreLib.dll
+                // Async API is required.
                 throw new NotImplementedException();
             }
+        }
+
+        private static async void Sync<TValue>(IJSRuntime jsRuntime, string identifier, params object[] args)
+        {
+            TValue value = default(TValue);
+            value = await jsRuntime.InvokeAsync<TValue>(identifier, args);
         }
 
         public static void InvokeVoid(this IJSRuntime jsRuntime, string identifier, params object[] args)
@@ -223,13 +226,10 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             }
             else
             {
-                // TODO: INVESTIGATE IF IT IS POSSIBLE TO RUN SERVER SIDE CODE SYNCHRONOUSLY
-                //          IF NOT, CREATE ALL AYNC API
-                // !!! Blocking UI thread !!!
-                //Task.Run(async () =>
-                //{
-                //await jsRuntime.InvokeVoidAsync(identifier, args);
-                //}).Wait();
+                // Sync call to JSInterop is not possible.
+                // Blocking current thread with any kind of Wait throws:
+                //   Exception thrown: 'System.Threading.Tasks.TaskCanceledException' in System.Private.CoreLib.dll
+                // Async API is required.
                 throw new NotImplementedException();
             }
         }
