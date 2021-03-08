@@ -1,14 +1,15 @@
 ﻿@page "/CallPage"
 @page "/CallPage/{ConnectionParametersJson}"
+@layout BlankLayout
 
-<h1>Call</h1>
+<h1 class="text-center">Call</h1>
 
-<div>
-    <Media Stream="@CallViewModel.LocalStream" Label="@CallViewModel.LocalLabel" 
-    VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
+<div class="mx-4">
+    <Media Stream="@CallViewModel.LocalStream" Label="@CallViewModel.LocalLabel"
+           VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
 </div>
 
-<div>
-    <Media Stream="@CallViewModel.Remote1Stream" Label="@CallViewModel.Remote1Label" 
-    VideoMuted="@CallViewModel.Remote1VideoMuted" AudioMuted="@CallViewModel.Remote1AudioMuted" />
+<div class="mx-4">
+    <Media Stream="@CallViewModel.Remote1Stream" Label="@CallViewModel.Remote1Label"
+           VideoMuted="@CallViewModel.Remote1VideoMuted" AudioMuted="@CallViewModel.Remote1AudioMuted" />
 </div>

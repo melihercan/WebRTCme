@@ -11,26 +11,67 @@
   }
 </style>
 
+<h1 class="text-center">Chat</h1>
 
-
-<h1>Chat</h1>
-
-<div class="list-group">
-@foreach (var dataParameters in ChatViewModel.DataParametersList)
-{
-    <h5>@dataParameters.Message</h5>
-}
+<div class="list-group mx-4">
+    @foreach (var dataParameters in ChatViewModel.DataParametersList)
+    {
+        if (dataParameters.From == DataFromType.System)
+        {
+            <div class="row my-1">
+                <div class="offset-3 col-6">
+                    <div class="row justify-content-center">
+                        <div class="card text-warning" style="background:#000080">
+                            <div class="card-body">
+                                @dataParameters.Message
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (dataParameters.From == DataFromType.Incoming)
+        {
+            <div class="row my-1">
+                <div class="col-9">
+                    <div class="row justify-content-start">
+                        <div class="card" style=" background:#e6e6f0">
+                            <div class="card-body">
+                                @dataParameters.Message
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (dataParameters.From == DataFromType.Outgoing)
+        {
+            <div class="row my-1">
+                <div class="offset-3 col-9">
+                    <div class="row justify-content-end">
+                        <div class="card" style="background:#d3d4bc">
+                            <div class="card-body">
+                                @dataParameters.Message
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
 </div>
 
 <div class="footer d-flex bg-primary px-4 py-2 align-items-center">
-    <div class="flex-grow-1 bg-warning">
-        <EditForm Model="@ChatViewModel.OutgoingText">
-            <InputText @bind-Value="ChatViewModel.OutgoingText"/>
+    <div class="flex-grow-1">
+        <EditForm Model="@ChatViewModel.OutgoingText" class="pr-4">
+            <InputText @bind-Value="ChatViewModel.OutgoingText" class="w-100"/>
         </EditForm>
     </div> 
-    <button class="btn btn-primary ml-auto" @onclick="ChatViewModel.Send">
-        Send
-    </button>
+    <div class=" ml-auto">
+        <button class="btn btn-primary" @onclick="ChatViewModel.Send">
+            Send
+        </button>
+    </div>
 
 </div>
 
