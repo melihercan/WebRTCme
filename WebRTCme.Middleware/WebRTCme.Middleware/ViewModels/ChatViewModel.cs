@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -84,7 +85,6 @@ namespace WebRTCme.Middleware
 
         private string _outgoingText = string.Empty;
 
-
         public string OutgoingText
         {
             get => _outgoingText; 
@@ -97,8 +97,11 @@ namespace WebRTCme.Middleware
 
         public void Send()
         {
-            DataManager.SendString(OutgoingText);
-            OutgoingText = string.Empty;
+            if (!string.IsNullOrEmpty(OutgoingText) && !string.IsNullOrWhiteSpace(OutgoingText))
+            {
+                DataManager.SendString(OutgoingText);
+                OutgoingText = string.Empty;
+            }
         }
 
         public ICommand SendCommand => new AsyncCommand(() => 
