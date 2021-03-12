@@ -15,7 +15,7 @@ namespace WebRTCme.Middleware.Services
 
         public void AddPeer(string peerUserName, MediaParameters mediaParameters)
         {
-            throw new NotImplementedException();
+            MediaParametersList.Add(mediaParameters);
         }
 
         public void RemovePeer(string peerUserName)

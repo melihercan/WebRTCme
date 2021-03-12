@@ -18,31 +18,57 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+        // A reference is required here. otherwise binding does not work.
+        public ObservableCollection<MediaParameters> MediaParametersList { get; set; }
+
         private readonly IMediaStreamService _mediaStreamService;
         private readonly ISignallingServerService _signallingServerService;
         private readonly INavigationService _navigationService;
+        private readonly IMediaManagerService _mediaManagerService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService, 
-            INavigationService navigationService)
+            INavigationService navigationService, IMediaManagerService mediaManagerService)
         {
             _mediaStreamService = mediaStreamService;
             _signallingServerService = signallingServerService;
             _navigationService = navigationService;
+            _mediaManagerService = mediaManagerService;
+            MediaParametersList = mediaManagerService.MediaParametersList;
         }
 
         public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
             _reRender = reRender;
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-            LocalLabel = connectionParameters.UserName;
-            var connectionRequestParameters = new ConnectionRequestParameters
+
+            _mediaManagerService.AddPeer("one", new MediaParameters
             {
-                ConnectionParameters = connectionParameters,
-                LocalStream = LocalStream,
-            };
-            Connect(connectionRequestParameters);
+                Stream = LocalStream
+            });
+            _mediaManagerService.AddPeer("two", new MediaParameters
+            {
+                Stream = LocalStream
+            });
+            _mediaManagerService.AddPeer("three", new MediaParameters
+            {
+                Stream = LocalStream
+            });
+            _mediaManagerService.AddPeer("four", new MediaParameters
+            {
+                Stream = LocalStream
+            });
+
+
+            //LocalLabel = connectionParameters.UserName;
+            //var connectionRequestParameters = new ConnectionRequestParameters
+            //{
+            //ConnectionParameters = connectionParameters,
+            //LocalStream = LocalStream,
+            //};
+            //Connect(connectionRequestParameters);
+
         }
 
         public Task OnPageDisappearingAsync()
