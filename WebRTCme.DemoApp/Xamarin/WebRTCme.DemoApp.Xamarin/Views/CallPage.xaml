@@ -4,13 +4,30 @@
              xmlns:webRtc="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware.Xamarin"
              x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
-        <StackLayout Spacing="0" Orientation="Vertical">
+
+        <FlexLayout BindableLayout.ItemsSource="{Binding MediaParametersList}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Center">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <webRtc:Media Stream="{Binding Stream}" Label="{Binding Label}" 
+                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}" 
+                                  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+
+
+        <!--<StackLayout Spacing="0" Orientation="Vertical">
             <webRtc:Media Stream="{Binding LocalStream}" Label="{Binding LocalLabel}" 
                           VideoMuted="{Binding LocalVideoMuted}" AudioMuted="{Binding LocalAudioMuted}" 
                           BackgroundColor="Orange" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
             <webRtc:Media Stream="{Binding Remote1Stream}" Label="{Binding Remote1Label}"
                           VideoMuted="{Binding Remote1VideoMuted}" AudioMuted="{Binding Remote1AudioMuted}"
                           BackgroundColor="Navy" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
-        </StackLayout>
+        </StackLayout>-->
+        
+        
     </ContentPage.Content>
 </ContentPage>

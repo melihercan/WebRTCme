@@ -23,18 +23,21 @@ namespace WebRTCme.Middleware
 
         private readonly IMediaStreamService _mediaStreamService;
         private readonly ISignallingServerService _signallingServerService;
-        private readonly INavigationService _navigationService;
         private readonly IMediaManagerService _mediaManagerService;
+        private readonly INavigationService _navigationService;
+        private readonly IRunOnUiThreadService _runOnUiThreadService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
 
-        public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService, 
-            INavigationService navigationService, IMediaManagerService mediaManagerService)
+        public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
+            IMediaManagerService mediaManagerService, INavigationService navigationService, 
+            IRunOnUiThreadService runOnUiThreadService)
         {
             _mediaStreamService = mediaStreamService;
             _signallingServerService = signallingServerService;
-            _navigationService = navigationService;
             _mediaManagerService = mediaManagerService;
+            _navigationService = navigationService;
+            _runOnUiThreadService = runOnUiThreadService;
             MediaParametersList = mediaManagerService.MediaParametersList;
         }
 
@@ -42,32 +45,42 @@ namespace WebRTCme.Middleware
         {
             _reRender = reRender;
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
+            _mediaManagerService.AddPeer(connectionParameters.UserName, new MediaParameters
+            {
+                Stream = LocalStream,
+                Label = connectionParameters.UserName,
+                VideoMuted = false,
+                AudioMuted = false
+            });
 
-            _mediaManagerService.AddPeer("one", new MediaParameters
-            {
-                Stream = LocalStream
-            });
-            _mediaManagerService.AddPeer("two", new MediaParameters
-            {
-                Stream = LocalStream
-            });
-            _mediaManagerService.AddPeer("three", new MediaParameters
-            {
-                Stream = LocalStream
-            });
-            _mediaManagerService.AddPeer("four", new MediaParameters
-            {
-                Stream = LocalStream
-            });
+
+            //_mediaManagerService.AddPeer("one", new MediaParameters
+            //{
+            //    Stream = LocalStream
+            //});
+            //_mediaManagerService.AddPeer("two", new MediaParameters
+            //{
+            //    Stream = LocalStream
+            //});
+            //_mediaManagerService.AddPeer("three", new MediaParameters
+            //{
+            //    Stream = LocalStream
+            //});
+            //_mediaManagerService.AddPeer("four", new MediaParameters
+            //{
+            //    Stream = LocalStream
+            //});
+
+
 
 
             //LocalLabel = connectionParameters.UserName;
-            //var connectionRequestParameters = new ConnectionRequestParameters
-            //{
-            //ConnectionParameters = connectionParameters,
-            //LocalStream = LocalStream,
-            //};
-            //Connect(connectionRequestParameters);
+            var connectionRequestParameters = new ConnectionRequestParameters
+            {
+                ConnectionParameters = connectionParameters,
+                LocalStream = LocalStream,
+            };
+            Connect(connectionRequestParameters);
 
         }
 
@@ -178,8 +191,20 @@ namespace WebRTCme.Middleware
                         case PeerResponseCode.PeerJoined:
                             if (peerResponseParameters.MediaStream != null)
                             {
-                                Remote1Stream = peerResponseParameters.MediaStream;
-                                Remote1Label = peerResponseParameters.PeerUserName;
+                                _runOnUiThreadService.Invoke(() =>
+                                {
+
+                                    _mediaManagerService.AddPeer(peerResponseParameters.PeerUserName, new MediaParameters
+                                    {
+                                        Stream = peerResponseParameters.MediaStream,
+                                        Label = peerResponseParameters.PeerUserName,
+                                        VideoMuted = false,
+                                        AudioMuted = false
+                                    });
+                                });
+
+                                //Remote1Stream = peerResponseParameters.MediaStream;
+                                //Remote1Label = peerResponseParameters.PeerUserName;
 
                                 _reRender?.Invoke();
                             }

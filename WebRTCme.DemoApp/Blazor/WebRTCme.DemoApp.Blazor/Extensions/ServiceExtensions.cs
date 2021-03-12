@@ -19,9 +19,15 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
 
             services.AddBlazoredModal();
             if (jsRuntime is not null && jsRuntime is not IJSInProcessRuntime)
+            {
                 services.AddScoped<INavigationService, NavigationService>();
+                services.AddScoped<IRunOnUiThreadService, RunOnUiThreadService>();
+            }
             else
+            {
                 services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<IRunOnUiThreadService, RunOnUiThreadService>();
+            }
             services.AddMiddleware();
 
             return services;
