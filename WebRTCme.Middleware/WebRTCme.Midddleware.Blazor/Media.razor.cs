@@ -15,18 +15,29 @@ namespace WebRTCme.Middleware
 {
     public partial class Media : IDisposable
     {
+  private static int _id = 1;
+  private int Id; 
+
         private IMediaStream _stream;
-        [Parameter]
-        public IMediaStream Stream
+
+
+        public Media()
         {
-            get => _stream;
-            set
-            {
-                _stream = value;
-                if (_stream is not null)
-                    BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, _stream);
-            }
+  Id = _id++;
+   Console.WriteLine($"$$$$$$ Media{Id} created");
         }
+
+        [Parameter]
+        public IMediaStream Stream { get; set; }
+        //{
+        //    get => _stream;
+        //    set
+        //    {
+        //        _stream = value;
+        //        if (_stream is not null)
+        //            BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, _stream);
+        //    }
+        //}
 
         [Parameter]
         public string Label { get; set; } = string.Empty;
@@ -45,12 +56,23 @@ namespace WebRTCme.Middleware
 
         private ElementReference VideoElementReference { get; set; }
 
-        protected override Task OnParametersSetAsync()
-        {
-            //if (Stream is not null)
-              //  BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
+        //protected override Task OnParametersSetAsync()
+        //{
+ //Console.WriteLine($"$$$$$$ Media{Id} OnParametersSetAync Stream:{Stream} VideoElementReference.Id{VideoElementReference.Id}");
+            //if (Stream is not null)// && VideoElementReference.Id is not null)
+               //BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
 
-            return base.OnParametersSetAsync();
+            //return base.OnParametersSetAsync();
+        //}
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+ Console.WriteLine($"$$$$$$ Media{Id} OnAfterRender firstRender{firstRender}  Stream:{Stream} VideoElementReference.Id{VideoElementReference.Id}");
+
+            base.OnAfterRender(firstRender);
+
+            if (Stream is not null)// && VideoElementReference.Id is not null)
+                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
         }
 
         public void Dispose()

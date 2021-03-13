@@ -32,6 +32,7 @@ namespace WebRTCme.Middleware
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService, 
             IRunOnUiThreadService runOnUiThreadService)
+        
         {
             _mediaStreamService = mediaStreamService;
             _signallingServerService = signallingServerService;
@@ -52,6 +53,24 @@ namespace WebRTCme.Middleware
                 VideoMuted = false,
                 AudioMuted = false
             });
+
+            //_mediaManagerService.AddPeer("test2", new MediaParameters
+            //{
+            //    Stream = LocalStream,
+            //    Label = "test2",
+            //    VideoMuted = false,
+            //    AudioMuted = false
+            //});
+
+            //_mediaManagerService.AddPeer("test3", new MediaParameters
+            //{
+            //    Stream = LocalStream,
+            //    Label = "test3",
+            //    VideoMuted = false,
+            //    AudioMuted = false
+            //});
+
+            reRender?.Invoke();
 
 
             //_mediaManagerService.AddPeer("one", new MediaParameters
@@ -193,7 +212,6 @@ namespace WebRTCme.Middleware
                             {
                                 _runOnUiThreadService.Invoke(() =>
                                 {
-
                                     _mediaManagerService.AddPeer(peerResponseParameters.PeerUserName, new MediaParameters
                                     {
                                         Stream = peerResponseParameters.MediaStream,
@@ -207,8 +225,9 @@ namespace WebRTCme.Middleware
                                 //Remote1Label = peerResponseParameters.PeerUserName;
 
                                 _reRender?.Invoke();
+                                //_reRender?.Invoke();
                             }
-                            
+
                             //if (peerResponseParameters.DataChannel != null)
                             //{
                             //    var dataChannel = peerResponseParameters.DataChannel;
