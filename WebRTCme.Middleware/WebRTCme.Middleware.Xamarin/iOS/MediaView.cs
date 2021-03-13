@@ -9,6 +9,7 @@ using UIKit;
 using WebRTCme;
 using CoreMedia;
 using WebRTCme.Middleware;
+using Xamarin.Forms;
 
 namespace WebRTCme.Middleware
 {
@@ -22,6 +23,10 @@ namespace WebRTCme.Middleware
 
         public MediaView()
         {
+            // By default iOS creates View with width 0 and height 0.
+            // This is problematic with FlexLayout as Bound width or height is always 0.
+            // Set inital frame to a high values, which will be set again with LayoutSubviews.  
+            Frame = new CGRect(0, 0, 1080, 1920);
             ClipsToBounds = true;
         }
 
@@ -83,6 +88,26 @@ namespace WebRTCme.Middleware
             SetNeedsLayout();
         }
 
+
+#if false
+        public override void LayoutSubviews()
+        {
+            System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
+
+            base.LayoutSubviews();
+
+            if (_isCamera && _cameraView is not null)
+            {
+                _cameraView.Frame = Bounds;
+            }
+            else if (!_isCamera && _rendererView is not null)
+            {
+                _rendererView.Frame = Bounds;
+            }
+        }
+#endif
+
+#if true
         public override void LayoutSubviews()
         {
             System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
@@ -158,6 +183,7 @@ namespace WebRTCme.Middleware
                     _rendererView.Frame = Bounds;
             }
         }
+#endif
 
         [Export("videoView:didChangeVideoSize:")]
         public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
