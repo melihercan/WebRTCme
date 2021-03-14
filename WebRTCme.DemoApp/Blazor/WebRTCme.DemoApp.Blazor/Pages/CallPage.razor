@@ -6,9 +6,9 @@
 <h1 class="text-center">Call</h1>
 
 @*<div class="mx-4">
-    <Media Stream="@CallViewModel.LocalStream" Label="Wanna"
-           VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
-</div>*@
+        <Media Stream="@CallViewModel.LocalStream" Label="Wanna"
+               VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
+    </div>*@
 
 @*<div class="mx-4">
         <Media Stream="@CallViewModel.Remote1Stream" Label="@CallViewModel.Remote1Label"
@@ -17,14 +17,18 @@
 
 
 <div class="mx-4 d-flex flex-wrap">
-        @foreach (var mediaParameters in CallViewModel.MediaParametersList)
-        {
-            @*<div class="flex-fill">
-                    @mediaParameters.Label
-                </div>*@
-    <div class="p-2">
-        <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label"
-               VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted" />
-    </div>
-        }
+    @foreach (var mediaParameters in CallViewModel.MediaParametersList)
+    {
+        @*<div class="flex-fill">
+                @mediaParameters.Label
+            </div>*@
+
+
+        <div class="p-2">
+            <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label"
+                   VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"
+                   ShowContols="@mediaParameters.ShowControls" />
+        </div>
+    }
 </div>
+

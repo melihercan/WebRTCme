@@ -20,6 +20,9 @@ namespace WebRTCme.Middleware
         public static readonly BindableProperty AudioMutedProperty = BindableProperty
             .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
 
+        public static readonly BindableProperty ShowControlsProperty = BindableProperty
+            .Create(nameof(ShowControlsProperty), typeof(bool), typeof(Media), false);
+
         public IMediaStream Stream
         {
             get => (IMediaStream)GetValue(StreamProperty);
@@ -44,5 +47,10 @@ namespace WebRTCme.Middleware
             set => SetValue(AudioMutedProperty, value);
         }
 
+        public bool ShowControls
+        {
+            get => (bool)GetValue(ShowControlsProperty);
+            set => SetValue(ShowControlsProperty, value);
+        }
     }
 }

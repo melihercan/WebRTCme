@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using WebRTCme.Middleware;
+using System.Linq;
 
 namespace WebRTCme.Middleware.Services
 {
@@ -10,22 +11,23 @@ namespace WebRTCme.Middleware.Services
     {
         // Will be used as 'ItemsSource'. 
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; } = new();
-        private Dictionary<string/*PeerUserName*/, MediaParameters> _peers = new();
+        //private Dictionary<string/*PeerUserName*/, MediaParameters> _peers = new();
 
 
-        public void AddPeer(string peerUserName, MediaParameters mediaParameters)
+        public void Add(MediaParameters mediaParameters)
         {
             MediaParametersList.Add(mediaParameters);
         }
 
-        public void RemovePeer(string peerUserName)
+        public void Remove(string label)
         {
-            throw new NotImplementedException();
+            MediaParametersList.Remove(MediaParametersList.Single(mp => mp.Label == label));
         }
 
-        public void Update(string peerUserName, MediaParameters mediaParameters)
+        public void Update(MediaParameters mediaParameters)
         {
-            throw new NotImplementedException();
+            var current = MediaParametersList.Single(mp => mp.Label == mediaParameters.Label);
+            current = mediaParameters;
         }
     }
 }

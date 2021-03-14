@@ -48,6 +48,9 @@ namespace WebRTCme.Middleware
         [Parameter]
         public bool AudioMuted { get; set; } = false;
 
+        [Parameter]
+        public bool ShowContols { get; set; } = false;
+
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
 

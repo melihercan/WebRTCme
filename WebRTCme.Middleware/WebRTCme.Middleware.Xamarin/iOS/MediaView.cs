@@ -25,7 +25,7 @@ namespace WebRTCme.Middleware
         {
             // By default iOS creates View with width 0 and height 0.
             // This is problematic with FlexLayout as Bound width or height is always 0.
-            // Set inital frame to a high values, which will be set again with LayoutSubviews.  
+            // Set inital frame to a high value, which will be set to real value again with LayoutSubviews.  
             Frame = new CGRect(0, 0, 1080, 1920);
             ClipsToBounds = true;
         }

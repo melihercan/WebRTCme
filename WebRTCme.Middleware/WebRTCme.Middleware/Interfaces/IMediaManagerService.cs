@@ -9,10 +9,11 @@ namespace WebRTCme.Middleware
     {
         ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 
-        void AddPeer(string peerUserName, MediaParameters mediaParameters);
-        void RemovePeer(string peerUserName);
+        void Add(MediaParameters mediaParameters);
 
-        void Update(string peerUserName, MediaParameters mediaParameters);
+        void Remove(string peerUserName);
+
+        void Update(MediaParameters mediaParameters);
 
     }
 }

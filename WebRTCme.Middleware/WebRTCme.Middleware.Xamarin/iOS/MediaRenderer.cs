@@ -51,9 +51,7 @@ namespace WebRTCme.Middleware
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-
                     _mediaView = new MediaView();
-                    //_mediaView.Frame = new CGRect(0, 0, 414, 672);
                     if (_videoTrack is not null)
                         _mediaView.SetTrack(_videoTrack);
                     SetNativeControl(_mediaView);

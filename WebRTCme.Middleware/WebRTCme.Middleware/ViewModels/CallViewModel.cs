@@ -46,12 +46,13 @@ namespace WebRTCme.Middleware
         {
             _reRender = reRender;
             LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-            _mediaManagerService.AddPeer(connectionParameters.UserName, new MediaParameters
+            _mediaManagerService.Add(new MediaParameters
             {
-                Stream = LocalStream,
                 Label = connectionParameters.UserName,
+                Stream = LocalStream,
                 VideoMuted = false,
-                AudioMuted = false
+                AudioMuted = false,
+                ShowControls = false
             });
 
             //_mediaManagerService.AddPeer("test2", new MediaParameters
@@ -212,12 +213,13 @@ namespace WebRTCme.Middleware
                             {
                                 _runOnUiThreadService.Invoke(() =>
                                 {
-                                    _mediaManagerService.AddPeer(peerResponseParameters.PeerUserName, new MediaParameters
+                                    _mediaManagerService.Add(new MediaParameters
                                     {
-                                        Stream = peerResponseParameters.MediaStream,
                                         Label = peerResponseParameters.PeerUserName,
+                                        Stream = peerResponseParameters.MediaStream,
                                         VideoMuted = false,
-                                        AudioMuted = false
+                                        AudioMuted = false,
+                                        ShowControls = false
                                     });
                                 });
 
