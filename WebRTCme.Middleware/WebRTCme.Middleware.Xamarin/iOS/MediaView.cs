@@ -40,7 +40,6 @@ namespace WebRTCme.Middleware
             if (_isCamera)
             {
                 _cameraView = new Webrtc.RTCCameraPreviewView();
-                _cameraView.BackgroundColor = UIColor.Green; 
                 AddSubview(_cameraView);
 
                 var nativeVideoSource = nativeVideoTrack.Source;
@@ -89,25 +88,6 @@ namespace WebRTCme.Middleware
         }
 
 
-#if false
-        public override void LayoutSubviews()
-        {
-            System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
-
-            base.LayoutSubviews();
-
-            if (_isCamera && _cameraView is not null)
-            {
-                _cameraView.Frame = Bounds;
-            }
-            else if (!_isCamera && _rendererView is not null)
-            {
-                _rendererView.Frame = Bounds;
-            }
-        }
-#endif
-
-#if true
         public override void LayoutSubviews()
         {
             System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
@@ -183,7 +163,6 @@ namespace WebRTCme.Middleware
                     _rendererView.Frame = Bounds;
             }
         }
-#endif
 
         [Export("videoView:didChangeVideoSize:")]
         public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)

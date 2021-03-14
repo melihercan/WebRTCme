@@ -45,63 +45,24 @@ namespace WebRTCme.Middleware
         public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
             _reRender = reRender;
-            LocalStream = await _mediaStreamService.GetCameraMediaStreamAsync();
+            var localStream = await _mediaStreamService.GetCameraMediaStreamAsync();
             _mediaManagerService.Add(new MediaParameters
             {
                 Label = connectionParameters.UserName,
-                Stream = LocalStream,
+                Stream = localStream,
                 VideoMuted = false,
                 AudioMuted = false,
                 ShowControls = false
             });
 
-            //_mediaManagerService.AddPeer("test2", new MediaParameters
-            //{
-            //    Stream = LocalStream,
-            //    Label = "test2",
-            //    VideoMuted = false,
-            //    AudioMuted = false
-            //});
-
-            //_mediaManagerService.AddPeer("test3", new MediaParameters
-            //{
-            //    Stream = LocalStream,
-            //    Label = "test3",
-            //    VideoMuted = false,
-            //    AudioMuted = false
-            //});
-
             reRender?.Invoke();
 
-
-            //_mediaManagerService.AddPeer("one", new MediaParameters
-            //{
-            //    Stream = LocalStream
-            //});
-            //_mediaManagerService.AddPeer("two", new MediaParameters
-            //{
-            //    Stream = LocalStream
-            //});
-            //_mediaManagerService.AddPeer("three", new MediaParameters
-            //{
-            //    Stream = LocalStream
-            //});
-            //_mediaManagerService.AddPeer("four", new MediaParameters
-            //{
-            //    Stream = LocalStream
-            //});
-
-
-
-
-            //LocalLabel = connectionParameters.UserName;
             var connectionRequestParameters = new ConnectionRequestParameters
             {
                 ConnectionParameters = connectionParameters,
-                LocalStream = LocalStream,
+                LocalStream = localStream,
             };
             Connect(connectionRequestParameters);
-
         }
 
         public Task OnPageDisappearingAsync()
@@ -110,99 +71,8 @@ namespace WebRTCme.Middleware
             return Task.CompletedTask;
         }
 
-        private IMediaStream _localStream;
-        public IMediaStream LocalStream
-        { 
-            get => _localStream; 
-            set
-            {
-                _localStream = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _localLabel;
-        public string LocalLabel
-        {
-            get => _localLabel;
-            set
-            {
-                _localLabel = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _localVideoMuted;
-        public bool LocalVideoMuted
-        {
-            get => _localVideoMuted;
-            set
-            {
-                _localVideoMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _localAudioMuted;
-        public bool LocalAudioMuted
-        {
-            get => _localAudioMuted;
-            set
-            {
-                _localAudioMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IMediaStream _remote1Stream;
-        public IMediaStream Remote1Stream
-        {
-            get => _remote1Stream;
-            set
-            {
-                _remote1Stream = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _remote1Label;
-        public string Remote1Label
-        {
-            get => _remote1Label;
-            set
-            {
-                _remote1Label = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _remote1VideoMuted;
-        public bool Remote1VideoMuted
-        {
-            get => _remote1VideoMuted;
-            set
-            {
-                _remote1VideoMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool _remote1AudioMuted;
-
-
-        public bool Remote1AudioMuted
-        {
-            get => _remote1AudioMuted;
-            set
-            {
-                _remote1AudioMuted = value;
-                OnPropertyChanged();
-            }
-        }
-
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
- ////connectionRequestParameters.DataChannelName = "Testing";
             _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
@@ -223,20 +93,8 @@ namespace WebRTCme.Middleware
                                     });
                                 });
 
-                                //Remote1Stream = peerResponseParameters.MediaStream;
-                                //Remote1Label = peerResponseParameters.PeerUserName;
-
                                 _reRender?.Invoke();
-                                //_reRender?.Invoke();
                             }
-
-                            //if (peerResponseParameters.DataChannel != null)
-                            //{
-                            //    var dataChannel = peerResponseParameters.DataChannel;
-                            //    Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
-                            //        $"state:{dataChannel.ReadyState}");
-                            //}
-
                             break;
 
                         case PeerResponseCode.PeerLeft:

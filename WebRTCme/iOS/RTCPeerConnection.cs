@@ -144,19 +144,6 @@ namespace WebRTCme.iOS
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options)// =>
         {
-            //var config =
-            //        new Webrtc.RTCDataChannelConfiguration()
-            //        {
-            //            ChannelId = 1
-            //        };
-
-            //System.Diagnostics.Debug.WriteLine($"IsOrdered{config.IsOrdered}");
-            //System.Diagnostics.Debug.WriteLine($"MaxRetransmits{config.MaxRetransmits}");
-            //System.Diagnostics.Debug.WriteLine($"IsNegotiated{config.IsNegotiated}");
-            //System.Diagnostics.Debug.WriteLine($"ChannelId{config.ChannelId}");
-            //System.Diagnostics.Debug.WriteLine($"Protocol{config.Protocol}");
-
-
             var nativeOptions = options.ToNative();
 
             var dataChannel =

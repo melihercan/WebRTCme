@@ -2,28 +2,11 @@
 @page "/CallPage/{ConnectionParametersJson}"
 @layout BlankLayout
 
-
 <h1 class="text-center">Call</h1>
-
-@*<div class="mx-4">
-        <Media Stream="@CallViewModel.LocalStream" Label="Wanna"
-               VideoMuted="@CallViewModel.LocalVideoMuted" AudioMuted="@CallViewModel.LocalAudioMuted" />
-    </div>*@
-
-@*<div class="mx-4">
-        <Media Stream="@CallViewModel.Remote1Stream" Label="@CallViewModel.Remote1Label"
-               VideoMuted="@CallViewModel.Remote1VideoMuted" AudioMuted="@CallViewModel.Remote1AudioMuted" />
-    </div>*@
-
 
 <div class="mx-4 d-flex flex-wrap">
     @foreach (var mediaParameters in CallViewModel.MediaParametersList)
     {
-        @*<div class="flex-fill">
-                @mediaParameters.Label
-            </div>*@
-
-
         <div class="p-2">
             <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label"
                    VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"

@@ -3,13 +3,6 @@
 
 <div class="d-flex h-100 flex-column justify-content-center align-items-center">
 
-@*        @if (@InitializingViewModel.IsCheckingSignallingServer)
-        {
-        <div>
-            <Circle />
-        </div>
-        }
-*@
         <div class="@(InitializingViewModel.IsCheckingSignallingServer ? "visible" : "invisible")">
             <Circle />
         </div>
@@ -19,15 +12,6 @@
             <p class="text-center">@InitializingViewModel.Message</p>
         </div>
 
-@*        @if (@InitializingViewModel.RetryButtonEnabled)
-        {
-        <div>
-            <button class="btn btn-primary" @onclick="InitializingViewModel.RetryCommand">
-                OK
-            </button>
-        </div>
-        }
-*@
         <button @onclick="InitializingViewModel.Retry"
                 class="btn btn-primary @(InitializingViewModel.RetryButtonEnabled ? "visible" : "invisible")">
             OK

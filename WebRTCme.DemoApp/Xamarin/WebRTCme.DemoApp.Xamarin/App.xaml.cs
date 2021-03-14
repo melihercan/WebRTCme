@@ -23,7 +23,6 @@ namespace DemoApp
                 Prefix = "WebRTCme.DemoApp.Xamarin"
             });
 
-
             _ = CrossWebRtcMiddlewareXamarin.Current;
             hostBuilder.Services.AddSingleton<INavigationService, NavigationService>();
             hostBuilder.Services.AddSingleton<IRunOnUiThreadService, RunOnUiThreadService>();
@@ -37,10 +36,6 @@ namespace DemoApp
 
         protected override void OnStart()
         {
-            //var mediaStreamService = Host.Services.GetService<IMediaStreamService>();
-            //await mediaStreamService.Initialization;
-            //var signallingServerService = Host.Services.GetService<ISignallingServerService>();
-            //await signallingServerService.Initialization;
         }
 
         protected override void OnSleep()

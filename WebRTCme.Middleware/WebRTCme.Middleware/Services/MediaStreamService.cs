@@ -13,7 +13,6 @@ namespace WebRTCme.Middleware.Services
     {
         private readonly IWindow _window;
 
-
         public MediaStreamService(IJSRuntime jsRuntime = null)
         {
             _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);

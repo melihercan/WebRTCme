@@ -11,8 +11,6 @@ namespace WebRTCme.Middleware.Services
     {
         // Will be used as 'ItemsSource'. 
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; } = new();
-        //private Dictionary<string/*PeerUserName*/, MediaParameters> _peers = new();
-
 
         public void Add(MediaParameters mediaParameters)
         {
