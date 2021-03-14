@@ -54,7 +54,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware", "WebR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Blazor", "WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj", "{36BF2F92-C0EF-4744-A345-C72C4215FAD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.DemoApp.Blazor", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor\WebRTCme.DemoApp.Blazor.csproj", "{71693BC7-EAEA-43F2-9C76-C38B02242065}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor\WebRTCme.DemoApp.Blazor.csproj", "{71693BC7-EAEA-43F2-9C76-C38B02242065}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -177,6 +177,7 @@ Global
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|Any CPU.ActiveCfg = Release|iPhoneSimulator
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|iPhone.ActiveCfg = Release|iPhone
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|iPhone.Build.0 = Release|iPhone
+		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|iPhone.Deploy.0 = Release|iPhone
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{6A8E36FA-7CB0-431F-B22F-930F0793A1FF}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 		{8C61814F-89E3-4572-9BD3-81F1BD5B59E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
