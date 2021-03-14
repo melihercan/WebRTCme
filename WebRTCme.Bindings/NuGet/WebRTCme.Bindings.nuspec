@@ -9,11 +9,13 @@
     <license type="expression">MIT</license>
     <icon>me.png</icon>
     <description>WebRTC bindings for Xamarin.Android, Xamarin.iOS and .NET WEB applications.</description>
-    <releaseNotes>Creation.
-WebRTC Android version: 1.0.320006
-WebRTC iOS version: 1.1.31999</releaseNotes>
-    <copyright>melihercan 2020</copyright>
-    <tags>WebRTC Bindings Xamarin iOS .NET WEB Blazor</tags>
+    <releaseNotes>
+      Creation.
+      WebRTC Android SDK from commit: 934b5e2ac651df0160c31e33b72f2b1fdfb73f21
+      WebRTC iOS SDK from commit: f9a6148e0498abdbe74eb6edf6aac78667d29499
+    </releaseNotes>
+    <copyright>melihercan 2021</copyright>
+    <tags>WebRTC Bindings Xamarin Android iOS .NET Blazor</tags>
     <repository type="git" url="https://github.com/melihercan/WebRTCme.Bindings" />
     <dependencies>
       <group targetFramework="MonoAndroid11.0">
@@ -22,16 +24,15 @@ WebRTC iOS version: 1.1.31999</releaseNotes>
       </group>
       <group targetFramework=".NETStandard2.0">
       </group>
+      <group targetFramework=".NET5.0">
+      </group>
     </dependencies>
-    <frameworkAssemblies>
-      <frameworkAssembly assemblyName="Java.Interop" targetFramework="MonoAndroid11.0" />
-      <frameworkAssembly assemblyName="System.Drawing.Common.dll" targetFramework="Xamarin.iOS1.0" />
-    </frameworkAssemblies>
   </metadata>
   <files>
     <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid11.0\WebRTCme.Bindings.Xamarin.Android.dll" />
 	  <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarinios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
-	  <file src="..\WebRTCme.Bindings.Web\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
+	  <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
     <file src="..\..\doc\me.png" target="me.png" />
   </files>
 </package>
