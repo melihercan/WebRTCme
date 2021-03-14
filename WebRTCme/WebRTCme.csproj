@@ -62,7 +62,7 @@
 	
 
 	<ItemGroup>
-	  <None Include="..\..\doc\me.png">
+	  <None Include="..\doc\me.png">
 	    <Pack>True</Pack>
 	    <PackagePath></PackagePath>
 	  </None>
