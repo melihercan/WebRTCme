@@ -24,7 +24,7 @@
       </group>
       <group targetFramework=".NETStandard2.0">
       </group>
-      <group targetFramework=".NET5.0">
+      <group targetFramework="net5.0">
       </group>
     </dependencies>
   </metadata>
