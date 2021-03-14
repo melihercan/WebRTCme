@@ -8,7 +8,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <icon>me.png</icon>
-    <description>WebRTC bindings for Xamarin.Android, Xamarin.iOS and .NET WEB applications.</description>
+    <description>WebRTC bindings for Xamarin Forms (Android and iOS) and Blazor applications.</description>
     <releaseNotes>
       Creation.
       WebRTC Android SDK from commit: 934b5e2ac651df0160c31e33b72f2b1fdfb73f21

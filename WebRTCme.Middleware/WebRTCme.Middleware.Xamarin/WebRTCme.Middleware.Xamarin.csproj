@@ -7,6 +7,16 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
 		<LangVersion>9.0</LangVersion>
+		<Authors>melihercan</Authors>
+		<Description>Services layer between Xamarin Forms applications and WebRTCme library.</Description>
+		<Copyright>melihercan 2021</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware/WebRTCme.Middleware.Xamarin</RepositoryUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC Xamarin Android iOS .NET</PackageTags>
+		<PackageReleaseNotes>Creation.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -37,6 +47,14 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <None Include="..\..\doc\me.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
 	
 

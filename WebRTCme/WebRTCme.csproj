@@ -5,7 +5,17 @@
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>9.0</LangVersion>		
-        <RootNamespace>WebRTCme</RootNamespace>
+        <RootNamespace>WebRTCme</RootNamespace>		
+        <Authors>melihercan</Authors>		
+        <Description>WebRTC library for Xamarin Forms and Blazor applications with a single common API.</Description>		
+        <Copyright>melihercan 2021</Copyright>		
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>		
+        <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>		
+        <PackageIcon>me.png</PackageIcon>		
+        <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme</RepositoryUrl>		
+        <RepositoryType>git</RepositoryType>		
+        <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>		
+        <PackageReleaseNotes>Creation.</PackageReleaseNotes>
     </PropertyGroup>
 
 	<ItemGroup>
@@ -47,6 +57,15 @@
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.12" Condition="'$(TargetFramework)' != 'net5'" />
 		<PackageReference Include="Microsoft.JSInterop" Version="5.0.4" Condition="'$(TargetFramework)' == 'net5'" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+	</ItemGroup>
+	
+	
+
+	<ItemGroup>
+	  <None Include="..\..\doc\me.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
 
 

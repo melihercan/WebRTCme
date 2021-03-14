@@ -4,6 +4,17 @@
 	  <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>WebRTCme.SignallingServerProxy</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>melihercan</Authors>
+    <Description>Signalling server proxy library to provide services to WebRTCme Middleware.</Description>
+    <Copyright>melihercan 2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>me.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.SignallingServerProxy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>
+    <PackageReleaseNotes>Creation.</PackageReleaseNotes>
   </PropertyGroup>
 
 
@@ -22,5 +33,12 @@
 	<ItemGroup>
     <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\doc\me.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
+	</ItemGroup>
 
 </Project>
