@@ -36,7 +36,7 @@
     <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <MtouchLink>None</MtouchLink>
+    <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>x86_64</MtouchArch>
     <CodesignKey>Apple Development: Melih Ercan (C7JX2FK3F4)</CodesignKey>
     <CodesignProvision>VS: WildCard Development</CodesignProvision>
@@ -69,6 +69,8 @@
     <CodesignProvision>VS: WildCard Development</CodesignProvision>
     <MtouchDebug>false</MtouchDebug>
     <MtouchLink>SdkOnly</MtouchLink>
+    <MtouchInterpreter>
+    </MtouchInterpreter>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />

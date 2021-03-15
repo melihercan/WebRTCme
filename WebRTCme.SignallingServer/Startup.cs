@@ -30,7 +30,8 @@ namespace WebRTCme.SignallingServer
             });
             
             services.AddRazorPages();
-            services.AddSignalR().AddMessagePackProtocol();
+            services.AddSignalR()
+                .AddMessagePackProtocol();
 
             services.AddSingleton<TurnServerProxyFactory>();
             services

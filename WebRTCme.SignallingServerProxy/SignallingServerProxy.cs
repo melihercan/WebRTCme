@@ -48,17 +48,10 @@ namespace WebRTCme.SignallingServerProxy
                     logging.AddDebug();
                     logging.SetMinimumLevel(LogLevel./*Error*/Debug);
                 })
-                //.AddMessagePackProtocol()
-                .AddMessagePackProtocol(options =>
-                {
-                    StaticCompositeResolver.Instance.Register(
-                        MessagePack.Resolvers.GeneratedResolver.Instance,
-                        MessagePack.Resolvers.StandardResolver.Instance
-                    );
-                    options.SerializerOptions = MessagePackSerializerOptions.Standard
-                        .WithResolver(StaticCompositeResolver.Instance)
-                        .WithSecurity(MessagePackSecurity.UntrustedData);
-                })
+                //// iOS has problems with MessagePack:
+                //// https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/signalr/messagepackhubprotocol.md   
+                //.If(DeviceInfo.Platform != DevicePlatform.iOS, builder => builder.AddMessagePackProtocol())
+                .AddMessagePackProtocol()
                 .Build();
 
             // Register callback handlers invoked by server hub.
