@@ -18,21 +18,23 @@
     <tags>WebRTC Bindings Xamarin Android iOS .NET Blazor</tags>
     <repository type="git" url="https://github.com/melihercan/WebRTCme.Bindings" />
     <dependencies>
-      <group targetFramework="MonoAndroid11.0">
+      <group targetFramework="monoandroid10.0">
       </group>
-      <group targetFramework="Xamarin.iOS1.0">
+      <group targetFramework="xamarinios10">
       </group>
-      <group targetFramework=".NETStandard2.0">
+      <group targetFramework="netstandard2.0">
       </group>
       <group targetFramework="net5.0">
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid11.0\WebRTCme.Bindings.Xamarin.Android.dll" />
+    <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid10.0\WebRTCme.Bindings.Xamarin.Android.dll" />
 	  <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarinios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
 	  <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
     <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\monoandroid10.0\WebRTCme.Api.dll" />
+    <file src="..\..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\xamarinios10\WebRTCme.Api.dll" />
     <file src="..\..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\netstandard2.0\WebRTCme.Api.dll" />
     <file src="..\..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
     <file src="..\..\doc\me.png" target="me.png" />
