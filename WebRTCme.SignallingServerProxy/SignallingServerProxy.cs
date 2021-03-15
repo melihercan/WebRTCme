@@ -1,4 +1,6 @@
 ﻿using Ardalis.Result;
+using MessagePack;
+using MessagePack.Resolvers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -46,7 +48,17 @@ namespace WebRTCme.SignallingServerProxy
                     logging.AddDebug();
                     logging.SetMinimumLevel(LogLevel./*Error*/Debug);
                 })
-                .AddMessagePackProtocol()
+                //.AddMessagePackProtocol()
+                .AddMessagePackProtocol(options =>
+                {
+                    StaticCompositeResolver.Instance.Register(
+                        MessagePack.Resolvers.GeneratedResolver.Instance,
+                        MessagePack.Resolvers.StandardResolver.Instance
+                    );
+                    options.SerializerOptions = MessagePackSerializerOptions.Standard
+                        .WithResolver(StaticCompositeResolver.Instance)
+                        .WithSecurity(MessagePackSecurity.UntrustedData);
+                })
                 .Build();
 
             // Register callback handlers invoked by server hub.
