@@ -137,10 +137,10 @@ namespace WebRTCme.Middleware.Services
             try
             {
                 var connectionContext = GetConnectionContext(turnServerName, roomName);
-                //_logger.LogInformation(
-                //    $">>>>>>>> OnPeerJoined - turn:{turnServerName} room:{roomName} " +
-                //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
-                //    $"peerUser:{peerUserName}");
+                _logger.LogInformation(
+                    $">>>>>>>> OnPeerJoined - turn:{turnServerName} room:{roomName} " +
+                    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
+                    $"peerUser:{peerUserName}");
 
                 await CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName, isInitiator: true);
                 var peerContext = connectionContext.PeerContexts

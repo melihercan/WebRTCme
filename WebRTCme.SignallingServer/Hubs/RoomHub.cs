@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +16,17 @@ namespace WebRTCme.SignallingServer.Hubs
     public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerProxy
     {
         private readonly TurnServerProxyFactory _turnServerClientFactory;
+        private readonly ILogger<RoomHub> _logger;
 
         private static List<Server> Servers = new();
 
         private static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
 
-        public RoomHub(TurnServerProxyFactory turnServerClientFactory) => 
+        public RoomHub(TurnServerProxyFactory turnServerClientFactory, ILogger<RoomHub> logger)
+        { 
             _turnServerClientFactory = turnServerClientFactory;
+            _logger = logger;
+        }
 
         private ITurnServerProxy GetTurnServerClient(TurnServer turnServer)
         {
@@ -52,6 +57,8 @@ namespace WebRTCme.SignallingServer.Hubs
 
         public async Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName)
         {
+            _logger.LogInformation(
+                $"######## JoinRoomAsync - turn:{turnServerName} room:{roomName}  userName:{userName}");
             try
             {
                 var turnServer = GetTurnServerFromName(turnServerName);
@@ -75,6 +82,7 @@ namespace WebRTCme.SignallingServer.Hubs
                         RoomName = roomName,
                         UserName = userName
                     });
+
                     await Groups.AddToGroupAsync(Context.ConnectionId, room.GroupName);
                     // Notify others.
                     await Clients.GroupExcept(room.GroupName, Context.ConnectionId)
@@ -116,6 +124,7 @@ namespace WebRTCme.SignallingServer.Hubs
             }
             catch (Exception ex)
             {
+                _logger.LogInformation($"######## JoinRoomAsync - EXCEPTION {ex.Message}");
                 return Result<Unit>.Error(new string[] { ex.Message });
             }
         }
