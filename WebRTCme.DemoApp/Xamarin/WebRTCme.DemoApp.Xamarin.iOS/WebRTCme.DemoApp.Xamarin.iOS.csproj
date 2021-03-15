@@ -69,8 +69,7 @@
     <CodesignProvision>VS: WildCard Development</CodesignProvision>
     <MtouchDebug>false</MtouchDebug>
     <MtouchLink>SdkOnly</MtouchLink>
-    <MtouchInterpreter>
-    </MtouchInterpreter>
+    <MtouchInterpreter>-all</MtouchInterpreter>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />

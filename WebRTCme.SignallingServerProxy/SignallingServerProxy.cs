@@ -51,6 +51,7 @@ namespace WebRTCme.SignallingServerProxy
                 //// iOS has problems with MessagePack:
                 //// https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/signalr/messagepackhubprotocol.md   
                 //.If(DeviceInfo.Platform != DevicePlatform.iOS, builder => builder.AddMessagePackProtocol())
+                //// Workaround: tick 'Enable the Mono interpreter' option (unticked for release build)
                 .AddMessagePackProtocol()
                 .Build();
 
