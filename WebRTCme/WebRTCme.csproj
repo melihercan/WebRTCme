@@ -31,30 +31,40 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
+		  <PrivateAssets>All</PrivateAssets>
+		</ProjectReference>
 		<Compile Include="Blazor\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<Compile Include="Blazor\**\*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" >
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <Compile Include="Blazor\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
-		<Compile Include="Android\**\*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" >
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<!-- !!! BEWARE: Intellisense DOES NOT work for iOS binding project. -->
-		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
-		<Compile Include="iOS\**\*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" >
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 	
 	
 
 	<ItemGroup>
-		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
+		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj">
+		  <PrivateAssets>All</PrivateAssets>
+		</ProjectReference>
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.12" Condition="'$(TargetFramework)' != 'net5'" />
 		<PackageReference Include="Microsoft.JSInterop" Version="5.0.4" Condition="'$(TargetFramework)' == 'net5'" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
@@ -71,7 +81,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 

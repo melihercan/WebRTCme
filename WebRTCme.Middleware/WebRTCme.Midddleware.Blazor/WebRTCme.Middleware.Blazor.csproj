@@ -34,8 +34,12 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
-    <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
   </ItemGroup>
 
 
@@ -48,7 +52,7 @@
 
    <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
      <ItemGroup>
-       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
      </ItemGroup>
    </Target>
 
