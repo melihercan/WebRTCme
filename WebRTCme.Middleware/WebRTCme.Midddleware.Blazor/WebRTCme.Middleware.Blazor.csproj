@@ -34,6 +34,9 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
       <PrivateAssets>All</PrivateAssets>
     </ProjectReference>

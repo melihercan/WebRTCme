@@ -31,11 +31,17 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<Compile Include="Android\**\*.cs" />
+    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" >
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-		<Compile Include="iOS\**\*.cs" />
+    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" >
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+    <Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
 	
@@ -46,6 +52,9 @@
 	
 	
 	<ItemGroup>
+	  <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj">
+	    <PrivateAssets>All</PrivateAssets>
+	  </ProjectReference>
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
 	    <PrivateAssets>All</PrivateAssets>
 	  </ProjectReference>

@@ -27,7 +27,6 @@
 	<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
 	<PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
 	<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
-	<PackageReference Include="websocketsharp.core" Version="1.0.0" />
 	<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
   </ItemGroup>
 
@@ -46,7 +45,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>  
   
