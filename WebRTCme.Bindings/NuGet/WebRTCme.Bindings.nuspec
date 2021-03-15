@@ -33,6 +33,8 @@
 	  <file src="..\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarinios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
 	  <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
     <file src="..\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\netstandard2.0\WebRTCme.Api.dll" />
+    <file src="..\..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
     <file src="..\..\doc\me.png" target="me.png" />
   </files>
 </package>

@@ -1,11 +1,12 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 	
-    <PropertyGroup>
-	    <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
-		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  <PropertyGroup>
+	  <TargetFrameworks>netstandard2.0; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRTCme.Middleware</RootNamespace>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
 		<LangVersion>9.0</LangVersion>
 		<Authors>melihercan</Authors>
 		<Description>Services layer between Xamarin Forms applications and WebRTCme library.</Description>
@@ -56,7 +57,12 @@
 	    <PackagePath></PackagePath>
 	  </None>
 	</ItemGroup>
-	
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
 
 
 </Project>

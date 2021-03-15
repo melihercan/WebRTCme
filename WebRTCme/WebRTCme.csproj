@@ -1,22 +1,23 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
 
 	<PropertyGroup>
-        <TargetFrameworks>netstandard2.0; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
-        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TargetFrameworks>netstandard2.0; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>9.0</LangVersion>		
-        <RootNamespace>WebRTCme</RootNamespace>		
-        <Authors>melihercan</Authors>		
-        <Description>WebRTC library for Xamarin Forms and Blazor applications with a single common API.</Description>		
-        <Copyright>melihercan 2021</Copyright>		
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>		
-        <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>		
-        <PackageIcon>me.png</PackageIcon>		
-        <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme</RepositoryUrl>		
-        <RepositoryType>git</RepositoryType>		
-        <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>		
-        <PackageReleaseNotes>Creation.</PackageReleaseNotes>
-    </PropertyGroup>
+    <RootNamespace>WebRTCme</RootNamespace>		
+    <Authors>melihercan</Authors>		
+    <Description>WebRTC library for Xamarin Forms and Blazor applications with a single common API.</Description>		
+    <Copyright>melihercan 2021</Copyright>		
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>		
+    <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>		
+    <PackageIcon>me.png</PackageIcon>		
+    <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme</RepositoryUrl>		
+    <RepositoryType>git</RepositoryType>		
+    <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>		
+    <PackageReleaseNotes>Creation.</PackageReleaseNotes>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
@@ -67,6 +68,12 @@
 	    <PackagePath></PackagePath>
 	  </None>
 	</ItemGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
 
 
 </Project>

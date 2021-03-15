@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1; net5.0</TargetFrameworks>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <RazorLangVersion>3.0</RazorLangVersion>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
     <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
@@ -45,4 +46,10 @@
     </None>
   </ItemGroup>
 
-</Project>
+   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+     <ItemGroup>
+       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+     </ItemGroup>
+   </Target>
+
+ </Project>
