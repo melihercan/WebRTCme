@@ -5,7 +5,20 @@ As stated in the [`WebRTC`](https://webrtc.org/) site: "With WebRTC (Real-Time C
 
 ![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/LibsAndNugets.png)
 
-As can be seen in the above figure, the framework provides several libraries and their corresponsing NuGets.
+As can be seen in the above figure, the framework provides several libraries and their corresponding NuGets:
+
+WebRTCme: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.svg)](https://www.nuget.org/packages/WebRTCme)
+
+WebRTCme.Bindings: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Bindings.svg)](https://www.nuget.org/packages/WebRTCme.Bindings)
+
+WebRTCme.Bindings.Blazor: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Bindings.Blazor.svg)](https://www.nuget.org/packages/WebRTCme.Bindings.Blazor)
+
+WebRTCme.Middleware.Blazor: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.Blazor.svg)](https://www.nuget.org/packages/WebRTCme.Middleware.Blazor)
+
+WebRTCme.Middleware.Xamarin: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.Xamarin.svg)](https://www.nuget.org/packages/WebRTCme.Middleware.Xamarin)
+
+WebRTCme.SignallingServerProxy: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.SignallingServerProxy.svg)](https://www.nuget.org/packages/WebRTCme.SignallingServerProxy)
+
 
 ## Bindings and API
 [WebRTC](https://webrtc.googlesource.com/src) is implemented in C++. The platform wrappers are added on top of this as:
@@ -25,9 +38,13 @@ Binding layer provides 3 separate APIs for each platform: Blazor, Xamarin Androi
 
 ## Middleware
 This is the services layer between applications and the `WebRTCme` plug-in. This layer provides four functionalities:
+
 1.) Xamarin custom renderer and Blazor component to support `Media` tag. This requires platform specific implementations, hence `WebRTCme.Middleware.Blazor` and `WebRTCme.Xamarin` libraries provided on top of shared `WebRTCme.Middleware` library. 
+
 2.) Media stream service.
+
 3.) Blazor and Xamarin shared connection handling with signalling server through a proxy.
+
 4.) Blazor and Xamarin shared view models to handle call and chat functionalities.
 
 ## Signalling Server Proxy
