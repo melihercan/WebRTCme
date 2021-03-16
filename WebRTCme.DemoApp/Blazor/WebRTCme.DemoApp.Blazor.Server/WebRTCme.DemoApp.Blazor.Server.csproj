@@ -8,8 +8,4 @@
     <ProjectReference Include="..\WebRTCme.DemoApp.Blazor\WebRTCme.DemoApp.Blazor.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
 </Project>
