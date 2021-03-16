@@ -33,5 +33,15 @@ This is the services layer between applications and the `WebRTCme` plug-in. This
 ## Signalling Server Proxy
 This tiny library is a bridge between middleware and the signalling server. It exposes two APIs as C# interfaces; one for the middleware and the other for the signalling server.
 
-
+## Screenshots
+Peer to Peer call between Blazor and Xamarin.Android
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/Call.png)
  
+Peer to Peer chat between Blazor and Xamarin.Android
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/Chat.png)
+
+3 Peers call: Xamarin.iOS, Blazor, Xamarin.Android 
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/3Peers_Call.png)
+ 
+3 Peers chat: Xamarin.iOS, Blazor, Xamarin.Android 
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/3Peers_Chat.png)
