@@ -209,8 +209,17 @@ namespace WebRTCme.Android
             // Depreceted. Convert to OnTrack.
         }
 
-        public void OnAddTrack(Webrtc.RtpReceiver p0, Webrtc.MediaStream[] p1) => 
+        public void OnAddTrack(Webrtc.RtpReceiver p0, Webrtc.MediaStream[] p1)
+        {
+            var track = p0.Track();
+            if (track.Kind() == Webrtc.MediaStreamTrack.AudioTrackKind)
+            {
+                var audioTrack = track as AudioTrack;
+                audioTrack.SetEnabled(true);
+                audioTrack.SetVolume(10);
+            }
             OnTrack?.Invoke(this, RTCTrackEvent.Create(p0, p1));
+        }
 
         void Webrtc.PeerConnection.IObserver.OnDataChannel(Webrtc.DataChannel p0) =>
             OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(p0));
