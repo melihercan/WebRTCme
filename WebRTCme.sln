@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Xamarin.i
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Xamarin", "WebRTCme.Middleware\WebRTCme.Middleware.Xamarin\WebRTCme.Middleware.Xamarin.csproj", "{FC0F9A4D-0D31-4930-A0CA-56D9CF55EFDF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Blazor", "WebRTCme.Middleware\WebRTCme.Midddleware.Blazor\WebRTCme.Middleware.Blazor.csproj", "{8E7559B1-3C14-438D-9D71-D5656C20387E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware.Blazor", "WebRTCme.Middleware\WebRTCme.Middleware.Blazor\WebRTCme.Middleware.Blazor.csproj", "{8E7559B1-3C14-438D-9D71-D5656C20387E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Xamarin", "WebRTCme.DemoApp\Xamarin\WebRTCme.DemoApp.Xamarin\WebRTCme.DemoApp.Xamarin.csproj", "{68D2D99F-CE72-4EC6-BE84-64044277FE85}"
 EndProject
