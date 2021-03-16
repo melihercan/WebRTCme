@@ -2,7 +2,9 @@
 
 	<PropertyGroup>
     <TargetFrameworks>netstandard2.0; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
-		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		<TargetsForTfmSpecificBuildOutput>
+      $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
+    </TargetsForTfmSpecificBuildOutput>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>9.0</LangVersion>		
@@ -81,7 +83,8 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage 
+        Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 
