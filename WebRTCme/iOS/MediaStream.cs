@@ -47,7 +47,10 @@ namespace WebRTCme.iOS
             }
             if (isVideo)
             {
-                var defaultVideoDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+                var devices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
+                //// TODO: CURENTLY HARD CODED TO BACK. SELECT THE CAMERA BASED ON constraints
+                var defaultVideoDevice = devices.FirstOrDefault(d => d.Position == AVCaptureDevicePosition.Front/*.Back*/);
+                //var defaultVideoDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, defaultVideoDevice.UniqueID));
             }
 

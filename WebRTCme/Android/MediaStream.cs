@@ -59,7 +59,8 @@ namespace WebRTCme.Android
                 // TODO: HOW TO GET DEFAULT VIDEO INPUT???
                 var cameraManager = (CameraManager)activity.GetSystemService(
                     global::Android.Content.Context.CameraService);
-                var id = cameraManager.GetCameraIdList()[0];
+  //var list = cameraManager.GetCameraIdList();
+                var id = cameraManager.GetCameraIdList()[/*0*/1];   //// TODO: CURENTLY HARD CODED TO FRONT. SELECT THE CAMERA BASED ON constraints
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"{id}"));
             }
 
