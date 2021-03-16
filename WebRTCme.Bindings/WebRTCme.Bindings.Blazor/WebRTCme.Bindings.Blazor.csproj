@@ -10,6 +10,15 @@
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
     <LangVersion>9.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>melihercan</Authors>
+    <Description>NuGet to provide JS interop. Only required for Blazor apps. This is a temporary solution till a fix is implemented.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+    <PackageIcon>me.png</PackageIcon>
+    <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Bindings/WebRTCme.Bindings.Blazor</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>WebRTC .NET Blazor</PackageTags>
+    <PackageReleaseNotes>Creation.</PackageReleaseNotes>
   </PropertyGroup>
 
 
@@ -29,6 +38,14 @@
       <PrivateAssets>All</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
+
+
+	<ItemGroup>
+	  <None Include="..\doc\me.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
+	</ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
