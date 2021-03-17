@@ -51,7 +51,21 @@ This is the services layer between applications and the `WebRTCme` plug-in. This
 This tiny library is a bridge between middleware and the signalling server. It exposes two APIs as C# interfaces; one for the middleware and the other for the signalling server.
 
 ## Usage of Libraries (NuGets)
+
 TODO: ADD THIS
+
+### WebRTCme.Bindings
+
+### WebRTCme
+
+### WebRTCme.Middleware.Blazor
+* Check `NuGetTests` folder. Demo apps employing this NuGet are provided there as an example.
+* 
+### WebRTCme.Middleware.Xamarin
+* Check `NuGetTests` folder. Demo apps employing this NuGet are provided there as an example.
+
+### WebRTCme.SignallingServerProxy
+* Check `NuGetTests` folder. Signalling server employing this NuGet is provided there as an example.
 
 ## Screenshots
 Peer to Peer call between Blazor and Xamarin.Android
