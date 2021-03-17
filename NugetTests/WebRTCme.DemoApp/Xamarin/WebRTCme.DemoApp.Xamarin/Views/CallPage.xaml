@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:webRtc="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware.Xamarin"
+             x:Class="DemoApp.Views.CallPage">
+    <ContentPage.Content>
+
+        <FlexLayout BindableLayout.ItemsSource="{Binding MediaParametersList}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Center">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <webRtc:Media Stream="{Binding Stream}" Label="{Binding Label}" 
+                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}" 
+                                  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+       
+    </ContentPage.Content>
+</ContentPage>

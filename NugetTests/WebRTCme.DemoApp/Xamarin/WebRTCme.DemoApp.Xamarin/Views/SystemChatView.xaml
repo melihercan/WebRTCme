@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<StackLayout xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WebRTCme.DemoApp.Xamarin.Views.SystemChatView">
+
+    <Grid ColumnDefinitions="40,*,40">
+        <Grid Grid.Column="1" HorizontalOptions="Center" Margin="20,5" VerticalOptions="FillAndExpand">
+            <BoxView CornerRadius="10" BackgroundColor="Navy"  HorizontalOptions="FillAndExpand"/>
+            <StackLayout VerticalOptions="FillAndExpand" Padding="10" Spacing="0">
+                <Label Margin="0,5,0,0" Text="{Binding Message}" TextColor="Yellow"/>
+                <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="Micro" FontAttributes="Italic" 
+                       TextColor="Yellow"/>
+            </StackLayout>
+        </Grid>
+    </Grid>
+</StackLayout>
