@@ -1,3 +1,11 @@
+!!!IMPORTANT!!! vs2019 16.9.x is broken for iOS.Bindings projects on Windows.
+
+See the workarounds:
+
+[Building Xamarin iOS binding project not longer works in 16.9](https://developercommunity2.visualstudio.com/t/Building-Xamarin-iOS-binding-project-not/1361154?entry=problem&ref=native&refTime=1616432601108&refUserId=9fc44a6c-086f-4bc5-8dec-c2ffaa73501d)
+
+[VS2019 Community (v16.9), iOS and Android bindings project templates are missing](https://developercommunity2.visualstudio.com/t/VS2019-Community-v169-iOS-and-Androi/1357564?entry=problem&ref=native&refTime=1616432820554&refUserId=9fc44a6c-086f-4bc5-8dec-c2ffaa73501d)
+
 # WebRTCme
 `WebRTCme` framework libraries provide [`WebRTC`](https://webrtc.org/) functionality to Blazor and Xamarin Forms applications with a single common API. [Here](https://melihercan.medium.com/webrtc-for-blazor-and-xamarin-forms-with-a-single-common-api-93ee0a2eca4b) is the link to the story published in Medium regarding this framework.
 
@@ -51,7 +59,21 @@ This is the services layer between applications and the `WebRTCme` plug-in. This
 This tiny library is a bridge between middleware and the signalling server. It exposes two APIs as C# interfaces; one for the middleware and the other for the signalling server.
 
 ## Usage of Libraries (NuGets)
+
 TODO: ADD THIS
+
+### WebRTCme.Bindings
+
+### WebRTCme
+
+### WebRTCme.Middleware.Blazor
+* Check `NuGetTests` folder. Demo apps employing this NuGet are provided there as an example.
+* 
+### WebRTCme.Middleware.Xamarin
+* Check `NuGetTests` folder. Demo apps employing this NuGet are provided there as an example.
+
+### WebRTCme.SignallingServerProxy
+* Check `NuGetTests` folder. Signalling server employing this NuGet is provided there as an example.
 
 ## Screenshots
 Peer to Peer call between Blazor and Xamarin.Android
