@@ -3,6 +3,7 @@ using System;
 using WebRTCme;
 using Org.Webrtc;
 using System.Linq;
+using System.Text.Json;
 
 namespace WebRTCme.Android
 {
@@ -107,12 +108,8 @@ namespace WebRTCme.Android
                 .Split(" ", StringSplitOptions.RemoveEmptyEntries)[7],
             true);
 
-        public string UsernameFragment => null; 
+        public string UsernameFragment => null;
 
-
-        public string ToJson()
-        {
-            throw new NotImplementedException();
-        }
+        public string ToJson() => JsonSerializer.Serialize(this);
     }
 }

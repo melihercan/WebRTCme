@@ -46,11 +46,6 @@ namespace WebRTCme.Bindings.Blazor.Api
         
         public string UsernameFragment => GetNativeProperty<string>("usernameFragment");
 
-
         public string ToJson() => JsonSerializer.Serialize(this);
-
-
-
-
     }
 }

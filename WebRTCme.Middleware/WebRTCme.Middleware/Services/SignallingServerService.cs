@@ -27,12 +27,6 @@ namespace WebRTCme.Middleware.Services
         private ISignallingServerProxy _signallingServerClient;
         private static List<ConnectionContext> _connectionContexts = new();
 
-        private JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };
-
         public SignallingServerService(IConfiguration configuration, ILogger<ISignallingServerService> logger,
             IJSRuntime jsRuntime = null)
         {
@@ -156,7 +150,7 @@ namespace WebRTCme.Middleware.Services
 
                 // Send offer before setting local description to avoid race condition with ice candidates.
                 // Setting local description triggers ice candidate packets.
-                var sdp = JsonSerializer.Serialize(offerDescription, _jsonSerializerOptions);
+                var sdp = JsonSerializer.Serialize(offerDescription, JsonHelper.WebRtcJsonSerializerOptions);
                 _logger.LogInformation(
                     $"-------> Sending Offer - room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -235,7 +229,7 @@ namespace WebRTCme.Middleware.Services
                     $"peerUser:{peerUserName}"); //peedSdp:{peerSdp}");
 
                 var description = JsonSerializer.Deserialize<RTCSessionDescriptionInit>(peerSdp,
-                    _jsonSerializerOptions);
+                    JsonHelper.WebRtcJsonSerializerOptions);
 
                 var peerContext = connectionContext.PeerContexts
                     .FirstOrDefault(context => context.PeerParameters.PeerUserName
@@ -265,7 +259,7 @@ namespace WebRTCme.Middleware.Services
 
                     // Send offer before setting local description to avoid race condition with ice candidates.
                     // Setting local description triggers ice candidate packets.
-                    var sdp = JsonSerializer.Serialize(answerDescription, _jsonSerializerOptions);
+                    var sdp = JsonSerializer.Serialize(answerDescription, JsonHelper.WebRtcJsonSerializerOptions);
                     _logger.LogInformation(
                         $"-------> Sending Answer - room:{roomName} " +
                         $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName}  " +
@@ -312,7 +306,7 @@ namespace WebRTCme.Middleware.Services
                 subject = peerContext.PeerResponseSubject;
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
-                    _jsonSerializerOptions);
+                    JsonHelper.WebRtcJsonSerializerOptions);
                 //_logger.LogInformation(
                 //    $"**** AddIceCandidate - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -496,7 +490,7 @@ namespace WebRTCme.Middleware.Services
                             SdpMLineIndex = e.Candidate.SdpMLineIndex,
                             //UsernameFragment = ???
                         };
-                        var ice = JsonSerializer.Serialize(iceCandidate, _jsonSerializerOptions);
+                        var ice = JsonSerializer.Serialize(iceCandidate, JsonHelper.WebRtcJsonSerializerOptions);
                         _logger.LogInformation(
                             $"--------> Sending ICE Candidate - room:{roomName} " +
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
