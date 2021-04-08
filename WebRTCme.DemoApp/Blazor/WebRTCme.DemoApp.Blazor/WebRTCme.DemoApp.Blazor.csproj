@@ -10,14 +10,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.5" />
     <PackageReference Include="Blazored.Modal" Version="6.0.1" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-    <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Midddleware.Blazor\WebRTCme.Middleware.Blazor.csproj" />
+    <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\WebRTCme.Middleware.Blazor.csproj" />
     <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
   </ItemGroup>
 

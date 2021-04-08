@@ -16,19 +16,35 @@ namespace WebRTCme.Android
 
         public string Candidate => ((Webrtc.IceCandidate)NativeObject).Sdp;
 
-        public string Component => throw new NotImplementedException();
+        public RTCIceComponent Component => Candidate
+            .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[1] == "1" 
+                ? RTCIceComponent.Rtp : RTCIceComponent.Rtcp;
 
-        public string Foundation => throw new NotImplementedException();
+        public string Foundation => Candidate
+            .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[0];
 
-        public string Ip => throw new NotImplementedException();
+        public string Ip => Address;
 
-        public ushort? Port => throw new NotImplementedException();
+        public ushort Port => Convert.ToUInt16(Candidate
+            .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[5]);
 
-        public ulong? Priority => throw new NotImplementedException();
+        public uint Priority => Convert.ToUInt32(Candidate
+            .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[3]);
 
-        public string Address => throw new NotImplementedException();
+        public string Address => Candidate
+            .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[4];
 
-        public RTCIceProtocol Protocol { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public RTCIceProtocol Protocol => (RTCIceProtocol)Enum.Parse(
+            typeof(RTCIceProtocol),
+            Candidate
+                .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Split(" ", StringSplitOptions.RemoveEmptyEntries)[2],
+            true);
 
         public string RelatedAddress => throw new NotImplementedException();
 
@@ -38,10 +54,10 @@ namespace WebRTCme.Android
 
         public ushort? SdpMLineIndex => (ushort)((Webrtc.IceCandidate)NativeObject).SdpMLineIndex;
 
-        public RTCIceTcpCandidateType TcpType => throw new NotImplementedException();
+        public RTCIceTcpCandidateType? TcpType => throw new NotImplementedException();
 
-        public string Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string UsernameFragment { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public RTCIceCandidateType Type => throw new NotImplementedException();
+        public string UsernameFragment => throw new NotImplementedException(); 
 
 
         public string ToJson()

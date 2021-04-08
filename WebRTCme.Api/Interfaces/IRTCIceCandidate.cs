@@ -11,19 +11,19 @@ namespace WebRTCme
     {
         string Candidate { get; }
         
-        string Component { get; }
+        RTCIceComponent Component { get; }
 
         string Foundation { get; }
 
         string Ip { get; }
 
-        ushort? Port { get; }
+        ushort Port { get; }
 
-        ulong? Priority { get; }
+        uint Priority { get; }
 
         string Address { get; }
 
-        RTCIceProtocol Protocol { get; set; }
+        RTCIceProtocol Protocol { get; }
 
         string RelatedAddress { get; }
 
@@ -33,11 +33,11 @@ namespace WebRTCme
 
         ushort? SdpMLineIndex { get; }
 
-        RTCIceTcpCandidateType TcpType { get; }
+        RTCIceTcpCandidateType? TcpType { get; }
 
-        string Type { get; set; }
+        RTCIceCandidateType Type { get; }
 
-        string UsernameFragment { get; set; }
+        string UsernameFragment { get; }
 
         string ToJson();
     }

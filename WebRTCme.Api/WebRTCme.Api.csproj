@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0</TargetFrameworks>
     <RootNamespace>WebRTCme</RootNamespace>
 	<LangVersion>9.0</LangVersion>
 	<UserSecretsId>a419948c-ce76-4240-bd44-60047b666b15</UserSecretsId>
@@ -12,12 +12,12 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.4" />
+	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.5" />
   </ItemGroup>
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-	<PackageReference Include="System.Text.Json" Version="5.0.1" />
+	<PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
 

@@ -18,23 +18,19 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public string Candidate => GetNativeProperty<string>("candidate");
 
-        public string Component => GetNativeProperty<string>("component");
+        public RTCIceComponent Component => GetNativeProperty<RTCIceComponent>("component");
 
         public string Foundation => GetNativeProperty<string>("foundation");
 
         public string Ip => GetNativeProperty<string>("ip");
 
-        public ushort? Port => GetNativeProperty<ushort?>("port");
+        public ushort Port => GetNativeProperty<ushort>("port");
 
-        public ulong? Priority => GetNativeProperty<ulong?>("priority");
+        public uint Priority => GetNativeProperty<uint>("priority");
 
         public string Address => GetNativeProperty<string>("address");
 
-        public RTCIceProtocol Protocol 
-        {
-            get => GetNativeProperty<RTCIceProtocol>("protocol");
-            set => SetNativeProperty("protocol", value);
-        }
+        public RTCIceProtocol Protocol => GetNativeProperty<RTCIceProtocol>("protocol");
 
         public string RelatedAddress => GetNativeProperty<string>("relatedAddress");
 
@@ -44,19 +40,11 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public ushort? SdpMLineIndex => GetNativeProperty<ushort?>("sdpMLineIndex");
 
-        public RTCIceTcpCandidateType TcpType => GetNativeProperty<RTCIceTcpCandidateType>("tcpType");
+        public RTCIceTcpCandidateType? TcpType => GetNativeProperty<RTCIceTcpCandidateType?>("tcpType");
 
-        public string Type 
-        {
-            get => GetNativeProperty<string>("type");
-            set => SetNativeProperty("type", value);
-        }
+        public RTCIceCandidateType Type => GetNativeProperty<RTCIceCandidateType>("type");
         
-        public string UsernameFragment 
-        {
-            get => GetNativeProperty<string>("usernameFragment");
-            set => SetNativeProperty("usernameFRagment", value);
-        }
+        public string UsernameFragment => GetNativeProperty<string>("usernameFragment");
 
 
         public string ToJson() => JsonSerializer.Serialize(this);

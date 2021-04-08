@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0; net5.0</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0</TargetFrameworks>
     <TargetsForTfmSpecificBuildOutput>
       $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
     </TargetsForTfmSpecificBuildOutput>    
@@ -23,8 +23,8 @@
 
   <ItemGroup>
 	<PackageReference Include="Ardalis.Result" Version="3.1.1" />
-	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.4" />
-	<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.4" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.5" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.5" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
 	<PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
@@ -47,8 +47,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage 
-        Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 
