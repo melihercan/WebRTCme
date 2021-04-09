@@ -73,7 +73,7 @@ namespace WebRTCme.Middleware.Services
                         connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
 
- //await OnPeerJoinedAsync("StunOnly", "hello", "Android");
+//// await OnPeerJoinedAsync("StunOnly", "hello", "iOS");
 
                 }
                 catch (Exception ex)
