@@ -1,18 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <!--<TargetFrameworks>net5.0; net6.0</TargetFrameworks>-->
+    <TargetFrameworks>net5.0</TargetFrameworks>
+
+    <!-- Uncomment this if you deploy to Linux server to avoid: 
+        "Failed to find a valid digest in the 'integrity' attribute for resource" issue for js or text files.
+        It is due to CRLF differences: https://github.com/dotnet/aspnetcore/issues/19796 -->
+    <!--BlazorCacheBootResources>false</BlazorCacheBootResources-->
   </PropertyGroup>
 
   <ItemGroup>
     <Content Remove="C:\Users\melih\.nuget\packages\blazorpro.spinkit\1.2.0\contentFiles\any\netstandard2.1\libman.json" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.5" PrivateAssets="all" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
+
+  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0-preview.3.21201.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0-preview.3.21201.13" PrivateAssets="all" />
+    <PackageReference Include="System.Net.Http.Json" Version="6.0.0-preview.3.21201.4" />
+  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\WebRTCme.Middleware.Blazor.csproj" />

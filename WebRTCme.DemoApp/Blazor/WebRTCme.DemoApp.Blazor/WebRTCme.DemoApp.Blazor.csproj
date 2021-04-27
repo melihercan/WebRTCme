@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <!--<TargetFrameworks>net5.0; net6.0</TargetFrameworks>-->
+    <TargetFrameworks>net5.0;</TargetFrameworks>
   </PropertyGroup>
 
   
@@ -9,11 +10,17 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.5" />
     <PackageReference Include="Blazored.Modal" Version="6.0.1" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
   </ItemGroup>
+
+  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0-preview.3.21201.13" />
+    <PackageReference Include="Blazored.Modal" Version="6.0.1" />
+    <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
+  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />

@@ -7,6 +7,7 @@ using Android.Media;
 using Android.Hardware.Camera2;
 using Xamarin.Essentials;
 using System.Linq;
+using Android.OS;
 
 namespace WebRTCme.Android
 {
@@ -51,7 +52,18 @@ namespace WebRTCme.Android
             {
                 // TODO: HOW TO GET DEFAULT AUDIO INPUT???
                 var audioManager = (AudioManager)activity.GetSystemService(global::Android.Content.Context.AudioService);
-                var id = audioManager.Microphones[0].Id;
+                ////var id = audioManager.Microphones[0].Id;
+                // alzubitariq modification: https://github.com/melihercan/WebRTCme/issues/1
+                int id = 0;
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.P)
+                {
+                    id = audioManager.Microphones[0].Id;
+                }
+                else
+                {
+                    AudioDeviceInfo[] deviceInfo = audioManager.GetDevices(GetDevicesTargets.Inputs);
+                    id = deviceInfo[0].Id;
+                }
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Audio, $"{id}"));
             }
             if (isVideo)

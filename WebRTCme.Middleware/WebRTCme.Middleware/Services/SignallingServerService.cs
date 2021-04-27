@@ -24,7 +24,7 @@ namespace WebRTCme.Middleware.Services
         private readonly IJSRuntime _jsRuntime;
         private readonly ILogger<ISignallingServerService> _logger;
         private readonly string _signallingServerBaseUrl;
-        private ISignallingServerProxy _signallingServerClient;
+        private ISignallingServerProxy _signallingServerProxy;
         private static List<ConnectionContext> _connectionContexts = new();
 
         public SignallingServerService(IConfiguration configuration, ILogger<ISignallingServerService> logger,
@@ -33,12 +33,12 @@ namespace WebRTCme.Middleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            _signallingServerClient = new SignallingServerProxy.SignallingServerProxy(_signallingServerBaseUrl, this);
+            _signallingServerProxy = new SignallingServerProxy.SignallingServerProxy(_signallingServerBaseUrl, this);
         }
 
         public async Task<string[]> GetTurnServerNamesAsync()
         {
-            var result = await _signallingServerClient.GetTurnServerNamesAsync();
+            var result = await _signallingServerProxy.GetTurnServerNamesAsync();
             if (result.Status != Ardalis.Result.ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
             return result.Value;
@@ -67,7 +67,7 @@ namespace WebRTCme.Middleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await _signallingServerClient.JoinRoomAsync(
+                    await _signallingServerProxy.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName, 
                         connectionRequestParameters.ConnectionParameters.UserName);
@@ -86,7 +86,7 @@ namespace WebRTCme.Middleware.Services
                     try
                     {
                         if (isJoined)
-                            await _signallingServerClient.LeaveRoomAsync(
+                            await _signallingServerProxy.LeaveRoomAsync(
                                 connectionRequestParameters.ConnectionParameters.TurnServerName,
                                 connectionRequestParameters.ConnectionParameters.RoomName, 
                                 connectionRequestParameters.ConnectionParameters.UserName);
@@ -113,7 +113,7 @@ namespace WebRTCme.Middleware.Services
 
         public async ValueTask DisposeAsync()
         {
-            await _signallingServerClient.DisposeAsync();
+            await _signallingServerProxy.DisposeAsync();
         }
 
         private ConnectionContext GetConnectionContext(string turnServerName, string roomName) =>
@@ -162,7 +162,7 @@ namespace WebRTCme.Middleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                await _signallingServerClient.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
 
             }
             catch (Exception ex)
@@ -270,7 +270,7 @@ namespace WebRTCme.Middleware.Services
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
                     await peerConnection.SetLocalDescription(answerDescription);
-                    await _signallingServerClient.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                    await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
                 }
             }
             catch (Exception ex)
@@ -372,7 +372,7 @@ namespace WebRTCme.Middleware.Services
 
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = connectionContext.IceServers ?? await _signallingServerClient
+                        IceServers = connectionContext.IceServers ?? await _signallingServerProxy
                             .GetIceServersAsync(turnServerName),
                         //PeerIdentity = peerUserName
                     };
@@ -497,7 +497,7 @@ namespace WebRTCme.Middleware.Services
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
                         //if (_isAsyncCall)
-                            await _signallingServerClient.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
+                            await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
                         //else
                             //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }
