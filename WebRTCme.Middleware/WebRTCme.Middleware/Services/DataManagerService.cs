@@ -65,14 +65,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.OnError -= DataChannel_OnError;
                 dataChannel.OnMessage -= DataChannel_OnMessage;
                 _peers.Remove(peerUserName);
-
-                DataParametersList.Add(new DataParameters
-                {
-                    From = DataFromType.System,
-                    PeerUserName = peerUserName,
-                    Time = DateTime.Now.ToString("HH:mm"),
-                    Message = $"User {peerUserName} has left the room"
-                });
+                DataParametersList.Remove(DataParametersList.Single(dp => dp.PeerUserName == peerUserName));
             }
             else
             {

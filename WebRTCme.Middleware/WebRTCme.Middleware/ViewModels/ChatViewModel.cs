@@ -24,17 +24,17 @@ namespace WebRTCme.Middleware
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
         private readonly ISignallingServerService _signallingServerService;
-        public readonly IDataManagerService DataManager;
+        public readonly IDataManagerService _dataManagerService;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
 
-        public ChatViewModel(ISignallingServerService signallingServerService, IDataManagerService dataManager, 
+        public ChatViewModel(ISignallingServerService signallingServerService, IDataManagerService dataManagerService, 
             INavigationService navigationService)
         {
             _signallingServerService = signallingServerService;
-             DataManager = dataManager;
-            DataParametersList = dataManager.DataParametersList;
+             _dataManagerService = dataManagerService;
+            DataParametersList = dataManagerService.DataParametersList;
             _navigationService = navigationService;
         }
 
@@ -99,7 +99,7 @@ namespace WebRTCme.Middleware
         {
             if (!string.IsNullOrEmpty(OutgoingText) && !string.IsNullOrWhiteSpace(OutgoingText))
             {
-                DataManager.SendString(OutgoingText);
+                _dataManagerService.SendString(OutgoingText);
                 OutgoingText = string.Empty;
             }
         }
@@ -125,13 +125,13 @@ namespace WebRTCme.Middleware
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
 
-                                DataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
+                                _dataManagerService.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
                             }
                             break;
 
                         case PeerResponseCode.PeerLeft:
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
-                            DataManager.RemovePeer(peerResponseParameters.PeerUserName);
+                            _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
                             break;
 
                         case PeerResponseCode.PeerError:
