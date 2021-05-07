@@ -34,7 +34,6 @@ namespace WebRTCme.Android
             }
         }
 
-
         public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
 
@@ -93,7 +92,6 @@ namespace WebRTCme.Android
         public RTCIceServer[] GetDefaultIceServers() =>
             throw new NotImplementedException();
 
-
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
             var x = candidate.ToNative();
@@ -105,7 +103,6 @@ namespace WebRTCme.Android
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(((Webrtc.PeerConnection)NativeObject).AddTrack(
                 track.NativeObject as Webrtc.MediaStreamTrack, new List<string> { stream.Id }));
-
 
         public void Close() => ((Webrtc.PeerConnection)NativeObject).Close();
 
@@ -163,7 +160,6 @@ namespace WebRTCme.Android
             ((Webrtc.PeerConnection)NativeObject).Transceivers
                 .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
-
         public void RemoveTrack(IRTCRtpSender sender) =>
             ((Webrtc.PeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
 
@@ -183,24 +179,18 @@ namespace WebRTCme.Android
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            var x = sessionDescription.ToNative();
-            System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET LOCAL: {x.Description}");
             ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
-                new SdpObserverProxy(tcs), x);
+                new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            var x = sessionDescription.ToNative();
-            System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET REMOTE: {x.Description}");
             ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
-                new SdpObserverProxy(tcs), x);
+                new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
-
-
 
 
         #region NativeEvents
