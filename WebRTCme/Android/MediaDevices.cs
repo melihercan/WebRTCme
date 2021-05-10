@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using WebRTCme;
 using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
-//using Android.Hardware.Camera2;
 using Android.Media;
+using Android.Hardware.Camera2;
 
 namespace WebRTCme.Android
 {
@@ -21,7 +21,7 @@ namespace WebRTCme.Android
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
-            var activity = Xamarin.Essentials.Platform.CurrentActivity;
+            var activity = Platform.CurrentActivity;
             var context = activity.ApplicationContext;
 
             var camera2Enumerator = new Webrtc.Camera2Enumerator(context);
@@ -32,18 +32,38 @@ namespace WebRTCme.Android
                 GroupId = name,
                 Kind = MediaDeviceInfoKind.VideoInput,
                 Label = name
-            });
-            //var cm = (CameraManager)activity.GetSystemService(global::Android.Content.Context.CameraService);
-            //var list = cm.GetCameraIdList();
+            }).ToArray();
+            
+            var cm = (CameraManager)activity.GetSystemService(global::Android.Content.Context.CameraService);
+            var cameraIds = cm.GetCameraIdList();
+            foreach (var cameraId in cameraIds)
+            {
+                var cameraCaptureDevice = cameraCaptureDevices.FirstOrDefault(
+                    name => name.DeviceId.Equals(cameraId, StringComparison.OrdinalIgnoreCase));
+                if (cameraCaptureDevice is not null)
+                {
+                    var characteristics = cm.GetCameraCharacteristics(cameraId);
+                    var facing = characteristics.Get(CameraCharacteristics.LensFacing);
+                    ////var capabilities = characteristics.Get(CameraCharacteristics.RequestAvailableCapabilities);
+                    if (((int)facing) == (int)LensFacing.Front)
+                        cameraCaptureDevice.Label = LensFacing.Front.ToString();
+                    else if (((int)facing) == (int)LensFacing.Back)
+                        cameraCaptureDevice.Label = LensFacing.Back.ToString();
+                    else if (((int)facing) == (int)LensFacing.External)
+                        cameraCaptureDevice.Label = LensFacing.External.ToString();
+                }
+            }
 
-            var audioManager = (AudioManager)/*activity*/context.GetSystemService(global::Android.Content.Context.AudioService);
+            var audioManager = (AudioManager)context.GetSystemService(
+                global::Android.Content.Context.AudioService);
             var inputs = audioManager.GetDevices(GetDevicesTargets.Inputs);
             var audioCaptureDevices = inputs.Select(input => new MediaDeviceInfo
             {
                 DeviceId = input.Id.ToString(),
                 GroupId = input.Id.ToString(),
                 Kind = MediaDeviceInfoKind.AudioInput,
-                Label = input.Address
+                Label = input.Type.ToString() + (string.IsNullOrEmpty(input.Address) ?
+                    string.Empty : "." + input.Address)
             });
             var outputs = audioManager.GetDevices(GetDevicesTargets.Outputs);
             var audioRenderDevices = outputs.Select(output => new MediaDeviceInfo
@@ -51,7 +71,8 @@ namespace WebRTCme.Android
                 DeviceId = output.Id.ToString(),
                 GroupId = output.Id.ToString(),
                 Kind = MediaDeviceInfoKind.AudioOutput,
-                Label = output.Address
+                Label = output.Type.ToString() + (string.IsNullOrEmpty(output.Address) ?
+                    string.Empty : "." + output.Address)
             });
 
             return Task.FromResult(

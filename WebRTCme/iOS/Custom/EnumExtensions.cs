@@ -55,15 +55,6 @@ namespace WebRTCme.iOS
                 RTCSdpType.Rollback => Webrtc.RTCSdpType.Rollback
             };
 
-        public static AVCaptureDevicePosition ToNative(this CameraType cameraType) =>
-            cameraType switch
-            {
-                CameraType.Default => AVCaptureDevicePosition.Unspecified,
-                CameraType.Back => AVCaptureDevicePosition.Back,
-                CameraType.Front => AVCaptureDevicePosition.Front,
-                _ => throw new NotSupportedException()
-            };
-
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
             nativeBundlePolicy switch
             {
