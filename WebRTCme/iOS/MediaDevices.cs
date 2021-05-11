@@ -5,6 +5,8 @@ using System.Text;
 using WebRTCme;
 using System.Threading.Tasks;
 using System.Linq;
+using CoreAudioKit;
+using AudioUnit;
 
 namespace WebRTCme.iOS
 {
@@ -35,6 +37,31 @@ namespace WebRTCme.iOS
                     Kind = MediaDeviceInfoKind.AudioInput,
                     Label = device.LocalizedName
                 });
+
+
+#if TESTING
+            //// TESTING TO GET LIST OF AUDIO OUTPUT DEVICES
+            /// Apple don't want developers to change the output route/volume programmically. 
+            /// https://stackoverflow.com/questions/29999393/avaudiosession-output-selection
+            var x = Webrtc.RTCAudioSession.SharedInstance();
+            var xouts = x.OutputDataSources;
+            var xins = x.InputDataSources;
+
+            var y = AVAudioSession.SharedInstance();
+            y.SetCategory(AVAudioSessionCategory.PlayAndRecord/*, AVAudioSessionCategoryOptions.DefaultToSpeaker*/);
+            y.SetActive(true);
+            var cr = y.CurrentRoute;
+            var outs2 = cr.Outputs;
+            var ins2 = cr.Inputs;
+
+            var outs = y.OutputDataSources;
+            var ins = y.InputDataSources;
+
+            var xxxx = outs;
+            y.SetActive(false);
+#endif
+
+
 
             return Task.FromResult(cameraCaptureDevices.Concat(audioCaptureDevices).ToArray());
         }
