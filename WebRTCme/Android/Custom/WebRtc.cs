@@ -38,7 +38,7 @@ namespace WebRTCme
                     //.SetEnableInternalTracer(true)
                     .CreateInitializationOptions();
             Webrtc.PeerConnectionFactory.Initialize(options);
-     //Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity./*LsInfo*/LsError/*LsWarning*//*LsVerbose*/);
+     Webrtc.Logging.EnableLogToDebugOutput(Webrtc.Logging.Severity./*LsInfo*/LsError/*LsWarning*//*LsVerbose*/);
 
             ///// TODO: INVESTIGATE WHY Webrtc.EglBase.Create() FAILS
             NativeEglBase = Webrtc.EglBase.Create();// EglBaseHelper.Create();
