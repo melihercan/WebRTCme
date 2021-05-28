@@ -21,9 +21,9 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.Result" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Connections.Client" Version="5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Connections.Client" Version="5.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.6" />
     <PackageReference Include="Microsoft.JSInterop" Version="3.1.13" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
