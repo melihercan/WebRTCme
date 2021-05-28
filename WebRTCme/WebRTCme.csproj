@@ -48,7 +48,7 @@
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="5.0.5" />
+    <PackageReference Include="Microsoft.JSInterop" Version="5.0.6" />
   </ItemGroup>
 
   <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
