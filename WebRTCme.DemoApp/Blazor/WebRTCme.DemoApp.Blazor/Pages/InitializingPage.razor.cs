@@ -14,10 +14,19 @@ namespace WebRTCme.DemoApp.Blazor.Pages
         [Inject]
         InitializingViewModel InitializingViewModel { get; set; }
 
-        protected override async Task OnInitializedAsync()
+        // Navigation failes on server side.
+        //protected override async Task OnInitializedAsync()
+        //{
+        //    await base.OnInitializedAsync();
+        //    await InitializingViewModel.OnPageAppearingAsync();
+        //}
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await base.OnInitializedAsync();
-            await InitializingViewModel.OnPageAppearingAsync();
+            await base.OnAfterRenderAsync(firstRender);
+            if (firstRender)
+                await InitializingViewModel.OnPageAppearingAsync();
+
         }
     }
 }
