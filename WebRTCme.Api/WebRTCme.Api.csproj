@@ -17,7 +17,8 @@
 	  <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Api</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>
-	  <PackageReleaseNotes>Creation</PackageReleaseNotes>
+	  <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+	  <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">

@@ -5,6 +5,19 @@
     <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0</TargetFrameworks>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
 	  <LangVersion>9.0</LangVersion>
+	  <Authors>melihercan</Authors>
+	  <Version>1.0.1</Version>
+	  <Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
+	  <Copyright>melihercan 2021</Copyright>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+	  <PackageIcon>me.png</PackageIcon>
+	  <PackageIconUrl />
+	  <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>WebRTC .NET Blazor Xamarin</PackageTags>
+	  <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -32,6 +45,13 @@
 	  <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
 	  <ProjectReference Include="..\..\WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj" />
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\doc\me.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

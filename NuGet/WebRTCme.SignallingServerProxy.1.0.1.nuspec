@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>WebRTCme.SignallingServerProxy</id>
+    <version>1.0.1</version>
+    <authors>melihercan</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <icon>me.png</icon>
+    <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
+    <description>Signalling server proxy library to provide services to WebRTCme Middleware.</description>
+    <releaseNotes>Bug fixes.</releaseNotes>
+    <copyright>melihercan 2021</copyright>
+    <tags>WebRTC Xamarin Android iOS .NET Blazor</tags>
+    <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.SignallingServerProxy" />
+    <dependencies>
+      <group targetFramework="net5.0">
+        <dependency id="Ardalis.Result" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http.Json" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive.Core" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Ardalis.Result" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http.Json" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive.Core" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="Ardalis.Result" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http.Json" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive.Core" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\WebRTCme.SignallingServerProxy\bin\Release\net5.0\WebRTCme.SignallingServerProxy.dll" target="lib\net5.0\WebRTCme.SignallingServerProxy.dll" />
+    <file src="..\WebRTCme.SignallingServerProxy\bin\Release\netstandard2.0\WebRTCme.SignallingServerProxy.dll" target="lib\netstandard2.0\WebRTCme.SignallingServerProxy.dll" />
+    <file src="..\WebRTCme.SignallingServerProxy\bin\Release\netstandard2.1\WebRTCme.SignallingServerProxy.dll" target="lib\netstandard2.1\WebRTCme.SignallingServerProxy.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\netstandard2.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\netstandard2.1\WebRTCme.Api.dll" target="lib\netstandard2.1\WebRTCme.Api.dll" />
+    <file src="..\doc\me.png" target="me.png" />
+  </files>
+</package>

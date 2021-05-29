@@ -2,9 +2,6 @@
 	
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
-    <TargetsForTfmSpecificBuildOutput>
-      $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
-    </TargetsForTfmSpecificBuildOutput>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRTCme.Middleware</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -19,7 +16,8 @@
 		<PackageIcon>me.png</PackageIcon>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>WebRTC Xamarin Android iOS .NET</PackageTags>
-		<PackageReleaseNotes>Creation.</PackageReleaseNotes>
+		<PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+		<Version>1.0.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -33,15 +31,13 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" >
-      <PrivateAssets>All</PrivateAssets>
+    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" >
-      <PrivateAssets>All</PrivateAssets>
+    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
     </ProjectReference>
     <Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -55,13 +51,10 @@
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj">
-	    <PrivateAssets>All</PrivateAssets>
 	  </ProjectReference>
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
-	    <PrivateAssets>All</PrivateAssets>
 	  </ProjectReference>
 	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
-	    <PrivateAssets>All</PrivateAssets>
 	  </ProjectReference>
 	</ItemGroup>
 	
@@ -72,13 +65,6 @@
 	    <PackagePath></PackagePath>
 	  </None>
 	</ItemGroup>
-
-  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
-    <ItemGroup>
-      <BuildOutputInPackage 
-        Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
-    </ItemGroup>
-  </Target>
 
 
 </Project>

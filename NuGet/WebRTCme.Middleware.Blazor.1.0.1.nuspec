@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>WebRTCme.Middleware.Blazor</id>
+    <version>1.0.1</version>
+    <authors>melihercan</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <icon>me.png</icon>
+    <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
+    <description>Services layer between Blazor applications and WebRTCme library.</description>
+    <releaseNotes>Bug fixes.</releaseNotes>
+    <copyright>melihercan 2021</copyright>
+    <tags>WebRTC .NET Blazor</tags>
+    <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware/WebRTCme.Midddleware.Blazor" />
+    <dependencies>
+      <group targetFramework="net5.0">
+        <dependency id="Microsoft.AspNetCore.Components" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Components.Web" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="5.0.2" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="Ardalis.Result" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http.Json" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive.Core" version="5.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="Microsoft.AspNetCore.Components" version="3.1.12" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.12" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="5.0.2" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="3.1.12" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="Ardalis.Result" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="5.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http.Json" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive.Core" version="5.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net5.0\WebRTCme.Middleware.Blazor.dll" target="lib\net5.0\WebRTCme.Middleware.Blazor.dll" />
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\netstandard2.1\WebRTCme.Middleware.Blazor.dll" target="lib\netstandard2.1\WebRTCme.Middleware.Blazor.dll" />
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware\bin\Release\net5.0\WebRTCme.Middleware.dll" target="lib\net5.0\WebRTCme.Middleware.dll" />
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware\bin\Release\netstandard2.1\WebRTCme.Middleware.dll" target="lib\netstandard2.1\WebRTCme.Middleware.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\netstandard2.1\WebRTCme.Api.dll" target="lib\netstandard2.1\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net5.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.1\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.1\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
+    <file src="..\WebRTCme\bin\Release\netstandard2.1\WebRTCme.dll" target="lib\netstandard2.1\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net5\WebRTCme.dll" target="lib\net5.0\WebRTCme.dll" />
+    <file src="..\WebRTCme.SignallingServerProxy\bin\Release\net5.0\WebRTCme.SignallingServerProxy.dll" target="lib\net5.0\WebRTCme.SignallingServerProxy.dll" />
+    <file src="..\WebRTCme.SignallingServerProxy\bin\Release\netstandard2.1\WebRTCme.SignallingServerProxy.dll" target="lib\netstandard2.1\WebRTCme.SignallingServerProxy.dll" />
+    <file src="..\doc\me.png" target="me.png" />
+  </files>
+</package>
