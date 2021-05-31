@@ -213,7 +213,7 @@ namespace WebRTCme.Bindings.Blazor.Extensions
         //private static async void Sync<TValue>(IJSRuntime jsRuntime, string identifier, params object[] args)
         //{
         //    TValue value = default(TValue);
-        //    value = await jsRuntime.InvokeAsync<TValue>(identifier, args);
+        //    value = await jsRuntime.InvokeAsync<TValue>(identifier, args).Wait();
         //}
 
         public static void InvokeVoid(this IJSRuntime jsRuntime, string identifier, params object[] args)
