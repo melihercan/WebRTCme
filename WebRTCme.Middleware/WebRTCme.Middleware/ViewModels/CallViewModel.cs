@@ -28,6 +28,7 @@ namespace WebRTCme.Middleware
         private readonly IRunOnUiThreadService _runOnUiThreadService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
+        private string _userName;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService, 
@@ -45,6 +46,7 @@ namespace WebRTCme.Middleware
         public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
             _reRender = reRender;
+            _userName = connectionParameters.UserName;
             var localStream = await _mediaStreamService.GetCameraMediaStreamAsync();
             _mediaManagerService.Add(new MediaParameters
             {
@@ -98,10 +100,20 @@ namespace WebRTCme.Middleware
                             break;
 
                         case PeerResponseCode.PeerLeft:
+                            _runOnUiThreadService.Invoke(() =>
+                            {
+                                _mediaManagerService.Remove(peerResponseParameters.PeerUserName);
+                            });
+                            _reRender?.Invoke();
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             break;
 
                         case PeerResponseCode.PeerError:
+                            _runOnUiThreadService.Invoke(() =>
+                            {
+                                _mediaManagerService.Remove(peerResponseParameters.PeerUserName);
+                            });
+                            _reRender?.Invoke();
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
                             break;
                     }
@@ -118,6 +130,7 @@ namespace WebRTCme.Middleware
 
         private void Disconnect()
         {
+            _mediaManagerService.Remove(_userName);
             _connectionDisposer.Dispose();
         }
     }

@@ -94,7 +94,10 @@ namespace WebRTCme.Middleware.Services
                         if (connectionContext is not null)
                         {
                             foreach (var peerContext in connectionContext.PeerContexts)
+                            {
                                 peerContext.PeerResponseDisposer.Dispose();
+                                peerContext.PeerConnection.Close();
+                            }
                             _connectionContexts.Remove(connectionContext);
                         }
                     }

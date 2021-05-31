@@ -130,11 +130,12 @@ namespace WebRTCme.Middleware
                             break;
 
                         case PeerResponseCode.PeerLeft:
-                            System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
+                            System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             break;
 
                         case PeerResponseCode.PeerError:
+                            _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
                             break;
                     }
