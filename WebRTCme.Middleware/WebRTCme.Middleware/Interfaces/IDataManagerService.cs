@@ -13,6 +13,8 @@ namespace WebRTCme.Middleware
 
         void RemovePeer(string peerUserName);
 
+        void ClearPeers();
+
         void SendBytes(byte[] data);
 
         void SendString(string message);

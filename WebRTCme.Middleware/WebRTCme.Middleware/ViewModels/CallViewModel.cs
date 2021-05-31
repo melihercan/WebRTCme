@@ -130,7 +130,7 @@ namespace WebRTCme.Middleware
 
         private void Disconnect()
         {
-            _mediaManagerService.Remove(_userName);
+            _mediaManagerService.Clear();
             _connectionDisposer.Dispose();
         }
     }

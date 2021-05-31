@@ -22,6 +22,11 @@ namespace WebRTCme.Middleware.Services
             MediaParametersList.Remove(MediaParametersList.Single(mp => mp.Label == label));
         }
 
+        public void Clear()
+        {
+            MediaParametersList.Clear();
+        }
+
         public void Update(MediaParameters mediaParameters)
         {
             var current = MediaParametersList.Single(mp => mp.Label == mediaParameters.Label);

@@ -27,6 +27,18 @@ namespace WebRTCme.Middleware.Services
             AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
         }
 
+        public void ClearPeers()
+        {
+            foreach (var peer in _peers)
+            {
+                var peerUserName = peer.Key;
+                var dataChannel = _peers[peerUserName];
+                AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
+            }
+            _peers.Clear();
+            DataParametersList.Clear();
+        }
+
         public void SendBytes(byte[] data)
         {
             DataParametersList.Add(new DataParameters
@@ -123,5 +135,6 @@ namespace WebRTCme.Middleware.Services
                 throw new NotImplementedException();
             }
         }
+
     }
 }

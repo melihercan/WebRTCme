@@ -13,6 +13,8 @@ namespace WebRTCme.Middleware
 
         void Remove(string peerUserName);
 
+        void Clear();
+
         void Update(MediaParameters mediaParameters);
 
     }

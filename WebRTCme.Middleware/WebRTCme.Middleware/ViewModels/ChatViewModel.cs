@@ -155,6 +155,7 @@ namespace WebRTCme.Middleware
 
         private void Disconnect()
         {
+            _dataManagerService.ClearPeers();
             _connectionDisposer.Dispose();
         }
     }
