@@ -19,14 +19,14 @@ Search "Manage computer certificates" and open it.
 Right click on "Personal/Certificates" and import pfx file.
 Install crt file to LocalComputer "Trusted Root Certificates Authorities".
 
-KESTREL INSTALLATION
---------------------
+KESTREL INSTALLATION (USER)
+---------------------------
 # Install new certificate for .net core (Kestrel)
 dotnet dev-certs https -v --clean --import webrtcme.pfx -p _webrtcme_
 dotnet dev-certs https -v --trust
 
-IIS EXPRESS INSTALLATION
-------------------------
+IIS EXPRESS INSTALLATION (SYSTEM)
+---------------------------------
 # Install new certificate for IIS Express
 # Exporting cert to store
 - Key is required by IIS, so exporting CER file to LocalComputer\Personal will not work. Search "Manage computer certificates" and open it. 
