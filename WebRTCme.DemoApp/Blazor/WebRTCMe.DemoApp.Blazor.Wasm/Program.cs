@@ -23,6 +23,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
+            
+            ////builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
             ConfigureServices(builder.Services);
 

@@ -379,6 +379,13 @@ namespace WebRTCme.Middleware.Services
                             .GetIceServersAsync(turnServerName),
                         //PeerIdentity = peerUserName
                     };
+
+                    _logger.LogInformation($"################ LIST OF ICE SERVERS ################");
+                    foreach (var iceServer in configuration.IceServers)
+                        foreach (var url in iceServer.Urls)
+                            _logger.LogInformation($"\t - {url}");
+                    _logger.LogInformation($"#####################################################");
+
                     peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
                     subject = new Subject<PeerResponseParameters>();
                     peerContext = new PeerContext

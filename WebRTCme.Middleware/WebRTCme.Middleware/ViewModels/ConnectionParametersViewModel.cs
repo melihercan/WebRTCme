@@ -75,9 +75,6 @@ namespace WebRTCme.Middleware
 
         public async Task JoinCall()
         {
-/// TESTING
-ConnectionParameters.TurnServerName = "StunOnly";
-
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigationService.NavigateToPageAsync(
                 "",
@@ -90,8 +87,6 @@ ConnectionParameters.TurnServerName = "StunOnly";
 
         public async Task JoinChat()
         {
-/// TESTING
-ConnectionParameters.TurnServerName = "StunOnly";
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigationService.NavigateToPageAsync(
                 "",
