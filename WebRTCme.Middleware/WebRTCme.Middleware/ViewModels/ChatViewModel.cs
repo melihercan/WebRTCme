@@ -112,6 +112,18 @@ namespace WebRTCme.Middleware
             await SendAsync();
         });
 
+        public void AddMessage()
+        {
+        }
+
+        public Task AddFileAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public void AddLink()
+        {
+        }
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {

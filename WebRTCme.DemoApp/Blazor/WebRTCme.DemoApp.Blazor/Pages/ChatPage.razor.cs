@@ -1,5 +1,6 @@
 ﻿using Blazored.Modal.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,6 +46,12 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             //Task.Run(async () => await _signallingServerService.DisposeAsync());
             //_webRtcMiddleware.Dispose();
         }
+
+        private void LoadFile(InputFileChangeEventArgs e)
+        {
+            var file = e.File;
+        }
+
     }
 }
 

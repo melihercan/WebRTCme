@@ -71,6 +71,7 @@
         <ValidationSummary />
         <InputText @bind-Value="ChatViewModel.OutgoingText" class="flex-grow-1 w-100 mr-3" />
         <button type="submit" class="ml-auto">Send</button>
+        <InputFile class="ml-2" OnChange="@LoadFile"/>
     </EditForm>
 </div>
 

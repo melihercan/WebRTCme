@@ -82,6 +82,7 @@
 	    <Pack>True</Pack>
 	    <PackagePath></PackagePath>
 	  </None>
+	  <None Include="..\WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor\Pages\EditForm.razor" Link="EditForm.razor" />
 	</ItemGroup>
 
 </Project>
