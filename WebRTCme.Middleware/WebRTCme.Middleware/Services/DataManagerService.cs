@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
 
@@ -39,33 +40,43 @@ namespace WebRTCme.Middleware.Services
             DataParametersList.Clear();
         }
 
-        public void SendBytes(byte[] data)
+        public void SendString(string text)
         {
             DataParametersList.Add(new DataParameters
             {
                 From = DataFromType.Outgoing,
                 Time = DateTime.Now.ToString("HH:mm"),
-                Bytes = data
+                Text = text
             });
 
             var dataChannels = _peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
-                dataChannel.Send(data);
+                dataChannel.Send(text);
+        }
+
+        public void SendMessage(Message message)
+        {
 
         }
 
-        public void SendString(string message)
+        public void SendLink(Link link)
         {
-            DataParametersList.Add(new DataParameters
-            {
-                From = DataFromType.Outgoing,
-                Time = DateTime.Now.ToString("HH:mm"),
-                Message = message
-            });
 
+        }
+
+        public Task SendFile(File file)
+        {
+            
+            return Task.CompletedTask;
+        }
+
+
+
+        private void SendBytes(byte[] bytes)
+        {
             var dataChannels = _peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
-                dataChannel.Send(message);
+                dataChannel.Send(bytes);
         }
 
         private void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, bool isRemove)
@@ -93,7 +104,7 @@ namespace WebRTCme.Middleware.Services
                     From = DataFromType.System,
                     PeerUserName = peerUserName,
                     Time = DateTime.Now.ToString("HH:mm"),
-                    Message = $"User {peerUserName} has joined the room"
+                    Text = $"User {peerUserName} has joined the room"
                 });
             }
 
@@ -120,9 +131,10 @@ namespace WebRTCme.Middleware.Services
                 };
 
                 if (e.Data.GetType() == typeof(byte[]))
-                    dataParameters.Bytes = (byte[])e.Data;
+                    //// TODO: DECODE OBJECT HERE
+                    dataParameters.Object = (byte[])e.Data;
                 else if (e.Data.GetType() == typeof(string))
-                    dataParameters.Message = (string)e.Data;
+                    dataParameters.Text = (string)e.Data;
                 else
                     throw new Exception("Bad data type");
 

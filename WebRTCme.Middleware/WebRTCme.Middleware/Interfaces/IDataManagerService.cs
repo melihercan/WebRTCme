@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
@@ -15,9 +16,12 @@ namespace WebRTCme.Middleware
 
         void ClearPeers();
 
-        void SendBytes(byte[] data);
+        void SendString(string text);
 
-        void SendString(string message);
+        void SendMessage(Message message);
 
+        void SendLink(Link link);
+
+        Task SendFile(File file);
     }
 }

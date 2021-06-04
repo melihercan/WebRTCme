@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace WebRTCme.Middleware
 {
     public class DataParameters
     {
+        [Key]
+        public uint Id { get; set; }
+
+        public uint SequenceNo { get; set; }
+
         public DataFromType From { get; set; }
 
         public string PeerUserName { get; set; }
@@ -14,8 +20,10 @@ namespace WebRTCme.Middleware
 
         public string Time { get; set; }
 
-        public byte[] Bytes { get; set; }
+        ////public byte[] Bytes { get; set; }
 
-        public string Message { get; set; }
+        public string Text { get; set; }
+
+        public object Object { get; set; }
     }
 }
