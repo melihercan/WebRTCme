@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -14,29 +15,28 @@ namespace WebRTCme.Middleware.Services
     {
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
-        private Dictionary<string/*PeerUserName*/, IRTCDataChannel> _peers = new();
+        internal Dictionary<string/*PeerUserName*/, IRTCDataChannel> Peers { get; set; } = new();
 
         public void AddPeer(string peerUserName, IRTCDataChannel dataChannel)
         {
             AddOrRemovePeer(peerUserName, dataChannel, isRemove: false);
         }
 
-
         public void RemovePeer(string peerUserName)
         {
-            var dataChannel = _peers[peerUserName];
+            var dataChannel = Peers[peerUserName];
             AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
         }
 
         public void ClearPeers()
         {
-            foreach (var peer in _peers)
+            foreach (var peer in Peers)
             {
                 var peerUserName = peer.Key;
-                var dataChannel = _peers[peerUserName];
+                var dataChannel = Peers[peerUserName];
                 AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
             }
-            _peers.Clear();
+            Peers.Clear();
             DataParametersList.Clear();
         }
 
@@ -49,7 +49,7 @@ namespace WebRTCme.Middleware.Services
                 Text = text
             });
 
-            var dataChannels = _peers.Select(p => p.Value);
+            var dataChannels = Peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
                 dataChannel.Send(text);
         }
@@ -64,17 +64,17 @@ namespace WebRTCme.Middleware.Services
 
         }
 
-        public Task SendFileAsync(File file)
+        public async Task SendFileAsync(File file)
         {
-            
-            return Task.CompletedTask;
+            WebRtcDataStream webRtcDataStream = new(this, file);
+            await file.Stream.CopyToAsync(webRtcDataStream, 16384);
         }
 
 
 
-        private void SendBytes(byte[] bytes)
+        internal void SendBytes(byte[] bytes)
         {
-            var dataChannels = _peers.Select(p => p.Value);
+            var dataChannels = Peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
                 dataChannel.Send(bytes);
         }
@@ -87,7 +87,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.OnClose -= DataChannel_OnClose;
                 dataChannel.OnError -= DataChannel_OnError;
                 dataChannel.OnMessage -= DataChannel_OnMessage;
-                _peers.Remove(peerUserName);
+                Peers.Remove(peerUserName);
                 DataParametersList.Remove(DataParametersList.Single(dp => dp.PeerUserName == peerUserName));
             }
             else
@@ -97,7 +97,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.OnError += DataChannel_OnError;
                 dataChannel.OnMessage += DataChannel_OnMessage;
 
-                _peers.Add(peerUserName, dataChannel);
+                Peers.Add(peerUserName, dataChannel);
 
                 DataParametersList.Add(new DataParameters
                 {
@@ -147,6 +147,58 @@ namespace WebRTCme.Middleware.Services
                 throw new NotImplementedException();
             }
         }
+
+        private class WebRtcDataStream : Stream
+        {
+            private readonly DataManagerService _dataManagerService;
+            private readonly File _file;
+
+            public WebRtcDataStream(DataManagerService dataManagerService, File file)
+            {
+                _dataManagerService = dataManagerService;
+                _file = file;
+            }
+
+            public override bool CanRead => true;
+
+            public override bool CanSeek => false;
+
+            public override bool CanWrite => true;
+
+            public override long Length => 0;
+
+            public override long Position 
+            { 
+                get => throw new NotImplementedException(); 
+                set => throw new NotImplementedException(); 
+            }
+
+            public override void Flush()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
 
     }
 }
