@@ -19,8 +19,15 @@ namespace WebRTCme.DemoApp.Blazor.Pages
 {
     partial class ChatPage : IDisposable
     {
+        //        string dropClass = string.Empty;
+        const string DefaultStatus = "Drag and drop file(s) here to send, or click to choose...";
+        string status = DefaultStatus;
+
         [Inject]
         ChatViewModel ChatViewModel { get; set; }
+
+        [Inject]
+        ILogger<ChatPage> Logger { get; set; }
 
         [Parameter]
         public string ConnectionParametersJson { get; set; }
@@ -47,11 +54,22 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             //_webRtcMiddleware.Dispose();
         }
 
-        private void LoadFile(InputFileChangeEventArgs e)
+        private Task LoadFilesAsync(InputFileChangeEventArgs e)
         {
-            var file = e.File;
-        }
+            if (e.FileCount > 1)
+            {
+                var files = e.GetMultipleFiles();
+                foreach (var file in files)
+                    Logger.LogInformation($"uploading multiple files: {file.Name}");
+            }
+            else
+            {
+                var file = e.File;
+                Logger.LogInformation($"uploading file: {file.Name}");
+            }
 
+            return Task.CompletedTask;
+        }
     }
 }
 
