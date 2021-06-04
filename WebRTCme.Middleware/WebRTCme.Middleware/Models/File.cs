@@ -7,6 +7,9 @@ namespace WebRTCme.Middleware
 {
     public class File
     {
-        public FileInfo FileInfo { get; init; }
+        public string Name { get; init; }
+        public ulong Size { get; init; }
+        public string ContentType { get; init; }
+        public Stream Stream { get; init; }
     }
 }

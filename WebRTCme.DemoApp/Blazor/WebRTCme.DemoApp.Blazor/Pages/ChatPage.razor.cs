@@ -54,21 +54,35 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             //_webRtcMiddleware.Dispose();
         }
 
-        private Task LoadFilesAsync(InputFileChangeEventArgs e)
+        private async Task LoadFilesAsync(InputFileChangeEventArgs e)
         {
             if (e.FileCount > 1)
             {
                 var files = e.GetMultipleFiles();
                 foreach (var file in files)
+                {
                     Logger.LogInformation($"uploading multiple files: {file.Name}");
+                    await ChatViewModel.SendFileAsync(new File
+                    {
+                        Name = file.Name,
+                        Size = (ulong)file.Size,
+                        ContentType = file.ContentType,
+                        Stream = file.OpenReadStream()
+                    });
+                }
             }
             else
             {
                 var file = e.File;
                 Logger.LogInformation($"uploading file: {file.Name}");
+                await ChatViewModel.SendFileAsync(new File 
+                {
+                    Name = file.Name,
+                    Size = (ulong)file.Size,
+                    ContentType = file.ContentType,
+                    Stream = file.OpenReadStream()
+                });
             }
-
-            return Task.CompletedTask;
         }
     }
 }

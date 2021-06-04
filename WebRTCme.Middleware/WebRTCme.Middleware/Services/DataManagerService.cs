@@ -64,7 +64,7 @@ namespace WebRTCme.Middleware.Services
 
         }
 
-        public Task SendFile(File file)
+        public Task SendFileAsync(File file)
         {
             
             return Task.CompletedTask;

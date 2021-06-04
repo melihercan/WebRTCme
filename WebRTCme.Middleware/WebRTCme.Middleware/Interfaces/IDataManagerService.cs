@@ -22,6 +22,6 @@ namespace WebRTCme.Middleware
 
         void SendLink(Link link);
 
-        Task SendFile(File file);
+        Task SendFileAsync(File file);
     }
 }

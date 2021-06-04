@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -112,16 +113,16 @@ namespace WebRTCme.Middleware
             await SendAsync();
         });
 
-        public void AddMessage()
+        public void SendMessage()
         {
         }
 
-        public Task AddFileAsync()
+        public Task SendFileAsync(File file)
         {
-            return Task.CompletedTask;
+            return _dataManagerService.SendFileAsync(file);
         }
 
-        public void AddLink()
+        public void SendLink()
         {
         }
 

@@ -8,9 +8,12 @@ namespace WebRTCme.Middleware.Models
     [Serializable]
     internal class FileDto : BaseDto
     {
-        public FileInfo FileInfo { get; init; }
-        
+        public string Name { get; init; }
+        public ulong Size { get; init; }
+        public string ContentType { get; init; }
+
         // Zero lenght indicates end of file transfer.
+        public ulong Offset { get; init; }
         public byte[] Data { get; init; }
     }
 }
