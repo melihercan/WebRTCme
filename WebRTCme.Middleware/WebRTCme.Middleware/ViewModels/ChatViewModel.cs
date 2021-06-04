@@ -1,4 +1,5 @@
-﻿using MvvmHelpers.Commands;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -95,19 +96,20 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public void Send()
+        public Task SendAsync()
         {
             if (!string.IsNullOrEmpty(OutgoingText) && !string.IsNullOrWhiteSpace(OutgoingText))
             {
                 _dataManagerService.SendString(OutgoingText);
                 OutgoingText = string.Empty;
             }
+
+            return Task.CompletedTask;
         }
 
-        public ICommand SendCommand => new AsyncCommand(() => 
+        public ICommand SendCommand => new AsyncCommand(async () => 
         {
-            Send();
-            return Task.CompletedTask;
+            await SendAsync();
         });
 
 
