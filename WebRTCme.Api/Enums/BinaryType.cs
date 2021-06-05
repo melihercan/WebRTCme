@@ -9,6 +9,6 @@ namespace WebRTCme
     public enum BinaryType
     {
         Blob,
-        ArrayBuffer
+        Arraybuffer
     }
 }

@@ -90,6 +90,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.Send(object_);
         }
 
+
         private void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, bool isRemove)
         {
             if (isRemove)
@@ -142,10 +143,27 @@ namespace WebRTCme.Middleware.Services
                 };
 
                 if (e.Data.GetType() == typeof(byte[]))
+                {
                     //// TODO: DECODE OBJECT HERE
-                    dataParameters.Object = (byte[])e.Data;
+                    var bytes = (byte[])e.Data;
+                    var json = Encoding.UTF8.GetString(bytes);
+                    var baseDto = JsonSerializer.Deserialize<BaseDto>(json);
+                }
+
+
                 else if (e.Data.GetType() == typeof(string))
+                {
+                    var bytes = Convert.FromBase64String((string)e.Data);
+                    var json = Encoding.UTF8.GetString(bytes);
+                    var baseDto = JsonSerializer.Deserialize<BaseDto>(json);
+
+
+
+
                     dataParameters.Text = (string)e.Data;
+
+
+                }
                 else
                     throw new Exception("Bad data type");
 
@@ -231,8 +249,12 @@ namespace WebRTCme.Middleware.Services
                     Offset = _wrOffset,
                     Data = data
                 };
-                var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(fileDto));
-                ////_dataManagerService.SendObject(bytes);
+                var json = JsonSerializer.Serialize(fileDto);
+                //_dataManagerService.SendObject(json);
+                var bytes = Encoding.UTF8.GetBytes(json);
+                var base64 = Convert.ToBase64String(bytes);
+                _dataManagerService.SendObject(base64);
+
                 _wrOffset += (ulong)count;
             }
         }
