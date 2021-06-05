@@ -164,6 +164,8 @@ namespace WebRTCme.Middleware.Services
             private readonly DataManagerService _dataManagerService;
             private readonly File _file;
             private readonly DataParameters _dataParameters;
+            private ulong _wrOffset;
+            private ulong _rdOffset;
 
             public WebRtcDataStream(DataManagerService dataManagerService, File file)
             {
@@ -215,7 +217,9 @@ namespace WebRTCme.Middleware.Services
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                _dataManagerService.Logger.LogInformation($"============== WRITING offset:{offset} count:{count}");
+                _dataManagerService.Logger.LogInformation($"============== WRITING {_file.Name} offset:{offset} count:{count}");
+
+                var data = buffer.Skip(offset).Take(count).ToArray();
 
                 FileDto fileDto = new() 
                 { 
@@ -224,15 +228,13 @@ namespace WebRTCme.Middleware.Services
                     Name = _file.Name,
                     Size = _file.Size,
                     ContentType = _file.ContentType,
-                    Offset = (uint)offset,
-                    Data = buffer
+                    Offset = _wrOffset,
+                    Data = data
                 };
-
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(fileDto));
                 ////_dataManagerService.SendObject(bytes);
+                _wrOffset += (ulong)count;
             }
         }
-
-
     }
 }

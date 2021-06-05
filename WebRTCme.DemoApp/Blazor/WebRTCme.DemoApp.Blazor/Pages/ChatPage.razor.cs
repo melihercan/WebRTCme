@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
@@ -59,17 +60,20 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             if (e.FileCount > 1)
             {
                 var files = e.GetMultipleFiles();
+                var tasks = new List<Task>();
                 foreach (var file in files)
                 {
                     Logger.LogInformation($"uploading multiple files: {file.Name}");
-                    await ChatViewModel.SendFileAsync(new File
+                    tasks.Add(ChatViewModel.SendFileAsync(new File
                     {
                         Name = file.Name,
                         Size = (ulong)file.Size,
                         ContentType = file.ContentType,
-                        Stream = file.OpenReadStream()
-                    });
+                        Stream = file.OpenReadStream(maxAllowedSize:file.Size)
+                    }));
                 }
+
+                await Task.WhenAll(tasks);
             }
             else
             {
@@ -80,7 +84,7 @@ namespace WebRTCme.DemoApp.Blazor.Pages
                     Name = file.Name,
                     Size = (ulong)file.Size,
                     ContentType = file.ContentType,
-                    Stream = file.OpenReadStream()
+                    Stream = file.OpenReadStream(maxAllowedSize: file.Size)
                 });
             }
         }
