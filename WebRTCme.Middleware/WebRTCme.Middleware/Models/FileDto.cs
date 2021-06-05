@@ -5,7 +5,6 @@ using System.Text;
 
 namespace WebRTCme.Middleware.Models
 {
-    [Serializable]
     internal class FileDto : BaseDto
     {
         public string Name { get; init; }

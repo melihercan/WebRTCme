@@ -5,10 +5,9 @@ using WebRTCme.Middleware.Enums;
 
 namespace WebRTCme.Middleware.Models
 {
-    [Serializable]
     internal class BaseDto
     {
-        public ulong Cookies { get; init; }
+        public ulong Cookie { get; init; }
 
         public DtoObjectType DtoObjectType { get; init; }
     }

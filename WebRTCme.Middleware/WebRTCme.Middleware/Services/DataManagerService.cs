@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
+using WebRTCme.Middleware.Models;
 
 namespace WebRTCme.Middleware.Services
 {
@@ -16,6 +19,15 @@ namespace WebRTCme.Middleware.Services
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
         internal Dictionary<string/*PeerUserName*/, IRTCDataChannel> Peers { get; set; } = new();
+
+        internal readonly ILogger<DataManagerService> Logger;
+
+        internal const ulong Cookie = 0x55aa5aa533cc3cc3;
+
+        public DataManagerService(ILogger<DataManagerService> logger)
+        {
+            Logger = logger;
+        }
 
         public void AddPeer(string peerUserName, IRTCDataChannel dataChannel)
         {
@@ -49,9 +61,7 @@ namespace WebRTCme.Middleware.Services
                 Text = text
             });
 
-            var dataChannels = Peers.Select(p => p.Value);
-            foreach (var dataChannel in dataChannels)
-                dataChannel.Send(text);
+            SendObject(text);
         }
 
         public void SendMessage(Message message)
@@ -71,12 +81,13 @@ namespace WebRTCme.Middleware.Services
         }
 
 
-
-        internal void SendBytes(byte[] bytes)
+        internal void SendObject(object object_)
         {
+            // TODO: ADD MUTEX OR LOCK????
+
             var dataChannels = Peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
-                dataChannel.Send(bytes);
+                dataChannel.Send(object_);
         }
 
         private void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, bool isRemove)
@@ -152,11 +163,20 @@ namespace WebRTCme.Middleware.Services
         {
             private readonly DataManagerService _dataManagerService;
             private readonly File _file;
+            private readonly DataParameters _dataParameters;
 
             public WebRtcDataStream(DataManagerService dataManagerService, File file)
             {
                 _dataManagerService = dataManagerService;
                 _file = file;
+
+                _dataParameters = new DataParameters
+                {
+                    From = DataFromType.Outgoing,
+                    Time = DateTime.Now.ToString("HH:mm"),
+                    Object = file
+                };
+                dataManagerService.DataParametersList.Add(_dataParameters);
             }
 
             public override bool CanRead => true;
@@ -195,7 +215,21 @@ namespace WebRTCme.Middleware.Services
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                throw new NotImplementedException();
+                _dataManagerService.Logger.LogInformation($"============== WRITING offset:{offset} count:{count}");
+
+                FileDto fileDto = new() 
+                { 
+                    Cookie = DataManagerService.Cookie,
+                    DtoObjectType = Enums.DtoObjectType.File,
+                    Name = _file.Name,
+                    Size = _file.Size,
+                    ContentType = _file.ContentType,
+                    Offset = (uint)offset,
+                    Data = buffer
+                };
+
+                var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(fileDto));
+                ////_dataManagerService.SendObject(bytes);
             }
         }
 
