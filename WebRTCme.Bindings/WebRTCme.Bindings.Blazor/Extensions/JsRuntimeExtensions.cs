@@ -53,7 +53,7 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             object parent, string property)
         {
             var jsObjectRef = jsRuntime.InvokeAsync<JsObjectRef>(
-                "DotNetInterop.getPropertyObjectRef",
+                "JsInterop.getPropertyObjectRef",
                 new object[]
                 {
                     parent,

@@ -130,44 +130,78 @@ namespace WebRTCme.Middleware.Services
                 Console.WriteLine($"************* DataChannel_OnClose");
             }
 
-            void DataChannel_OnMessage(object sender, IMessageEvent e)
+            async void DataChannel_OnMessage(object sender, IMessageEvent e)
             {
-                Console.WriteLine($"************* DataChannel_OnMessage");
-
-                var dataParameters = new DataParameters
+                try
                 {
-                    From = DataFromType.Incoming,
-                    PeerUserName = peerUserName,
-                    PeerUserNameTextColor = "#123456",
-                    Time = DateTime.Now.ToString("HH:mm"),
-                };
+                    Console.WriteLine($"************* DataChannel_OnMessage");
 
-                if (e.Data.GetType() == typeof(byte[]))
-                {
-                    //// TODO: DECODE OBJECT HERE
-                    var bytes = (byte[])e.Data;
-                    var json = Encoding.UTF8.GetString(bytes);
-                    var baseDto = JsonSerializer.Deserialize<BaseDto>(json);
+                    string json = string.Empty;
+                    BaseDto baseDto = null;
+
+                    var dataParameters = new DataParameters
+                    {
+                        From = DataFromType.Incoming,
+                        PeerUserName = peerUserName,
+                        PeerUserNameTextColor = "#123456",
+                        Time = DateTime.Now.ToString("HH:mm"),
+                    };
+
+                    if (e.Data.GetType() == typeof(byte[]))
+                    {
+                        var bytes = (byte[])e.Data;
+                        json = Encoding.UTF8.GetString(bytes);
+                        baseDto = JsonSerializer.Deserialize<BaseDto>(json);
+                    }
+                    else if (e.Data.GetType() == typeof(string))
+                    {
+                        var bytes = Convert.FromBase64String((string)e.Data);
+                        json = Encoding.UTF8.GetString(bytes);
+                        baseDto = JsonSerializer.Deserialize<BaseDto>(json);
+                    }
+                    else
+                        throw new Exception("Bad data type");
+
+                    switch (baseDto.DtoObjectType)
+                    {
+                        case Enums.DtoObjectType.Message:
+                            break;
+                        case Enums.DtoObjectType.Link:
+                            break;
+                        case Enums.DtoObjectType.File:
+                            var file = JsonSerializer.Deserialize<FileDto>(json);
+                            if (file.Cookie != DataManagerService.Cookie)
+                                throw new Exception("Bad cookie");
+
+                            //// TODO: CREATE DATA PARAMETERS LIST FOR INCOMING FILES. ON EACH CALL BOTH STREAM(FOR FILE SAVE)  AND PROGRESS BAR SHOULD BE UPDATED
+                            /// 
+
+                            //if (file.Offset == 0)
+                            //{
+                            //    // New incoming file.
+
+                            //}
+                            //else if (file.Offset + (ulong)file.Data.Length == file.Size)
+                            //{
+                            //    // End of file.
+                            //}
+
+                            Logger.LogInformation($"============== READING {file.Name} offset:{file.Offset} count:{file.Data.Length}");
+
+
+
+
+                            break;
+                        default:
+                            throw new Exception("Unknown object");
+                    }
+
+                    DataParametersList.Add(dataParameters);
                 }
-
-
-                else if (e.Data.GetType() == typeof(string))
+                catch (Exception ex)
                 {
-                    var bytes = Convert.FromBase64String((string)e.Data);
-                    var json = Encoding.UTF8.GetString(bytes);
-                    var baseDto = JsonSerializer.Deserialize<BaseDto>(json);
-
-
-
-
-                    dataParameters.Text = (string)e.Data;
-
-
+                    Console.WriteLine($"************* DataChannel_OnMessage EXCEPTION: {ex.Message}");
                 }
-                else
-                    throw new Exception("Bad data type");
-
-                DataParametersList.Add(dataParameters);
             }
 
             void DataChannel_OnError(object sender, IErrorEvent e)
@@ -235,7 +269,7 @@ namespace WebRTCme.Middleware.Services
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                _dataManagerService.Logger.LogInformation($"============== WRITING {_file.Name} offset:{offset} count:{count}");
+                _dataManagerService.Logger.LogInformation($"============== WRITING {_file.Name} offset:{_wrOffset} count:{count}");
 
                 var data = buffer.Skip(offset).Take(count).ToArray();
 

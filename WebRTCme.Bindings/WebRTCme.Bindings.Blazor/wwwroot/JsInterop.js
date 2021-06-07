@@ -69,10 +69,6 @@
     }
 
     addObjectRef = function (object) {
-
- if (object === null) {
-     let x = object;
-     }
         let id = objectRefId++;
         objectRefs[id] = object;
         let objectRef = {};

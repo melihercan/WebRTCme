@@ -23,5 +23,7 @@ namespace WebRTCme.Middleware
         public string Text { get; set; }
 
         public object Object { get; set; }
+
+        ///// TODO: HOW TO ADVANCE PROGRESS BAR DURING FILE??? UPLOAD/DOWNLOAD
     }
 }
