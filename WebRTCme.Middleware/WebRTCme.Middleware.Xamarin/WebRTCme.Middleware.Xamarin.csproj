@@ -22,13 +22,19 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-		<UpToDateCheckInput Include="Android\**\*.cs" />
+    <UpToDateCheckInput Include="Services\*.cs" />
+    <UpToDateCheckInput Include="Helpers\*.cs" />
+    <UpToDateCheckInput Include="Extensions\*.cs" />
+    <UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="*.cs" />
-	</ItemGroup>
+    <Compile Include="Services\*.cs" />
+    <Compile Include="Helpers\*.cs" />
+    <Compile Include="Extensions\*.cs" />
+  </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">

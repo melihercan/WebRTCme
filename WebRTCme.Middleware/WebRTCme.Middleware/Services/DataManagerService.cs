@@ -18,7 +18,10 @@ namespace WebRTCme.Middleware.Services
     {
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
-        internal Dictionary<string/*PeerUserName*/, IRTCDataChannel> Peers { get; set; } = new();
+        /*internal*/ private Dictionary<string/*PeerUserName*/, IRTCDataChannel> Peers { get; set; } = new();
+
+        public Dictionary<string/*PeerUserName*/, Tuple<string/*FIleName*/, Stream>> 
+            IncomingFileDispatcher { get; set; } = new();
 
         internal readonly ILogger<DataManagerService> Logger;
 
@@ -173,20 +176,28 @@ namespace WebRTCme.Middleware.Services
                             if (file.Cookie != DataManagerService.Cookie)
                                 throw new Exception("Bad cookie");
 
-                            //// TODO: CREATE DATA PARAMETERS LIST FOR INCOMING FILES. ON EACH CALL BOTH STREAM(FOR FILE SAVE)  AND PROGRESS BAR SHOULD BE UPDATED
+                            //// TODO: CREATE DATA PARAMETERS LIST FOR INCOMING FILES PER PEERNAME,
+                            /// ON EACH CALL BOTH STREAM(FOR FILE SAVE)  AND PROGRESS BAR SHOULD BE UPDATED
                             /// 
 
-                            //if (file.Offset == 0)
-                            //{
-                            //    // New incoming file.
-
-                            //}
-                            //else if (file.Offset + (ulong)file.Data.Length == file.Size)
-                            //{
-                            //    // End of file.
-                            //}
 
                             Logger.LogInformation($"============== READING {file.Name} offset:{file.Offset} count:{file.Data.Length}");
+
+                            //var x = new WebRtcIncomingFileStream(peerUserName, file);
+
+
+                            if (file.Offset == 0)
+                            {
+                                // New incoming file.
+
+                            }
+                            else if (file.Offset + (ulong)file.Data.Length == file.Size)
+                            {
+                                // End of file.
+                            }
+
+
+
 
 
 
