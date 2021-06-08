@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme;
 using WebRTCme.Middleware;
+using WebRTCme.Middleware.Helpers;
 using WebRTCme.Middleware.Models;
 
 namespace WebRTCme.Middleware.Services
@@ -84,8 +85,17 @@ namespace WebRTCme.Middleware.Services
 
         public async Task SendFileAsync(File file, Stream stream)
         {
-            WebRtcDataStream webRtcDataStream = new(this, file);
-            await stream.CopyToAsync(webRtcDataStream, 16384);
+            var dataParameters = new DataParameters
+            {
+                From = DataFromType.Outgoing,
+                Time = DateTime.Now.ToString("HH:mm"),
+                Object = file
+            };
+            DataParametersList.Add(dataParameters);
+
+            WebRtcOutgoingFileStream webRtcOutgoingFileStream = new(file, SendObject, Logger);
+            await stream.CopyToAsync(webRtcOutgoingFileStream, 16384);
+            stream.Close();
         }
 
 
@@ -253,7 +263,8 @@ namespace WebRTCme.Middleware.Services
 
         }
 
-        private class WebRtcDataStream : Stream
+#if false
+        private class WebRtcOutgoingDataStream : Stream
         {
             private readonly DataManagerService _dataManagerService;
             private readonly File _file;
@@ -262,7 +273,7 @@ namespace WebRTCme.Middleware.Services
             private ulong _rdOffset;
             private Guid _guid;
 
-            public WebRtcDataStream(DataManagerService dataManagerService, File file)
+            public WebRtcOutgoingDataStream(DataManagerService dataManagerService, File file)
             {
                 _dataManagerService = dataManagerService;
                 _file = file;
@@ -337,5 +348,6 @@ namespace WebRTCme.Middleware.Services
                 _wrOffset += (ulong)count;
             }
         }
+#endif
     }
 }
