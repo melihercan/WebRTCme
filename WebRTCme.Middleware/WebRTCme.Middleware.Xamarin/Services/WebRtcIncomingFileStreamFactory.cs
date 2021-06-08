@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
     public class WebRtcIncomingFileStreamFactory : IWebRtcIncomingFileStreamFactory
     {
-        public Stream Create(string peerUserName, File file, DataParameters dataParameters, Action cbCompleted)
+        public Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, Action<string, Guid> onCompleted)
         {
             throw new NotImplementedException();
         }

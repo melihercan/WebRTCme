@@ -18,17 +18,22 @@ namespace WebRTCme.Middleware.Services
     {
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
-        /*internal*/ private Dictionary<string/*PeerUserName*/, IRTCDataChannel> Peers { get; set; } = new();
+        /*internal*/ private Dictionary<string/*PeerUserName*/, IRTCDataChannel> _peers = new();
 
-        public Dictionary<string/*PeerUserName*/, Tuple<string/*FIleName*/, Stream>> 
-            IncomingFileDispatcher { get; set; } = new();
+        private Dictionary<(string peerUserName, Guid guid), Stream>
+            _incomingFileStreamDispatcher = new();
 
         internal readonly ILogger<DataManagerService> Logger;
 
         internal const ulong Cookie = 0x55aa5aa533cc3cc3;
 
-        public DataManagerService(ILogger<DataManagerService> logger)
+        private readonly IWebRtcIncomingFileStreamFactory _webRtcIncomingFileStreamFactory;
+        private uint _id;
+
+        public DataManagerService(IWebRtcIncomingFileStreamFactory webRtcIncomingFileStreamFactory,
+            ILogger<DataManagerService> logger)
         {
+            _webRtcIncomingFileStreamFactory = webRtcIncomingFileStreamFactory;
             Logger = logger;
         }
 
@@ -39,19 +44,19 @@ namespace WebRTCme.Middleware.Services
 
         public void RemovePeer(string peerUserName)
         {
-            var dataChannel = Peers[peerUserName];
+            var dataChannel = _peers[peerUserName];
             AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
         }
 
         public void ClearPeers()
         {
-            foreach (var peer in Peers)
+            foreach (var peer in _peers)
             {
                 var peerUserName = peer.Key;
-                var dataChannel = Peers[peerUserName];
+                var dataChannel = _peers[peerUserName];
                 AddOrRemovePeer(peerUserName, dataChannel, isRemove: true);
             }
-            Peers.Clear();
+            _peers.Clear();
             DataParametersList.Clear();
         }
 
@@ -77,10 +82,10 @@ namespace WebRTCme.Middleware.Services
 
         }
 
-        public async Task SendFileAsync(File file)
+        public async Task SendFileAsync(File file, Stream stream)
         {
             WebRtcDataStream webRtcDataStream = new(this, file);
-            await file.Stream.CopyToAsync(webRtcDataStream, 16384);
+            await stream.CopyToAsync(webRtcDataStream, 16384);
         }
 
 
@@ -88,7 +93,7 @@ namespace WebRTCme.Middleware.Services
         {
             // TODO: ADD MUTEX OR LOCK????
 
-            var dataChannels = Peers.Select(p => p.Value);
+            var dataChannels = _peers.Select(p => p.Value);
             foreach (var dataChannel in dataChannels)
                 dataChannel.Send(object_);
         }
@@ -102,7 +107,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.OnClose -= DataChannel_OnClose;
                 dataChannel.OnError -= DataChannel_OnError;
                 dataChannel.OnMessage -= DataChannel_OnMessage;
-                Peers.Remove(peerUserName);
+                _peers.Remove(peerUserName);
                 DataParametersList.Remove(DataParametersList.Single(dp => dp.PeerUserName == peerUserName));
             }
             else
@@ -112,7 +117,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel.OnError += DataChannel_OnError;
                 dataChannel.OnMessage += DataChannel_OnMessage;
 
-                Peers.Add(peerUserName, dataChannel);
+                _peers.Add(peerUserName, dataChannel);
 
                 DataParametersList.Add(new DataParameters
                 {
@@ -172,8 +177,8 @@ namespace WebRTCme.Middleware.Services
                         case Enums.DtoObjectType.Link:
                             break;
                         case Enums.DtoObjectType.File:
-                            var file = JsonSerializer.Deserialize<FileDto>(json);
-                            if (file.Cookie != DataManagerService.Cookie)
+                            var fileDto = JsonSerializer.Deserialize<FileDto>(json);
+                            if (fileDto.Cookie != DataManagerService.Cookie)
                                 throw new Exception("Bad cookie");
 
                             //// TODO: CREATE DATA PARAMETERS LIST FOR INCOMING FILES PER PEERNAME,
@@ -181,17 +186,34 @@ namespace WebRTCme.Middleware.Services
                             /// 
 
 
-                            Logger.LogInformation($"============== READING {file.Name} offset:{file.Offset} count:{file.Data.Length}");
+                            Logger.LogInformation($"============== READING {fileDto.Name} offset:{fileDto.Offset} count:{fileDto.Data.Length}");
 
                             //var x = new WebRtcIncomingFileStream(peerUserName, file);
 
+                            if (!_incomingFileStreamDispatcher.TryGetValue((peerUserName, fileDto.Guid), out var stream))
+                                // First chunk.
+                                stream = await _webRtcIncomingFileStreamFactory.CreateAsync(
+                                    peerUserName, 
+                                    new File
+                                    {
+                                        Guid = fileDto.Guid,
+                                        Name = fileDto.Name,
+                                        ContentType = fileDto.ContentType,
+                                        Size = fileDto.Size
+                                    },
+                                    dataParameters,
+                                    OnWebRtcIncomingFileStreamCompleted);
 
-                            if (file.Offset == 0)
+                            await stream.ReadAsync(fileDto.Data, 0, fileDto.Data.Length);
+                            
+
+
+                            if (fileDto.Offset == 0)
                             {
                                 // New incoming file.
 
                             }
-                            else if (file.Offset + (ulong)file.Data.Length == file.Size)
+                            else if (fileDto.Offset + (ulong)fileDto.Data.Length == fileDto.Size)
                             {
                                 // End of file.
                             }
@@ -220,6 +242,11 @@ namespace WebRTCme.Middleware.Services
                 Console.WriteLine($"************* DataChannel_OnError");
                 throw new NotImplementedException();
             }
+        }
+
+        private void OnWebRtcIncomingFileStreamCompleted(string peerUserName, Guid fileGuid)
+        {
+
         }
 
         private class WebRtcDataStream : Stream

@@ -68,9 +68,8 @@ namespace WebRTCme.DemoApp.Blazor.Pages
                     {
                         Name = file.Name,
                         Size = (ulong)file.Size,
-                        ContentType = file.ContentType,
-                        Stream = file.OpenReadStream(maxAllowedSize:file.Size)
-                    }));
+                        ContentType = file.ContentType
+                    }, file.OpenReadStream(maxAllowedSize: file.Size)));
                 }
 
                 await Task.WhenAll(tasks);
@@ -84,8 +83,7 @@ namespace WebRTCme.DemoApp.Blazor.Pages
                     Name = file.Name,
                     Size = (ulong)file.Size,
                     ContentType = file.ContentType,
-                    Stream = file.OpenReadStream(maxAllowedSize: file.Size)
-                });
+                }, file.OpenReadStream(maxAllowedSize: file.Size));
             }
         }
     }

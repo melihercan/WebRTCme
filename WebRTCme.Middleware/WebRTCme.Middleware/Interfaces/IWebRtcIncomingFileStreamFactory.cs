@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
     public interface IWebRtcIncomingFileStreamFactory
     {
-        Stream Create(string peerUserName, File file, DataParameters dataParameters, Action cbCompleted);
+        Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, 
+            Action<string/*peerUserName*/, Guid/*fileGuid*/> onCompleted);
     }
 }

@@ -28,7 +28,7 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<IRunOnUiThreadService, RunOnUiThreadService>();
             }
-            services.AddMiddleware();
+            services.AddBlazorMiddleware();
 
             return services;
         }

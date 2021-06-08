@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!--<TargetFrameworks>netstandard2.1; net5.0; net6.0</TargetFrameworks>-->
-    <TargetFrameworks>netstandard2.1; net5.0</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <RazorLangVersion>3.0</RazorLangVersion>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
     <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
@@ -41,6 +41,7 @@
    </ItemGroup>-->
 
    <ItemGroup>
+    <ProjectReference Include="..\..\..\Blazorme\StreamSaver\StreamSaver.csproj" />
     <ProjectReference Include="..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
     </ProjectReference>
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">

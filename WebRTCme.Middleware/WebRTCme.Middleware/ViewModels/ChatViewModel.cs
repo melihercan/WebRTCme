@@ -117,9 +117,9 @@ namespace WebRTCme.Middleware
         {
         }
 
-        public Task SendFileAsync(File file)
+        public Task SendFileAsync(File file, Stream stream)
         {
-            return _dataManagerService.SendFileAsync(file);
+            return _dataManagerService.SendFileAsync(file, stream);
         }
 
         public void SendLink()

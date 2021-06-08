@@ -13,20 +13,20 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddMiddleware(this IServiceCollection services)
         {
-            var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
+            //var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
             
-            if (jsRuntime is not null && jsRuntime is not IJSInProcessRuntime)
-            {
-                services.AddScoped<IMediaStreamService, MediaStreamService>();
-                services.AddScoped<ISignallingServerService, SignallingServerService>();
-                services.AddScoped<IMediaManagerService, MediaManagerService>();
-                services.AddScoped<IDataManagerService, DataManagerService>();
-                services.AddScoped<InitializingViewModel>();
-                services.AddScoped<ConnectionParametersViewModel>();
-                services.AddScoped<CallViewModel>();
-                services.AddScoped<ChatViewModel>();
-            }
-            else
+            //if (jsRuntime is not null && jsRuntime is not IJSInProcessRuntime)
+            //{
+            //    services.AddScoped<IMediaStreamService, MediaStreamService>();
+            //    services.AddScoped<ISignallingServerService, SignallingServerService>();
+            //    services.AddScoped<IMediaManagerService, MediaManagerService>();
+            //    services.AddScoped<IDataManagerService, DataManagerService>();
+            //    services.AddScoped<InitializingViewModel>();
+            //    services.AddScoped<ConnectionParametersViewModel>();
+            //    services.AddScoped<CallViewModel>();
+            //    services.AddScoped<ChatViewModel>();
+            //}
+            //else
             {
                 services.AddSingleton<IMediaStreamService, MediaStreamService>();
                 services.AddSingleton<ISignallingServerService, SignallingServerService>();

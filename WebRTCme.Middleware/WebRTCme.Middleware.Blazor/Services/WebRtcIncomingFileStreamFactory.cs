@@ -1,15 +1,28 @@
-﻿using System;
+﻿using Blazorme;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using WebRTCme.Middleware.Helpers;
 
 namespace WebRTCme.Middleware.Services
 {
     class WebRtcIncomingFileStreamFactory : IWebRtcIncomingFileStreamFactory
     {
-        public Stream Create(string peerUserName, File file, DataParameters dataParameters, Action cbCompleted)
+        private readonly IStreamSaver _streamSaver;
+
+        public WebRtcIncomingFileStreamFactory(IStreamSaver streamSaver)
         {
-            throw new NotImplementedException();
+            _streamSaver = streamSaver;
+        }
+
+        public async Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, Action<string, Guid> onCompleted)
+        {
+            WebRtcIncomingFileStream webRtcIncomingFileStream = new(_streamSaver, peerUserName, file, dataParameters, 
+                onCompleted);
+            await webRtcIncomingFileStream.CreateAsync();
+            return webRtcIncomingFileStream;
         }
     }
 }

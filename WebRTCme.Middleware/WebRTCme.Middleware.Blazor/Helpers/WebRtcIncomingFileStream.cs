@@ -1,24 +1,48 @@
-﻿using System;
+﻿using Blazorme;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware.Helpers
 {
     internal class WebRtcIncomingFileStream : Stream
     {
-        public override bool CanRead => throw new NotImplementedException();
+        private readonly IStreamSaver _streamSaver;
+        private readonly string _peerUserName;
+        private readonly File _file;
+        private readonly DataParameters _dataParameters;
+        private readonly Action<string/*peerUserName*/, Guid/*fileGuid*/> _onCompleted;
+        private Stream _writableFileStream;
 
-        public override bool CanSeek => throw new NotImplementedException();
+        public WebRtcIncomingFileStream(IStreamSaver streamSaver, string peerUserName, File file, 
+            DataParameters dataParameters, Action<string, Guid> onCompleted)
+        {
+            _streamSaver = streamSaver;
+            _peerUserName = peerUserName;
+            _file = file;
+            _dataParameters = dataParameters;
+            _onCompleted = onCompleted;
 
-        public override bool CanWrite => throw new NotImplementedException();
+            Length = (long)file.Size;
+        }
 
-        public override long Length => throw new NotImplementedException();
+        public override bool CanRead => false;
 
-        public override long Position 
-        { 
-            get => throw new NotImplementedException(); 
-            set => throw new NotImplementedException(); 
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => true;
+
+        public override long Length { get; }
+
+        public override long Position { get; set; }
+
+        public async Task CreateAsync()
+        {
+            _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_file.Name);
+
         }
 
         public override void Flush()
@@ -44,6 +68,20 @@ namespace WebRTCme.Middleware.Helpers
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
+        }
+
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await _writableFileStream.WriteAsync(buffer, 0, count, cancellationToken);
+            Position += count;
+            //// TODO: GUI PROGRESS BAR PROCESS BY USING _dataParameters
+            if (Position >= Length)
+            {
+                // File download completed, we are done.
+                await _writableFileStream.DisposeAsync();
+                _onCompleted(_peerUserName, _file.Guid);
+                Dispose();
+            }
         }
     }
 }
