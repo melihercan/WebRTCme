@@ -191,9 +191,10 @@ namespace WebRTCme.Middleware.Services
                             //var x = new WebRtcIncomingFileStream(peerUserName, file);
 
                             if (!_incomingFileStreamDispatcher.TryGetValue((peerUserName, fileDto.Guid), out var stream))
+                            {
                                 // First chunk.
                                 stream = await _webRtcIncomingFileStreamFactory.CreateAsync(
-                                    peerUserName, 
+                                    peerUserName,
                                     new File
                                     {
                                         Guid = fileDto.Guid,
@@ -204,7 +205,10 @@ namespace WebRTCme.Middleware.Services
                                     dataParameters,
                                     OnWebRtcIncomingFileStreamCompleted);
 
-                            await stream.ReadAsync(fileDto.Data, 0, fileDto.Data.Length);
+                                _incomingFileStreamDispatcher.Add((peerUserName, fileDto.Guid), stream);
+                            }
+
+                            await stream.WriteAsync(fileDto.Data, 0, fileDto.Data.Length);
                             
 
 
@@ -256,11 +260,13 @@ namespace WebRTCme.Middleware.Services
             private readonly DataParameters _dataParameters;
             private ulong _wrOffset;
             private ulong _rdOffset;
+            private Guid _guid;
 
             public WebRtcDataStream(DataManagerService dataManagerService, File file)
             {
                 _dataManagerService = dataManagerService;
                 _file = file;
+                _guid = Guid.NewGuid();
 
                 _dataParameters = new DataParameters
                 {
@@ -315,10 +321,11 @@ namespace WebRTCme.Middleware.Services
                 { 
                     Cookie = DataManagerService.Cookie,
                     DtoObjectType = Enums.DtoObjectType.File,
+                    Guid = _guid,
                     Name = _file.Name,
                     Size = _file.Size,
-                    ContentType = _file.ContentType,
                     Offset = _wrOffset,
+                    ContentType = _file.ContentType,
                     Data = data
                 };
                 var json = JsonSerializer.Serialize(fileDto);
