@@ -17,6 +17,10 @@ namespace WebRTCme
 
         public void Cleanup() { }
 
+#if NETSTANDARD
+        public IWindow Window(IJSRuntime jsRuntime) => throw new NotImplementedException();
+#else
         public IWindow Window(IJSRuntime jsRuntime) => WebRTCme.Bindings.Blazor.Api.Window.Create(jsRuntime);
+#endif
     }
 }
