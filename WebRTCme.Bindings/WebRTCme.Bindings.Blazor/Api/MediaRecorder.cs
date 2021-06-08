@@ -7,5 +7,6 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     class MediaRecorder
     {
+        //HostObject
     }
 }
