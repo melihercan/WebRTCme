@@ -30,6 +30,9 @@ namespace WebRTCme.Middleware
         private IDisposable _connectionDisposer;
         private Action _reRender;
         private string _userName;
+        private IMediaStream _cameraStream;
+        private IMediaStream _displayStream;
+        private IMediaStream _localStream;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService,
@@ -48,11 +51,13 @@ namespace WebRTCme.Middleware
         {
             _reRender = reRender;
             _userName = connectionParameters.UserName;
-            var localStream = await _mediaStreamService.GetCameraMediaStreamAsync();
+            _cameraStream = await _mediaStreamService.GetCameraMediaStreamAsync();
+            _displayStream = await _mediaStreamService.GetDisplayMediaStreamAync();
+            _localStream = _cameraStream;
             _mediaManagerService.Add(new MediaParameters
             {
                 Label = connectionParameters.UserName,
-                Stream = localStream,
+                Stream = _localStream,
                 VideoMuted = false,
                 AudioMuted = false,
                 ShowControls = false
@@ -63,7 +68,7 @@ namespace WebRTCme.Middleware
             var connectionRequestParameters = new ConnectionRequestParameters
             {
                 ConnectionParameters = connectionParameters,
-                LocalStream = localStream,
+                LocalStream = _localStream,
             };
             Connect(connectionRequestParameters);
         }
@@ -153,6 +158,7 @@ namespace WebRTCme.Middleware
             {
                 // Stop sharing.
                 ShareScreenButtonText = "Start sharing screen";
+
             }
             else
             {

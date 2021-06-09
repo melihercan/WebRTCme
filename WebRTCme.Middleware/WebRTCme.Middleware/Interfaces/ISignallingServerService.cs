@@ -11,7 +11,8 @@ namespace WebRTCme.Middleware
         Task<string[]> GetTurnServerNamesAsync();
 
         IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
-      
+
+        Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, IMediaStreamTrack newVideoTrack);
 
     }
 }

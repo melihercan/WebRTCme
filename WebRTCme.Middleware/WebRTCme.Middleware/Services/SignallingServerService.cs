@@ -106,6 +106,25 @@ namespace WebRTCme.Middleware.Services
             });
         }
 
+        public Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, 
+            IMediaStreamTrack newVideoTrack)
+        {
+            var connectionContext = GetConnectionContext(turnServerName, roomName);
+            foreach (var peerContext in connectionContext.PeerContexts)
+            {
+                var peerConnection = peerContext.PeerConnection;
+                peerConnection
+                    .GetSenders()
+                    //.Where(sender => sender.Track.Kind == MediaStreamTrackKind.Video)
+                    //.Select(sender => sender.ReplaceTrack(newVideoTrack));
+                    .First(sender => sender.Track.Kind == MediaStreamTrackKind.Video)
+                    .ReplaceTrack(newVideoTrack);
+            }
+
+            return Task.CompletedTask;
+        }
+
+
         private async Task FatalErrorAsync(string message)
         {
             //// TODO: what???
@@ -573,5 +592,6 @@ namespace WebRTCme.Middleware.Services
                 });
             }
         }
+
     }
 }
