@@ -11,22 +11,38 @@ namespace WebRTCme.Middleware.Services
 {
     internal class MediaStreamService : IMediaStreamService
     {
-        private readonly IWindow _window;
+        private readonly IMediaDevices _mediaDevices;
 
         public MediaStreamService(IJSRuntime jsRuntime = null)
         {
-            _window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
+            var window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
+            var navigator = window.Navigator();
+            _mediaDevices = navigator.MediaDevices;
         }
 
         public async Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null)
         {
-            var navigator = _window.Navigator();
-            var mediaDevices = navigator.MediaDevices;
-            var mediaStream = await mediaDevices.GetUserMedia(mediaStreamConstraints ?? new MediaStreamConstraints
+            var mediaStream = await _mediaDevices.GetUserMedia(mediaStreamConstraints ?? new MediaStreamConstraints
             {
                 Audio = new MediaStreamContraintsUnion { Value = true },
                 Video = new MediaStreamContraintsUnion { Value = true }
+            });
+            return mediaStream;
+        }
+
+        public async Task<IMediaStream> GetDisplayMediaStreamAync(MediaStreamConstraints mediaStreamConstraints = null)
+        {
+            var mediaStream = await _mediaDevices.GetDisplayMedia(mediaStreamConstraints ?? new MediaStreamConstraints
+            { 
+                Video = new MediaStreamContraintsUnion
+                {
+                    Object = new MediaTrackConstraints
+                    {
+                        Cursor = CursorOptions.Never,
+                        DisplaySurface = DisplaySurfaceOptions.Monitor
+                    }
+                }
             });
             return mediaStream;
         }
