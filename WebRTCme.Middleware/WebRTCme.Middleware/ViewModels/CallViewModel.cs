@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MvvmHelpers.Commands;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -31,9 +32,9 @@ namespace WebRTCme.Middleware
         private string _userName;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
-            IMediaManagerService mediaManagerService, INavigationService navigationService, 
+            IMediaManagerService mediaManagerService, INavigationService navigationService,
             IRunOnUiThreadService runOnUiThreadService)
-        
+
         {
             _mediaStreamService = mediaStreamService;
             _signallingServerService = signallingServerService;
@@ -133,5 +134,39 @@ namespace WebRTCme.Middleware
             _mediaManagerService.Clear();
             _connectionDisposer.Dispose();
         }
+
+        private bool _isSharingScreen = false;
+        private string _shareScreenButtonText = "Start sharing screen";
+        public string ShareScreenButtonText
+        {
+            get => _shareScreenButtonText;
+            set
+            {
+                _shareScreenButtonText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Task OnShareScreenAsync()
+        {
+            if (_isSharingScreen)
+            {
+                // Stop sharing.
+                ShareScreenButtonText = "Start sharing screen";
+            }
+            else
+            {
+                // Start sharing.
+                ShareScreenButtonText = "Stop sharing screen";
+            }
+            _isSharingScreen = !_isSharingScreen;
+
+            return Task.CompletedTask;
+        }
+
+        public ICommand ShareScreenCommand => new AsyncCommand(async () =>
+        {
+            await OnShareScreenAsync();
+        });
     }
 }
