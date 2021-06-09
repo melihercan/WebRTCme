@@ -8,7 +8,7 @@ namespace WebRTCme.Middleware
 {
     public class WebRtcIncomingFileStreamFactory : IWebRtcIncomingFileStreamFactory
     {
-        public Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, Action<string, Guid> onCompleted)
+        public Task<Stream> CreateAsync(string peerUserName, DataParameters dataParameters, Action<string, Guid> onCompleted)
         {
             throw new NotImplementedException();
         }

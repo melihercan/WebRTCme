@@ -17,16 +17,16 @@ namespace WebRTCme.Middleware.Helpers
         private readonly Action<string/*peerUserName*/, Guid/*fileGuid*/> _onCompleted;
         private Stream _writableFileStream;
 
-        public WebRtcIncomingFileStream(IStreamSaver streamSaver, string peerUserName, File file, 
+        public WebRtcIncomingFileStream(IStreamSaver streamSaver, string peerUserName, 
             DataParameters dataParameters, Action<string, Guid> onCompleted)
         {
             _streamSaver = streamSaver;
             _peerUserName = peerUserName;
-            _file = file;
+            _file = dataParameters.Object as File;
             _dataParameters = dataParameters;
             _onCompleted = onCompleted;
 
-            Length = (long)file.Size;
+            Length = (long)_file.Size;
         }
 
         public override bool CanRead => false;

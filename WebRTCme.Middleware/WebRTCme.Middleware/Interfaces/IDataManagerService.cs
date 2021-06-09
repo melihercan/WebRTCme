@@ -17,8 +17,6 @@ namespace WebRTCme.Middleware
 
         void ClearPeers();
 
-        void SendString(string text);
-
         void SendMessage(Message message);
 
         void SendLink(Link link);

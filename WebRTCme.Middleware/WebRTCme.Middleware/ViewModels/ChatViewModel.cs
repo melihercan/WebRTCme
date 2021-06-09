@@ -97,20 +97,20 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public Task SendAsync()
+        public Task SendMessageAsync()
         {
             if (!string.IsNullOrEmpty(OutgoingText) && !string.IsNullOrWhiteSpace(OutgoingText))
             {
-                _dataManagerService.SendString(OutgoingText);
+                _dataManagerService.SendMessage(new Message { Text = OutgoingText });
                 OutgoingText = string.Empty;
             }
 
             return Task.CompletedTask;
         }
 
-        public ICommand SendCommand => new AsyncCommand(async () => 
+        public ICommand SendMessageCommand => new AsyncCommand(async () => 
         {
-            await SendAsync();
+            await SendMessageAsync();
         });
 
         public void SendMessage()

@@ -9,6 +9,6 @@ namespace WebRTCme.Middleware.Models
     {
         public ulong Cookie { get; init; }
 
-        public DtoObjectType DtoObjectType { get; init; }
+        public DataObjectType DtoObjectType { get; init; }
     }
 }

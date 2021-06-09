@@ -61,21 +61,25 @@ namespace WebRTCme.Middleware.Services
             DataParametersList.Clear();
         }
 
-        public void SendString(string text)
+        public void SendMessage(Message message)
         {
             DataParametersList.Add(new DataParameters
             {
                 From = DataFromType.Outgoing,
                 Time = DateTime.Now.ToString("HH:mm"),
-                Text = text
+                Object = message
             });
 
-            SendObject(text);
-        }
-
-        public void SendMessage(Message message)
-        {
-
+            MessageDto messageDto = new()
+            {
+                Cookie = DataManagerService.Cookie,
+                DtoObjectType = Enums.DataObjectType.Message,
+                Text = message.Text
+            };
+            var json = JsonSerializer.Serialize(messageDto);
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var base64 = Convert.ToBase64String(bytes);
+            SendObject(base64);
         }
 
         public void SendLink(Link link)
@@ -134,7 +138,7 @@ namespace WebRTCme.Middleware.Services
                     From = DataFromType.System,
                     PeerUserName = peerUserName,
                     Time = DateTime.Now.ToString("HH:mm"),
-                    Text = $"User {peerUserName} has joined the room"
+                    Object = new Message { Text = $"User {peerUserName} has joined the room" }
                 });
             }
 
@@ -182,36 +186,40 @@ namespace WebRTCme.Middleware.Services
 
                     switch (baseDto.DtoObjectType)
                     {
-                        case Enums.DtoObjectType.Message:
+                        case Enums.DataObjectType.Message:
+                            var messageDto = JsonSerializer.Deserialize<MessageDto>(json);
+                            if (messageDto.Cookie != DataManagerService.Cookie)
+                                throw new Exception("Bad cookie");
+                            dataParameters.Object = new Message { Text = messageDto.Text};
+                            DataParametersList.Add(dataParameters);
                             break;
-                        case Enums.DtoObjectType.Link:
+
+                        case Enums.DataObjectType.Link:
+                            //DataParametersList.Add(dataParameters);
                             break;
-                        case Enums.DtoObjectType.File:
+
+                        case Enums.DataObjectType.File:
                             var fileDto = JsonSerializer.Deserialize<FileDto>(json);
                             if (fileDto.Cookie != DataManagerService.Cookie)
                                 throw new Exception("Bad cookie");
 
-                            //// TODO: CREATE DATA PARAMETERS LIST FOR INCOMING FILES PER PEERNAME,
-                            /// ON EACH CALL BOTH STREAM(FOR FILE SAVE)  AND PROGRESS BAR SHOULD BE UPDATED
-                            /// 
-
-
                             Logger.LogInformation($"============== READING {fileDto.Name} offset:{fileDto.Offset} count:{fileDto.Data.Length}");
-
-                            //var x = new WebRtcIncomingFileStream(peerUserName, file);
 
                             if (!_incomingFileStreamDispatcher.TryGetValue((peerUserName, fileDto.Guid), out var stream))
                             {
-                                // First chunk.
+                                // New file starting.
+                                var file = new File
+                                {
+                                    Guid = fileDto.Guid,
+                                    Name = fileDto.Name,
+                                    ContentType = fileDto.ContentType,
+                                    Size = fileDto.Size
+                                };
+                                dataParameters.Object = file;
+                                DataParametersList.Add(dataParameters);
+
                                 stream = await _webRtcIncomingFileStreamFactory.CreateAsync(
                                     peerUserName,
-                                    new File
-                                    {
-                                        Guid = fileDto.Guid,
-                                        Name = fileDto.Name,
-                                        ContentType = fileDto.ContentType,
-                                        Size = fileDto.Size
-                                    },
                                     dataParameters,
                                     OnWebRtcIncomingFileStreamCompleted);
 
@@ -219,31 +227,12 @@ namespace WebRTCme.Middleware.Services
                             }
 
                             await stream.WriteAsync(fileDto.Data, 0, fileDto.Data.Length);
-                            
-
-
-                            if (fileDto.Offset == 0)
-                            {
-                                // New incoming file.
-
-                            }
-                            else if (fileDto.Offset + (ulong)fileDto.Data.Length == fileDto.Size)
-                            {
-                                // End of file.
-                            }
-
-
-
-
-
-
-
                             break;
+
                         default:
                             throw new Exception("Unknown object");
                     }
 
-                    DataParametersList.Add(dataParameters);
                 }
                 catch (Exception ex)
                 {

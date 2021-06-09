@@ -49,57 +49,61 @@
 <div class="list-group mx-4">
     @foreach (var dataParameters in ChatViewModel.DataParametersList)
     {
-        if (dataParameters.From == DataFromType.System)
+        if (dataParameters.Object.GetType() == typeof(Message))
         {
-            <div class="row my-1">
-                <div class="offset-3 col-6">
-                    <div class="row justify-content-center">
-                        <div class="card text-warning" style="background:#000080">
-                            <div class="card-body px-2 py-0">
-                                <p class="card-text my-0">@dataParameters.Text</p>
-                                <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+            var message = dataParameters.Object as Message;
+            if (dataParameters.From == DataFromType.System)
+            {
+                <div class="row my-1">
+                    <div class="offset-3 col-6">
+                        <div class="row justify-content-center">
+                            <div class="card text-warning" style="background:#000080">
+                                <div class="card-body px-2 py-0">
+                                    <p class="card-text my-0">@message.Text</p>
+                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-        else if (dataParameters.From == DataFromType.Incoming)
-        {
-            <div class="row my-1">
-                <div class="col-9">
-                    <div class="row justify-content-start">
-                        <div class="card" style=" background:#e6e6f0">
-                            <div class="card-body px-2 py-0">
-                                <p class="my-0 font-italic small">@dataParameters.PeerUserName</p>
-                                <p class="card-text my-0">@dataParameters.Text</p>
-                                <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+            }
+            else if (dataParameters.From == DataFromType.Incoming)
+            {
+                <div class="row my-1">
+                    <div class="col-9">
+                        <div class="row justify-content-start">
+                            <div class="card" style=" background:#e6e6f0">
+                                <div class="card-body px-2 py-0">
+                                    <p class="my-0 font-italic small">@dataParameters.PeerUserName</p>
+                                    <p class="card-text my-0">@message.Text</p>
+                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-        else if (dataParameters.From == DataFromType.Outgoing)
-        {
-            <div class="row my-1">
-                <div class="offset-3 col-9">
-                    <div class="row justify-content-end">
-                        <div class="card" style="background:#d3d4bc">
-                            <div class="card-body px-2 py-0">
-                                <p class="card-text my-0" >@dataParameters.Text</p>
-                                <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+            }
+            else if (dataParameters.From == DataFromType.Outgoing)
+            {
+                <div class="row my-1">
+                    <div class="offset-3 col-9">
+                        <div class="row justify-content-end">
+                            <div class="card" style="background:#d3d4bc">
+                                <div class="card-body px-2 py-0">
+                                    <p class="card-text my-0" >@message.Text</p>
+                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         }
     }
 </div>
 
 <div class="footer bg-primary px-4 pt-3">
-    <EditForm Model="@ChatViewModel" class="d-flex" OnValidSubmit="@ChatViewModel.SendAsync">
+    <EditForm Model="@ChatViewModel" class="d-flex" OnValidSubmit="@ChatViewModel.SendMessageAsync">
         <DataAnnotationsValidator />
         <ValidationSummary />
         <InputText @bind-Value="ChatViewModel.OutgoingText" class="flex-grow-1 w-100 mr-3" />

@@ -17,9 +17,9 @@ namespace WebRTCme.Middleware.Services
             _streamSaver = streamSaver;
         }
 
-        public async Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, Action<string, Guid> onCompleted)
+        public async Task<Stream> CreateAsync(string peerUserName, DataParameters dataParameters, Action<string, Guid> onCompleted)
         {
-            WebRtcIncomingFileStream webRtcIncomingFileStream = new(_streamSaver, peerUserName, file, dataParameters, 
+            WebRtcIncomingFileStream webRtcIncomingFileStream = new(_streamSaver, peerUserName, dataParameters, 
                 onCompleted);
             await webRtcIncomingFileStream.CreateAsync();
             return webRtcIncomingFileStream;

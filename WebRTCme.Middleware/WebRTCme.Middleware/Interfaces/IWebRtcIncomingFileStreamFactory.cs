@@ -8,7 +8,7 @@ namespace WebRTCme.Middleware
 {
     public interface IWebRtcIncomingFileStreamFactory
     {
-        Task<Stream> CreateAsync(string peerUserName, File file, DataParameters dataParameters, 
+        Task<Stream> CreateAsync(string peerUserName, DataParameters dataParameters, 
             Action<string/*peerUserName*/, Guid/*fileGuid*/> onCompleted);
     }
 }

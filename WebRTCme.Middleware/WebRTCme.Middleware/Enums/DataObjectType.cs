@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware.Enums
 {
-    internal enum DtoObjectType
+    internal enum DataObjectType
     {
         Unknown,
         Message,

@@ -66,7 +66,7 @@ namespace WebRTCme.Middleware.Helpers
             FileDto fileDto = new()
             {
                 Cookie = DataManagerService.Cookie,
-                DtoObjectType = Enums.DtoObjectType.File,
+                DtoObjectType = Enums.DataObjectType.File,
                 Guid = _guid,
                 Name = _file.Name,
                 Size = _file.Size,
@@ -75,7 +75,6 @@ namespace WebRTCme.Middleware.Helpers
                 Data = data
             };
             var json = JsonSerializer.Serialize(fileDto);
-            //_dataManagerService.SendObject(json);
             var bytes = Encoding.UTF8.GetBytes(json);
             var base64 = Convert.ToBase64String(bytes);
             _sendObject(base64);
