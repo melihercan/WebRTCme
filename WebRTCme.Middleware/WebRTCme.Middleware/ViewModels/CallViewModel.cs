@@ -32,7 +32,7 @@ namespace WebRTCme.Middleware
         private string _userName;
         private IMediaStream _cameraStream;
         private IMediaStream _displayStream;
-        private IMediaStream _localStream;
+        private ConnectionParameters _connectionParameters;
 
         public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService,
@@ -49,15 +49,15 @@ namespace WebRTCme.Middleware
 
         public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
+            _connectionParameters = connectionParameters;
             _reRender = reRender;
             _userName = connectionParameters.UserName;
             _cameraStream = await _mediaStreamService.GetCameraMediaStreamAsync();
             _displayStream = await _mediaStreamService.GetDisplayMediaStreamAync();
-            _localStream = _cameraStream;
             _mediaManagerService.Add(new MediaParameters
             {
                 Label = connectionParameters.UserName,
-                Stream = _localStream,
+                Stream = _cameraStream,
                 VideoMuted = false,
                 AudioMuted = false,
                 ShowControls = false
@@ -68,7 +68,7 @@ namespace WebRTCme.Middleware
             var connectionRequestParameters = new ConnectionRequestParameters
             {
                 ConnectionParameters = connectionParameters,
-                LocalStream = _localStream,
+                LocalStream = _cameraStream,
             };
             Connect(connectionRequestParameters);
         }
@@ -140,7 +140,7 @@ namespace WebRTCme.Middleware
             _connectionDisposer.Dispose();
         }
 
-        private bool _isSharingScreen = false;
+        private bool _isSharingScreen;
         private string _shareScreenButtonText = "Start sharing screen";
         public string ShareScreenButtonText
         {
@@ -157,12 +157,16 @@ namespace WebRTCme.Middleware
             if (_isSharingScreen)
             {
                 // Stop sharing.
+                _signallingServerService.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
+                    _connectionParameters.RoomName, _cameraStream.GetVideoTracks()[0]);
                 ShareScreenButtonText = "Start sharing screen";
 
             }
             else
             {
                 // Start sharing.
+                _signallingServerService.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
+                    _connectionParameters.RoomName, _displayStream.GetVideoTracks()[0]);
                 ShareScreenButtonText = "Stop sharing screen";
             }
             _isSharingScreen = !_isSharingScreen;
