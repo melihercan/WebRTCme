@@ -23,6 +23,7 @@ namespace WebRTCme.Middleware
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 
         private readonly IMediaStreamService _mediaStreamService;
+        private readonly IWebRtcConnection _webRtcConnection;
         private readonly ISignallingServerService _signallingServerService;
         private readonly IMediaManagerService _mediaManagerService;
         private readonly INavigationService _navigationService;
@@ -34,12 +35,14 @@ namespace WebRTCme.Middleware
         private IMediaStream _displayStream;
         private ConnectionParameters _connectionParameters;
 
-        public CallViewModel(IMediaStreamService mediaStreamService, ISignallingServerService signallingServerService,
+        public CallViewModel(IMediaStreamService mediaStreamService, IWebRtcConnection webRtcConnection,
+            ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService,
             IRunOnUiThreadService runOnUiThreadService)
 
         {
             _mediaStreamService = mediaStreamService;
+            _webRtcConnection = webRtcConnection;
             _signallingServerService = signallingServerService;
             _mediaManagerService = mediaManagerService;
             _navigationService = navigationService;
@@ -81,7 +84,7 @@ namespace WebRTCme.Middleware
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
+            _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)
@@ -152,12 +155,12 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public Task OnShareScreenAsync()
+        public async Task OnShareScreenAsync()
         {
             if (_isSharingScreen)
             {
                 // Stop sharing.
-                _signallingServerService.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
+                await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
                     _connectionParameters.RoomName, _cameraStream.GetVideoTracks()[0]);
                 ShareScreenButtonText = "Start sharing screen";
 
@@ -165,18 +168,46 @@ namespace WebRTCme.Middleware
             else
             {
                 // Start sharing.
-                _signallingServerService.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
+                await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
                     _connectionParameters.RoomName, _displayStream.GetVideoTracks()[0]);
                 ShareScreenButtonText = "Stop sharing screen";
             }
             _isSharingScreen = !_isSharingScreen;
 
-            return Task.CompletedTask;
         }
 
         public ICommand ShareScreenCommand => new AsyncCommand(async () =>
         {
             await OnShareScreenAsync();
         });
+
+        private bool _isRecording;
+        private string _recordButtonText = "Start recording";
+        public string RecordButtonText
+        {
+            get => _recordButtonText;
+            set
+            {
+                _recordButtonText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Task OnRecordAsync()
+        {
+            if (_isRecording)
+            {
+                // Stop recording.
+                RecordButtonText = "Stop recording";
+            }
+            else
+            {
+                // Start recording.
+                RecordButtonText = "Start recording";
+            }
+            _isRecording = !_isRecording;
+
+            return Task.CompletedTask;
+        }
     }
 }

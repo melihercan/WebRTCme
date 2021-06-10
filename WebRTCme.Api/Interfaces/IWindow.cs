@@ -16,5 +16,7 @@ namespace WebRTCme
 
         
         IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null);
+
+        IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null);
     }
 }

@@ -3,8 +3,12 @@
 @layout BlankLayout
 
 <h1 class="text-center">Call</h1>
-<button type="button" class="ms-2 btn btn-secondary" @onclick="@CallViewModel.OnShareScreenAsync">
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnShareScreenAsync">
     @CallViewModel.ShareScreenButtonText
+</button>
+
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnRecordAsync">
+    @CallViewModel.RecordButtonText
 </button>
 
 

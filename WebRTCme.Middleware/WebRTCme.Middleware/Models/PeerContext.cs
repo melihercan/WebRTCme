@@ -7,7 +7,7 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.Middleware.Models
 {
-    internal class PeerContext
+    public class PeerContext
     {
         public PeerParameters PeerParameters { get; set; }
         

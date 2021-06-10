@@ -8,7 +8,7 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.Middleware.Models
 {
-    internal class ConnectionContext
+    public class ConnectionContext
     {
         public ConnectionRequestParameters ConnectionRequestParameters { get; set; }
 

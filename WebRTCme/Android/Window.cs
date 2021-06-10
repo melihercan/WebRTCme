@@ -18,5 +18,9 @@ namespace WebRTCme.Android
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Android.RTCPeerConnection.Create(configuration);
 
+        public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

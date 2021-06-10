@@ -25,17 +25,20 @@ namespace WebRTCme.Middleware
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
+        private readonly IWebRtcConnection _webRtcConnection;
         private readonly ISignallingServerService _signallingServerService;
         public readonly IDataManagerService _dataManagerService;
         private readonly INavigationService _navigationService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
 
-        public ChatViewModel(ISignallingServerService signallingServerService, IDataManagerService dataManagerService, 
+        public ChatViewModel(IWebRtcConnection webRtcConnection, ISignallingServerService signallingServerService, 
+            IDataManagerService dataManagerService, 
             INavigationService navigationService)
         {
             _signallingServerService = signallingServerService;
-             _dataManagerService = dataManagerService;
+            _webRtcConnection = webRtcConnection;
+            _dataManagerService = dataManagerService;
             DataParametersList = dataManagerService.DataParametersList;
             _navigationService = navigationService;
         }
@@ -128,7 +131,7 @@ namespace WebRTCme.Middleware
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            _connectionDisposer = _signallingServerService.ConnectionRequest(connectionRequestParameters).Subscribe(
+            _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
                 onNext: (peerResponseParameters) =>
                 {
                     switch (peerResponseParameters.Code)

@@ -6,7 +6,6 @@ namespace WebRTCme
 {
     public interface IMediaRecorder : INativeObject
     {
-        
         string MimeType { get; } 
         
         RecordingState State { get; }

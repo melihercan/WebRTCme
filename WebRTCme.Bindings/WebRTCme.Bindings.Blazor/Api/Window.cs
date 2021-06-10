@@ -24,5 +24,9 @@ namespace WebRTCme.Bindings.Blazor.Api
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Api.RTCPeerConnection.Create(JsRuntime, configuration);
 
+        public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

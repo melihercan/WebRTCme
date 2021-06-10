@@ -17,5 +17,9 @@ namespace WebRTCme.iOS
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
             iOS.RTCPeerConnection.Create(configuration);
 
+        public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

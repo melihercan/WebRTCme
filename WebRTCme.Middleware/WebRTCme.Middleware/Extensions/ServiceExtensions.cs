@@ -29,6 +29,7 @@ namespace WebRTCme.Middleware
             //else
             {
                 services.AddSingleton<IMediaStreamService, MediaStreamService>();
+                services.AddSingleton<IWebRtcConnection, WebRtcConnection>();
                 services.AddSingleton<ISignallingServerService, SignallingServerService>();
                 services.AddSingleton<IMediaManagerService, MediaManagerService>();
                 services.AddSingleton<IDataManagerService, DataManagerService>();

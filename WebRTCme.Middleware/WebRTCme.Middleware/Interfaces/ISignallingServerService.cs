@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
+using WebRTCme.SignallingServerProxy;
 
 namespace WebRTCme.Middleware
 {
@@ -10,9 +11,9 @@ namespace WebRTCme.Middleware
     {
         Task<string[]> GetTurnServerNamesAsync();
 
-        IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
+        //IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
 
-        Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, IMediaStreamTrack newVideoTrack);
+        //Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, IMediaStreamTrack newVideoTrack);
 
     }
 }
