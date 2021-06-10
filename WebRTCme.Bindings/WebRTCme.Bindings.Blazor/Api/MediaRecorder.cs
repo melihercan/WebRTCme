@@ -31,24 +31,33 @@ namespace WebRTCme.Bindings.Blazor.Api
         private MediaRecorder(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, IMediaStream stream, 
             MediaRecorderOptions options) : base(jsRuntime, jsObjectRef)
         {
-            ////AddNativeEventListenerForObjectRef("dataavailable", (s, e) => OnDataAvailable?.Invoke(s, e),
-                //// TCDataChannelEvent.Create);
-
+            AddNativeEventListenerForObjectRef("dataavailable", (s, e) => OnDataAvailable?.Invoke(s, e),
+                BlobEvent.Create);
+            AddNativeEventListenerForObjectRef("error", (s, e) => OnError?.Invoke(s, e),
+                DOMException.Create);
+            AddNativeEventListener("pause", (s, e) => OnPause?.Invoke(s, e));
+            AddNativeEventListener("resume", (s, e) => OnResume?.Invoke(s, e));
+            AddNativeEventListener("start", (s, e) => OnStart?.Invoke(s, e));
+            AddNativeEventListener("stop", (s, e) => OnStop?.Invoke(s, e));
         }
 
-        public string MimeType => throw new NotImplementedException();
+        public string MimeType => GetNativeProperty<string>("mimeType");
 
-        public RecordingState State => throw new NotImplementedException();
+        public RecordingState State => GetNativeProperty<RecordingState>("state");
 
-        public IMediaStream Stream => throw new NotImplementedException();
+        public IMediaStream Stream => 
+            MediaStream.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "stream"));
 
-        public bool IgnoreMutedMedia { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool IgnoreMutedMedia 
+        { 
+            get => GetNativeProperty<bool>("ignoreMutedMedia"); 
+            set => SetNativeProperty("ignoreMutedMedia", value);
+        }
 
-        public double VideoBitsPerSecond => throw new NotImplementedException();
+        public double VideoBitsPerSecond => GetNativeProperty<double>("videoBitsPerSecond");
 
-        public double AudioBitsPerSecond => throw new NotImplementedException();
+        public double AudioBitsPerSecond => GetNativeProperty<double>("AudioBitsPerSecond");
 
-        ////public object NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event EventHandler<IBlobEvent> OnDataAvailable;
         public event EventHandler<IDOMException> OnError;
@@ -57,39 +66,34 @@ namespace WebRTCme.Bindings.Blazor.Api
         public event EventHandler OnStart;
         public event EventHandler OnStop;
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public bool IsTypeSupported(string mimeType)
         {
-            throw new NotImplementedException();
+            return JsRuntime.CallJsMethod<bool>(NativeObject, mimeType);
         }
 
         public void Pause()
         {
-            throw new NotImplementedException();
+            JsRuntime.CallJsMethodVoid(NativeObject, "pause");
         }
 
         public void RequestData()
         {
-            throw new NotImplementedException();
+            JsRuntime.CallJsMethodVoid(NativeObject, "requestData");
         }
 
         public void Resume()
         {
-            throw new NotImplementedException();
+            JsRuntime.CallJsMethodVoid(NativeObject, "resume");
         }
 
         public void Start(int? timeslice = null)
         {
-            throw new NotImplementedException();
+            JsRuntime.CallJsMethodVoid(NativeObject, "start");
         }
 
         public void Stop()
         {
-            throw new NotImplementedException();
+            JsRuntime.CallJsMethodVoid(NativeObject, "stop");
         }
     }
 }

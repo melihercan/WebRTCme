@@ -13,8 +13,8 @@ namespace WebRTCme.Bindings.Blazor.Api
     internal class RTCTrackEvent : ApiBase, IRTCTrackEvent
     {
 
-        public static IRTCTrackEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
-            new RTCTrackEvent(jsRuntime, jsObjectRefRtcStatsReport);
+        public static IRTCTrackEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeTrackEvent) => 
+            new RTCTrackEvent(jsRuntime, jsObjectRefNativeTrackEvent);
 
         private RTCTrackEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
