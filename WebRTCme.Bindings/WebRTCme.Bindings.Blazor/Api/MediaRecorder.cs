@@ -2,13 +2,40 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop;
+using WebRTCme.Bindings.Blazor.Extensions;
+using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    class MediaRecorder : IMediaRecorder
+    internal class MediaRecorder : ApiBase, IMediaRecorder
     {
+        //// TODO: REFACTOR WHOLE BLAZOR API BY USING System.Private.Runtime.InteropServices.JavaScript and use HostObject.
+        //private readonly JSObject _jsObjectMediaRecorder;
+        ////private readonly IMediaStream _stream;
+        ////private readonly MediaRecorderOptions _options;
 
-        //HostObject
+        //public MediaRecorder(IMediaStream stream, MediaRecorderOptions options)
+        //{
+            //_stream = stream;
+            //_options = options;
+            //_jsObjectMediaRecorder = new HostObject("MediaRecorder");
+        //}
+
+        public static IMediaRecorder Create(IJSRuntime jsRuntime, IMediaStream stream, MediaRecorderOptions options)
+        {
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaRecorder", stream.NativeObject, options);
+            return new MediaRecorder(jsRuntime, jsObjectRef, stream, options);
+        }
+
+        private MediaRecorder(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, IMediaStream stream, 
+            MediaRecorderOptions options) : base(jsRuntime, jsObjectRef)
+        {
+            ////AddNativeEventListenerForObjectRef("dataavailable", (s, e) => OnDataAvailable?.Invoke(s, e),
+                //// TCDataChannelEvent.Create);
+
+        }
+
         public string MimeType => throw new NotImplementedException();
 
         public RecordingState State => throw new NotImplementedException();
@@ -21,7 +48,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public double AudioBitsPerSecond => throw new NotImplementedException();
 
-        public object NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        ////public object NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event EventHandler<IBlobEvent> OnDataAvailable;
         public event EventHandler<IDOMException> OnError;

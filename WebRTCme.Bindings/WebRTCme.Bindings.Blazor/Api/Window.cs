@@ -24,9 +24,16 @@ namespace WebRTCme.Bindings.Blazor.Api
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             Api.RTCPeerConnection.Create(JsRuntime, configuration);
 
-        public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
-        {
-            throw new NotImplementedException();
-        }
+
+        //// TODO: REFACTOR WHOLE BLAZOR API BY USING System.Private.Runtime.InteropServices.JavaScript and use HostObject.
+        ////public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
+        ////{
+        ////return new MediaRecorder(stream, options);
+        ////}
+        ///
+
+        public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null) =>
+            Api.MediaRecorder.Create(JsRuntime, stream, options);
+
     }
 }

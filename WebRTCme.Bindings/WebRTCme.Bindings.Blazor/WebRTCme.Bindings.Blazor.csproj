@@ -49,14 +49,19 @@
 	  </None>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
-	    <HintPath>Resources\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
-
   <ItemGroup>
     <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
+      <HintPath>Resources\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

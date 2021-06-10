@@ -1,4 +1,5 @@
-﻿using MvvmHelpers.Commands;
+﻿using Microsoft.JSInterop;
+using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,7 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using WebRTCme;
+using WebRTCme.Middleware;
 
 namespace WebRTCme.Middleware
 {
@@ -28,6 +29,8 @@ namespace WebRTCme.Middleware
         private readonly IMediaManagerService _mediaManagerService;
         private readonly INavigationService _navigationService;
         private readonly IRunOnUiThreadService _runOnUiThreadService;
+        private readonly IJSRuntime _jsRuntime;
+
         private IDisposable _connectionDisposer;
         private Action _reRender;
         private string _userName;
@@ -35,10 +38,12 @@ namespace WebRTCme.Middleware
         private IMediaStream _displayStream;
         private ConnectionParameters _connectionParameters;
 
+        private IMediaRecorder _mediaRecorder;
+
         public CallViewModel(IMediaStreamService mediaStreamService, IWebRtcConnection webRtcConnection,
             ISignallingServerService signallingServerService,
             IMediaManagerService mediaManagerService, INavigationService navigationService,
-            IRunOnUiThreadService runOnUiThreadService)
+            IRunOnUiThreadService runOnUiThreadService, IJSRuntime jsRuntime = null)
 
         {
             _mediaStreamService = mediaStreamService;
@@ -47,6 +52,7 @@ namespace WebRTCme.Middleware
             _mediaManagerService = mediaManagerService;
             _navigationService = navigationService;
             _runOnUiThreadService = runOnUiThreadService;
+            _jsRuntime = jsRuntime;
             MediaParametersList = mediaManagerService.MediaParametersList;
         }
 
@@ -203,6 +209,9 @@ namespace WebRTCme.Middleware
             else
             {
                 // Start recording.
+                var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
+
+                _mediaRecorder = window.MediaRecorder(_displayStream);
                 RecordButtonText = "Start recording";
             }
             _isRecording = !_isRecording;

@@ -114,8 +114,8 @@ namespace WebRTCme.Bindings.Blazor.Api
         {
             var jsObjectRef = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject,
                 "createAnswer", options);
-        var descriptor = JsRuntime.GetJsPropertyValue<RTCSessionDescriptionInit>(jsObjectRef, null);
-        JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
+            var descriptor = JsRuntime.GetJsPropertyValue<RTCSessionDescriptionInit>(jsObjectRef, null);
+            JsRuntime.DeleteJsObjectRef(jsObjectRef.JsObjectRefId);
             return descriptor;
         }
 
