@@ -19,6 +19,7 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             };
             if (args != null)
             {
+                ////args = args.Where(a => a is not null).ToArray();
                 invokeParams = invokeParams.Concat(args).ToArray();
             }
             var jsObjectRef = jsRuntime.Invoke<JsObjectRef>("JsInterop.createObject", invokeParams);

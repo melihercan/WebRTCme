@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace WebRTCme.Middleware
         private readonly IMediaManagerService _mediaManagerService;
         private readonly INavigationService _navigationService;
         private readonly IRunOnUiThreadService _runOnUiThreadService;
+        private readonly ILogger<CallViewModel> _logger;
         private readonly IJSRuntime _jsRuntime;
 
         private IDisposable _connectionDisposer;
@@ -41,10 +43,9 @@ namespace WebRTCme.Middleware
         private IMediaRecorder _mediaRecorder;
 
         public CallViewModel(IMediaStreamService mediaStreamService, IWebRtcConnection webRtcConnection,
-            ISignallingServerService signallingServerService,
-            IMediaManagerService mediaManagerService, INavigationService navigationService,
-            IRunOnUiThreadService runOnUiThreadService, IJSRuntime jsRuntime = null)
-
+            ISignallingServerService signallingServerService, IMediaManagerService mediaManagerService, 
+            INavigationService navigationService,  IRunOnUiThreadService runOnUiThreadService, 
+            ILogger<CallViewModel> logger, IJSRuntime jsRuntime = null)
         {
             _mediaStreamService = mediaStreamService;
             _webRtcConnection = webRtcConnection;
@@ -52,6 +53,7 @@ namespace WebRTCme.Middleware
             _mediaManagerService = mediaManagerService;
             _navigationService = navigationService;
             _runOnUiThreadService = runOnUiThreadService;
+            _logger = logger;
             _jsRuntime = jsRuntime;
             MediaParametersList = mediaManagerService.MediaParametersList;
         }
@@ -166,17 +168,17 @@ namespace WebRTCme.Middleware
             if (_isSharingScreen)
             {
                 // Stop sharing.
+                ShareScreenButtonText = "Start sharing screen";
                 await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
                     _connectionParameters.RoomName, _cameraStream.GetVideoTracks()[0]);
-                ShareScreenButtonText = "Start sharing screen";
 
             }
             else
             {
                 // Start sharing.
+                ShareScreenButtonText = "Stop sharing screen";
                 await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
                     _connectionParameters.RoomName, _displayStream.GetVideoTracks()[0]);
-                ShareScreenButtonText = "Stop sharing screen";
             }
             _isSharingScreen = !_isSharingScreen;
 
@@ -204,15 +206,23 @@ namespace WebRTCme.Middleware
             if (_isRecording)
             {
                 // Stop recording.
-                RecordButtonText = "Stop recording";
+                RecordButtonText = "Start recording";
+                _mediaRecorder.Stop();
+                _mediaRecorder.Dispose();
             }
             else
             {
                 // Start recording.
+                RecordButtonText = "Stop recording";
                 var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
 
                 _mediaRecorder = window.MediaRecorder(_displayStream);
-                RecordButtonText = "Start recording";
+                _mediaRecorder.OnDataAvailable += ((s, e) => 
+                {
+                    _logger.LogInformation("---------------------------- RECORDER BLOB DATA");
+                    var blob = e.Data;
+                });
+                _mediaRecorder.Start();
             }
             _isRecording = !_isRecording;
 

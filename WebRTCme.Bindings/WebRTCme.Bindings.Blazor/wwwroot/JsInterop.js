@@ -179,7 +179,7 @@
     public.createObject = function (parent, interface, ...args) {
         let parentObject = getParentObject(parent);;
         let interfaceObject = getPropertyObject(parentObject, interface);
-        let createdObject = new interfaceObject(args);
+        let createdObject = new interfaceObject(...args);
         let objectRef = addObjectRef(createdObject);
         return objectRef;
     }
