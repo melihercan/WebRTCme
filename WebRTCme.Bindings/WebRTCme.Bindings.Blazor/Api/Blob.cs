@@ -11,11 +11,11 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class Blob : ApiBase, IBlob
     {
-        public static IBlob Create(IJSRuntime jsRuntime, byte[] array, BlobPropertyBag options)
-        {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "Blob", array, options);
-            return new Blob(jsRuntime, jsObjectRef);
-        }
+        //public static IBlob Create(IJSRuntime jsRuntime, byte[] array, BlobPropertyBag options)
+        //{
+        //    var jsObjectRef = jsRuntime.CreateJsObject("window", "Blob", array, options);
+        //    return new Blob(jsRuntime, jsObjectRef);
+        //}
 
 
         //public static IBlob Create(IJSRuntime jsRuntime, string[] array, BlobPropertyBag options)
