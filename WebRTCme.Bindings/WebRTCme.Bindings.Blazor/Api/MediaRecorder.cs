@@ -88,7 +88,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public void Start(int? timeslice = null)
         {
-            JsRuntime.CallJsMethodVoid(NativeObject, "start");
+            JsRuntime.CallJsMethodVoid(NativeObject, "start", timeslice);
         }
 
         public void Stop()

@@ -201,7 +201,7 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public Task OnRecordAsync()
+        public async Task OnRecordAsync()
         {
             if (_isRecording)
             {
@@ -217,16 +217,29 @@ namespace WebRTCme.Middleware
                 var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
 
                 _mediaRecorder = window.MediaRecorder(_displayStream);
-                _mediaRecorder.OnDataAvailable += ((s, e) => 
+                _mediaRecorder.OnDataAvailable += (async (s, e) => 
                 {
-                    _logger.LogInformation("---------------------------- RECORDER BLOB DATA");
                     var blob = e.Data;
+                    _logger.LogInformation($"---------------------------- RECORDER BLOB DATA: size:{blob.Size}");
+                    //var data = await blob.ArrayBuffer();
+                    var data = await blob.Text();
+                    _logger.LogInformation($"---------------------------- RECORDER UTF-8 STRING : size:{data.Length}");
+                    var dataBin = Encoding.UTF8.GetBytes(data);
+////                    _logger.LogInformation($"DATA:\n {data}");
+      //_mediaRecorder.Stop();
                 });
-                _mediaRecorder.Start();
+                _mediaRecorder.OnStart += ((s, e) => 
+                {
+                    _logger.LogInformation("---------------------------- RECORDER STARTED");
+                });
+                _mediaRecorder.Start(1000);
+                //await Task.Delay(1000);
+                //_mediaRecorder.RequestData();
+    ///_mediaRecorder.Stop();
             }
             _isRecording = !_isRecording;
 
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
     }
 }

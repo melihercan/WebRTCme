@@ -53,8 +53,10 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public async Task<string> Text()
         {
-            var bytes = await ArrayBuffer();
-            return Encoding.UTF8.GetString(bytes);
+            ////var bytes = await ArrayBuffer();
+            ////return Encoding.UTF8.GetString(bytes);
+            ///
+            return await JsRuntime.CallJsMethodAsync<string>(NativeObject, "text");
         }
     }
 }
