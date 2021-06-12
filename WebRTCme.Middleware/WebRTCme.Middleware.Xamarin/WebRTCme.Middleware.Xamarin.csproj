@@ -3,7 +3,7 @@
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-		<RootNamespace>WebRTCme.Middleware</RootNamespace>
+		<RootNamespace>WebRTCme.Middleware.Xamarin</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
 		<LangVersion>9.0</LangVersion>
@@ -48,7 +48,6 @@
     <Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-	
 	<ItemGroup>
 	  <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
 	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Middleware.Helpers;
+using WebRTCme.Middleware.Blazor.Helpers;
 
-namespace WebRTCme.Middleware.Services
+namespace WebRTCme.Middleware.Blazor.Services
 {
     class WebRtcIncomingFileStreamFactory : IWebRtcIncomingFileStreamFactory
     {

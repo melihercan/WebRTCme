@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace WebRTCme.Middleware.Xamarin.Helpers
+namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    internal class WebRtcIncomingFIleStream : Stream
+    class VideoRecorderFileStream : Stream
     {
         public override bool CanRead => throw new NotImplementedException();
 
@@ -15,11 +18,7 @@ namespace WebRTCme.Middleware.Xamarin.Helpers
 
         public override long Length => throw new NotImplementedException();
 
-        public override long Position 
-        { 
-            get => throw new NotImplementedException(); 
-            set => throw new NotImplementedException(); 
-        }
+        public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override void Flush()
         {
@@ -44,6 +43,11 @@ namespace WebRTCme.Middleware.Xamarin.Helpers
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return base.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }

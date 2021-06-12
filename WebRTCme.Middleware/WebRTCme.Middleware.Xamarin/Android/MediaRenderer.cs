@@ -54,7 +54,7 @@ namespace WebRTCme.Middleware
 
                     // Instantiate the native control and assign it to the Control property with
                     // the SetNativeControl method.
-                    var context = Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
+                    var context = global::Xamarin.Essentials.Platform.CurrentActivity.ApplicationContext;
                     _mediaView = new MediaView(context);
                     if (_videoTrack is not null)
                         _mediaView.SetTrack(_videoTrack);

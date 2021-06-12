@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Middleware.Helpers
+namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    internal class WebRtcIncomingFileStream : Stream
+    class WebRtcIncomingFileStream : Stream
     {
         private readonly IStreamSaver _streamSaver;
         private readonly string _peerUserName;
