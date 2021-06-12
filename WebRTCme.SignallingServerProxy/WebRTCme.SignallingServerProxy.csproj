@@ -22,8 +22,8 @@
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
     <PackageReference Include="Ardalis.Result" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
@@ -33,8 +33,8 @@
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
     <PackageReference Include="Ardalis.Result" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />

@@ -16,6 +16,7 @@ namespace WebRTCme.Middleware
             services.AddMiddleware();
 
             services.AddStreamSaver();
+            services.AddFFmpeg();
 
             return services;
 
