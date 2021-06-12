@@ -41,7 +41,6 @@
    </ItemGroup>-->
 
    <ItemGroup>
-    <ProjectReference Include="..\..\..\Blazorme\StreamSaver\StreamSaver.csproj" />
     <ProjectReference Include="..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
     </ProjectReference>
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
@@ -56,6 +55,11 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Blazorme.StreamSaver" Version="1.0.0" />
   </ItemGroup>
 
  </Project>
