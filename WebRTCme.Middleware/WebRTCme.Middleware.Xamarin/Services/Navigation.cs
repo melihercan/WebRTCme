@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using WebRTCme.Middleware;
 using Xamarin.Forms;
 
-namespace WebRTCme.DemoApp.Xamarin.Services
+namespace WebRTCme.Middleware.Xamarin.Services
 {
     public class Navigation : Middleware.INavigation
     {

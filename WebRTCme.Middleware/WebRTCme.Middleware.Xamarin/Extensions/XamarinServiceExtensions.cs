@@ -10,6 +10,8 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddXamarinMiddleware(this IServiceCollection services)
         {
+            services.AddSingleton<INavigation, Navigation>();
+            services.AddSingleton<IRunOnUiThread, RunOnUiThread>();
             services.AddSingleton<IWebRtcIncomingFileStreamFactory, WebRtcIncomingFileStreamFactory>();
             services.AddSingleton<IVideoRecorderFileStreamFactory, VideoRecorderFileStreamFactory>();
 

@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using WebRTCme.Middleware;
+using Xamarin.Forms;
 
-namespace WebRTCme.DemoApp.Blazor.Services
+namespace WebRTCme.Middleware.Xamarin.Services
 {
     public class RunOnUiThread : IRunOnUiThread
     {
         public void Invoke(Action action)
         {
-            action();
+            Device.BeginInvokeOnMainThread(action);
         }
     }
 }

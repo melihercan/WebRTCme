@@ -72,5 +72,21 @@
 	</ItemGroup>
 	
 	
+	<ItemGroup>
+	  <None Remove="Services\Navigation.cs" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="Services\Navigation.cs" />
+	  <UpToDateCheckInput Remove="Services\RunOnUiThread.cs" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <None Remove="Services\RunOnUiThread.cs" />
+	</ItemGroup>
+	
+	
 
 </Project>

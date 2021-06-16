@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.DemoApp.Blazor.Services;
 using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Extensions
@@ -18,16 +17,6 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
             var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
 
             services.AddBlazoredModal();
-            if (jsRuntime is not null && jsRuntime is not IJSInProcessRuntime)
-            {
-                services.AddScoped<INavigation, Navigation>();
-                services.AddScoped<IRunOnUiThread, RunOnUiThread>();
-            }
-            else
-            {
-                services.AddSingleton<INavigation, Navigation>();
-                services.AddSingleton<IRunOnUiThread, RunOnUiThread>();
-            }
             services.AddBlazorMiddleware();
 
             return services;
