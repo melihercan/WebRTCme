@@ -19,19 +19,19 @@ using Xamarin.Essentials;
 
 namespace WebRTCme.Middleware.Services
 {
-    internal class SignallingServerService : ISignallingServerService, ISignallingServerCallbacks
+    internal class SignallingServer : ISignallingServer, ISignallingServerCallbacks
     {
         private readonly IWebRtcConnection _webRtcConnection;
         private readonly IJSRuntime _jsRuntime;
-        private readonly ILogger<SignallingServerService> _logger;
+        private readonly ILogger<SignallingServer> _logger;
         private readonly string _signallingServerBaseUrl;
 
         //// TODO: FIND ANOTHER SOLUTION TO PASS THIS TO WebRtcConnection.
         private readonly ISignallingServerProxy SignallingServerProxy;
 //        private static List<ConnectionContext> _connectionContexts = new();
 
-        public SignallingServerService(IWebRtcConnection webRtcConnection, IConfiguration configuration, 
-            ILogger<SignallingServerService> logger,
+        public SignallingServer(IWebRtcConnection webRtcConnection, IConfiguration configuration, 
+            ILogger<SignallingServer> logger,
             IJSRuntime jsRuntime = null)
         {
             _webRtcConnection = webRtcConnection;

@@ -21,12 +21,12 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private readonly ISignallingServerService _signallingServerService;
-        private readonly INavigationService _navigationService;
+        private readonly ISignallingServer _signallingServerService;
+        private readonly INavigation _navigationService;
         private string[] _turnServerNames;
 
-        public InitializingViewModel(ISignallingServerService signallingServerService,
-            INavigationService navigationService)
+        public InitializingViewModel(ISignallingServer signallingServerService,
+            INavigation navigationService)
         {
             _signallingServerService = signallingServerService;
             _navigationService = navigationService;

@@ -28,11 +28,11 @@ namespace WebRTCme.Middleware
             //}
             //else
             {
-                services.AddSingleton<IMediaStreamService, MediaStreamService>();
+                services.AddSingleton<ILocalMediaStream, LocalMediaStream>();
                 services.AddSingleton<IWebRtcConnection, WebRtcConnection>();
-                services.AddSingleton<ISignallingServerService, SignallingServerService>();
-                services.AddSingleton<IMediaManagerService, MediaManagerService>();
-                services.AddSingleton<IDataManagerService, DataManagerService>();
+                services.AddSingleton<ISignallingServer, SignallingServer>();
+                services.AddSingleton<IMediaManager, MediaManager>();
+                services.AddSingleton<IDataManager, DataManager>();
                 services.AddSingleton<InitializingViewModel>();
                 services.AddSingleton<ConnectionParametersViewModel>();
                 services.AddSingleton<CallViewModel>();

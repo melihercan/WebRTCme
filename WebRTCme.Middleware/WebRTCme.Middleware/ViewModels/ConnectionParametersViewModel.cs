@@ -20,12 +20,12 @@ namespace WebRTCme.Middleware
         private void OnPropertyChanged([CallerMemberName] string name = null) => 
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private readonly INavigationService _navigationService;
+        private readonly INavigation _navigationService;
 
         private List<string> _turnServerNames;
 
 
-        public ConnectionParametersViewModel(INavigationService navigationService)
+        public ConnectionParametersViewModel(INavigation navigationService)
         {
             _navigationService = navigationService;
 

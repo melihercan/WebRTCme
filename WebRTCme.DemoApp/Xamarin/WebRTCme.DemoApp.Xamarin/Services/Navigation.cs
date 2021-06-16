@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace WebRTCme.DemoApp.Xamarin.Services
 {
-    public class NavigationService : INavigationService
+    public class Navigation : Middleware.INavigation
     {
         public async Task NavigateToPageAsync(string prefix, string uri)
         {

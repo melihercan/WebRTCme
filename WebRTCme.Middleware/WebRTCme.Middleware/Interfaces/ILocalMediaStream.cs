@@ -6,7 +6,7 @@ using WebRTCme;
 
 namespace WebRTCme.Middleware
 {
-    public interface IMediaStreamService
+    public interface ILocalMediaStream
     {
         Task<IMediaStream> GetCameraMediaStreamAsync(CameraType cameraType = CameraType.Default,
             MediaStreamConstraints mediaStreamConstraints = null);

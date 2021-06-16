@@ -72,9 +72,5 @@
 	</ItemGroup>
 	
 	
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="Helpers\VideoRecorderBlobFileStream.cs" />
-	</ItemGroup>
-
 
 </Project>

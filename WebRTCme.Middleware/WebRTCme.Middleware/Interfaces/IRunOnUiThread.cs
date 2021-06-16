@@ -4,7 +4,8 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public interface IModalPopupService
+    public interface IRunOnUiThread
     {
+        void Invoke(Action action);
     }
 }

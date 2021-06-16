@@ -25,13 +25,13 @@ namespace WebRTCme.Middleware
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 
-        private readonly IMediaStreamService _mediaStreamService;
+        private readonly ILocalMediaStream _mediaStreamService;
         private readonly IWebRtcConnection _webRtcConnection;
-        private readonly ISignallingServerService _signallingServerService;
-        private readonly IMediaManagerService _mediaManagerService;
+        private readonly ISignallingServer _signallingServerService;
+        private readonly IMediaManager _mediaManagerService;
         private readonly IVideoRecorderFileStreamFactory _videoRecorderFileStreamFactory;
-        private readonly INavigationService _navigationService;
-        private readonly IRunOnUiThreadService _runOnUiThreadService;
+        private readonly INavigation _navigationService;
+        private readonly IRunOnUiThread _runOnUiThreadService;
         private readonly ILogger<CallViewModel> _logger;
         private readonly IJSRuntime _jsRuntime;
 
@@ -47,10 +47,10 @@ namespace WebRTCme.Middleware
         BlobStream _videoRecorderBlobFileStream;
 
 
-        public CallViewModel(IMediaStreamService mediaStreamService, IWebRtcConnection webRtcConnection,
-            ISignallingServerService signallingServerService, IMediaManagerService mediaManagerService,
-            IVideoRecorderFileStreamFactory videoRecorderFileStreamFactory, INavigationService navigationService,  
-            IRunOnUiThreadService runOnUiThreadService, ILogger<CallViewModel> logger, IJSRuntime jsRuntime = null)
+        public CallViewModel(ILocalMediaStream mediaStreamService, IWebRtcConnection webRtcConnection,
+            ISignallingServer signallingServerService, IMediaManager mediaManagerService,
+            IVideoRecorderFileStreamFactory videoRecorderFileStreamFactory, INavigation navigationService,  
+            IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, IJSRuntime jsRuntime = null)
         {
             _mediaStreamService = mediaStreamService;
             _webRtcConnection = webRtcConnection;

@@ -24,8 +24,8 @@ namespace DemoApp
             });
 
             _ = CrossWebRtcMiddlewareXamarin.Current;
-            hostBuilder.Services.AddSingleton<INavigationService, NavigationService>();
-            hostBuilder.Services.AddSingleton<IRunOnUiThreadService, RunOnUiThreadService>();
+            hostBuilder.Services.AddSingleton<WebRTCme.Middleware.INavigation, Navigation>();
+            hostBuilder.Services.AddSingleton<IRunOnUiThread, RunOnUiThreadService>();
             hostBuilder.Services.AddXamarinMiddleware();
             Host = hostBuilder.Build();
 

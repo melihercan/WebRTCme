@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
-    public interface IDataManagerService
+    public interface IDataManager
     {
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 

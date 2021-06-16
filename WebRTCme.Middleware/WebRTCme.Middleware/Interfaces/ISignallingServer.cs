@@ -7,7 +7,7 @@ using WebRTCme.SignallingServerProxy;
 
 namespace WebRTCme.Middleware
 {
-    public interface ISignallingServerService : /*IAsyncInitialization,*/ IAsyncDisposable
+    public interface ISignallingServer : /*IAsyncInitialization,*/ IAsyncDisposable
     {
         Task<string[]> GetTurnServerNamesAsync();
 

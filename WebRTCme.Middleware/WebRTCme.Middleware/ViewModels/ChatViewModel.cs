@@ -26,15 +26,15 @@ namespace WebRTCme.Middleware
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
         private readonly IWebRtcConnection _webRtcConnection;
-        private readonly ISignallingServerService _signallingServerService;
-        public readonly IDataManagerService _dataManagerService;
-        private readonly INavigationService _navigationService;
+        private readonly ISignallingServer _signallingServerService;
+        public readonly IDataManager _dataManagerService;
+        private readonly INavigation _navigationService;
         private IDisposable _connectionDisposer;
         private Action _reRender;
 
-        public ChatViewModel(IWebRtcConnection webRtcConnection, ISignallingServerService signallingServerService, 
-            IDataManagerService dataManagerService, 
-            INavigationService navigationService)
+        public ChatViewModel(IWebRtcConnection webRtcConnection, ISignallingServer signallingServerService, 
+            IDataManager dataManagerService, 
+            INavigation navigationService)
         {
             _signallingServerService = signallingServerService;
             _webRtcConnection = webRtcConnection;

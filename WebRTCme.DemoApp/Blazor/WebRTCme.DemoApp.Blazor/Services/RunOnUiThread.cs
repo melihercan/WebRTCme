@@ -7,7 +7,7 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Services
 {
-    public class RunOnUiThreadService : IRunOnUiThreadService
+    public class RunOnUiThread : IRunOnUiThread
     {
         public void Invoke(Action action)
         {

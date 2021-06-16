@@ -7,11 +7,11 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Services
 {
-    public class NavigationService : INavigationService
+    public class Navigation : INavigation
     {
         private readonly NavigationManager _navigationManager;
 
-        public NavigationService(NavigationManager navigationManager)
+        public Navigation(NavigationManager navigationManager)
         {
             _navigationManager = navigationManager;
         }

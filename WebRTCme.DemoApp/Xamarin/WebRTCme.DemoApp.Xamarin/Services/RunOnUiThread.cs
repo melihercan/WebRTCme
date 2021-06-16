@@ -6,7 +6,7 @@ using Xamarin.Forms;
 
 namespace WebRTCme.DemoApp.Xamarin.Services
 {
-    public class RunOnUiThreadService : IRunOnUiThreadService
+    public class RunOnUiThreadService : IRunOnUiThread
     {
         public void Invoke(Action action)
         {

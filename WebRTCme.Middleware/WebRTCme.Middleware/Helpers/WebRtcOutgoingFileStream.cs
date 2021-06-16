@@ -14,10 +14,10 @@ namespace WebRTCme.Middleware.Helpers
     {
         private readonly File _file;
         private readonly Action<object> _sendObject;
-        private readonly ILogger<DataManagerService> _logger;
+        private readonly ILogger<DataManager> _logger;
         private Guid _guid;
 
-        public WebRtcOutgoingFileStream(File file, Action<object> sendObject, ILogger<DataManagerService> logger)
+        public WebRtcOutgoingFileStream(File file, Action<object> sendObject, ILogger<DataManager> logger)
         {
             _file = file;
             _sendObject = sendObject;
@@ -65,7 +65,7 @@ namespace WebRTCme.Middleware.Helpers
 
             FileDto fileDto = new()
             {
-                Cookie = DataManagerService.Cookie,
+                Cookie = DataManager.Cookie,
                 DtoObjectType = Enums.DataObjectType.File,
                 Guid = _guid,
                 Name = _file.Name,

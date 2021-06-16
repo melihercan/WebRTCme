@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
-    public interface INavigationService
+    public interface INavigation
     {
         Task NavigateToPageAsync(string prefix, string uri);
 

@@ -9,11 +9,11 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.Middleware.Services
 {
-    internal class MediaStreamService : IMediaStreamService
+    internal class LocalMediaStream : ILocalMediaStream
     {
         private readonly IMediaDevices _mediaDevices;
 
-        public MediaStreamService(IJSRuntime jsRuntime = null)
+        public LocalMediaStream(IJSRuntime jsRuntime = null)
         {
             var window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
             var navigator = window.Navigator();

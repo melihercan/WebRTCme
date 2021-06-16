@@ -15,7 +15,7 @@ using WebRTCme.Middleware.Models;
 
 namespace WebRTCme.Middleware.Services
 {
-    public class DataManagerService : IDataManagerService
+    public class DataManager : IDataManager
     {
         // 'ItemsSource' to 'ChatView'.
         public ObservableCollection<DataParameters> DataParametersList { get; set; } = new();
@@ -24,15 +24,15 @@ namespace WebRTCme.Middleware.Services
         private Dictionary<(string peerUserName, Guid guid), Stream>
             _incomingFileStreamDispatcher = new();
 
-        internal readonly ILogger<DataManagerService> Logger;
+        internal readonly ILogger<DataManager> Logger;
 
         internal const ulong Cookie = 0x55aa5aa533cc3cc3;
 
         private readonly IWebRtcIncomingFileStreamFactory _webRtcIncomingFileStreamFactory;
         private uint _id;
 
-        public DataManagerService(IWebRtcIncomingFileStreamFactory webRtcIncomingFileStreamFactory,
-            ILogger<DataManagerService> logger)
+        public DataManager(IWebRtcIncomingFileStreamFactory webRtcIncomingFileStreamFactory,
+            ILogger<DataManager> logger)
         {
             _webRtcIncomingFileStreamFactory = webRtcIncomingFileStreamFactory;
             Logger = logger;
@@ -72,7 +72,7 @@ namespace WebRTCme.Middleware.Services
 
             MessageDto messageDto = new()
             {
-                Cookie = DataManagerService.Cookie,
+                Cookie = DataManager.Cookie,
                 DtoObjectType = Enums.DataObjectType.Message,
                 Text = message.Text
             };
@@ -188,7 +188,7 @@ namespace WebRTCme.Middleware.Services
                     {
                         case Enums.DataObjectType.Message:
                             var messageDto = JsonSerializer.Deserialize<MessageDto>(json);
-                            if (messageDto.Cookie != DataManagerService.Cookie)
+                            if (messageDto.Cookie != DataManager.Cookie)
                                 throw new Exception("Bad cookie");
                             dataParameters.Object = new Message { Text = messageDto.Text};
                             DataParametersList.Add(dataParameters);
@@ -200,7 +200,7 @@ namespace WebRTCme.Middleware.Services
 
                         case Enums.DataObjectType.File:
                             var fileDto = JsonSerializer.Deserialize<FileDto>(json);
-                            if (fileDto.Cookie != DataManagerService.Cookie)
+                            if (fileDto.Cookie != DataManager.Cookie)
                                 throw new Exception("Bad cookie");
 
                             Logger.LogInformation($"============== READING {fileDto.Name} offset:{fileDto.Offset} count:{fileDto.Data.Length}");

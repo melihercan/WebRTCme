@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace WebRTCme.Middleware.Services
 {
-    public class MediaManagerService : IMediaManagerService
+    public class MediaManager : IMediaManager
     {
         // Will be used as 'ItemsSource'. 
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; } = new();
