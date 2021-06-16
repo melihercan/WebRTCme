@@ -69,5 +69,10 @@ namespace WebRTCme.Bindings.Blazor.Api
             ///
             return await JsRuntime.CallJsMethodAsync<string>(NativeObject, "text");
         }
+
+        public object GetNativeObject()
+        {
+            return NativeObject;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Blazorme;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,25 +12,26 @@ namespace WebRTCme.Middleware.Blazor.Services
 {
     class VideoRecorderFileStreamFactory : IVideoRecorderFileStreamFactory
     {
-//// TEMPORARY FOR TESTING
-readonly IStreamSaver _streamSaver;
-   public VideoRecorderFileStreamFactory(IStreamSaver streamSaver)
-   {
-        _streamSaver = streamSaver;
-   }
+        readonly IStreamSaver _streamSaver;
+        readonly IJSRuntime _jsRuntime;
 
+        public VideoRecorderFileStreamFactory(IStreamSaver streamSaver, IJSRuntime jsRuntime)
+        {
+            _streamSaver = streamSaver;
+            _jsRuntime = jsRuntime;
+        }
 
         public async Task<Stream> CreateStreamAsync(string fileName, MediaRecorderOptions options)
         {
-            VideoRecorderFileStream videoRecorderFileStream = new(fileName, options);
-            await videoRecorderFileStream.CreateAsync(_streamSaver);
+            VideoRecorderFileStream videoRecorderFileStream = new(fileName, options, _streamSaver);
+            await videoRecorderFileStream.InitAsync();
             return videoRecorderFileStream;
         }
 
         public async Task<BlobStream> CreateBlobStreamAsync(string fileName, MediaRecorderOptions options)
         {
-            VideoRecorderBlobFileStream videoRecorderBlobFileStream = new(fileName, options);
-            await videoRecorderBlobFileStream.CreateAsync(_streamSaver);
+            VideoRecorderBlobFileStream videoRecorderBlobFileStream = new(fileName, options, _jsRuntime);
+            await videoRecorderBlobFileStream.InitAsync();
             return videoRecorderBlobFileStream;
         }
 

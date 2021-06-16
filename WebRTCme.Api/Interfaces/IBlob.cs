@@ -19,5 +19,6 @@ namespace WebRTCme
 
         Task<string> Text();
 
+        object GetNativeObject();
     }
 }

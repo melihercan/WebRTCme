@@ -13,16 +13,16 @@ namespace WebRTCme.Middleware.Blazor.Helpers
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
+        readonly IStreamSaver _streamSaver;
 
-IStreamSaver _streamSaver;
-Stream _writableFileStream;
+        Stream _writableFileStream;
 
-        public VideoRecorderFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions)
+        public VideoRecorderFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions, IStreamSaver streamSaver)
         {
             _fileName = fileName;
             _mediaRecorderOptions = mediaRecorderOptions;
+            _streamSaver = streamSaver;
         }
-
 
         public override bool CanRead => throw new NotImplementedException();
 
@@ -34,18 +34,10 @@ Stream _writableFileStream;
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public async Task CreateAsync(/*** TESTING*/IStreamSaver streamSaver)
+        public async Task InitAsync()
         {
-            //// TODO: CREATE HERE FFmpeg access
-            ///
-
-
-            /////////////// TEMPORARY SAVE EACH BLOB TO A FILE
-    _streamSaver = streamSaver;
-    _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_fileName);
-
+            _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_fileName);
         }
-
 
         public override void Flush()
         {
@@ -74,8 +66,7 @@ Stream _writableFileStream;
 
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-   await _writableFileStream.WriteAsync(buffer, 0, count, cancellationToken);
-
+            await _writableFileStream.WriteAsync(buffer, 0, count, cancellationToken);
         }
 
         public override void Close()

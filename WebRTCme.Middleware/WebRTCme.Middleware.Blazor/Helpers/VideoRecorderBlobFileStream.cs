@@ -1,4 +1,5 @@
 ﻿using Blazorme;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebRTCme.Bindings.Blazor.Extensions;
+using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Middleware.Blazor.Helpers
 {
@@ -13,16 +16,25 @@ namespace WebRTCme.Middleware.Blazor.Helpers
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
+        readonly IJSRuntime _jsRuntime;
+        readonly JsObjectRef _streamSaverJsObjectRef;
+        readonly JsObjectRef _writeableStreamJsObjectRef;
+        readonly JsObjectRef _writerJsObjectRef;
 
-IStreamSaver _streamSaver;
-Stream _writableFileStream;
+        Stream _writableFileStream;
 
-        public VideoRecorderBlobFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions)
+        public VideoRecorderBlobFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions, 
+            IJSRuntime jsRuntime)
         {
             _fileName = fileName;
             _mediaRecorderOptions = mediaRecorderOptions;
-        }
+            _jsRuntime = jsRuntime;
 
+            _streamSaverJsObjectRef = jsRuntime.GetJsPropertyObjectRef("window", "streamSaver");
+            _writeableStreamJsObjectRef = jsRuntime.CallJsMethod<JsObjectRef>(
+                _streamSaverJsObjectRef, "createWriteStream", fileName);
+            _writerJsObjectRef = jsRuntime.CallJsMethod<JsObjectRef>(_writeableStreamJsObjectRef, "getWriter");
+        }
 
         public override bool CanRead => throw new NotImplementedException();
 
@@ -34,18 +46,10 @@ Stream _writableFileStream;
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public async Task CreateAsync(/*** TESTING*/IStreamSaver streamSaver)
+        public Task InitAsync()
         {
-            //// TODO: CREATE HERE FFmpeg access
-            ///
-
-
-            /////////////// TEMPORARY SAVE EACH BLOB TO A FILE
-    _streamSaver = streamSaver;
-    _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_fileName);
-
+            return Task.CompletedTask;
         }
-
 
         public override void Flush()
         {
@@ -72,15 +76,21 @@ Stream _writableFileStream;
             throw new NotImplementedException();
         }
 
-        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-   await _writableFileStream.WriteAsync(buffer, 0, count, cancellationToken);
+            throw new NotImplementedException();
+        }
 
+        public override async Task WriteAsync(IBlob blob, CancellationToken cancellationToken)
+        {
+            var arrayBufferJsObject = await _jsRuntime.CallJsMethodAsync<JsObjectRef>(blob.GetNativeObject(), "arrayBuffer");
+            var uint8JsObject = _jsRuntime.CreateJsObject("window", "Uint8Array", arrayBufferJsObject);
+            await _jsRuntime.CallJsMethodVoidAsync(_writerJsObjectRef, "write", uint8JsObject);
         }
 
         public override void Close()
         {
-            Task.Run(async () => await _writableFileStream.DisposeAsync());
+            Task.Run(async () => await _jsRuntime.CallJsMethodVoidAsync(_writerJsObjectRef, "close"));
             base.Close();
         }
     }

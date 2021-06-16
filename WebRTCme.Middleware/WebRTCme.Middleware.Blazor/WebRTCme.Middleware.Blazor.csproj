@@ -60,7 +60,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Blazorme.StreamSaver" Version="1.0.0" />
+    <PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
   </ItemGroup>
 
  </Project>

@@ -44,7 +44,7 @@ namespace WebRTCme.Middleware
 
         private IMediaRecorder _mediaRecorder;
 
-        Stream _videoRecorderFileStream;
+        BlobStream _videoRecorderBlobFileStream;
 
 
         public CallViewModel(IMediaStreamService mediaStreamService, IWebRtcConnection webRtcConnection,
@@ -214,12 +214,7 @@ namespace WebRTCme.Middleware
                 // Stop recording.
                 RecordButtonText = "Start recording";
 
-
-////                _mediaRecorder.Pause();
-////                _mediaRecorder.RequestData();
-////                await Task.Delay(1000);
-
-                _videoRecorderFileStream.Close();
+                _videoRecorderBlobFileStream.Close();
                 _mediaRecorder.Stop();
                 _mediaRecorder.Dispose();
             }
@@ -231,14 +226,10 @@ namespace WebRTCme.Middleware
                 var mediaRecorderOptions = new MediaRecorderOptions
                 {
                     MimeType = "video/webm",
-                    //MimeType = "video/webm;codecs=vp9",
-                    //MimeType = "video/webm;codecs=h264,opus",
-                    //AudioBitsPerSecond = 48000,
-                    //VideoBitsPerSecond = 2500000,
                 };
 
-                _videoRecorderFileStream = await _videoRecorderFileStreamFactory
-                    .CreateStreamAsync("MyFirst.webm", mediaRecorderOptions);
+                _videoRecorderBlobFileStream = await _videoRecorderFileStreamFactory
+                    .CreateBlobStreamAsync("MyFirst.webm", mediaRecorderOptions);
 
                 var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
 
@@ -248,54 +239,16 @@ namespace WebRTCme.Middleware
                     var blob = e.Data;
                     _logger.LogInformation($"---------------------------- RECORDER BLOB DATA: size:{blob.Size} type:{blob.Type }");
 
-                    ////var newBlob = blob.Slice(0, e.Data.Size, "video/webm");
-                    ////_logger.LogInformation($"---------------------------- RECORDER NEW BLOB DATA: size:{newBlob.Size} type:{newBlob.Type }");
-
-                    //_videoRecorderFileStream.Close();
-                    //_mediaRecorder.Stop();
-                    // _mediaRecorder.Dispose();
-
-
-                    //var dataBin = await blob.ArrayBuffer();
-
-                    _logger.LogInformation($"---------------------------- NOW: {DateTime.Now}");
-                    var data = await blob.Text();
-                    //var data = await newBlob.Text();
-                    //_logger.LogInformation($"---------------------------- RECORDER UTF-8 STRING : size:{data.Length}");
-
-
-                    _logger.LogInformation($"---------------------------- THEN: {DateTime.Now}");
-                    var dataBin = Encoding.UTF8.GetBytes(data);
-                    ////                    _logger.LogInformation($"DATA:\n {data}");
-                    //_mediaRecorder.Stop();
-                    //var b64 = Convert.ToBase64String(dataBin);
-                    //_logger.LogInformation($"---------------------------- RECORDER Base64 STRING : {b64}");
-
-
-                    _logger.LogInformation($"---------------------------- RECORDER BYTES : size:{dataBin.Length}");
-                    await _videoRecorderFileStream.WriteAsync(dataBin, 0, dataBin.Length);
-
-
-
-
+                    await _videoRecorderBlobFileStream.WriteAsync(blob);
                 };
                 _mediaRecorder.OnStart += (s, e) => 
                 {
                     _logger.LogInformation("---------------------------- RECORDER STARTED");
                 };
-                _mediaRecorder.Start(3000);
-
-
-
-
-
-                //await Task.Delay(1000);
-                //_mediaRecorder.RequestData();
-    ///_mediaRecorder.Stop();
+                
+                _mediaRecorder.Start(5000);
             }
             _isRecording = !_isRecording;
-
-            //return Task.CompletedTask;
         }
     }
 }

@@ -281,7 +281,6 @@
     //    }
     //    parentObject[property] = valueObject;
         parentObject[property] = value;
-
     }
 
     /**
@@ -305,15 +304,6 @@
             } else {
                 return ret;
             }
-        }
-    }
-
-    public.getByteArray = function (parent, method, ...args) {
-        let parentObject = getParentObject(parent);
-        let methodObject = getPropertyObject(parentObject, method);
-        let ret = methodObject.apply(parentObject, args);
-        if (ret !== undefined) {
-            return ret;
         }
     }
 
