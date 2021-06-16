@@ -42,7 +42,6 @@ namespace WebRTCme.Middleware.Blazor.Helpers
         public async Task CreateAsync()
         {
             _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_file.Name);
-
         }
 
         public override void Flush()

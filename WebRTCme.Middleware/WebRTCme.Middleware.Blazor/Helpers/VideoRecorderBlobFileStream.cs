@@ -44,7 +44,11 @@ namespace WebRTCme.Middleware.Blazor.Helpers
 
         public override long Length => throw new NotImplementedException();
 
-        public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override long Position 
+        { 
+            get => throw new NotImplementedException(); 
+            set => throw new NotImplementedException(); 
+        }
 
         public Task InitAsync()
         {
@@ -83,7 +87,8 @@ namespace WebRTCme.Middleware.Blazor.Helpers
 
         public override async Task WriteAsync(IBlob blob, CancellationToken cancellationToken)
         {
-            var arrayBufferJsObject = await _jsRuntime.CallJsMethodAsync<JsObjectRef>(blob.GetNativeObject(), "arrayBuffer");
+            var arrayBufferJsObject = await _jsRuntime.CallJsMethodAsync<JsObjectRef>(blob.GetNativeObject(), 
+                "arrayBuffer");
             var uint8JsObject = _jsRuntime.CreateJsObject("window", "Uint8Array", arrayBufferJsObject);
             await _jsRuntime.CallJsMethodVoidAsync(_writerJsObjectRef, "write", uint8JsObject);
         }
