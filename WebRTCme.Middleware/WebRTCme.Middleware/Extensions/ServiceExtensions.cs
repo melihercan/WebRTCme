@@ -28,6 +28,8 @@ namespace WebRTCme.Middleware
             //}
             //else
             {
+                services.AddSignallingServerProxy();
+                
                 services.AddSingleton<ILocalMediaStream, LocalMediaStream>();
                 services.AddSingleton<IWebRtcConnection, WebRtcConnection>();
                 services.AddSingleton<ISignallingServer, SignallingServer>();

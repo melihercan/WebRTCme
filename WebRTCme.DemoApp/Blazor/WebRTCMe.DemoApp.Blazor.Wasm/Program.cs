@@ -34,7 +34,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
 
             _ = CrossWebRtcMiddlewareBlazor.Current;
 
-            builder.Services.AddAppServices();
+            builder.Services.AddApp();
 
             var host = builder.Build();
             ConfigureProviders(host.Services);

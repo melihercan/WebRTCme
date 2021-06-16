@@ -12,7 +12,7 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddAppServices(this IServiceCollection services)
+        public static IServiceCollection AddApp(this IServiceCollection services)
         {
             var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
 

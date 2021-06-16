@@ -37,7 +37,7 @@ namespace WebRTCme.DemoApp.Blazor.Server
 
             _ = CrossWebRtcMiddlewareBlazor.Current;
 
-            services.AddAppServices();
+            services.AddApp();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
