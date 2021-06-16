@@ -2,6 +2,7 @@ using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme.Bindings.Blazor.Interops;
 
@@ -135,6 +136,24 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             var ret = jsRuntime.Invoke<T>("JsInterop.callMethod", invokeParams);
             return ret;
         }
+
+        public static byte[] GetByteArray(this IJSRuntime jsRuntime, object parent,
+            string method, params object[] args)
+        {
+            var invokeParams = new object[]
+            {
+                parent,
+                method
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            var xxx = (JsonElement)jsRuntime.Invoke<object>("JsInterop.getByteArray", invokeParams);
+            var ret = new byte[] { };
+            return ret;
+        }
+
 
         public static ValueTask CallJsMethodVoidAsync(this IJSRuntime jsRuntime, object parent,
             string method, params object[] args)

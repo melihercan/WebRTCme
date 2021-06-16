@@ -8,9 +8,16 @@ namespace WebRTCme.Middleware.Xamarin.Services
 {
     class VideoRecorderFileStreamFactory : IVideoRecorderFileStreamFactory
     {
-        public Task<Stream> CreateAsync(string fileName, MediaRecorderOptions options)
+
+        public Task<Stream> CreateStreamAsync(string fileName, MediaRecorderOptions options)
         {
             throw new NotImplementedException();
         }
+
+        public Task<BlobStream> CreateBlobStreamAsync(string fileName, MediaRecorderOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme.Bindings.Blazor.Extensions;
@@ -29,11 +30,9 @@ namespace WebRTCme.Bindings.Blazor.Api
             return new Blob(jsRuntime, nativeBlobJsObjectRef);
         }
 
-
         private Blob(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
         { 
         }
-
 
         public int Size => GetNativeProperty<int>("size");
 
@@ -41,7 +40,19 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public async Task<byte[]> ArrayBuffer()
         {
-            return await JsRuntime.CallJsMethodAsync<byte[]>(NativeObject, "arrayBuffer");
+            
+            //var arrayBuffer = await JsRuntime.CallJsMethodAsync<object>(NativeObject, "arrayBuffer");
+            //var uint8Array = new Uint8Array(arrayBuffer);
+            //var bytes = uint8Array.ToArray();
+            //return bytes;
+
+            ////var arrayBufferJsObject = await JsRuntime.CallJsMethodAsync<JsObjectRef>(NativeObject, "arrayBuffer");
+            ////var uint8JsObject = JsRuntime.CreateJsObject("window", "Uint8Array", arrayBufferJsObject);
+            ////var bytes = JsRuntime.GetByteArray("Array", "from", uint8JsObject);
+            //return null;
+            ////return bytes;
+            throw new NotImplementedException("TODO: How to get byte[] from JS ArrayBuffer???");
+
         }
 
         public IBlob Slice(int start = 0, int end = 0, string contentType = "")

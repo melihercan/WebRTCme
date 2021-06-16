@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    class VideoRecorderFileStream : Stream
+    class VideoRecorderBlobFileStream : BlobStream
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
@@ -17,7 +17,7 @@ namespace WebRTCme.Middleware.Blazor.Helpers
 IStreamSaver _streamSaver;
 Stream _writableFileStream;
 
-        public VideoRecorderFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions)
+        public VideoRecorderBlobFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions)
         {
             _fileName = fileName;
             _mediaRecorderOptions = mediaRecorderOptions;

@@ -8,10 +8,10 @@ namespace WebRTCme
     {
         public string MimeType { get; set; }
 
-        public uint AudioBitsPerSecond { get; set; }
+        public uint? AudioBitsPerSecond { get; set; }
 
-        public uint VideoBitsPerSecond { get; set; }
+        public uint? VideoBitsPerSecond { get; set; }
 
-        public uint  BitsPerSecond { get; set; }
+        public uint?  BitsPerSecond { get; set; }
     }
 }

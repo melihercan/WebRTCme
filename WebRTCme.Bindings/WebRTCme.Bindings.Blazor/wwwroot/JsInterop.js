@@ -177,7 +177,7 @@
      * @param {...any} args: Argument list of the constructor.
      */
     public.createObject = function (parent, interface, ...args) {
-        let parentObject = getParentObject(parent);;
+        let parentObject = getParentObject(parent);
         let interfaceObject = getPropertyObject(parentObject, interface);
         let createdObject = new interfaceObject(...args);
         let objectRef = addObjectRef(createdObject);
@@ -299,12 +299,21 @@
         let methodObject = getPropertyObject(parentObject, method);
         let ret = methodObject.apply(parentObject, args);
         if (ret !== undefined) {
-            if (ret !== null && typeof (ret) === 'object') {
+            if (ret !== null && typeof(ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;
             } else {
                 return ret;
             }
+        }
+    }
+
+    public.getByteArray = function (parent, method, ...args) {
+        let parentObject = getParentObject(parent);
+        let methodObject = getPropertyObject(parentObject, method);
+        let ret = methodObject.apply(parentObject, args);
+        if (ret !== undefined) {
+            return ret;
         }
     }
 
@@ -323,10 +332,16 @@
         let methodObject = getPropertyObject(parentObject, method);
         let ret = await methodObject.apply(parentObject, args);
         if (ret !== undefined) {
-            if (ret !== null && typeof (ret) === 'object') {
+            if (ret !== null && typeof(ret) === 'object') {
                 let objectRef = addObjectRef(ret);
                 return objectRef;
             } else {
+                //if (typeof (ret) == 'string') {
+                    //var x = ret.length;
+                    //console.log('blob string len:' + x);
+                    //var b64 = btoa(unescape(encodeURIComponent(ret)));
+                    //console.log('blob b64 data:' + b64);
+                //}
                 return ret;
             }
         }
