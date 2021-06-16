@@ -2,6 +2,7 @@
 using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -21,15 +22,15 @@ namespace WebRTCme.SignallingServerProxy
 
         private string _signallingServerBaseUrl;
 
-        public SignallingServerProxy(string signallingServerBaseUrl,
+        public SignallingServerProxy(IConfiguration configuration, //string signallingServerBaseUrl,
             ISignallingServerCallbacks signallingServerCallbacks)
         {
-            _signallingServerBaseUrl = signallingServerBaseUrl;
+            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];// signallingServerBaseUrl;
 
             var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(signallingServerBaseUrl + "/roomhub", (opts) =>
+                .WithUrl(_signallingServerBaseUrl + "/roomhub", (opts) =>
                 {
                     if (bypassSslCertificateError)
                     {

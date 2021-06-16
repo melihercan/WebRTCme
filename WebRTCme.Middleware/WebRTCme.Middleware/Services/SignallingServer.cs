@@ -38,7 +38,7 @@ namespace WebRTCme.Middleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            SignallingServerProxy = new SignallingServerProxy.SignallingServerProxy(_signallingServerBaseUrl, this);
+            SignallingServerProxy = new SignallingServerProxy.SignallingServerProxy(configuration/*_signallingServerBaseUrl*/, this);
             _webRtcConnection.SignallingServerProxy = SignallingServerProxy;
         }
 
