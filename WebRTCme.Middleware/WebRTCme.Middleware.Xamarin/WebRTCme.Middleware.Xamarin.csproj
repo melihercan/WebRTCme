@@ -25,6 +25,7 @@
     <UpToDateCheckInput Include="Services\*.cs" />
     <UpToDateCheckInput Include="Helpers\*.cs" />
     <UpToDateCheckInput Include="Extensions\*.cs" />
+    <UpToDateCheckInput Include="Popups\*.cs" />
     <UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
@@ -34,6 +35,10 @@
     <Compile Include="Services\*.cs" />
     <Compile Include="Helpers\*.cs" />
     <Compile Include="Extensions\*.cs" />
+    <Compile Include="Popups\*.cs" />
+    <Compile Update="Popups\GenericPopup.xaml.cs">
+      <DependentUpon>GenericPopup.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
@@ -48,7 +53,9 @@
     <Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
+
 	<ItemGroup>
+	  <PackageReference Include="Xamarin.CommunityToolkit" Version="1.1.0" />
 	  <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
 	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
 	</ItemGroup>
@@ -69,6 +76,13 @@
 	    <Pack>True</Pack>
 	    <PackagePath></PackagePath>
 	  </None>
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <EmbeddedResource Update="Popups\GenericPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </EmbeddedResource>
 	</ItemGroup>
 	
 

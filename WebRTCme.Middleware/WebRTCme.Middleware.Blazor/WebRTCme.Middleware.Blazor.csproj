@@ -59,6 +59,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="BlazorDialog" Version="1.2.0" />
     <PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
   </ItemGroup>
 

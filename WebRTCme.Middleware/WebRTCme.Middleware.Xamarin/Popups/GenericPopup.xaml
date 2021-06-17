@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xct:Popup xmlns="http://xamarin.com/schemas/2014/forms"
+           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+           xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+           xmlns:models="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware"
+           Size="300,300"
+           x:TypeArguments="models:GenericPopupOut"
+           x:Class="WebRTCme.Middleware.Xamarin.Popups.GenericPopup">
+
+    <StackLayout>
+        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+                <Image x:Name="Image" Aspect="AspectFit" HeightRequest="30" IsVisible="False"/>
+                <Label x:Name="Title" FontSize="Title" FontAttributes="Bold" IsVisible="False"/>
+            </StackLayout>
+            <Label x:Name="Text" Margin="0,20,0,0" IsVisible="False"/>
+            <Entry x:Name="Entry" Margin="0,10,0,0" IsVisible="False"/>
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,20">
+                <Button x:Name="OkButton" Clicked="OkButton_Clicked" IsVisible="False"/>
+                <Button x:Name="CancelButton" Clicked="CancelButton_Clicked" IsVisible="False"/>
+            </StackLayout>
+        </StackLayout>
+    </StackLayout>
+</xct:Popup>

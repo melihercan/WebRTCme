@@ -137,6 +137,9 @@ namespace WebRTCme.Middleware
                                 _mediaManagerService.Remove(peerResponseParameters.PeerUserName);
                             });
                             _reRender?.Invoke();
+
+                            //// TODO: ADD POPUP ERROR MESSAGE
+
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
                             break;
                     }
@@ -233,7 +236,7 @@ namespace WebRTCme.Middleware
 
                 var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
 
-                _mediaRecorder = window.MediaRecorder(/****_displayStream****/ _cameraStream, mediaRecorderOptions); 
+                _mediaRecorder = window.MediaRecorder(/*_displayStream*/ _cameraStream, mediaRecorderOptions); 
                 _mediaRecorder.OnDataAvailable += async (s, e) => 
                 {
                     var blob = e.Data;

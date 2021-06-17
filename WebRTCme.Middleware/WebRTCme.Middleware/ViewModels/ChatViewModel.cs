@@ -155,6 +155,8 @@ namespace WebRTCme.Middleware
                         case PeerResponseCode.PeerError:
                             _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
+
+                            //// TODO: ADD POPUP ERROR MESSAGE
                             break;
                     }
 

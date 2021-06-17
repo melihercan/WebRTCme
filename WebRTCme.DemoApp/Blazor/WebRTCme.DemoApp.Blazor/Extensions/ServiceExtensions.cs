@@ -1,5 +1,4 @@
-﻿using Blazored.Modal;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ namespace WebRTCme.DemoApp.Blazor.Extensions
         {
             var jsRuntime = services.BuildServiceProvider().GetService<IJSRuntime>();
 
-            services.AddBlazoredModal();
             services.AddBlazorMiddleware();
 
             return services;

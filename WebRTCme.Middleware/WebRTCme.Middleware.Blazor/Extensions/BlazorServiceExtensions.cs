@@ -12,6 +12,9 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddBlazorMiddleware(this IServiceCollection services)
         {
+            services.AddBlazorDialog();
+
+            services.AddSingleton<IModalPopup, ModalPopup>();
             services.AddSingleton<INavigation, Navigation>();
             services.AddSingleton<IRunOnUiThread, RunOnUiThread>();
             services.AddSingleton<IWebRtcIncomingFileStreamFactory, WebRtcIncomingFileStreamFactory>();

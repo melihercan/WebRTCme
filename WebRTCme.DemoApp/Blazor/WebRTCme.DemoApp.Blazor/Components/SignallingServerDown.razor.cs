@@ -1,5 +1,4 @@
-﻿using Blazored.Modal;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +8,8 @@ namespace WebRTCme.DemoApp.Blazor.Components
 {
     public partial class SignallingServerDown
     {
-        [CascadingParameter]
-        BlazoredModalInstance Modal { get; set; }
-
-        private async void OnOk()
+        private void OnOk()
         {
-            await Modal.CloseAsync();
         }
     }
 }
