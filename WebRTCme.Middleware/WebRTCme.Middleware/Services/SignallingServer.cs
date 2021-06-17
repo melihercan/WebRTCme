@@ -40,7 +40,6 @@ namespace WebRTCme.Middleware.Services
             _logger = logger;
             _jsRuntime = jsRuntime;
             SignallingServerProxy = signallingServerProxy;// new SignallingServerProxy.SignallingServerProxy(configuration/*_signallingServerBaseUrl*/, this);
-            _webRtcConnection.SignallingServerProxy = SignallingServerProxy;
 
             SignallingServerProxy.OnPeerJoinedAsyncEvent += OnPeerJoinedAsync;
             SignallingServerProxy.OnPeerLeftAsyncEvent += OnPeerLeftAsync;

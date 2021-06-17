@@ -20,12 +20,12 @@ namespace WebRTCme.Middleware.Services
         private readonly IJSRuntime _jsRuntime;
         private static List<ConnectionContext> _connectionContexts = new();
 
-        public ISignallingServerProxy SignallingServerProxy { get; set; }
+        ISignallingServerProxy SignallingServerProxy; 
 
-        public WebRtcConnection(/*ISignallingServerService signallingServerService,*/ ILogger<WebRtcConnection> logger,
+        public WebRtcConnection(ISignallingServerProxy signallingServerProxy, ILogger<WebRtcConnection> logger,
             IJSRuntime jsRuntime = null)
         {
-            //_signallingServerService = signallingServerService;
+            SignallingServerProxy = signallingServerProxy;
             _logger = logger;
             _jsRuntime = jsRuntime;
         }
