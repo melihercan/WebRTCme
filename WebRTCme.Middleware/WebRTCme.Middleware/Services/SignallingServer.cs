@@ -21,14 +21,10 @@ namespace WebRTCme.Middleware.Services
 {
     internal class SignallingServer : ISignallingServer, ISignallingServerCallbacks
     {
-        private readonly IWebRtcConnection _webRtcConnection;
-        private readonly IJSRuntime _jsRuntime;
-        private readonly ILogger<SignallingServer> _logger;
-        private readonly string _signallingServerBaseUrl;
-
-        //// TODO: FIND ANOTHER SOLUTION TO PASS THIS TO WebRtcConnection.
-        private readonly ISignallingServerProxy SignallingServerProxy;
-//        private static List<ConnectionContext> _connectionContexts = new();
+        readonly IWebRtcConnection _webRtcConnection;
+        readonly ILogger<SignallingServer> _logger;
+        readonly ISignallingServerProxy SignallingServerProxy;
+        readonly IJSRuntime _jsRuntime;
 
         public SignallingServer(ISignallingServerProxy signallingServerProxy,
             IWebRtcConnection webRtcConnection, IConfiguration configuration, 
@@ -36,10 +32,9 @@ namespace WebRTCme.Middleware.Services
             IJSRuntime jsRuntime = null)
         {
             _webRtcConnection = webRtcConnection;
-            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            SignallingServerProxy = signallingServerProxy;// new SignallingServerProxy.SignallingServerProxy(configuration/*_signallingServerBaseUrl*/, this);
+            SignallingServerProxy = signallingServerProxy;
 
             SignallingServerProxy.OnPeerJoinedAsyncEvent += OnPeerJoinedAsync;
             SignallingServerProxy.OnPeerLeftAsyncEvent += OnPeerLeftAsync;
@@ -55,13 +50,13 @@ namespace WebRTCme.Middleware.Services
             return result.Value;
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             SignallingServerProxy.OnPeerJoinedAsyncEvent -= OnPeerJoinedAsync;
             SignallingServerProxy.OnPeerLeftAsyncEvent -= OnPeerLeftAsync;
             SignallingServerProxy.OnPeerSdpAsyncEvent -= OnPeerSdpAsync;
             SignallingServerProxy.OnPeerIceAsyncEvent -= OnPeerIceCandidateAsync;
-////            await SignallingServerProxy.DisposeAsync();
+            return new ValueTask();
         }
 
         #region SignallingServerCallbacks

@@ -15,17 +15,15 @@ namespace WebRTCme.Middleware.Services
 {
     internal class WebRtcConnection : IWebRtcConnection
     {
-//        private readonly ISignallingServerService _signallingServerService;
-        private readonly ILogger<WebRtcConnection> _logger;
-        private readonly IJSRuntime _jsRuntime;
-        private static List<ConnectionContext> _connectionContexts = new();
-
-        ISignallingServerProxy SignallingServerProxy; 
+        readonly ISignallingServerProxy _signallingServerProxy;
+        readonly ILogger<WebRtcConnection> _logger;
+        readonly IJSRuntime _jsRuntime;
+        static List<ConnectionContext> _connectionContexts = new();
 
         public WebRtcConnection(ISignallingServerProxy signallingServerProxy, ILogger<WebRtcConnection> logger,
             IJSRuntime jsRuntime = null)
         {
-            SignallingServerProxy = signallingServerProxy;
+            _signallingServerProxy = signallingServerProxy;
             _logger = logger;
             _jsRuntime = jsRuntime;
         }
@@ -53,7 +51,7 @@ namespace WebRTCme.Middleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await SignallingServerProxy.JoinRoomAsync(
+                    await _signallingServerProxy.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName,
                         connectionRequestParameters.ConnectionParameters.UserName);
@@ -72,7 +70,7 @@ namespace WebRTCme.Middleware.Services
                     try
                     {
                         if (isJoined)
-                            await SignallingServerProxy.LeaveRoomAsync(
+                            await _signallingServerProxy.LeaveRoomAsync(
                                 connectionRequestParameters.ConnectionParameters.TurnServerName,
                                 connectionRequestParameters.ConnectionParameters.RoomName,
                                 connectionRequestParameters.ConnectionParameters.UserName);
@@ -119,8 +117,9 @@ namespace WebRTCme.Middleware.Services
         }
 
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
+            return new ValueTask();
         }
 
         public ConnectionContext GetConnectionContext(string turnServerName, string roomName) =>
@@ -173,7 +172,7 @@ namespace WebRTCme.Middleware.Services
 
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = connectionContext.IceServers ?? await SignallingServerProxy
+                        IceServers = connectionContext.IceServers ?? await _signallingServerProxy
                             .GetIceServersAsync(turnServerName),
                         //PeerIdentity = peerUserName
                     };
@@ -305,7 +304,7 @@ namespace WebRTCme.Middleware.Services
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
                         //if (_isAsyncCall)
-                        await SignallingServerProxy.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
+                        await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
                         //else
                         //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
                     }

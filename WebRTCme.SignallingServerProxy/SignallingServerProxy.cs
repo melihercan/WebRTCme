@@ -17,14 +17,9 @@ namespace WebRTCme.SignallingServerProxy
 {
     public class SignallingServerProxy : ISignallingServerProxy
     {
-        private CancellationTokenSource _cts = new CancellationTokenSource();
-        private HubConnection _hubConnection;
-
-        private string _signallingServerBaseUrl;
-
-        //public delegate Task JoinedOrLeftCallbackHandler(string turnServerName, string roomName, string peerUserName);
-        //public delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, string sdpOrIce);
-
+        CancellationTokenSource _cts = new CancellationTokenSource();
+        HubConnection _hubConnection;
+        string _signallingServerBaseUrl;
 
         public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;

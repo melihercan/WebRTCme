@@ -9,9 +9,6 @@ namespace WebRTCme.Middleware
 {
     public interface IWebRtcConnection
     {
-        //// TODO: FIND ANOTHER SOLUTION TO PASS THIS TO WebRtcConnection.
-        ////ISignallingServerProxy SignallingServerProxy { get; set; }
-
         ConnectionContext GetConnectionContext(string turnServerName, string roomName);
 
         Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName,

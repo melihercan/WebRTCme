@@ -15,18 +15,16 @@ namespace WebRTCme.SignallingServer.Hubs
 {
     public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerProxy
     {
-        private readonly TurnServerProxyFactory _turnServerClientFactory;
-        private readonly ILogger<RoomHub> _logger;
+        readonly TurnServerProxyFactory _turnServerClientFactory;
+        readonly ILogger<RoomHub> _logger;
 
-        private static List<Server> Servers = new();
-
-        private static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
+        static List<Server> Servers = new();
+        static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
 
         public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerIceAsyncEvent;
         public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
-
 
         public RoomHub(TurnServerProxyFactory turnServerClientFactory, ILogger<RoomHub> logger)
         { 
