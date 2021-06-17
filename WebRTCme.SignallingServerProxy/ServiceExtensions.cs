@@ -12,6 +12,8 @@ namespace WebRTCme.SignallingServerProxy
         public static IServiceCollection AddSignallingServerProxy(this IServiceCollection services)
         {
 
+            services.AddSingleton<ISignallingServerProxy, SignallingServerProxy>();
+
             return services;
         }
     }

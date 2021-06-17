@@ -22,8 +22,39 @@ namespace WebRTCme.SignallingServerProxy
 
         private string _signallingServerBaseUrl;
 
-        public SignallingServerProxy(IConfiguration configuration, //string signallingServerBaseUrl,
-            ISignallingServerCallbacks signallingServerCallbacks)
+        //public delegate Task JoinedOrLeftCallbackHandler(string turnServerName, string roomName, string peerUserName);
+        //public delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, string sdpOrIce);
+
+
+        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
+        public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;
+        public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerIceAsyncEvent;
+        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
+
+        async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName)
+        {
+            await OnPeerJoinedAsyncEvent?.Invoke(turnServerName, roomName, peerUserName);
+        }
+
+        async Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName)
+        {
+            await OnPeerLeftAsyncEvent?.Invoke(turnServerName, roomName, peerUserName);
+        }
+
+        async Task OnPeerSdpAsync(string turnServerName, string roomName, string peerUserName, string peerSdp)
+        {
+            await OnPeerSdpAsyncEvent?.Invoke(turnServerName, roomName, peerUserName, peerSdp);
+        }
+
+        public async Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName,
+            string peerIce)
+        {
+            await OnPeerIceAsyncEvent?.Invoke(turnServerName, roomName, peerUserName, peerIce);
+        }
+
+
+        public SignallingServerProxy(IConfiguration configuration //string signallingServerBaseUrl,
+            /*ISignallingServerCallbacks signallingServerCallbacks*/)
         {
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];// signallingServerBaseUrl;
 
@@ -57,14 +88,10 @@ namespace WebRTCme.SignallingServerProxy
                 .Build();
 
             // Register callback handlers invoked by server hub.
-            _hubConnection.On<string, string, string>(nameof(signallingServerCallbacks.OnPeerJoinedAsync),
-                signallingServerCallbacks.OnPeerJoinedAsync);
-            _hubConnection.On<string, string, string>(nameof(signallingServerCallbacks.OnPeerLeftAsync),
-                signallingServerCallbacks.OnPeerLeftAsync);
-            _hubConnection.On<string, string, string, string>(nameof(signallingServerCallbacks.OnPeerSdpAsync),
-                signallingServerCallbacks.OnPeerSdpAsync);
-            _hubConnection.On<string, string, string, string>(nameof(signallingServerCallbacks.OnPeerIceCandidateAsync),
-                signallingServerCallbacks.OnPeerIceCandidateAsync);
+            _hubConnection.On<string, string, string>(nameof(OnPeerJoinedAsync), OnPeerJoinedAsync);
+            _hubConnection.On<string, string, string>(nameof(OnPeerLeftAsync), OnPeerLeftAsync);
+            _hubConnection.On<string, string, string, string>(nameof(OnPeerSdpAsync), OnPeerSdpAsync);
+            _hubConnection.On<string, string, string, string>(nameof(OnPeerIceCandidateAsync), OnPeerIceCandidateAsync);
 
             _hubConnection.Closed += HubConnection_Closed;
 

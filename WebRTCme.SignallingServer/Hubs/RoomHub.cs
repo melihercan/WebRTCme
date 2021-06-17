@@ -22,6 +22,12 @@ namespace WebRTCme.SignallingServer.Hubs
 
         private static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
 
+        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
+        public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;
+        public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerIceAsyncEvent;
+        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
+
+
         public RoomHub(TurnServerProxyFactory turnServerClientFactory, ILogger<RoomHub> logger)
         { 
             _turnServerClientFactory = turnServerClientFactory;

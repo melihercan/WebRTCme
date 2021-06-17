@@ -30,7 +30,8 @@ namespace WebRTCme.Middleware.Services
         private readonly ISignallingServerProxy SignallingServerProxy;
 //        private static List<ConnectionContext> _connectionContexts = new();
 
-        public SignallingServer(IWebRtcConnection webRtcConnection, IConfiguration configuration, 
+        public SignallingServer(ISignallingServerProxy signallingServerProxy,
+            IWebRtcConnection webRtcConnection, IConfiguration configuration, 
             ILogger<SignallingServer> logger,
             IJSRuntime jsRuntime = null)
         {
@@ -38,8 +39,13 @@ namespace WebRTCme.Middleware.Services
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
             _logger = logger;
             _jsRuntime = jsRuntime;
-            SignallingServerProxy = new SignallingServerProxy.SignallingServerProxy(configuration/*_signallingServerBaseUrl*/, this);
+            SignallingServerProxy = signallingServerProxy;// new SignallingServerProxy.SignallingServerProxy(configuration/*_signallingServerBaseUrl*/, this);
             _webRtcConnection.SignallingServerProxy = SignallingServerProxy;
+
+            SignallingServerProxy.OnPeerJoinedAsyncEvent += OnPeerJoinedAsync;
+            SignallingServerProxy.OnPeerLeftAsyncEvent += OnPeerLeftAsync;
+            SignallingServerProxy.OnPeerSdpAsyncEvent += OnPeerSdpAsync;
+            SignallingServerProxy.OnPeerIceAsyncEvent += OnPeerIceCandidateAsync;
         }
 
         public async Task<string[]> GetTurnServerNamesAsync()
@@ -50,13 +56,14 @@ namespace WebRTCme.Middleware.Services
             return result.Value;
         }
 
-
-
         public async ValueTask DisposeAsync()
         {
-            await SignallingServerProxy.DisposeAsync();
+            SignallingServerProxy.OnPeerJoinedAsyncEvent -= OnPeerJoinedAsync;
+            SignallingServerProxy.OnPeerLeftAsyncEvent -= OnPeerLeftAsync;
+            SignallingServerProxy.OnPeerSdpAsyncEvent -= OnPeerSdpAsync;
+            SignallingServerProxy.OnPeerIceAsyncEvent -= OnPeerIceCandidateAsync;
+////            await SignallingServerProxy.DisposeAsync();
         }
-
 
         #region SignallingServerCallbacks
 

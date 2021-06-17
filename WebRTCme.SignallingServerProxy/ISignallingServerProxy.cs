@@ -7,6 +7,9 @@ namespace WebRTCme.SignallingServerProxy
 {
     public interface ISignallingServerProxy : IAsyncDisposable
     {
+        delegate Task JoinedOrLeftCallbackHandler(string turnServerName, string roomName, string peerUserName);
+        delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, string sdpOrIce);
+
         Task<Result<string[]>> GetTurnServerNamesAsync();
 
         Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName);
@@ -20,5 +23,11 @@ namespace WebRTCme.SignallingServerProxy
 
         // ice is JSON of RTCIceCandidateInit.
         Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
+
+        event JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
+        event JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
+        event SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;
+        event SdpOrIceCallbackHandler OnPeerIceAsyncEvent;
+
     }
 }
