@@ -21,37 +21,27 @@ namespace WebRTCme.SignallingServerProxy
         HubConnection _hubConnection;
         string _signallingServerBaseUrl;
 
+        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
         public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent;
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerIceAsyncEvent;
-        public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
 
-        async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName)
-        {
+        async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName) => 
             await OnPeerJoinedAsyncEvent?.Invoke(turnServerName, roomName, peerUserName);
-        }
 
-        async Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName)
-        {
+        async Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName) => 
             await OnPeerLeftAsyncEvent?.Invoke(turnServerName, roomName, peerUserName);
-        }
 
-        async Task OnPeerSdpAsync(string turnServerName, string roomName, string peerUserName, string peerSdp)
-        {
+        async Task OnPeerSdpAsync(string turnServerName, string roomName, string peerUserName, string peerSdp) => 
             await OnPeerSdpAsyncEvent?.Invoke(turnServerName, roomName, peerUserName, peerSdp);
-        }
 
         public async Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName,
-            string peerIce)
-        {
-            await OnPeerIceAsyncEvent?.Invoke(turnServerName, roomName, peerUserName, peerIce);
-        }
+            string peerIce) => await OnPeerIceAsyncEvent?.Invoke(turnServerName, roomName, peerUserName, peerIce);
 
 
-        public SignallingServerProxy(IConfiguration configuration //string signallingServerBaseUrl,
-            /*ISignallingServerCallbacks signallingServerCallbacks*/)
+        public SignallingServerProxy(IConfiguration configuration)
         {
-            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];// signallingServerBaseUrl;
+            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
 
             var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
@@ -126,9 +116,10 @@ namespace WebRTCme.SignallingServerProxy
 
         public Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName,
             string ice) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(IceCandidateAsync), turnServerName, roomName, peerUserName, ice);
+                _hubConnection.InvokeAsync<Result<Unit>>(nameof(IceCandidateAsync), turnServerName, roomName, 
+                    peerUserName, ice);
 
-        private Task HubConnection_Closed(Exception arg)
+        Task HubConnection_Closed(Exception arg)
         {
             if (arg != null)
             {
@@ -140,7 +131,7 @@ namespace WebRTCme.SignallingServerProxy
             return Task.CompletedTask;
         }
 
-        private async Task ConnectWithRetryAsync()
+        async Task ConnectWithRetryAsync()
         {
             const int TimeoutMs = 1000;
 
@@ -158,7 +149,7 @@ namespace WebRTCme.SignallingServerProxy
                 }
                 catch 
                 {
-                    // Failed to connect, trying again in TimeoutMs if not overriden by keepTrying flag.
+                    // Failed to connect, trying again in TimeoutMs.
                     await Task.Delay(TimeoutMs);
                 }
             }

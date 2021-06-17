@@ -51,14 +51,16 @@ namespace WebRTCme.Middleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await _signallingServerProxy.JoinRoomAsync(
+                    var result = await _signallingServerProxy.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName,
                         connectionRequestParameters.ConnectionParameters.UserName);
+                    if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                        throw new Exception(string.Join("-", result.Errors.ToArray()));
                     isJoined = true;
 
-                    //// await OnPeerJoinedAsync("StunOnly", "hello", "iOS");
-
+//// For quick testing.                    
+//// await OnPeerJoinedAsync("StunOnly", "hello", "iOS");
                 }
                 catch (Exception ex)
                 {
@@ -70,7 +72,7 @@ namespace WebRTCme.Middleware.Services
                     try
                     {
                         if (isJoined)
-                            await _signallingServerProxy.LeaveRoomAsync(
+                            /* var result= */await _signallingServerProxy.LeaveRoomAsync(
                                 connectionRequestParameters.ConnectionParameters.TurnServerName,
                                 connectionRequestParameters.ConnectionParameters.RoomName,
                                 connectionRequestParameters.ConnectionParameters.UserName);
@@ -85,7 +87,7 @@ namespace WebRTCme.Middleware.Services
                             _connectionContexts.Remove(connectionContext);
                         }
                     }
-                    catch { };
+                    catch { /* if result is not OK */};
                 };
             });
         }
@@ -107,15 +109,6 @@ namespace WebRTCme.Middleware.Services
 
             return Task.CompletedTask;
         }
-
-
-        private async Task FatalErrorAsync(string message)
-        {
-            //// TODO: what???
-            ///
-            await Task.CompletedTask;
-        }
-
 
         public ValueTask DisposeAsync()
         {
@@ -169,11 +162,20 @@ namespace WebRTCme.Middleware.Services
                 else
                 {
                     mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
+                    RTCIceServer[] iceServers;
+                    if (connectionContext.IceServers is null)
+                    {
+                        var result = await _signallingServerProxy.GetIceServersAsync(turnServerName);
+                        if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                            throw new Exception(string.Join("-", result.Errors.ToArray()));
+                        iceServers = result.Value;
+                    }
+                    else
+                        iceServers = connectionContext.IceServers;
 
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = connectionContext.IceServers ?? await _signallingServerProxy
-                            .GetIceServersAsync(turnServerName),
+                        IceServers = iceServers,
                         //PeerIdentity = peerUserName
                     };
 
@@ -303,10 +305,10 @@ namespace WebRTCme.Middleware.Services
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        //if (_isAsyncCall)
-                        await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, peerUserName, ice);
-                        //else
-                        //_signallingServerClient.IceCandidateSync(turnServerName, roomName, peerUserName, ice);
+                        var result = await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, 
+                            peerUserName, ice);
+                        if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                            throw new Exception(string.Join("-", result.Errors.ToArray()));
                     }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
@@ -370,8 +372,5 @@ namespace WebRTCme.Middleware.Services
                 });
             }
         }
-
-
-
     }
 }

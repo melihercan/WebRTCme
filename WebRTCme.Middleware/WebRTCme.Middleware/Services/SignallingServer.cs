@@ -21,30 +21,28 @@ namespace WebRTCme.Middleware.Services
 {
     internal class SignallingServer : ISignallingServer, ISignallingServerCallbacks
     {
+        readonly ISignallingServerProxy _signallingServerProxy;
         readonly IWebRtcConnection _webRtcConnection;
         readonly ILogger<SignallingServer> _logger;
-        readonly ISignallingServerProxy SignallingServerProxy;
         readonly IJSRuntime _jsRuntime;
 
-        public SignallingServer(ISignallingServerProxy signallingServerProxy,
-            IWebRtcConnection webRtcConnection, IConfiguration configuration, 
-            ILogger<SignallingServer> logger,
-            IJSRuntime jsRuntime = null)
+        public SignallingServer(ISignallingServerProxy signallingServerProxy, IWebRtcConnection webRtcConnection,
+            ILogger<SignallingServer> logger, IJSRuntime jsRuntime = null)
         {
+            _signallingServerProxy = signallingServerProxy;
             _webRtcConnection = webRtcConnection;
             _logger = logger;
             _jsRuntime = jsRuntime;
-            SignallingServerProxy = signallingServerProxy;
 
-            SignallingServerProxy.OnPeerJoinedAsyncEvent += OnPeerJoinedAsync;
-            SignallingServerProxy.OnPeerLeftAsyncEvent += OnPeerLeftAsync;
-            SignallingServerProxy.OnPeerSdpAsyncEvent += OnPeerSdpAsync;
-            SignallingServerProxy.OnPeerIceAsyncEvent += OnPeerIceCandidateAsync;
+            _signallingServerProxy.OnPeerJoinedAsyncEvent += OnPeerJoinedAsync;
+            _signallingServerProxy.OnPeerLeftAsyncEvent += OnPeerLeftAsync;
+            _signallingServerProxy.OnPeerSdpAsyncEvent += OnPeerSdpAsync;
+            _signallingServerProxy.OnPeerIceAsyncEvent += OnPeerIceCandidateAsync;
         }
 
         public async Task<string[]> GetTurnServerNamesAsync()
         {
-            var result = await SignallingServerProxy.GetTurnServerNamesAsync();
+            var result = await _signallingServerProxy.GetTurnServerNamesAsync();
             if (result.Status != Ardalis.Result.ResultStatus.Ok)
                 throw new Exception(string.Join("-", result.Errors.ToArray()));
             return result.Value;
@@ -52,10 +50,10 @@ namespace WebRTCme.Middleware.Services
 
         public ValueTask DisposeAsync()
         {
-            SignallingServerProxy.OnPeerJoinedAsyncEvent -= OnPeerJoinedAsync;
-            SignallingServerProxy.OnPeerLeftAsyncEvent -= OnPeerLeftAsync;
-            SignallingServerProxy.OnPeerSdpAsyncEvent -= OnPeerSdpAsync;
-            SignallingServerProxy.OnPeerIceAsyncEvent -= OnPeerIceCandidateAsync;
+            _signallingServerProxy.OnPeerJoinedAsyncEvent -= OnPeerJoinedAsync;
+            _signallingServerProxy.OnPeerLeftAsyncEvent -= OnPeerLeftAsync;
+            _signallingServerProxy.OnPeerSdpAsyncEvent -= OnPeerSdpAsync;
+            _signallingServerProxy.OnPeerIceAsyncEvent -= OnPeerIceCandidateAsync;
             return new ValueTask();
         }
 
@@ -98,8 +96,9 @@ namespace WebRTCme.Middleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                await SignallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
-
+                var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                    throw new Exception(string.Join("-", result.Errors.ToArray()));
             }
             catch (Exception ex)
             {
@@ -206,7 +205,9 @@ namespace WebRTCme.Middleware.Services
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
                     await peerConnection.SetLocalDescription(answerDescription);
-                    await SignallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                    var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                    if (result.Status != Ardalis.Result.ResultStatus.Ok)
+                        throw new Exception(string.Join("-", result.Errors.ToArray()));
                 }
             }
             catch (Exception ex)
