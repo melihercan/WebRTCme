@@ -10,10 +10,5 @@ namespace WebRTCme.Middleware
     public interface ISignallingServer : /*IAsyncInitialization,*/ IAsyncDisposable
     {
         Task<string[]> GetTurnServerNamesAsync();
-
-        //IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
-
-        //Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, IMediaStreamTrack newVideoTrack);
-
     }
 }

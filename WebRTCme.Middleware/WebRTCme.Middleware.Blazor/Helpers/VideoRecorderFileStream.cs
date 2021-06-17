@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    class VideoRecorderFileStream : Stream
+    class VideoRecorderFileStream : Stream, IAsyncInit
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
@@ -22,7 +22,11 @@ namespace WebRTCme.Middleware.Blazor.Helpers
             _fileName = fileName;
             _mediaRecorderOptions = mediaRecorderOptions;
             _streamSaver = streamSaver;
+
+            Initialization = InitAsync();
         }
+
+        public Task Initialization { get; private set; }
 
         public override bool CanRead => throw new NotImplementedException();
 
@@ -34,7 +38,7 @@ namespace WebRTCme.Middleware.Blazor.Helpers
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public async Task InitAsync()
+        async Task InitAsync()
         {
             _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_fileName);
         }

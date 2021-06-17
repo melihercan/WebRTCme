@@ -12,7 +12,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    class VideoRecorderBlobFileStream : BlobStream
+    class VideoRecorderBlobFileStream : BlobStream, IAsyncInit
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
@@ -34,7 +34,11 @@ namespace WebRTCme.Middleware.Blazor.Helpers
             _writeableStreamJsObjectRef = jsRuntime.CallJsMethod<JsObjectRef>(
                 _streamSaverJsObjectRef, "createWriteStream", fileName);
             _writerJsObjectRef = jsRuntime.CallJsMethod<JsObjectRef>(_writeableStreamJsObjectRef, "getWriter");
+
+            Initialization = InitAsync();
         }
+
+        public Task Initialization { get; private set; }
 
         public override bool CanRead => throw new NotImplementedException();
 
@@ -50,7 +54,7 @@ namespace WebRTCme.Middleware.Blazor.Helpers
             set => throw new NotImplementedException(); 
         }
 
-        public Task InitAsync()
+        Task InitAsync()
         {
             return Task.CompletedTask;
         }

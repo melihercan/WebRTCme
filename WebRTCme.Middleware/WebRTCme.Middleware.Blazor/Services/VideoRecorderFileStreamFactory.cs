@@ -24,14 +24,14 @@ namespace WebRTCme.Middleware.Blazor.Services
         public async Task<Stream> CreateStreamAsync(string fileName, MediaRecorderOptions options)
         {
             VideoRecorderFileStream videoRecorderFileStream = new(fileName, options, _streamSaver);
-            await videoRecorderFileStream.InitAsync();
+            await videoRecorderFileStream.Initialization;
             return videoRecorderFileStream;
         }
 
         public async Task<BlobStream> CreateBlobStreamAsync(string fileName, MediaRecorderOptions options)
         {
             VideoRecorderBlobFileStream videoRecorderBlobFileStream = new(fileName, options, _jsRuntime);
-            await videoRecorderBlobFileStream.InitAsync();
+            await videoRecorderBlobFileStream.Initialization;
             return videoRecorderBlobFileStream;
         }
 

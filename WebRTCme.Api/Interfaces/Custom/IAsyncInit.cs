@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IAsyncInitialization
+    public interface IAsyncInit
     {
         Task Initialization { get; }
     }
