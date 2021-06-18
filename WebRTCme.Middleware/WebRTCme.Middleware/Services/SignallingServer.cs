@@ -42,10 +42,7 @@ namespace WebRTCme.Middleware.Services
 
         public async Task<string[]> GetTurnServerNamesAsync()
         {
-            var result = await _signallingServerProxy.GetTurnServerNamesAsync();
-            if (result.Status != Ardalis.Result.ResultStatus.Ok)
-                throw new Exception(string.Join("-", result.Errors.ToArray()));
-            return result.Value;
+            return await _signallingServerProxy.GetTurnServerNamesAsync();
         }
 
         public ValueTask DisposeAsync()
@@ -96,9 +93,7 @@ namespace WebRTCme.Middleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
-                if (result.Status != Ardalis.Result.ResultStatus.Ok)
-                    throw new Exception(string.Join("-", result.Errors.ToArray()));
+                await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
             }
             catch (Exception ex)
             {
@@ -205,9 +200,8 @@ namespace WebRTCme.Middleware.Services
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                     //    $"peerUser:{peerUserName}");
                     await peerConnection.SetLocalDescription(answerDescription);
-                    var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
-                    if (result.Status != Ardalis.Result.ResultStatus.Ok)
-                        throw new Exception(string.Join("-", result.Errors.ToArray()));
+                    
+                    await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
                 }
             }
             catch (Exception ex)

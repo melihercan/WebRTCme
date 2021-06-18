@@ -19,49 +19,48 @@ namespace WebRTCme.Middleware
     public class CallViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
+        void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 
-        private readonly ILocalMediaStream _mediaStreamService;
-        private readonly IWebRtcConnection _webRtcConnection;
-        private readonly ISignallingServer _signallingServerService;
-        private readonly IMediaManager _mediaManagerService;
-        private readonly IVideoRecorderFileStreamFactory _videoRecorderFileStreamFactory;
-        private readonly INavigation _navigationService;
-        private readonly IRunOnUiThread _runOnUiThreadService;
-        private readonly ILogger<CallViewModel> _logger;
-        private readonly IJSRuntime _jsRuntime;
+        readonly ILocalMediaStream _localMediaStream;
+        readonly IWebRtcConnection _webRtcConnection;
+        readonly IMediaManager _mediaManager;
+        readonly IVideoRecorderFileStreamFactory _videoRecorderFileStreamFactory;
+        readonly IModalPopup _modalPopup;
+        readonly IRunOnUiThread _runOnUiThread;
+        readonly ILogger<CallViewModel> _logger;
+        readonly IJSRuntime _jsRuntime;
 
-        private IDisposable _connectionDisposer;
-        private Action _reRender;
-        private string _userName;
-        private IMediaStream _cameraStream;
-        private IMediaStream _displayStream;
-        private ConnectionParameters _connectionParameters;
+        IDisposable _connectionDisposer;
+        Action _reRender;
+        string _userName;
+        IMediaStream _cameraStream;
+        IMediaStream _displayStream;
+        ConnectionParameters _connectionParameters;
 
-        private IMediaRecorder _mediaRecorder;
+        IMediaRecorder _mediaRecorder;
 
         BlobStream _videoRecorderBlobFileStream;
 
 
-        public CallViewModel(ILocalMediaStream mediaStreamService, IWebRtcConnection webRtcConnection,
-            ISignallingServer signallingServerService, IMediaManager mediaManagerService,
-            IVideoRecorderFileStreamFactory videoRecorderFileStreamFactory, INavigation navigationService,  
-            IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, IJSRuntime jsRuntime = null)
+        public CallViewModel(ILocalMediaStream localMediaStream, IWebRtcConnection webRtcConnection,
+            IMediaManager mediaManager,
+            IVideoRecorderFileStreamFactory videoRecorderFileStreamFactory, IModalPopup modalPopup, 
+            IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, 
+            IJSRuntime jsRuntime = null)
         {
-            _mediaStreamService = mediaStreamService;
+            _localMediaStream = localMediaStream;
             _webRtcConnection = webRtcConnection;
-            _signallingServerService = signallingServerService;
-            _mediaManagerService = mediaManagerService;
+            _mediaManager = mediaManager;
             _videoRecorderFileStreamFactory = videoRecorderFileStreamFactory;
-            _navigationService = navigationService;
-            _runOnUiThreadService = runOnUiThreadService;
+            _modalPopup = modalPopup;
+            _runOnUiThread = runOnUiThreadService;
             _logger = logger;
             _jsRuntime = jsRuntime;
-            MediaParametersList = mediaManagerService.MediaParametersList;
+            MediaParametersList = mediaManager.MediaParametersList;
         }
 
         public async Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
@@ -69,9 +68,8 @@ namespace WebRTCme.Middleware
             _connectionParameters = connectionParameters;
             _reRender = reRender;
             _userName = connectionParameters.UserName;
-            _cameraStream = await _mediaStreamService.GetCameraMediaStreamAsync();
-            _displayStream = await _mediaStreamService.GetDisplayMediaStreamAync();
-            _mediaManagerService.Add(new MediaParameters
+            _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
+            _mediaManager.Add(new MediaParameters
             {
                 Label = connectionParameters.UserName,
                 Stream = _cameraStream,
@@ -99,16 +97,17 @@ namespace WebRTCme.Middleware
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
             _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
-                onNext: (peerResponseParameters) =>
+                // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
+                onNext: async peerResponseParameters =>
                 {
                     switch (peerResponseParameters.Code)
                     {
                         case PeerResponseCode.PeerJoined:
                             if (peerResponseParameters.MediaStream != null)
                             {
-                                _runOnUiThreadService.Invoke(() =>
+                                _runOnUiThread.Invoke(() =>
                                 {
-                                    _mediaManagerService.Add(new MediaParameters
+                                    _mediaManager.Add(new MediaParameters
                                     {
                                         Label = peerResponseParameters.PeerUserName,
                                         Stream = peerResponseParameters.MediaStream,
@@ -123,30 +122,42 @@ namespace WebRTCme.Middleware
                             break;
 
                         case PeerResponseCode.PeerLeft:
-                            _runOnUiThreadService.Invoke(() =>
+                            _runOnUiThread.Invoke(() =>
                             {
-                                _mediaManagerService.Remove(peerResponseParameters.PeerUserName);
+                                _mediaManager.Remove(peerResponseParameters.PeerUserName);
                             });
                             _reRender?.Invoke();
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             break;
 
                         case PeerResponseCode.PeerError:
-                            _runOnUiThreadService.Invoke(() =>
+                            _runOnUiThread.Invoke(() =>
                             {
-                                _mediaManagerService.Remove(peerResponseParameters.PeerUserName);
+                                _mediaManager.Remove(peerResponseParameters.PeerUserName);
                             });
                             _reRender?.Invoke();
 
+                            _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                            { 
+                                Title = "Error",
+                                Text = peerResponseParameters.ErrorMessage,
+                                Ok = "OK"
+                            });
                             //// TODO: ADD POPUP ERROR MESSAGE
 
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
                             break;
                     }
                 },
-                onError: (exception) =>
+                onError: async exception =>
                 {
                     System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                    {
+                        Title = "Error",
+                        Text = exception.Message,
+                        Ok = "OK"
+                    });
                 },
                 onCompleted: () =>
                 {
@@ -156,7 +167,7 @@ namespace WebRTCme.Middleware
 
         private void Disconnect()
         {
-            _mediaManagerService.Clear();
+            _mediaManager.Clear();
             _connectionDisposer.Dispose();
         }
 
@@ -180,10 +191,12 @@ namespace WebRTCme.Middleware
                 ShareScreenButtonText = "Start sharing screen";
                 await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,
                     _connectionParameters.RoomName, _cameraStream.GetVideoTracks()[0]);
-
+                _displayStream = null;
             }
             else
             {
+                _displayStream ??= await _localMediaStream.GetDisplayMediaStreamAync();
+
                 // Start sharing.
                 ShareScreenButtonText = "Stop sharing screen";
                 await _webRtcConnection.ReplaceOutgoingVideoTracksAsync(_connectionParameters.TurnServerName,

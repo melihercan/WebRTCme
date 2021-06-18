@@ -19,28 +19,24 @@ namespace WebRTCme.Middleware
     public class ChatViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
+        void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
-        private readonly IWebRtcConnection _webRtcConnection;
-        private readonly ISignallingServer _signallingServerService;
-        public readonly IDataManager _dataManagerService;
-        private readonly INavigation _navigationService;
-        private IDisposable _connectionDisposer;
-        private Action _reRender;
+        readonly IWebRtcConnection _webRtcConnection;
+        readonly IDataManager _dataManager;
+        readonly IModalPopup _modalPopup;
+        IDisposable _connectionDisposer;
+        Action _reRender;
 
-        public ChatViewModel(IWebRtcConnection webRtcConnection, ISignallingServer signallingServerService, 
-            IDataManager dataManagerService, 
-            INavigation navigationService)
+        public ChatViewModel(IWebRtcConnection webRtcConnection, IDataManager dataManager, IModalPopup modalPopup)
         {
-            _signallingServerService = signallingServerService;
             _webRtcConnection = webRtcConnection;
-            _dataManagerService = dataManagerService;
-            DataParametersList = dataManagerService.DataParametersList;
-            _navigationService = navigationService;
+            _dataManager = dataManager;
+            _modalPopup = modalPopup;
+            DataParametersList = dataManager.DataParametersList;
         }
 
         public Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
@@ -104,7 +100,7 @@ namespace WebRTCme.Middleware
         {
             if (!string.IsNullOrEmpty(OutgoingText) && !string.IsNullOrWhiteSpace(OutgoingText))
             {
-                _dataManagerService.SendMessage(new Message { Text = OutgoingText });
+                _dataManager.SendMessage(new Message { Text = OutgoingText });
                 OutgoingText = string.Empty;
             }
 
@@ -122,7 +118,7 @@ namespace WebRTCme.Middleware
 
         public Task SendFileAsync(File file, Stream stream)
         {
-            return _dataManagerService.SendFileAsync(file, stream);
+            return _dataManager.SendFileAsync(file, stream);
         }
 
         public void SendLink()
@@ -132,7 +128,8 @@ namespace WebRTCme.Middleware
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
             _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
-                onNext: (peerResponseParameters) =>
+                // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
+                onNext: async peerResponseParameters =>
                 {
                     switch (peerResponseParameters.Code)
                     {
@@ -143,27 +140,38 @@ namespace WebRTCme.Middleware
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
 
-                                _dataManagerService.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
+                                _dataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
                             }
                             break;
 
                         case PeerResponseCode.PeerLeft:
-                            _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
+                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             break;
 
                         case PeerResponseCode.PeerError:
-                            _dataManagerService.RemovePeer(peerResponseParameters.PeerUserName);
+                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
 
-                            //// TODO: ADD POPUP ERROR MESSAGE
+                            _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                            {
+                                Title = "Error",
+                                Text = peerResponseParameters.ErrorMessage,
+                                Ok = "OK"
+                            });
                             break;
                     }
 
                 },
-                onError: (exception) =>
+                onError: async exception =>
                 {
                     System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                    {
+                        Title = "Error",
+                        Text = exception.Message,
+                        Ok = "OK"
+                    });
                 },
                 onCompleted: () =>
                 {
@@ -175,7 +183,7 @@ namespace WebRTCme.Middleware
 
         private void Disconnect()
         {
-            _dataManagerService.ClearPeers();
+            _dataManager.ClearPeers();
             _connectionDisposer.Dispose();
         }
     }

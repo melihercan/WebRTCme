@@ -1,5 +1,4 @@
-﻿using Ardalis.Result;
-using System;
+﻿using System;
 using System.Reactive;
 using System.Threading.Tasks;
 
@@ -8,21 +7,22 @@ namespace WebRTCme.SignallingServerProxy
     public interface ISignallingServerProxy : IAsyncDisposable
     {
         delegate Task JoinedOrLeftCallbackHandler(string turnServerName, string roomName, string peerUserName);
-        delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, string sdpOrIce);
+        delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, 
+            string sdpOrIce);
 
-        Task<Result<string[]>> GetTurnServerNamesAsync();
+        Task<string[]> GetTurnServerNamesAsync();
 
-        Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName);
+        Task<RTCIceServer[]> GetIceServersAsync(string turnServerName);
 
-        Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName);
+        Task JoinRoomAsync(string turnServerName, string roomName, string userName);
         
-        Task<Result<Unit>> LeaveRoomAsync(string turnServerName, string roomName, string userName);
+        Task LeaveRoomAsync(string turnServerName, string roomName, string userName);
 
         // sdp is JSON of RTCSessionDescriptionInit.
-        Task<Result<Unit>> SdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
+        Task SdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
 
         // ice is JSON of RTCIceCandidateInit.
-        Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
+        Task IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
 
         event JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
         event JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;

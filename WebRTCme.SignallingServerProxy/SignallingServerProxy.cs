@@ -1,5 +1,4 @@
-﻿using Ardalis.Result;
-using MessagePack;
+﻿using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
@@ -97,26 +96,26 @@ namespace WebRTCme.SignallingServerProxy
             }
         }
 
-        public Task<Result<string[]>> GetTurnServerNamesAsync() => 
-            _hubConnection.InvokeAsync<Result<string[]>>(nameof(GetTurnServerNamesAsync));
+        public Task<string[]> GetTurnServerNamesAsync() => 
+            _hubConnection.InvokeAsync<string[]>(nameof(GetTurnServerNamesAsync));
 
-        public Task<Result<RTCIceServer[]>> GetIceServersAsync(string turnServerName) =>
-            _hubConnection.InvokeAsync<Result<RTCIceServer[]>>(nameof(GetIceServersAsync), turnServerName);
+        public Task<RTCIceServer[]> GetIceServersAsync(string turnServerName) =>
+            _hubConnection.InvokeAsync<RTCIceServer[]>(nameof(GetIceServersAsync), turnServerName);
 
-        public Task<Result<Unit>> JoinRoomAsync(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(JoinRoomAsync), turnServerName, roomName, userName);
+        public Task JoinRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync(nameof(JoinRoomAsync), turnServerName, roomName, userName);
 
-        public Task<Result<Unit>> LeaveRoomAsync(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(LeaveRoomAsync), turnServerName, roomName, userName);
+        public Task LeaveRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync(nameof(LeaveRoomAsync), turnServerName, roomName, userName);
 
-        public Task<Result<Unit>> SdpAsync(string turnServerName, string roomName, string peerUserName,
+        public Task SdpAsync(string turnServerName, string roomName, string peerUserName,
             string sdp) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(SdpAsync), turnServerName, roomName, peerUserName,
+                _hubConnection.InvokeAsync(nameof(SdpAsync), turnServerName, roomName, peerUserName,
                     sdp);
 
-        public Task<Result<Unit>> IceCandidateAsync(string turnServerName, string roomName, string peerUserName,
+        public Task IceCandidateAsync(string turnServerName, string roomName, string peerUserName,
             string ice) =>
-                _hubConnection.InvokeAsync<Result<Unit>>(nameof(IceCandidateAsync), turnServerName, roomName, 
+                _hubConnection.InvokeAsync(nameof(IceCandidateAsync), turnServerName, roomName, 
                     peerUserName, ice);
 
         Task HubConnection_Closed(Exception arg)
