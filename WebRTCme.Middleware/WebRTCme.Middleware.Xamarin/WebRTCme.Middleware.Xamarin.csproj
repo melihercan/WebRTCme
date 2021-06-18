@@ -36,12 +36,19 @@
     <Compile Include="Helpers\*.cs" />
     <Compile Include="Extensions\*.cs" />
     <Compile Include="Popups\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Popups\GenericPopup.xaml.cs">
       <DependentUpon>GenericPopup.xaml</DependentUpon>
     </Compile>
+    <EmbeddedResource Update="Popups\GenericPopup.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
@@ -79,11 +86,6 @@
 	</ItemGroup>
 	
 	
-	<ItemGroup>
-	  <EmbeddedResource Update="Popups\GenericPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </EmbeddedResource>
-	</ItemGroup>
 	
 
   

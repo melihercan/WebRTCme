@@ -10,6 +10,7 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddXamarinMiddleware(this IServiceCollection services)
         {
+            services.AddSingleton<IModalPopup, ModalPopup>();
             services.AddSingleton<INavigation, Navigation>();
             services.AddSingleton<IRunOnUiThread, RunOnUiThread>();
             services.AddSingleton<IWebRtcIncomingFileStreamFactory, WebRtcIncomingFileStreamFactory>();
