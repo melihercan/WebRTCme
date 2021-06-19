@@ -38,11 +38,18 @@ namespace WebRTCme.Middleware.Services
 
                 try
                 {
+                    // Do checks before creating connection context.
                     if (GetConnectionContext(connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName)
                             is not null)
                         observer.OnError(new Exception(
                             $"Room {connectionRequestParameters.ConnectionParameters.RoomName} is in use"));
+
+                    // This call will throw if user name already exists.
+                    await _signallingServerProxy.JoinRoomAsync(
+                        connectionRequestParameters.ConnectionParameters.TurnServerName,
+                        connectionRequestParameters.ConnectionParameters.RoomName,
+                        connectionRequestParameters.ConnectionParameters.UserName);
 
                     connectionContext = new ConnectionContext
                     {
@@ -51,10 +58,10 @@ namespace WebRTCme.Middleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    await _signallingServerProxy.JoinRoomAsync(
-                        connectionRequestParameters.ConnectionParameters.TurnServerName,
-                        connectionRequestParameters.ConnectionParameters.RoomName,
-                        connectionRequestParameters.ConnectionParameters.UserName);
+                    //await _signallingServerProxy.JoinRoomAsync(
+                    //    connectionRequestParameters.ConnectionParameters.TurnServerName,
+                    //    connectionRequestParameters.ConnectionParameters.RoomName,
+                    //    connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
 
 //// For quick testing.                    

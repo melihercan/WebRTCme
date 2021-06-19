@@ -22,9 +22,7 @@
   </ItemGroup>-->
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
     <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\WebRTCme.Middleware.Blazor.csproj" />
-    <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
   </ItemGroup>
 
 </Project>

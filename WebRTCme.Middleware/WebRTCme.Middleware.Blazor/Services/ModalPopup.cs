@@ -10,12 +10,17 @@ namespace WebRTCme.Middleware.Blazor.Services
 {
     public class ModalPopup : IModalPopup
     {
-        [Inject]
-        IBlazorDialogService BlazorDialog { get; set; }
+        readonly IBlazorDialogService _blazorDialog;
 
-        public Task<GenericPopupOut> GenericPopupAsync(GenericPopupIn genericPopupIn)
+        public ModalPopup(IBlazorDialogService blazorDialog)
         {
-            return BlazorDialog.ShowDialog<GenericPopupOut>("GenericPopup", genericPopupIn);
+            _blazorDialog = blazorDialog;
+        }
+
+        public async Task<GenericPopupOut> GenericPopupAsync(GenericPopupIn genericPopupIn)
+        {
+            var ret = await _blazorDialog.ShowDialog<GenericPopupOut>("GenericPopup", genericPopupIn);
+            return new GenericPopupOut { };
         }
     }
 }

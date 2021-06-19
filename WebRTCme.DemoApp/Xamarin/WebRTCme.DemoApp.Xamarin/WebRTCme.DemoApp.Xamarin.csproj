@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Xamarin\WebRTCme.Middleware.Xamarin.csproj" />
-    <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
   </ItemGroup>
 
   <ItemGroup>

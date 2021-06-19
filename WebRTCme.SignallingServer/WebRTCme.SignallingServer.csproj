@@ -17,7 +17,6 @@
   </ItemGroup>-->
 
   <ItemGroup>
-    <ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
     <ProjectReference Include="..\WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj" />
   </ItemGroup>
 

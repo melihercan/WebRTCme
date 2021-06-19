@@ -1,4 +1,5 @@
-﻿<Dialog Id="simple-dialog" Size="DialogSize.Large" Centered="true" Animation="DialogAnimation.FadeIn">
+﻿@namespace WebRTCme.Middleware
+<Dialog Id="GenericPopup" Size="DialogSize.Large" Centered="true" Animation="DialogAnimation.FadeIn">
     <DialogInputProvider TInput="GenericPopupIn">
         <DialogHeader ShowClose="true">
             <h4>@context.Input</h4>
@@ -20,6 +21,11 @@
 
 
 
-@code {
 
-}
+@*<h1>@GenericPopupIn.Title</h1>
+<h3>@GenericPopupIn.Text</h3>
+<button type="button" class="btn btn-secondary" @onclick="@OnOkAsync">
+    @GenericPopupIn.Ok
+</button>
+*@
+
