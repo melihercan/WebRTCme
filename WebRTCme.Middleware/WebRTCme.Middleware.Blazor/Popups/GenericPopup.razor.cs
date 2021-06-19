@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorDialog;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +12,27 @@ namespace WebRTCme.Middleware
     public partial class GenericPopup
     {
 
-//        [Parameter]
-//        public GenericPopupIn GenericPopupIn { get; set; }
+        Dialog _dialog;
+        GenericPopupIn _in;
 
-//        GenericPopupOut _genericPopupOut = new();
+        public async Task OnBeforeShow(DialogBeforeShowEventArgs e)
+        {
+            _dialog = e.Dialog;
+            _in = (GenericPopupIn)_dialog.Input;
+        }
 
-//        protected override Task OnInitializedAsync()
-//        {
-//            return base.OnInitializedAsync();
-//        }
+        public async Task OnAfterShow(DialogAfterShowEventArgs e)
+        {
+        }
 
-//        async Task OnOkAsync()
-//        {
-//            _genericPopupOut.Ok = true;
-////            await Modal.CloseAsync(ModalResult.Ok<GenericPopupOut>(_genericPopupOut));
-//        }
+        public async Task OnBeforeHide(DialogBeforeHideEventArgs e)
+        {
+        }
+
+        public async Task OnAfterHide(DialogAfterHideEventArgs e)
+        {
+        }
+
+
     }
 }

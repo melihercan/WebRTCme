@@ -4,6 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
+    // Set unused elements to null.
     public class GenericPopupIn
     {
         public string Image { get; init; }

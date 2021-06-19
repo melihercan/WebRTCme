@@ -154,8 +154,8 @@ namespace WebRTCme.Middleware
                     System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
                     _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
                     {
-                        Title = "Error",
-                        Text = exception.Message,
+                        //Title = "Error",
+                        //Text = exception.Message,
                         Ok = "OK"
                     });
                 },

@@ -41,6 +41,7 @@
    </ItemGroup>-->
 
    <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Users\melih\source\repos\BlazorDialog\BlazorDialog\BlazorDialog.csproj" />
     <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
     </ProjectReference>
   </ItemGroup>
@@ -55,9 +56,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="BlazorDialog" Version="1.2.0" />
+    <!--<PackageReference Include="BlazorDialog" Version="1.2.0" />-->
     <PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
-    <!--<PackageReference Include="LiquidTechnologies.Blazor.ModalDialog" Version="0.9.7" />-->
   </ItemGroup>
 
  </Project>

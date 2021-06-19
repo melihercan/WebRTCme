@@ -1,16 +1,12 @@
 ﻿@namespace WebRTCme.Middleware
-<Dialog Id="GenericPopup" Size="DialogSize.Large" Centered="true" Animation="DialogAnimation.FadeIn">
+<Dialog Id="GenericPopup" Size="DialogSize.Normal" Centered="true" Animation="DialogAnimation.FadeIn"
+    OnBeforeShow="OnBeforeShow" OnAfterShow="OnAfterShow" OnBeforeHide="OnBeforeHide" OnAfterHide="OnAfterHide">
     <DialogInputProvider TInput="GenericPopupIn">
         <DialogHeader ShowClose="true">
-            <h4>@context.Input</h4>
+            <h4>@_in.Title</h4>
         </DialogHeader>
         <DialogBody>
-            <p>Lorem Ipsum</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum quis est vitae purus eleifend bibendum id et neque. Sed eu nisi commodo, 
-                sagittis neque suscipit, euismod quam. In metus turpis, pulvinar ut odio vel, vehicula congue dui. Praesent sed feugiat est. Ut ut rhoncus mi, 
-                et facilisis eros. Vivamus malesuada nulla eu tincidunt vulputate. Donec non augue aliquam, sodales est vel, varius quam. Nam vel fringilla felis.
-            </p>
+            <p>@_in.Text</p>
         </DialogBody>
         <DialogFooter>
             <button type="button" class="btn btn-primary" @onclick="@(()=> context.Dialog.Hide("yes"))">Yes</button>
