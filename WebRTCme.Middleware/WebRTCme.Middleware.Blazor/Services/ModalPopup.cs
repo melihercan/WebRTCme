@@ -17,10 +17,7 @@ namespace WebRTCme.Middleware.Blazor.Services
             _blazorDialog = blazorDialog;
         }
 
-        public async Task<GenericPopupOut> GenericPopupAsync(GenericPopupIn genericPopupIn)
-        {
-            var ret = await _blazorDialog.ShowDialog<GenericPopupOut>("GenericPopup", genericPopupIn);
-            return new GenericPopupOut { };
-        }
+        public async Task<GenericPopupOut> GenericPopupAsync(GenericPopupIn genericPopupIn) => 
+            await _blazorDialog.ShowDialog<GenericPopupOut>("GenericPopup", genericPopupIn);
     }
 }
