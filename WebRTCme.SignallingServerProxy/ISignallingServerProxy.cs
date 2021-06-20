@@ -10,19 +10,19 @@ namespace WebRTCme.SignallingServerProxy
         delegate Task SdpOrIceCallbackHandler(string turnServerName, string roomName, string peerUserName, 
             string sdpOrIce);
 
-        Task<string[]> GetTurnServerNamesAsync();
+        Task<(SignallingServerResult, string[])> GetTurnServerNamesAsync();
 
-        Task<RTCIceServer[]> GetIceServersAsync(string turnServerName);
+        Task<(SignallingServerResult, RTCIceServer[])> GetIceServersAsync(string turnServerName);
 
-        Task JoinRoomAsync(string turnServerName, string roomName, string userName);
+        Task<SignallingServerResult> JoinRoomAsync(string turnServerName, string roomName, string userName);
         
-        Task LeaveRoomAsync(string turnServerName, string roomName, string userName);
+        Task<SignallingServerResult> LeaveRoomAsync(string turnServerName, string roomName, string userName);
 
         // sdp is JSON of RTCSessionDescriptionInit.
-        Task SdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
+        Task<SignallingServerResult> SdpAsync(string turnServerName, string roomName, string peerUserName, string sdp);
 
         // ice is JSON of RTCIceCandidateInit.
-        Task IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
+        Task<SignallingServerResult> IceCandidateAsync(string turnServerName, string roomName, string peerUserName, string ice);
 
         event JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent;
         event JoinedOrLeftCallbackHandler OnPeerLeftAsyncEvent;

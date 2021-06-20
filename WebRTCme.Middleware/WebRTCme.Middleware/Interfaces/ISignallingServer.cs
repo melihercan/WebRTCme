@@ -9,6 +9,6 @@ namespace WebRTCme.Middleware
 {
     public interface ISignallingServer : /*IAsyncInitialization,*/ IAsyncDisposable
     {
-        Task<string[]> GetTurnServerNamesAsync();
+        Task<(SignallingServerResult, string[])> GetTurnServerNamesAsync();
     }
 }

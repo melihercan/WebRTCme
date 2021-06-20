@@ -39,17 +39,17 @@ namespace WebRTCme.Middleware.Services
                 try
                 {
                     // Do checks before creating connection context.
-                    if (GetConnectionContext(connectionRequestParameters.ConnectionParameters.TurnServerName,
-                        connectionRequestParameters.ConnectionParameters.RoomName)
-                            is not null)
-                        observer.OnError(new Exception(
-                            $"Room {connectionRequestParameters.ConnectionParameters.RoomName} is in use"));
+                    if (GetConnectionContext(
+                        connectionRequestParameters.ConnectionParameters.TurnServerName,
+                        connectionRequestParameters.ConnectionParameters.RoomName) is not null)
+                            throw new Exception($"{SignallingServerResult.RoomIsInUse}");
 
-                    // This call will throw if user name already exists.
-                    await _signallingServerProxy.JoinRoomAsync(
+                    var result = await _signallingServerProxy.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName,
                         connectionRequestParameters.ConnectionParameters.UserName);
+                    if (result != SignallingServerResult.Ok)
+                        throw new Exception($"{result}");
 
                     connectionContext = new ConnectionContext
                     {
@@ -58,10 +58,6 @@ namespace WebRTCme.Middleware.Services
                     };
                     _connectionContexts.Add(connectionContext);
 
-                    //await _signallingServerProxy.JoinRoomAsync(
-                    //    connectionRequestParameters.ConnectionParameters.TurnServerName,
-                    //    connectionRequestParameters.ConnectionParameters.RoomName,
-                    //    connectionRequestParameters.ConnectionParameters.UserName);
                     isJoined = true;
 
 //// For quick testing.                    
@@ -77,7 +73,8 @@ namespace WebRTCme.Middleware.Services
                     try
                     {
                         if (isJoined)
-                            await _signallingServerProxy.LeaveRoomAsync(
+                            // No error handling for leave.
+                            _ = await _signallingServerProxy.LeaveRoomAsync(
                                 connectionRequestParameters.ConnectionParameters.TurnServerName,
                                 connectionRequestParameters.ConnectionParameters.RoomName,
                                 connectionRequestParameters.ConnectionParameters.UserName);
@@ -167,10 +164,17 @@ namespace WebRTCme.Middleware.Services
                 else
                 {
                     mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
+                    RTCIceServer[] iceServers = connectionContext.IceServers;
+                    if (iceServers is null)
+                    {
+                        var result = await _signallingServerProxy.GetIceServersAsync(turnServerName);
+                        if (result.Item1 != SignallingServerResult.Ok)
+                            throw new Exception($"{result.Item1}");
+                        iceServers = result.Item2;
+                    }
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = connectionContext.IceServers ?? 
-                            await _signallingServerProxy.GetIceServersAsync(turnServerName),
+                        IceServers = iceServers,
                         //PeerIdentity = peerUserName
                     };
 
@@ -300,8 +304,10 @@ namespace WebRTCme.Middleware.Services
                             $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
                             $"peerUser:{peerUserName} " +
                             $"ice:{ice}");
-                        await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, 
+                        var result = await _signallingServerProxy.IceCandidateAsync(turnServerName, roomName, 
                             peerUserName, ice);
+                        if (result != SignallingServerResult.Ok)
+                            throw new Exception($"{result}");
                     }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)

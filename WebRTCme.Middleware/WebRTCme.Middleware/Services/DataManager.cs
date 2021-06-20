@@ -29,7 +29,6 @@ namespace WebRTCme.Middleware.Services
         internal const ulong Cookie = 0x55aa5aa533cc3cc3;
 
         private readonly IWebRtcIncomingFileStreamFactory _webRtcIncomingFileStreamFactory;
-        private uint _id;
 
         public DataManager(IWebRtcIncomingFileStreamFactory webRtcIncomingFileStreamFactory,
             ILogger<DataManager> logger)

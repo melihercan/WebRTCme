@@ -56,8 +56,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Blazor", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Blazor", "WebRTCme.DemoApp\Blazor\WebRTCme.DemoApp.Blazor\WebRTCme.DemoApp.Blazor.csproj", "{71693BC7-EAEA-43F2-9C76-C38B02242065}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDialog", "..\..\Users\melih\source\repos\BlazorDialog\BlazorDialog\BlazorDialog.csproj", "{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -266,18 +264,6 @@ Global
 		{71693BC7-EAEA-43F2-9C76-C38B02242065}.Release|iPhone.Build.0 = Release|Any CPU
 		{71693BC7-EAEA-43F2-9C76-C38B02242065}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{71693BC7-EAEA-43F2-9C76-C38B02242065}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|iPhone.Build.0 = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{B1E5EA9F-3CC9-489C-9AA3-C1FF52CEB376}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -99,13 +99,20 @@ namespace WebRTCme.Middleware
                 Message = $"Getting TURN server list from signalling server...";
                 RetryButtonEnabled = false;
 
-                _turnServerNames = await _signallingServerService.GetTurnServerNamesAsync();
-
-                IsCheckingSignallingServer = false;
-                Header = string.Empty;
-                Message = string.Empty;
-                RetryButtonEnabled = false;
-                return true;
+                var result = await _signallingServerService.GetTurnServerNamesAsync();
+                if (result.Item1 == SignallingServerProxy.SignallingServerResult.Ok)
+                {
+                    _turnServerNames = result.Item2;
+                    IsCheckingSignallingServer = false;
+                    Header = string.Empty;
+                    Message = string.Empty;
+                    RetryButtonEnabled = false;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception($"{result.Item1}");
+                }
             }
             catch (Exception ex)
             {
@@ -117,7 +124,6 @@ namespace WebRTCme.Middleware
             }
             return false;
         }
-
 
         private async Task NavigateToConnectionParametersPage()
         {

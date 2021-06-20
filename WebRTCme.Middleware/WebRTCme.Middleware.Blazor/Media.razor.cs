@@ -15,13 +15,6 @@ namespace WebRTCme.Middleware
 {
     public partial class Media : IDisposable
     {
-        private IMediaStream _stream;
-
-
-        public Media()
-        {
-        }
-
         [Parameter]
         public IMediaStream Stream { get; set; }
 
@@ -44,7 +37,6 @@ namespace WebRTCme.Middleware
         private IConfiguration Configuration { get; set; }
 
         private ElementReference VideoElementReference { get; set; }
-
 
         protected override void OnAfterRender(bool firstRender)
         {

@@ -11,9 +11,6 @@ namespace WebRTCme.Middleware
 {
     public partial class GenericPopup
     {
-
-        Dialog _dialog;
-        GenericPopupIn _in;
         GenericPopupOut _out = new();
 
         async Task OnOkAsync(Dialog dialog)
@@ -28,10 +25,9 @@ namespace WebRTCme.Middleware
             await dialog.Hide(_out);
         }
 
+#if false
         public async Task OnBeforeShow(DialogBeforeShowEventArgs e)
         {
-            _dialog = e.Dialog;
-            _in = (GenericPopupIn)_dialog.Input;
         }
 
         public async Task OnAfterShow(DialogAfterShowEventArgs e)
@@ -45,7 +41,7 @@ namespace WebRTCme.Middleware
         public async Task OnAfterHide(DialogAfterHideEventArgs e)
         {
         }
-
+#endif
 
     }
 }

@@ -96,26 +96,29 @@ namespace WebRTCme.SignallingServerProxy
             }
         }
 
-        public Task<string[]> GetTurnServerNamesAsync() => 
-            _hubConnection.InvokeAsync<string[]>(nameof(GetTurnServerNamesAsync));
+        public Task<(SignallingServerResult, string[])> GetTurnServerNamesAsync() => 
+            _hubConnection.InvokeAsync<(SignallingServerResult, string[])>(nameof(GetTurnServerNamesAsync));
 
-        public Task<RTCIceServer[]> GetIceServersAsync(string turnServerName) =>
-            _hubConnection.InvokeAsync<RTCIceServer[]>(nameof(GetIceServersAsync), turnServerName);
+        public Task<(SignallingServerResult, RTCIceServer[])> GetIceServersAsync(string turnServerName) =>
+            _hubConnection.InvokeAsync< (SignallingServerResult, RTCIceServer[])>(nameof(GetIceServersAsync), 
+                turnServerName);
 
-        public Task JoinRoomAsync(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync(nameof(JoinRoomAsync), turnServerName, roomName, userName);
+        public Task<SignallingServerResult> JoinRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync<SignallingServerResult>(nameof(JoinRoomAsync), turnServerName, roomName, 
+                userName);
 
-        public Task LeaveRoomAsync(string turnServerName, string roomName, string userName) =>
-            _hubConnection.InvokeAsync(nameof(LeaveRoomAsync), turnServerName, roomName, userName);
+        public Task<SignallingServerResult> LeaveRoomAsync(string turnServerName, string roomName, string userName) =>
+            _hubConnection.InvokeAsync<SignallingServerResult>(nameof(LeaveRoomAsync), turnServerName, roomName, 
+                userName);
 
-        public Task SdpAsync(string turnServerName, string roomName, string peerUserName,
+        public Task<SignallingServerResult> SdpAsync(string turnServerName, string roomName, string peerUserName,
             string sdp) =>
-                _hubConnection.InvokeAsync(nameof(SdpAsync), turnServerName, roomName, peerUserName,
-                    sdp);
+                _hubConnection.InvokeAsync<SignallingServerResult>(nameof(SdpAsync), turnServerName, roomName, 
+                    peerUserName, sdp);
 
-        public Task IceCandidateAsync(string turnServerName, string roomName, string peerUserName,
+        public Task<SignallingServerResult> IceCandidateAsync(string turnServerName, string roomName, string peerUserName,
             string ice) =>
-                _hubConnection.InvokeAsync(nameof(IceCandidateAsync), turnServerName, roomName, 
+                _hubConnection.InvokeAsync<SignallingServerResult>(nameof(IceCandidateAsync), turnServerName, roomName, 
                     peerUserName, ice);
 
         Task HubConnection_Closed(Exception arg)

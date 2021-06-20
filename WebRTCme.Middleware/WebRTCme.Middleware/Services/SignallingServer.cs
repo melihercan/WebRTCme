@@ -40,7 +40,7 @@ namespace WebRTCme.Middleware.Services
             _signallingServerProxy.OnPeerIceAsyncEvent += OnPeerIceCandidateAsync;
         }
 
-        public async Task<string[]> GetTurnServerNamesAsync()
+        public async Task<(SignallingServerResult, string[])> GetTurnServerNamesAsync()
         {
             return await _signallingServerProxy.GetTurnServerNamesAsync();
         }
@@ -93,7 +93,9 @@ namespace WebRTCme.Middleware.Services
                 //    $"peerUser:{peerUserName}");
                 await peerConnection.SetLocalDescription(offerDescription);
 
-                await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                if (result != SignallingServerResult.Ok)
+                    throw new Exception($"{result}");
             }
             catch (Exception ex)
             {
@@ -201,7 +203,9 @@ namespace WebRTCme.Middleware.Services
                     //    $"peerUser:{peerUserName}");
                     await peerConnection.SetLocalDescription(answerDescription);
                     
-                    await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                    var result = await _signallingServerProxy.SdpAsync(turnServerName, roomName, peerUserName, sdp);
+                    if (result != SignallingServerResult.Ok)
+                        throw new Exception($"{result}");
                 }
             }
             catch (Exception ex)
