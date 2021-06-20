@@ -17,7 +17,7 @@
             {
                 <EditForm Context="editFormContext" Model="@_out">
                     <div class="text-center">
-                        <InputText placeholder=context.Input.EntryPlaceholder @bind-Value="_out.Entry" />
+                        <InputText placeholder=@context.Input.EntryPlaceholder @bind-Value="_out.Entry" />
                     </div>
                 </EditForm>    
             }
@@ -25,16 +25,14 @@
         <DialogFooter>
             @if(!string.IsNullOrEmpty(context.Input.Ok))
             {
-                <button type="button" class="btn btn-primary" 
-                        @onclick="@(() => context.Dialog.Hide("yes"))">
-                    Yes
+                <button type="button" class="btn btn-primary" @onclick="@(async () => OnOkAsync(context.Dialog))">
+                    @context.Input.Ok
                 </button>
             }
             @if(!string.IsNullOrEmpty(context.Input.Cancel))
             {
-                <button type="button" class="btn btn-secondary" 
-                        @onclick="@(() => context.Dialog.Hide("no"))">
-                    No
+                <button type="button" class="btn btn-secondary" @onclick="@(async () => OnCancelAsync(context.Dialog))">
+                    @context.Input.Cancel
                 </button>
             }
         </DialogFooter>

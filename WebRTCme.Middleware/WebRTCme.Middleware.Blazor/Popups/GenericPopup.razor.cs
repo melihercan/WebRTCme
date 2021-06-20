@@ -16,6 +16,18 @@ namespace WebRTCme.Middleware
         GenericPopupIn _in;
         GenericPopupOut _out = new();
 
+        async Task OnOkAsync(Dialog dialog)
+        {
+            _out.Ok = true;    
+            await dialog.Hide(_out);
+        }
+
+        async Task OnCancelAsync(Dialog dialog)
+        {
+            _out.Ok = false;
+            await dialog.Hide(_out);
+        }
+
         public async Task OnBeforeShow(DialogBeforeShowEventArgs e)
         {
             _dialog = e.Dialog;
