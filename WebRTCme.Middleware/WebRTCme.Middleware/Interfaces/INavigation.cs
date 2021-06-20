@@ -9,6 +9,6 @@ namespace WebRTCme.Middleware
     {
         Task NavigateToPageAsync(string prefix, string uri);
 
-        Task NavigateToPageAsync(string prefix, string url, string queryKey, string queryValue);
+        Task NavigateToPageAsync(string prefix, string uri, string queryKey, string queryValue);
     }
 }

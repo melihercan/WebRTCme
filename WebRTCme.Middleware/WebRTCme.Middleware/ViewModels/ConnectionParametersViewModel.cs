@@ -17,18 +17,16 @@ namespace WebRTCme.Middleware
     public class ConnectionParametersViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) => 
+        void OnPropertyChanged([CallerMemberName] string name = null) => 
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private readonly INavigation _navigationService;
+        readonly INavigation _navigation;
+        
+        List<string> _turnServerNames;
 
-        private List<string> _turnServerNames;
-
-
-        public ConnectionParametersViewModel(INavigation navigationService)
+        public ConnectionParametersViewModel(INavigation navigation)
         {
-            _navigationService = navigationService;
-
+            _navigation = navigation;
 
             // Default values for debugging.
             var platformName = string.Empty;
@@ -76,7 +74,7 @@ namespace WebRTCme.Middleware
         public async Task JoinCall()
         {
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
-            await _navigationService.NavigateToPageAsync(
+            await _navigation.NavigateToPageAsync(
                 "",
                 "CallPage",
                 "ConnectionParametersJson",
@@ -88,7 +86,7 @@ namespace WebRTCme.Middleware
         public async Task JoinChat()
         {
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
-            await _navigationService.NavigateToPageAsync(
+            await _navigation.NavigateToPageAsync(
                 "",
                 "ChatPage",
                 "ConnectionParametersJson",

@@ -25,6 +25,7 @@ namespace WebRTCme.Middleware
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<MediaParameters> MediaParametersList { get; set; }
 
+        readonly INavigation _navigation;
         readonly ILocalMediaStream _localMediaStream;
         readonly IWebRtcConnection _webRtcConnection;
         readonly IMediaManager _mediaManager;
@@ -46,12 +47,13 @@ namespace WebRTCme.Middleware
         BlobStream _videoRecorderBlobFileStream;
 
 
-        public CallViewModel(ILocalMediaStream localMediaStream, IWebRtcConnection webRtcConnection,
-            IMediaManager mediaManager,
+        public CallViewModel(INavigation navigation, ILocalMediaStream localMediaStream, 
+            IWebRtcConnection webRtcConnection, IMediaManager mediaManager,
             IVideoRecorderFileStreamFactory videoRecorderFileStreamFactory, IModalPopup modalPopup, 
             IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, 
             IJSRuntime jsRuntime = null)
         {
+            _navigation = navigation;
             _localMediaStream = localMediaStream;
             _webRtcConnection = webRtcConnection;
             _mediaManager = mediaManager;
@@ -152,16 +154,49 @@ namespace WebRTCme.Middleware
                 onError: async exception =>
                 {
                     System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
-                    var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                    if (exception.Message.Equals($"{SignallingServerProxy.SignallingServerResult.UserNameIsInUse}"))
                     {
-                        Title = "Error",
-                        Text = exception.Message,
-                   ////EntryPlaceholder = "Re-enter user name",
-                        Ok = "OK",
-                        ////Cancel = "Cancel"
-                    });
-
-
+                        var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                        {
+                            Title = "Error",
+                            Text = $"User name {connectionRequestParameters.ConnectionParameters.UserName} " +
+                                   $"is in use. Please enter another name or 'Cancel' to cancel the call.",
+                            EntryPlaceholder = "New user name",
+                            Ok = "OK",
+                            Cancel = "Cancel"
+                        });
+                        await OnPageDisappearingAsync();
+                        if (popupOut.Ok)
+                        {
+                            connectionRequestParameters.ConnectionParameters.UserName = popupOut.Entry;
+                            await OnPageAppearingAsync(connectionRequestParameters.ConnectionParameters, _reRender);
+                        }
+                        else
+                        {
+                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                        }
+                    }
+                    else 
+                    {
+                        var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                        {
+                            Title = "Error",
+                            Text = $"An error occured during the connection. Here is the reported error message:" +
+                                   Environment.NewLine + 
+                                   $"{exception.Message}",
+                            Ok = "Try again",
+                            Cancel = "Cancel"
+                        });
+                        Disconnect();
+                        if (popupOut.Ok)
+                        {
+                            Connect(connectionRequestParameters);
+                        }
+                        else
+                        {
+                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                        }
+                    }
                 },
                 onCompleted: () =>
                 {

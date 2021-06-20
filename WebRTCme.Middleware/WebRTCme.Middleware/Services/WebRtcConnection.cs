@@ -39,11 +39,10 @@ namespace WebRTCme.Middleware.Services
                 try
                 {
                     // Do checks before creating connection context.
-                    if (GetConnectionContext(
-                        connectionRequestParameters.ConnectionParameters.TurnServerName,
-                        connectionRequestParameters.ConnectionParameters.RoomName) is not null)
-                            throw new Exception($"{SignallingServerResult.RoomIsInUse}");
-
+                    //if (GetConnectionContext(
+                    //    connectionRequestParameters.ConnectionParameters.TurnServerName,
+                    //    connectionRequestParameters.ConnectionParameters.RoomName) is not null)
+                    //        throw new Exception($"{SignallingServerResult.RoomIsInUse}");
                     var result = await _signallingServerProxy.JoinRoomAsync(
                         connectionRequestParameters.ConnectionParameters.TurnServerName,
                         connectionRequestParameters.ConnectionParameters.RoomName,
