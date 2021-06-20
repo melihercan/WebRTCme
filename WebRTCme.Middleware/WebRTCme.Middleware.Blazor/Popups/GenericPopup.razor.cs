@@ -14,6 +14,7 @@ namespace WebRTCme.Middleware
 
         Dialog _dialog;
         GenericPopupIn _in;
+        GenericPopupOut _out = new();
 
         public async Task OnBeforeShow(DialogBeforeShowEventArgs e)
         {
