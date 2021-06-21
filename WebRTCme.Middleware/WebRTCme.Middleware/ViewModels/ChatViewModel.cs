@@ -187,7 +187,7 @@ namespace WebRTCme.Middleware
                         }
                         else
                         {
-                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                            await _navigation.NavigateToPageAsync("///", "ConnectionParametersPage");
                         }
                     }
                     else
@@ -208,7 +208,7 @@ namespace WebRTCme.Middleware
                         }
                         else
                         {
-                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                            await _navigation.NavigateToPageAsync("///", "ConnectionParametersPage");
                         }
                     }
                 },

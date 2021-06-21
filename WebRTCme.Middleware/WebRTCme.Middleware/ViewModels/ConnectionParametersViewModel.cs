@@ -22,7 +22,6 @@ namespace WebRTCme.Middleware
 
         readonly INavigation _navigation;
         
-        List<string> _turnServerNames;
 
         public ConnectionParametersViewModel(INavigation navigation)
         {
@@ -36,6 +35,7 @@ namespace WebRTCme.Middleware
                 platformName = "iOS";
             else
                 platformName = "Blazor";
+            //SelectedTurnServer = "StunOnly";
             ConnectionParameters.TurnServerName = "StunOnly";
             ConnectionParameters.RoomName = "hello";
             ConnectionParameters.UserName = platformName;
@@ -47,6 +47,18 @@ namespace WebRTCme.Middleware
                 TurnServerNames = turnServerNames.ToList();
         }
 
+        //string _selectedTurnServer;
+        //public string SelectedTurnServer
+        //{
+        //    get => _selectedTurnServer;
+        //    set
+        //    {
+        //        _selectedTurnServer = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
+
+        List<string> _turnServerNames;
         public List<string> TurnServerNames
         {
             get => _turnServerNames;
@@ -57,7 +69,16 @@ namespace WebRTCme.Middleware
             }
         }
 
-        public ConnectionParameters ConnectionParameters { get; set; } = new ConnectionParameters();
+        ConnectionParameters _connectionParameters = new();
+        public ConnectionParameters ConnectionParameters 
+        { 
+            get => _connectionParameters;
+            set 
+            {
+                _connectionParameters = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool IsCall { get; set; }
 
