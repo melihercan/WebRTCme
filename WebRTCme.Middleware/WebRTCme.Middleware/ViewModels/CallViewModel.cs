@@ -30,7 +30,7 @@ namespace WebRTCme.Middleware
         readonly IWebRtcConnection _webRtcConnection;
         readonly IMediaStreamManager _mediaStreamManager;
         readonly IMediaRecorderManager _mediaRecorderManager;
-        readonly IMediaRecorderFileStreamFactory _mediaRecorderFileStreamFactory;
+//        readonly IMediaRecorderFileStreamFactory _mediaRecorderFileStreamFactory;
         readonly IModalPopup _modalPopup;
         readonly IRunOnUiThread _runOnUiThread;
         readonly ILogger<CallViewModel> _logger;
@@ -38,21 +38,22 @@ namespace WebRTCme.Middleware
 
         IDisposable _connectionDisposer;
         Action _reRender;
-        string _userName;
+        //string _userName;
         IMediaStream _cameraStream;
         IMediaStream _displayStream;
         ConnectionParameters _connectionParameters;
 
-        IMediaRecorder _mediaRecorder;
+        //IMediaRecorder _mediaRecorder;
 
-        BlobStream _mediaRecorderBlobFileStream;
+        //BlobStream _mediaRecorderBlobFileStream;
 
         string _recordingFileName = "WebRTCme.webm";
 
         public CallViewModel(INavigation navigation, ILocalMediaStream localMediaStream, 
             IWebRtcConnection webRtcConnection, IMediaStreamManager mediaStreamManager,
             IMediaRecorderManager mediaRecorderManager,
-            IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory, IModalPopup modalPopup, 
+            //IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory, 
+            IModalPopup modalPopup, 
             IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, 
             IJSRuntime jsRuntime = null)
         {
@@ -60,7 +61,8 @@ namespace WebRTCme.Middleware
             _localMediaStream = localMediaStream;
             _webRtcConnection = webRtcConnection;
             _mediaStreamManager = mediaStreamManager;
-            _mediaRecorderFileStreamFactory = mediaRecorderFileStreamFactory;
+            _mediaRecorderManager = mediaRecorderManager;
+            //_mediaRecorderFileStreamFactory = mediaRecorderFileStreamFactory;
             _modalPopup = modalPopup;
             _runOnUiThread = runOnUiThreadService;
             _logger = logger;
@@ -72,7 +74,7 @@ namespace WebRTCme.Middleware
         {
             _connectionParameters = connectionParameters;
             _reRender = reRender;
-            _userName = connectionParameters.UserName;
+            //_userName = connectionParameters.UserName;
             _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
             _mediaStreamManager.Add(new MediaStreamParameters
             {
@@ -143,7 +145,7 @@ namespace WebRTCme.Middleware
                             _reRender?.Invoke();
 
                             _logger.LogInformation($"************* APP PeerError");
-                            var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                            _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
                             {
                                 Title = "Error",
                                 Text = $"Peer {peerResponseParameters.PeerUserName} indicated an error:" +
@@ -151,7 +153,6 @@ namespace WebRTCme.Middleware
                                        peerResponseParameters.ErrorMessage,
                                 Ok = "Ok",
                             });
-
                             break;
                     }
                 }),
@@ -208,7 +209,7 @@ namespace WebRTCme.Middleware
                 });
         }
 
-        private void Disconnect()
+        void Disconnect()
         {
             _mediaRecorderManager.ResetAllAsync();
             _mediaStreamManager.Clear();

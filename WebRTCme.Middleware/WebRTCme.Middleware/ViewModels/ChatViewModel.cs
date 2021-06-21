@@ -25,14 +25,17 @@ namespace WebRTCme.Middleware
         // A reference is required here. otherwise binding does not work.
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
+        readonly INavigation _navigation;
         readonly IWebRtcConnection _webRtcConnection;
         readonly IDataManager _dataManager;
         readonly IModalPopup _modalPopup;
         IDisposable _connectionDisposer;
         Action _reRender;
 
-        public ChatViewModel(IWebRtcConnection webRtcConnection, IDataManager dataManager, IModalPopup modalPopup)
+        public ChatViewModel(INavigation navigation, IWebRtcConnection webRtcConnection, IDataManager dataManager, 
+            IModalPopup modalPopup)
         {
+            _navigation = navigation;
             _webRtcConnection = webRtcConnection;
             _dataManager = dataManager;
             _modalPopup = modalPopup;
@@ -165,13 +168,49 @@ namespace WebRTCme.Middleware
                 },
                 onError: async exception =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"************* APP OnError:{exception.Message}");
-                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                    if (exception.Message.Equals($"{SignallingServerProxy.SignallingServerResult.UserNameIsInUse}"))
                     {
-                        Title = "Error",
-                        Text = exception.Message,
-                        Ok = "OK"
-                    });
+                        var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                        {
+                            Title = "Error",
+                            Text = $"User name {connectionRequestParameters.ConnectionParameters.UserName} " +
+                                   $"is in use. Please enter another name or 'Cancel' to cancel the call.",
+                            EntryPlaceholder = "New user name",
+                            Ok = "OK",
+                            Cancel = "Cancel"
+                        });
+                        await OnPageDisappearingAsync();
+                        if (popupOut.Ok)
+                        {
+                            connectionRequestParameters.ConnectionParameters.UserName = popupOut.Entry;
+                            await OnPageAppearingAsync(connectionRequestParameters.ConnectionParameters, _reRender);
+                        }
+                        else
+                        {
+                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                        }
+                    }
+                    else
+                    {
+                        var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                        {
+                            Title = "Error",
+                            Text = $"An error occured during the connection. Here is the reported error message:" +
+                                   Environment.NewLine +
+                                   $"{exception.Message}",
+                            Ok = "Try again",
+                            Cancel = "Cancel"
+                        });
+                        Disconnect();
+                        if (popupOut.Ok)
+                        {
+                            Connect(connectionRequestParameters);
+                        }
+                        else
+                        {
+                            await _navigation.NavigateToPageAsync("", "ConnectionParametersPage");
+                        }
+                    }
                 },
                 onCompleted: () =>
                 {
