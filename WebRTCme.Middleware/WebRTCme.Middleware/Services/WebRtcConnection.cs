@@ -27,7 +27,7 @@ namespace WebRTCme.Middleware.Services
             _logger = logger;
             _jsRuntime = jsRuntime;
         }
-
+         
         public IObservable<PeerResponseParameters> ConnectionRequest(
             ConnectionRequestParameters connectionRequestParameters)
         {
@@ -58,9 +58,6 @@ namespace WebRTCme.Middleware.Services
                     _connectionContexts.Add(connectionContext);
 
                     isJoined = true;
-
-//// For quick testing.                    
-//// await OnPeerJoinedAsync("StunOnly", "hello", "iOS");
                 }
                 catch (Exception ex)
                 {

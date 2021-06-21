@@ -5,7 +5,7 @@
              x:Class="DemoApp.Views.CallPage">
     <ContentPage.Content>
 
-        <FlexLayout BindableLayout.ItemsSource="{Binding MediaParametersList}"
+        <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
                     Wrap="Wrap"
                     Direction="Row"
                     JustifyContent="Center">

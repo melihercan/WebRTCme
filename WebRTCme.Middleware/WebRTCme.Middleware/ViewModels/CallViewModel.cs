@@ -30,11 +30,9 @@ namespace WebRTCme.Middleware
         readonly IWebRtcConnection _webRtcConnection;
         readonly IMediaStreamManager _mediaStreamManager;
         readonly IMediaRecorderManager _mediaRecorderManager;
-//        readonly IMediaRecorderFileStreamFactory _mediaRecorderFileStreamFactory;
         readonly IModalPopup _modalPopup;
         readonly IRunOnUiThread _runOnUiThread;
         readonly ILogger<CallViewModel> _logger;
-        readonly IJSRuntime _jsRuntime;
 
         IDisposable _connectionDisposer;
         Action _reRender;
@@ -43,30 +41,23 @@ namespace WebRTCme.Middleware
         IMediaStream _displayStream;
         ConnectionParameters _connectionParameters;
 
-        //IMediaRecorder _mediaRecorder;
-
-        //BlobStream _mediaRecorderBlobFileStream;
-
         string _recordingFileName = "WebRTCme.webm";
 
         public CallViewModel(INavigation navigation, ILocalMediaStream localMediaStream, 
             IWebRtcConnection webRtcConnection, IMediaStreamManager mediaStreamManager,
             IMediaRecorderManager mediaRecorderManager,
-            //IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory, 
             IModalPopup modalPopup, 
-            IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger, 
-            IJSRuntime jsRuntime = null)
+            IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger)
         {
             _navigation = navigation;
             _localMediaStream = localMediaStream;
             _webRtcConnection = webRtcConnection;
             _mediaStreamManager = mediaStreamManager;
             _mediaRecorderManager = mediaRecorderManager;
-            //_mediaRecorderFileStreamFactory = mediaRecorderFileStreamFactory;
             _modalPopup = modalPopup;
             _runOnUiThread = runOnUiThreadService;
             _logger = logger;
-            _jsRuntime = jsRuntime;
+
             MediaStreamParametersList = mediaStreamManager.MediaStreamParametersList;
         }
 
@@ -288,26 +279,6 @@ namespace WebRTCme.Middleware
                 };
                 await _mediaRecorderManager.StartAsync(_recordingFileName, 5000, /*_displayStream*/ _cameraStream,
                     mediaRecorderOptions);
-
-                //_mediaRecorderBlobFileStream = await _mediaRecorderFileStreamFactory
-                //    .CreateBlobStreamAsync("MyFirst.webm", mediaRecorderOptions);
-
-                //var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
-
-                //_mediaRecorder = window.MediaRecorder(/*_displayStream*/ _cameraStream, mediaRecorderOptions); 
-                //_mediaRecorder.OnDataAvailable += async (s, e) => 
-                //{
-                //    var blob = e.Data;
-                //    _logger.LogInformation($"---------------------------- RECORDER BLOB DATA: size:{blob.Size} type:{blob.Type }");
-
-                //    await _mediaRecorderBlobFileStream.WriteAsync(blob);
-                //};
-                //_mediaRecorder.OnStart += (s, e) => 
-                //{
-                //    _logger.LogInformation("---------------------------- RECORDER STARTED");
-                //};
-                
-                //_mediaRecorder.Start(5000);
             }
             _isRecording = !_isRecording;
         }

@@ -16,8 +16,6 @@ namespace WebRTCme.Middleware.Services
 
         List<MediaRecorderParameters> _mediaRecorderParametersList = new();
 
-        BlobStream _mediaRecorderBlobFileStream;
-
         public MediaRecorderManager(IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory,
             ILogger<MediaRecorderManager> logger, IJSRuntime jsRuntime = null)
         {
