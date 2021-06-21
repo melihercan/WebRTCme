@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware.Xamarin.Helpers
 {
-    class VideoRecorderFileStream : Stream
+    class MediaRecorderBlobFileStream : BlobStream
     {
         public override bool CanRead => throw new NotImplementedException();
 
@@ -48,5 +48,11 @@ namespace WebRTCme.Middleware.Xamarin.Helpers
         {
             return base.WriteAsync(buffer, offset, count, cancellationToken);
         }
+
+        public override Task WriteAsync(IBlob blob, CancellationToken cancellationToken)
+        {
+            throw null;
+        }
+
     }
 }

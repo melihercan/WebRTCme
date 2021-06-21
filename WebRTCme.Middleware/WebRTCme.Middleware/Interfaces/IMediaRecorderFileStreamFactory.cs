@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware
 {
-    public interface IVideoRecorderFileStreamFactory
+    public interface IMediaRecorderFileStreamFactory
     {
         Task<Stream> CreateStreamAsync(string fileName, MediaRecorderOptions options);
 

@@ -1,33 +1,14 @@
-﻿using Blazorme;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Middleware.Blazor.Helpers
+namespace WebRTCme.Middleware.Xamarin.Helpers
 {
-    class VideoRecorderFileStream : Stream, IAsyncInit
+    class MediaRecorderFileStream : Stream
     {
-        readonly string _fileName;
-        readonly MediaRecorderOptions _mediaRecorderOptions;
-        readonly IStreamSaver _streamSaver;
-
-        Stream _writableFileStream;
-
-        public VideoRecorderFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions, IStreamSaver streamSaver)
-        {
-            _fileName = fileName;
-            _mediaRecorderOptions = mediaRecorderOptions;
-            _streamSaver = streamSaver;
-
-            Initialization = InitAsync();
-        }
-
-        public Task Initialization { get; private set; }
-
         public override bool CanRead => throw new NotImplementedException();
 
         public override bool CanSeek => throw new NotImplementedException();
@@ -37,11 +18,6 @@ namespace WebRTCme.Middleware.Blazor.Helpers
         public override long Length => throw new NotImplementedException();
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        async Task InitAsync()
-        {
-            _writableFileStream = await _streamSaver.CreateWritableFileStreamAsync(_fileName);
-        }
 
         public override void Flush()
         {
@@ -68,15 +44,9 @@ namespace WebRTCme.Middleware.Blazor.Helpers
             throw new NotImplementedException();
         }
 
-        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            await _writableFileStream.WriteAsync(buffer, 0, count, cancellationToken);
-        }
-
-        public override void Close()
-        {
-            Task.Run(async () => await _writableFileStream.DisposeAsync());
-            base.Close();
+            return base.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }

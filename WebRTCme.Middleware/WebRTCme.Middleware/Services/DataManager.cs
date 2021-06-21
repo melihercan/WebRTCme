@@ -112,7 +112,7 @@ namespace WebRTCme.Middleware.Services
         }
 
 
-        private void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, bool isRemove)
+        void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, bool isRemove)
         {
             if (isRemove)
             {

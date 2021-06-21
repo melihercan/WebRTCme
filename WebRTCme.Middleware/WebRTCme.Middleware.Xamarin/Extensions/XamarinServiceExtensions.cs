@@ -14,7 +14,7 @@ namespace WebRTCme.Middleware
             services.AddSingleton<INavigation, Navigation>();
             services.AddSingleton<IRunOnUiThread, RunOnUiThread>();
             services.AddSingleton<IWebRtcIncomingFileStreamFactory, WebRtcIncomingFileStreamFactory>();
-            services.AddSingleton<IVideoRecorderFileStreamFactory, VideoRecorderFileStreamFactory>();
+            services.AddSingleton<IMediaRecorderFileStreamFactory, MediaRecorderFileStreamFactory>();
 
             services.AddMiddleware();
 

@@ -12,7 +12,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Middleware.Blazor.Helpers
 {
-    class VideoRecorderBlobFileStream : BlobStream, IAsyncInit
+    class MediaRecorderBlobFileStream : BlobStream, IAsyncInit
     {
         readonly string _fileName;
         readonly MediaRecorderOptions _mediaRecorderOptions;
@@ -23,7 +23,7 @@ namespace WebRTCme.Middleware.Blazor.Helpers
 
         Stream _writableFileStream;
 
-        public VideoRecorderBlobFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions, 
+        public MediaRecorderBlobFileStream(string fileName, MediaRecorderOptions mediaRecorderOptions, 
             IJSRuntime jsRuntime)
         {
             _fileName = fileName;

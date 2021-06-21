@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Middleware.Xamarin.Services
 {
-    class VideoRecorderFileStreamFactory : IVideoRecorderFileStreamFactory
+    class MediaRecorderFileStreamFactory : IMediaRecorderFileStreamFactory
     {
 
         public Task<Stream> CreateStreamAsync(string fileName, MediaRecorderOptions options)

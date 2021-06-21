@@ -38,6 +38,12 @@
     <Compile Include="Popups\*.cs" />
   </ItemGroup>
 
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="Helpers\MediaRecorderBlobFileStream.cs" />
+	  <UpToDateCheckInput Remove="Helpers\MediaRecorderFileStream.cs" />
+	  <UpToDateCheckInput Remove="Services\MediaRecorderFileStreamFactory.cs" />
+	</ItemGroup>
+
   <ItemGroup>
     <Compile Update="Popups\GenericPopup.xaml.cs">
       <DependentUpon>GenericPopup.xaml</DependentUpon>

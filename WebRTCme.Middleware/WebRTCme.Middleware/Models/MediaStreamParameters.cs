@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Middleware
 {
-    public class MediaParameters
+    public class MediaStreamParameters
     {
         public string Label { get; set; }
         public IMediaStream Stream { get; set; }
