@@ -14,11 +14,11 @@ namespace WebRTCme.Bindings.Blazor.Api
     {
         public static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection");
-            return new RTCPeerConnection(jsRuntime, jsObjectRef, rtcConfiguration);
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection", rtcConfiguration);
+            return new RTCPeerConnection(jsRuntime, jsObjectRef);
         }
 
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, RTCConfiguration rtcConfiguration)
+        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
             : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListener("connectionstatechange", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
