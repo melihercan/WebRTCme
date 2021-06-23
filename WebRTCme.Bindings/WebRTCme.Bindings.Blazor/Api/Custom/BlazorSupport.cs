@@ -11,14 +11,14 @@ namespace WebRTCme
 {
     public static class BlazorSupport
     {
-        public static void SetVideoSource(IJSRuntime jsRuntime, ElementReference videoElementReference, 
-            IMediaStream mediaStream)
+        public static void SetVideoSource(IJSRuntime jsRuntime, ElementReference videoElementReference,
+            IMediaStream mediaStream, bool muted = false)
         {
             jsRuntime.SetJsProperty(videoElementReference, "srcObject", mediaStream.NativeObject);
 
             //jsRuntime.SetJsProperty(videoElementReference, "autoplay", true);
             //jsRuntime.SetJsProperty(videoElementReference, "playsInline", true);
-            //jsRuntime.SetJsProperty(videoElementReference, "muted", true);
+            jsRuntime.SetJsProperty(videoElementReference, "muted", muted);
 
         }
     }

@@ -11,6 +11,9 @@ namespace WebRTCme.Middleware
         public static readonly BindableProperty StreamProperty = BindableProperty
             .Create(nameof(StreamProperty), typeof(IMediaStream), typeof(Media), null);
 
+        public static readonly BindableProperty HangupProperty = BindableProperty
+            .Create(nameof(HangupProperty), typeof(bool), typeof(Media), false);
+
         public static readonly BindableProperty LabelProperty = BindableProperty
             .Create(nameof(LabelProperty), typeof(string), typeof(Media), string.Empty);
 
@@ -19,6 +22,9 @@ namespace WebRTCme.Middleware
 
         public static readonly BindableProperty AudioMutedProperty = BindableProperty
             .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
+
+        public static readonly BindableProperty CameraTypeProperty = BindableProperty
+            .Create(nameof(CameraTypeProperty), typeof(bool), typeof(Media), CameraType.Default);
 
         public static readonly BindableProperty ShowControlsProperty = BindableProperty
             .Create(nameof(ShowControlsProperty), typeof(bool), typeof(Media), false);
@@ -35,6 +41,12 @@ namespace WebRTCme.Middleware
             set => SetValue(LabelProperty, value);
         }
 
+        public bool Hangup
+        {
+            get => (bool)GetValue(HangupProperty);
+            set => SetValue(HangupProperty, value);
+        }
+
         public bool VideoMuted
         {
             get => (bool)GetValue(VideoMutedProperty);
@@ -45,6 +57,12 @@ namespace WebRTCme.Middleware
         {
             get => (bool)GetValue(AudioMutedProperty);
             set => SetValue(AudioMutedProperty, value);
+        }
+
+        public CameraType CameraType
+        {
+            get => (CameraType)GetValue(CameraTypeProperty);
+            set => SetValue(CameraTypeProperty, value);
         }
 
         public bool ShowControls

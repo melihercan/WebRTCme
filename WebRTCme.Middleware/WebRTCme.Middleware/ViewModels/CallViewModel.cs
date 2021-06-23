@@ -69,10 +69,12 @@ namespace WebRTCme.Middleware
             _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
             _mediaStreamManager.Add(new MediaStreamParameters
             {
-                Label = connectionParameters.UserName,
                 Stream = _cameraStream,
+                Label = connectionParameters.UserName,
+                Hangup = false,
                 VideoMuted = false,
-                AudioMuted = false,
+                AudioMuted = true,  // prevents local echo
+                CameraType = CameraType.Default,
                 ShowControls = false
             });
 
@@ -107,10 +109,12 @@ namespace WebRTCme.Middleware
                                 {
                                     _mediaStreamManager.Add((MediaStreamParameters)new MediaStreamParameters
                                     {
-                                        Label = peerResponseParameters.PeerUserName,
                                         Stream = peerResponseParameters.MediaStream,
+                                        Label = peerResponseParameters.PeerUserName,
+                                        Hangup = false,
                                         VideoMuted = false,
                                         AudioMuted = false,
+                                        CameraType = CameraType.Default,
                                         ShowControls = false
                                     });
                                 }));

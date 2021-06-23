@@ -22,10 +22,16 @@ namespace WebRTCme.Middleware
         public string Label { get; set; } = string.Empty;
 
         [Parameter]
+        public bool Hangup { get; set; } = false;
+
+        [Parameter]
         public bool VideoMuted { get; set; } = false;
 
         [Parameter]
         public bool AudioMuted { get; set; } = false;
+
+        [Parameter]
+        public CameraType CameraType { get; set; } = CameraType.Default;
 
         [Parameter]
         public bool ShowContols { get; set; } = false;
@@ -43,7 +49,7 @@ namespace WebRTCme.Middleware
             base.OnAfterRender(firstRender);
 
             if (Stream is not null)// && VideoElementReference.Id is not null)
-                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream);
+                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, AudioMuted);
         }
 
         public void Dispose()

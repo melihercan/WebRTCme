@@ -16,9 +16,9 @@
     @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)
     {
         <div class="p-2">
-            <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label"
+            <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label" Hangup="@mediaParameters.Hangup"
                    VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"
-                   ShowContols="@mediaParameters.ShowControls" />
+                   CameraType="@mediaParameters.CameraType"  ShowContols="@mediaParameters.ShowControls" />
         </div>
     }
 </div>

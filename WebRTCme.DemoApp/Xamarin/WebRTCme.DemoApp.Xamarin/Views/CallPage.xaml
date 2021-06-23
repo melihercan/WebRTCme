@@ -11,8 +11,9 @@
                     JustifyContent="Center">
             <BindableLayout.ItemTemplate>
                 <DataTemplate>
-                    <webRtc:Media Stream="{Binding Stream}" Label="{Binding Label}" 
-                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}" 
+                    <webRtc:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
+                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
+                                  CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
                                   VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

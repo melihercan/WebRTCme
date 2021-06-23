@@ -20,8 +20,11 @@ namespace WebRTCme.Middleware
     {
         private IMediaStream _stream;
         private string _label;
+        private bool _hangup;
         private bool _videoMuted;
         private bool _audioMuted;
+        private CameraType _cameraType;
+        private bool _showControls;
         private IMediaStreamTrack _videoTrack;
         private IMediaStreamTrack _audioTrack;
         private MediaView _mediaView;
@@ -42,9 +45,12 @@ namespace WebRTCme.Middleware
                 if (Control == null)
                 {
                     _stream = e.NewElement.Stream;
+                    _hangup = e.NewElement.Hangup;
                     _label = e.NewElement.Label;
                     _videoMuted = e.NewElement.VideoMuted;
                     _audioMuted = e.NewElement.AudioMuted;
+                    _cameraType = e.NewElement.CameraType;
+                    _showControls = e.NewElement.ShowControls;
 
                     if (_stream is not null)
                     {
@@ -77,12 +83,27 @@ namespace WebRTCme.Middleware
             }
             else if (args.PropertyName == Media.LabelProperty.PropertyName)
             {
+                _label = Element.Label;
+            }
+            else if (args.PropertyName == Media.HangupProperty.PropertyName)
+            {
+                _hangup = Element.Hangup;
             }
             else if (args.PropertyName == Media.VideoMutedProperty.PropertyName)
             {
+                _videoMuted = Element.VideoMuted;
             }
             else if (args.PropertyName == Media.AudioMutedProperty.PropertyName)
             {
+                _audioMuted = Element.AudioMuted;
+            }
+            else if (args.PropertyName == Media.CameraTypeProperty.PropertyName)
+            {
+                _cameraType = Element.CameraType;
+            }
+            else if (args.PropertyName == Media.ShowControlsProperty.PropertyName)
+            {
+                _showControls = Element.ShowControls;
             }
         }
     }
