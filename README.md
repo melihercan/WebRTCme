@@ -1,3 +1,17 @@
+# COMING SOON NEW NUGETS (July 25th, 2021)
+I am actively working on this project to evolve this framework from demo level to production quality level. The upcoming improvements in the pipeline:
+- Bug fixes
+- Major rework of Middleware layer
+- Adding file sharing, screen sharing and recording of call session or camera services
+- Selecting audio/video sources
+- Adding [mediasoup](https://mediasoup.org/) WebRTC media server support for group video conferencing using SFU
+- And more...
+
+I will release the new NuGets once the code reaches to a certain maturity level.
+
+
+
+## VS2019 16.9.x iOS Binding Issues
 !!!IMPORTANT!!! vs2019 16.9.x is broken for iOS.Bindings projects on Windows.
 
 See the workarounds:
