@@ -1,7 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="nodejs\**" />
+    <Content Remove="nodejs\**" />
+    <EmbeddedResource Remove="nodejs\**" />
+    <None Remove="nodejs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="package-lock.json" />
+  </ItemGroup>
+
+  
 </Project>
