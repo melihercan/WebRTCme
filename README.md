@@ -10,6 +10,8 @@ I am actively working on this project to evolve this framework from demo level t
 I will release the new NuGets once the code reaches to a certain maturity level.
 
 
+
+## VS2019 16.9.x iOS Binding Issues
 !!!IMPORTANT!!! vs2019 16.9.x is broken for iOS.Bindings projects on Windows.
 
 See the workarounds:
