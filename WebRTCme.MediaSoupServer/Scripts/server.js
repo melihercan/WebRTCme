@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 process.title = 'mediasoup-demo-server';
-process.env.DEBUG = process.env.DEBUG || '*INFO* *WARN* *ERROR*';
+process.env.DEBUG = process.env.DEBUG || '*mediasoup* *INFO* *WARN* *ERROR*';
 
 const config = require('./config');
 
@@ -59,7 +59,6 @@ run();
 async function run()
 {
 	console.log('################ Starting MediaSoup server...');
-	logger.info('YESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
 
 	// Open the interactive server.
 	await interactiveServer();
