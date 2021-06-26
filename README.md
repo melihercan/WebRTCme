@@ -1,4 +1,4 @@
-# COMING SOON NEW NUGETS (July 25th, 2021)
+# COMING SOON NEW NUGETS
 I am actively working on this project to evolve this framework from demo level to production quality level. The upcoming improvements in the pipeline:
 - Bug fixes
 - Major rework of Middleware layer
