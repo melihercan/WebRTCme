@@ -8,3 +8,7 @@ WINDOWS REQUIRES THE FOLLOWING SETTINGS:
 Hard coded values may require some changes based on your environment.
 
 To create node_modules, right click 'package.json' and select 'Restore Packages'.
+For some reason heapdump addon is reporting problems. To solve it run:
+'npm install heapdump' from command line.
+
+

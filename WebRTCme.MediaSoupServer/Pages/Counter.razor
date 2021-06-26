@@ -20,6 +20,13 @@
 
     async Task OnMediaSoupAsync()
     {
-        
+        try
+        {
+            await NodeJsService.InvokeFromFileAsync("./Scripts/mediaSoupServer", "runServer");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"EXCEPTION: {ex.Message}");
+        }
     }
 }
