@@ -30,12 +30,12 @@ namespace WebRTCme
             //Webrtc.CFunctions.RTCSetMinDebugLogLevel(Webrtc.RTCLoggingSeverity./*Verbose*/Error/*Warning*/);
         }
 
-        public void Cleanup()
+        public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.iOS.Window.Create();
+
+        public void Dispose()
         {
             ////CFunctions.RTCShutdownInternalTracer();
             //Webrtc.CFunctions.RTCCleanupSSL();
         }
-
-        public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.iOS.Window.Create();
     }
 }

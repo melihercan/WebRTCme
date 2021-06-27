@@ -31,7 +31,8 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
             });
 
-            _ = CrossWebRtcMiddlewareBlazor.Current;
+            var webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
+            builder.Services.AddSingleton(serviceProvider => webRtcMiddleware);
 
             builder.Services.AddApp();
 

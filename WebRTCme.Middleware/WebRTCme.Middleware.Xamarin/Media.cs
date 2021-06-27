@@ -24,7 +24,7 @@ namespace WebRTCme.Middleware
             .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
 
         public static readonly BindableProperty CameraTypeProperty = BindableProperty
-            .Create(nameof(CameraTypeProperty), typeof(bool), typeof(Media), CameraType.Default);
+            .Create(nameof(CameraTypeProperty), typeof(CameraType), typeof(Media), CameraType.Default);
 
         public static readonly BindableProperty ShowControlsProperty = BindableProperty
             .Create(nameof(ShowControlsProperty), typeof(bool), typeof(Media), false);

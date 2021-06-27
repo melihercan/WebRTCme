@@ -7,7 +7,7 @@ namespace WebRTCme.Middleware
     public static class CrossWebRtcMiddlewareXamarin
     {
         public static IWebRtcMiddleware Current => _webRtcMiddleware.Value;
-
+       
         private static readonly Lazy<IWebRtcMiddleware> _webRtcMiddleware = new Lazy<IWebRtcMiddleware>(() => 
             CreateWebRtcMiddleware());
 
@@ -16,5 +16,6 @@ namespace WebRTCme.Middleware
             var webRtc = CrossWebRtc.Current;
             return new WebRtcMiddleware(webRtc);
         }
+
     }
 }

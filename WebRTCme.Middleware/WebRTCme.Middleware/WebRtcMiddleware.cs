@@ -13,7 +13,7 @@ namespace WebRTCme.Middleware
 {
     public class WebRtcMiddleware : IWebRtcMiddleware
     {
-        public static IWebRtc WebRtc { get; private set; }
+        public IWebRtc WebRtc { get; private set; }
 
         public WebRtcMiddleware(IWebRtc webRtc)
         {
@@ -38,7 +38,7 @@ namespace WebRTCme.Middleware
                 if (disposing)
                 {
                     // Dispose managed.
-                    WebRtc.Cleanup();
+                    WebRtc.Dispose();
                 }
 
                 _isDisposed = true;

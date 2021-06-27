@@ -11,11 +11,11 @@ namespace WebRTCme
 {
     internal class WebRtc : IWebRtc
     {
-        private WebRtc() { }
-
         public static IWebRtc Create() => new WebRtc();
 
-        public void Cleanup() { }
+        public void Dispose()
+        {
+        }
 
 #if NETSTANDARD
         public IWindow Window(IJSRuntime jsRuntime) => throw new NotImplementedException();

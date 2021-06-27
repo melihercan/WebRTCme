@@ -15,14 +15,16 @@ namespace WebRTCme.Middleware.Services
 {
     internal class WebRtcConnection : IWebRtcConnection
     {
+        readonly IWebRtcMiddleware _webRtcMiddleware;
         readonly ISignallingServerProxy _signallingServerProxy;
         readonly ILogger<WebRtcConnection> _logger;
         readonly IJSRuntime _jsRuntime;
         static List<ConnectionContext> _connectionContexts = new();
 
-        public WebRtcConnection(ISignallingServerProxy signallingServerProxy, ILogger<WebRtcConnection> logger,
-            IJSRuntime jsRuntime = null)
+        public WebRtcConnection(IWebRtcMiddleware webRtcMiddleware, ISignallingServerProxy signallingServerProxy, 
+            ILogger<WebRtcConnection> logger,  IJSRuntime jsRuntime = null)
         {
+            _webRtcMiddleware = webRtcMiddleware;
             _signallingServerProxy = signallingServerProxy;
             _logger = logger;
             _jsRuntime = jsRuntime;
@@ -159,7 +161,7 @@ namespace WebRTCme.Middleware.Services
                 }
                 else
                 {
-                    mediaStream = WebRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
+                    mediaStream = _webRtcMiddleware.WebRtc.Window(_jsRuntime).MediaStream();
                     RTCIceServer[] iceServers = connectionContext.IceServers;
                     if (iceServers is null)
                     {
@@ -180,7 +182,7 @@ namespace WebRTCme.Middleware.Services
                             _logger.LogInformation($"\t - {url}");
                     _logger.LogInformation($"#####################################################");
 
-                    peerConnection = WebRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
+                    peerConnection = _webRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
                     subject = new Subject<PeerResponseParameters>();
                     peerContext = new PeerContext
                     {

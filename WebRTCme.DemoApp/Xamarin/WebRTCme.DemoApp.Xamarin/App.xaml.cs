@@ -22,7 +22,9 @@ namespace DemoApp
                 Prefix = "WebRTCme.DemoApp.Xamarin"
             });
 
-            _ = CrossWebRtcMiddlewareXamarin.Current;
+            var webRtcMiddleware = CrossWebRtcMiddlewareXamarin.Current;
+            hostBuilder.Services.AddSingleton(serviceProvider => webRtcMiddleware);
+
             hostBuilder.Services.AddXamarinMiddleware();
             Host = hostBuilder.Build();
 

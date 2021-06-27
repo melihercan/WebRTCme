@@ -59,10 +59,6 @@ namespace WebRTCme
             //adm.Release();
         }
 
-        public void Cleanup() 
-        { 
-        }
-
         public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.Android.Window.Create();
 
         private static IAudioDeviceModule CreateJavaAudioDevice(Context context)
@@ -74,6 +70,10 @@ namespace WebRTCme
                 .SetAudioTrackErrorCallback(audioErrorCallbacks)
                 .SetAudioTrackStateCallback(audioErrorCallbacks)
                 .CreateAudioDeviceModule();
+        }
+
+        public void Dispose()
+        {
         }
 
         private class AudioErrorCallbacks : Java.Lang.Object,

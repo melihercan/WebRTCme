@@ -10,5 +10,6 @@ namespace WebRTCme.Middleware
 {
     public interface IWebRtcMiddleware : IDisposable
     {
+        IWebRtc WebRtc { get; }
     }
 }

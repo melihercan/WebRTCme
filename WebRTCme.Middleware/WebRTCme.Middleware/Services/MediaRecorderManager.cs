@@ -10,15 +10,18 @@ namespace WebRTCme.Middleware.Services
 {
     class MediaRecorderManager : IMediaRecorderManager
     {
+        readonly IWebRtcMiddleware _webRtcMiddleware;
         readonly IMediaRecorderFileStreamFactory _mediaRecorderFileStreamFactory;
         readonly ILogger<MediaRecorderManager> _logger;
         readonly IJSRuntime _jsRuntime;
 
         List<MediaRecorderParameters> _mediaRecorderParametersList = new();
 
-        public MediaRecorderManager(IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory,
+        public MediaRecorderManager(IWebRtcMiddleware webRtcMiddleware, 
+            IMediaRecorderFileStreamFactory mediaRecorderFileStreamFactory,
             ILogger<MediaRecorderManager> logger, IJSRuntime jsRuntime = null)
         {
+            _webRtcMiddleware = webRtcMiddleware;
             _mediaRecorderFileStreamFactory = mediaRecorderFileStreamFactory;
             _logger = logger;
             _jsRuntime = jsRuntime;
@@ -105,7 +108,7 @@ namespace WebRTCme.Middleware.Services
                     .CreateBlobStreamAsync(mediaRecorderParameters.FileName, 
                         mediaRecorderParameters.MediaRecorderOptions);
                 
-                var window = WebRtcMiddleware.WebRtc.Window(_jsRuntime);
+                var window = _webRtcMiddleware.WebRtc.Window(_jsRuntime);
 
                 mediaRecorderParameters.MediaRecorder = window.MediaRecorder(mediaRecorderParameters.MediaStream, 
                     mediaRecorderParameters.MediaRecorderOptions);

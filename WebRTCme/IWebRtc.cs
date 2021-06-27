@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IWebRtc
+    public interface IWebRtc : IDisposable
     {
         IWindow Window(IJSRuntime jsRuntime = null);
-
-        void Cleanup();
     }
 }

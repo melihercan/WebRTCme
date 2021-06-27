@@ -13,9 +13,9 @@ namespace WebRTCme.Middleware.Services
     {
         private readonly IMediaDevices _mediaDevices;
 
-        public LocalMediaStream(IJSRuntime jsRuntime = null)
+        public LocalMediaStream(IWebRtcMiddleware webRtcMiddleware, IJSRuntime jsRuntime = null)
         {
-            var window = WebRtcMiddleware.WebRtc.Window(jsRuntime);
+            var window = webRtcMiddleware.WebRtc.Window(jsRuntime);
             var navigator = window.Navigator();
             _mediaDevices = navigator.MediaDevices;
         }
