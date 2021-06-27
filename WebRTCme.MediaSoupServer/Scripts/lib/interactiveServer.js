@@ -9,8 +9,8 @@ const colors = require('colors/safe');
 const pidusage = require('pidusage');
 const heapdump = require('heapdump');
 
-const SOCKET_PATH_UNIX = '/tmp/mediasoup-demo.sock';
-const SOCKET_PATH_WIN = path.join('\\\\?\\pipe', process.cwd(), 'Scripts' ,'MediaSoupServer');
+const SOCKET_PATH_UNIX = '/tmp/MediaSoupServer.sock';
+const SOCKET_PATH_WIN = path.join('\\\\?\\pipe', process.cwd(), 'Scripts','MediaSoupServer');
 const SOCKET_PATH = os.platform() === 'win32' ? SOCKET_PATH_WIN : SOCKET_PATH_UNIX;
 
 // Maps to store all mediasoup objects.

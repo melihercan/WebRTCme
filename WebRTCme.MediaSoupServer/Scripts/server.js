@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-process.title = 'mediasoup-demo-server';
+process.title = 'MediaSoupServer';
 process.env.DEBUG = process.env.DEBUG || '*mediasoup* *INFO* *WARN* *ERROR*';
 
 const config = require('./config');
@@ -64,8 +64,8 @@ async function run()
 	await interactiveServer();
 
 	// Open the interactive client.
-	if (process.env.INTERACTIVE === 'true' || process.env.INTERACTIVE === '1')
-		await interactiveClient();
+	//if (process.env.INTERACTIVE === 'true' || process.env.INTERACTIVE === '1')
+		//await interactiveClient();
 
 	// Run a mediasoup Worker.
 	await runMediasoupWorkers();
@@ -439,6 +439,7 @@ async function runHttpsServer()
 
 	await new Promise((resolve) =>
 	{
+		console.log('---------------- HTTPS server: ' + config.https.listenIp + ':' + config.https.listenPort);
 		httpsServer.listen(
 			Number(config.https.listenPort), config.https.listenIp, resolve);
 	});
