@@ -10,7 +10,7 @@ const pidusage = require('pidusage');
 const heapdump = require('heapdump');
 
 const SOCKET_PATH_UNIX = '/tmp/mediasoup-demo.sock';
-const SOCKET_PATH_WIN = path.join('\\\\?\\pipe', process.cwd(), 'mediasoup-demo');
+const SOCKET_PATH_WIN = path.join('\\\\?\\pipe', process.cwd(), 'Scripts' ,'MediaSoupServer');
 const SOCKET_PATH = os.platform() === 'win32' ? SOCKET_PATH_WIN : SOCKET_PATH_UNIX;
 
 // Maps to store all mediasoup objects.
@@ -660,6 +660,7 @@ module.exports = async function()
 		try { fs.unlinkSync(SOCKET_PATH); }
 		catch (error) {}
 
+		console.log('---------------- Interactive server: ' + SOCKET_PATH);
 		server.listen(SOCKET_PATH, resolve);
 	});
 };
