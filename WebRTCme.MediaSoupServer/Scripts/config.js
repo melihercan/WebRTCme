@@ -23,7 +23,7 @@ module.exports =
 		// NOTE: Set your own valid certificate files.
 		tls        :
 		{
-			cert : process.env.HTTPS_CERT_FULLCHAIN || `${__dirname}/certs/webrtcme.crt`,
+			cert : process.env.HTTPS_CERT_FULLCHAIN || `${__dirname}/certs/mediasoupserver.crt`,
 			key  : process.env.HTTPS_CERT_PRIVKEY || `${__dirname}/certs/key.pem`
 		}
 	},

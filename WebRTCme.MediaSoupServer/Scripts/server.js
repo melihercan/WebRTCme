@@ -464,10 +464,13 @@ async function runProtooWebSocketServer()
 	// Handle connections from clients.
 	protooWebSocketServer.on('connectionrequest', (info, accept, reject) =>
 	{
+		console.log('>>>>>>>>>>>>> WebSocket connectionrequest');
+
 		// The client indicates the roomId and peerId in the URL query.
 		const u = url.parse(info.request.url, true);
 		const roomId = u.query['roomId'];
 		const peerId = u.query['peerId'];
+
 
 		if (!roomId || !peerId)
 		{
@@ -499,6 +502,8 @@ async function runProtooWebSocketServer()
 				reject(error);
 			});
 	});
+
+	console.log('>>>>>>>>>>>>> WebSocketServer created');
 }
 
 /**
