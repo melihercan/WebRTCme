@@ -5,7 +5,7 @@ namespace WebRTCme.SignallingServer.TurnServerService
 {
     public class TurnServerProxyFactory
     {
-        private readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _serviceProvider;
 
         public TurnServerProxyFactory(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 

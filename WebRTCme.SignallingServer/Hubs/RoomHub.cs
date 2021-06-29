@@ -14,11 +14,11 @@ namespace WebRTCme.SignallingServer.Hubs
 {
     public class RoomHub : Hub<ISignallingServerCallbacks>, ISignallingServerProxy
     {
-        readonly TurnServerProxyFactory _turnServerClientFactory;
+        readonly TurnServerProxyFactory _turnServerProxyFactory;
         readonly ILogger<RoomHub> _logger;
 
         static List<Server> Servers = new();
-        static Dictionary<TurnServer, ITurnServerProxy> TurnServerClients = new();
+        static Dictionary<TurnServer, ITurnServerProxy> TurnServerProxies = new();
 
         // Currently these events are not used. Hence appended empty { add { } remove { } }.
         public event ISignallingServerProxy.JoinedOrLeftCallbackHandler OnPeerJoinedAsyncEvent { add { } remove { } }
@@ -26,17 +26,17 @@ namespace WebRTCme.SignallingServer.Hubs
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerSdpAsyncEvent { add { } remove { } }
         public event ISignallingServerProxy.SdpOrIceCallbackHandler OnPeerIceAsyncEvent { add { } remove { } }
 
-        public RoomHub(TurnServerProxyFactory turnServerClientFactory, ILogger<RoomHub> logger)
+        public RoomHub(TurnServerProxyFactory turnServerProxyFactory, ILogger<RoomHub> logger)
         { 
-            _turnServerClientFactory = turnServerClientFactory;
+            _turnServerProxyFactory = turnServerProxyFactory;
             _logger = logger;
         }
 
         ITurnServerProxy GetTurnServerClient(TurnServer turnServer)
         {
-            if (!TurnServerClients.ContainsKey(turnServer))
-                TurnServerClients.Add(turnServer, _turnServerClientFactory.Create(turnServer));
-            return TurnServerClients[turnServer];
+            if (!TurnServerProxies.ContainsKey(turnServer))
+                TurnServerProxies.Add(turnServer, _turnServerProxyFactory.Create(turnServer));
+            return TurnServerProxies[turnServer];
         }
 
         TurnServer GetTurnServerFromName(string turnServerName) =>
