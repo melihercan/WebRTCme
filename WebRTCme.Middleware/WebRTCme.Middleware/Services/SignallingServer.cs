@@ -19,7 +19,7 @@ using Xamarin.Essentials;
 
 namespace WebRTCme.Middleware.Services
 {
-    internal class SignallingServer : ISignallingServer, ISignallingServerCallbacks
+    class SignallingServer : ISignallingServer, ISignallingServerCallbacks
     {
         readonly ISignallingServerProxy _signallingServerProxy;
         readonly IWebRtcConnection _webRtcConnection;

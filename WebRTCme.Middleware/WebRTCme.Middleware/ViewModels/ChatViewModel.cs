@@ -27,16 +27,18 @@ namespace WebRTCme.Middleware
 
         readonly INavigation _navigation;
         readonly IWebRtcConnection _webRtcConnection;
+        readonly IMediaServerConnection _mediaServerConnection;
         readonly IDataManager _dataManager;
         readonly IModalPopup _modalPopup;
         IDisposable _connectionDisposer;
         Action _reRender;
 
-        public ChatViewModel(INavigation navigation, IWebRtcConnection webRtcConnection, IDataManager dataManager, 
-            IModalPopup modalPopup)
+        public ChatViewModel(INavigation navigation, IWebRtcConnection webRtcConnection,
+            IMediaServerConnection mediaServerConnection, IDataManager dataManager, IModalPopup modalPopup)
         {
             _navigation = navigation;
             _webRtcConnection = webRtcConnection;
+            _mediaServerConnection = mediaServerConnection;
             _dataManager = dataManager;
             _modalPopup = modalPopup;
             DataParametersList = dataManager.DataParametersList;
@@ -130,7 +132,21 @@ namespace WebRTCme.Middleware
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
+            IObservable<PeerResponseParameters> connectionObservable = null;
+
+            if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            {
+                connectionObservable = _webRtcConnection.ConnectionRequest(connectionRequestParameters);
+            }
+            else if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            {
+                connectionObservable = _mediaServerConnection.ConnectionRequest(connectionRequestParameters);
+            }
+            else
+                throw new Exception("Either TURN or Media Server should be provided");
+
+
+            _connectionDisposer = connectionObservable.Subscribe(
                 // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
                 onNext: async peerResponseParameters =>
                 {

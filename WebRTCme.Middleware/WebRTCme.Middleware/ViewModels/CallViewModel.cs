@@ -28,6 +28,7 @@ namespace WebRTCme.Middleware
         readonly INavigation _navigation;
         readonly ILocalMediaStream _localMediaStream;
         readonly IWebRtcConnection _webRtcConnection;
+        readonly IMediaServerConnection _mediaServerConnection;
         readonly IMediaStreamManager _mediaStreamManager;
         readonly IMediaRecorderManager _mediaRecorderManager;
         readonly IModalPopup _modalPopup;
@@ -44,7 +45,8 @@ namespace WebRTCme.Middleware
         string _recordingFileName = "WebRTCme.webm";
 
         public CallViewModel(INavigation navigation, ILocalMediaStream localMediaStream, 
-            IWebRtcConnection webRtcConnection, IMediaStreamManager mediaStreamManager,
+            IWebRtcConnection webRtcConnection, IMediaServerConnection mediaServerConnection,
+            IMediaStreamManager mediaStreamManager,
             IMediaRecorderManager mediaRecorderManager,
             IModalPopup modalPopup, 
             IRunOnUiThread runOnUiThreadService, ILogger<CallViewModel> logger)
@@ -52,6 +54,7 @@ namespace WebRTCme.Middleware
             _navigation = navigation;
             _localMediaStream = localMediaStream;
             _webRtcConnection = webRtcConnection;
+            _mediaServerConnection = mediaServerConnection;
             _mediaStreamManager = mediaStreamManager;
             _mediaRecorderManager = mediaRecorderManager;
             _modalPopup = modalPopup;
@@ -96,7 +99,21 @@ namespace WebRTCme.Middleware
 
         private void Connect(ConnectionRequestParameters connectionRequestParameters)
         {
-            _connectionDisposer = _webRtcConnection.ConnectionRequest(connectionRequestParameters).Subscribe(
+            IObservable<PeerResponseParameters> connectionObservable = null;
+
+            if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            {
+                connectionObservable = _webRtcConnection.ConnectionRequest(connectionRequestParameters);
+            }
+            else if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            {
+                connectionObservable = _mediaServerConnection.ConnectionRequest(connectionRequestParameters);
+            }
+            else
+                throw new Exception("Either TURN or Media Server should be provided");
+
+
+            _connectionDisposer = connectionObservable.Subscribe(
                 // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
                 onNext: (Action<PeerResponseParameters>)(async peerResponseParameters =>
                 {
