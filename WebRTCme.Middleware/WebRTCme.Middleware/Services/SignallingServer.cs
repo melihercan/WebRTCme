@@ -58,10 +58,10 @@ namespace WebRTCme.Middleware.Services
 
         public async Task OnPeerJoinedAsync(string turnServerName, string roomName, string peerUserName) 
         {
-            Subject<PeerResponseParameters> subject = null;
+            ConnectionContext connectionContext = null;
             try
             {
-                var connectionContext =  _webRtcConnection.GetConnectionContext(turnServerName, roomName);
+                connectionContext =  _webRtcConnection.GetConnectionContext(turnServerName, roomName);
                 _logger.LogInformation(
                     $">>>>>>>> OnPeerJoined - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -72,7 +72,6 @@ namespace WebRTCme.Middleware.Services
                     .Single(context => context.PeerParameters.PeerUserName
                     .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                 var peerConnection = peerContext.PeerConnection;
-                subject = peerContext.PeerResponseSubject;
 
                 var offerDescription = await peerConnection.CreateOffer();
                 // Android DOES NOT expose 'Type'!!! I set it manually here. 
@@ -99,7 +98,7 @@ namespace WebRTCme.Middleware.Services
             }
             catch (Exception ex)
             {
-                subject?.OnNext(new PeerResponseParameters 
+                connectionContext?.Observer.OnNext(new PeerResponseParameters
                 { 
                     Code = PeerResponseCode.PeerError,
                     TurnServerName = turnServerName,
@@ -112,10 +111,10 @@ namespace WebRTCme.Middleware.Services
 
         public async Task OnPeerLeftAsync(string turnServerName, string roomName, string peerUserName)
         {
-            Subject<PeerResponseParameters> subject = null;
+            ConnectionContext connectionContext = null;
             try
             {
-                var connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
+                connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
                 //_logger.LogInformation(
                 //    $">>>>>>>> OnPeerLeft - turn:{turnServerName} room:{roomName} " +
                 //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -123,12 +122,11 @@ namespace WebRTCme.Middleware.Services
                 var peerContext = connectionContext.PeerContexts
                     .Single(context => context.PeerParameters.PeerUserName
                     .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
-                subject = peerContext.PeerResponseSubject;
 
                 await _webRtcConnection.CreateOrDeletePeerConnectionAsync(turnServerName, roomName, peerUserName,
                     isInitiator: peerContext.IsInitiator, isDelete: true);
 
-                subject.OnNext(new PeerResponseParameters 
+                connectionContext.Observer.OnNext(new PeerResponseParameters 
                 {
                     Code = PeerResponseCode.PeerLeft,
                     TurnServerName = turnServerName,
@@ -138,7 +136,7 @@ namespace WebRTCme.Middleware.Services
             }
             catch (Exception ex)
             {
-                subject?.OnNext(new PeerResponseParameters
+                connectionContext?.Observer.OnNext(new PeerResponseParameters
                 {
                     Code = PeerResponseCode.PeerError,
                     TurnServerName = turnServerName,
@@ -151,10 +149,10 @@ namespace WebRTCme.Middleware.Services
 
         public async Task OnPeerSdpAsync(string turnServerName, string roomName, string peerUserName, string peerSdp)
         {
-            Subject<PeerResponseParameters> subject = null;
+            ConnectionContext connectionContext = null;
             try
             {
-                var connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
+                connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
                 _logger.LogInformation(
                     $"<-------- OnPeerSdp - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -174,7 +172,6 @@ namespace WebRTCme.Middleware.Services
                         .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                 }
                 var peerConnection = peerContext.PeerConnection;
-                subject = peerContext.PeerResponseSubject;
 
                 //_logger.LogInformation(
                 //    $"**** SetRemoteDescription - turn:{turnServerName} room:{roomName} " +
@@ -189,7 +186,6 @@ namespace WebRTCme.Middleware.Services
                     if (DeviceInfo.Platform == DevicePlatform.Android)
                         answerDescription.Type = RTCSdpType.Answer;
 
-                    // Send offer before setting local description to avoid race condition with ice candidates.
                     // Setting local description triggers ice candidate packets.
                     var sdp = JsonSerializer.Serialize(answerDescription, JsonHelper.WebRtcJsonSerializerOptions);
                     _logger.LogInformation(
@@ -210,7 +206,7 @@ namespace WebRTCme.Middleware.Services
             }
             catch (Exception ex)
             {
-                subject?.OnNext(new PeerResponseParameters
+                connectionContext?.Observer.OnNext(new PeerResponseParameters
                 {
                     Code = PeerResponseCode.PeerError,
                     TurnServerName = turnServerName,
@@ -225,10 +221,10 @@ namespace WebRTCme.Middleware.Services
         public async Task OnPeerIceCandidateAsync(string turnServerName, string roomName, string peerUserName, 
             string peerIce)
         {
-            Subject<PeerResponseParameters> subject = null;
+            ConnectionContext connectionContext = null;
             try
             {
-                var connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
+                connectionContext = _webRtcConnection.GetConnectionContext(turnServerName, roomName);
                 _logger.LogInformation(
                     $"<-------- OnPeerIceCandidate - turn:{turnServerName} room:{roomName} " +
                     $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -238,7 +234,6 @@ namespace WebRTCme.Middleware.Services
                     .Single(context => context.PeerParameters.PeerUserName
                     .Equals(peerUserName, StringComparison.OrdinalIgnoreCase));
                 var peerConnection = peerContext.PeerConnection;
-                subject = peerContext.PeerResponseSubject;
 
                 var iceCandidate = JsonSerializer.Deserialize<RTCIceCandidateInit>(peerIce,
                     JsonHelper.WebRtcJsonSerializerOptions);
@@ -250,7 +245,7 @@ namespace WebRTCme.Middleware.Services
             }
             catch (Exception ex)
             {
-                subject?.OnNext(new PeerResponseParameters
+                connectionContext?.Observer.OnNext(new PeerResponseParameters
                 {
                     Code = PeerResponseCode.PeerError,
                     TurnServerName = turnServerName,

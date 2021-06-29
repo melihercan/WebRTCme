@@ -14,7 +14,7 @@ namespace WebRTCme.Middleware
         Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName,
             string peerUserName, bool isInitiator, bool isDelete = false);
 
-        IObservable< PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
+        IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request);
 
         Task ReplaceOutgoingVideoTracksAsync(string turnServerName, string roomName, IMediaStreamTrack newVideoTrack);
     }

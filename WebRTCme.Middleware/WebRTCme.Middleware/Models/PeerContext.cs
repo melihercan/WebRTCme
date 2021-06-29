@@ -14,9 +14,5 @@ namespace WebRTCme.Middleware.Models
         public IRTCPeerConnection PeerConnection { get; set; }
 
         public bool IsInitiator { get; set; }
-
-        public Subject<PeerResponseParameters> PeerResponseSubject { get; set; }
-
-        public IDisposable PeerResponseDisposer { get; set; }
     }
 }

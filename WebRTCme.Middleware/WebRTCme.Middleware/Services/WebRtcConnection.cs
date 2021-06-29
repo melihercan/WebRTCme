@@ -81,7 +81,6 @@ namespace WebRTCme.Middleware.Services
                         {
                             foreach (var peerContext in connectionContext.PeerContexts)
                             {
-                                peerContext.PeerResponseDisposer.Dispose();
                                 peerContext.PeerConnection.Close();
                             }
                             _connectionContexts.Remove(connectionContext);
@@ -125,7 +124,7 @@ namespace WebRTCme.Middleware.Services
         public async Task CreateOrDeletePeerConnectionAsync(string turnServerName, string roomName,
             string peerUserName, bool isInitiator, bool isDelete = false)
         {
-            Subject<PeerResponseParameters> subject = null;
+            ConnectionContext connectionContext = null;
             try
             {
                 PeerContext peerContext = null;
@@ -133,7 +132,7 @@ namespace WebRTCme.Middleware.Services
                 IMediaStream mediaStream = null;
                 IRTCDataChannel dataChannel = null;
 
-                var connectionContext = GetConnectionContext(turnServerName, roomName);
+                connectionContext = GetConnectionContext(turnServerName, roomName);
 
                 if (isDelete)
                 {
@@ -183,7 +182,6 @@ namespace WebRTCme.Middleware.Services
                     _logger.LogInformation($"#####################################################");
 
                     peerConnection = _webRtcMiddleware.WebRtc.Window(_jsRuntime).RTCPeerConnection(configuration);
-                    subject = new Subject<PeerResponseParameters>();
                     peerContext = new PeerContext
                     {
                         PeerParameters = new PeerParameters
@@ -194,10 +192,6 @@ namespace WebRTCme.Middleware.Services
                         },
                         PeerConnection = peerConnection,
                         IsInitiator = isInitiator,
-                        PeerResponseSubject = subject,
-                        PeerResponseDisposer = subject
-                            .AsObservable()
-                            .Subscribe(connectionContext.Observer.OnNext)
                     };
                     connectionContext.PeerContexts.Add(peerContext);
 
@@ -244,7 +238,7 @@ namespace WebRTCme.Middleware.Services
                         $"peerUser:{peerUserName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
                     if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
-                        peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
+                        connectionContext.Observer.OnNext(new PeerResponseParameters
                         {
                             Code = PeerResponseCode.PeerJoined,
                             TurnServerName = turnServerName,
@@ -269,7 +263,7 @@ namespace WebRTCme.Middleware.Services
                     dataChannel?.Dispose();
 
                     dataChannel = e.Channel;
-                    peerContext.PeerResponseSubject.OnNext(new PeerResponseParameters
+                    connectionContext.Observer.OnNext(new PeerResponseParameters
                     {
                         Code = PeerResponseCode.PeerJoined,
                         TurnServerName = turnServerName,
@@ -359,7 +353,7 @@ namespace WebRTCme.Middleware.Services
             }
             catch (Exception ex)
             {
-                subject?.OnNext(new PeerResponseParameters
+                connectionContext?.Observer.OnNext(new PeerResponseParameters
                 {
                     Code = PeerResponseCode.PeerError,
                     TurnServerName = turnServerName,
