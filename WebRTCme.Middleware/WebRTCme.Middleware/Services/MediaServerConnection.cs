@@ -42,20 +42,20 @@ namespace WebRTCme.Middleware.Services
 
             return Observable.Create<PeerResponseParameters>(async observer =>
             {
-                ConnectionContext connectionContext = null;
-                bool isJoined = false;
+                //ConnectionContext connectionContext = null;
+                //bool isJoined = false;
 
                 try
                 {
                     var mediaServerName = GetMediaServerFromName(request.ConnectionParameters.MediaServerName);
                     var mediaServerProxy = GetMediaServerClient(mediaServerName);
-                    mediaServerProxy.Join();
+                    await mediaServerProxy.JoinAsync(request);
 
-                    connectionContext = new ConnectionContext
-                    {
-                        ConnectionRequestParameters = request,
-                        Observer = observer
-                    };
+                    //connectionContext = new ConnectionContext
+                    //{
+                    //    ConnectionRequestParameters = request,
+                    //    Observer = observer
+                    //};
 
                 }
                 catch (Exception ex)

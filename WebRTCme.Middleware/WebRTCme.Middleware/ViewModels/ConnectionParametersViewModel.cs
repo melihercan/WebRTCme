@@ -23,6 +23,7 @@ namespace WebRTCme.Middleware
         readonly INavigation _navigation;
         readonly ISignallingServer _signallingServer;
         readonly IMediaServerConnection _mediaServerConnection;
+        readonly IModalPopup _modalPopup;
 
         string[] _turnServerNames;
         string[] _mediaServerNames;
@@ -30,11 +31,12 @@ namespace WebRTCme.Middleware
         Action _reRender;
 
         public ConnectionParametersViewModel(ISignallingServer signallingServer,
-            IMediaServerConnection mediaServerConnection, INavigation navigation)
+            IMediaServerConnection mediaServerConnection, INavigation navigation, IModalPopup modalPopup)
         {
             _signallingServer = signallingServer;
             _mediaServerConnection = mediaServerConnection;
             _navigation = navigation;
+            _modalPopup = modalPopup;
 
             SelectedServerType = ServerTypes[0];
             ServerNames = _turnServerNames;
@@ -83,6 +85,7 @@ namespace WebRTCme.Middleware
                     {
                         _turnServerNames = await GetTurnServerNamesAsync();
                         ServerNames = _turnServerNames;
+                        SelectedServerName = _turnServerNames is null ? null : _turnServerNames[0];
                         _reRender?.Invoke();
                     });
                 }
@@ -92,6 +95,7 @@ namespace WebRTCme.Middleware
                     {
                         _mediaServerNames = await GetMediaServerNamesAsync();
                         ServerNames = _mediaServerNames;
+                        SelectedServerName = _mediaServerNames is null ? null : _mediaServerNames[0];
                         _reRender?.Invoke();
                     });
                 }
@@ -172,6 +176,37 @@ namespace WebRTCme.Middleware
 
         public async Task JoinCall()
         {
+            if (SelectedServerType.Equals("TURN server"))
+            {
+                if (_turnServerNames is null)
+                {
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
+                    { 
+                        Title = "No TURN server selected",
+                        Text = "Make sure signalling server is online and you selected a TURN server from dropdown list",
+                        Ok = "OK"
+                    });
+                    return;
+                }
+                ConnectionParameters.MediaServerName = null;
+                ConnectionParameters.TurnServerName = SelectedServerName;
+            }
+            else if (SelectedServerType.Equals("Media server"))
+            {
+                if (_mediaServerNames is null)
+                {
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                    {
+                        Title = "No Media server selected",
+                        Text = "Make sure media server is online and you selected a media server from dropdown list",
+                        Ok = "OK"
+                    });
+                    return;
+                }
+                ConnectionParameters.MediaServerName = SelectedServerName;
+                ConnectionParameters.TurnServerName = null;
+            }
+
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigation.NavigateToPageAsync(
                 "",
@@ -184,6 +219,37 @@ namespace WebRTCme.Middleware
 
         public async Task JoinChat()
         {
+            if (SelectedServerType.Equals("TURN server"))
+            {
+                if (_turnServerNames is null)
+                {
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                    {
+                        Title = "No TURN server selected",
+                        Text = "Make sure signalling server is online and you selected a TURN server from dropdown list",
+                        Ok = "OK"
+                    });
+                    return;
+                }
+                ConnectionParameters.MediaServerName = null;
+                ConnectionParameters.TurnServerName = SelectedServerName;
+            }
+            else if (SelectedServerType.Equals("Media server"))
+            {
+                if (_mediaServerNames is null)
+                {
+                    _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                    {
+                        Title = "No Media server selected",
+                        Text = "Make sure media server is online and you selected a media server from dropdown list",
+                        Ok = "OK"
+                    });
+                    return;
+                }
+                ConnectionParameters.MediaServerName = SelectedServerName;
+                ConnectionParameters.TurnServerName = null;
+            }
+
             var connectionParamatersJson = JsonSerializer.Serialize(ConnectionParameters);
             await _navigation.NavigateToPageAsync(
                 "",

@@ -101,11 +101,11 @@ namespace WebRTCme.Middleware
         {
             IObservable<PeerResponseParameters> connectionObservable = null;
 
-            if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            if (!string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
             {
                 connectionObservable = _webRtcConnection.ConnectionRequest(connectionRequestParameters);
             }
-            else if (string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
+            else if (!string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.MediaServerName))
             {
                 connectionObservable = _mediaServerConnection.ConnectionRequest(connectionRequestParameters);
             }
