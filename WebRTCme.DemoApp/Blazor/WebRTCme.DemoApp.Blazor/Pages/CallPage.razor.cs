@@ -29,7 +29,7 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             await CallViewModel.OnPageAppearingAsync(connectionParameters, ReRender);
         }
 
-        private void ReRender()
+        void ReRender()
         {
             //// TODO: Add InvokeAsync(StateHasChanged)
             StateHasChanged();

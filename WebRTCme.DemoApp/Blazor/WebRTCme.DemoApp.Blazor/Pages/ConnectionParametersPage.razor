@@ -1,5 +1,8 @@
-﻿@page "/ConnectionParametersPage"
+﻿@*@page "/ConnectionParametersPage"
 @page "/ConnectionParametersPage/{TurnServerNamesJson}"
+*@
+
+@page "/"
 
 <h3 class="my-5 text-center">Connection Parameters</h3>
 
@@ -10,13 +13,23 @@
     <ValidationSummary />
 
     <div>
-        <label class="col-6 text-right">TURN server name:</label>
-        <InputSelect @bind-Value="ConnectionParametersViewModel.ConnectionParameters.TurnServerName">
-            @if (ConnectionParametersViewModel.TurnServerNames is not null)
+        <label class="col-6 text-right">Connection server type:</label>
+        <InputSelect @bind-Value="ConnectionParametersViewModel.SelectedServerType">
+            @foreach (var serverType in ConnectionParametersViewModel.ServerTypes)
             {
-                @foreach (var turnServerName in ConnectionParametersViewModel.TurnServerNames)
+                <option value="@serverType">@serverType</option>
+            }
+        </InputSelect>
+     </div>
+
+     <div>
+        <label class="col-6 text-right">Connection server name:</label>
+        <InputSelect @bind-Value="ConnectionParametersViewModel.SelectedServerName">
+            @if (ConnectionParametersViewModel.ServerNames is not null)
+            {
+                @foreach (var serverName in ConnectionParametersViewModel.ServerNames)
                 {
-                    <option value="@turnServerName">@turnServerName</option>
+                    <option value="@serverName">@serverName</option>
                 }
             }
         </InputSelect>

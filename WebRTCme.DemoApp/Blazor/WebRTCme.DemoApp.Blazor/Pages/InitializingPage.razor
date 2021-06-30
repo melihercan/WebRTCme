@@ -1,9 +1,9 @@
-﻿@page "/"
+﻿@page "/initializing"
 @layout BlankLayout
 
 <div class="d-flex h-100 flex-column justify-content-center align-items-center">
 
-        <div class="@(InitializingViewModel.IsCheckingSignallingServer ? "visible" : "invisible")">
+        <div class="@(InitializingViewModel.IsCheckingServers ? "visible" : "invisible")">
             <Circle />
         </div>
 

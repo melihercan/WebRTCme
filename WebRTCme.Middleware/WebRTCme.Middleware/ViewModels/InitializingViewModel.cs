@@ -17,33 +17,37 @@ namespace WebRTCme.Middleware
     public class InitializingViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null) =>
+        void OnPropertyChanged([CallerMemberName] string name = null) =>
           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private readonly ISignallingServer _signallingServerService;
-        private readonly INavigation _navigationService;
-        private string[] _turnServerNames;
+        readonly ISignallingServer _signallingServer;
+        readonly IMediaServerConnection _mediaServerConnection;
+        readonly INavigation _navigation;
+        
+        string[] _turnServerNames;
+        string[] _mediaServerNames;
 
-        public InitializingViewModel(ISignallingServer signallingServerService,
-            INavigation navigationService)
+        public InitializingViewModel(ISignallingServer signallingServer, IMediaServerConnection mediaServerConnection,
+            INavigation navigation)
         {
-            _signallingServerService = signallingServerService;
-            _navigationService = navigationService;
+            _signallingServer = signallingServer;
+            _mediaServerConnection = mediaServerConnection;
+            _navigation = navigation;
         }
 
         public async Task OnPageAppearingAsync()
         {
-            if (await GetTurnServerNamesAsync())
+            if (await GetTurnOrMediaServerNamesAsync())
                 await NavigateToConnectionParametersPage();
         }
 
-        private bool _isCheckingSignallingServer;
-        public bool IsCheckingSignallingServer
+        private bool _isCheckingServers;
+        public bool IsCheckingServers
         {
-            get => _isCheckingSignallingServer;
+            get => _isCheckingServers;
             set
             {
-                _isCheckingSignallingServer = value;
+                _isCheckingServers = value;
                 OnPropertyChanged();
             }
         }
@@ -90,20 +94,20 @@ namespace WebRTCme.Middleware
         public ICommand RetryCommand => new AsyncCommand(async () => await Retry());
 
 
-        private async Task<bool> GetTurnServerNamesAsync()
+        async Task<bool> GetTurnOrMediaServerNamesAsync()
         {
             try
             {
-                IsCheckingSignallingServer = true;
+                IsCheckingServers = true;
                 Header = string.Empty;
-                Message = $"Getting TURN server list from signalling server...";
+                Message = $"Getting TURN or Media server list...";
                 RetryButtonEnabled = false;
 
-                var result = await _signallingServerService.GetTurnServerNamesAsync();
+                var result = await _signallingServer.GetTurnServerNamesAsync();
                 if (result.Item1 == SignallingServerProxy.SignallingServerResult.Ok)
                 {
                     _turnServerNames = result.Item2;
-                    IsCheckingSignallingServer = false;
+                    IsCheckingServers = false;
                     Header = string.Empty;
                     Message = string.Empty;
                     RetryButtonEnabled = false;
@@ -117,9 +121,9 @@ namespace WebRTCme.Middleware
             catch (Exception ex)
             {
                 Console.WriteLine("-------- " + ex.Message);
-                IsCheckingSignallingServer = false;
-                Header = "TURN server list couldn't be obtained";
-                Message = "Make sure signalling server is online and try again";
+                IsCheckingServers = false;
+                Header = "TURN or Media server list couldn't be obtained";
+                Message = "Make sure signalling server and/or media server is online and try again";
                 RetryButtonEnabled = true;
             }
             return false;
@@ -128,7 +132,7 @@ namespace WebRTCme.Middleware
         private async Task NavigateToConnectionParametersPage()
         {
             var turnServerNamesJson = JsonSerializer.Serialize(_turnServerNames);
-            await _navigationService.NavigateToPageAsync(
+            await _navigation.NavigateToPageAsync(
                 "///",
                 "ConnectionParametersPage",
                 "TurnServerNamesJson", 
