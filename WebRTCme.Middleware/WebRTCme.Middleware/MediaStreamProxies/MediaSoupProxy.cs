@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
 using System.Threading;
+using System.Text.Json;
+using WebRTCme.Middleware.MediaStreamProxies.Models;
 
 namespace WebRTCme.Middleware.MediaStreamProxies
 {
@@ -13,6 +15,7 @@ namespace WebRTCme.Middleware.MediaStreamProxies
         readonly ClientWebSocket _webSocket = new();
 
         string _mediaSoupServerBaseUrl;
+        static uint _counter;
 
         public MediaSoupProxy(IConfiguration configuration)
         {
@@ -39,6 +42,36 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                 _webSocket.Options.AddSubProtocol("protoo");
                 _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
                 await _webSocket.ConnectAsync(uri, cts.Token);
+
+
+                //var pr = new ProtooRequest
+                //{
+                //    Id = _counter++,
+                //    Method = "getRouterRtpCapabilities",
+                //};
+
+                //var json = JsonSerializer.Serialize(pr, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+
+
+                await _webSocket.SendAsync(
+                    new ArraySegment<byte>(Encoding.UTF8.GetBytes(
+                        JsonSerializer.Serialize(new ProtooRequest 
+                        { 
+                            Request = true,
+                            Id = _counter++,
+                            Method = "getRouterRtpCapabilities",
+                        }, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                    WebSocketMessageType.Text,
+                    true,
+                    cts.Token);
+
+                var buffer = new ArraySegment<byte>(new byte[1024]); 
+                var received = await _webSocket.ReceiveAsync(buffer, cts.Token);
+                var receivedAsText = Encoding.UTF8.GetString(buffer.Array, 0, received.Count);
+
+
+
+
             }
             catch(Exception ex)
             {

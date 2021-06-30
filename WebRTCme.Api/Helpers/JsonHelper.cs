@@ -14,5 +14,12 @@ namespace WebRTCme
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
+        public static JsonSerializerOptions CamelCaseAndIgnoreNullJsonSerializerOptions => new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,            
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
     }
 }
