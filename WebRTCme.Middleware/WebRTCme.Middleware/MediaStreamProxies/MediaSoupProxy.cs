@@ -33,7 +33,11 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                 // "protoo" 
                 // "Sec-WebSocket-Protocol"
                 CancellationTokenSource cts = new();
-                var uri = new Uri(_mediaSoupServerBaseUrl);
+                var uri = new Uri(new Uri(_mediaSoupServerBaseUrl), 
+                    $"?roomId={connectionRequestParameters.ConnectionParameters.RoomName}" +
+                    $"&peerId={connectionRequestParameters.ConnectionParameters.UserName}");
+                _webSocket.Options.AddSubProtocol("protoo");
+                _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
                 await _webSocket.ConnectAsync(uri, cts.Token);
             }
             catch(Exception ex)
