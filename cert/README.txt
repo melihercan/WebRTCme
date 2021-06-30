@@ -3,15 +3,15 @@ SELF SIGNED CERT FOR .NET and IIS Express
 
 CREATE
 ------
-openssl req -config webrtcme.config -new -out csr.pem
-openssl x509 -req -days 3652 -extfile webrtcme.config -extensions v3_req -in csr.pem -signkey key.pem -out webrtcme.crt
-openssl pkcs12 -export -out webrtcme.pfx -inkey key.pem -in webrtcme.crt -password pass:_webrtcme_
+openssl req -config localhost.config -new -out csr.pem
+openssl x509 -req -days 3652 -sha256 -extfile localhost.config -extensions v3_req -in csr.pem -signkey key.pem -out localhost.crt
+openssl pkcs12 -export -out localhost.pfx -inkey key.pem -in localhost.crt -password pass:_localhost_
 
 CHECK
 -----
-openssl x509 -in csr.pem -noout -text -inform pem
-openssl x509 -in webrtme.crt -noout -text -inform der
-openssl.exe pkcs12 -info -in webrtcme.pfx
+##openssl x509 -in csr.pem -noout -text -inform pem
+##openssl x509 -in localhost.crt -noout -text -inform der
+openssl.exe pkcs12 -info -in localhost.pfx
 
 WINDOWS INSTALL
 ---------------
@@ -22,7 +22,7 @@ Install crt file to LocalComputer "Trusted Root Certificates Authorities".
 KESTREL INSTALLATION (USER)
 ---------------------------
 # Install new certificate for .net core (Kestrel)
-dotnet dev-certs https -v --clean --import webrtcme.pfx -p _webrtcme_
+dotnet dev-certs https -v --clean --import localhost.pfx -p _localhost_
 dotnet dev-certs https -v --trust
 
 IIS EXPRESS INSTALLATION (SYSTEM)
@@ -50,7 +50,7 @@ for /L %i in (44300,1,44399) do netsh http add sslcert ipport=0.0.0.0:%i certhas
 ANDROID INSTALLATION
 --------------------
 # Push pfx file to "/sdcard/Download"
-adb push webrtcme.cer /sdcard/Download
+adb push localhost.cer /sdcard/Download
 # On phone Settings, Security, Encription & credentials use "Install from SD card"
 
 

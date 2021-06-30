@@ -121,7 +121,6 @@ namespace WebRTCme.Middleware
             get => _serverNames;
             set
             {
-                Console.WriteLine($"================== {value}");
                 _serverNames = value;
                 OnPropertyChanged();
             }
