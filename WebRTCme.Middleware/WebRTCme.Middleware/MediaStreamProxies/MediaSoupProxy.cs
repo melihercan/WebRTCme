@@ -7,79 +7,132 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Text.Json;
 using WebRTCme.Middleware.MediaStreamProxies.Models;
+using WebRTCme.Middleware.MediaStreamProxies.Enums;
 
 namespace WebRTCme.Middleware.MediaStreamProxies
 {
     class MediaSoupProxy : IMediaServerProxy
     {
         readonly ClientWebSocket _webSocket = new();
+        readonly ArraySegment<byte> _rxBuffer = new(new byte[16384]);
 
+
+        TaskCompletionSource<ProtooResponseOk> _tcs;
+        CancellationTokenSource _cts;
         string _mediaSoupServerBaseUrl;
         static uint _counter;
+        SemaphoreSlim _sem = new(1);
 
         public MediaSoupProxy(IConfiguration configuration)
         {
             _mediaSoupServerBaseUrl = configuration["MediaSoupServer:BaseUrl"];
         }
 
-        public async Task InitAsync()
+
+        public async Task StartAsync(ConnectionRequestParameters connectionRequestParameters)
         {
-//            await _webSocket.ConnectAsync(new Uri(_mediaSoupServerBaseUrl))
+            _cts = new();
+
+            var uri = new Uri(new Uri(_mediaSoupServerBaseUrl),
+                $"?roomId={connectionRequestParameters.ConnectionParameters.RoomName}" +
+                $"&peerId={connectionRequestParameters.ConnectionParameters.UserName}");
+            _webSocket.Options.AddSubProtocol("protoo");
+            _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
+            await _webSocket.ConnectAsync(uri, _cts.Token);
+
+            _ = Task.Run(async () =>
+            {
+                while (!_cts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var bytes = await _webSocket.ReceiveAsync(_rxBuffer, _cts.Token);
+                        var json = Encoding.UTF8.GetString(_rxBuffer.Array, 0, bytes.Count);
+                        var jsonDocument = JsonDocument.Parse(json);
+                        if (jsonDocument.RootElement.TryGetProperty("response", out var r))
+                        {
+                            var ok = jsonDocument.RootElement.GetProperty("ok").GetBoolean();
+                            if (ok)
+                            {
+                                var responseOk = JsonSerializer.Deserialize<ProtooResponseOk>(json,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                _tcs?.SetResult(responseOk);
+                            }
+                            else
+                            {
+                                var responseError = JsonSerializer.Deserialize<ProtooResponseError>(json,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                _tcs.SetException(new Exception($"{responseError.ErrorReason}"));
+                            }
+                        }
+                        else if (jsonDocument.RootElement.TryGetProperty("notification", out var n))
+                        {
+                            var notification = JsonSerializer.Deserialize<ProtooNotification>(json,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+
+                            //// TODO: ANALYZE AND INVOKE EVENT
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                }
+            });
         }
 
-        public async Task JoinAsync(ConnectionRequestParameters connectionRequestParameters)
+        public async Task StopAsync()
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye", CancellationToken.None);
+        }
+
+        public async Task JoinAsync()
+        {
+            var routerRtpCapabilities = await ProtooTransactionAsync(MethodName.GetRouterRtpCapabilities);
+        }
+
+        public Task LeaveAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        async Task<object> ProtooTransactionAsync(string method, object data = null)
         {
             try
             {
+                await _sem.WaitAsync();
+                _tcs = new();
 
-                //'wss://192.168.1.48:4443/?roomId=qt95tmpv&peerId=g0iywgxd'
-                // "protoo" 
-                // "Sec-WebSocket-Protocol"
-                CancellationTokenSource cts = new();
-                var uri = new Uri(new Uri(_mediaSoupServerBaseUrl), 
-                    $"?roomId={connectionRequestParameters.ConnectionParameters.RoomName}" +
-                    $"&peerId={connectionRequestParameters.ConnectionParameters.UserName}");
-                _webSocket.Options.AddSubProtocol("protoo");
-                _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
-                await _webSocket.ConnectAsync(uri, cts.Token);
-
-
-                //var pr = new ProtooRequest
-                //{
-                //    Id = _counter++,
-                //    Method = "getRouterRtpCapabilities",
-                //};
-
-                //var json = JsonSerializer.Serialize(pr, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-
+                var request = new ProtooRequest
+                {
+                    Request = true,
+                    Id = _counter++,
+                    Method = method,
+                    Data = data
+                };
 
                 await _webSocket.SendAsync(
                     new ArraySegment<byte>(Encoding.UTF8.GetBytes(
-                        JsonSerializer.Serialize(new ProtooRequest 
-                        { 
-                            Request = true,
-                            Id = _counter++,
-                            Method = "getRouterRtpCapabilities",
-                        }, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                        JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
                     WebSocketMessageType.Text,
                     true,
-                    cts.Token);
+                    _cts.Token);
 
-                var buffer = new ArraySegment<byte>(new byte[1024]); 
-                var received = await _webSocket.ReceiveAsync(buffer, cts.Token);
-                var receivedAsText = Encoding.UTF8.GetString(buffer.Array, 0, received.Count);
+                var response = await _tcs.Task;
+                if (response.Id != request.Id)
+                    throw new Exception($"request.Id:{request.Id} and response.Id:{response.Id} are different!");
 
+                /// TODO: CONVERT DATA TO MODEL
 
-
-
+                return response.Data;
             }
-            catch(Exception ex)
+            finally
             {
-                var m = ex.Message;
+                _tcs.Task.Dispose();
+                _tcs = null;
+                _sem.Release();
             }
-
         }
-
-
     }
 }

@@ -7,8 +7,12 @@ namespace WebRTCme.Middleware.MediaStreamProxies
 {
     interface IMediaServerProxy
     {
-        Task InitAsync();
+        Task StartAsync(ConnectionRequestParameters connectionRequestParameters);
 
-        Task JoinAsync(ConnectionRequestParameters connectionRequestParameters);
+        Task StopAsync();
+
+
+        Task JoinAsync();
+        Task LeaveAsync();
     }
 }

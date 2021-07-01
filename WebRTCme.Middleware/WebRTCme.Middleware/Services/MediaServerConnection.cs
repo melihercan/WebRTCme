@@ -39,17 +39,19 @@ namespace WebRTCme.Middleware.Services
 
         public IObservable<PeerResponseParameters> ConnectionRequest(ConnectionRequestParameters request)
         {
-
             return Observable.Create<PeerResponseParameters>(async observer =>
             {
+                IMediaServerProxy mediaServerProxy = null;
+
                 //ConnectionContext connectionContext = null;
                 //bool isJoined = false;
 
                 try
                 {
                     var mediaServerName = GetMediaServerFromName(request.ConnectionParameters.MediaServerName);
-                    var mediaServerProxy = GetMediaServerClient(mediaServerName);
-                    await mediaServerProxy.JoinAsync(request);
+                    mediaServerProxy = GetMediaServerClient(mediaServerName);
+                    await mediaServerProxy.StartAsync(request);
+                    await mediaServerProxy.JoinAsync();
 
                     //connectionContext = new ConnectionContext
                     //{
@@ -67,6 +69,7 @@ namespace WebRTCme.Middleware.Services
                 {
                     try
                     {
+                        await mediaServerProxy.StopAsync();
                     }
                     catch { };
                 };
