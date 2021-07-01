@@ -8,6 +8,8 @@ using System.Threading;
 using System.Text.Json;
 using WebRTCme.Middleware.MediaStreamProxies.Models;
 using WebRTCme.Middleware.MediaStreamProxies.Enums;
+using WebRTCme.Middleware.MediaStreamProxies.Enums.MediaSoup;
+using WebRTCme.Middleware.MediaStreamProxies.Models.MediaSoup;
 
 namespace WebRTCme.Middleware.MediaStreamProxies
 {
@@ -124,8 +126,16 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                     throw new Exception($"request.Id:{request.Id} and response.Id:{response.Id} are different!");
 
                 /// TODO: CONVERT DATA TO MODEL
-
-                return response.Data;
+                /// 
+                switch (method)
+                {
+                    case MethodName.GetRouterRtpCapabilities:
+                        var json = ((JsonElement)response.Data).GetRawText();
+                        var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilities>(
+                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        return routerRtpCapabilities;
+                }
+                return null;
             }
             finally
             {

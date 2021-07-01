@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Middleware.MediaStreamProxies.Enums
+namespace WebRTCme.Middleware.MediaStreamProxies.Enums.MediaSoup
 {
     class MethodName
     {
