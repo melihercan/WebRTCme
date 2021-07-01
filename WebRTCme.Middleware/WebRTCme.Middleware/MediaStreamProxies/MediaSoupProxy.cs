@@ -133,6 +133,42 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                         var json = ((JsonElement)response.Data).GetRawText();
                         var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilities>(
                             json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        foreach(var codec in routerRtpCapabilities.Codecs)
+                        {
+                            var parametersJson = ((JsonElement)codec.Parameters).GetRawText();
+                            if (codec.MimeType.Equals("audio/opus"))
+                            {
+                                var opus = JsonSerializer.Deserialize<OpusParameters>(parametersJson,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                codec.Parameters = opus;
+                            }
+                            if (codec.MimeType.Equals("video/H264"))
+                            {
+                                var h264 = JsonSerializer.Deserialize<H264Parameters>(parametersJson,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                codec.Parameters = h264;
+                            }
+                            else if (codec.MimeType.Equals("video/VP8"))
+                            {
+                                var vp8 = JsonSerializer.Deserialize<VP8Parameters>(parametersJson,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                codec.Parameters = vp8;
+                            }
+                            else if (codec.MimeType.Equals("video/VP9"))
+                            {
+                                var vp9 = JsonSerializer.Deserialize<VP9Parameters>(parametersJson,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                codec.Parameters = vp9;
+                            }
+                            else if (codec.MimeType.Equals("video/rtx"))
+                            {
+                                var rtx = JsonSerializer.Deserialize<RtxParameters>(parametersJson,
+                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                codec.Parameters = rtx;
+                            }
+                            else
+                                codec.Parameters = null;
+                        }
                         return routerRtpCapabilities;
                 }
                 return null;

@@ -11,8 +11,8 @@ namespace WebRTCme.Middleware.MediaStreamProxies.Models.MediaSoup
         public string MimeType { get; init; }
         public int PreferredPayloadType { get; init; }
         public int ClockRate { get; init; }
-        public int Channels { get; init; }
-        public object Parameters { get; init; }
+        public int? Channels { get; init; }
+        public object Parameters { get; set; }
         public RtcpFeedback[] RtcpFeedback { get; init; }
     }
 }
