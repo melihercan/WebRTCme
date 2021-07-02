@@ -7,7 +7,7 @@ namespace WebRTCme.Middleware.MediaStreamProxies.Models.MediaSoup
 {
     class RtpHeaderExtension
     {
-        public MediaKind Kind { get; init; }
+        public MediaStreamTrackKind Kind { get; init; }
         public string Uri { get; init; }
         public int PreferedId { get; init; }
         public bool? PreferredEncrypt { get; init; }

@@ -92,7 +92,7 @@ namespace WebRTCme.Middleware.MediaStreamProxies
         public async Task JoinAsync()
         {
             var routerRtpCapabilities = await ProtooTransactionAsync(MethodName.GetRouterRtpCapabilities);
-            _ = await ProtooTransactionAsync(MethodName.CreateWebRtcTransport, new WebRtcTransportCreateParameters 
+            var transportInfo = await ProtooTransactionAsync(MethodName.CreateWebRtcTransport, new WebRtcTransportCreateParameters 
             {
                 ForceTcp = false,
                 Producing = true,
@@ -138,13 +138,11 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                 var response = await _tcs.Task;
                 if (response.Id != request.Id)
                     throw new Exception($"request.Id:{request.Id} and response.Id:{response.Id} are different!");
+                var json = ((JsonElement)response.Data).GetRawText();
 
-                /// TODO: CONVERT DATA TO MODEL
-                /// 
                 switch (method)
                 {
                     case MethodName.GetRouterRtpCapabilities:
-                        var json = ((JsonElement)response.Data).GetRawText();
                         var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilities>(
                             json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
                         foreach(var codec in routerRtpCapabilities.Codecs)
@@ -184,6 +182,12 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                                 codec.Parameters = null;
                         }
                         return routerRtpCapabilities;
+
+                    case MethodName.CreateWebRtcTransport:
+                        var transportInfo = JsonSerializer.Deserialize<TransportInfo>(
+                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        return transportInfo;
+
                 }
                 return null;
             }

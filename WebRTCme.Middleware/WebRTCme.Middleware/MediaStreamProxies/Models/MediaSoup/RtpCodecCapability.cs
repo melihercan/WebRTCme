@@ -7,7 +7,7 @@ namespace WebRTCme.Middleware.MediaStreamProxies.Models.MediaSoup
 {
     class RtpCodecCapability
     {
-        public MediaKind Kind { get; init; }
+        public MediaStreamTrackKind Kind { get; init; }
         public string MimeType { get; init; }
         public int PreferredPayloadType { get; init; }
         public int ClockRate { get; init; }

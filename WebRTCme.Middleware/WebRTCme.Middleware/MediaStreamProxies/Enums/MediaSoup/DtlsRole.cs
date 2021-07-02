@@ -6,9 +6,10 @@ using System.Text.Json.Serialization;
 namespace WebRTCme.Middleware.MediaStreamProxies.Enums.MediaSoup
 {
     [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
-    enum MediaKind
+    enum DtlsRole
     {
-        Audio,
-        Video
+        Auto,
+        Client,
+        Server
     }
 }
