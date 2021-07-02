@@ -92,6 +92,20 @@ namespace WebRTCme.Middleware.MediaStreamProxies
         public async Task JoinAsync()
         {
             var routerRtpCapabilities = await ProtooTransactionAsync(MethodName.GetRouterRtpCapabilities);
+            _ = await ProtooTransactionAsync(MethodName.CreateWebRtcTransport, new WebRtcTransportCreateParameters 
+            {
+                ForceTcp = false,
+                Producing = true,
+                Consuming = false,
+                SctpCapabilities = new SctpCapabilities 
+                { 
+                    NumStream = new NumSctpStreams 
+                    { 
+                        Os = 1024,
+                        Mis = 1024,
+                    }
+                }
+            });
         }
 
         public Task LeaveAsync()
