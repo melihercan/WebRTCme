@@ -1,21 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  
   <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.7" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\lib\mediasoup-client\lib\" />
-    <Folder Include="wwwroot\lib\mediasoup-client\src\" />
+    <ProjectReference Include="..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
 </Project>
