@@ -1,0 +1,17 @@
+{
+	"compileOnSave": true,
+	"compilerOptions":
+	{
+		"lib": [ "es2018", "dom" ],
+		"target": "es2017",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"strict": true,
+		"outDir": "lib",
+		"declaration": true,
+		"declarationMap": true
+	},
+	"include": [ "src" ]
+}
