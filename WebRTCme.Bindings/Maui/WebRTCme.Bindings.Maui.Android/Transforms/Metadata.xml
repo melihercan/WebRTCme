@@ -1,0 +1,37 @@
+﻿<metadata>
+  <!--
+  This sample removes the class: android.support.v4.content.AsyncTaskLoader.LoadTask:
+  <remove-node path="/api/package[@name='android.support.v4.content']/class[@name='AsyncTaskLoader.LoadTask']" />
+  
+  This sample removes the method: android.support.v4.content.CursorLoader.loadInBackground:
+  <remove-node path="/api/package[@name='android.support.v4.content']/class[@name='CursorLoader']/method[@name='loadInBackground']" />
+  -->
+	<attr path="/api/package[@name='org.webrtc']/class[@name='StatsReport.Value']" name="name">
+		StatsReportValue
+	</attr>
+
+	<attr path="/api/package[@name='org.webrtc']/class[@name='StatsReport.Value']/field[@name='value']"
+		  name="managedName">value</attr>
+
+	<!--<attr path="/api/package[@name='org.webrtc']"
+		  name="managedName">Org.Webrtc</attr>
+	<attr path="/api/package[@name='org.webrtc.audio']"
+		  name="managedName">Org.Webrtc.Audio</attr>
+	<attr path="/api/package[@name='org.webrtc.voiceengine']"
+		  name="managedName">Org.Webrtc.VoiceEngine</attr>-->
+
+	<attr path="/api/package[@name='org.webrtc']/interface[@name='CameraSession']"
+		  name="visibility">public</attr>
+
+	<attr path="/api/package[@name='org.webrtc']/class[@name='SessionDescription.Type']"
+		  name="managedName">SessionDescription.SdpType</attr>
+
+	<attr path="/api/package[@name='org.webrtc']/class[@name='EncodedImage.FrameType']"
+		  name="managedName">EncodedImage.VideoFrameType</attr>
+
+	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getFrameSizePixels']" />
+	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMinStartBitrateBps']" />
+	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMinBitrateBps']" />
+	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMaxBitrateBps']" />
+
+</metadata>

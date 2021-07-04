@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0</TargetFrameworks>-->
+    <!--<TargetFrameworks>net5.0; net6.0</TargetFrameworks>-->
     <TargetFrameworks>net5.0</TargetFrameworks>
-    <RazorLangVersion>3.0</RazorLangVersion>
+    <!--<RazorLangVersion>3.0</RazorLangVersion>-->
     <AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
-    <LangVersion>9.0</LangVersion>
+    <!--<LangVersion>9.0</LangVersion>-->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>melihercan</Authors>
     <Description>Blazor bindings using JSInterop.</Description>
@@ -22,20 +22,20 @@
   </PropertyGroup>
 
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.16" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.16" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
 	<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.7" />
 	<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.7" />
   </ItemGroup>
 
-  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.0-preview.3.21201.13" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0-preview.3.21201.13" />
-  </ItemGroup>-->
+  </ItemGroup>
 
 
   <ItemGroup>

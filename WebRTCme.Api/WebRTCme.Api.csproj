@@ -33,11 +33,11 @@
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
-  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.0-preview.3.21201.13" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0-preview.3.21201.4" />
     <PackageReference Include="System.Text.Json" Version="6.0.0-preview.3.21201.4" />
-  </ItemGroup>-->
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\doc\me.png">
