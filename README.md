@@ -5,6 +5,7 @@ I am actively working on this project to evolve this framework from demo level t
 - Adding file sharing, screen sharing and recording of call session or camera services
 - Selecting audio/video sources
 - Adding [mediasoup](https://mediasoup.org/) WebRTC media server support for group video conferencing using SFU
+- Adding MAUI and NET6 support
 - And more...
 
 I will release the new NuGets once the code reaches to a certain maturity level.
