@@ -63,6 +63,14 @@ namespace WebRTCme.Android
                 _ => throw new NotImplementedException()
             };
 
+        public static Webrtc.MediaStreamTrack.MediaType ToNative(this MediaStreamTrackKind kind) =>
+            kind switch
+            {
+                MediaStreamTrackKind.Audio => Webrtc.MediaStreamTrack.MediaType.MediaTypeAudio,
+                MediaStreamTrackKind.Video => Webrtc.MediaStreamTrack.MediaType.MediaTypeVideo,
+                _ => throw new NotImplementedException()
+            };
+
         public static RTCPeerConnectionState FromNative(
             this Webrtc.PeerConnection.PeerConnectionState nativePeerConnectionState)
         {

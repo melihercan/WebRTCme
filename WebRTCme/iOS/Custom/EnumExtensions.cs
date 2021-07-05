@@ -55,6 +55,15 @@ namespace WebRTCme.iOS
                 RTCSdpType.Rollback => Webrtc.RTCSdpType.Rollback
             };
 
+        public static Webrtc.RTCRtpMediaType ToNative(this MediaStreamTrackKind kind) =>
+            kind switch
+            {
+                MediaStreamTrackKind.Audio => Webrtc.RTCRtpMediaType.Audio,
+                MediaStreamTrackKind.Video => Webrtc.RTCRtpMediaType.Video,
+                _ => throw new NotImplementedException()
+            };
+
+
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
             nativeBundlePolicy switch
             {

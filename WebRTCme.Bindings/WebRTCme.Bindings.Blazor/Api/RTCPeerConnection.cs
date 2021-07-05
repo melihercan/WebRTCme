@@ -22,15 +22,15 @@ namespace WebRTCme.Bindings.Blazor.Api
             : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListener("connectionstatechange", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
-            AddNativeEventListenerForObjectRef("datachannel", (s, e) => OnDataChannel?.Invoke(s, e), 
+            AddNativeEventListenerForObjectRef("datachannel", (s, e) => OnDataChannel?.Invoke(s, e),
                 RTCDataChannelEvent.Create);
-            AddNativeEventListenerForObjectRef("icecandidate", (s, e) => OnIceCandidate?.Invoke(s, e), 
+            AddNativeEventListenerForObjectRef("icecandidate", (s, e) => OnIceCandidate?.Invoke(s, e),
                 RTCPeerConnectionIceEvent.Create);
             AddNativeEventListener("iceconnectionstatechange", (s, e) => OnIceConnectionStateChange?.Invoke(s, e));
             AddNativeEventListener("icegatheringstatechange", (s, e) => OnIceGatheringStateChange?.Invoke(s, e));
-            AddNativeEventListener("negotiationneeded", (s,e) => OnNegotiationNeeded?.Invoke(s, e));
+            AddNativeEventListener("negotiationneeded", (s, e) => OnNegotiationNeeded?.Invoke(s, e));
             AddNativeEventListener("signallingstatechange", (s, e) => OnSignallingStateChange?.Invoke(s, e));
-            AddNativeEventListenerForObjectRef("track", (s, e) => OnTrack?.Invoke(s, e), 
+            AddNativeEventListenerForObjectRef("track", (s, e) => OnTrack?.Invoke(s, e),
                 RTCTrackEvent.Create);
         }
 
@@ -44,7 +44,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public RTCSessionDescriptionInit CurrentRemoteDescription =>
             GetNativeProperty<RTCSessionDescriptionInit>("currentRemoteDescription");
 
-        public RTCIceConnectionState IceConnectionState => 
+        public RTCIceConnectionState IceConnectionState =>
             GetNativeProperty<RTCIceConnectionState>("iceConnectionState");
 
         public RTCIceGatheringState IceGatheringState => GetNativeProperty<RTCIceGatheringState>("iceGatheringState");
@@ -53,7 +53,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             GetNativeProperty<RTCSessionDescriptionInit>("localDescription");
 
         public Task<IRTCIdentityAssertion> PeerIdentity => GetPeerIdentity();
-        private async Task<IRTCIdentityAssertion> GetPeerIdentity() => 
+        private async Task<IRTCIdentityAssertion> GetPeerIdentity() =>
             await Task.FromResult(RTCIdentityAssertion.Create(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
                 NativeObject, "peerIdentity")));
 
@@ -84,7 +84,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public RTCIceServer[] GetDefaultIceServers()
         {
             var iceServers = new List<RTCIceServer>();
-            var jsObjectRefGetDefaultIceServers = 
+            var jsObjectRefGetDefaultIceServers =
                 JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getDefaultIceServers");
             var jsObjectRefIceServerArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetDefaultIceServers);
             foreach (var jsObjectRefIceServer in jsObjectRefIceServerArray)
@@ -96,9 +96,8 @@ namespace WebRTCme.Bindings.Blazor.Api
             return iceServers.ToArray();
         }
 
-
         public Task AddIceCandidate(RTCIceCandidateInit candidate) =>
-            JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate/*.NativeObject*/).AsTask(); 
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate/*.NativeObject*/).AsTask();
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",
@@ -107,6 +106,14 @@ namespace WebRTCme.Bindings.Blazor.Api
                     ((MediaStreamTrack)track).NativeObject,
                     ((MediaStream)stream).NativeObject
                 }));
+
+        public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init) =>
+            RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(
+                NativeObject, "addTransceiver", kind, init));
+
+        public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init) =>
+            RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(
+                NativeObject, "addTransceiver", track, init));
 
         public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 

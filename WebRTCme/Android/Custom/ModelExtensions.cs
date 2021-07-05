@@ -77,7 +77,22 @@ namespace WebRTCme.Android
                 //AdapterType = Webrtc.PeerConnection.AdapterType.AdapterTypeAny,
                 ////ServerUrl = ???
             };
-          
+
+        public static Webrtc.RtpParameters.Encoding ToNative(this RTCRtpEncodingParameters parameters) =>
+            new Webrtc.RtpParameters.Encoding(parameters.Rid, parameters.Active, 
+                (Java.Lang.Double)parameters.ScaleResolutionDownBy)
+            {
+                MaxBitrateBps = (Java.Lang.Integer)(int)parameters.MaxBitrate, 
+                MaxFramerate = (Java.Lang.Integer)parameters.MaxFramerate,
+            };
+
+        public static Webrtc.RtpTransceiver.RtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
+        {
+            var direction = init.Direction is null ? null : ((RTCRtpTransceiverDirection)init.Direction).ToNative();
+            var streamIds = init.Streams is null ? null : init.Streams.Select(stream => stream.Id).ToList();
+            var sendEncodings = init.SendEncodings.Select(encodings => encodings.ToNative()).ToList();
+            return new Webrtc.RtpTransceiver.RtpTransceiverInit(direction, streamIds, sendEncodings);
+        }
 
         public static RTCRtpCodecParameters FromNative(this Webrtc.RtpParameters.Codec nativeCodecParameters) =>
             new RTCRtpCodecParameters

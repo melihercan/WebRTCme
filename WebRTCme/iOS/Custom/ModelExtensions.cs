@@ -67,6 +67,30 @@ namespace WebRTCme.iOS
                 ///ServerUrl = ???
             };
 
+        public static Webrtc.RTCRtpEncodingParameters ToNative(this RTCRtpEncodingParameters parameters) =>
+            new Webrtc.RTCRtpEncodingParameters
+            {
+                Rid = parameters.Rid,
+                IsActive = parameters.Active,
+                MaxBitrateBps = parameters.MaxBitrate,
+                MaxFramerate = parameters.MaxFramerate,
+                ScaleResolutionDownBy = parameters.ScaleResolutionDownBy,
+            };
+
+        public static Webrtc.RTCRtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
+        {
+            var direction = init.Direction is null ? Webrtc.RTCRtpTransceiverDirection.Inactive : 
+                ((RTCRtpTransceiverDirection)init.Direction).ToNative();
+            var streamIds = init.Streams is null ? null : init.Streams.Select(stream => stream.Id).ToArray();
+            var sendEncodings = init.SendEncodings.Select(encodings => encodings.ToNative()).ToArray();
+            return new Webrtc.RTCRtpTransceiverInit
+            {
+                Direction = direction,
+                StreamIds = streamIds,
+                SendEncodings = sendEncodings
+            };
+        }
+
         public static RTCIceServer FromNative(this Webrtc.RTCIceServer nativeIceServer) =>
             new RTCIceServer
             {

@@ -122,7 +122,28 @@ namespace WebRTCme.iOS
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTrack(
-                track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] {track.Id}));
+                track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
+
+        public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
+        {
+            if (init is null)
+                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverOfType(
+                    kind.ToNative()));
+            else
+                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverOfType(
+                    kind.ToNative(), init.ToNative()));
+        }
+
+        public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
+        {
+            if (init is null)
+                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
+                    (Webrtc.RTCMediaStreamTrack)track.NativeObject));
+            else
+                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
+                    (Webrtc.RTCMediaStreamTrack)track.NativeObject, init.ToNative()));
+        }
+
 
         public void Close() => ((Webrtc.RTCPeerConnection)NativeObject).Close();
 

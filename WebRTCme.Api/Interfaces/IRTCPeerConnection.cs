@@ -50,6 +50,10 @@ namespace WebRTCme
 
         IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
 
+        IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init = null);
+        
+        IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init = null);
+
         void Close();
 
         Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null);

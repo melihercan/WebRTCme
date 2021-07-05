@@ -104,6 +104,27 @@ namespace WebRTCme.Android
             RTCRtpSender.Create(((Webrtc.PeerConnection)NativeObject).AddTrack(
                 track.NativeObject as Webrtc.MediaStreamTrack, new List<string> { stream.Id }));
 
+        public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
+        {
+            if (init is null)
+                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                    kind.ToNative()));
+            else
+                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                    kind.ToNative(), init.ToNative()));
+        }
+
+        public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
+        {
+            if (init is null)
+                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                    (Webrtc.MediaStreamTrack)track.NativeObject));
+            else
+                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                    (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative()));
+        }
+
+
         public void Close() => ((Webrtc.PeerConnection)NativeObject).Close();
 
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
