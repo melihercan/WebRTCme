@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class RtcpFeedback
+    public class RtcpFeedback
     {
         public string Type { get; init; }
         public string Parameter { get; init; }

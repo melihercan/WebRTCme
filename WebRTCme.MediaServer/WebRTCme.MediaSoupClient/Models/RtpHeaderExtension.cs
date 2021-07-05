@@ -5,7 +5,7 @@ using WebRTCme.MediaSoupClient.Enums;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class RtpHeaderExtension
+    public class RtpHeaderExtension
     {
         public MediaStreamTrackKind Kind { get; init; }
         public string Uri { get; init; }
