@@ -5,7 +5,7 @@ using WebRTCme.MediaSoupClient.Enums;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class DtlsParameters
+    public class DtlsParameters
     {
         public DtlsRole? DtlsRole { get; init; } 
         public DtlsFingerprint[] Fingerprints { get; init; }

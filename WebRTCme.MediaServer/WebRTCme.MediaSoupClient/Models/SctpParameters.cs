@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class SctpParameters
+    public class SctpParameters
     {
         public int Port { get; init; }
 

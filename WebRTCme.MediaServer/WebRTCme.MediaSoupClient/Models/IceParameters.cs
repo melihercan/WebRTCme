@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class IceParameters
+    public class IceParameters
     {
         public string UsernameFragment { get; init; }
         public string Password { get; init; }

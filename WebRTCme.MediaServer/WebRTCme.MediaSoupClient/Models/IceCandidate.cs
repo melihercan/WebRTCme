@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class IceCandidate
+    public class IceCandidate
     {
         public string Foundation { get; init; }
         public int Priority { get; init; }

@@ -7,7 +7,7 @@ using WebRTCme.MediaSoupClient.Extensions;
 
 namespace WebRTCme.MediaSoupClient.Api
 {
-    class Producer
+    public class Producer
     {
         bool _stopTracks;
         bool _disableTrackOnPause;

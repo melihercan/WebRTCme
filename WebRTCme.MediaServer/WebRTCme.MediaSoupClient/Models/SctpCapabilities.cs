@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class SctpCapabilities
+    public class SctpCapabilities
     {
         public NumSctpStreams NumStream { get; set; }
     }

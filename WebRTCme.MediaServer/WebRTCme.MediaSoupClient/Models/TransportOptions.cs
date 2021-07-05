@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class TransportOptions
+    public class TransportOptions
     {
         public string Id { get; init; }
         public IceParameters IceParameters { get; init; }

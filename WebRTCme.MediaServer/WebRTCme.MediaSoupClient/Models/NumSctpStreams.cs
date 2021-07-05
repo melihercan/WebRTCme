@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme.MediaSoupClient.Models
 {
-    class NumSctpStreams
+    public class NumSctpStreams
     {
         [JsonPropertyName("OS")]
         public int Os { get; init; }

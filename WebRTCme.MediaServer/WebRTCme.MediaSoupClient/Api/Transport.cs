@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.MediaSoupClient.Api
 {
-    class Transport
+    public class Transport
     {
     }
 }

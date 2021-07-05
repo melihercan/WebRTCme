@@ -7,7 +7,7 @@ using WebRTCme.MediaSoupClient.Models;
 
 namespace WebRTCme.MediaSoupClient.Api
 {
-    class Device
+    public class Device
     {
         public RtpCapabilities GetRtpCapabilities()
         {
