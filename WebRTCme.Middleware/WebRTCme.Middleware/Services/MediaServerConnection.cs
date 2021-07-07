@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using WebRTCme.Middleware.MediaStreamProxies;
 using WebRTCme.Middleware.Models;
 
+//// CURRENTLY USING HARD CODED MediaSoup
+
 namespace WebRTCme.Middleware.Services
 {
     class MediaServerConnection : IMediaServerConnection

@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme.MediaSoupClient.Models;
 using WebRTCme;
+using SDPLib;
 
 namespace WebRTCme.MediaSoupClient.Api
 {
@@ -38,6 +39,7 @@ namespace WebRTCme.MediaSoupClient.Api
             var offer = await pc.CreateOffer();
             pc.Close();
 
+            var sdpObject = SDPSerializer.ReadSDP(Encoding.UTF8.GetBytes(offer.Sdp));
 
             return null;
         }
