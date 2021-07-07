@@ -42,6 +42,8 @@
   </ItemGroup>-->
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\WebRTCme.ConnectionServer\WebRTCme.ConnectionServer.Stub\WebRTCme.ConnectionServer.Stub.csproj" />
+	  <ProjectReference Include="..\..\WebRTCme.MediaServer\WebRTCme.MediaSoupClient\WebRTCme.MediaSoupClient.csproj" />
 	  <ProjectReference Include="..\..\WebRTCme.SignallingServerProxy\WebRTCme.SignallingServerProxy.csproj" />
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>

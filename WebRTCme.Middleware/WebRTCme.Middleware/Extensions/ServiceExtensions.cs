@@ -7,6 +7,7 @@ using WebRTCme.Middleware;
 using WebRTCme.Middleware.Services;
 using Microsoft.JSInterop;
 using WebRTCme.Middleware.MediaStreamProxies;
+using WebRTCme.ConnectionServer;
 
 namespace WebRTCme.Middleware
 {
@@ -26,6 +27,8 @@ namespace WebRTCme.Middleware
             services.AddSingleton<ConnectionParametersViewModel>();
             services.AddSingleton<CallViewModel>();
             services.AddSingleton<ChatViewModel>();
+
+            services.AddMediaSoup();
 
             services.AddSingleton<MediaServerProxyFactory>();
             services
