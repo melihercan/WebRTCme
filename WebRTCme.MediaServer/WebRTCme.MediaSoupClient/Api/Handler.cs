@@ -25,15 +25,21 @@ namespace WebRTCme.MediaSoupClient.Api
             _pc?.Close();
         }
 
-        public Task<RtpCapabilities> GetNativeRtpCapabilities()
+        public async Task<RtpCapabilities> GetNativeRtpCapabilities()
         {
             IRTCPeerConnection pc = _window.RTCPeerConnection(new RTCConfiguration 
             { 
                 IceTransportPolicy = RTCIceTransportPolicy.All,
                 BundlePolicy = RTCBundlePolicy.MaxBundle,
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
-            }); 
-            pc.Add
+            });
+            pc.AddTransceiver(MediaStreamTrackKind.Audio);
+            pc.AddTransceiver(MediaStreamTrackKind.Video);
+            var offer = await pc.CreateOffer();
+            pc.Close();
+
+
+            return null;
         }
 
 
