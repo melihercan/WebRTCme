@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace WebRTCme.ConnectionServer
 {
-    interface IMediaServerNotify
+    public class RtxParameters
     {
+        public int? apt { get; init; }
+
     }
 }

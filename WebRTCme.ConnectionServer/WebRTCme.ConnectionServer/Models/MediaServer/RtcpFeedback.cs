@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace WebRTCme.ConnectionServer
 {
-    interface IMediaServerNotify
+    public class RtcpFeedback
     {
+        public string Type { get; init; }
+        public string Parameter { get; init; }
     }
 }

@@ -1,23 +1,22 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Net.WebSockets;
-using System.Threading;
+using System.Reactive;
+using System.Text;
 using System.Text.Json;
-using WebRTCme.Middleware.MediaStreamProxies.Models;
-using WebRTCme.Middleware.MediaStreamProxies.Enums;
-using WebRTCme.Middleware.MediaStreamProxies.Enums.MediaSoup;
-using WebRTCme.Middleware.MediaStreamProxies.Models.MediaSoup;
+using System.Threading;
+using System.Threading.Tasks;
+using Utilme;
+using WebRTCme.ConnectionServer;
 
-namespace WebRTCme.Middleware.MediaStreamProxies
+namespace WebRTCme.ConnectionServer.Stub
 {
-    class MediaSoupProxy : IMediaServerProxy
+    class MediaSoupStub : IMediaServerApi
     {
         readonly ClientWebSocket _webSocket = new();
         readonly ArraySegment<byte> _rxBuffer = new(new byte[16384]);
-
 
         TaskCompletionSource<ProtooResponseOk> _tcs;
         CancellationTokenSource _cts;
@@ -25,18 +24,18 @@ namespace WebRTCme.Middleware.MediaStreamProxies
         static uint _counter;
         SemaphoreSlim _sem = new(1);
 
-        public MediaSoupProxy(IConfiguration configuration)
+        public MediaSoupStub(IConfiguration configuration)
         {
             _mediaSoupServerBaseUrl = configuration["MediaSoupServer:BaseUrl"];
         }
 
-        public async Task StartAsync(ConnectionRequestParameters connectionRequestParameters)
+        public async Task<Result<Unit>> JoinAsync(Guid id, string name, string room)
         {
             _cts = new();
 
             var uri = new Uri(new Uri(_mediaSoupServerBaseUrl),
-                $"?roomId={connectionRequestParameters.ConnectionParameters.RoomName}" +
-                $"&peerId={connectionRequestParameters.ConnectionParameters.UserName}");
+                $"?roomId={room}" +
+                $"&peerId={name}");
             _webSocket.Options.AddSubProtocol("protoo");
             _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
             await _webSocket.ConnectAsync(uri, _cts.Token);
@@ -79,35 +78,28 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                     }
                 }
             });
-        }
 
-        public async Task StopAsync()
-        {
-            _cts.Cancel();
-            _cts.Dispose();
-            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye", CancellationToken.None);
-        }
-
-        public async Task JoinAsync()
-        {
             var routerRtpCapabilities = await ProtooTransactionAsync(MethodName.GetRouterRtpCapabilities);
-            var transportInfo = await ProtooTransactionAsync(MethodName.CreateWebRtcTransport, new WebRtcTransportCreateParameters 
+            var transportInfo = await ProtooTransactionAsync(MethodName.CreateWebRtcTransport, new WebRtcTransportCreateParameters
             {
                 ForceTcp = false,
                 Producing = true,
                 Consuming = false,
-                SctpCapabilities = new SctpCapabilities 
-                { 
-                    NumStream = new NumSctpStreams 
-                    { 
+                SctpCapabilities = new SctpCapabilities
+                {
+                    NumStream = new NumSctpStreams
+                    {
                         Os = 1024,
                         Mis = 1024,
                     }
                 }
             });
+
+
+            return Result<Unit>.Ok(Unit.Default);
         }
 
-        public Task LeaveAsync()
+        public Task<Result<Unit>> LeaveAsync(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -144,7 +136,7 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                     case MethodName.GetRouterRtpCapabilities:
                         var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilities>(
                             json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                        foreach(var codec in routerRtpCapabilities.Codecs)
+                        foreach (var codec in routerRtpCapabilities.Codecs)
                         {
                             var parametersJson = ((JsonElement)codec.Parameters).GetRawText();
                             if (codec.MimeType.Equals("audio/opus"))
@@ -197,5 +189,6 @@ namespace WebRTCme.Middleware.MediaStreamProxies
                 _sem.Release();
             }
         }
+
     }
 }

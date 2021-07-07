@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace WebRTCme.ConnectionServer
 {
-    interface IMediaServerNotify
+    public class DtlsFingerprint
     {
+        public string Algorithm { get; init; }
+        public string Value { get; init; }
     }
 }
