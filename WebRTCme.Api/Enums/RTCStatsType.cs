@@ -1,50 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum RTCStatsType
     {
-        [Description("candidate-pair")]
+        [EnumMember(Value = "candidate-pair")]
         CandidatePair,
 
+        [EnumMember(Value = "certificate")]
         Certificate,
+
+        [EnumMember(Value = "codec")]
         Codec,
+
+        [EnumMember(Value = "csrc")]
         Csrc,
 
-        [Description("data-channel")]
+        [EnumMember(Value = "data-channel")]
         DataChannel,
 
-        [Description("inbound-rtp")]
+        [EnumMember(Value = "inbound-rtp")]
         InboundRtp,
 
-        [Description("local-candidate")]
+        [EnumMember(Value = "local-candidate")]
         LocalCandidate,
 
-        [Description("outbound-rtp")]
+        [EnumMember(Value = "outbound-rtp")]
         OutboundRtp,
 
-        [Description("peer-connection")]
+        [EnumMember(Value = "peer-connection")]
         PeerConnection,
 
+        [EnumMember(Value = "receiver")]
         Receiver,
 
-        [Description("remote-candidate")]
+        [EnumMember(Value = "remote-candidate")]
         RemoteCandidate,
 
-        [Description("remote-inbound-rtp")]
+        [EnumMember(Value = "remote-inbound-rtp")]
         RemoteInboundRtp,
 
-        [Description("remote-outbound-rtp")]
+        [EnumMember(Value = "remote-outbound-rtp")]
         RemoteOutboundRtp,
 
+        [EnumMember(Value = "sender")]
         Sender,
+
+        [EnumMember(Value = "stream")]
         Stream,
+
+        [EnumMember(Value = "track")]
         Track,
+
+        [EnumMember(Value = "transport")]
         Transport
     }
 }

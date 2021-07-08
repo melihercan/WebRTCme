@@ -26,12 +26,12 @@ namespace WebRTCme.MediaSoupClient
             _pc?.Close();
         }
 
-        public async Task<RtpCapabilities> GetNativeRtpCapabilities()
+        public async Task<RtpCapabilities> GetNativeRtpCapabilitiesAsync()
         {
             IRTCPeerConnection pc = _window.RTCPeerConnection(new RTCConfiguration 
             { 
                 IceTransportPolicy = RTCIceTransportPolicy.All,
-                BundlePolicy = RTCBundlePolicy.MaxBundle,
+                BundlePolicy = RTCBundlePolicy.Balanced,// .MaxBundle,
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
             });
             pc.AddTransceiver(MediaStreamTrackKind.Audio);

@@ -3,29 +3,32 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme.ConnectionServer;
+using WebRTCme.MediaSoupClient.Api;
 
 namespace WebRTCme.MediaSoupClient
 {
     public class Device
     {
-        public RtpCapabilities GetRtpCapabilities()
-        {
-            throw new NotImplementedException();
-        }
+        bool _loaded;
+        RtpCapabilities _rtpCapabilities;
+        SctpCapabilities _sctpCapabilities;
 
-        public SctpCapabilities GetSctpCapabilities()
-        {
-            throw new NotImplementedException();
-        }
+        public string HandlerName => "Generic";
+        public bool Loaded => _loaded;
 
-        public bool IsLoaded()
-        {
-            throw new NotImplementedException();
-        }
+        public RtpCapabilities RtpCapabilities => _rtpCapabilities;
 
-        public async Task LoadAsync(RtpCapabilities rtpCapabilities)
+        public SctpCapabilities SctpCapabilities => _sctpCapabilities;
+
+        public async Task LoadAsync(RtpCapabilities routerRtpCapabilities)
         {
-            throw new NotImplementedException();
+            if (_loaded)
+                throw new Exception("Already loaded");
+
+            Ortc.ValidateRtpCapabilities(routerRtpCapabilities);
+
+            var handler = new Handler();
+            var nativeRtpCapabilities = await handler.GetNativeRtpCapabilitiesAsync();
         }
 
         public bool CanProduce(MediaKind kind)

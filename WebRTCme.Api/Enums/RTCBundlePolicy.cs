@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum RTCBundlePolicy
     {
+        [EnumMember(Value = "balanced")]
         Balanced,
-        
-        [Description("max-compat")]
+
+        [EnumMember(Value = "max-compat")]
         MaxCompat,
         
-        [Description("max-bundle")]
+        [EnumMember(Value = "max-bundle")]
         MaxBundle,
     }
 }

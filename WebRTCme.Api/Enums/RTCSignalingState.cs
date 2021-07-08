@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum RTCSignalingState
     {
+        [EnumMember(Value = "stable")]
         Stable,
 
-        [Description("have-local-offer")]
+        [EnumMember(Value = "have-local-offer")]
         HaveLocalOffer,
 
-        [Description("have-remote-offer")]
+        [EnumMember(Value = "have-remote-offer")]
         HaveRemoteOffer,
 
-        [Description("have-local-pranswer")]
+        [EnumMember(Value = "have-local-pranswer")]
         HaveLocalPranswer,
 
-        [Description("have-remote-pranswer")]
+        [EnumMember(Value = "have-remote-pranswer")]
         HaveRemotePranswer,
 
+        [EnumMember(Value = "closed")]
         Closed
     }
 }
