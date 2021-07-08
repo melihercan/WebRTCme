@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRTCme.MediaSoupClient.Enums;
 
-namespace WebRTCme.MediaSoupClient.Extensions
+namespace WebRTCme.ConnectionServer
 {
-    static class EnumExtensions
+    public static class EnumExtensions
     {
-        public static MediaKind ToMediaSoup(this MediaStreamTrackKind kind) =>
+        public static MediaKind ToMediaServer(this MediaStreamTrackKind kind) =>
             kind switch
             {
                 MediaStreamTrackKind.Audio => MediaKind.Audio,

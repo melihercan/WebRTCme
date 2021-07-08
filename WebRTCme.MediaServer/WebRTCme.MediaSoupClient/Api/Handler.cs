@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.MediaSoupClient.Models;
 using WebRTCme;
 using SDPLib;
+using WebRTCme.ConnectionServer;
 
-namespace WebRTCme.MediaSoupClient.Api
+namespace WebRTCme.MediaSoupClient
 {
     public class Handler
     {

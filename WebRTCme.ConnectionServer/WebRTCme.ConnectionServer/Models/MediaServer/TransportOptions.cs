@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.MediaSoupClient.Models
+namespace WebRTCme.ConnectionServer
 {
     public class TransportOptions
     {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.MediaSoupClient.Models
+namespace WebRTCme.ConnectionServer
 {
-    class ProducerOptions
+    public class ProducerOptions
     {
         public IMediaStreamTrack Track { get; init; }
         public RTCRtpEncodingParameters[] Encodings { get; init; }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.MediaSoupClient.Models
+namespace WebRTCme.ConnectionServer
 {
-    class ProducerCodecOptions
+    public class ProducerCodecOptions
     {
         public bool? OpusStereo { get; init; } 
         public bool? OpusFec { get; init; }

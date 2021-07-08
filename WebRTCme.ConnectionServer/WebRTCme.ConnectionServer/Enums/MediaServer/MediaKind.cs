@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace WebRTCme.MediaSoupClient.Enums
+namespace WebRTCme.ConnectionServer
 {
     [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
-    public enum Direction
+    public enum MediaKind
     {
-        Sendrecv,
-        Sendonly,
-        Recvonly
+        Audio,
+        Video
     }
 }

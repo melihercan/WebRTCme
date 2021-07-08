@@ -7,7 +7,6 @@ namespace WebRTCme.ConnectionServer
 {
     public class RtxParameters
     {
-        public int? apt { get; init; }
-
+        public int? Apt { get; init; }
     }
 }

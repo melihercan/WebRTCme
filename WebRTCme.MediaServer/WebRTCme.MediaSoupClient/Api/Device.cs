@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.MediaSoupClient.Enums;
-using WebRTCme.MediaSoupClient.Models;
+using WebRTCme.ConnectionServer;
 
-namespace WebRTCme.MediaSoupClient.Api
+namespace WebRTCme.MediaSoupClient
 {
     public class Device
     {

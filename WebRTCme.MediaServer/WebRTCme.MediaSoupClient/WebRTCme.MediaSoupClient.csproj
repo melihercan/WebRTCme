@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Externals\SDPLib\SDPLib.csproj" />
+    <ProjectReference Include="..\..\WebRTCme.ConnectionServer\WebRTCme.ConnectionServer\WebRTCme.ConnectionServer.csproj" />
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 

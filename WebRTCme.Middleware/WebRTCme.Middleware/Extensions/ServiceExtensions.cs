@@ -6,7 +6,6 @@ using WebRTCme.SignallingServerProxy;
 using WebRTCme.Middleware;
 using WebRTCme.Middleware.Services;
 using Microsoft.JSInterop;
-using WebRTCme.Middleware.MediaStreamProxies;
 using WebRTCme.ConnectionServer;
 
 namespace WebRTCme.Middleware
@@ -30,11 +29,11 @@ namespace WebRTCme.Middleware
 
             services.AddMediaSoup();
 
-            services.AddSingleton<MediaServerProxyFactory>();
-            services
-                .AddSingleton<MediaSoupProxy>()
-                .AddSingleton<IMediaServerProxy, MediaSoupProxy>(serviceProvider => 
-                    serviceProvider.GetService<MediaSoupProxy>());
+            //services.AddSingleton<MediaServerProxyFactory>();
+            //services
+            //    .AddSingleton<MediaSoupProxy>()
+            //    .AddSingleton<IMediaServerProxy, MediaSoupProxy>(serviceProvider => 
+            //        serviceProvider.GetService<MediaSoupProxy>());
 
             return services;
         }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.ConnectionServer
 {
-    public class RouterRtpCapabilities
+    public class RtpCapabilities
     {
         public RtpCodecCapability[] Codecs { get; init; }
         public RtpHeaderExtension[] HeaderExtensions { get; init; }

@@ -9,8 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.ConnectionServer;
-using WebRTCme.Middleware.MediaStreamProxies;
-using WebRTCme.Middleware.Models;
+using WebRTCme.MediaSoupClient;
 
 //// CURRENTLY USING HARD CODED MediaSoup
 
@@ -25,7 +24,7 @@ namespace WebRTCme.Middleware.Services
         readonly IWebRtcMiddleware _webRtcMiddleware;
         readonly IJSRuntime _jsRuntime;
 
-        static Dictionary<MediaServer, IMediaServerProxy> MediaServerProxies = new();
+        //static Dictionary<MediaServer, IMediaServerProxy> MediaServerProxies = new();
 
         public MediaServerConnection(IConfiguration configuration, /*MediaServerProxyFactory mediaServerProxyFactory,*/ 
             IMediaServerApi mediaServerApi, 
@@ -63,10 +62,12 @@ namespace WebRTCme.Middleware.Services
         {
             return Observable.Create<PeerResponseParameters>(async observer =>
             {
-                IMediaServerProxy mediaServerProxy = null;
+                //IMediaServerProxy mediaServerProxy = null;
 
                 //ConnectionContext connectionContext = null;
                 //bool isJoined = false;
+
+                var guid = Guid.NewGuid();
 
                 try
                 {
@@ -82,10 +83,13 @@ namespace WebRTCme.Middleware.Services
 
                     //await _mediaServerApi.JoinAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
                     //    request.ConnectionParameters.RoomName);
-                    await _mediaServerApi.ConnectAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
+                    await _mediaServerApi.ConnectAsync(guid, request.ConnectionParameters.UserName,
                         request.ConnectionParameters.RoomName);
 
 
+                    var mediaSoupDevice = new Device();
+                    
+                    
                     /////////// TODO: CREATE DEVICE AND HANDLER
 
                     var routerRtpCapabilities = ParseResponse(MethodName.GetRouterRtpCapabilities, 
@@ -130,7 +134,8 @@ namespace WebRTCme.Middleware.Services
                     try
                     {
                         _mediaServerApi.NotifyEventAsync -= MediaServer_OnNotifyAsync;
-                        await mediaServerProxy.StopAsync();
+                        await _mediaServerApi.DisconnectAsync(guid);
+                        //await mediaServerProxy.StopAsync();
                     }
                     catch { };
                 };
@@ -165,7 +170,7 @@ namespace WebRTCme.Middleware.Services
             switch (method)
             {
                 case MethodName.GetRouterRtpCapabilities:
-                    var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilities>(
+                    var routerRtpCapabilities = JsonSerializer.Deserialize<RtpCapabilities>(
                         json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
                     foreach (var codec in routerRtpCapabilities.Codecs)
                     {

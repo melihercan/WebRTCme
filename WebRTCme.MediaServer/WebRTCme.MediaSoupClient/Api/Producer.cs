@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.MediaSoupClient.Enums;
-using WebRTCme.MediaSoupClient.Extensions;
+using WebRTCme.ConnectionServer;
 
-namespace WebRTCme.MediaSoupClient.Api
+namespace WebRTCme.MediaSoupClient
 {
     public class Producer
     {
@@ -27,7 +26,7 @@ namespace WebRTCme.MediaSoupClient.Api
             _zeroRtpOnPause = zeroRtpOnPause;
             AppData = appData;
 
-            Kind = track.Kind.ToMediaSoup();
+            Kind = track.Kind.ToMediaServer();
             Paused = disableTrackOnPause ? !Track.Enabled : false;
         }
 
