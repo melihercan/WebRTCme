@@ -1,14 +1,15 @@
-﻿using SDPLib;
+﻿using UtilmeSdpTransform;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme.ConnectionServer;
+using Utilme.SdpTransform;
 
 namespace WebRTCme.MediaSoupClient.Api
 {
     static class SdpCommonUtils
     {
-        public static RtpCapabilities ExtractRtpCapabilities(SDP sdp)
+        public static RtpCapabilities ExtractRtpCapabilities(Sdp sdp)
         {
             Dictionary<int, RtpCodecCapability> codecsDictionary = new();
             List<RtpHeaderExtension> headerExtensions = new();
@@ -34,9 +35,11 @@ namespace WebRTCme.MediaSoupClient.Api
                     default:
                         continue;
                 }
+
+                //foreach (var rtp in m.)
+
             }
 
-            //for (var )
 
             return null;
         }

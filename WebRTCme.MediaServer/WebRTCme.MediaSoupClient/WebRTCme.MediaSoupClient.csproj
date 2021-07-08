@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Externals\SDPLib\SDPLib.csproj" />
+    <ProjectReference Include="..\..\Externals\SdpTransform\SdpTransform.csproj" />
     <ProjectReference Include="..\..\WebRTCme.ConnectionServer\WebRTCme.ConnectionServer\WebRTCme.ConnectionServer.csproj" />
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-using SDPLib;
+using UtilmeSdpTransform;
 using WebRTCme.ConnectionServer;
+using WebRTCme.MediaSoupClient.Api;
+using Utilme.SdpTransform;
 
 namespace WebRTCme.MediaSoupClient
 {
@@ -39,7 +41,8 @@ namespace WebRTCme.MediaSoupClient
             var offer = await pc.CreateOffer();
             pc.Close();
 
-            var sdpObject = SDPSerializer.ReadSDP(Encoding.UTF8.GetBytes(offer.Sdp));
+            var sdpObject = SdpSerializer.ReadSDP(Encoding.UTF8.GetBytes(offer.Sdp));
+            var nativeRtpCapabilities = SdpCommonUtils.ExtractRtpCapabilities(sdpObject);
 
             return null;
         }
