@@ -15,7 +15,7 @@ namespace WebRTCme.ConnectionServer
         Task<Result<Unit>> ConnectAsync(Guid id, string name, string room);
         Task<Result<Unit>> DisconnectAsync(Guid id);
 
-        Task<Result<object>> CallAsync(string method, object data);
+        Task<Result<object>> CallAsync(string method, object data = null);
 
         event IMediaServerNotify.NotifyDelegateAsync NotifyEventAsync; 
 
