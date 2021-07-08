@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0;</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>UtilmeResult</RootNamespace>
+    <AssemblyName>Utilme.Result</AssemblyName>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>melihercan</Authors>
+    <Description>Generic result library returning result object on success or error reporing on failure.</Description>
+    <Copyright>melihercan 2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/melihercan/Utilme</PackageProjectUrl>
+    <PackageIcon>me.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/melihercan/Utilme/tree/master/Result</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>.NET Result Status Error</PackageTags>
+    <PackageReleaseNotes>Creation</PackageReleaseNotes>
+  </PropertyGroup>
+
+</Project>

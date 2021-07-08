@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Utilme\Result\Result.csproj" />
+    <ProjectReference Include="..\..\Externals\Result\Result.csproj" />
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
