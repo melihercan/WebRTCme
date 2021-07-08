@@ -67,7 +67,7 @@ namespace WebRTCme.Middleware.Services
 
                     /////////// TODO: RoomClient.js functionality here.
 
-
+                    _mediaServerApi.NotifyEventAsync += MediaServer_OnNotifyAsync;
 
 
                     //var mediaServerName = GetMediaServerFromName(request.ConnectionParameters.MediaServerName);
@@ -75,8 +75,11 @@ namespace WebRTCme.Middleware.Services
                     //await mediaServerProxy.StartAsync(request);
                     //await mediaServerProxy.JoinAsync();
 
-                    await _mediaServerApi.JoinAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
+                    //await _mediaServerApi.JoinAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
+                    //    request.ConnectionParameters.RoomName);
+                    await _mediaServerApi.ConnectAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
                         request.ConnectionParameters.RoomName);
+
 
                     //connectionContext = new ConnectionContext
                     //{
@@ -94,11 +97,18 @@ namespace WebRTCme.Middleware.Services
                 {
                     try
                     {
+                        _mediaServerApi.NotifyEventAsync -= MediaServer_OnNotifyAsync;
                         await mediaServerProxy.StopAsync();
                     }
                     catch { };
                 };
             });
+
+            Task MediaServer_OnNotifyAsync(string method, object data)
+            {
+                throw new NotImplementedException();
+            }
+
         }
 
 

@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.ConnectionServer
 {
-    interface IMediaServerNotify
+    public interface IMediaServerNotify
     {
+        delegate Task NotifyDelegateAsync(string method, object data);
+
+        Task OnNotifyAsync(string method, object data);
     }
 }
