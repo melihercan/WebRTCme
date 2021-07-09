@@ -1,7 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0;</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>WebRTCmeConnectionMediaSoup</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Externals\Result\Result.csproj" />
+    <ProjectReference Include="..\..\..\Externals\SdpTransform\SdpTransform.csproj" />
+    <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
 
 </Project>
