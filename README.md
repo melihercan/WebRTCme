@@ -8,7 +8,7 @@ I am actively working on this project to evolve this framework from demo level t
 - Adding .NET 6 and MAUI support
 - And more...
 
-I will release the new NuGets once the code reaches to a certain maturity level.
+I will release the new NuGets once the MediaSoup implementation is completed.
 
 
 
