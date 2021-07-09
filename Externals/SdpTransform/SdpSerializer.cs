@@ -18,7 +18,7 @@ namespace Utilme.SdpTransform
         public const string CRLF = "\r\n";
         public static readonly byte[] CharsetAttributePrefix = Encoding.UTF8.GetBytes("charset:");
 
-        public static async Task<Sdp> ReadSDP(PipeReader reader)
+        public static async Task<Sdp> ReadSdp(PipeReader reader)
         {
             var session = new DeserializationSession();
 
@@ -37,7 +37,7 @@ namespace Utilme.SdpTransform
 
                     if (position != null)
                     {
-                        stateFn = stateFn(TrimSDPLineCR(buffer.Slice(0, position.Value)), session);
+                        stateFn = stateFn(TrimSdpLineCR(buffer.Slice(0, position.Value)), session);
 
                         buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
                     }
@@ -63,7 +63,7 @@ namespace Utilme.SdpTransform
             return session.ParsedValue;
         }
 
-        public static Sdp ReadSDP(ReadOnlySpan<byte> data)
+        public static Sdp ReadSdp(ReadOnlySpan<byte> data)
         {
             var session = new DeserializationSession();
             DeserializationState stateFn = Serializer.Instance.ReadValue;
@@ -72,7 +72,7 @@ namespace Utilme.SdpTransform
 
             while ((position = remainingSlice.IndexOf(ByteLF)) != -1)
             {
-                stateFn = stateFn(TrimSDPLineCR(remainingSlice.Slice(0, position)), session);
+                stateFn = stateFn(TrimSdpLineCR(remainingSlice.Slice(0, position)), session);
                 remainingSlice = remainingSlice.Slice(position + 1);
             }
 
@@ -96,7 +96,7 @@ namespace Utilme.SdpTransform
             }
         }
 
-        private static ReadOnlySpan<byte> TrimSDPLineCR(ReadOnlySpan<byte> line)
+        private static ReadOnlySpan<byte> TrimSdpLineCR(ReadOnlySpan<byte> line)
         {
             //Check for CR
             if (line.Length > 1 && line[line.Length - 1] == ByteCR)
@@ -107,22 +107,22 @@ namespace Utilme.SdpTransform
             return line;
         }
 
-        private static ReadOnlySpan<byte> TrimSDPLineCR(ReadOnlySequence<byte> seq)
+        private static ReadOnlySpan<byte> TrimSdpLineCR(ReadOnlySequence<byte> seq)
         {
             var line = seq.ToSpan();
 
-            return TrimSDPLineCR(line);
+            return TrimSdpLineCR(line);
         }
 
-        public static void WriteSDP(PipeWriter writer, Sdp value)
+        public static void WriteSdp(PipeWriter writer, Sdp value)
         {
             Serializer.Instance.WriteValue(writer, value);
         }
 
-        public static byte[] WriteSDP(Sdp value)
+        public static byte[] WriteSdp(Sdp value)
         {
             var pipe = new Pipe();
-            WriteSDP(pipe.Writer, value);
+            WriteSdp(pipe.Writer, value);
             pipe.Writer.Complete();
             var serialized = pipe.Reader.ReadAsync().Result.Buffer.ToArray();
             return serialized;

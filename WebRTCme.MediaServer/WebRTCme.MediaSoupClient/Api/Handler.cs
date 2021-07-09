@@ -41,7 +41,7 @@ namespace WebRTCme.MediaSoupClient
             var offer = await pc.CreateOffer();
             pc.Close();
 
-            var sdpObject = SdpSerializer.ReadSDP(Encoding.UTF8.GetBytes(offer.Sdp));
+            var sdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
             var nativeRtpCapabilities = SdpCommonUtils.ExtractRtpCapabilities(sdpObject);
 
             return null;
