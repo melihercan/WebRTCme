@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0;</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
-    <RootNamespace>WebRTCmeConnectionMediaSoup</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
