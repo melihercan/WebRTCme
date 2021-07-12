@@ -4,4 +4,23 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Interface\ISignalingServerApi.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="Interface\ISignalingServerApi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Externals\Result\Result.csproj" />
+    <ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+  </ItemGroup>
+
 </Project>

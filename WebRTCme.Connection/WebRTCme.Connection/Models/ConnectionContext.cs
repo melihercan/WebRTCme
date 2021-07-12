@@ -6,9 +6,9 @@ namespace WebRTCme.Connection
 {
     class ConnectionContext
     {
-        public Guid Id { get; init; }
-
         public string ConnectionServer { get; init; }
+
+        public Guid Id { get; init; }
 
         public string Name { get; init; }
 

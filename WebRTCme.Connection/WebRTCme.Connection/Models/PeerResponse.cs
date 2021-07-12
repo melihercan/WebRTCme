@@ -8,11 +8,15 @@ namespace WebRTCme.Connection
     {
         public PeerResponseType Type { get; init; }
 
+        public Guid Id;
+
         public string Name { get; init; }
 
         public IMediaStream MediaStream { get; init; }
 
         public IRTCDataChannel DataChannel { get; init; }
+
+        public MediaContext MediaContext { get; init; }
 
         public string ErrorMessage { get; init; }
 

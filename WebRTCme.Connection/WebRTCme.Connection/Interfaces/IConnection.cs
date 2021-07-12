@@ -9,10 +9,11 @@ namespace WebRTCme.Connection.Interfaces
     public interface IConnection
     {
 
-        IObservable<PeerResponse> ConnectionRequest(string name, string room); 
+        IObservable<PeerResponse> ConnectionRequest(Guid id, string name, string room); 
 
         Task ReplaceOutgoingTrackAsync(IMediaStreamTrack track, IMediaStreamTrack newTrack);
 
-       
+        Task<IRTCStatsReport> GetStats(Guid id);
+      
     }
 }
