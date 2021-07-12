@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Connection.Interfaces
+namespace WebRTCme.Connection
 {
     public interface IConnectionFactory
     {

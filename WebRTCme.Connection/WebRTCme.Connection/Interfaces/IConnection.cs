@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
 
-namespace WebRTCme.Connection.Interfaces
+namespace WebRTCme.Connection
 {
     public interface IConnection
     {
