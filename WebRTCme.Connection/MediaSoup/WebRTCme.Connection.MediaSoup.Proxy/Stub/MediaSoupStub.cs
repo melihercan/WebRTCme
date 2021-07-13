@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,9 +27,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
 
         public event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
 
-        public MediaSoupStub(IConfiguration configuration)
+        public MediaSoupStub(IConfiguration configuration, IWebRtc webRtc, IJSRuntime jsRuntime = null)
         {
             _mediaSoupServerBaseUrl = configuration["MediaSoupServer:BaseUrl"];
+            Registry.WebRtc = webRtc;
+            Registry.JsRuntime = jsRuntime;
         }
 
         public async Task<Result<Unit>> ConnectAsync(Guid id, string name, string room)

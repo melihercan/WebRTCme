@@ -17,7 +17,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public Handler()
         {
             Name = "Generic";
-            ////_window = Registry.WebRtc.Window(Registry.JsRuntime);
+            _window = Registry.WebRtc.Window(Registry.JsRuntime);
         }
 
         public string Name { get; }
