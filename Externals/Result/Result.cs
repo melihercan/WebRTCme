@@ -12,18 +12,16 @@ namespace Utilme
         public ResultStatus Status { get; } = ResultStatus.Ok;
         public string ErrorMessage { get; }
 
-        private Result(T value) => Value = value;
+        public Result(T value) => Value = value;
 
-        private Result(ResultStatus status)
+        Result(ResultStatus status)
         {
             Status = status;
-            if(status != ResultStatus.Ok)
-            {
-                IsOk = false;
-            }
+            IsOk = false;
+            ErrorMessage = status.ToString();
         }
 
-        private Result(string message)
+        Result(string message)
         {
             Status = ResultStatus.Error;
             IsOk = false;

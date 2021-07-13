@@ -23,6 +23,7 @@ namespace DemoApp
             });
 
             var webRtcMiddleware = CrossWebRtcMiddlewareXamarin.Current;
+            hostBuilder.Services.AddSingleton(serviceProvider => webRtcMiddleware.WebRtc);
             hostBuilder.Services.AddSingleton(serviceProvider => webRtcMiddleware);
 
             hostBuilder.Services.AddXamarinMiddleware();

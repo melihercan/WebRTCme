@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0;</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
@@ -20,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Externals\Result\Result.csproj" />
-    <ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+    <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
 </Project>

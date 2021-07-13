@@ -6,10 +6,10 @@
              x:Class="DemoApp.Views.ConnectionParametersPage">
     <ContentPage.Content>
         <StackLayout VerticalOptions="Center" Margin="40,0" Spacing="20">
-            <Picker Title="select TURN server" ItemsSource="{Binding TurnServerNames}" 
-                    SelectedItem="{Binding ConnectionParameters.TurnServerName}"/>
-            <Entry Placeholder="enter room name" Text="{Binding ConnectionParameters.RoomName}"/>
-            <Entry Placeholder="enter user name" Text="{Binding ConnectionParameters.UserName}"/>
+            <Picker Title="select connection server" ItemsSource="{Binding ConnectionTypeNames}" 
+                    SelectedItem="{Binding SelectedConnectionTypeName}"/>
+            <Entry Placeholder="enter room name" Text="{Binding ConnectionParameters.Room}"/>
+            <Entry Placeholder="enter user name" Text="{Binding ConnectionParameters.Name}"/>
             <StackLayout Orientation="Horizontal" Margin="40,40">
                 <Button Text="Join call" Padding="10,0"
                         Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>

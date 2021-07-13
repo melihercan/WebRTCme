@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Stub
+namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
 {
     class MediaSoupStub : IMediaSoupServerApi
     {
@@ -213,6 +213,11 @@ namespace WebRTCme.Connection.MediaSoup.Stub
             _cts.Dispose();
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye", CancellationToken.None);
             return Result<Unit>.Ok(Unit.Default);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            throw new NotImplementedException();
         }
 
         //public Task<Result<object>> RequestResponseAsync(string method, string jsonData)

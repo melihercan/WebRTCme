@@ -7,7 +7,7 @@ using Utilme;
 
 namespace WebRTCme.Connection.MediaSoup
 {
-    public interface IMediaSoupServerApi
+    public interface IMediaSoupServerApi : IAsyncDisposable
     {
         Task<Result<Unit>> ConnectAsync(Guid id, string name, string room);
         Task<Result<Unit>> DisconnectAsync(Guid id);

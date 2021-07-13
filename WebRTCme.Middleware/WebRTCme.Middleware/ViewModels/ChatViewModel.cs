@@ -1,4 +1,5 @@
 ﻿//using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Logging;
 using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using WebRTCme;
+using WebRTCme.Connection;
 
 namespace WebRTCme.Middleware
 {
@@ -26,36 +27,51 @@ namespace WebRTCme.Middleware
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
         readonly INavigation _navigation;
-        readonly IWebRtcConnection _webRtcConnection;
-        readonly IMediaServerConnection _mediaServerConnection;
         readonly IDataManager _dataManager;
         readonly IModalPopup _modalPopup;
+        readonly ILogger<ChatViewModel> _logger;
+        readonly IConnectionFactory _connectionFactory;
+
+        readonly Guid _guid = Guid.NewGuid();
+
+        IConnection _connection;
+        UserContext _userContext;
+
         IDisposable _connectionDisposer;
+        ConnectionParameters _connectionParameters;
         Action _reRender;
 
-        public ChatViewModel(INavigation navigation, IWebRtcConnection webRtcConnection,
-            IMediaServerConnection mediaServerConnection, IDataManager dataManager, IModalPopup modalPopup)
+        public ChatViewModel(INavigation navigation, IDataManager dataManager, IModalPopup modalPopup,
+            ILogger<ChatViewModel> logger, IConnectionFactory connectionFactory)
         {
             _navigation = navigation;
-            _webRtcConnection = webRtcConnection;
-            _mediaServerConnection = mediaServerConnection;
             _dataManager = dataManager;
             _modalPopup = modalPopup;
+            _logger = logger;
+            _connectionFactory = connectionFactory;
+
             DataParametersList = dataManager.DataParametersList;
         }
 
         public Task OnPageAppearingAsync(ConnectionParameters connectionParameters, Action reRender = null)
         {
+            _connectionParameters = connectionParameters;
             _reRender = reRender;
             if (_reRender is not null)
                 AddOrRemoveReRenderNotification();
 
-            var connectionRequestParameters = new ConnectionRequestParameters
+            _connection = _connectionFactory.SelectConnection(connectionParameters.ConnectionType);
+            _userContext = new()
             {
-                ConnectionParameters = connectionParameters,
-                DataChannelName = connectionParameters.RoomName
+                ConnectionType = connectionParameters.ConnectionType,
+                Id = _guid,
+                Name = connectionParameters.Name,
+                Room = connectionParameters.Room,
+                DataChannelName = connectionParameters.Room
             };
-            Connect(connectionRequestParameters);
+
+            Connect();
+
             return Task.CompletedTask;
         }
 
@@ -84,9 +100,6 @@ namespace WebRTCme.Middleware
                 _reRender();
             }
         }
-
-
-        public ConnectionParameters ConnectionParameters { get; set; }
 
 
         private string _outgoingText = string.Empty;
@@ -130,66 +143,57 @@ namespace WebRTCme.Middleware
         {
         }
 
-        private void Connect(ConnectionRequestParameters connectionRequestParameters)
+        private void Connect()
         {
-            IObservable<PeerResponseParameters> connectionObservable = null;
-
-            if (!string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.TurnServerName))
-            {
-                connectionObservable = _webRtcConnection.ConnectionRequest(connectionRequestParameters);
-            }
-            else if (!string.IsNullOrEmpty(connectionRequestParameters.ConnectionParameters.MediaServerName))
-            {
-                connectionObservable = _mediaServerConnection.ConnectionRequest(connectionRequestParameters);
-            }
-            else
-                throw new Exception("Either TURN or Media Server should be provided");
-
-
-            _connectionDisposer = connectionObservable.Subscribe(
+            _connectionDisposer = _connection.ConnectionRequest(_userContext).Subscribe(
                 // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
-                onNext: async peerResponseParameters =>
+                onNext: async peerResponse =>
                 {
-                    switch (peerResponseParameters.Code)
+                    switch (peerResponse.Type)
                     {
-                        case PeerResponseCode.PeerJoined:
-                            if (peerResponseParameters.DataChannel != null)
+                        case PeerResponseType.PeerJoined:
+                            if (peerResponse.DataChannel != null)
                             {
-                                var dataChannel = peerResponseParameters.DataChannel;
+                                var dataChannel = peerResponse.DataChannel;
                                 Console.WriteLine($"--------------- DataChannel: {dataChannel.Label} " +
                                     $"state:{dataChannel.ReadyState}");
 
-                                _dataManager.AddPeer(peerResponseParameters.PeerUserName, dataChannel);
+                                _dataManager.AddPeer(peerResponse.Name, dataChannel);
                             }
                             break;
 
-                        case PeerResponseCode.PeerLeft:
-                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
+                        case PeerResponseType.PeerLeft:
+                            _dataManager.RemovePeer(peerResponse.Name);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerLeft");
                             break;
 
-                        case PeerResponseCode.PeerError:
-                            _dataManager.RemovePeer(peerResponseParameters.PeerUserName);
+                        case PeerResponseType.PeerError:
+                            _dataManager.RemovePeer(peerResponse.Name);
                             System.Diagnostics.Debug.WriteLine($"************* APP PeerError");
 
                             _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn 
                             {
                                 Title = "Error",
-                                Text = peerResponseParameters.ErrorMessage,
+                                Text = peerResponse.ErrorMessage,
                                 Ok = "OK"
                             });
                             break;
+                        case PeerResponseType.PeerMedia:
+                            // Nothing to do on chat.
+                            _logger.LogInformation($"************* APP PeerMedia");
+                            break;
+
                     }
 
                 },
                 onError: async exception =>
                 {
-                    if (exception.Message.Equals($"{SignallingServerProxy.SignallingServerResult.UserNameIsInUse}"))
+                    if (exception.Message.Contains("has already joined"))
                     {
                         var popupOut = await _modalPopup.GenericPopupAsync(new GenericPopupIn
                         {
                             Title = "Error",
-                            Text = $"User name {connectionRequestParameters.ConnectionParameters.UserName} " +
+                            Text = $"User name {_userContext.Name} " +
                                    $"is in use. Please enter another name or 'Cancel' to cancel the call.",
                             EntryPlaceholder = "New user name",
                             Ok = "OK",
@@ -198,8 +202,9 @@ namespace WebRTCme.Middleware
                         await OnPageDisappearingAsync();
                         if (popupOut.Ok)
                         {
-                            connectionRequestParameters.ConnectionParameters.UserName = popupOut.Entry;
-                            await OnPageAppearingAsync(connectionRequestParameters.ConnectionParameters, _reRender);
+                            _userContext.Name = popupOut.Entry;
+                            _connectionParameters.Name = popupOut.Entry;
+                            await OnPageAppearingAsync(_connectionParameters, _reRender);
                         }
                         else
                         {
@@ -220,7 +225,7 @@ namespace WebRTCme.Middleware
                         Disconnect();
                         if (popupOut.Ok)
                         {
-                            Connect(connectionRequestParameters);
+                            Connect();
                         }
                         else
                         {

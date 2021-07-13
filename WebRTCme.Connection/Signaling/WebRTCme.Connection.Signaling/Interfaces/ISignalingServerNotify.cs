@@ -4,18 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Connection.Signaling.Interfaces
+namespace WebRTCme.Connection.Signaling
 {
-    interface ISignalingServerNotify
+    public interface ISignalingServerNotify
     {
-        Task OnPeerJoined(Guid peerId, string peerName, string room);
+        delegate Task PeerJoinedDelegateAsync(Guid peerId, string peerName);
 
-        Task OnPeerLeft(Guid peerId);
+        delegate Task PeerLeftDelegateAsync(Guid peerId);
 
-        Task OnPeerSdpAsync(Guid peerId, string peerSdp);
+        delegate Task PeerSdpAsyncDelegateAsync(Guid peerId, string peerName, string peerSdp);
+
+        delegate Task PeerIceAsyncDelegateAsync(Guid peerId, string peerIce);
+
+        delegate Task PeerMediaAsyncDelegateAsync(Guid peerId, bool videoMuted, bool audioMuted, bool speaking);
+
+
+        Task OnPeerJoinedAsync(Guid peerId, string peerName);
+
+        Task OnPeerLeftAsync(Guid peerId);
+
+        Task OnPeerSdpAsync(Guid peerId, string peerName, string peerSdp);
 
         Task OnPeerIceAsync(Guid peerId, string peerIce);
 
-        Task OnPeerMediaAsync(Guid peerId, MediaContext peerMediaContext);
+        Task OnPeerMediaAsync(Guid peerId, bool videoMuted, bool audioMuted, bool speaking);
     }
 }

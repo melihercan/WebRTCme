@@ -3,7 +3,6 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:DemoApp.Views"
        Title="DemoApp"
-       CurrentItem="{x:Reference InitializingPageItem}"
        x:Class="DemoApp.AppShell">
 
     <!--
@@ -98,7 +97,7 @@
         await Shell.Current.GoToAsync("//LoginPage");
     -->
 
-    <ShellContent ContentTemplate="{DataTemplate local:InitializingPage}" x:Name="InitializingPageItem"/>
+    <!--<ShellContent ContentTemplate="{DataTemplate local:InitializingPage}" x:Name="InitializingPageItem"/>-->
 
     <!--<ShellContent Route="CallPage" Title="Call" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:CallPage}" />
         <ShellContent Route="ChatPage" Title="Chat" Icon="tab_feed.png" ContentTemplate="{DataTemplate local:ChatPage}" />-->

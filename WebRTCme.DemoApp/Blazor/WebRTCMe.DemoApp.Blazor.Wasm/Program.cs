@@ -32,6 +32,7 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
             });
 
             var webRtcMiddleware = CrossWebRtcMiddlewareBlazor.Current;
+            builder.Services.AddSingleton(serviceProvider => webRtcMiddleware.WebRtc);
             builder.Services.AddSingleton(serviceProvider => webRtcMiddleware);
 
             builder.Services.AddApp();
