@@ -43,9 +43,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var sdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
             var nativeRtpCapabilities = SdpCommonUtils.ExtractRtpCapabilities(sdpObject);
 
-            return null;
+            return nativeRtpCapabilities;
         }
-
-
     }
 }

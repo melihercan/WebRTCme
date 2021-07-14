@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Utilme.SdpTransform
 {
-    public class RtpMapAttribute
+    public class RtpmapAttribute
     {
         public int PayloadType { get; set; }
         public string EncodingName { get; set; }
         public int ClockRate { get; set; }
-        public string EncodingParameters { get; set; }
+        public int? Channels { get; set; }
     }
 }
