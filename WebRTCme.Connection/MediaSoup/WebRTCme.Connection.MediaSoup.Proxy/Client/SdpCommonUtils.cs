@@ -20,14 +20,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             foreach (var m in sdp.MediaDescriptions)
             {
                 var kind = m.Media;
+                MediaKind mediaKind = MediaKind.Video;
                 switch (kind)
                 {
                     case "audio":
+                        mediaKind = MediaKind.Audio;
                         if (gotAudio)
                             continue;
                         gotAudio = true;
                         break;
                     case "video":
+                        mediaKind = MediaKind.Video;
                         if (gotVideo)
                             continue;
                         gotVideo = true;
@@ -37,6 +40,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 }
 
                 //foreach (var rtp in m.)
+                var rtpMapAttributes = AttributeParser.ToRtpMapAttributes(m);
+                foreach (var rtp in rtpMapAttributes)
+                {
+                    var codec = new RtpCodecCapability 
+                    {
+                        Kind = mediaKind,
+                        MimeType = $"{kind}/{rtp.EncodingName}",
+                        PreferredPayloadType = rtp.PayloadType,
+                        ClockRate = rtp.ClockRate,
+                        Channels = rtp.EncodingParameters is null ? null : int.Parse(rtp.EncodingParameters) 
+                    };
+                    codecsDictionary.Add(codec.PreferredPayloadType, codec);
+                }
 
             }
 
