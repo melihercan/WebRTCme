@@ -10,6 +10,7 @@ namespace WebRTCme.Connection.MediaSoup
     {
         Sendrecv,
         Sendonly,
-        Recvonly
+        Recvonly,
+        Inactive
     }
 }

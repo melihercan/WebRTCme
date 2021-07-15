@@ -8,8 +8,8 @@
         public int? Channels { get; init; }
 
         public int LocalPayloadType { get; init; }
-        public int? LocalRtxPayloadType { get; init; }
-        public int RemotePayloadType { get; init; }
+        public int? LocalRtxPayloadType { get; set; }
+        public int RemotePayloadType { get; set; }
         public int? RemoteRtxPayloadType { get; init; }
 
         public object LocalParameters { get; set; }

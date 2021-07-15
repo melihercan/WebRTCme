@@ -16,10 +16,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
-        public RtpCapabilities GetExtendedRtpCapabilites(RtpCapabilities localCaps, RtpCapabilities remoteCaps)
+        public ExtendedRtpCapabilities GetExtendedRtpCapabilites(RtpCapabilities localCaps, RtpCapabilities remoteCaps)
         {
-            RtpCapabilities extendedRtpCapabilities = new();
+            List<ExtendedRtpCodecCapability> codecs = new();
 
+            // Match media codecs and keep the order preferred by remoteCaps.
             foreach (var remoteCodec in remoteCaps.Codecs)
             {
                 if (IsRtxCodec(remoteCodec))
@@ -29,16 +30,80 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     localCodec => MatchCodecs(localCodec, remoteCodec, strict: true, modify: true));
                 if (matchingLocalCodec is null)
                     continue;
-
-
+                codecs.Add(new ExtendedRtpCodecCapability 
+                {
+                    Kind = matchingLocalCodec.Kind,
+                    MimeType = matchingLocalCodec.MimeType,
+                    ClockRate = matchingLocalCodec.ClockRate,
+                    Channels = matchingLocalCodec.Channels,
+                    LocalPayloadType = matchingLocalCodec.PreferredPayloadType,
+                    RemotePayloadType = remoteCodec.PreferredPayloadType,
+                    LocalParameters = matchingLocalCodec.Parameters,
+                    RemoteParameters = remoteCodec.Parameters,
+                    RtcpFeedback = ReduceRtcpFeedback(matchingLocalCodec, remoteCodec)
+                });
             }
 
+            // Match RTX codecs.
+            foreach (var extendedCodec in codecs)
+            {
+                var matchingLocalRtxCodec = localCaps.Codecs.FirstOrDefault(localCodec =>
+                    IsRtxCodec(localCodec) &&
+                    (bool)((RtxParameters)localCodec.Parameters).Apt?.Equals(extendedCodec.LocalRtxPayloadType));
+                var matchingRemoteRtxCodec = remoteCaps.Codecs.FirstOrDefault(remoteCodec =>
+                    IsRtxCodec(remoteCodec) &&
+                    (bool)((RtxParameters)remoteCodec.Parameters).Apt?.Equals(extendedCodec.RemoteRtxPayloadType));
+                if (matchingLocalRtxCodec is not null && matchingRemoteRtxCodec is not null)
+                {
+                    extendedCodec.LocalRtxPayloadType = matchingLocalRtxCodec.PreferredPayloadType;
+                    extendedCodec.RemotePayloadType = matchingRemoteRtxCodec.PreferredPayloadType;
+                }
+            }
 
-            throw new NotImplementedException();
+            List<ExtendedRtpHeaderExtensions> headerExtensions = new();
+
+            // Match header extensions.
+            foreach (var remoteExt in remoteCaps.HeaderExtensions)
+            {
+                var matchingLocalExt = localCaps.HeaderExtensions?.FirstOrDefault(localExt => 
+                    MatchHeaderExtensions(localExt, remoteExt));
+                if (matchingLocalExt is null)
+                    continue;
+
+                Direction direction = remoteExt.Direction switch
+                {
+                    Direction.Sendrecv => Direction.Sendrecv,
+                    Direction.Recvonly => Direction.Sendonly,
+                    Direction.Sendonly => Direction.Recvonly,
+                    Direction.Inactive => Direction.Inactive,
+                    _ => throw new NotImplementedException()
+                };
+                headerExtensions.Add(new ExtendedRtpHeaderExtensions 
+                {
+                    Kind = remoteExt.Kind,
+                    Uri = remoteExt.Uri,
+                    SendId = matchingLocalExt.PreferedId,
+                    RecvId = remoteExt.PreferedId,
+                    PreferredEncrypt = matchingLocalExt.PreferredEncrypt,
+                    Direction = direction
+                });
+            }
+
+            return new ExtendedRtpCapabilities 
+            {
+                Codecs = codecs.ToArray(),
+                HeaderExtensions = headerExtensions.ToArray()
+            };
         }
 
-
-
+        bool MatchHeaderExtensions(RtpHeaderExtension aExt, RtpHeaderExtension bExt)
+        {
+            if (aExt.Kind != bExt.Kind)
+                return false;
+            if (!aExt.Uri.Equals(bExt.Uri))
+                return false;
+            return true;
+        }
 
         bool IsRtxCodec(RtpCodecCapability codec) =>
             new Regex(@"(?i).+/rtx$").IsMatch(codec.MimeType);
@@ -126,6 +191,22 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 throw new NotSupportedException($"Type {codec.Parameters.GetType()} is not supported");
 
             return value;
+        }
+
+        RtcpFeedback[] ReduceRtcpFeedback(RtpCodecCapability codecA, RtpCodecCapability codecB)
+        {
+            List<RtcpFeedback> reducedRtcpFeedback = new();
+
+            foreach(var aFb in codecA.RtcpFeedback)
+            {
+                var matchingBFb = codecA.RtcpFeedback.FirstOrDefault(
+                    bFb => bFb.Type.Equals(aFb.Type) &&
+                    bFb.Parameter is not null && aFb.Parameter is not null || bFb.Parameter.Equals(aFb.Parameter));
+                if (matchingBFb is not null)
+                    reducedRtcpFeedback.Add(matchingBFb);
+            }
+
+            return reducedRtcpFeedback.ToArray();
         }
     }
 }
