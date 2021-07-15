@@ -54,22 +54,49 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             switch (aMimeType)
             {
                 case "video/h264":
-                    var aCodecParameters = (H264Parameters)aCodec.Parameters;
-                    var bCodecParameters = (H264Parameters)bCodec.Parameters;
+                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
+                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
                     
-                    if (aCodecParameters.PacketizationMode != bCodecParameters.PacketizationMode)
+                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
                         return false;
 
                     if (strict)
                     {
-                        if (!H264.IsSameProfile(aCodecParameters, bCodecParameters))
+                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
                             return false;
 
+                        string selectedProfileLevelId;
+                        try
+                        {
+                            selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
+                                aH264CodecParameters, bH264CodecParameters);
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                         if (modify)
+                        {
+                            if (selectedProfileLevelId is not null)
+                            {
+                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                            }
+                        }
 
                     }
                     break;
 
+                case "video/vp9":
+                    if (strict)
+                    {
+                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
+                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
 
+                        if (aVp9CodecParameters != bVp9CodecParameters)
+                            return false;
+                    }
+                    break;
             }
 
             return true;
