@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -23,6 +24,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 if (IsRtxCodec(remoteCodec))
                     continue;
+
+                var matchingLocalCodec = localCaps.Codecs.FirstOrDefault(
+                    localCodec => MatchCodecs(localCodec, remoteCodec, strict: true, modify: true));
+                if (matchingLocalCodec is null)
+                    continue;
+
 
             }
 
