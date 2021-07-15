@@ -8,9 +8,9 @@ namespace WebRTCme.Connection.MediaSoup
     public class OpusParameters
     {
         [JsonPropertyName("useinbandfec")]
-        public int? UseInbandFec { get; init; }
+        public int? UseInbandFec { get; set; }
 
         [JsonPropertyName("usedtx")]
-        public int? UsedTx { get; init; }
+        public int? UsedTx { get; set; }
     }
 }

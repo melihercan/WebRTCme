@@ -8,6 +8,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Device
     {
+        readonly Ortc _ortc = new();
+        readonly Handler _handler = new();
+        
         bool _loaded;
         RtpCapabilities _rtpCapabilities;
         SctpCapabilities _sctpCapabilities;
@@ -24,10 +27,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (_loaded)
                 throw new Exception("Already loaded");
 
-            Ortc.ValidateRtpCapabilities(routerRtpCapabilities);
+            _ortc.ValidateRtpCapabilities(routerRtpCapabilities);
 
-            var handler = new Handler();
-            var nativeRtpCapabilities = await handler.GetNativeRtpCapabilitiesAsync();
+            var nativeRtpCapabilities = await _handler.GetNativeRtpCapabilitiesAsync();
+           _ortc.ValidateRtpCapabilities(nativeRtpCapabilities);
+
+            var extendedRtpCapabilities = _ortc.GetExtendedRtpCapabilites(nativeRtpCapabilities, routerRtpCapabilities);
+
+
+            _loaded = true;
         }
 
         public bool CanProduce(MediaKind kind)

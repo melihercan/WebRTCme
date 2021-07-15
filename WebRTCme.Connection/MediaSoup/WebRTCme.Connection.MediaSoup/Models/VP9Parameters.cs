@@ -8,16 +8,16 @@ namespace WebRTCme.Connection.MediaSoup
     public class VP9Parameters
     {
         [JsonPropertyName("profile-id")]
-        public int? ProfileId { get; init; }
+        public int? ProfileId { get; set; }
 
         [JsonPropertyName("x-google-start-bitrate")]
-        public int? XGoogleStartBitrate { get; init; }
+        public int? XGoogleStartBitrate { get; set; }
 
         [JsonPropertyName("x-google-max-bitrate")]
-        public int? XGoogleMaxBitrate { get; init; }
+        public int? XGoogleMaxBitrate { get; set; }
 
         [JsonPropertyName("x-google-min-bitrate")]
-        public int? XGoogleMinBitrate { get; init; }
+        public int? XGoogleMinBitrate { get; set; }
 
     }
 }

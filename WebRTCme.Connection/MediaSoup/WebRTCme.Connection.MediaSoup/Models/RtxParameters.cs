@@ -7,6 +7,6 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class RtxParameters
     {
-        public int? Apt { get; init; }
+        public int? Apt { get; set; }
     }
 }
