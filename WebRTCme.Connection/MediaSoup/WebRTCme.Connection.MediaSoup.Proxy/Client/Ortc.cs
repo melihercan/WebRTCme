@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using WebRTCme.Connection.MediaSoup;
+using WebRTCme.Connection.MediaSoup.Proxy.Codecs;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
@@ -53,6 +54,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             switch (aMimeType)
             {
                 case "video/h264":
+                    var aCodecParameters = (H264Parameters)aCodec.Parameters;
+                    var bCodecParameters = (H264Parameters)bCodec.Parameters;
+                    
+                    if (aCodecParameters.PacketizationMode != bCodecParameters.PacketizationMode)
+                        return false;
+
+                    if (strict)
+                    {
+                        if (!H264.IsSameProfile(aCodecParameters, bCodecParameters))
+                            return false;
+
+
+                    }
                     break;
 
 
