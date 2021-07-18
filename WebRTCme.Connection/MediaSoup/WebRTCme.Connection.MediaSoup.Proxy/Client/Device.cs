@@ -53,7 +53,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public bool CanProduce(MediaKind kind)
         {
-            throw new NotImplementedException();
+            if (!_loaded)
+                throw new Exception("Not loaded");
+
+            return kind switch
+            {
+                MediaKind.Audio => _canProduceByKind.Audio,
+                MediaKind.Video => _canProduceByKind.Video,
+                _ => throw new NotImplementedException()
+            };
+
         }
 
         public Transport CreateSendTransport(TransportOptions options)
@@ -68,5 +77,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public event EventHandler OnClose;
         public event EventHandler<Transport> OnNewTransport; 
+
+        Transport CreateTransport(InternalDirection direction, TransportOptions options, Handler handler,
+            ExtendedRtpCapabilities extendedRtpCapabilities, CanProduceByKind canProduceByKind)
+        {
+            //// TODO: Original code makes lots of checkings???
+            ///
+            var transport = new Transport(direction, options, handler, extendedRtpCapabilities, canProduceByKind);
+            OnNewTransport?.Invoke(this, transport);
+
+            return transport;
+        }
     }
 }

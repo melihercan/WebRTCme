@@ -63,5 +63,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 NumStreams = NumSctpStreams
             });
         }
+
+        public void Run(HandlerRunOptions options)
+        {
+
+        }
     }
 }

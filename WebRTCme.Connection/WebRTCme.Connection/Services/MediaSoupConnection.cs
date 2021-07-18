@@ -69,13 +69,9 @@ namespace WebRTCme.Connection.Services
                     var mediaSoupDevice = new Device();
 
 
-                    /////////// TODO: CREATE DEVICE AND HANDLER
-
                     var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
                         await _mediaSoupServerApi.CallAsync(MethodName.GetRouterRtpCapabilities));
                     await mediaSoupDevice.LoadAsync(routerRtpCapabilities);
-
-                    ////////////////// TODO: CALL DEVICE Load(routerRtpCapabilities)
 
                     var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
                         await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
