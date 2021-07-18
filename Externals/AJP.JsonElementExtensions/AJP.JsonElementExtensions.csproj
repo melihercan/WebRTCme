@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
+    <RootNamespace>AJP</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <nullable>disable</nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Andrew Poole</Authors>
+    <Description>Some extension methods for adding effectively properties dynamically to a JsonElement, it actually recreates a new JsonElement from the original plus the new property.</Description>
+    <Copyright>2020 andrew poole</Copyright>
+    <RepositoryUrl>https://github.com/andrewjpoole/jsonelement.extensions</RepositoryUrl>
+    <PackageTags>JsonElement dynamic System.Text.Json AddProperty</PackageTags>
+    <PackageReleaseNotes>
+      1.5.0) added InsertProperty, UpdateProperty and ParseAsJsonStringAndMutatePreservingOrder methods and associated tests
+      1.4.0) added support for IEnumerables, nested objects, better handle null values, thanks to hanabanashiku
+      1.3.0) targetting netstandard2.1 in order to make of spans and added ConvertToObject methods
+      1.2.0) fixed issue where primitive style objects passed in as object were treated incorrectly
+      1.1.0) changed target framework to netstandard2.0
+      1.0.0) initial version
+    </PackageReleaseNotes>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <Version>1.5.0</Version>
+    <RepositoryType>github</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+    <NoWarn>1701;1702;1573</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DocumentationFile />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>

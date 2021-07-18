@@ -5,13 +5,19 @@
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
+
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Externals\AJP.JsonElementExtensions\AJP.JsonElementExtensions.csproj" />
+    <ProjectReference Include="..\..\..\Externals\SdpTransform\SdpTransform.csproj" />
+    <ProjectReference Include="..\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Externals\SdpTransform\SdpTransform.csproj" />
-    <ProjectReference Include="..\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

@@ -143,14 +143,14 @@ namespace Utilme.SdpTransform
                 Console.WriteLine($"SessionInformation:{Encoding.UTF8.GetString(sdp.SessionInformation)}");
             if (sdp.ConnectionData is not null)
             {
-                Console.WriteLine($"ConnectionData.Nettype{sdp.ConnectionData.Nettype}");
-                Console.WriteLine($"ConnectionData.AddrType{sdp.ConnectionData.AddrType}");
-                Console.WriteLine($"ConnectionData.ConnectionAddress{sdp.ConnectionData.ConnectionAddress}");
+                Console.WriteLine($"ConnectionData.Nettype:{sdp.ConnectionData.Nettype}");
+                Console.WriteLine($"ConnectionData.AddrType:{sdp.ConnectionData.AddrType}");
+                Console.WriteLine($"ConnectionData.ConnectionAddress:{sdp.ConnectionData.ConnectionAddress}");
             }
             foreach (var item in sdp.Timings)
             {
-                Console.WriteLine($"Timing.StartTime{item.StartTime}");
-                Console.WriteLine($"Timing.StopTime{item.StopTime}");
+                Console.WriteLine($"Timing.StartTime:{item.StartTime}");
+                Console.WriteLine($"Timing.StopTime:{item.StopTime}");
             }
             Console.WriteLine($"Uri:{sdp.Uri}");
             if (sdp.EmailNumbers is not null)
