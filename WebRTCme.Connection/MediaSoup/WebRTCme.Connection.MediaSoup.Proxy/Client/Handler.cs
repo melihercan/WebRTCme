@@ -9,10 +9,16 @@ using Utilme.SdpTransform;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
-    public class Handler
+    public class Handler : IDisposable
     {
         IWindow _window;
         IRTCPeerConnection _pc;
+
+        NumSctpStreams NumSctpStreams = new() 
+        {
+            Os = 1024,
+            Mis = 1024,
+        };
 
         public Handler()
         {
@@ -25,6 +31,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public void Close()
         {
             _pc?.Close();
+        }
+
+        public void Dispose()
+        {
         }
 
         public async Task<RtpCapabilities> GetNativeRtpCapabilitiesAsync()
@@ -44,6 +54,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var nativeRtpCapabilities = SdpCommonUtils.ExtractRtpCapabilities(sdpObject);
 
             return nativeRtpCapabilities;
+        }
+
+        public Task<SctpCapabilities> GetNativeSctpCapabilitiesAsync()
+        {
+            return Task.FromResult(new SctpCapabilities 
+            {
+                NumStreams = NumSctpStreams
+            });
         }
     }
 }

@@ -86,7 +86,7 @@ namespace WebRTCme.Connection.Services
                                 Consuming = false,
                                 SctpCapabilities = new SctpCapabilities
                                 {
-                                    NumStream = new NumSctpStreams
+                                    NumStreams = new NumSctpStreams
                                     {
                                         Os = 1024,
                                         Mis = 1024,

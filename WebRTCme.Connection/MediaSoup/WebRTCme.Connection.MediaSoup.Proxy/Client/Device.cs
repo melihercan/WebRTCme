@@ -10,10 +10,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     {
         readonly Ortc _ortc = new();
         readonly Handler _handler = new();
+
+
+        ExtendedRtpCapabilities _extendedRtpCapabilities;
         
         bool _loaded;
         RtpCapabilities _rtpCapabilities;
+        RtpCapabilities _recvRtpCapabilities;
         SctpCapabilities _sctpCapabilities;
+        CanProduceByKind _canProduceByKind = new() { Audio = false, Video = false };
 
         public string HandlerName => "Generic";
         public bool Loaded => _loaded;
@@ -30,10 +35,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _ortc.ValidateRtpCapabilities(routerRtpCapabilities);
 
             var nativeRtpCapabilities = await _handler.GetNativeRtpCapabilitiesAsync();
-           _ortc.ValidateRtpCapabilities(nativeRtpCapabilities);
+            _ortc.ValidateRtpCapabilities(nativeRtpCapabilities);
 
-            var extendedRtpCapabilities = _ortc.GetExtendedRtpCapabilites(nativeRtpCapabilities, routerRtpCapabilities);
+            _extendedRtpCapabilities = _ortc.GetExtendedRtpCapabilites(nativeRtpCapabilities, routerRtpCapabilities);
 
+            _canProduceByKind.Audio = _ortc.CanSend(MediaKind.Audio, _extendedRtpCapabilities);
+            _canProduceByKind.Video = _ortc.CanSend(MediaKind.Video, _extendedRtpCapabilities);
+
+            _recvRtpCapabilities = _ortc.GetRecvRtpCapabilities(_extendedRtpCapabilities);
+            _ortc.ValidateRtpCapabilities(_recvRtpCapabilities);
+
+            _sctpCapabilities = await _handler.GetNativeSctpCapabilitiesAsync();
+            _ortc.ValidateSctpCapabilities(_sctpCapabilities);
 
             _loaded = true;
         }

@@ -16,6 +16,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
+        public void ValidateSctpCapabilities(SctpCapabilities sctpCapabilities)
+        {
+        }
+
         public ExtendedRtpCapabilities GetExtendedRtpCapabilites(RtpCapabilities localCaps, RtpCapabilities remoteCaps)
         {
             List<ExtendedRtpCodecCapability> codecs = new();
@@ -90,6 +94,72 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             }
 
             return new ExtendedRtpCapabilities 
+            {
+                Codecs = codecs.ToArray(),
+                HeaderExtensions = headerExtensions.ToArray()
+            };
+        }
+
+
+        public bool CanSend(MediaKind kind, ExtendedRtpCapabilities extendedRtpCapabilities)
+        {
+            return extendedRtpCapabilities.Codecs.Any(codec => codec.Kind == kind);
+        }
+
+        public RtpCapabilities GetRecvRtpCapabilities(ExtendedRtpCapabilities extendedRtpCapabilities)
+        {
+            List<RtpCodecCapability> codecs = new();
+            foreach (var extendedCodec in extendedRtpCapabilities.Codecs)
+            {
+                RtpCodecCapability codec = new() 
+                { 
+                    Kind = extendedCodec.Kind,
+                    MimeType = extendedCodec.MimeType,
+                    PreferredPayloadType = extendedCodec.RemotePayloadType,
+                    ClockRate = extendedCodec.ClockRate,
+                    Channels = extendedCodec.Channels,
+                    Parameters = extendedCodec.LocalParameters,
+                    RtcpFeedback = extendedCodec.RtcpFeedback
+                };
+                codecs.Add(codec);
+
+                if (extendedCodec.RemoteRtxPayloadType is null)
+                    continue;
+
+                RtpCodecCapability rtxCodec = new()
+                {
+                    Kind = extendedCodec.Kind,
+                    MimeType = $"{extendedCodec.Kind}/rtx",
+                    PreferredPayloadType = extendedCodec.RemotePayloadType,
+                    ClockRate = extendedCodec.ClockRate,
+                    Parameters = new RtxParameters
+                    {
+                        Apt = extendedCodec.RemotePayloadType
+                    },
+                    RtcpFeedback = new RtcpFeedback[] { }
+                };
+                codecs.Add(rtxCodec);
+            }
+
+            List<RtpHeaderExtension> headerExtensions = new();
+            foreach (var extendedExtensions in extendedRtpCapabilities.HeaderExtensions)
+            {
+                if (extendedExtensions.Direction != Direction.Sendrecv
+                    && extendedExtensions.Direction != Direction.Recvonly)
+                    continue;
+
+                RtpHeaderExtension ext = new() 
+                { 
+                    Kind = extendedExtensions.Kind,
+                    Uri = extendedExtensions.Uri,
+                    PreferedId = extendedExtensions.RecvId,
+                    PreferredEncrypt = extendedExtensions.PreferredEncrypt,
+                    Direction = extendedExtensions.Direction
+                };
+                headerExtensions.Add(ext);
+            }
+
+            return new RtpCapabilities
             {
                 Codecs = codecs.ToArray(),
                 HeaderExtensions = headerExtensions.ToArray()

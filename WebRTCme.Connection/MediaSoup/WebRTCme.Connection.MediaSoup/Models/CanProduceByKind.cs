@@ -4,8 +4,10 @@ using System.Text;
 
 namespace WebRTCme.Connection.MediaSoup
 {
-    public class SctpCapabilities
+    public class CanProduceByKind
     {
-        public NumSctpStreams NumStreams { get; set; }
+        public bool Audio { get; set; }
+        public bool Video { get; set; }
+
     }
 }
