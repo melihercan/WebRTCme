@@ -15,6 +15,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         bool? _planB;
 
         Sdp _sdpObject;
+
+
         public RemoteSdp(IceParameters iceParameters, IceCandidate[] iceCandidates, DtlsParameters dtlsParameters, 
             SctpParameters sctpParameters, PlainRtpParameters plainRtpParameters, bool? planB)
         {
@@ -24,7 +26,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _sctpParameters = sctpParameters;
             _plainRtpParameters = plainRtpParameters;
             _planB = planB;
-
 
             _sdpObject = new Sdp
             {

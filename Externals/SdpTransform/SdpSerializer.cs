@@ -128,5 +128,122 @@ namespace Utilme.SdpTransform
             return serialized;
         }
 
+        public static void DumpSdp(Sdp sdp)
+        {
+            Console.WriteLine("================================ SDP OBJECT START ================================");
+            Console.WriteLine($"Version:{sdp.Version}");
+            Console.WriteLine($"Origin.UserName:{sdp.Origin.UserName}");
+            Console.WriteLine($"Origin.SessionId:{sdp.Origin.SessionId}");
+            Console.WriteLine($"Origin.SessionVersion:{sdp.Origin.SessionVersion}");
+            Console.WriteLine($"Origin.Nettype:{sdp.Origin.Nettype}");
+            Console.WriteLine($"Origin.AddrType:{sdp.Origin.AddrType}");
+            Console.WriteLine($"Origin.UnicastAddress:{sdp.Origin.UnicastAddress}");
+            Console.WriteLine($"SessionName:{Encoding.UTF8.GetString(sdp.SessionName)}");
+            if (sdp.SessionInformation is not null)
+                Console.WriteLine($"SessionInformation:{Encoding.UTF8.GetString(sdp.SessionInformation)}");
+            if (sdp.ConnectionData is not null)
+            {
+                Console.WriteLine($"ConnectionData.Nettype{sdp.ConnectionData.Nettype}");
+                Console.WriteLine($"ConnectionData.AddrType{sdp.ConnectionData.AddrType}");
+                Console.WriteLine($"ConnectionData.ConnectionAddress{sdp.ConnectionData.ConnectionAddress}");
+            }
+            foreach (var item in sdp.Timings)
+            {
+                Console.WriteLine($"Timing.StartTime{item.StartTime}");
+                Console.WriteLine($"Timing.StopTime{item.StopTime}");
+            }
+            Console.WriteLine($"Uri:{sdp.Uri}");
+            if (sdp.EmailNumbers is not null)
+            {
+                foreach (var item in sdp.EmailNumbers)
+                {
+                    Console.WriteLine($"EmailNumbers:{item}");
+                }
+            }
+            if (sdp.PhoneNumbers is not null)
+            {
+                foreach (var item in sdp.PhoneNumbers)
+                {
+                    Console.WriteLine($"PhoneNumbers:{item}");
+                }
+            }
+            if (sdp.BandWiths is not null)
+            {
+                foreach (var item in sdp.BandWiths)
+                {
+                    Console.WriteLine($"BandWiths.Type:{item.Type}");
+                    Console.WriteLine($"BandWidth.Value:{item.Value}");
+                }
+            }
+            if (sdp.RepeatTimes is not null)
+            {
+                foreach (var item in sdp.RepeatTimes)
+                {
+                    Console.WriteLine($"RepeatTime.RepeatInterval:{item.RepeatInterval}");
+                    Console.WriteLine($"RepeatTime.ActiveDuration:{item.ActiveDuration}");
+                    foreach (var subitem in item.OffsetsFromStartTime)
+                    {
+                        Console.WriteLine($"RepeatTime.OffsetsFromStartTime:{subitem}");
+                    }
+                }
+            }
+            if (sdp.TimeZones is not null)
+            {
+
+                foreach (var item in sdp.TimeZones)
+                {
+                    Console.WriteLine($"TimeZones.AdjustmentTime:{item.AdjustmentTime}");
+                    Console.WriteLine($"TimeZones.Offset:{item.Offset}");
+                }
+            }
+            if (sdp.EncriptionKey is not null)
+            {
+                Console.WriteLine($"EncriptionKey.Method:{sdp.EncriptionKey.Method}");
+                Console.WriteLine($"EncriptionKey.Value:{sdp.EncriptionKey.Value}");
+            }
+            foreach (var item in sdp.Attributes)
+            {
+                Console.WriteLine($"Attributes:{item}");
+            }
+            foreach (var item in sdp.MediaDescriptions)
+            {
+                Console.WriteLine($"-------- MediaDescription");
+                Console.WriteLine($"MediaDescriptions.Media:{item.Media}");
+                Console.WriteLine($"MediaDescriptions.Port:{item.Port}");
+                Console.WriteLine($"MediaDescriptions.Proto:{item.Proto}");
+                foreach (var subitem in item.Fmts)
+                {
+                    Console.WriteLine($"MediaDescriptions.Fmts:{subitem}");
+                }
+                if (item.Title is not null)
+                {
+                    Console.WriteLine($"MediaDescriptions.Title:{Encoding.UTF8.GetString(item.Title)}");
+                }
+                if (item.ConnectionInfo is not null)
+                {
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.Nettype:{item.ConnectionInfo.Nettype}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.AddrType:{item.ConnectionInfo.AddrType}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.ConnectionAddress:{item.ConnectionInfo.ConnectionAddress}");
+                }
+                if (item.Bandwiths is not null)
+                {
+                    foreach (var subitem in item.Bandwiths)
+                    {
+                        Console.WriteLine($"MediaDescriptions.Bandwidths.Type:{subitem.Type}");
+                        Console.WriteLine($"MediaDescriptions.Bandwidths.Value:{subitem.Value}");
+                    }
+                }
+                if (item.EncriptionKey is not null)
+                {
+                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Method:{item.EncriptionKey.Method}");
+                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Value:{item.EncriptionKey.Method}");
+                }
+                foreach (var subitem in item.Attributes)
+                {
+                    Console.WriteLine($"MediaDescriptions.Attributes:{subitem}");
+                }
+            }
+            Console.WriteLine("================================ SDP OBJECT END   ================================");
+        }
     }
 }
