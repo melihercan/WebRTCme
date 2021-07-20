@@ -10,17 +10,17 @@ namespace Utilme.SdpTransform
     public class MediaDescriptionParser
     {
         // https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-12
-        public static RtpmapAttribute[] ToRtpmapAttributes(MediaDescription mediaDescription)
+        public static Rtpmap[] ToRtpmapAttributes(MediaDescription mediaDescription)
         {
             var attributes = mediaDescription.Attributes
                 .Where(a => a.StartsWith("rtpmap:"))
                 .ToArray();
 
-            List<RtpmapAttribute> rtpmapAttributes = new();
+            List<Rtpmap> rtpmapAttributes = new();
             foreach (var a in attributes)
             {
                 var tokens = a.Substring(7).Split(new[] { ' ', '/' }, 4);
-                rtpmapAttributes.Add(new RtpmapAttribute 
+                rtpmapAttributes.Add(new Rtpmap 
                 { 
                     PayloadType = int.Parse(tokens[0]),
                     EncodingName = tokens[1],
@@ -32,17 +32,17 @@ namespace Utilme.SdpTransform
             return rtpmapAttributes.ToArray();
         }
 
-        public static FmtpAttribute[] ToFmtpAttributes(MediaDescription mediaDescription)
+        public static Fmtp[] ToFmtpAttributes(MediaDescription mediaDescription)
         {
             var attributes = mediaDescription.Attributes
                 .Where(a => a.StartsWith("fmtp:"))
                 .ToArray();
 
-            List<FmtpAttribute> fmtpAttributes = new();
+            List<Fmtp> fmtpAttributes = new();
             foreach (var a in attributes)
             {
                 var tokens = a.Substring(5).Split(new char[] { ' ' }, 2);
-                fmtpAttributes.Add(new FmtpAttribute 
+                fmtpAttributes.Add(new Fmtp 
                 {
                     PayloadType = int.Parse(tokens[0]),
                     Value = tokens[1],
@@ -52,17 +52,17 @@ namespace Utilme.SdpTransform
             return fmtpAttributes.ToArray();
         }
 
-        public static RtcpFbAttribute[] ToRtcpFbAttributes(MediaDescription mediaDescription)
+        public static RtcpFb[] ToRtcpFbAttributes(MediaDescription mediaDescription)
         {
             var attributes = mediaDescription.Attributes
                 .Where(a => a.StartsWith("rtcp-fb:"))
                 .ToArray();
 
-            List<RtcpFbAttribute> rtcpFbAttributes = new();
+            List<RtcpFb> rtcpFbAttributes = new();
             foreach (var a in attributes)
             {
                 var tokens = a.Substring(8).Split(new char[] { ' ' }, 3);
-                rtcpFbAttributes.Add(new RtcpFbAttribute 
+                rtcpFbAttributes.Add(new RtcpFb 
                 {
                     PayloadType = int.Parse(tokens[0]),
                     Type = tokens[1],
@@ -73,19 +73,19 @@ namespace Utilme.SdpTransform
             return rtcpFbAttributes.ToArray();
         }
 
-        public static ExtmapAttribute[] ToExtmapAttributes(MediaDescription mediaDescription)
+        public static Extmap[] ToExtmapAttributes(MediaDescription mediaDescription)
         {
             var attributes = mediaDescription.Attributes
                 .Where(a => a.StartsWith("extmap:"))
                 .ToArray();
 
-            List<ExtmapAttribute> extmapAttributes = new();
+            List<Extmap> extmapAttributes = new();
             foreach (var a in attributes)
             {
                 // Direction is optional and attached to Value with '/'.
                 var tokens = a.Substring(7).Split(new char[] { ' ' }, 3);
                 var subtokens = tokens[0].Split(new char[] { '/' }, 2);
-                extmapAttributes.Add(new ExtmapAttribute
+                extmapAttributes.Add(new Extmap
                 {
                     Value = int.Parse(subtokens[0]),
                     Direction = subtokens.Length == 2 ? subtokens[1] : null,

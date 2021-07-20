@@ -70,6 +70,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                 _tcs.SetException(new Exception($"{responseError.ErrorReason}"));
                             }
                         }
+                        ///// TODO: else if (jsonDocument.RootElement.TryGetProperty("request", out _))
+                        /// REQUEST IS POSSIBLE FROM SERVER TOO
                         else if (jsonDocument.RootElement.TryGetProperty("notification", out _))
                         {
                             var notification = JsonSerializer.Deserialize<ProtooNotification>(json,

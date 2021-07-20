@@ -5,7 +5,7 @@ using System.Text;
 namespace Utilme.SdpTransform
 {
     // a=extmap:<value>["/"<direction>] <URI> <extensionattributes>
-    public class ExtmapAttribute
+    public class Extmap
     {
         public int Value { get; set; }
         public string Direction { get; set; }

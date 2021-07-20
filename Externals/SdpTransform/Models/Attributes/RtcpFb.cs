@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Utilme.SdpTransform
 {
-    public class RtcpFbAttribute
+    public class RtcpFb
     {
         public int PayloadType { get; set; }
         public string Type { get; set; }
