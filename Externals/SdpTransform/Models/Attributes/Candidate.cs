@@ -28,8 +28,8 @@ namespace Utilme.SdpTransform
 
         public int Port { get; init; }
 
+        
         public const string Typ = "typ";
-
         public CandidateType Type { get; init; }
 
         public const string Raddr = "raddr";
@@ -37,8 +37,5 @@ namespace Utilme.SdpTransform
 
         public const string Rport = "rport";
         public int RelPort { get; init; }
-
-
-
     }
 }

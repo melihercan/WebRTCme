@@ -9,10 +9,10 @@ namespace Utilme.SdpTransform
     {
         public static Candidate ToCandidate(this string str)
         {
-            // Trim character ('a=') if exist.vb
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                 .Replace(Candidate.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Candidate
             {
                 Foundation = tokens[0],
@@ -27,13 +27,34 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToString(this Candidate candidate, bool withCharacter = false)
+        public static IceUfrag ToIceUfrag(this string str)
         {
-            var transport = candidate.Transport;
-            transport.DisplayName();
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(IceUfrag.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new IceUfrag
+            {
+                Ufrag = tokens[0]
+            };
+        }
 
+        public static IcePwd ToIcePwd(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(IcePwd.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new IcePwd
+            {
+                Password = tokens[0]
+            };
+        }
+
+        public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
+        {
             StringBuilder sb = new();
-            if (withCharacter)
+            if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
                 .Append(Candidate.Name)
@@ -62,6 +83,28 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
+        public static string ToString(this IceUfrag iceUfrag, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(IceUfrag.Name)
+                .Append(iceUfrag.Ufrag)
+                .Append(SdpSerializer.CRLF);
+            return sb.ToString();
+        }
+        public static string ToString(this IcePwd icePwd, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(IcePwd.Name)
+                .Append(icePwd.Password)
+                .Append(SdpSerializer.CRLF);
+            return sb.ToString();
+        }
 
     }
 }
