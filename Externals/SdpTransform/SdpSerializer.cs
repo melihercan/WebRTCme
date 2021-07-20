@@ -11,12 +11,14 @@ namespace Utilme.SdpTransform
 {
     public class SdpSerializer
     {
+        public const string AttributeCharacter = "a=";
         public const byte ByteCR = (byte)'\r';
         public const byte ByteLF = (byte)'\n';
         public const byte ByteColon = (byte)':';
         public const byte ByteSpace = (byte)' ';
         public const string CRLF = "\r\n";
         public static readonly byte[] CharsetAttributePrefix = Encoding.UTF8.GetBytes("charset:");
+
 
         public static async Task<Sdp> ReadSdp(PipeReader reader)
         {
