@@ -26,7 +26,37 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 SetIceParameters(iceParameters);
             }
+            
+            if (iceCandidates is not null)
+            {
+                List<Candidate> candidates = new();
+
+                foreach (var iceCandidate in iceCandidates)
+                {
+                    Candidate candidate = new()
+                    {
+                        Foundation = iceCandidate.Foundation,
+                        ComponentId = 1,    // RTP
+                        Transport = iceCandidate.Protocol.ToSdp(), 
+                        Priority = iceCandidate.Priority,
+                        ConnectionAddress = iceCandidate.Ip,
+                        Port = iceCandidate.Port,
+                        Type = iceCandidate.Type.ToSdp()
+                    };
+                    candidates.Add(candidate);
+                }
+                _mediaObject.Candidates = candidates.ToArray();
+            }
+
+            _mediaObject.IceOptions = new IceOptions { Tags = new string[] { "renomination" } };
+
+            if (dtlsParameters is not null)
+            {
+                SetDtlsRole(dtlsParameters.DtlsRole);
+            }
         }
+
+        protected abstract void SetDtlsRole(DtlsRole? dtlsRole);
 
         public void SetIceParameters(IceParameters iceParameters)
         {

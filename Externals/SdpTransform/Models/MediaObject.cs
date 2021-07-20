@@ -9,6 +9,7 @@ namespace Utilme.SdpTransform
         public IceUfrag IceUfrag { get; set; }
         public IcePwd IcePwd { get; set; }
         public Candidate[] Candidates { get; set; } 
+        public IceOptions IceOptions { get; set; }
 
     }
 }

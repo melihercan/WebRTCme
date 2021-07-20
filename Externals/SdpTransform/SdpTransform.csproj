@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0;</TargetFrameworks>
@@ -19,6 +19,10 @@
     <PackageReference Include="Macross.Json.Extensions" Version="2.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
 

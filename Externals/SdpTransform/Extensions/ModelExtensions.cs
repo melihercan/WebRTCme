@@ -17,7 +17,7 @@ namespace Utilme.SdpTransform
             {
                 Foundation = tokens[0],
                 ComponentId = int.Parse(tokens[1]),
-                Transport = (Transport)Enum.Parse(typeof(Transport), tokens[2], true),
+                Transport = (CandidateTransport)Enum.Parse(typeof(CandidateTransport), tokens[2], true),
                 Priority = int.Parse(tokens[3]),
                 ConnectionAddress = tokens[4],
                 Port = int.Parse(tokens[5]),
@@ -48,6 +48,21 @@ namespace Utilme.SdpTransform
             return new IcePwd
             {
                 Password = tokens[0]
+            };
+        }
+
+        public static IceOptions ToIceOptions(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(IceOptions.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var tags = new string[tokens.Length];
+            for (var i = 0; i < tokens.Length; i++)
+                tags[i] = tokens[i];
+            return new IceOptions
+            {
+                Tags = tags
             };
         }
 
@@ -106,5 +121,19 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
+        public static string ToString(this IceOptions iceOptions, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            for (int i=0; i<iceOptions.Tags.Length; i++)
+            {
+                sb.Append(iceOptions.Tags[i]);
+                if (i != iceOptions.Tags.Length - 1)
+                    sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+            return sb.ToString();
+        }
     }
 }

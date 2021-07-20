@@ -8,9 +8,12 @@ using System.Text.Json.Serialization;
 
 namespace Utilme.SdpTransform
 {
-    public enum Transport
+    public enum CandidateTransport
     {
         [Display(Name = "UDP")]
-        Udp
+        Udp,
+
+        [Display(Name = "TCP")]
+        Tcp
     }
 }

@@ -20,7 +20,7 @@ namespace Utilme.SdpTransform
 
         public int ComponentId { get; init; }
 
-        public Transport Transport { get; init; }
+        public CandidateTransport Transport { get; init; }
 
         public int Priority { get; init; }
 
