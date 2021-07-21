@@ -9,6 +9,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     {
         protected readonly MediaObject _mediaObject = new();
         protected readonly bool _planB;
+       
 
         readonly IceParameters _iceParameters;
         readonly IceCandidate[] _iceCandidates;
@@ -56,12 +57,43 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             }
         }
 
+        public MediaObject MediaObject => _mediaObject;
+        public Mid Mid => _mediaObject.Mid;
+        public bool Closed => _mediaObject.Port == 0;
+
         protected abstract void SetDtlsRole(DtlsRole? dtlsRole);
 
         public void SetIceParameters(IceParameters iceParameters)
         {
             _mediaObject.IceUfrag = new IceUfrag { Ufrag = iceParameters.UsernameFragment };
             _mediaObject.IcePwd = new IcePwd { Password = iceParameters.Password };
+        }
+
+        public void Disable()
+        {
+            _mediaObject.Direction = Direction.Inactive;
+
+            //_mediaObject.Ext = null;
+            //_mediaObject.Ssrcs = null;
+            //_mediaObject.SsrcGroups = null;
+            //_mediaObject.Simulcast = null;
+            //_mediaObject.Simulcast03 = null;
+            //_mediaObject.Rids = null;
+        }
+
+        public void Close()
+        {
+            _mediaObject.Direction = Direction.Inactive;
+            _mediaObject.Port = 0;
+
+            //_mediaObject.Ext = null;
+            //_mediaObject.Ssrcs = null;
+            //_mediaObject.SsrcGroups = null;
+            //_mediaObject.Simulcast = null;
+            //_mediaObject.Simulcast03 = null;
+            //_mediaObject.Rids = null;
+            //_mediaObject.ExtmapAllowMixed = null;
+
         }
     }
 }

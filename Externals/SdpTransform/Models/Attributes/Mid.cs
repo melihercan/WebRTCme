@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Utilme.SdpTransform
 {
-    public class IcePwd
+    public class Mid
     {
-        public const string Name = "ice-pwd:";
+        public const string Name = "mid:";
 
-        public string Password { get; init; }
+        public string Id { get; init; }
     }
 }

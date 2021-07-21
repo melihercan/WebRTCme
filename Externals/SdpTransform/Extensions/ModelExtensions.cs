@@ -66,6 +66,19 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static Mid ToMid(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Mid.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Mid
+            {
+                Id = tokens[0]
+            };
+
+        }
+
         public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
@@ -135,5 +148,18 @@ namespace Utilme.SdpTransform
             sb.Append(SdpSerializer.CRLF);
             return sb.ToString();
         }
+
+        public static string ToString(this Mid mid, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Mid.Name)
+                .Append(mid.Id)
+                .Append(SdpSerializer.CRLF);
+            return sb.ToString();
+        }
+
     }
 }
