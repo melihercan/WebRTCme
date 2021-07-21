@@ -9,7 +9,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
     {
         protected readonly MediaObject _mediaObject = new();
         protected readonly bool _planB;
-       
 
         readonly IceParameters _iceParameters;
         readonly IceCandidate[] _iceCandidates;

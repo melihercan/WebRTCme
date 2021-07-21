@@ -13,7 +13,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         bool _zeroRtpOnPause;
 
         public Producer(string id, string localId, IRTCRtpSender rtpSender, IMediaStreamTrack track, 
-            RTCRtpParameters rtpParameters, bool stopTracks, bool disableTrackOnPause, bool zeroRtpOnPause, 
+            RtpParameters rtpParameters, bool stopTracks, bool disableTrackOnPause, bool zeroRtpOnPause, 
             object appData)
         {
             Id = id;
@@ -37,7 +37,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public IRTCRtpSender RtpSender { get; }
         public IMediaStreamTrack Track { get; }
-        public RTCRtpParameters RtpParameters { get; }
+        public RtpParameters RtpParameters { get; }
         public bool Paused { get; }
         public int MaxSpatialLayer { get; }
         public object AppData { get; }
