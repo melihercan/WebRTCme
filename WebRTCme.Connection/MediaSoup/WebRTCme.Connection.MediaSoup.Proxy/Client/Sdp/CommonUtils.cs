@@ -6,11 +6,11 @@ using WebRTCme.Connection.MediaSoup;
 using Utilme.SdpTransform;
 using System.Linq;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
-    static class SdpCommonUtils
+    static class CommonUtils
     {
-        public static RtpCapabilities ExtractRtpCapabilities(Sdp sdp)
+        public static RtpCapabilities ExtractRtpCapabilities(Utilme.SdpTransform.Sdp sdp)
         {
             Dictionary<int, RtpCodecCapability> codecsDictionary = new();
             List<RtpHeaderExtension> headerExtensions = new();

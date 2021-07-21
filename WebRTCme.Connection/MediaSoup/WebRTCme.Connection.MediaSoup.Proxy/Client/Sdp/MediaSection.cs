@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Utilme.SdpTransform;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
     abstract class MediaSection
     {

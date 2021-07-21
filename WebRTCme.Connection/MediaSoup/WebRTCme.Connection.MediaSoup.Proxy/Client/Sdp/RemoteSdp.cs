@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Utilme.SdpTransform;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
     class RemoteSdp
     {
@@ -14,7 +14,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         PlainRtpParameters _plainRtpParameters;
         bool? _planB;
 
-        Sdp _sdpObject;
+        Utilme.SdpTransform.Sdp _sdp;
 
 
         public RemoteSdp(IceParameters iceParameters, IceCandidate[] iceCandidates, DtlsParameters dtlsParameters, 
@@ -27,7 +27,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _plainRtpParameters = plainRtpParameters;
             _planB = planB;
 
-            _sdpObject = new Sdp
+            _sdp = new Utilme.SdpTransform.Sdp
             {
                 Version = 0,
                 Origin = new Origin

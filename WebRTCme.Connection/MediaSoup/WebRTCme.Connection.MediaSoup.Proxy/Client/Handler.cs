@@ -6,6 +6,7 @@ using WebRTCme;
 using UtilmeSdpTransform;
 using WebRTCme.Connection.MediaSoup;
 using Utilme.SdpTransform;
+using WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
@@ -58,7 +59,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             ////var x = Encoding.UTF8.GetString(SdpSerializer.WriteSdp(sdpObject));
 
-            var nativeRtpCapabilities = SdpCommonUtils.ExtractRtpCapabilities(sdpObject);
+            var nativeRtpCapabilities = CommonUtils.ExtractRtpCapabilities(sdpObject);
 
             return nativeRtpCapabilities;
         }
