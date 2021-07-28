@@ -10,10 +10,13 @@ namespace Utilme.SdpTransform
     {
         [Display(Name="host")]
         Host,
+        
         [Display(Name = "srflx")]
         Srflx,
+        
         [Display(Name = "prlfx")]
         Prflx,
+        
         [Display(Name = "relay")]
         Relay
     }

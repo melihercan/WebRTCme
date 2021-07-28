@@ -14,6 +14,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     {
         IWindow _window;
         IRTCPeerConnection _pc;
+        InternalDirection _direction;
 
         NumSctpStreams NumSctpStreams = new() 
         {
@@ -74,6 +75,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public void Run(HandlerRunOptions options)
         {
+            _direction = options.Direction;
 
         }
     }

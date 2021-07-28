@@ -62,6 +62,16 @@ namespace Utilme.SdpTransform
 
         public IList<string> Attributes { get; set; }
 
+
+        // Session description binary attributes.
+        public BinaryAttributes SessionBinaryAttributes { get; set; }
+
+
+        // Session description attributes.
+        public MsidSemantic MsidSemantic { get; set; }
+
+        public Fingerprint Fingerprint { get; set; }
+
         public IList<MediaDescription> MediaDescriptions { get; set; }
     }
 }

@@ -15,7 +15,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         ExtendedRtpCapabilities _extendedRtpCapabilities;
         
         bool _loaded;
-        RtpCapabilities _rtpCapabilities;
         RtpCapabilities _recvRtpCapabilities;
         SctpCapabilities _sctpCapabilities;
         CanProduceByKind _canProduceByKind = new() { Audio = false, Video = false };
@@ -23,7 +22,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public string HandlerName => "Generic";
         public bool Loaded => _loaded;
 
-        public RtpCapabilities RtpCapabilities => _rtpCapabilities;
+        public RtpCapabilities RtpCapabilities => _recvRtpCapabilities;
 
         public SctpCapabilities SctpCapabilities => _sctpCapabilities;
 
@@ -67,12 +66,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public Transport CreateSendTransport(TransportOptions options)
         {
-            throw new NotImplementedException();
+            return CreateTransport(InternalDirection.Send, options, _handler, _extendedRtpCapabilities, 
+                _canProduceByKind);
         }
 
         public Transport CreateRecvTransport(TransportOptions options)
         {
-            throw new NotImplementedException();
+            return CreateTransport(InternalDirection.Receive, options, _handler, _extendedRtpCapabilities,
+                _canProduceByKind);
         }
 
         public event EventHandler OnClose;

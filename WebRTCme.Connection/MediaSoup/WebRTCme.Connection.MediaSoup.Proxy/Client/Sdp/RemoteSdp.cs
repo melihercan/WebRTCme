@@ -13,6 +13,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         SctpParameters _sctpParameters;
         PlainRtpParameters _plainRtpParameters;
         bool? _planB;
+        MediaSection[] _mediaSections = new MediaSection[] { };
+        Dictionary<string, int> _midToIndex = new();
+        string _firstMid;
 
         Utilme.SdpTransform.Sdp _sdp;
 
@@ -40,8 +43,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 },
                 SessionName = new byte[] { (byte)'-' },
                 Timings = new List<TimingInfo>() { new TimingInfo { StartTime = 0, StopTime = 0 } },
+                SessionBinaryAttributes = new(),
                 MediaDescriptions = new List<MediaDescription>()
             };
+
+            if (iceParameters is not null && iceParameters.IceLite.HasValue)
+                _sdp.SessionBinaryAttributes.IceLite = iceParameters.IceLite;
+
+            if (dtlsParameters is not null)
+            {
+                _sdp.MsidSemantic = new MsidSemantic 
+                { 
+                    Token = MsidSemantic.WebRtcMediaStreamToken, 
+                    IdList = new string[] { MsidSemantic.AllIds } 
+                };
+
+                var numFingerprints = dtlsParameters.Fingerprints.Length;
+
+            }
 
         }
     }

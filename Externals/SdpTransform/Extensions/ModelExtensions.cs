@@ -76,6 +76,35 @@ namespace Utilme.SdpTransform
             {
                 Id = tokens[0]
             };
+        }
+
+        public static MsidSemantic ToMsidSemantic(this string str)
+        {
+            var tokens = str
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(MsidSemantic.Name, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var idList = new string[tokens.Length -1];
+            for (int i = 0; i < idList.Length; i++)
+                idList[i] = tokens[i + 1];
+            return new MsidSemantic
+            {
+                Token = tokens[0],
+                IdList = idList
+            };
+        }
+
+        public static Fingerprint ToFingerprint(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Fingerprint.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Fingerprint
+            {
+                HashFunction = (HashFunction)Enum.Parse(typeof(HashFunction), tokens[0], true),
+                HashValue = HexadecimalStringToByteArray(tokens[1].Replace(":", string.Empty))
+            };
 
         }
 
@@ -159,6 +188,54 @@ namespace Utilme.SdpTransform
                 .Append(mid.Id)
                 .Append(SdpSerializer.CRLF);
             return sb.ToString();
+        }
+
+        public static string ToString(this MsidSemantic msidSemantic, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(MsidSemantic.Name)
+                .Append(msidSemantic.Token)
+                .Append(" ");
+            for (int i= 0; i < msidSemantic.IdList.Length; i++)
+            {
+                sb.Append(msidSemantic.IdList[i]);
+                if (i != msidSemantic.IdList.Length -1)
+                    sb.Append(" ");
+                sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
+
+        public static string ToString(this Fingerprint fingerprint, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Fingerprint.Name)
+                .Append(fingerprint.HashFunction.DisplayName())
+                .Append(" ")
+                .Append(BitConverter.ToString(fingerprint.HashValue).Replace("-",":"))
+                .Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
+
+        // Utility method.
+        public static byte[] HexadecimalStringToByteArray(String hexadecimalString)
+        {
+            int length = hexadecimalString.Length;
+            byte[] byteArray = new byte[length / 2];
+            for (int i = 0; i < length; i += 2)
+            {
+                byteArray[i / 2] = Convert.ToByte(hexadecimalString.Substring(i, 2), 16);
+            }
+            return byteArray;
         }
 
     }
