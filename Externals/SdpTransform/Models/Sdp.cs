@@ -72,6 +72,8 @@ namespace Utilme.SdpTransform
 
         public Fingerprint Fingerprint { get; set; }
 
+        public Group Group { get; set; }
+
         public IList<MediaDescription> MediaDescriptions { get; set; }
     }
 }

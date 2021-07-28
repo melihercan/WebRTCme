@@ -59,7 +59,21 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 };
 
                 var numFingerprints = dtlsParameters.Fingerprints.Length;
+                var fingerprintStr = dtlsParameters.Fingerprints[numFingerprints - 1].Algorithm + " " +
+                    dtlsParameters.Fingerprints[numFingerprints - 1].Value;
+                _sdp.Fingerprint = fingerprintStr.ToFingerprint();
 
+                _sdp.Group = new Group 
+                {
+                    Type = Group.BundleType,
+                    Tokens = new string[] { }
+                };
+            }
+
+            if (plainRtpParameters is not null)
+            {
+                _sdp.Origin.AddrType = plainRtpParameters.Ip;
+                _sdp.Origin.Nettype = plainRtpParameters.IpVersion .DisplayName();
             }
 
         }

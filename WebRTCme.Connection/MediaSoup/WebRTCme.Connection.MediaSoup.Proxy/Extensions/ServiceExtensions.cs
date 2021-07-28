@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using WebRTCme.Connection.MediaSoup.Proxy.Stub;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy
-
 {
     public static class ServiceExtensions
     {

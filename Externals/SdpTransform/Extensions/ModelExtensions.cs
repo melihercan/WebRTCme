@@ -108,6 +108,22 @@ namespace Utilme.SdpTransform
 
         }
 
+        public static Group ToGroup(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Group.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var groupTokens = new string[tokens.Length - 1];
+            for (int i = 1; i < tokens.Length; i++)
+                groupTokens[i - 1] = tokens[i];
+            return new Group
+            {
+                Type = tokens[0],
+                Tokens = groupTokens
+            };
+        }
+
         public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
@@ -225,6 +241,24 @@ namespace Utilme.SdpTransform
 
             return sb.ToString();
         }
+
+        public static string ToString(this Group group, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb.Append(group.Type);
+            for (int i = 0; i < group.Tokens.Length; i++)
+            {
+                sb.Append(group.Tokens[i]);
+                if (i != group.Tokens.Length - 1)
+                    sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+            return sb.ToString();
+        }
+
+
 
         // Utility method.
         public static byte[] HexadecimalStringToByteArray(String hexadecimalString)
