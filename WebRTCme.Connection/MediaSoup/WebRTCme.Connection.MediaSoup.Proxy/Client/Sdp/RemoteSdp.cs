@@ -39,7 +39,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     SessionId = 10000,
                     SessionVersion = 0,
                     Nettype = "IN",
-                    AddrType = "0.0.0.0"
+                    AddrType = IpVersion.Ip4.DisplayName(),
+                    UnicastAddress = "0.0.0.0"
                 },
                 SessionName = new byte[] { (byte)'-' },
                 Timings = new List<TimingInfo>() { new TimingInfo { StartTime = 0, StopTime = 0 } },
@@ -48,7 +49,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             };
 
             if (iceParameters is not null && iceParameters.IceLite.HasValue)
-                _sdp.SessionBinaryAttributes.IceLite = iceParameters.IceLite;
+                _sdp.SessionBinaryAttributes.IceLite = true;
 
             if (dtlsParameters is not null)
             {
@@ -72,9 +73,25 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             if (plainRtpParameters is not null)
             {
-                _sdp.Origin.AddrType = plainRtpParameters.Ip;
-                _sdp.Origin.Nettype = plainRtpParameters.IpVersion .DisplayName();
+                _sdp.Origin.UnicastAddress = plainRtpParameters.Ip;
+                _sdp.Origin.AddrType = plainRtpParameters.IpVersion .DisplayName();
             }
+
+        }
+
+        public void UpdateIceParameters(IceParameters iceParameters)
+        {
+            _iceParameters = iceParameters;
+            _sdp.SessionBinaryAttributes.IceLite = iceParameters.IceLite.HasValue ? true : null;
+            foreach (var mediaSection in _mediaSections)
+                mediaSection.SetIceParameters(iceParameters);
+        }
+
+        public void UpdateDtlsRole(DtlsRole role)
+        {
+            _dtlsParameters.DtlsRole = role;
+            //foreach (var mediaSection in _mediaSections)
+//                mediaSection.SetDtl
 
         }
     }

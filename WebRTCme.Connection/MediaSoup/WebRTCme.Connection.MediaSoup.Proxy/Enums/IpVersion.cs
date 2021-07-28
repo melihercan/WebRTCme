@@ -7,10 +7,10 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public enum IpVersion
     {
-        [Display(Name="4")]
+        [Display(Name="IP4")]
         Ip4,
 
-        [Display(Name = "6")]
+        [Display(Name = "IP6")]
         Ip6
     }
 }

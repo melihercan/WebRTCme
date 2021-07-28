@@ -9,6 +9,7 @@ namespace WebRTCme.Connection.MediaSoup
     public enum MediaKind
     {
         Audio,
-        Video
+        Video,
+        Application
     }
 }
