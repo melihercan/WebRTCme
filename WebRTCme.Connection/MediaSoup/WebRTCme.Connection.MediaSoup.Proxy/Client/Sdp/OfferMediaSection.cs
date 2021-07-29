@@ -259,8 +259,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 .Select(codec => codec.PayloadType.ToString())).Trim();
 
 
-
-
             if (offerRtpParameters.Rtcp.Cname is not null)
             {
                 _mediaObject.Ssrcs.Add(new Ssrc
@@ -302,6 +300,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             }
         }
 
+        void PlanBStopReceiving(RtpParameters offerRtpParameters)
+        {
+            var encoding = offerRtpParameters.Encodings[0];
+            var ssrc = encoding.Ssrc;
+            var rtxSsrc = (encoding.Rtx is not null && encoding.Rtx.Ssrc.HasValue) ?
+                encoding.Rtx.Ssrc : null;
+
+            _mediaObject.Ssrcs.RemoveAll(s => s.Id != ssrc && s.Id != rtxSsrc);
+
+            if (rtxSsrc is not null)
+                _mediaObject.SsrcGroups.RemoveAll(g => g.SsrcIds.Any(id => id != $"{ssrc} {rtxSsrc}"));
+        }
 
         protected override void SetDtlsRole(DtlsRole? dtlsRole)
         {
