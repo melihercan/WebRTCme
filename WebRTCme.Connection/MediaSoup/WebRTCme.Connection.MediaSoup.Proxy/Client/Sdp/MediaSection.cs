@@ -8,7 +8,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
     abstract class MediaSection
     {
-        protected readonly MediaObject _mediaObject = new();
+        protected readonly MediaObject _mediaObject;
         protected readonly bool _planB;
 
         readonly IceParameters _iceParameters;
@@ -23,6 +23,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _dtlsParameters = dtlsParameters;
             _planB = planB;
 
+            _mediaObject = new() 
+            { 
+                Candidates = new(),
+                Rtpmaps = new(),
+                RtcpFbs = new(),
+                Fmtps = new(),
+                Ssrcs = new(),
+                SsrcGroups = new(),
+                Payloads = string.Empty,
+                Extensions = new(),
+                BinaryAttributes = new()
+            };
+
             if (iceParameters is not null)
             {
                 SetIceParameters(iceParameters);
@@ -30,8 +43,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             
             if (iceCandidates is not null)
             {
-                List<Candidate> candidates = new();
-
                 foreach (var iceCandidate in iceCandidates)
                 {
                     Candidate candidate = new()
@@ -44,9 +55,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         Port = iceCandidate.Port,
                         Type = iceCandidate.Type.ToSdp()
                     };
-                    candidates.Add(candidate);
+                    _mediaObject.Candidates.Add(candidate);
                 }
-                _mediaObject.Candidates = candidates.ToArray();
             }
 
             _mediaObject.IceOptions = new IceOptions { Tags = new string[] { "renomination" } };

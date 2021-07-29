@@ -12,16 +12,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public IceUfrag IceUfrag { get; set; }
         public IcePwd IcePwd { get; set; }
         public IceOptions IceOptions { get; set; }
-        public Candidate[] Candidates { get; set; }
+        public List<Candidate> Candidates { get; set; }
         public ConnectionData Connection { get; set; }
-        public Rtpmap[] Rtpmaps { get; set; }
-        public RtcpFb[] RtcpFbs { get; set; }
-        public Fmtp[] Fmtps { get; set; }
+        public List<Rtpmap> Rtpmaps { get; set; }
+        public List<RtcpFb> RtcpFbs { get; set; }
+        public List<Fmtp> Fmtps { get; set; }
         public Msid Msid { get; set; }
-        public Ssrc[] Ssrcs { get; set; }
-        public SsrcGroup[] SsrcGroups { get; set; }
+        public List<Ssrc> Ssrcs { get; set; }
+        public List<SsrcGroup> SsrcGroups { get; set; }
 
-        public BinaryAttributes BinaryAttributes { get; set; } = new();
 
         public Direction Direction { get; set; }
         public int Port { get; set; }
@@ -30,16 +29,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public string Protocol { get; set; }
 
-        public string Payloads { get; set; }
+        public string Payloads { get; set; }    // in this format: "P1 P2 P3 ... Pn"
 
-        public RtpHeaderExtensionParameters[] Extensions { get; set; }
+        public List<RtpHeaderExtensionParameters> Extensions { get; set; }
 
         public int SctpPort { get; set; }
         public int MaxMessageSize { get; set; }
 
         public SctpMap SctpMap { get; set; }
 
+        public string Setup { get; set; }
 
+
+        public BinaryAttributes BinaryAttributes { get; set; }
 
     }
 }

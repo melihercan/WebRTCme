@@ -63,9 +63,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaKind.Video:
                     {
                         _mediaObject.Direction = Direction.Sendonly;
-                        List<Rtpmap> rtpmaps = new();
-                        List<RtcpFb> rtcpFbs = new();
-                        List<Fmtp> fmtps = new();
 
                         if (!_planB)
                             _mediaObject.Msid = new() 
@@ -83,7 +80,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 ClockRate = codec.ClockRate,
                                 Channels = codec.Channels > 1 ? codec.Channels : null
                             };
-                            rtpmaps.Add(rtpmap);
+                            _mediaObject.Rtpmaps.Add(rtpmap);
 
                             Fmtp fmtp = new()
                             {
@@ -97,7 +94,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 fmtp.Value += $"{key}={codec.Parameters[key]}";
                             }
                             if (!string.IsNullOrEmpty(fmtp.Value))
-                                fmtps.Add(fmtp);
+                                _mediaObject.Fmtps.Add(fmtp);
 
                             foreach (var fb in codec.RtcpFeedback)
                             {
@@ -107,18 +104,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                     Type = fb.Type,
                                     SubType = fb.Parameter
                                 };
-                                rtcpFbs.Add(rtcpFb);
+                                _mediaObject.RtcpFbs.Add(rtcpFb);
                             }
                         }
-                        _mediaObject.Rtpmaps = rtpmaps.ToArray();
-                        _mediaObject.RtcpFbs = rtcpFbs.ToArray();
-                        _mediaObject.Fmtps = fmtps.ToArray();
 
-                        _mediaObject.Payloads = string.Join(" ", offerRtpParameters.Codecs
-                            .Select(codec => codec.PayloadType.ToString()).ToArray());
+                        _mediaObject.Payloads += string.Join(" ", offerRtpParameters.Codecs
+                            .Select(codec => codec.PayloadType.ToString()));
 
 
-                        List<RtpHeaderExtensionParameters> extensions = new();
                         foreach (var headerExtension in offerRtpParameters.HeaderExtensions)
                         {
                             var ext = new RtpHeaderExtensionParameters 
@@ -126,9 +119,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 Uri = headerExtension.Uri,
                                 Number = headerExtension.Number
                             };
-                            extensions.Add(ext);
+                            _mediaObject.Extensions.Add(ext);
                         }
-                        _mediaObject.Extensions = extensions.ToArray();
 
                         _mediaObject.BinaryAttributes.RtcpMux = true;
                         _mediaObject.BinaryAttributes.RtcpRsize = true;
@@ -138,12 +130,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         var rtxSsrc = (encoding.Rtx is not null && encoding.Rtx.Ssrc.HasValue) ? 
                             encoding.Rtx.Ssrc : null;
 
-                        List<Ssrc> ssrcs = new();
-                        List<SsrcGroup> ssrcGroups = new();
-
                         if (offerRtpParameters.Rtcp.Cname is not null)
                         {
-                            ssrcs.Add(new Ssrc
+                            _mediaObject.Ssrcs.Add(new Ssrc
                             {
                                 Id = (uint)ssrc,
                                 AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
@@ -152,7 +141,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                         if (_planB)
                         {
-                            ssrcs.Add(new Ssrc
+                            _mediaObject.Ssrcs.Add(new Ssrc
                             {
                                 Id = (uint)ssrc,
                                 AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
@@ -163,7 +152,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         {
                             if (offerRtpParameters.Rtcp.Cname is not null)
                             {
-                                ssrcs.Add(new Ssrc
+                                _mediaObject.Ssrcs.Add(new Ssrc
                                 {
                                     Id = (uint)rtxSsrc,
                                     AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
@@ -172,7 +161,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                             if (_planB)
                             {
-                                ssrcs.Add(new Ssrc
+                                _mediaObject.Ssrcs.Add(new Ssrc
                                 {
                                     Id = (uint)rtxSsrc,
                                     AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
@@ -180,15 +169,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             }
 
                             // Associate original and retransmission SSRCs.
-                            ssrcGroups.Add(new SsrcGroup
+                            _mediaObject.SsrcGroups.Add(new SsrcGroup
                             {
                                 Semantics = "FID",
                                 SsrcIds = new string[] { $"{ssrc} {rtxSsrc}"}
                             });
                         }
-
-                        _mediaObject.Ssrcs = ssrcs.ToArray();
-                        _mediaObject.SsrcGroups = ssrcGroups.ToArray();
 
                         break;
                     }
@@ -220,9 +206,61 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             }
         }
 
+        void PlanBReceive(RtpParameters offerRtpParameters, string streamId, IMediaStream trackId)
+        {
+            var encoding = offerRtpParameters.Encodings[0];
+            var ssrc = encoding.Ssrc;
+            var rtxSsrc = (encoding.Rtx is not null && encoding.Rtx.Ssrc.HasValue) ?
+                encoding.Rtx.Ssrc : null;
+            var payloads = _mediaObject.Payloads.Split(' ');
+
+
+            foreach (var codec in offerRtpParameters.Codecs)
+            {
+                if (payloads.Any(payload => payload.Contains(codec.PayloadType.ToString())))
+                    continue;
+
+                Rtpmap rtpmap = new()
+                {
+                    PayloadType = codec.PayloadType,
+                    EncodingName = GetCodecName(codec),
+                    ClockRate = codec.ClockRate,
+                    Channels = codec.Channels > 1 ? codec.Channels : null
+                };
+                _mediaObject.Rtpmaps.Add(rtpmap);
+
+                Fmtp fmtp = new()
+                {
+                    PayloadType = codec.PayloadType,
+                    Value = string.Empty
+                };
+                foreach (var key in codec.Parameters.Keys)
+                {
+                    if (!string.IsNullOrEmpty(fmtp.Value))
+                        fmtp.Value += ";";
+                    fmtp.Value += $"{key}={codec.Parameters[key]}";
+                }
+                if (!string.IsNullOrEmpty(fmtp.Value))
+                    _mediaObject.Fmtps.Add(fmtp);
+
+                foreach (var fb in codec.RtcpFeedback)
+                {
+                    RtcpFb rtcpFb = new()
+                    {
+                        PayloadType = codec.PayloadType,
+                        Type = fb.Type,
+                        SubType = fb.Parameter
+                    };
+                    _mediaObject.RtcpFbs.Add(rtcpFb);
+                }
+            }
+            
+        }
+
 
         protected override void SetDtlsRole(DtlsRole? dtlsRole)
         {
+            _mediaObject.Setup = "actpass";
         }
     }
 }
