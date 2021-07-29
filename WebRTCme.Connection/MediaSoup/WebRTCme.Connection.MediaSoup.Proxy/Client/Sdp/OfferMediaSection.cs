@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
 
@@ -66,8 +67,73 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         List<RtcpFb> rtcpFbs = new();
                         List<Fmtp> fmtps = new();
 
-                        ////if (!_planB)
-                            /////_mediaObject.Ms
+                        if (!_planB)
+                            _mediaObject.Msid = new() 
+                            { 
+                                Id = streamId ?? "-",
+                                AppData = trackId
+                            };
+
+                        foreach (var codec in offerRtpParameters.Codecs)
+                        {
+                            Rtpmap rtpmap = new() 
+                            {
+                                PayloadType = codec.PayloadType,
+                                EncodingName = GetCodecName(codec),
+                                ClockRate = codec.ClockRate,
+                                Channels = codec.Channels > 1 ? codec.Channels : null
+                            };
+                            rtpmaps.Add(rtpmap);
+
+                            Fmtp fmtp = new()
+                            {
+                                PayloadType = codec.PayloadType,
+                                Value = string.Empty
+                            };
+                            foreach (var key in codec.Parameters.Keys)
+                            {
+                                if (!string.IsNullOrEmpty(fmtp.Value))
+                                    fmtp.Value += ";";
+                                fmtp.Value += $"{key}={codec.Parameters[key]}";
+                            }
+                            if (!string.IsNullOrEmpty(fmtp.Value))
+                                fmtps.Add(fmtp);
+
+                            foreach (var fb in codec.RtcpFeedback)
+                            {
+                                RtcpFb rtcpFb = new() 
+                                {
+                                    PayloadType = codec.PayloadType,
+                                    Type = fb.Type,
+                                    SubType = fb.Parameter
+                                };
+                                rtcpFbs.Add(rtcpFb);
+                            }
+                        }
+                        _mediaObject.Rtpmap = rtpmaps.ToArray();
+                        _mediaObject.RtcpFb = rtcpFbs.ToArray();
+                        _mediaObject.Fmtp = fmtps.ToArray();
+
+                        _mediaObject.Payloads = string.Join(" ", offerRtpParameters.Codecs
+                            .Select(codec => codec.PayloadType.ToString()).ToArray());
+
+
+                        List<RtpHeaderExtensionParameters> extensions = new();
+                        foreach (var headerExtension in offerRtpParameters.HeaderExtensions)
+                        {
+                            var ext = new RtpHeaderExtensionParameters 
+                            {
+                                Uri = headerExtension.Uri,
+                                Number = headerExtension.Number
+                            };
+                            extensions.Add(ext);
+                        }
+                        _mediaObject.Extensions = extensions.ToArray();
+
+                        _mediaObject.BinaryAttributes.RtcpMux = true;
+                        _mediaObject.BinaryAttributes.RtcpRsize = true;
+
+
 
                         break;
                     }

@@ -124,6 +124,51 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static Msid ToMsid(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Msid.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Msid
+            {
+                Id = tokens[0],
+                AppData = tokens[1]
+            };
+        }
+
+        public static Ssrc ToSsrc(this string str)
+        {
+            var tokens = str
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Ssrc.Name, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var attributesAndValues = new string[tokens.Length - 1];
+            for (int i = 1; i < tokens.Length; i++)
+                attributesAndValues[i - 1] = tokens[i];
+            return new Ssrc
+            {
+                Id = uint.Parse(tokens[0]),
+                AttributesAndValues = attributesAndValues
+            };
+        }
+
+        public static SsrcGroup ToSsrcGroup(this string str)
+        {
+            var tokens = str
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(SsrcGroup.Name, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var ssrcIds = new string[tokens.Length - 1];
+            for (int i = 1; i < tokens.Length; i++)
+                ssrcIds[i - 1] = tokens[i];
+            return new SsrcGroup
+            {
+                Semantics = tokens[0],
+                SsrcIds = ssrcIds
+            };
+        }
+
         public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
@@ -153,6 +198,7 @@ namespace Utilme.SdpTransform
                 .Append(" ")
                 .Append(candidate.RelPort)
                 .Append(SdpSerializer.CRLF);
+            
             return sb.ToString();
         }
 
@@ -176,6 +222,7 @@ namespace Utilme.SdpTransform
                 .Append(IcePwd.Name)
                 .Append(icePwd.Password)
                 .Append(SdpSerializer.CRLF);
+            
             return sb.ToString();
         }
 
@@ -184,6 +231,9 @@ namespace Utilme.SdpTransform
             StringBuilder sb = new();
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(IceOptions.Name)
+                .Append("");
             for (int i=0; i<iceOptions.Tags.Length; i++)
             {
                 sb.Append(iceOptions.Tags[i]);
@@ -191,6 +241,7 @@ namespace Utilme.SdpTransform
                     sb.Append(" ");
             }
             sb.Append(SdpSerializer.CRLF);
+            
             return sb.ToString();
         }
 
@@ -203,6 +254,7 @@ namespace Utilme.SdpTransform
                 .Append(Mid.Name)
                 .Append(mid.Id)
                 .Append(SdpSerializer.CRLF);
+            
             return sb.ToString();
         }
 
@@ -247,7 +299,10 @@ namespace Utilme.SdpTransform
             StringBuilder sb = new();
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
-            sb.Append(group.Type);
+            sb
+                .Append(MsidSemantic.Name)
+                .Append(group.Type)
+                .Append(" ");
             for (int i = 0; i < group.Tokens.Length; i++)
             {
                 sb.Append(group.Tokens[i]);
@@ -255,10 +310,64 @@ namespace Utilme.SdpTransform
                     sb.Append(" ");
             }
             sb.Append(SdpSerializer.CRLF);
+            
             return sb.ToString();
         }
 
+        public static string ToString(this Msid msid, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Msid.Name)
+                .Append(msid.Id)
+                .Append(" ")
+                .Append(msid.AppData)
+                .Append(SdpSerializer.CRLF);
 
+            return sb.ToString();
+        }
+
+        public static string ToString(this Ssrc ssrc, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Ssrc.Name)
+                .Append(ssrc.Id.ToString())
+                .Append(" ");
+            for (int i = 0; i < ssrc.AttributesAndValues.Length; i++)
+            {
+                sb.Append(ssrc.AttributesAndValues[i]);
+                if (i != ssrc.AttributesAndValues.Length - 1)
+                    sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
+
+        public static string ToString(this SsrcGroup ssrcGroup, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(SsrcGroup.Name)
+                .Append(ssrcGroup.Semantics)
+                .Append(" ");
+            for (int i = 0; i < ssrcGroup.SsrcIds.Length; i++)
+            {
+                sb.Append(ssrcGroup.SsrcIds[i]);
+                if (i != ssrcGroup.SsrcIds.Length - 1)
+                    sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
 
         // Utility method.
         public static byte[] HexadecimalStringToByteArray(String hexadecimalString)

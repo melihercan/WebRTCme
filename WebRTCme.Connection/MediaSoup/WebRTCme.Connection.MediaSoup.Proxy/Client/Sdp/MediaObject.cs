@@ -16,8 +16,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public Rtpmap[] Rtpmap { get; set; }
         public RtcpFb[] RtcpFb { get; set; }
         public Fmtp[] Fmtp { get; set; }
+        public Msid Msid { get; set; }
 
-
+        public BinaryAttributes BinaryAttributes { get; set; } = new();
 
         public Direction Direction { get; set; }
         public int Port { get; set; }
@@ -25,6 +26,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public MediaKind Kind { get; set; }
 
         public string Protocol { get; set; }
+
+        public string Payloads { get; set; }
+
+        public RtpHeaderExtensionParameters[] Extensions { get; set; }
+
 
 
 

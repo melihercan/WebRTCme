@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Utilme.SdpTransform;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
@@ -94,5 +95,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             //_mediaObject.ExtmapAllowMixed = null;
 
         }
+
+        protected string GetCodecName(RtpCodecParameters codec)
+        {
+	        var mimeTypeRegex = new Regex("'^(audio|video)/(.+)");
+            var mimeTypeMatch = mimeTypeRegex.Match(codec.MimeType);
+
+	        if (!mimeTypeMatch.Success)
+		        throw new Exception("'invalid codec.mimeType");
+
+	        return mimeTypeMatch.Value;
+        }
+
     }
 }
