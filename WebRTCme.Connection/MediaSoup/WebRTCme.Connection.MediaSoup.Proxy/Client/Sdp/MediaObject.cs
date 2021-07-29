@@ -13,10 +13,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public IceOptions IceOptions { get; set; }
         public Candidate[] Candidates { get; set; }
         public ConnectionData Connection { get; set; }
-        public Rtpmap[] Rtpmap { get; set; }
-        public RtcpFb[] RtcpFb { get; set; }
-        public Fmtp[] Fmtp { get; set; }
+        public Rtpmap[] Rtpmaps { get; set; }
+        public RtcpFb[] RtcpFbs { get; set; }
+        public Fmtp[] Fmtps { get; set; }
         public Msid Msid { get; set; }
+        public Ssrc[] Ssrcs { get; set; }
+        public SsrcGroup[] SsrcGroups { get; set; }
 
         public BinaryAttributes BinaryAttributes { get; set; } = new();
 
