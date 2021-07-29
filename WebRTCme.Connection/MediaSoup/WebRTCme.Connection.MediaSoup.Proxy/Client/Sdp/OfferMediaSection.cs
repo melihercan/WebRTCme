@@ -195,6 +195,26 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                 case MediaKind.Application:
                     {
+                        // New spec.
+                        if (!oldDataChannelSpec)
+                        {
+                            _mediaObject.Payloads = "webrtc-datachannel";
+                            _mediaObject.SctpPort = sctpParameters.Port;
+                            _mediaObject.MaxMessageSize = sctpParameters.MaxMessageSize;
+                        }
+                        // Old spec.
+                        else
+                        {
+                            _mediaObject.Payloads = sctpParameters.Port.ToString();
+                            _mediaObject.SctpMap = new()
+                            {
+                                App = "webrtc-datachannel",
+						        SctpMapNumber =  sctpParameters.Port,
+						        MaxMessageSize = sctpParameters.MaxMessageSize
+
+                            };
+                        }
+
                         break;
                     }
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Utilme.SdpTransform;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
@@ -33,6 +34,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public RtpHeaderExtensionParameters[] Extensions { get; set; }
 
+        public int SctpPort { get; set; }
+        public int MaxMessageSize { get; set; }
+
+        public SctpMap SctpMap { get; set; }
 
 
 
