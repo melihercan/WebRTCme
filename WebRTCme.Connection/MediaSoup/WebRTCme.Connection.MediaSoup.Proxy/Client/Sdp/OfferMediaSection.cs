@@ -254,7 +254,52 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     _mediaObject.RtcpFbs.Add(rtcpFb);
                 }
             }
-            
+
+            _mediaObject.Payloads += string.Join(" ", offerRtpParameters.Codecs
+                .Select(codec => codec.PayloadType.ToString())).Trim();
+
+
+
+
+            if (offerRtpParameters.Rtcp.Cname is not null)
+            {
+                _mediaObject.Ssrcs.Add(new Ssrc
+                {
+                    Id = (uint)ssrc,
+                    AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                });
+            }
+
+            _mediaObject.Ssrcs.Add(new Ssrc
+            {
+                Id = (uint)ssrc,
+                AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+            });
+
+            if (rtxSsrc.HasValue)
+            {
+                if (offerRtpParameters.Rtcp.Cname is not null)
+                {
+                    _mediaObject.Ssrcs.Add(new Ssrc
+                    {
+                        Id = (uint)rtxSsrc,
+                        AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                    });
+                }
+
+                _mediaObject.Ssrcs.Add(new Ssrc
+                {
+                    Id = (uint)rtxSsrc,
+                    AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+                });
+
+                // Associate original and retransmission SSRCs.
+                _mediaObject.SsrcGroups.Add(new SsrcGroup
+                {
+                    Semantics = "FID",
+                    SsrcIds = new string[] { $"{ssrc} {rtxSsrc}" }
+                });
+            }
         }
 
 
