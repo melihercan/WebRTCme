@@ -40,6 +40,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public string Setup { get; set; }
 
+        public string XGoogleFlag { get; set; }
+
 
         public BinaryAttributes BinaryAttributes { get; set; }
 
