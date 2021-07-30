@@ -154,14 +154,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             Fmtp fmtp = new()
                             {
                                 PayloadType = codec.PayloadType,
-                                Value = string.Empty
+                                Value = CodecParametersToFmtpValue(codec.Parameters)
                             };
-                            //foreach (var key in codec.Parameters.Keys)
-                            //{
-                            //    if (!string.IsNullOrEmpty(fmtp.Value))
-                            //        fmtp.Value += ";";
-                            //    fmtp.Value += $"{key}={codec.Parameters[key]}";
-                            //}
+                            
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);
 
