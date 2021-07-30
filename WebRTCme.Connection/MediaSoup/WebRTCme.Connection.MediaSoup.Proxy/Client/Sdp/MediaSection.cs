@@ -65,7 +65,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public Mid Mid => _mediaObject.Mid;
         public bool Closed => _mediaObject.Port == 0;
 
-        protected abstract void SetDtlsRole(DtlsRole? dtlsRole);
+        public virtual void SetDtlsRole(DtlsRole? dtlsRole) => throw new NotImplementedException();
 
         public void SetIceParameters(IceParameters iceParameters)
         {

@@ -137,5 +137,47 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
+        public void UpdateIceServers(RTCIceServer[] iceServers)
+        {
+            var configuration = _pc.GetConfiguration();
+            configuration.IceServers = iceServers;
+            _pc.SetConfiguration(configuration);
+        }
+
+        public async Task RestartIceAsync(IceParameters iceParameters)
+        {
+            // Provide the remote SDP handler with new remote ICE parameters.
+            _remoteSdp.UpdateIceParameters(iceParameters);
+
+            if (!_transportReady)
+                return;
+
+            if (_direction == InternalDirection.Send)
+            {
+                var offer = await _pc.CreateOffer(new RTCOfferOptions { IceRestart = true });
+                await _pc.SetLocalDescription(offer);
+                RTCSessionDescriptionInit answer = new() 
+                {
+                    Type = RTCSdpType.Answer,
+                    Sdp = _remoteSdp.GetSdp()
+                };
+                await _pc.SetRemoteDescription(answer);
+            }
+            else
+            {
+                RTCSessionDescriptionInit offer = new()
+                {
+                    Type = RTCSdpType.Offer,
+                    Sdp = _remoteSdp.GetSdp()
+                };
+                await _pc.SetRemoteDescription(offer);
+                var answer = await _pc.CreateAnswer();
+                await _pc.SetLocalDescription(answer);
+            }
+
+        }
+
     }
+
+
 }

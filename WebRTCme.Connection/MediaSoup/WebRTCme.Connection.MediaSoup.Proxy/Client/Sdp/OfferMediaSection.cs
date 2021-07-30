@@ -308,7 +308,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 _mediaObject.SsrcGroups.RemoveAll(g => g.SsrcIds.Any(id => id != $"{ssrc} {rtxSsrc}"));
         }
 
-        protected override void SetDtlsRole(DtlsRole? dtlsRole)
+        public override void SetDtlsRole(DtlsRole? dtlsRole)
         {
             _mediaObject.Setup = "actpass";
         }

@@ -90,9 +90,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public void UpdateDtlsRole(DtlsRole role)
         {
             _dtlsParameters.DtlsRole = role;
-            //foreach (var mediaSection in _mediaSections)
-//                mediaSection.SetDtl
+            foreach (var mediaSection in _mediaSections)
+                mediaSection.SetDtlsRole(role);
+        }
 
+        public string GetSdp()
+        {
+            _sdp.Origin.SessionVersion++;
+            return Encoding.UTF8.GetString(SdpSerializer.WriteSdp(_sdp));
         }
     }
 }

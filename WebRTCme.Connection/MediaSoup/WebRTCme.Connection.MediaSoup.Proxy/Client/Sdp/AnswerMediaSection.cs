@@ -280,7 +280,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             }
         }
 
-        protected override void SetDtlsRole(DtlsRole? dtlsRole)
+        public override void SetDtlsRole(DtlsRole? dtlsRole)
         {
             switch (dtlsRole)
             {
