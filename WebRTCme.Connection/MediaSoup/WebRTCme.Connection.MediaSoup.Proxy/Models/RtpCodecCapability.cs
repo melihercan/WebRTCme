@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup
 {

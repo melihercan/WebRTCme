@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
@@ -88,7 +89,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             Fmtp fmtp = new()
                             {
                                 PayloadType = codec.PayloadType,
-                                Value = CodecParametersToFmtpValue(codec.Parameters)
+                                Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
                             };
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);
@@ -232,7 +233,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 Fmtp fmtp = new()
                 {
                     PayloadType = codec.PayloadType,
-                    Value = CodecParametersToFmtpValue(codec.Parameters)
+                    Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
                 };
                 if (!string.IsNullOrEmpty(fmtp.Value))
                     _mediaObject.Fmtps.Add(fmtp);

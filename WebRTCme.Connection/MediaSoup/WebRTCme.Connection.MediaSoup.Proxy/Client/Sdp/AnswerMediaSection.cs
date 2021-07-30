@@ -68,31 +68,32 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 Channels = codec.Channels > 1 ? codec.Channels : null
                             };
                             _mediaObject.Rtpmaps.Add(rtpmap);
+                            var cp = codec.Parameters as CodecParameters;
                             CodecParameters codecParameters = new()
                             {
-                                Stereo = codec.Parameters.Stereo,
-                                UseInBandFec = codec.Parameters.UseInBandFec,
-                                UsedTx = codec.Parameters.UsedTx,
-                                MaxPlaybackRate = codec.Parameters.MaxPlaybackRate,
-                                MaxAverageBitrate = codec.Parameters.MaxAverageBitrate,
-                                Ptime = codec.Parameters.Ptime,
-                                XGoogleStartBitrate = codec.Parameters.XGoogleStartBitrate,
-                                XGoogleMaxBitrate = codec.Parameters.XGoogleMaxBitrate,
-                                XGoogleMinBitrate = codec.Parameters.XGoogleMinBitrate
+                                Stereo = cp.Stereo,
+                                UseInBandFec = cp.UseInBandFec,
+                                UsedTx = cp.UsedTx,
+                                MaxPlaybackRate = cp.MaxPlaybackRate,
+                                MaxAverageBitrate = cp.MaxAverageBitrate,
+                                Ptime = cp.Ptime,
+                                XGoogleStartBitrate = cp.XGoogleStartBitrate,
+                                XGoogleMaxBitrate = cp.XGoogleMaxBitrate,
+                                XGoogleMinBitrate = cp.XGoogleMinBitrate
                             };
 
                             if (codecOptions is not null)
                             {
                                 var offerCodec = offerRtpParameters.Codecs
                                     .First(c => c.PayloadType == codec.PayloadType);
-
+                                var ocp = offerCodec.Parameters as CodecParameters;
                                 switch (codec.MimeType.ToLower())
                                 {
                                     case "audio/opus":
                                         {
                                             if (codecOptions.OpusStereo.HasValue)
                                             {
-                                                offerCodec.Parameters.Stereo = 
+                                                ocp.Stereo = 
                                                     (bool)codecOptions.OpusStereo ? true : false;
                                                 codecParameters.Stereo = 
                                                     (bool)codecOptions.OpusStereo ? true : false;
@@ -100,7 +101,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                                             if (codecOptions.OpusFec.HasValue)
                                             {
-                                                offerCodec.Parameters.UseInBandFec = 
+                                                ocp.UseInBandFec = 
                                                     (bool)codecOptions.OpusFec ? true : false;
                                                 codecParameters.UseInBandFec = 
                                                     (bool)codecOptions.OpusFec ? true :false;
@@ -108,7 +109,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                                             if (codecOptions.OpusDtx.HasValue)
                                             {
-                                                offerCodec.Parameters.UsedTx = 
+                                                ocp.UsedTx = 
                                                     (bool)codecOptions.OpusDtx ? true : false;
                                                 codecParameters.UsedTx = 
                                                     (bool)codecOptions.OpusDtx ? true : false;
@@ -126,7 +127,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                                             if (codecOptions.OpusPtime.HasValue)
                                             {
-                                                offerCodec.Parameters.Ptime = codecOptions.OpusPtime;
+                                                ocp.Ptime = codecOptions.OpusPtime;
                                                 codecParameters.Ptime = codecOptions.OpusPtime;
                                             }
                                             break;
@@ -157,7 +158,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             Fmtp fmtp = new()
                             {
                                 PayloadType = codec.PayloadType,
-                                Value = CodecParametersToFmtpValue(codec.Parameters)
+                                Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
                             };
                             
                             if (!string.IsNullOrEmpty(fmtp.Value))

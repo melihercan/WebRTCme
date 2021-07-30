@@ -12,9 +12,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Handler : IDisposable
     {
+        readonly Ortc _ortc;
         IWindow _window;
         IRTCPeerConnection _pc;
         InternalDirection _direction;
+        RemoteSdp _remoteSdp;
+        Dictionary<MediaKind, RtpParameters> _sendingRtpParametersByKind;
+        Dictionary<MediaKind, RtpParameters> _sendingRemoteRtpParametersByKind;
+        Dictionary<string, IRTCRtpTransceiver> _mapMidTransceiver = new();
+        IMediaStream _sendStream;
+        bool _hasDataChannelMediaSection;
+        int _nextSendSctpStreamId;
+        bool _transportReady;
+
 
         NumSctpStreams NumSctpStreams = new() 
         {
@@ -22,11 +32,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Mis = 1024,
         };
 
-        public Handler()
+        public Handler(Ortc ortc)
         {
+            _ortc = ortc;
             Name = "Generic";
             _window = Registry.WebRtc.Window(Registry.JsRuntime);
         }
+
 
         public string Name { get; }
 
@@ -76,6 +88,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public void Run(HandlerRunOptions options)
         {
             _direction = options.Direction;
+            _remoteSdp = new(options.IceParameters, options.iceCandidates, options.DtlsParameters, 
+                options.SctpParameters, null, null);
+
+            _sendingRtpParametersByKind = new() 
+            {
+                { MediaKind.Audio, new RtpParameters()},
+                { MediaKind.Video, new RtpParameters()}
+            };
 
         }
     }

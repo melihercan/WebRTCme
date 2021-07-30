@@ -6,10 +6,11 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.Proxy.Codecs;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
-    class Ortc
+    public class Ortc
     {
         public void ValidateRtpCapabilities(RtpCapabilities caps)
         {
@@ -42,8 +43,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Channels = matchingLocalCodec.Channels,
                     LocalPayloadType = matchingLocalCodec.PreferredPayloadType,
                     RemotePayloadType = remoteCodec.PreferredPayloadType,
-                    LocalParameters = matchingLocalCodec.Parameters,
-                    RemoteParameters = remoteCodec.Parameters,
+                    LocalParameters = (CodecParameters)matchingLocalCodec.Parameters,
+                    RemoteParameters = (CodecParameters)remoteCodec.Parameters,
                     RtcpFeedback = ReduceRtcpFeedback(matchingLocalCodec, remoteCodec)
                 });
             }
@@ -165,6 +166,171 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 HeaderExtensions = headerExtensions.ToArray()
             };
         }
+
+        public RtpParameters GetSendingRtpParameters(MediaKind kind, ExtendedRtpCapabilities extendedRtpCapabilities)
+        {
+
+            List<RtpCodecParameters> codecs = new();
+            foreach (var extendedCodec in extendedRtpCapabilities.Codecs)
+            {
+                if (extendedCodec.Kind != kind)
+                    continue;
+
+                RtpCodecParameters codec = new()
+                {
+                    MimeType = extendedCodec.MimeType,
+                    PayloadType = extendedCodec.LocalPayloadType,
+                    ClockRate = extendedCodec.ClockRate,
+                    Channels = extendedCodec.Channels,
+                    Parameters = extendedCodec.LocalParameters,
+                    RtcpFeedback = extendedCodec.RtcpFeedback
+                };
+                codecs.Add(codec);
+
+                if (extendedCodec.LocalRtxPayloadType.HasValue)
+                {
+                    RtpCodecParameters rtxCodec = new()
+                    {
+                        MimeType = $"{extendedCodec.Kind.DisplayName()}/rtx",
+                        PayloadType = (int)extendedCodec.LocalRtxPayloadType,
+                        ClockRate = extendedCodec.ClockRate,
+                        Parameters = extendedCodec.LocalParameters,
+                        RtcpFeedback = new RtcpFeedback[] { }
+                    };
+                    codecs.Add(rtxCodec);
+                }
+            }
+
+            List<RtpHeaderExtensionParameters> headerExtensions = new();
+            foreach (var extendedExtendion in extendedRtpCapabilities.HeaderExtensions)
+            {
+                // Ignore RTP extensions of a different kind and those not valid for sending.
+                if ((extendedExtendion.Kind != kind) ||
+                    (extendedExtendion.Direction != Direction.Sendrecv && 
+                    extendedExtendion.Direction != Direction.Sendonly))
+                    continue;
+
+                RtpHeaderExtensionParameters ext = new()
+                {
+                    Uri = extendedExtendion.Uri,
+                    Number = extendedExtendion.SendId,
+                    Encrypt = (bool)extendedExtendion.PreferredEncrypt,
+                    Parameters = new()
+                };
+                headerExtensions.Add(ext);
+            }
+
+            return new RtpParameters 
+            {
+                Codecs = codecs.ToArray(),
+                HeaderExtensions = headerExtensions.ToArray(),
+                Encodings = new RtpEncodingParameters[] { },
+                Rtcp = new()
+            };
+        }
+
+        public RtpParameters GetSendingRemoteRtpParameters(MediaKind kind, 
+            ExtendedRtpCapabilities extendedRtpCapabilities)
+        {
+
+            List<RtpCodecParameters> codecs = new();
+            foreach (var extendedCodec in extendedRtpCapabilities.Codecs)
+            {
+                if (extendedCodec.Kind != kind)
+                    continue;
+
+                RtpCodecParameters codec = new()
+                {
+                    MimeType = extendedCodec.MimeType,
+                    PayloadType = extendedCodec.LocalPayloadType,
+                    ClockRate = extendedCodec.ClockRate,
+                    Channels = extendedCodec.Channels,
+                    Parameters = extendedCodec.RemoteParameters,
+                    RtcpFeedback = extendedCodec.RtcpFeedback
+                };
+                codecs.Add(codec);
+
+                if (extendedCodec.LocalRtxPayloadType.HasValue)
+                {
+                    RtpCodecParameters rtxCodec = new()
+                    {
+                        MimeType = $"{extendedCodec.Kind.DisplayName()}/rtx",
+                        PayloadType = (int)extendedCodec.LocalRtxPayloadType,
+                        ClockRate = extendedCodec.ClockRate,
+                        Parameters = extendedCodec.LocalParameters,
+                        RtcpFeedback = new RtcpFeedback[] { }
+                    };
+                    codecs.Add(rtxCodec);
+                }
+            }
+
+            List<RtpHeaderExtensionParameters> headerExtensions = new();
+            foreach (var extendedExtendion in extendedRtpCapabilities.HeaderExtensions)
+            {
+                // Ignore RTP extensions of a different kind and those not valid for sending.
+                if ((extendedExtendion.Kind != kind) ||
+                    (extendedExtendion.Direction != Direction.Sendrecv &&
+                    extendedExtendion.Direction != Direction.Sendonly))
+                    continue;
+
+                RtpHeaderExtensionParameters ext = new()
+                {
+                    Uri = extendedExtendion.Uri,
+                    Number = extendedExtendion.SendId,
+                    Encrypt = (bool)extendedExtendion.PreferredEncrypt,
+                    Parameters = new()
+                };
+                headerExtensions.Add(ext);
+            }
+
+            // Reduce codecs' RTCP feedback. Use Transport-CC if available, REMB otherwise.
+            if (headerExtensions.Any(ext => 
+                ext.Uri == "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01"))
+            {
+                foreach (var codec in codecs)
+		        {
+                    codec.RtcpFeedback = codec.RtcpFeedback
+                        .Where(fb => fb.Type != "goog-remb").ToArray();
+                }
+            }
+            else if (headerExtensions.Any(ext => 
+                    ext.Uri == "http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time"))
+            {
+                foreach (var codec in codecs)
+		        {
+                    codec.RtcpFeedback = codec.RtcpFeedback
+                        .Where(fb => fb.Type != "transport-cc").ToArray();
+                }
+            }
+            else
+            {
+                foreach (var codec in codecs)
+		        {
+                    codec.RtcpFeedback = codec.RtcpFeedback
+                        .Where(fb => fb.Type != "transport-cc" && fb.Type != "goog-remb").ToArray();
+                }
+            }
+
+            return new RtpParameters
+            {
+                Codecs = codecs.ToArray(),
+                HeaderExtensions = headerExtensions.ToArray(),
+                Encodings = new RtpEncodingParameters[] { },
+                Rtcp = new()
+            };
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
         bool MatchHeaderExtensions(RtpHeaderExtension aExt, RtpHeaderExtension bExt)
         {

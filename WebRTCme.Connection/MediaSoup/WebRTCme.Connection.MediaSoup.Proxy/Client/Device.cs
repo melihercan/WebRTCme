@@ -8,8 +8,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Device
     {
-        readonly Ortc _ortc = new();
-        readonly Handler _handler = new();
+        readonly Ortc _ortc;
+        readonly Handler _handler;
 
 
         ExtendedRtpCapabilities _extendedRtpCapabilities;
@@ -18,6 +18,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         RtpCapabilities _recvRtpCapabilities;
         SctpCapabilities _sctpCapabilities;
         CanProduceByKind _canProduceByKind = new() { Audio = false, Video = false };
+
+        public Device()
+        {
+            _ortc = new();
+            _handler = new(_ortc);
+        }
 
         public string HandlerName => "Generic";
         public bool Loaded => _loaded;
@@ -72,7 +78,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public Transport CreateRecvTransport(TransportOptions options)
         {
-            return CreateTransport(InternalDirection.Receive, options, _handler, _extendedRtpCapabilities,
+            return CreateTransport(InternalDirection.Recv, options, _handler, _extendedRtpCapabilities,
                 _canProduceByKind);
         }
 
