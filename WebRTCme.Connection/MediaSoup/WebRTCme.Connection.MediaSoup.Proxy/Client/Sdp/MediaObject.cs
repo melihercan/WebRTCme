@@ -20,6 +20,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public Msid Msid { get; set; }
         public List<Ssrc> Ssrcs { get; set; }
         public List<SsrcGroup> SsrcGroups { get; set; }
+        public List<Rid> Rids { get; set; }
 
 
         public Direction Direction { get; set; }

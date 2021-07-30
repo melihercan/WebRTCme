@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UtilmeSdpTransform;
 
@@ -166,6 +167,24 @@ namespace Utilme.SdpTransform
             {
                 Semantics = tokens[0],
                 SsrcIds = ssrcIds
+            };
+        }
+
+        public static Rid ToRid(this string str)
+        {
+            var tokens = str
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Rid.Name, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var subTokens = tokens[2].Split(';');
+            var fmtList = subTokens.Where(st => st.StartsWith("pt=")).ToArray();
+            var restrictions = subTokens.Skip(fmtList.Length).Take(subTokens.Length - fmtList.Length).ToArray();
+            return new Rid
+            {
+                Id = tokens[0],
+                Direction = (RidDirection)Enum.Parse(typeof(RidDirection), tokens[1], true),
+                FmtList = fmtList,
+                Restrictions = restrictions
             };
         }
 
@@ -363,6 +382,32 @@ namespace Utilme.SdpTransform
                 sb.Append(ssrcGroup.SsrcIds[i]);
                 if (i != ssrcGroup.SsrcIds.Length - 1)
                     sb.Append(" ");
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
+
+        public static string ToString(this Rid rid, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Rid.Name)
+                .Append(rid.Id)
+                .Append(" ")
+                .Append(rid.Direction.DisplayName());
+            for (var i = 0; i < rid.FmtList.Length; i++)
+            {
+                sb.Append(rid.FmtList[i]);
+                sb.Append(";");
+            }
+            for (var i = 0; i < rid.Restrictions.Length; i++)
+            {
+                sb.Append(rid.Restrictions[i]);
+                if (i != rid.Restrictions.Length - 1)
+                    sb.Append(";");
             }
             sb.Append(SdpSerializer.CRLF);
 
