@@ -6,7 +6,7 @@ using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
-    public class MediaObject
+    class MediaObject
     {
         public Mid Mid { get; set; }
         public IceUfrag IceUfrag { get; set; }
@@ -42,6 +42,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public string Setup { get; set; }
 
         public string XGoogleFlag { get; set; }
+
+        public string ExtmapAllowMixed { get; set; }
+
+        public Simulcast Simulcast { get; set; }
+        public Simulcast03 Simulcast03 { get; set; }
 
 
         public BinaryAttributes BinaryAttributes { get; set; }

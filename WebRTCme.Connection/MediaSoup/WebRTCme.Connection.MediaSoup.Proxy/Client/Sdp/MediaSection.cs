@@ -31,6 +31,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 Fmtps = new(),
                 Ssrcs = new(),
                 SsrcGroups = new(),
+                Rids = new(),
                 Payloads = string.Empty,
                 Extensions = new(),
                 BinaryAttributes = new()

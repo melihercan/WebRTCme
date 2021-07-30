@@ -87,12 +87,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 PayloadType = codec.PayloadType,
                                 Value = string.Empty
                             };
-                            foreach (var key in codec.Parameters.Keys)
-                            {
-                                if (!string.IsNullOrEmpty(fmtp.Value))
-                                    fmtp.Value += ";";
-                                fmtp.Value += $"{key}={codec.Parameters[key]}";
-                            }
+                            //foreach (var key in codec.Parameters.Keys)
+                            //{
+                            //    if (!string.IsNullOrEmpty(fmtp.Value))
+                            //        fmtp.Value += ";";
+                            //    fmtp.Value += $"{key}={codec.Parameters[key]}";
+                            //}
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);
 
@@ -234,12 +234,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     PayloadType = codec.PayloadType,
                     Value = string.Empty
                 };
-                foreach (var key in codec.Parameters.Keys)
-                {
-                    if (!string.IsNullOrEmpty(fmtp.Value))
-                        fmtp.Value += ";";
-                    fmtp.Value += $"{key}={codec.Parameters[key]}";
-                }
+                //foreach (var key in codec.Parameters.Keys)
+                //{
+                //    if (!string.IsNullOrEmpty(fmtp.Value))
+                //        fmtp.Value += ";";
+                //    fmtp.Value += $"{key}={codec.Parameters[key]}";
+                //}
                 if (!string.IsNullOrEmpty(fmtp.Value))
                     _mediaObject.Fmtps.Add(fmtp);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
@@ -64,102 +65,103 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 Channels = codec.Channels > 1 ? codec.Channels : null
                             };
                             _mediaObject.Rtpmaps.Add(rtpmap);
+                            CodecParameters codecParameters = new()
+                            {
+                                Stereo = codec.Parameters.Stereo,
+                                UseInBandFec = codec.Parameters.UseInBandFec,
+                                UsedTx = codec.Parameters.UsedTx,
+                                MaxPlaybackRate = codec.Parameters.MaxPlaybackRate,
+                                MaxAverageBitrate = codec.Parameters.MaxAverageBitrate,
+                                Ptime = codec.Parameters.Ptime,
+                                XGoogleStartBitrate = codec.Parameters.XGoogleStartBitrate,
+                                XGoogleMaxBitrate = codec.Parameters.XGoogleMaxBitrate,
+                                XGoogleMinBitrate = codec.Parameters.XGoogleMinBitrate
+                            };
 
-       //                     if (codecOptions)
-       //                     {
-       //                         const {
-       //                             opusStereo,
-							//opusFec,
-							//opusDtx,
-							//opusMaxPlaybackRate,
-							//opusMaxAverageBitrate,
-							//opusPtime,
-							//videoGoogleStartBitrate,
-							//videoGoogleMaxBitrate,
-							//videoGoogleMinBitrate
-        
-       //                 } = codecOptions;
+                            if (codecOptions is not null)
+                            {
+                                var offerCodec = offerRtpParameters.Codecs
+                                    .First(c => c.PayloadType == codec.PayloadType);
 
-       //                         const offerCodec = offerRtpParameters!.codecs
-       //                             .find((c: RtpCodecParameters) => (
-       //                                 c.payloadType === codec.payloadType
-       //                             ));
+                                switch (codec.MimeType.ToLower())
+                                {
+                                    case "audio/opus":
+                                        {
+                                            if (codecOptions.OpusStereo.HasValue)
+                                            {
+                                                offerCodec.Parameters.Stereo = 
+                                                    (bool)codecOptions.OpusStereo ? true : false;
+                                                codecParameters.Stereo = 
+                                                    (bool)codecOptions.OpusStereo ? true : false;
+                                            }
 
-       //                         switch (codec.mimeType.toLowerCase())
-       //                         {
-       //                             case 'audio/opus':
-       //                                 {
-       //                                     if (opusStereo !== undefined)
-       //                                     {
-       //                                         offerCodec!.parameters['sprop-stereo'] = opusStereo ? 1 : 0;
-       //                                         codecParameters.stereo = opusStereo ? 1 : 0;
-       //                                     }
+                                            if (codecOptions.OpusFec.HasValue)
+                                            {
+                                                offerCodec.Parameters.UseInBandFec = 
+                                                    (bool)codecOptions.OpusFec ? true : false;
+                                                codecParameters.UseInBandFec = 
+                                                    (bool)codecOptions.OpusFec ? true :false;
+                                            }
 
-       //                                     if (opusFec !== undefined)
-       //                                     {
-       //                                         offerCodec!.parameters.useinbandfec = opusFec ? 1 : 0;
-       //                                         codecParameters.useinbandfec = opusFec ? 1 : 0;
-       //                                     }
+                                            if (codecOptions.OpusDtx.HasValue)
+                                            {
+                                                offerCodec.Parameters.UsedTx = 
+                                                    (bool)codecOptions.OpusDtx ? true : false;
+                                                codecParameters.UsedTx = 
+                                                    (bool)codecOptions.OpusDtx ? true : false;
+                                            }
 
-       //                                     if (opusDtx !== undefined)
-       //                                     {
-       //                                         offerCodec!.parameters.usedtx = opusDtx ? 1 : 0;
-       //                                         codecParameters.usedtx = opusDtx ? 1 : 0;
-       //                                     }
+                                            if (codecOptions.OpusMaxPlaybackRate.HasValue)
+                                            {
+                                                codecParameters.MaxPlaybackRate = codecOptions.OpusMaxPlaybackRate;
+                                            }
 
-       //                                     if (opusMaxPlaybackRate !== undefined)
-       //                                     {
-       //                                         codecParameters.maxplaybackrate = opusMaxPlaybackRate;
-       //                                     }
+                                            if (codecOptions.OpusMaxAverageBitrate.HasValue)
+                                            {
+                                                codecParameters.MaxAverageBitrate = codecOptions.OpusMaxAverageBitrate;
+                                            }
 
-       //                                     if (opusMaxAverageBitrate !== undefined)
-       //                                     {
-       //                                         codecParameters.maxaveragebitrate = opusMaxAverageBitrate;
-       //                                     }
+                                            if (codecOptions.OpusPtime.HasValue)
+                                            {
+                                                offerCodec.Parameters.Ptime = codecOptions.OpusPtime;
+                                                codecParameters.Ptime = codecOptions.OpusPtime;
+                                            }
+                                            break;
+                                        }
 
-       //                                     if (opusPtime !== undefined)
-       //                                     {
-       //                                         offerCodec!.parameters.ptime = opusPtime;
-       //                                         codecParameters.ptime = opusPtime;
-       //                                     }
+                                    case "video/vp8":
+                                    case "video/vp9":
+                                    case "video/h264":
+                                    case "video/h265":
+                                        {
+                                            if (codecOptions.VideoGoogleStartBitrate is not null)
+                                                codecParameters.XGoogleStartBitrate = 
+                                                    codecOptions.VideoGoogleStartBitrate;
 
-       //                                     break;
-       //                                 }
+                                            if (codecOptions.VideoGoogleMaxBitrate is not null)
+                                                codecParameters.XGoogleMaxBitrate = 
+                                                    codecOptions.VideoGoogleMaxBitrate;
 
-       //                             case 'video/vp8':
-       //                             case 'video/vp9':
-       //                             case 'video/h264':
-       //                             case 'video/h265':
-       //                                 {
-       //                                     if (videoGoogleStartBitrate !== undefined)
-       //                                         codecParameters['x-google-start-bitrate'] = videoGoogleStartBitrate;
+                                            if (codecOptions.VideoGoogleMinBitrate is not null)
+                                                codecParameters.XGoogleMinBitrate = 
+                                                    codecOptions.VideoGoogleMinBitrate;
 
-       //                                     if (videoGoogleMaxBitrate !== undefined)
-       //                                         codecParameters['x-google-max-bitrate'] = videoGoogleMaxBitrate;
-
-       //                                     if (videoGoogleMinBitrate !== undefined)
-       //                                         codecParameters['x-google-min-bitrate'] = videoGoogleMinBitrate;
-
-       //                                     break;
-       //                                 }
-       //                         }
-       //                     }
-
-
-
-
+                                            break;
+                                        }
+                                }
+                            }
 
                             Fmtp fmtp = new()
                             {
                                 PayloadType = codec.PayloadType,
                                 Value = string.Empty
                             };
-                            foreach (var key in codec.Parameters.Keys)
-                            {
-                                if (!string.IsNullOrEmpty(fmtp.Value))
-                                    fmtp.Value += ";";
-                                fmtp.Value += $"{key}={codec.Parameters[key]}";
-                            }
+                            //foreach (var key in codec.Parameters.Keys)
+                            //{
+                            //    if (!string.IsNullOrEmpty(fmtp.Value))
+                            //        fmtp.Value += ";";
+                            //    fmtp.Value += $"{key}={codec.Parameters[key]}";
+                            //}
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);
 
@@ -196,75 +198,58 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         }
 
                         // Allow both 1 byte and 2 bytes length header extensions.
-     //                   if (
-     //                       extmapAllowMixed &&
-     //                       offerMediaObject.extmapAllowMixed === 'extmap-allow-mixed'
-     //                   )
-     //                   {
-     //                       this._mediaObject.extmapAllowMixed = 'extmap-allow-mixed';
-     //                   }
+                        if (extmapAllowMixed && offerMediaObject.ExtmapAllowMixed == "extmap-allow-mixed")
+                            _mediaObject.ExtmapAllowMixed = "extmap-allow-mixed";
 
-     //                   // Simulcast.
-     //                   if (offerMediaObject.simulcast)
-     //                   {
-     //                       this._mediaObject.simulcast =
-        
-     //               {
-     //                       dir1: 'recv',
-					//	list1: offerMediaObject.simulcast.list1
+                        // Simulcast.
+                        if (offerMediaObject.Simulcast is not null)
+                        {
+                            _mediaObject.Simulcast = new()
+                            {
+                                Dir1 = RidDirection.Recv,
+                        	    List1 = offerMediaObject.Simulcast.List1
+                            };
 
-     //               };
+                            foreach (var rid in offerMediaObject.Rids)
+                            {
+                                if (rid.Direction != RidDirection.Send)
+                                    continue;
 
-     //                       this._mediaObject.rids = [];
+                                _mediaObject.Rids.Add(new Rid
+                                {
+                                    Id = rid.Id,
+                            	    Direction = RidDirection.Recv
+                                });
+                            }
+                        }
 
-     //                       for (const rid of offerMediaObject.rids || [])
-					//{
-     //                           if (rid.direction !== 'send')
-     //                               continue;
+                        // Simulcast (draft version 03).
+                        else if (offerMediaObject.Simulcast03 is not null)
+                        {
+                            _mediaObject.Simulcast03 = new()
+                            {
+                                Value = offerMediaObject.Simulcast03.Value.Replace(RidDirection.Send.DisplayName(),
+                                    RidDirection.Recv.DisplayName())
+                            };
 
-     //                           this._mediaObject.rids.push(
+                            foreach (var rid in offerMediaObject.Rids)
+                            {
+                                if (rid.Direction != RidDirection.Send)
+                                    continue;
 
-     //                       {
-     //                           id: rid.id,
-					//			direction: 'recv'
+                                _mediaObject.Rids.Add(new Rid
+                                {
+                                    Id = rid.Id,
+                            		Direction = RidDirection.Recv
+                                });
+                            }
+                    }
 
-     //                       });
-     //                       }
-     //                   }
-     //                   // Simulcast (draft version 03).
-     //                   else if (offerMediaObject.simulcast_03)
-     //                   {
-     //                       // eslint-disable-next-line camelcase
-     //                       this._mediaObject.simulcast_03 =
-        
-     //               {
-     //                       value: offerMediaObject.simulcast_03.value.replace(/ send / g, 'recv')
-
-     //               };
-
-     //                       this._mediaObject.rids = [];
-
-     //                       for (const rid of offerMediaObject.rids || [])
-					//{
-     //                           if (rid.direction !== 'send')
-     //                               continue;
-
-     //                           this._mediaObject.rids.push(
-
-     //                       {
-     //                           id: rid.id,
-					//			direction: 'recv'
-
-     //                       });
-     //                       }
-     //                   }
-
-                        _mediaObject.BinaryAttributes.RtcpMux = true;
+                    _mediaObject.BinaryAttributes.RtcpMux = true;
                         _mediaObject.BinaryAttributes.RtcpRsize = true;
 
                         if (_planB && _mediaObject.Kind == MediaKind.Video)
                             _mediaObject.XGoogleFlag = "conference";
-
                         break;
                     }
 
@@ -292,11 +277,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         break;
                     }
             }
-
-
-
-
-
         }
 
         protected override void SetDtlsRole(DtlsRole? dtlsRole)

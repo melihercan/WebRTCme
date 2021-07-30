@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup
 {
@@ -12,7 +13,7 @@ namespace WebRTCme.Connection.MediaSoup
 
         public int? Channels { get; init; }
 
-        public Dictionary<string,string> /*object*/ Parameters { get; init; }
+        public CodecParameters/*Dictionary<string,string>*/ /*object*/ Parameters { get; init; }
         public RtcpFeedback[] RtcpFeedback { get; set; }
 
     }
