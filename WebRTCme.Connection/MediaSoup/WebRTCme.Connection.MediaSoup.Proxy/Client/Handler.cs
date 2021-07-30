@@ -32,6 +32,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Mis = 1024,
         };
 
+        event EventHandler<ConnectionState> OnConnectionStateChange;
+
         public Handler(Ortc ortc)
         {
             _ortc = ortc;
@@ -93,10 +95,47 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             _sendingRtpParametersByKind = new() 
             {
-                { MediaKind.Audio, new RtpParameters()},
-                { MediaKind.Video, new RtpParameters()}
+                { MediaKind.Audio, _ortc.GetSendingRtpParameters(MediaKind.Audio, options.ExtendedRtpCapabilities)},
+                { MediaKind.Video, _ortc.GetSendingRtpParameters(MediaKind.Video, options.ExtendedRtpCapabilities) }
+            };
+
+            _sendingRemoteRtpParametersByKind = new()
+            {
+                { 
+                    MediaKind.Audio, 
+                    _ortc.GetSendingRemoteRtpParameters(MediaKind.Audio, options.ExtendedRtpCapabilities) 
+                },
+                { 
+                    MediaKind.Video, 
+                    _ortc.GetSendingRemoteRtpParameters(MediaKind.Video, options.ExtendedRtpCapabilities) 
+                }
+            };
+
+            _pc = _window.RTCPeerConnection(new RTCConfiguration 
+            { 
+                IceServers = options.RTCIceServers,
+                IceTransportPolicy = options.IceTransportPolicy,
+                BundlePolicy = RTCBundlePolicy.MaxBundle,
+                RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
+            });
+
+            _pc.OnIceConnectionStateChange += (s, e) => 
+            {
+                ConnectionState connectionState = _pc.IceConnectionState switch
+                {
+                    RTCIceConnectionState.Checking => ConnectionState.Connecting,
+                    RTCIceConnectionState.Connected => ConnectionState.Connected,
+                    RTCIceConnectionState.Completed => ConnectionState.Connected,
+                    RTCIceConnectionState.Failed => ConnectionState.Failed,
+                    RTCIceConnectionState.Disconnected => ConnectionState.Disconnected,
+                    RTCIceConnectionState.Closed => ConnectionState.Closed,
+                    _ => throw new NotImplementedException(),
+                };
+
+                OnConnectionStateChange?.Invoke(this, connectionState);
             };
 
         }
+
     }
 }
