@@ -54,6 +54,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaKind.Video:
                     {
                         _mediaObject.Direction = Direction.Recvonly;
+                        _mediaObject.Rtpmaps = new();
+                        _mediaObject.RtcpFbs = new();
+                        _mediaObject.Fmtps = new();
 
                         foreach (var codec in answerRtpParameters.Codecs)
                         {
@@ -175,7 +178,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         _mediaObject.Payloads += string.Join(" ", answerRtpParameters.Codecs
                             .Select(codec => codec.PayloadType.ToString()));
 
-
+                        _mediaObject.Extensions = new();
                         foreach (var headerExtension in answerRtpParameters.HeaderExtensions)
                         {
                             // Don't add a header extension if not present in the offer.
@@ -205,6 +208,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         	    List1 = offerMediaObject.Simulcast.List1
                             };
 
+                            _mediaObject.Rids = new();
                             foreach (var rid in offerMediaObject.Rids)
                             {
                                 if (rid.Direction != RidDirection.Send)
@@ -227,6 +231,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                     RidDirection.Recv.DisplayName())
                             };
 
+                            _mediaObject.Rids = new();
                             foreach (var rid in offerMediaObject.Rids)
                             {
                                 if (rid.Direction != RidDirection.Send)

@@ -26,15 +26,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             _mediaObject = new() 
             { 
-                Candidates = new(),
-                Rtpmaps = new(),
-                RtcpFbs = new(),
-                Fmtps = new(),
-                Ssrcs = new(),
-                SsrcGroups = new(),
-                Rids = new(),
-                Payloads = string.Empty,
-                Extensions = new(),
                 BinaryAttributes = new()
             };
 
@@ -45,6 +36,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             
             if (iceCandidates is not null)
             {
+                _mediaObject.Candidates = new();
                 foreach (var iceCandidate in iceCandidates)
                 {
                     Candidate candidate = new()
@@ -81,16 +73,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.IcePwd = new IcePwd { Password = iceParameters.Password };
         }
 
+
+
         public void Disable()
         {
             _mediaObject.Direction = Direction.Inactive;
 
-            //_mediaObject.Ext = null;
-            //_mediaObject.Ssrcs = null;
-            //_mediaObject.SsrcGroups = null;
-            //_mediaObject.Simulcast = null;
-            //_mediaObject.Simulcast03 = null;
-            //_mediaObject.Rids = null;
+            _mediaObject.Extensions = null;
+            _mediaObject.Ssrcs = null;
+            _mediaObject.SsrcGroups = null;
+            _mediaObject.Simulcast = null;
+            _mediaObject.Simulcast03 = null;
+            _mediaObject.Rids = null;
         }
 
         public void Close()
@@ -98,14 +92,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Direction = Direction.Inactive;
             _mediaObject.Port = 0;
 
-            //_mediaObject.Ext = null;
-            //_mediaObject.Ssrcs = null;
-            //_mediaObject.SsrcGroups = null;
-            //_mediaObject.Simulcast = null;
-            //_mediaObject.Simulcast03 = null;
-            //_mediaObject.Rids = null;
-            //_mediaObject.ExtmapAllowMixed = null;
-
+            _mediaObject.Extensions = null;
+            _mediaObject.Ssrcs = null;
+            _mediaObject.SsrcGroups = null;
+            _mediaObject.Simulcast = null;
+            _mediaObject.Simulcast03 = null;
+            _mediaObject.Rids = null;
+            _mediaObject.ExtmapAllowMixed = null;
         }
 
         protected string GetCodecName(RtpCodecParameters codec)

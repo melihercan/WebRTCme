@@ -63,6 +63,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaKind.Video:
                     {
                         _mediaObject.Direction = Direction.Sendonly;
+                        _mediaObject.Rtpmaps = new();
+                        _mediaObject.RtcpFbs = new();
+                        _mediaObject.Fmtps = new();
 
                         if (!_planB)
                             _mediaObject.Msid = new() 
@@ -106,6 +109,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             .Select(codec => codec.PayloadType.ToString()));
 
 
+                        _mediaObject.Extensions = new();
                         foreach (var headerExtension in offerRtpParameters.HeaderExtensions)
                         {
                             var ext = new RtpHeaderExtensionParameters 
@@ -124,6 +128,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         var rtxSsrc = (encoding.Rtx is not null && encoding.Rtx.Ssrc.HasValue) ? 
                             encoding.Rtx.Ssrc : null;
 
+                        _mediaObject.Ssrcs = new();
+                        _mediaObject.SsrcGroups = new();
                         if (offerRtpParameters.Rtcp.Cname is not null)
                         {
                             _mediaObject.Ssrcs.Add(new Ssrc
