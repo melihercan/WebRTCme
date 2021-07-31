@@ -220,7 +220,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             var offer = await _pc.CreateOffer();
             var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
-            Utilme.SdpTransform.Sdp offerMediaObject;
+            MediaObject offerMediaObject;
 
             if (!_transportReady)
                 SetupTransport(DtlsRole.Server, localSdpObject);
@@ -228,128 +228,128 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             // Special case for VP9 with SVC.
             var hackVp9Svc = false;
 
-            var layers = ScalabilityModes.Parse(options.Encodings[0].ScalabilityMode);
+            var layers = ScalabilityModes.Parse(options.Encodings?[0].ScalabilityMode);
 
-/****
-
-            if (
-                encodings &&
-                encodings.length === 1 &&
-                layers.spatialLayers > 1 &&
-                sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp9'
+            if (options.Encodings is not null &&
+                options.Encodings.Length == 1 &&
+                layers.SpatialLayers > 1 &&
+                sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp9"
             )
             {
-                logger.debug('send() | enabling legacy simulcast for VP9 SVC');
+                Console.WriteLine("send() | enabling legacy simulcast for VP9 SVC");
 
                 hackVp9Svc = true;
-                localSdpObject = sdpTransform.parse(offer.sdp);
-                offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
+                localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+                offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(
+                    localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]);
 
-                sdpUnifiedPlanUtils.addLegacySimulcast(
-    
-                {
-                    offerMediaObject,
-					numStreams: layers.spatialLayers
+                /****
+                    sdpUnifiedPlanUtils.addLegacySimulcast(
 
-                });
+                    {
+                        offerMediaObject,
+                        numStreams: layers.spatialLayers
 
-                offer = { type: 'offer', sdp: sdpTransform.write(localSdpObject) };
-            }
+                    });
 
-            logger.debug(
-                'send() | calling pc.setLocalDescription() [offer:%o]',
-                offer);
-
-            await this._pc.setLocalDescription(offer);
-
-            // We can now get the transceiver.mid.
-            const localId = transceiver.mid;
-
-            // Set MID.
-            sendingRtpParameters.mid = localId;
-
-            localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
-            offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
-
-            // Set RTCP CNAME.
-            sendingRtpParameters.rtcp.cname =
-                sdpCommonUtils.getCname({ offerMediaObject });
-
-            // Set RTP encodings by parsing the SDP offer if no encodings are given.
-            if (!encodings)
-            {
-                sendingRtpParameters.encodings =
-                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
-            }
-            // Set RTP encodings by parsing the SDP offer and complete them with given
-            // one if just a single encoding has been given.
-            else if (encodings.length === 1)
-            {
-                let newEncodings =
-                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
-
-                Object.assign(newEncodings[0], encodings[0]);
-
-                // Hack for VP9 SVC.
-                if (hackVp9Svc)
-                    newEncodings = [newEncodings[0]];
-
-                sendingRtpParameters.encodings = newEncodings;
-            }
-            // Otherwise if more than 1 encoding are given use them verbatim.
-            else
-            {
-                sendingRtpParameters.encodings = encodings;
-            }
-
-            // If VP8 or H264 and there is effective simulcast, add scalabilityMode to
-            // each encoding.
-            if (
-                sendingRtpParameters.encodings.length > 1 &&
-                (
-                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp8' ||
-                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264'
-                )
-            )
-            {
-                for (const encoding of sendingRtpParameters.encodings)
-			{
-                    encoding.scalabilityMode = 'S1T3';
+                    offer = { type: 'offer', sdp: sdpTransform.write(localSdpObject) };
                 }
-            }
 
-            this._remoteSdp!.send(
 
-            {
-                offerMediaObject,
-				reuseMid: mediaSectionIdx.reuseMid,
-				offerRtpParameters: sendingRtpParameters,
-				answerRtpParameters: sendingRemoteRtpParameters,
-				codecOptions,
-				extmapAllowMixed: true
+                            logger.debug(
+                                'send() | calling pc.setLocalDescription() [offer:%o]',
+                                offer);
 
-            });
+                            await this._pc.setLocalDescription(offer);
 
-            const answer = { type: 'answer', sdp: this._remoteSdp!.getSdp() };
+                            // We can now get the transceiver.mid.
+                            const localId = transceiver.mid;
 
-        logger.debug(
-			'send() | calling pc.setRemoteDescription() [answer:%o]',
-			answer);
+                            // Set MID.
+                            sendingRtpParameters.mid = localId;
 
-		await this._pc.setRemoteDescription(answer);
+                            localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
+                            offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
 
-        // Store in the map.
-        this._mapMidTransceiver.set(localId, transceiver);
+                            // Set RTCP CNAME.
+                            sendingRtpParameters.rtcp.cname =
+                                sdpCommonUtils.getCname({ offerMediaObject });
 
-		return {
+                            // Set RTP encodings by parsing the SDP offer if no encodings are given.
+                            if (!encodings)
+                            {
+                                sendingRtpParameters.encodings =
+                                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            }
+                            // Set RTP encodings by parsing the SDP offer and complete them with given
+                            // one if just a single encoding has been given.
+                            else if (encodings.length === 1)
+                            {
+                                let newEncodings =
+                                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
 
-            localId,
-            rtpParameters : sendingRtpParameters,
-            rtpSender     : transceiver.sender
+                                Object.assign(newEncodings[0], encodings[0]);
 
-        };
-****/
-            return null;
+                                // Hack for VP9 SVC.
+                                if (hackVp9Svc)
+                                    newEncodings = [newEncodings[0]];
+
+                                sendingRtpParameters.encodings = newEncodings;
+                            }
+                            // Otherwise if more than 1 encoding are given use them verbatim.
+                            else
+                            {
+                                sendingRtpParameters.encodings = encodings;
+                            }
+
+                            // If VP8 or H264 and there is effective simulcast, add scalabilityMode to
+                            // each encoding.
+                            if (
+                                sendingRtpParameters.encodings.length > 1 &&
+                                (
+                                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp8' ||
+                                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264'
+                                )
+                            )
+                            {
+                                for (const encoding of sendingRtpParameters.encodings)
+                            {
+                                    encoding.scalabilityMode = 'S1T3';
+                                }
+                            }
+
+                            this._remoteSdp!.send(
+
+                            {
+                                offerMediaObject,
+                                reuseMid: mediaSectionIdx.reuseMid,
+                                offerRtpParameters: sendingRtpParameters,
+                                answerRtpParameters: sendingRemoteRtpParameters,
+                                codecOptions,
+                                extmapAllowMixed: true
+
+                            });
+
+                            const answer = { type: 'answer', sdp: this._remoteSdp!.getSdp() };
+
+                        logger.debug(
+                            'send() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer);
+
+                        await this._pc.setRemoteDescription(answer);
+
+                        // Store in the map.
+                        this._mapMidTransceiver.set(localId, transceiver);
+
+                        return {
+
+                            localId,
+                            rtpParameters : sendingRtpParameters,
+                            rtpSender     : transceiver.sender
+
+                        };
+                ****/
+                return null;
 
         }
 
