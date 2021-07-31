@@ -7,6 +7,8 @@ namespace Utilme.SdpTransform
     // a=extmap:<value>["/"<direction>] <URI> <extensionattributes>
     public class Extmap
     {
+        public const string Name = "extmap:";
+
         public int Value { get; set; }
         public string Direction { get; set; }
         public string Uri { get; set; }

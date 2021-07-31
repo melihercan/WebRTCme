@@ -188,6 +188,49 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static Rtpmap ToRtpmap(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Rtpmap.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var subTokens = tokens[1].Split('/');
+            return new Rtpmap
+            {
+                PayloadType = int.Parse(tokens[0]),
+                EncodingName = subTokens[0],
+                ClockRate = int.Parse(subTokens[1]),
+                Channels = subTokens.Length > 2 ? int.Parse(subTokens[2]) : null
+            };
+        }
+
+        public static Fmtp ToFmtp(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Fmtp.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Fmtp
+            {
+                PayloadType = int.Parse(tokens[0]),
+                Value = tokens[1],
+            };
+        }
+
+        public static RtcpFb ToRtcpFb(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(RtcpFb.Name, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new RtcpFb
+            {
+                PayloadType = int.Parse(tokens[0]),
+                Type = tokens[1],
+                SubType = tokens.Length == 3 ? tokens[2] : null
+            };
+        }
+
         public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();

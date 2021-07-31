@@ -6,6 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class Fmtp
     {
+        public const string Name = "fmtp:";
         public int PayloadType { get; set; }
         public string Value { get; set; }
     }

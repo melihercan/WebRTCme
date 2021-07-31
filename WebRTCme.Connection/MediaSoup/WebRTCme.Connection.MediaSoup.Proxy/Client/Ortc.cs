@@ -229,6 +229,40 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
+        public  RtpCodecParameters[] ReduceCodecs(RtpCodecParameters[] codecs, RtpCodecCapability capCodec)
+        {
+            List<RtpCodecParameters> filteredCodecs = new();
+
+            // If no capability codec is given, take the first one (and RTX).
+            if (capCodec is not null)
+            {
+                filteredCodecs.Add(codecs[0]);
+
+                if (IsRtxCodec(codecs[1]))
+                    filteredCodecs.Add(codecs[1]);
+            }
+            // Otherwise look for a compatible set of codecs.
+            else
+            {
+                for (var idx = 0; idx < codecs.Length; ++idx)
+                {
+                    if (MatchCodecs(codecs[idx], capCodec))
+                    {
+                        filteredCodecs.Add(codecs[idx]);
+
+                        if (IsRtxCodec(codecs[idx + 1]))
+                            filteredCodecs.Add(codecs[idx + 1]);
+                        break;
+                    }
+                }
+
+                if (filteredCodecs.Count() == 0)
+                    throw new Exception("No matching codec found");
+            }
+
+            return filteredCodecs.ToArray();
+        }
+
         public RtpParameters GetSendingRemoteRtpParameters(MediaKind kind, 
             ExtendedRtpCapabilities extendedRtpCapabilities)
         {
@@ -344,6 +378,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         bool IsRtxCodec(RtpCodecCapability codec) =>
             new Regex(@"(?i).+/rtx$").IsMatch(codec.MimeType);
 
+        bool IsRtxCodec(RtpCodecParameters codec) =>
+            new Regex(@"(?i).+/rtx$").IsMatch(codec.MimeType);
+
         bool MatchCodecs(RtpCodecCapability aCodec, RtpCodecCapability bCodec, bool strict = false, 
             bool modify = false)
         {
@@ -409,6 +446,140 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             return true;
         }
+
+        bool MatchCodecs(RtpCodecParameters aCodec, RtpCodecParameters bCodec, bool strict = false,
+            bool modify = false)
+        {
+            var aMimeType = aCodec.MimeType.ToLower();
+            var bMimeType = bCodec.MimeType.ToLower();
+
+            if (aMimeType != bMimeType)
+                return false;
+
+            if (aCodec.ClockRate != bCodec.ClockRate)
+                return false;
+
+            if (aCodec.Channels != bCodec.Channels)
+                return false;
+
+            switch (aMimeType)
+            {
+                case "video/h264":
+                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
+                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
+
+                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                        return false;
+
+                    if (strict)
+                    {
+                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
+                            return false;
+
+                        string selectedProfileLevelId;
+                        try
+                        {
+                            selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
+                                aH264CodecParameters, bH264CodecParameters);
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                        if (modify)
+                        {
+                            if (selectedProfileLevelId is not null)
+                            {
+                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                            }
+                        }
+
+                    }
+                    break;
+
+                case "video/vp9":
+                    if (strict)
+                    {
+                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
+                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
+
+                        if (aVp9CodecParameters != bVp9CodecParameters)
+                            return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+
+
+        bool MatchCodecs(RtpCodecParameters aCodec, RtpCodecCapability bCodec, bool strict = false,
+            bool modify = false)
+        {
+            var aMimeType = aCodec.MimeType.ToLower();
+            var bMimeType = bCodec.MimeType.ToLower();
+
+            if (aMimeType != bMimeType)
+                return false;
+
+            if (aCodec.ClockRate != bCodec.ClockRate)
+                return false;
+
+            if (aCodec.Channels != bCodec.Channels)
+                return false;
+
+            switch (aMimeType)
+            {
+                case "video/h264":
+                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
+                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
+
+                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                        return false;
+
+                    if (strict)
+                    {
+                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
+                            return false;
+
+                        string selectedProfileLevelId;
+                        try
+                        {
+                            selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
+                                aH264CodecParameters, bH264CodecParameters);
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                        if (modify)
+                        {
+                            if (selectedProfileLevelId is not null)
+                            {
+                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                            }
+                        }
+
+                    }
+                    break;
+
+                case "video/vp9":
+                    if (strict)
+                    {
+                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
+                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
+
+                        if (aVp9CodecParameters != bVp9CodecParameters)
+                            return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+
 
         string GetCodecCapabilityParameterValue(RtpCodecCapability codec, string key)
         {

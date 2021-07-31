@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-using UtilmeSdpTransform;
-using WebRTCme.Connection.MediaSoup;
 using Utilme.SdpTransform;
 using WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using System.Linq;
+using WebRTCme.Connection.MediaSoup.Proxy;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
@@ -33,6 +34,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         };
 
         event EventHandler<ConnectionState> OnConnectionStateChange;
+        event EventHandler<DtlsParameters> OnConnect;
 
         public Handler(Ortc ortc)
         {
@@ -182,9 +184,195 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return _pc.GetStats();
         }
 
+        public async Task<HandlerSendResult> SendAsync(HandlerSendOptions options)
+        {
+            if (options.Encodings is not null && options.Encodings.Length > 1)
+            {
+                options.Encodings = options.Encodings
+                     .Select((encoding, idx) => 
+                     { 
+                         encoding.Rid = $"r{idx}";
+                         return encoding;
+                     }).ToArray();
+            }
 
 
+            var sendingRtpParameters =
+                Utils.Clone<RtpParameters>(_sendingRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+
+            // This may throw.
+            sendingRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRtpParameters.Codecs, options.Codec);
+
+            var sendingRemoteRtpParameters = 
+                Utils.Clone<RtpParameters>(
+                    _sendingRemoteRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+
+            // This may throw.
+            sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
+
+            var mediaSectionIdx = _remoteSdp.GetNextMediaSectionIdx();
+            var transceiver = _pc.AddTransceiver(options.Track, new RTCRtpTransceiverInit
+            {
+                Direction = RTCRtpTransceiverDirection.Sendonly,
+				Streams = new IMediaStream[] { _sendStream },
+                SendEncodings = options.Encodings.Select(e => e.ToWebRtc()).ToArray()
+            });
+
+            var offer = await _pc.CreateOffer();
+            var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+            Utilme.SdpTransform.Sdp offerMediaObject;
+
+            if (!_transportReady)
+                SetupTransport(DtlsRole.Server, localSdpObject);
+
+            // Special case for VP9 with SVC.
+            var hackVp9Svc = false;
+
+            var layers = ScalabilityModes.Parse(options.Encodings[0].ScalabilityMode);
+
+/****
+
+            if (
+                encodings &&
+                encodings.length === 1 &&
+                layers.spatialLayers > 1 &&
+                sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp9'
+            )
+            {
+                logger.debug('send() | enabling legacy simulcast for VP9 SVC');
+
+                hackVp9Svc = true;
+                localSdpObject = sdpTransform.parse(offer.sdp);
+                offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
+
+                sdpUnifiedPlanUtils.addLegacySimulcast(
+    
+                {
+                    offerMediaObject,
+					numStreams: layers.spatialLayers
+
+                });
+
+                offer = { type: 'offer', sdp: sdpTransform.write(localSdpObject) };
+            }
+
+            logger.debug(
+                'send() | calling pc.setLocalDescription() [offer:%o]',
+                offer);
+
+            await this._pc.setLocalDescription(offer);
+
+            // We can now get the transceiver.mid.
+            const localId = transceiver.mid;
+
+            // Set MID.
+            sendingRtpParameters.mid = localId;
+
+            localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
+            offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
+
+            // Set RTCP CNAME.
+            sendingRtpParameters.rtcp.cname =
+                sdpCommonUtils.getCname({ offerMediaObject });
+
+            // Set RTP encodings by parsing the SDP offer if no encodings are given.
+            if (!encodings)
+            {
+                sendingRtpParameters.encodings =
+                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+            }
+            // Set RTP encodings by parsing the SDP offer and complete them with given
+            // one if just a single encoding has been given.
+            else if (encodings.length === 1)
+            {
+                let newEncodings =
+                    sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+
+                Object.assign(newEncodings[0], encodings[0]);
+
+                // Hack for VP9 SVC.
+                if (hackVp9Svc)
+                    newEncodings = [newEncodings[0]];
+
+                sendingRtpParameters.encodings = newEncodings;
+            }
+            // Otherwise if more than 1 encoding are given use them verbatim.
+            else
+            {
+                sendingRtpParameters.encodings = encodings;
+            }
+
+            // If VP8 or H264 and there is effective simulcast, add scalabilityMode to
+            // each encoding.
+            if (
+                sendingRtpParameters.encodings.length > 1 &&
+                (
+                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/vp8' ||
+                    sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264'
+                )
+            )
+            {
+                for (const encoding of sendingRtpParameters.encodings)
+			{
+                    encoding.scalabilityMode = 'S1T3';
+                }
+            }
+
+            this._remoteSdp!.send(
+
+            {
+                offerMediaObject,
+				reuseMid: mediaSectionIdx.reuseMid,
+				offerRtpParameters: sendingRtpParameters,
+				answerRtpParameters: sendingRemoteRtpParameters,
+				codecOptions,
+				extmapAllowMixed: true
+
+            });
+
+            const answer = { type: 'answer', sdp: this._remoteSdp!.getSdp() };
+
+        logger.debug(
+			'send() | calling pc.setRemoteDescription() [answer:%o]',
+			answer);
+
+		await this._pc.setRemoteDescription(answer);
+
+        // Store in the map.
+        this._mapMidTransceiver.set(localId, transceiver);
+
+		return {
+
+            localId,
+            rtpParameters : sendingRtpParameters,
+            rtpSender     : transceiver.sender
+
+        };
+****/
+            return null;
+
+        }
+
+
+        void  SetupTransport(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
+        {
+            if (localSdpObject is null)
+                localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(_pc.LocalDescription.Sdp));
+
+            // Get our local DTLS parameters.
+            var dtlsParameters = CommonUtils.ExtractDtlsParameters(localSdpObject);
+
+            // Set our DTLS role.
+            dtlsParameters.DtlsRole = localDtlsRole;
+
+            // Update the remote DTLS role in the SDP.
+            _remoteSdp.UpdateDtlsRole(localDtlsRole == DtlsRole.Client ? DtlsRole.Server : DtlsRole.Client);
+
+            // Need to tell the remote transport about our parameters.
+            OnConnect?.Invoke(this, dtlsParameters);
+
+            _transportReady = true;
+        }
     }
-
 
 }

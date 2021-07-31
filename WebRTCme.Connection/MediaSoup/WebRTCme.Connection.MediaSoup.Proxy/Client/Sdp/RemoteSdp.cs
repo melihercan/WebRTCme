@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Utilme.SdpTransform;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
@@ -98,6 +99,20 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         {
             _sdp.Origin.SessionVersion++;
             return Encoding.UTF8.GetString(SdpSerializer.WriteSdp(_sdp));
+        }
+
+        public MediaSectionIdx GetNextMediaSectionIdx()
+        {
+            // If a closed media section is found, return its index.
+            for (var idx = 0; idx < _mediaSections.Length; ++idx)
+            {
+                var mediaSection = _mediaSections[idx];
+                if (mediaSection.Closed)
+                    return new MediaSectionIdx { Idx = idx, ReuseMid = mediaSection.Mid };
+            }
+
+            // If no closed media section is found, return next one.
+            return new MediaSectionIdx { Idx = _mediaSections.Length };
         }
     }
 }

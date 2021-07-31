@@ -9,20 +9,22 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
     class MediaObject
     {
         public Mid Mid { get; set; }
+        public Msid Msid { get; set; }
         public IceUfrag IceUfrag { get; set; }
         public IcePwd IcePwd { get; set; }
         public IceOptions IceOptions { get; set; }
+        public Fingerprint Fingerprint { get; set; }
         public List<Candidate> Candidates { get; set; }
-        public ConnectionData Connection { get; set; }
         public List<Rtpmap> Rtpmaps { get; set; }
         public List<RtcpFb> RtcpFbs { get; set; }
         public List<Fmtp> Fmtps { get; set; }
-        public Msid Msid { get; set; }
         public List<Ssrc> Ssrcs { get; set; }
         public List<SsrcGroup> SsrcGroups { get; set; }
         public List<Rid> Rids { get; set; }
+        public BinaryAttributes BinaryAttributes { get; set; }
 
 
+        public ConnectionData Connection { get; set; }
         public Direction Direction { get; set; }
         public int Port { get; set; }
 
@@ -49,7 +51,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public Simulcast03 Simulcast03 { get; set; }
 
 
-        public BinaryAttributes BinaryAttributes { get; set; }
 
     }
 }
