@@ -177,6 +177,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
+        public Task<IRTCStatsReport> GetTransportStatsAsync()
+        {
+            return _pc.GetStats();
+        }
+
+
+
     }
 
 
