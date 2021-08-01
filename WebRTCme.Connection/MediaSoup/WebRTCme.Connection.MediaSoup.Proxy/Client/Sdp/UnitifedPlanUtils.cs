@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
 
@@ -64,5 +65,120 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
 			return encodings.ToArray();
 		}
+
+		// Adds multi-ssrc based simulcast into the given SDP media section offer.
+		public static void AddLegacySimulcast(MediaObject offerMediaObject, int numStreams)
+        {
+			if (numStreams <= 1)
+				throw new Exception("'numStreams must be greater than 1");
+
+			// Get the SSRC.
+			var ssrcMsidLine = (offerMediaObject.Ssrcs ?? new List<Ssrc>())
+				.FirstOrDefault(line => line.AttributesAndValues.Any(aav => aav == "msid"));
+
+			if (ssrcMsidLine is null)
+				throw new Exception("'a=ssrc line with msid information not found");
+
+
+/****
+			const [streamId, trackId] = ssrcMsidLine.value.split(' ');
+			const firstSsrc = ssrcMsidLine.id;
+			let firstRtxSsrc;
+
+			// Get the SSRC for RTX.
+			(offerMediaObject.ssrcGroups || [])
+				.some((line: any) =>
+		{
+				if (line.semantics !== 'FID')
+					return false;
+
+				const ssrcs = line.ssrcs.split(/\s +/);
+
+				if (Number(ssrcs[0]) === firstSsrc)
+				{
+					firstRtxSsrc = Number(ssrcs[1]);
+
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			});
+
+			const ssrcCnameLine = offerMediaObject.ssrcs
+				.find((line: any) => line.attribute === 'cname');
+
+			if (!ssrcCnameLine)
+				throw new Error('a=ssrc line with cname information not found');
+
+			const cname = ssrcCnameLine.value;
+			const ssrcs = [];
+			const rtxSsrcs = [];
+
+			for (let i = 0; i < numStreams; ++i)
+			{
+				ssrcs.push(firstSsrc + i);
+
+				if (firstRtxSsrc)
+					rtxSsrcs.push(firstRtxSsrc + i);
+			}
+
+			offerMediaObject.ssrcGroups = [];
+			offerMediaObject.ssrcs = [];
+
+			offerMediaObject.ssrcGroups.push(
+		{
+			semantics: 'SIM',
+			ssrcs: ssrcs.join(' ')
+		});
+
+			for (let i = 0; i < ssrcs.length; ++i)
+			{
+				const ssrc = ssrcs[i];
+
+				offerMediaObject.ssrcs.push(
+					{
+				id: ssrc,
+				attribute: 'cname',
+				value: cname
+			});
+
+			offerMediaObject.ssrcs.push(
+			{
+			id: ssrc,
+				attribute: 'msid',
+				value: `${ streamId} ${ trackId}`
+			});
+		}
+
+	for (let i = 0; i<rtxSsrcs.length; ++i)
+	{
+		const ssrc = ssrcs[i];
+		const rtxSsrc = rtxSsrcs[i];
+
+		offerMediaObject.ssrcs.push(
+			{
+				id        : rtxSsrc,
+				attribute : 'cname',
+				value     : cname
+	});
+
+		offerMediaObject.ssrcs.push(
+			{
+				id        : rtxSsrc,
+				attribute : 'msid',
+				value     : `${streamId
+} ${ trackId}`
+			});
+
+offerMediaObject.ssrcGroups.push(
+			{
+semantics: 'FID',
+				ssrcs: `${ ssrc} ${ rtxSsrc}`
+			});
+	}
+****/
+        }
 	}
 }
