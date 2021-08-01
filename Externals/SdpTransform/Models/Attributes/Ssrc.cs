@@ -6,14 +6,14 @@ namespace Utilme.SdpTransform
 {
     // a=ssrc:<ssrc-id> <attribute>
     // a=ssrc:<ssrc-id> <attribute>:<value>
-
     
     public class Ssrc
     {
         public const string Name = "ssrc:";
 
         public uint Id { get; init; }
-        public string[] AttributesAndValues { get; init; }
+        public string Attribute { get; init; }
+        public string Value { get; init; }
 
 
     }

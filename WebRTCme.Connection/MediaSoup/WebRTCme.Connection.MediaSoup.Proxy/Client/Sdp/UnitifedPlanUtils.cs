@@ -74,7 +74,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
 			// Get the SSRC.
 			var ssrcMsidLine = (offerMediaObject.Ssrcs ?? new List<Ssrc>())
-				.FirstOrDefault(line => line.AttributesAndValues.Any(aav => aav == "msid"));
+				.FirstOrDefault(line => line.Attribute == "msid");
 
 			if (ssrcMsidLine is null)
 				throw new Exception("'a=ssrc line with msid information not found");

@@ -136,7 +136,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             _mediaObject.Ssrcs.Add(new Ssrc
                             {
                                 Id = (uint)ssrc,
-                                AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                                Attribute = "cname",
+                                Value = offerRtpParameters.Rtcp.Cname
                             }); 
                         }
 
@@ -145,7 +146,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             _mediaObject.Ssrcs.Add(new Ssrc
                             {
                                 Id = (uint)ssrc,
-                                AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+                                Attribute = "msid",
+                                Value = $"{streamId ?? "-"} {trackId}"
                             });
                         }
 
@@ -156,7 +158,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 _mediaObject.Ssrcs.Add(new Ssrc
                                 {
                                     Id = (uint)rtxSsrc,
-                                    AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                                    Attribute = "cname",
+                                    Value = offerRtpParameters.Rtcp.Cname
                                 });
                             }
 
@@ -165,7 +168,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 _mediaObject.Ssrcs.Add(new Ssrc
                                 {
                                     Id = (uint)rtxSsrc,
-                                    AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+                                    Attribute = "msid",
+                                    Value = $"{streamId ?? "-"} {trackId}"
                                 });
                             }
 
@@ -259,14 +263,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 _mediaObject.Ssrcs.Add(new Ssrc
                 {
                     Id = (uint)ssrc,
-                    AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                    Attribute = "cname",
+                    Value = offerRtpParameters.Rtcp.Cname
                 });
             }
 
             _mediaObject.Ssrcs.Add(new Ssrc
             {
                 Id = (uint)ssrc,
-                AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+                Attribute = "msid",
+                Value = $"{streamId ?? "-"} {trackId}"
             });
 
             if (rtxSsrc.HasValue)
@@ -276,14 +282,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     _mediaObject.Ssrcs.Add(new Ssrc
                     {
                         Id = (uint)rtxSsrc,
-                        AttributesAndValues = new string[] { $"cname:{offerRtpParameters.Rtcp.Cname}" }
+                        Attribute = "cname",
+                        Value = offerRtpParameters.Rtcp.Cname
                     });
                 }
 
                 _mediaObject.Ssrcs.Add(new Ssrc
                 {
                     Id = (uint)rtxSsrc,
-                    AttributesAndValues = new string[] { $"msid:{streamId ?? "-"} {trackId}" }
+                    Attribute = "msid",
+                    Value = $"{streamId ?? "-"} {trackId}"
                 });
 
                 // Associate original and retransmission SSRCs.

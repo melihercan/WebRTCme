@@ -144,14 +144,13 @@ namespace Utilme.SdpTransform
                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
                 .Replace(Ssrc.Name, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var attributesAndValues = new string[tokens.Length - 1];
-            for (int i = 1; i < tokens.Length; i++)
-                attributesAndValues[i - 1] = tokens[i];
+            var attributeAndValue = tokens[1].Split(':');
             return new Ssrc
             {
                 Id = uint.Parse(tokens[0]),
-                AttributesAndValues = attributesAndValues
-            };
+                Attribute = attributeAndValue[0],
+                Value = attributeAndValue.Length > 1 ? attributeAndValue[1] : null
+             };
         }
 
         public static SsrcGroup ToSsrcGroup(this string str)
@@ -399,12 +398,13 @@ namespace Utilme.SdpTransform
             sb
                 .Append(Ssrc.Name)
                 .Append(ssrc.Id.ToString())
-                .Append(" ");
-            for (int i = 0; i < ssrc.AttributesAndValues.Length; i++)
+                .Append(" ")
+                .Append(ssrc.Attribute);
+            if (ssrc.Value is not null)
             {
-                sb.Append(ssrc.AttributesAndValues[i]);
-                if (i != ssrc.AttributesAndValues.Length - 1)
-                    sb.Append(" ");
+                sb
+                    .Append(":")
+                    .Append(ssrc.Value);
             }
             sb.Append(SdpSerializer.CRLF);
 
