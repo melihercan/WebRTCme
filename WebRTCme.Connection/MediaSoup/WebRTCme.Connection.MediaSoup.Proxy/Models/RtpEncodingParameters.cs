@@ -7,15 +7,15 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class Rtx
     {
-        public int? Ssrc { get; init; }
+        public uint? Ssrc { get; set; }
     }
 
     public class RtpEncodingParameters
     {
-        public uint? Ssrc { get; init; }
+        public uint? Ssrc { get; set; }
         public string Rid { get; set; }
         public int? CodecPayloadType { get; init; }
-        public Rtx Rtx { get; init; }
+        public Rtx Rtx { get; set; }
         public bool? Dtx { get; init; }
         public string ScalabilityMode { get; init; }
         public int? ScaleResolutionDownBy { get; init; }

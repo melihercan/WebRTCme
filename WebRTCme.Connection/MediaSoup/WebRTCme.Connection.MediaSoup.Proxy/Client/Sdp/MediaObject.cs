@@ -6,7 +6,7 @@ using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
-    class MediaObject
+    public class MediaObject
     {
         public Mid Mid { get; set; }
         public Msid Msid { get; set; }

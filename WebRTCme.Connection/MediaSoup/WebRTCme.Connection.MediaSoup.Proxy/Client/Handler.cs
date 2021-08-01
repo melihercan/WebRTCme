@@ -233,8 +233,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (options.Encodings is not null &&
                 options.Encodings.Length == 1 &&
                 layers.SpatialLayers > 1 &&
-                sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp9"
-            )
+                sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp9")
             {
                 Console.WriteLine("send() | enabling legacy simulcast for VP9 SVC");
 
@@ -346,10 +345,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                             localId,
                             rtpParameters : sendingRtpParameters,
                             rtpSender     : transceiver.sender
-
-                        };
                 ****/
-                return null;
+
+            };
+   return null;
 
         }
 

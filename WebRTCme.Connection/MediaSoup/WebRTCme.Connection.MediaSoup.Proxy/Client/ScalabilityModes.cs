@@ -9,7 +9,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
     public static class ScalabilityModes
     {
-        static Regex ScalabilityModeRegex = new("'^[LS]([1-9]\\d{0,1})T([1-9]\\d{0,1})");
+        static Regex ScalabilityModeRegex = new("^[LS]([1-9]\\d{0,1})T([1-9]\\d{0,1})");
 
 		public static ScalabilityMode Parse(string scalabilityMode = "")
 		{
