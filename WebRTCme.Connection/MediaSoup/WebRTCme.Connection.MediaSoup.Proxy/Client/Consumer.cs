@@ -10,7 +10,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler OnClose;
         public event EventHandler OnTransportClosed;
         public event EventHandler OnTrackEnded;
-
         public event EventHandlerAsync<string, IRTCStatsReport> OnGetStatsAsync;
 
 

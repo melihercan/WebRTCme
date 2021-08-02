@@ -5,15 +5,15 @@ using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
-    public class DataConsumer
+
+    public class DataProducer
     {
         readonly IRTCDataChannel _dataChannel;
 
-        public DataConsumer(string id, string dataProducerId, IRTCDataChannel dataChannel, 
-            SctpStreamParameters sctpStreamParameters, object appData)
+        public DataProducer(string id, IRTCDataChannel dataChannel, SctpStreamParameters sctpStreamParameters, 
+            object appData)
         {
             Id = id;
-            DataProducerId = dataProducerId;
             _dataChannel = dataChannel;
             SctpStreamParameters = sctpStreamParameters;
             AppData = appData;
@@ -26,19 +26,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler OnClose;
         public event EventHandler<IErrorEvent> OnError;
         public event EventHandler OnTransportClosed;
-        public event EventHandler<IMessageEvent> OnMessage;
+        public event EventHandler OnBufferedAmountLow;
 
         public string Id { get; }
-        public string DataProducerId { get; }
         public bool Closed { get; private set; }
         public SctpStreamParameters SctpStreamParameters { get; }
         public RTCDataChannelState DataChannelState => _dataChannel.ReadyState;
         public string Label => _dataChannel.Label;
         public string Protocol => _dataChannel.Protocol;
-        public BinaryType BinaryType
+        public uint BufferedAmount => _dataChannel.BufferedAmount;
+        public uint BufferedAmountLowThreshold
         {
-            get => _dataChannel.BinaryType;
-            set => _dataChannel.BinaryType = value;
+            get => _dataChannel.BufferedAmountLowThreshold;
+            set => _dataChannel.BufferedAmountLowThreshold = value;
         }
         public object AppData { get; }
 
@@ -72,20 +72,29 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             OnTransportClosed?.Invoke(this, EventArgs.Empty);
         }
 
+        public void Send(object data)
+        {
+            if (Closed)
+                throw new Exception("Closed");
+            
+            _dataChannel.Send(data);
+        }
+
         void HandleDataChannel()
         {
             _dataChannel.OnOpen += DataChannel_OnOpen;
             _dataChannel.OnError += DataChannel_OnError;
             _dataChannel.OnClose += DataChannel_OnClose;
-            _dataChannel.OnMessage += DataChannel_OnMessage;
+            _dataChannel.OnBufferedAmountLow += DataChannel_OnBufferedAmountLow;
         }
+
 
         void DestroyDataChannel()
         {
             _dataChannel.OnOpen -= DataChannel_OnOpen;
             _dataChannel.OnError -= DataChannel_OnError;
             _dataChannel.OnClose -= DataChannel_OnClose;
-            _dataChannel.OnMessage -= DataChannel_OnMessage;
+            _dataChannel.OnBufferedAmountLow -= DataChannel_OnBufferedAmountLow;
         }
 
         void DataChannel_OnOpen(object sender, EventArgs e)
@@ -118,10 +127,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (Closed)
                 return;
 
-            OnMessage?.Invoke(this, e);
+            Console.WriteLine("DataChannel message event in a DataProducer, message discarded");
         }
 
+        private void DataChannel_OnBufferedAmountLow(object sender, EventArgs e)
+        {
+            if (Closed)
+                return;
 
+            OnBufferedAmountLow?.Invoke(this, e);
+        }
 
     }
 }

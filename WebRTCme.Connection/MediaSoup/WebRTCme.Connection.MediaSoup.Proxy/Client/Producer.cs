@@ -16,15 +16,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler OnClose;
         public event EventHandler OnTransportClosed;
         public event EventHandler OnTrackEnded;
-
-
-        // Internal events.
-        internal event EventHandler<IMediaStreamTrack> ReplaceTrackEvent;
-        internal event EventHandler<int> SetMaxSpatialLayerEvent;
-        internal event EventHandler<RTCRtpEncodingParameters> SetRtpEncodingParametersEvent;
-
-        internal delegate Task<IRTCStatsReport> GetStatsDelegate(string producerLocalId);
-        internal event GetStatsDelegate GetStatsEvent;
+        public event EventHandlerAsync<IMediaStreamTrack> OnReplaceTrackAsync;
+        public event EventHandlerAsync<int> OnSetMaxSpatialLayerAsync;
+        public event EventHandlerAsync<RTCRtpEncodingParameters> OnSetRtpEncodingParametersAsync;
+        public event EventHandlerAsync<string, IRTCStatsReport> OnGetStatsAsync;
 
         public Producer(string id, string localId, IRTCRtpSender rtpSender, IMediaStreamTrack track, 
             RtpParameters rtpParameters, bool stopTracks, bool disableTrackOnPause, bool zeroRtpOnPause, 
@@ -92,12 +87,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (Closed)
                 throw new Exception("closed");
 
-            if (GetStatsEvent is not null)
-                return await Task.Run(async () => await GetStatsEvent(LocalId));
-            else
-                return null;
-            
-            ///return await RtpSender.GetStats();
+            return await OnGetStatsAsync?.Invoke(this, LocalId);
         }
 
         public void Pause()
@@ -111,7 +101,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Track.Enabled = false;
 
             if (_zeroRtpOnPause)
-                RtpSender.ReplaceTrack();
+                OnReplaceTrackAsync?.Invoke(this, null);
         }
 
         public void Resume()
@@ -125,10 +115,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Track.Enabled = true;
 
             if (_zeroRtpOnPause)
-                RtpSender.ReplaceTrack(Track);
+                OnReplaceTrackAsync?.Invoke(this, Track);
         }
 
-        public void ReplaceTrack(IMediaStreamTrack track)
+        public async Task ReplaceTrackAsync(IMediaStreamTrack track)
         {
             if (Closed)
             {
@@ -154,7 +144,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             if (!_zeroRtpOnPause || !Paused)
             {
-                ReplaceTrackEvent?.Invoke(this, track);
+                await OnReplaceTrackAsync?.Invoke(this, track);
             }
 
             // Destroy the previous track.
@@ -177,7 +167,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             HandleTrack();
         }
 
-        public void SetMaxSpatialLayer(int spatialLayer)
+        public async Task SetMaxSpatialLayerAsync(int spatialLayer)
         {
             if (Closed)
                 throw new Exception("closed");
@@ -187,17 +177,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (spatialLayer == _maxSpatialLayer)
                 return;
 
-            SetMaxSpatialLayerEvent?.Invoke(this, spatialLayer);
+            await OnSetMaxSpatialLayerAsync?.Invoke(this, spatialLayer);
             _maxSpatialLayer = spatialLayer;
 
         }
 
-        public void SetRtpEncodingParameters(RTCRtpEncodingParameters parameters)
+        public async Task SetRtpEncodingParameters(RTCRtpEncodingParameters parameters)
         {
             if (Closed)
                 throw new Exception("closed");
 
-            SetRtpEncodingParametersEvent?.Invoke(this, parameters);
+            await OnSetRtpEncodingParametersAsync?.Invoke(this, parameters);
         }
 
         void HandleTrack()
@@ -205,9 +195,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Track.OnEnded += Producer_TrackEnded;
         }
 
-        private void Producer_TrackEnded(object sender, EventArgs e)
+        void Producer_TrackEnded(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            OnTrackEnded?.Invoke(this, EventArgs.Empty);
         }
 
         void DestroyTrack()
@@ -224,7 +214,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             }
             catch
             { }
-
         }
     }
 }

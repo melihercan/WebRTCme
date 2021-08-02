@@ -86,20 +86,20 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
         }
 
-        async Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, string e)
+        async Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, string localId)
         {
-            return await _handler.GetReceiverStatsAsync(e);
+            return await _handler.GetReceiverStatsAsync(localId);
         }
 
         void HandleProducer(Producer producer)
         {
-            producer.GetStatsEvent += Producer_GetStatsEvent;
+            producer.OnGetStatsAsync += Producer_OnGetStatsAsync;
 
         }
 
-        private async Task<IRTCStatsReport> Producer_GetStatsEvent(string producerLocalId)
+        async Task<IRTCStatsReport> Producer_OnGetStatsAsync(object sender, string localId)
         {
-            return await _handler.GetSenderStatsAsync(producerLocalId);
+            return await _handler.GetSenderStatsAsync(localId);
         }
     }
 
