@@ -7,35 +7,31 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class DataConsumer
     {
-        readonly string _id;
-        readonly string _dataProducerId;
         readonly IRTCDataChannel _dataChannel;
-        readonly SctpStreamParameters _sctpStreamParameters;
-        readonly object _appData;
-        bool _closed;
 
         public DataConsumer(string id, string dataProducerId, IRTCDataChannel dataChannel, 
             SctpStreamParameters sctpStreamParameters, object appData)
         {
-            _id = id;
-            _dataProducerId = dataProducerId;
+            Id = id;
+            DataProducerId = dataProducerId;
             _dataChannel = dataChannel;
-            _sctpStreamParameters = sctpStreamParameters;
-            _appData = appData;
+            SctpStreamParameters = sctpStreamParameters;
+            AppData = appData;
+            Closed = false;
 
             HandleDataChannel();
         }
 
         public event EventHandler OnOpen;
         public event EventHandler OnClose;
-        public event EventHandler<string> OnError;
+        public event EventHandler<IErrorEvent> OnError;
         public event EventHandler OnTransportClosed;
-        public event EventHandler<object> OnMessage;
+        public event EventHandler<IMessageEvent> OnMessage;
 
-        public string Id => _id;
-        public string DataProducerId => _dataProducerId;
-        public bool Closed => _closed;
-        public SctpStreamParameters SctpStreamParameters => _sctpStreamParameters;
+        public string Id { get; }
+        public string DataProducerId { get; }
+        public bool Closed { get; private set; }
+        public SctpStreamParameters SctpStreamParameters { get; }
         public RTCDataChannelState DataChannelState => _dataChannel.ReadyState;
         public string Label => _dataChannel.Label;
         public string Protocol => _dataChannel.Protocol;
@@ -44,16 +40,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             get => _dataChannel.BinaryType;
             set => _dataChannel.BinaryType = value;
         }
-        public object AppData => _appData;
+        public object AppData { get; }
 
         public void Close()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
             Console.WriteLine("close()");
 
-            _closed = true;
+            Closed = true;
 
             DestroyDataChannel();
             _dataChannel.Close();
@@ -63,12 +59,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public void TransportClosed()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
             Console.WriteLine("TransportClosed()");
 
-            _closed = true;
+            Closed = true;
 
             DestroyDataChannel();
             _dataChannel.Close();
@@ -93,24 +89,40 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _dataChannel.OnMessage -= DataChannel_OnMessage;
         }
 
-        void DataChannel_OnMessage(object sender, IMessageEvent e)
+        void DataChannel_OnOpen(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
-        }
+            if (Closed)
+                return;
 
-        void DataChannel_OnClose(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
+            OnOpen?.Invoke(this, EventArgs.Empty);
         }
 
         void DataChannel_OnError(object sender, IErrorEvent e)
         {
-            throw new NotImplementedException();
+            if (Closed)
+                return;
+
+            OnError?.Invoke(this, e);
         }
 
-        void DataChannel_OnOpen(object sender, EventArgs e)
+        void DataChannel_OnClose(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            if (Closed)
+                return;
+
+            Closed = true;
+            OnClose?.Invoke(this, EventArgs.Empty);
         }
+
+        void DataChannel_OnMessage(object sender, IMessageEvent e)
+        {
+            if (Closed)
+                return;
+
+            OnMessage?.Invoke(this, e);
+        }
+
+
+
     }
 }

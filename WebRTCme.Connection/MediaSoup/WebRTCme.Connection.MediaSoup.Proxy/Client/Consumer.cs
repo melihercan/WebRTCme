@@ -7,14 +7,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Consumer
     {
-		bool _closed;
-		bool _paused;
-
         public event EventHandler OnClose;
         public event EventHandler OnTransportClosed;
         public event EventHandler OnTrackEnded;
 
-        public Consumer(string id, string localId, string producerId, IRTCRtpReceiver rtpReceiver, 
+        public Consumer(string id, string localId, string producerId, IRTCRtpReceiver rtpReceiver,
             IMediaStreamTrack track, RtpParameters rtpParameters, object appData)
         {
             Id = id;
@@ -24,7 +21,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Track = track;
             RtpParameters = rtpParameters;
             AppData = appData;
-            _paused = !track.Enabled;
+            Paused = !track.Enabled;
+            Closed = false;
 
             HandleTrack();
         }
@@ -33,23 +31,23 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public string Id { get; }
         public string LocalId { get; }
         public string ProducerId { get; }
-        public bool Closed => _closed;
+        public bool Closed { get; private set; }
         public MediaKind Kind => Track.Kind.ToMediaSoup();
         public IRTCRtpReceiver RtpReceiver { get; }
         public IMediaStreamTrack Track { get; }
         public RtpParameters RtpParameters { get; }
-        public bool Paused => _paused;
+        public bool Paused { get; private set;}
         public object AppData { get; }
 
 
         public void Close()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
             Console.WriteLine("close()");
 
-            _closed = true;
+            Closed = true;
 
             DestroyTrack();
 
@@ -58,12 +56,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public void TransportClosed()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
             Console.WriteLine("TransportClosed()");
 
-            _closed = true;
+            Closed = true;
 
             DestroyTrack();
 
@@ -72,7 +70,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public async Task<IRTCStatsReport> GetStats()
         {
-            if (_closed)
+            if (Closed)
                 throw new Exception("closed");
             
             return await RtpReceiver.GetStats();
@@ -80,25 +78,25 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public void Pause()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
-            _paused = true;
+            Paused = true;
             Track.Enabled = false;
         }
 
         public void Resume()
         {
-            if (_closed)
+            if (Closed)
                 return;
 
-            _paused = false;
+            Paused = false;
             Track.Enabled = true;
         }
 
         void HandleTrack()
         {
-            Track.OnEnded += TrackEndedEvent;
+            Track.OnEnded += Consumer_TrackEnded;
         }
 
 
@@ -106,14 +104,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         {
             try
             {
-                Track.OnEnded -= TrackEndedEvent;
+                Track.OnEnded -= Consumer_TrackEnded;
                 Track.Stop();
             }
             catch
             { }
         }
         
-        void TrackEndedEvent(object sender, EventArgs e)
+        void Consumer_TrackEnded(object sender, EventArgs e)
         {
             OnTrackEnded?.Invoke(this, EventArgs.Empty);
         }
