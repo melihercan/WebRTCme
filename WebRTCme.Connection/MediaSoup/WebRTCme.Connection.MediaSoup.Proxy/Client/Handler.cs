@@ -81,6 +81,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return nativeRtpCapabilities;
         }
 
+
         public Task<SctpCapabilities> GetNativeSctpCapabilitiesAsync()
         {
             return Task.FromResult(new SctpCapabilities 
@@ -330,8 +331,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
+        public async Task<IRTCStatsReport> GetSenderStatsAsync(string producerLocalId)
+        {
+            var transceiver = _mapMidTransceiver[producerLocalId];
+            if (transceiver is null)
+                throw new Exception("associated RTCRtpTransceiver not found");
 
-        void  SetupTransport(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
+            return await transceiver.Sender.GetStats();
+        }
+
+
+        void SetupTransport(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
         {
             if (localSdpObject is null)
                 localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(_pc.LocalDescription.Sdp));

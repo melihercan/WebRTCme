@@ -6,6 +6,7 @@ namespace WebRTCme.Connection
 {
     public enum ConnectionState
     {
+        New,
         Connecting,
         Connected,
         Failed,
