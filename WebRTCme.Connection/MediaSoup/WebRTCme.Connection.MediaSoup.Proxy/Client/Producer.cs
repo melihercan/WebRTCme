@@ -87,7 +87,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             OnTransportClosed?.Invoke(this, EventArgs.Empty);
         }
 
-        public async Task<IRTCStatsReport> GetStats()
+        public async Task<IRTCStatsReport> GetStatsAsync()
         {
             if (Closed)
                 throw new Exception("closed");

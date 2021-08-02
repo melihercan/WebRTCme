@@ -90,6 +90,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             });
         }
 
+
         public void Run(HandlerRunOptions options)
         {
             _direction = options.Direction;
@@ -331,9 +332,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
-        public async Task<IRTCStatsReport> GetSenderStatsAsync(string producerLocalId)
+        public async Task<IRTCStatsReport> GetReceiverStatsAsync(string localId)
         {
-            var transceiver = _mapMidTransceiver[producerLocalId];
+            var transceiver = _mapMidTransceiver[localId];
+            if (transceiver is null)
+                throw new Exception("associated RTCRtpTransceiver not found");
+
+            return await transceiver.Receiver.GetStats();
+        }
+
+        public async Task<IRTCStatsReport> GetSenderStatsAsync(string localId)
+        {
+            var transceiver = _mapMidTransceiver[localId];
             if (transceiver is null)
                 throw new Exception("associated RTCRtpTransceiver not found");
 

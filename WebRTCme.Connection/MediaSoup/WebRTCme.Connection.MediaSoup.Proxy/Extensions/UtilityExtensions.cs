@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy
 {
-    internal static class Extensions
+    internal static class UtilityExtensions
     {
         public static string DisplayName(this Enum enumValue)
         {

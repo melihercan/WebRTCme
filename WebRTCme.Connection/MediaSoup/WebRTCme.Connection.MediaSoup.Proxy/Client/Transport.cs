@@ -27,24 +27,36 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
-        //public async Task<Consumer> Consume(ConsumerOptions options)
-        //{
-        //    Console.WriteLine("Consume()");
+        public async Task<Consumer> Consume(ConsumerOptions options)
+        {
+            Console.WriteLine("Consume()");
 
-        //    var rtpParameters = Utils.Clone<RtpParameters>(options.RtpParameters, null);
+            var rtpParameters = Utils.Clone<RtpParameters>(options.RtpParameters, null);
 
-        //    if (_closed)
-        //        throw new Exception("closed");
-        //    else if (_direction != InternalDirection.Recv)
-        //        throw new Exception("not a receiving Transport");
-        //    else if (options.Kind != MediaKind.Audio && options.Kind != MediaKind.Video)
-        //        throw new Exception($"invalid kind {options.Kind}");
-        //    else if (_connectionState == ConnectionState.New)
-        //        throw new Exception($"no connect listener set into this transport");
+            if (_closed)
+                throw new Exception("closed");
+            else if (_direction != InternalDirection.Recv)
+                throw new Exception("not a receiving Transport");
+            else if (options.Kind != MediaKind.Audio && options.Kind != MediaKind.Video)
+                throw new Exception($"invalid kind {options.Kind}");
+            else if (_connectionState == ConnectionState.New)
+                throw new Exception($"no connect listener set into this transport");
 
 
+            var consumer = new Consumer(
+                "",
+                "",
+                "",
+                null,
+                null,
+                null,
+                null);
 
-        //}
+
+            HandleConsumer(consumer);
+
+            return consumer;
+        }
 
 
         public async Task<Producer> Produce(ProducerOptions options)
@@ -67,6 +79,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             return producer;
 
+        }
+
+        void HandleConsumer(Consumer consumer)
+        {
+            consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
+        }
+
+        async Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, string e)
+        {
+            return await _handler.GetReceiverStatsAsync(e);
         }
 
         void HandleProducer(Producer producer)
