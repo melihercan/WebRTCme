@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
+namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public static class Utils
     {
