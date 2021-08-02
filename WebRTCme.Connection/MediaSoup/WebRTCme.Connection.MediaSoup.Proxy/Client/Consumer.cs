@@ -7,13 +7,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Consumer
     {
-		readonly string _id;
-		readonly string _localId;
-		readonly string _producerId;
-		readonly IRTCRtpReceiver _rtpReceiver;
-		readonly IMediaStreamTrack _track;
-		readonly RtpParameters _rtpParameters;
-		readonly object _appData;
 		bool _closed;
 		bool _paused;
 
@@ -24,29 +17,29 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public Consumer(string id, string localId, string producerId, IRTCRtpReceiver rtpReceiver, 
             IMediaStreamTrack track, RtpParameters rtpParameters, object appData)
         {
-            _id = id;
-            _localId = localId;
-            _producerId = producerId;
-            _rtpReceiver = rtpReceiver;
-            _track = track;
-            _rtpParameters = rtpParameters;
-            _appData = appData;
+            Id = id;
+            LocalId = localId;
+            ProducerId = producerId;
+            RtpReceiver = rtpReceiver;
+            Track = track;
+            RtpParameters = rtpParameters;
+            AppData = appData;
             _paused = !track.Enabled;
 
             HandleTrack();
         }
 
 
-        public string Id => _id;
-        public string LocalId => _localId;
-        public string ProducerId => _producerId;
+        public string Id { get; }
+        public string LocalId { get; }
+        public string ProducerId { get; }
         public bool Closed => _closed;
-        public MediaKind Kind => _track.Kind.ToMediaSoup();
-        public IRTCRtpReceiver RtpReceiver => _rtpReceiver;
-        public IMediaStreamTrack Track => _track;
-        public RtpParameters RtpParameters => _rtpParameters;
+        public MediaKind Kind => Track.Kind.ToMediaSoup();
+        public IRTCRtpReceiver RtpReceiver { get; }
+        public IMediaStreamTrack Track { get; }
+        public RtpParameters RtpParameters { get; }
         public bool Paused => _paused;
-        public object AppData => _appData;
+        public object AppData { get; }
 
 
         public void Close()
@@ -82,7 +75,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (_closed)
                 throw new Exception("closed");
             
-            return await _rtpReceiver.GetStats();
+            return await RtpReceiver.GetStats();
         }
 
         public void Pause()
@@ -91,7 +84,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 return;
 
             _paused = true;
-            _track.Enabled = false;
+            Track.Enabled = false;
         }
 
         public void Resume()
@@ -100,12 +93,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 return;
 
             _paused = false;
-            _track.Enabled = true;
+            Track.Enabled = true;
         }
 
         void HandleTrack()
         {
-            _track.OnEnded += TrackEndedEvent;
+            Track.OnEnded += TrackEndedEvent;
         }
 
 
@@ -113,8 +106,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         {
             try
             {
-                _track.OnEnded -= TrackEndedEvent;
-                _track.Stop();
+                Track.OnEnded -= TrackEndedEvent;
+                Track.Stop();
             }
             catch
             { }
