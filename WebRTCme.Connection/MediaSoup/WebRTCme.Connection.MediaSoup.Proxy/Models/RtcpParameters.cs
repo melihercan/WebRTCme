@@ -6,7 +6,7 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class RtcpParameters
     {
-        public string Cname { get; init; }
+        public string Cname { get; set; }
         public bool ReducedSize { get; init; }
         public bool Mux { get; init; }
     }

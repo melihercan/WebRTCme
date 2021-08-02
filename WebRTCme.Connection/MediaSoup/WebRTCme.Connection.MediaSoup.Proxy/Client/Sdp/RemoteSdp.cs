@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
 using WebRTCme.Connection.MediaSoup.Proxy.Models;
@@ -14,9 +15,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         SctpParameters _sctpParameters;
         PlainRtpParameters _plainRtpParameters;
         bool? _planB;
-        MediaSection[] _mediaSections = new MediaSection[] { };
-        Dictionary<string, int> _midToIndex = new();
-        string _firstMid;
+        List<MediaSection> _mediaSections = new();
+        Dictionary<Mid, int> _midToIndex = new();
+        Mid _firstMid;
 
         Utilme.SdpTransform.Sdp _sdp;
 
@@ -104,7 +105,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public MediaSectionIdx GetNextMediaSectionIdx()
         {
             // If a closed media section is found, return its index.
-            for (var idx = 0; idx < _mediaSections.Length; ++idx)
+            for (var idx = 0; idx < _mediaSections.Count; ++idx)
             {
                 var mediaSection = _mediaSections[idx];
                 if (mediaSection.Closed)
@@ -112,7 +113,111 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             }
 
             // If no closed media section is found, return next one.
-            return new MediaSectionIdx { Idx = _mediaSections.Length };
+            return new MediaSectionIdx { Idx = _mediaSections.Count };
+        }
+
+        internal void Send(MediaObject offerMediaObject, Mid reuseMid, RtpParameters offerRtpParameters, 
+            RtpParameters answerRtpParameters, ProducerCodecOptions codecOptions, bool extmapAllowMixed)
+        {
+            var mediaSection = new AnswerMediaSection(
+                _iceParameters,
+				_iceCandidates,
+				_dtlsParameters,
+                null,
+				_plainRtpParameters,
+				(bool)_planB,
+				offerMediaObject,
+				offerRtpParameters,
+				answerRtpParameters,
+				codecOptions,
+				extmapAllowMixed);
+
+		    // Unified-Plan with closed media section replacement.
+		if (reuseMid is not null)
+		{
+			ReplaceMediaSection(mediaSection, reuseMid);
+        }
+		// Unified-Plan or Plan-B with different media kind.
+		else if (!_midToIndex.ContainsKey(mediaSection.Mid))
+        {
+            AddMediaSection(mediaSection);
+        }
+		// Plan-B with same media kind.
+		else
+        {
+            ReplaceMediaSection(mediaSection);
+        }
+
+    }
+
+        private void AddMediaSection(AnswerMediaSection newMediaSection)
+        {
+            if (_firstMid is null)
+                _firstMid = newMediaSection.Mid;
+
+            // Add to the vector.
+            _mediaSections.Add(newMediaSection);
+
+            // Add to the map.
+            _midToIndex.Add(newMediaSection.Mid, _mediaSections.Count - 1);
+
+            // Add to the SDP object.
+            _sdp.MediaDescriptions.Add(CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject));
+
+            // Regenerate BUNDLE mids.
+            RegenerateBundleMids();
+        }
+
+        private void ReplaceMediaSection(AnswerMediaSection newMediaSection, Mid reuseMid = null)
+        {
+            // Store it in the map.
+            if (reuseMid is not null)
+            {
+                if (!_midToIndex.ContainsKey(reuseMid))
+                    throw new Exception($"no media section found for reuseMid: {reuseMid}");
+
+                var idx = _midToIndex[reuseMid];
+                var oldMediaSection = _mediaSections[idx];
+
+                // Replace the index in the vector with the new media section.
+                _mediaSections[idx] = newMediaSection;
+
+                // Update the map.
+                _midToIndex.Remove(oldMediaSection.Mid);
+                _midToIndex.Add(newMediaSection.Mid, idx);
+
+                // Update the SDP object.
+                _sdp.MediaDescriptions[idx] = 
+                    CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject);
+
+                // Regenerate BUNDLE mids.
+                RegenerateBundleMids();
+            }
+            else
+            {
+                if (!_midToIndex.ContainsKey(newMediaSection.Mid))
+                    throw new Exception($"no media section found for mid: {newMediaSection.Mid}");
+
+                var idx = _midToIndex[newMediaSection.Mid];
+
+                // Replace the index in the vector with the new media section.
+                _mediaSections[idx] = newMediaSection;
+
+                // Update the SDP object.
+                _sdp.MediaDescriptions[idx] = 
+                    CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject);
+            }
+
+        }
+
+        void RegenerateBundleMids()
+        {
+            if (_dtlsParameters is null)
+                return;
+
+            _sdp.Group.Tokens = _mediaSections
+                .Where(mediaSection => !mediaSection.Closed)
+                .Select(mediaSection => mediaSection.Mid.Id).ToArray();
         }
     }
 }

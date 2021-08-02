@@ -6,7 +6,7 @@ using Utilme.SdpTransform;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
-    public static class UnitifedPlanUtils
+    public static class UnifiedPlanUtils
     {
         public static RtpEncodingParameters[] GetRtpEncodings(MediaObject offerMediaObject)
         {
@@ -79,25 +79,21 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 			if (ssrcMsidLine is null)
 				throw new Exception("'a=ssrc line with msid information not found");
 
-
-/****
-			const [streamId, trackId] = ssrcMsidLine.value.split(' ');
-			const firstSsrc = ssrcMsidLine.id;
-			let firstRtxSsrc;
+			var values = ssrcMsidLine.Value.Split(' ');
+			var streamId = values[0];
+			var trackId = values.Length > 1 ? values[1] : null;
+			var firstSsrc = ssrcMsidLine.Id;
+			uint? firstRtxSsrc = null;
 
 			// Get the SSRC for RTX.
-			(offerMediaObject.ssrcGroups || [])
-				.some((line: any) =>
-		{
-				if (line.semantics !== 'FID')
+			(offerMediaObject.SsrcGroups ?? new List<SsrcGroup>()).Any(line =>
+			{
+				if (line.Semantics != "FID")
 					return false;
 
-				const ssrcs = line.ssrcs.split(/\s +/);
-
-				if (Number(ssrcs[0]) === firstSsrc)
+				if (uint.Parse(line.SsrcIds[0]) == firstSsrc)
 				{
-					firstRtxSsrc = Number(ssrcs[1]);
-
+					firstRtxSsrc = uint.Parse(line.SsrcIds[1]);
 					return true;
 				}
 				else
@@ -106,79 +102,79 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				}
 			});
 
-			const ssrcCnameLine = offerMediaObject.ssrcs
-				.find((line: any) => line.attribute === 'cname');
+			var ssrcCnameLine = offerMediaObject.Ssrcs
+				.FirstOrDefault(line => line.Attribute == "cname");
 
-			if (!ssrcCnameLine)
-				throw new Error('a=ssrc line with cname information not found');
+			if (ssrcCnameLine is null)
+				throw new Exception("a=ssrc line with cname information not found");
 
-			const cname = ssrcCnameLine.value;
-			const ssrcs = [];
-			const rtxSsrcs = [];
+			var cname = ssrcCnameLine.Value;
+			List<uint> ssrcs = new();
+			List<uint> rtxSsrcs = new();
 
-			for (let i = 0; i < numStreams; ++i)
+			for (uint i = 0; i < numStreams; ++i)
 			{
-				ssrcs.push(firstSsrc + i);
+				ssrcs.Add(firstSsrc + i);
 
-				if (firstRtxSsrc)
-					rtxSsrcs.push(firstRtxSsrc + i);
+				if (firstRtxSsrc is not null)
+					rtxSsrcs.Add((uint)(firstRtxSsrc + i));
 			}
 
-			offerMediaObject.ssrcGroups = [];
-			offerMediaObject.ssrcs = [];
+			offerMediaObject.SsrcGroups = new();
+			offerMediaObject.Ssrcs = new();
 
-			offerMediaObject.ssrcGroups.push(
-		{
-			semantics: 'SIM',
-			ssrcs: ssrcs.join(' ')
-		});
+			var x = ssrcs.Select(ssrc => ssrc.ToString()).ToArray();
 
-			for (let i = 0; i < ssrcs.length; ++i)
+			offerMediaObject.SsrcGroups.Add(new SsrcGroup 
 			{
-				const ssrc = ssrcs[i];
-
-				offerMediaObject.ssrcs.push(
-					{
-				id: ssrc,
-				attribute: 'cname',
-				value: cname
+				Semantics = "SIM",
+				SsrcIds = ssrcs.Select(ssrc => ssrc.ToString()).ToArray()
 			});
 
-			offerMediaObject.ssrcs.push(
+			for (int i = 0; i < ssrcs.Count; ++i)
 			{
-			id: ssrc,
-				attribute: 'msid',
-				value: `${ streamId} ${ trackId}`
-			});
+				var ssrc = ssrcs[i];
+
+				offerMediaObject.Ssrcs.Add(new Ssrc
+				{
+					Id = ssrc,
+					Attribute = "cname",
+					Value = cname
+				});
+
+				offerMediaObject.Ssrcs.Add(new Ssrc
+				{
+					Id = ssrc,
+					Attribute = "msid",
+					Value = $"{ streamId} { trackId}"
+				});
+			}
+
+			for (int i = 0; i<rtxSsrcs.Count; ++i)
+			{
+				var ssrc = ssrcs[i];
+				var rtxSsrc = rtxSsrcs[i];
+
+				offerMediaObject.Ssrcs.Add(new Ssrc
+				{
+					Id = rtxSsrc,
+					Attribute = "cname",
+					Value = cname
+				});
+
+				offerMediaObject.Ssrcs.Add(new Ssrc
+				{
+					Id = rtxSsrc,
+					Attribute = "msid",
+					Value = $"{streamId} ${ trackId}"
+				});
+
+				offerMediaObject.SsrcGroups.Add(new SsrcGroup
+				{
+					Semantics = "FID",
+					SsrcIds = new string[] { $"{ ssrc} ${ rtxSsrc}" }
+				});
+			}
 		}
-
-	for (let i = 0; i<rtxSsrcs.length; ++i)
-	{
-		const ssrc = ssrcs[i];
-		const rtxSsrc = rtxSsrcs[i];
-
-		offerMediaObject.ssrcs.push(
-			{
-				id        : rtxSsrc,
-				attribute : 'cname',
-				value     : cname
-	});
-
-		offerMediaObject.ssrcs.push(
-			{
-				id        : rtxSsrc,
-				attribute : 'msid',
-				value     : `${streamId
-} ${ trackId}`
-			});
-
-offerMediaObject.ssrcGroups.push(
-			{
-semantics: 'FID',
-				ssrcs: `${ ssrc} ${ rtxSsrc}`
-			});
-	}
-****/
-        }
 	}
 }

@@ -9,6 +9,7 @@ namespace Utilme.SdpTransform
         public const string Name = "group:";
 
         public string Type { get; init; }
+
         public const string BundleType = "BUNDLE";
 
         public string[] Tokens { get; set; }

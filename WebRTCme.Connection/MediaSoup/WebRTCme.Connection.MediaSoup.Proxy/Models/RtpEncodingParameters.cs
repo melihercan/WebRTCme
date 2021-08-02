@@ -17,7 +17,7 @@ namespace WebRTCme.Connection.MediaSoup
         public int? CodecPayloadType { get; init; }
         public Rtx Rtx { get; set; }
         public bool? Dtx { get; init; }
-        public string ScalabilityMode { get; init; }
+        public string ScalabilityMode { get; set; }
         public int? ScaleResolutionDownBy { get; init; }
         public int? MaxBitrate { get; init; }
         public int? MaxFramerate { get; init; }

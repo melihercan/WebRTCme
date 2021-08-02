@@ -223,6 +223,39 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 	        };
         }
 
+        public static MediaDescription MediaObjectToSdpMediaDescription(MediaObject mediaObject)
+        {
+            var attributes = new List<string>
+            {
+                mediaObject.Mid.ToString(),
+                mediaObject.Msid.ToString(),
+                mediaObject.IceUfrag.ToString(),
+                mediaObject.IcePwd.ToString(),
+                mediaObject.IceOptions.ToString(),
+                mediaObject.Fingerprint.ToString(),
+            };
+            attributes.AddRange(mediaObject.Candidates.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.Rids.Select(i => i.ToString()).ToList());
+
+            return new MediaDescription
+            {
+                Media = mediaObject.Kind.DisplayName(),
+                Port = mediaObject.Port.ToString(),
+                Proto = mediaObject.Protocol,
+                //Fmts = ???
+                Title = Encoding.UTF8.GetBytes(mediaObject.Kind.DisplayName()),
+                ConnectionInfo = mediaObject.Connection,
+                //Bandwiths = ???
+                //EncriptionKey = ???
+                Attributes = attributes
+            };
+        }
+
         public static MediaObject SdpMediaDescriptionToMediaObject(MediaDescription mediaDescription)
         {
             return new MediaObject
@@ -268,6 +301,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     .Select(r => r.ToRid())
                     .ToList()
             };
+        }
+
+        public static string GetCname(MediaObject offerMediaObject)
+        {
+            var ssrcCnameLine = (offerMediaObject.Ssrcs ?? new List<Ssrc>())
+                .FirstOrDefault(line => line .Attribute == "cname");
+            if (ssrcCnameLine is null)
+                return string.Empty;
+
+            return ssrcCnameLine.Value;
         }
     }
 }
