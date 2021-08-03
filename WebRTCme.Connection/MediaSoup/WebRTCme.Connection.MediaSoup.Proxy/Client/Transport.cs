@@ -26,6 +26,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public object AppData { get; }
 
         public event EventHandler<ConnectionState> OnConnectionStateChange;
+        public event EventHandlerAsync<DtlsParameters> OnConnectAsync;
 
 
         public Transport(InternalDirection direction, TransportOptions options, Handler handler,
@@ -119,7 +120,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         void HandleHandler()
         {
-            Handler.OnConnectionStateChange += Handler_OnConnectionStateChange; 
+            Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
+            Handler.OnConnectAsync += Handler_OnConnectAsync;
+        }
+
+        async Task Handler_OnConnectAsync(object sender, DtlsParameters e)
+        {
+            await OnConnectAsync.Invoke(this, e);
         }
 
         void Handler_OnConnectionStateChange(object sender, ConnectionState connectionState)
