@@ -34,7 +34,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         };
 
         public event EventHandler<ConnectionState> OnConnectionStateChange;
-        public event EventHandler<DtlsParameters> OnConnect;
+        public event EventHandlerAsync<DtlsParameters> OnConnectAsync;
 
         public Handler(Ortc ortc)
         {
@@ -542,7 +542,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    };
         }
 
+        public async Task StopReceivingAsync(string localId)
+        {
+            if (!_mapMidTransceiver.ContainsKey(localId))
+                throw new Exception("associated RTCRtpTransceiver not found");
 
+            var transceiver = _mapMidTransceiver[localId];
+            _remoteSdp.CloseMediaSection(transceiver.Mid);
+
+            RTCSessionDescriptionInit offer = new()
+            {
+                Type = RTCSdpType.Offer, 
+                Sdp = _remoteSdp.GetSdp() 
+            };
+
+		    await _pc.SetRemoteDescription(offer);
+            var answer = await _pc.CreateAnswer();
+		    await _pc.SetLocalDescription(answer);
+        }
 
         public async Task<IRTCStatsReport> GetReceiverStatsAsync(string localId)
         {
@@ -553,7 +570,51 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return await transceiver.Receiver.GetStats();
         }
 
+        public async Task<HandlerReceiveDataChannelResult> ReceiveDataChannelAsync(HandlerReceiveDataChannelOptions
+            options_)
+        {
+            RTCDataChannelInit options = new()
+            {
+                Ordered = options_.SctpStreamParameters.Ordered,
+                MaxPacketLifeTime = (ushort?)options_.SctpStreamParameters.MaxPacketLifeTime,
+                MaxRetransmits = (ushort?)options_.SctpStreamParameters.MaxRestansmits,
+                Protocol = options_.Protocol,
+                Negotiated = true,
+                Id = (short?)options_.SctpStreamParameters.StreamId
+            };
 
+            var dataChannel = _pc.CreateDataChannel(options_.Label, options);
+
+            // If this is the first DataChannel we need to create the SDP offer with
+            // m=application section.
+            if (!_hasDataChannelMediaSection)
+            {
+                _remoteSdp.ReceiveSctpAssociation();
+
+                RTCSessionDescriptionInit offer = new()
+                { 
+                    Type = RTCSdpType.Offer, 
+                    Sdp = _remoteSdp.GetSdp() 
+                };
+
+                await _pc.SetRemoteDescription(offer);
+                var answer = await _pc.CreateAnswer();
+
+                if (!_transportReady)
+                {
+                    var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(answer.Sdp));
+                    await SetupTransportAsync(DtlsRole.Client, localSdpObject);
+                }
+
+                await _pc.SetLocalDescription(answer);
+                _hasDataChannelMediaSection = true;
+            }
+
+            return new HandlerReceiveDataChannelResult
+            {
+                DataChannel = dataChannel
+            };
+        }
 
         async Task SetupTransportAsync(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
         {
@@ -570,7 +631,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _remoteSdp.UpdateDtlsRole(localDtlsRole == DtlsRole.Client ? DtlsRole.Server : DtlsRole.Client);
 
             // Need to tell the remote transport about our parameters.
-            OnConnect?.Invoke(this, dtlsParameters);
+            await OnConnectAsync?.Invoke(this, dtlsParameters);
 
             _transportReady = true;
         }

@@ -319,5 +319,23 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 ReplaceMediaSection(mediaSection);
             }
         }
+
+        public void ReceiveSctpAssociation(bool oldDataChannelSpec = false)
+        {
+            var mediaSection = new OfferMediaSection(
+                _iceParameters,
+                _iceCandidates,
+                _dtlsParameters,
+                _sctpParameters,
+                _plainRtpParameters,
+                (bool)_planB,
+                new Mid() { Id = "datachannel" },
+                MediaKind.Application,
+                null,
+                null,
+                null,
+                oldDataChannelSpec);
+            AddMediaSection(mediaSection);
+        }
     }
 }
