@@ -116,7 +116,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             return new MediaSectionIdx { Idx = _mediaSections.Count };
         }
 
-        internal void Send(MediaObject offerMediaObject, Mid reuseMid, RtpParameters offerRtpParameters, 
+        public void Send(MediaObject offerMediaObject, Mid reuseMid, RtpParameters offerRtpParameters, 
             RtpParameters answerRtpParameters, ProducerCodecOptions codecOptions, bool extmapAllowMixed)
         {
             var mediaSection = new AnswerMediaSection(
@@ -133,24 +133,67 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				extmapAllowMixed);
 
 		    // Unified-Plan with closed media section replacement.
-		if (reuseMid is not null)
-		{
-			ReplaceMediaSection(mediaSection, reuseMid);
-        }
-		// Unified-Plan or Plan-B with different media kind.
-		else if (!_midToIndex.ContainsKey(mediaSection.Mid))
-        {
-            AddMediaSection(mediaSection);
-        }
-		// Plan-B with same media kind.
-		else
-        {
-            ReplaceMediaSection(mediaSection);
+		    if (reuseMid is not null)
+		    {
+			    ReplaceMediaSection(mediaSection, reuseMid);
+            }
+		    // Unified-Plan or Plan-B with different media kind.
+		    else if (!_midToIndex.ContainsKey(mediaSection.Mid))
+            {
+                AddMediaSection(mediaSection);
+            }
+		    // Plan-B with same media kind.
+		    else
+            {
+                ReplaceMediaSection(mediaSection);
+            }
         }
 
-    }
+        public void CloseMediaSection(string midId)
+        {
+            Mid mid = new Mid { Id = midId };
+            if (!_midToIndex.ContainsKey(mid))
+                throw new Exception($"no media section found for mid: {mid}");
 
-        private void AddMediaSection(AnswerMediaSection newMediaSection)
+            var idx = _midToIndex[mid];
+            var mediaSection = _mediaSections[idx];
+
+            // NOTE: Closing the first m section is a pain since it invalidates the
+            // bundled transport, so let's avoid it.
+            if (mid == _firstMid)
+            {
+                Console.WriteLine($"closeMediaSection() | cannot close first media section, disabling it instead {mid.Id}");
+                DisableMediaSection(mid);
+                return;
+            }
+
+            mediaSection.Close();
+
+            // Regenerate BUNDLE mids.
+            RegenerateBundleMids();
+
+        }
+
+        public void SendSctpAssociation(MediaObject offerMediaObject)
+        {
+            var mediaSection = new AnswerMediaSection(
+                _iceParameters,
+                _iceCandidates,
+                _dtlsParameters,
+                _sctpParameters,
+                _plainRtpParameters,
+                false,
+                offerMediaObject,
+                null,
+                null,
+                null,
+                false);
+
+		    AddMediaSection(mediaSection);
+        }
+
+
+        void AddMediaSection(MediaSection newMediaSection)
         {
             if (_firstMid is null)
                 _firstMid = newMediaSection.Mid;
@@ -168,7 +211,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             RegenerateBundleMids();
         }
 
-        private void ReplaceMediaSection(AnswerMediaSection newMediaSection, Mid reuseMid = null)
+        void ReplaceMediaSection(MediaSection newMediaSection, Mid reuseMid = null)
         {
             // Store it in the map.
             if (reuseMid is not null)
@@ -210,6 +253,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         }
 
+        void DisableMediaSection(Mid mid)
+        {
+            if (!_midToIndex.ContainsKey(mid))
+                throw new Exception($"no media section found for mid: {mid}");
+            
+            var idx = _midToIndex[mid];
+            var mediaSection = _mediaSections[idx];
+            mediaSection.Disable();
+        }
+
         void RegenerateBundleMids()
         {
             if (_dtlsParameters is null)
@@ -218,6 +271,53 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _sdp.Group.Tokens = _mediaSections
                 .Where(mediaSection => !mediaSection.Closed)
                 .Select(mediaSection => mediaSection.Mid.Id).ToArray();
+        }
+
+        public void Receive(string midId, MediaKind kind, RtpParameters offerRtpParameters, 
+            string streamId, string trackId)
+        {
+            Mid mid = new Mid { Id = midId };
+            OfferMediaSection mediaSection = null;
+
+            if (_midToIndex.ContainsKey(mid))
+            {
+                var idx = _midToIndex[mid];
+                mediaSection = _mediaSections[idx] as OfferMediaSection;
+            }
+
+            if (mediaSection is null)
+            {
+                mediaSection = new OfferMediaSection(
+                    _iceParameters,
+                    _iceCandidates,
+                    _dtlsParameters,
+                    null,
+                    _plainRtpParameters,
+                    (bool)_planB,
+                    mid,
+                    kind,
+                    offerRtpParameters,
+                    streamId,
+                    trackId,
+                    false);
+                // Let's try to recycle a closed media section (if any).
+                // NOTE: Yes, we can recycle a closed m=audio section with a new m=video.
+               var oldMediaSection = _mediaSections.FirstOrDefault(m => m.Closed);
+                if (oldMediaSection is not null)
+                {
+                    ReplaceMediaSection(mediaSection, oldMediaSection.Mid);
+                }
+                else
+                {
+                    AddMediaSection(mediaSection);
+                }
+            }
+            // Plan-B.
+            else
+            {
+                mediaSection.PlanBReceive(offerRtpParameters, streamId, trackId);
+                ReplaceMediaSection(mediaSection);
+            }
         }
     }
 }

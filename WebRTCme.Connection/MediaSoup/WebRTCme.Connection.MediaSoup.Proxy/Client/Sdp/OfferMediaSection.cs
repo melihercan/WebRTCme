@@ -303,6 +303,103 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             }
         }
 
+        public void PlanBReceive(RtpParameters offerRtpParameters, string streamId, string trackId)
+        {
+            var encoding = offerRtpParameters.Encodings[0];
+            var ssrc = encoding.Ssrc;
+            var rtxSsrc = (encoding.Rtx is not null && encoding.Rtx.Ssrc.HasValue)
+                ? encoding.Rtx.Ssrc
+                : null;
+            var payloads = _mediaObject.Payloads.Split(' ');
+
+            foreach (var codec in offerRtpParameters.Codecs)
+		    {
+                if (payloads.Contains(codec.PayloadType.ToString()))
+                {
+                    continue;
+                }
+
+                Rtpmap rtpmap = new()
+                {
+                    PayloadType = codec.PayloadType,
+                    EncodingName = GetCodecName(codec),
+                    ClockRate = codec.ClockRate,
+                    Channels = codec.Channels > 1 ? codec.Channels : null
+                };
+                _mediaObject.Rtpmaps.Add(rtpmap);
+
+                Fmtp fmtp = new()
+                {
+                    PayloadType = codec.PayloadType,
+                    Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
+                };
+
+                
+                if (!string.IsNullOrEmpty(fmtp.Value))
+                    _mediaObject.Fmtps.Add(fmtp);
+
+                foreach (var fb in codec.RtcpFeedback)
+			    {
+                    _mediaObject.RtcpFbs.Add(new RtcpFb
+                    {
+                        PayloadType = codec.PayloadType,
+						Type = fb.Type,
+						SubType = fb.Parameter
+                    });
+                }
+            }
+
+            _mediaObject.Payloads += string.Join(" ",offerRtpParameters.Codecs
+                .Where(codec => !_mediaObject.Payloads.Contains(codec.PayloadType.ToString()))
+                .Select(codec => codec.PayloadType.ToString())
+                .ToArray())
+                .Trim();
+
+		    if (offerRtpParameters.Rtcp.Cname is not null)
+            {
+                _mediaObject.Ssrcs.Add(new Ssrc 
+                {
+                    Id = (uint)ssrc,
+					Attribute = "cname",
+                    Value = offerRtpParameters.Rtcp.Cname
+                });
+            }
+
+		    _mediaObject.Ssrcs.Add(new Ssrc
+            {
+                Id = (uint)ssrc,
+				Attribute = "msid",
+				Value = $"{ streamId ?? "-"} { trackId}"
+			});
+
+		    if (rtxSsrc is not null)
+            {
+                if (offerRtpParameters.Rtcp.Cname is not null)
+                {
+                    _mediaObject.Ssrcs.Add(new Ssrc
+                    {
+                        Id = (uint)rtxSsrc,
+						Attribute = "cname",
+						Value = offerRtpParameters.Rtcp.Cname
+                    });
+                }
+
+                _mediaObject.Ssrcs.Add(new Ssrc
+                {
+                    Id = (uint)rtxSsrc,
+			        Attribute = "msid",
+				    Value = $"{ streamId ?? "-"} {trackId}"
+			    });
+
+                // Associate original and retransmission SSRCs.
+                _mediaObject.SsrcGroups.Add(new SsrcGroup
+                {
+                    Semantics = "FID",
+				    SsrcIds = new string[] {$"{ ssrc }${rtxSsrc}" }
+			    });
+            }
+        }
+
         void PlanBStopReceiving(RtpParameters offerRtpParameters)
         {
             var encoding = offerRtpParameters.Encodings[0];

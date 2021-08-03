@@ -11,13 +11,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         readonly Ortc _ortc;
         readonly Handler _handler;
 
-
-        ExtendedRtpCapabilities _extendedRtpCapabilities;
-        
         bool _loaded;
+        ExtendedRtpCapabilities _extendedRtpCapabilities;
         RtpCapabilities _recvRtpCapabilities;
-        SctpCapabilities _sctpCapabilities;
         CanProduceByKind _canProduceByKind = new() { Audio = false, Video = false };
+        SctpCapabilities _sctpCapabilities;
 
         public Device()
         {
@@ -82,8 +80,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 _canProduceByKind);
         }
 
-        public event EventHandler OnClose;
-        public event EventHandler<Transport> OnNewTransport; 
 
         Transport CreateTransport(InternalDirection direction, TransportOptions options, Handler handler,
             ExtendedRtpCapabilities extendedRtpCapabilities, CanProduceByKind canProduceByKind)
@@ -91,7 +87,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             //// TODO: Original code makes lots of checkings???
             ///
             var transport = new Transport(direction, options, handler, extendedRtpCapabilities, canProduceByKind);
-            OnNewTransport?.Invoke(this, transport);
 
             return transport;
         }

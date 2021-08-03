@@ -5,6 +5,7 @@ using System.Text;
 using WebRTCme.Connection.MediaSoup;
 using Utilme.SdpTransform;
 using System.Linq;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
@@ -311,6 +312,50 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 return string.Empty;
 
             return ssrcCnameLine.Value;
+        }
+
+        public static void ApplyCodecParameters(RtpParameters offerRtpParameters, MediaObject answerMediaObject)
+        {
+            foreach (var codec in offerRtpParameters.Codecs)
+	        {
+                var mimeType = codec.MimeType.ToLower();
+
+                // Avoid parsing codec parameters for unhandled codecs.
+                if (mimeType != "audio/opus")
+                    continue;
+
+                var rtpmap = (answerMediaObject.Rtpmaps ?? new List<Rtpmap>())
+                    .FirstOrDefault(r => r.PayloadType == codec.PayloadType);
+                if (rtpmap is null)
+                    continue;
+
+                var fmtp = (answerMediaObject.Fmtps ?? new List<Fmtp>())
+                    .FirstOrDefault(f => f.PayloadType == codec.PayloadType);
+                if (fmtp is null)
+                {
+                    fmtp = new Fmtp { PayloadType = codec.PayloadType, Value = string.Empty };
+                    answerMediaObject.Fmtps.Add(fmtp);
+                }
+
+                var parameters = fmtp.Value.Split(';').ToList();
+                switch (mimeType)
+                {
+                    case "audio/opus":
+                        {
+                            var spropStereo = ((CodecParameters)codec.Parameters).Stereo;
+                            if (spropStereo is not null)
+                            {
+                                parameters = parameters.Where(p => !p.StartsWith("stereo")).ToList();
+                                var stereo = (bool)spropStereo ? 1 : 0;
+                                parameters.Add($"stereo={stereo}");
+                            }
+                            break;
+                        }
+                }
+
+                // Write the codec fmtp.config back.
+                fmtp.Value = string.Join(";", parameters.ToArray());
+            }
         }
     }
 }

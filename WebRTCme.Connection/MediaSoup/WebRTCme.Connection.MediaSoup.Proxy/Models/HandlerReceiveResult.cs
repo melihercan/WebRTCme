@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Models
 {
-    public class HandleReceiveResult
+    public class HandlerReceiveResult
     {
         public string LocalId { get; init; }
         public IMediaStreamTrack Track { get; init; }
