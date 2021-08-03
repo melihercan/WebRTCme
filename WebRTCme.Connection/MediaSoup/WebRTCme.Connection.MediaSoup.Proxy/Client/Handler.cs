@@ -146,11 +146,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
-        public void UpdateIceServers(RTCIceServer[] iceServers)
+        public Task UpdateIceServersAsync(RTCIceServer[] iceServers)
         {
             var configuration = _pc.GetConfiguration();
             configuration.IceServers = iceServers;
             _pc.SetConfiguration(configuration);
+            return Task.CompletedTask;
         }
 
         public async Task RestartIceAsync(IceParameters iceParameters)

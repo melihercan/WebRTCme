@@ -167,6 +167,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
+        public void ValidateRtpParameters(RtpParameters rtpParameters)
+        {
+            throw new NotImplementedException();
+        }
+
         public RtpParameters GetSendingRtpParameters(MediaKind kind, ExtendedRtpCapabilities extendedRtpCapabilities)
         {
 

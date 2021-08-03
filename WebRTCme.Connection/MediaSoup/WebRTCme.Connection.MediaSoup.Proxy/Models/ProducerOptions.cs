@@ -7,7 +7,7 @@ namespace WebRTCme.Connection.MediaSoup
     public class ProducerOptions
     {
         public IMediaStreamTrack Track { get; init; }
-        public RTCRtpEncodingParameters[] Encodings { get; init; }
+        public RtpEncodingParameters[] Encodings { get; init; }
         public ProducerCodecOptions CodecOptions { get; init; }
         public RtpCodecCapability Codec { get; init; }
         public bool? StopTracks { get; init; }

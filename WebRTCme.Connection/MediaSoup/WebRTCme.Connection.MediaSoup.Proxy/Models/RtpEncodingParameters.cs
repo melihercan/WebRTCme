@@ -12,6 +12,7 @@ namespace WebRTCme.Connection.MediaSoup
 
     public class RtpEncodingParameters
     {
+        public bool Active { get; set; }
         public uint? Ssrc { get; set; }
         public string Rid { get; set; }
         public int? CodecPayloadType { get; init; }

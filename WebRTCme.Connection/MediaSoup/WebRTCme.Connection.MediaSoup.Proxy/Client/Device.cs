@@ -86,7 +86,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         {
             //// TODO: Original code makes lots of checkings???
             ///
-            var transport = new Transport(direction, options, handler, extendedRtpCapabilities, canProduceByKind);
+            var transport = new Transport(_ortc, direction, options, handler, extendedRtpCapabilities, canProduceByKind);
 
             return transport;
         }
