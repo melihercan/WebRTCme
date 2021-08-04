@@ -368,6 +368,46 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
+        public async Task<DataConsumer> ConsumerDataAsync(DataConsumerOptions options)
+        {
+            Console.WriteLine("consumeData()");
+
+            var sctpStreamParameters = Utils.Clone(options.SctpStreamParameters, null);
+
+            if (Closed)
+                throw new Exception("closed");
+            else if (Direction != InternalDirection.Recv)
+                throw new Exception("not a receiving Transport");
+            else if (_maxSctpMessageSize is null)
+                throw new Exception("SCTP not enabled by remote Transport");
+
+            // This may throw.
+            _ortc.ValidateSctpStreamParameters(sctpStreamParameters);
+
+
+            var handlerReceiveDataChannelResult = await Handler.ReceiveDataChannelAsync(
+                new HandlerReceiveDataChannelOptions
+                {
+                    SctpStreamParameters = options.SctpStreamParameters,
+					Label = options.Label,
+					Protocol = options.Protocol
+                });
+
+            var dataConsumer = new DataConsumer(
+                options.Id, 
+                options.DataProducerId, 
+                handlerReceiveDataChannelResult.DataChannel,
+                options.SctpStreamParameters,
+                options.AppData);
+
+            _dataConsumers.Add(options.Id, dataConsumer);
+            HandleDataConsumer(dataConsumer);
+
+            OnNewDataConsumer?.Invoke(this, dataConsumer);
+            return dataConsumer;
+        }
+
+
         void HandleHandler()
         {
             Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
@@ -408,11 +448,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return await Handler.GetSenderStatsAsync(localId);
         }
 
-        private void HandleDataProducer(DataProducer dataProducer)
+        void HandleDataProducer(DataProducer dataProducer)
         {
             throw new NotImplementedException();
         }
 
+        void HandleDataConsumer(DataConsumer dataConsumer)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 
