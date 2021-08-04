@@ -26,6 +26,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         SemaphoreSlim _sem = new(1);
 
         public event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
+        public event IMediaSoupServerNotify.RequestDelegateAsync RequestEventAsync;
 
         public MediaSoupStub(IConfiguration configuration, IWebRtc webRtc, IJSRuntime jsRuntime = null)
         {
@@ -70,16 +71,69 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                 _tcs.SetException(new Exception($"{responseError.ErrorReason}"));
                             }
                         }
-                        ///// TODO: else if (jsonDocument.RootElement.TryGetProperty("request", out _))
-                        /// REQUEST IS POSSIBLE FROM SERVER TOO
+                        else if (jsonDocument.RootElement.TryGetProperty("request", out _))
+                        {
+                            var request = JsonSerializer.Deserialize<ProtooRequest>(json,
+                                JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                            await RequestEventAsync?.Invoke(request.Method, request.Data,
+                                // accept
+                                async (data) => 
+                                { 
+                                    try
+                                    {
+                                        await _sem.WaitAsync();
+                                        var response = new ProtooResponse
+                                        {
+                                            Response = true,
+                                            Id = request.Id,
+                                            Ok = true,
+                                            Data = data
+                                        };
+                                        await _webSocket.SendAsync(
+                                            new ArraySegment<byte>(Encoding.UTF8.GetBytes(
+                                                JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                                            WebSocketMessageType.Text,
+                                            true,
+                                            _cts.Token);
+                                    }
+                                    finally
+                                    {
+                                        _sem.Release();
+                                    }
+                                },
+                                // reject
+                                async (error, errorReason) => 
+                                { 
+                                    try
+                                    {
+                                        await _sem.WaitAsync();
+                                        var response = new ProtooResponse
+                                        {
+                                            Response = true,
+                                            Id = request.Id,
+                                            Ok = true,
+                                            ErrorCode = error,
+                                            ErrorReason = errorReason
+                                        };
+                                        await _webSocket.SendAsync(
+                                            new ArraySegment<byte>(Encoding.UTF8.GetBytes(
+                                                JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                                            WebSocketMessageType.Text,
+                                            true,
+                                            _cts.Token);
+                                    }
+                                    finally
+                                    {
+                                        _sem.Release();
+                                    }
+                                });
+
+                        }
                         else if (jsonDocument.RootElement.TryGetProperty("notification", out _))
                         {
                             var notification = JsonSerializer.Deserialize<ProtooNotification>(json,
                                     JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-
-                            //// TODO: ANALYZE AND INVOKE EVENT
-                            ///
-                            NotifyEventAsync?.Invoke(notification.Method, notification.Data);
+                            await NotifyEventAsync?.Invoke(notification.Method, notification.Data);
                         }
                     }
                     catch (OperationCanceledException)

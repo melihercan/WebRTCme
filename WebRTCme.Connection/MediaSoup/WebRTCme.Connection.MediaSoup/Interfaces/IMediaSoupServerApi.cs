@@ -15,6 +15,7 @@ namespace WebRTCme.Connection.MediaSoup
         Task<Result<object>> CallAsync(string method, object data = null);
 
         event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
+        event IMediaSoupServerNotify.RequestDelegateAsync RequestEventAsync;
 
     }
 }

@@ -52,7 +52,8 @@ namespace WebRTCme.Connection.Services
                 {
 
 
-                    _mediaSoupServerApi.NotifyEventAsync += MediaServer_OnNotifyAsync;
+                    _mediaSoupServerApi.NotifyEventAsync += MediaSoupServer_OnNotifyAsync;
+                    _mediaSoupServerApi.RequestEventAsync += MediaSoupServerApi_OnRequestsync;
 
 
                     //var mediaServerName = GetMediaServerFromName(request.ConnectionParameters.MediaServerName);
@@ -110,7 +111,8 @@ namespace WebRTCme.Connection.Services
                 {
                     try
                     {
-                        _mediaSoupServerApi.NotifyEventAsync -= MediaServer_OnNotifyAsync;
+                        _mediaSoupServerApi.NotifyEventAsync -= MediaSoupServer_OnNotifyAsync;
+                        _mediaSoupServerApi.RequestEventAsync -= MediaSoupServerApi_OnRequestsync;
                         await _mediaSoupServerApi.DisconnectAsync(guid);
                         //await mediaServerProxy.StopAsync();
                     }
@@ -118,11 +120,19 @@ namespace WebRTCme.Connection.Services
                 };
             });
 
-            Task MediaServer_OnNotifyAsync(string method, object data)
+            Task MediaSoupServer_OnNotifyAsync(string method, object data)
             {
                 throw new NotImplementedException();
             }
+
+            Task MediaSoupServerApi_OnRequestsync(string method, object data, 
+                IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
+            {
+                throw new NotImplementedException();
+            }
+
         }
+
 
         public Task<IRTCStatsReport> GetStats(Guid id)
         {

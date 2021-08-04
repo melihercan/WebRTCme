@@ -18,8 +18,17 @@ namespace WebRTCme.Connection.MediaSoup
 
     public class ProtooResponseError : ProtooResponseBase
     {
-        public uint ErrorCode { get; init; }
+        public int ErrorCode { get; init; }
         public string ErrorReason { get; init; }
     }
 
+    public class ProtooResponse : ProtooResponseBase
+    {
+        public object Data { get; set; }
+        public int? ErrorCode { get; init; }
+        public string ErrorReason { get; init; }
+
+    }
 }
+
+
