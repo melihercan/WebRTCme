@@ -408,54 +408,113 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
-        void HandleHandler()
+        void HandleHandler(/**** TODO: Add bool flag to unregister events****/)
         {
             Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
             Handler.OnConnectAsync += Handler_OnConnectAsync;
+
+            async Task Handler_OnConnectAsync(object sender, DtlsParameters e)
+            {
+                await OnConnectAsync.Invoke(this, e);
+            }
+
+            void Handler_OnConnectionStateChange(object sender, ConnectionState connectionState)
+            {
+                if (ConnectionState == connectionState)
+                    return;
+                ConnectionState = connectionState;
+                OnConnectionStateChange?.Invoke(this, connectionState);
+            }
         }
 
-        async Task Handler_OnConnectAsync(object sender, DtlsParameters e)
-        {
-            await OnConnectAsync.Invoke(this, e);
-        }
 
-        void Handler_OnConnectionStateChange(object sender, ConnectionState connectionState)
+        void HandleProducer(Producer producer/**** TODO: Add bool flag to unregister events****/)
         {
-            if (ConnectionState == connectionState)
-                return;
-            ConnectionState = connectionState;
-            OnConnectionStateChange?.Invoke(this, connectionState);
-        }
-
-        void HandleConsumer(Consumer consumer)
-        {
-            consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
-        }
-
-        async Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, string localId)
-        {
-            return await Handler.GetReceiverStatsAsync(localId);
-        }
-
-        void HandleProducer(Producer producer)
-        {
+            producer.OnClose += Producer_OnClose;
+            producer.OnReplaceTrackAsync += Producer_OnReplaceTrackAsync;
+            producer.OnSetMaxSpatialLayerAsync += Producer_OnSetMaxSpatialLayerAsync;
+            producer.OnSetRtpEncodingParametersAsync += Producer_OnSetRtpEncodingParametersAsync;
             producer.OnGetStatsAsync += Producer_OnGetStatsAsync;
 
+            void Producer_OnClose(object sender, EventArgs e)
+            {
+                _producers.Remove(producer.Id);
+                
+                if (Closed)
+                    return;
+
+                // TODO: THIS IS FIRE AND FORGET!!!
+                Task.Run(async () => await Handler.StopSendingAsync(producer.LocalId));
+            }
+
+            async Task Producer_OnReplaceTrackAsync(object sender, IMediaStreamTrack track)
+            {
+                await Handler.ReplaceTrackAsync(producer.LocalId, track);
+            }
+
+            async Task Producer_OnSetMaxSpatialLayerAsync(object sender, int spatialLayer)
+            {
+                await Handler.SetMaxSpatialLayerAsync(producer.LocalId, spatialLayer);
+            }
+
+            async Task Producer_OnSetRtpEncodingParametersAsync(object sender, RTCRtpEncodingParameters params_)
+            {
+                await Handler.SetRtpEncodingParametersAsync(producer.LocalId, params_);
+            }
+            
+            async Task<IRTCStatsReport> Producer_OnGetStatsAsync(object sender, EventArgs e)
+            {
+                return await Handler.GetSenderStatsAsync(producer.LocalId);
+            }
+
         }
 
-        async Task<IRTCStatsReport> Producer_OnGetStatsAsync(object sender, string localId)
+
+
+        void HandleConsumer(Consumer consumer/**** TODO: Add bool flag to unregister events****/)
         {
-            return await Handler.GetSenderStatsAsync(localId);
+            consumer.OnClose += Consumer_OnClose;
+            consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
+
+            void Consumer_OnClose(object sender, EventArgs e)
+            {
+                _consumers.Remove(consumer.Id);
+
+                if (Closed)
+                    return;
+
+                // TODO: THIS IS FIRE AND FORGET!!!
+                Task.Run(async () => await Handler.StopReceivingAsync(consumer.LocalId));
+
+            }
+
+            async Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, EventArgs e)
+            {
+                return await Handler.GetReceiverStatsAsync(consumer.LocalId);
+            }
         }
 
-        void HandleDataProducer(DataProducer dataProducer)
+
+
+        void HandleDataProducer(DataProducer dataProducer/**** TODO: Add bool flag to unregister events****/)
         {
-            throw new NotImplementedException();
+            dataProducer.OnClose += DataProducer_OnClose;
+
+            void DataProducer_OnClose(object sender, EventArgs e)
+            {
+                _dataProducers.Remove(dataProducer.Id);
+            }
         }
 
-        void HandleDataConsumer(DataConsumer dataConsumer)
+
+        void HandleDataConsumer(DataConsumer dataConsumer/**** TODO: Add bool flag to unregister events****/)
         {
-            throw new NotImplementedException();
+            dataConsumer.OnClose += DataConsumer_OnClose;
+
+            void DataConsumer_OnClose(object sender, EventArgs e)
+            {
+                _dataConsumers.Remove(dataConsumer.Id);
+            }
         }
 
     }

@@ -10,7 +10,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler OnClose;
         public event EventHandler OnTransportClosed;
         public event EventHandler OnTrackEnded;
-        public event EventHandlerAsync<string, IRTCStatsReport> OnGetStatsAsync;
+        public event EventHandlerAsync<EventArgs, IRTCStatsReport> OnGetStatsAsync;
 
 
         public Consumer(string id, string localId, string producerId, IRTCRtpReceiver rtpReceiver,
@@ -75,7 +75,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (Closed)
                 throw new Exception("closed");
 
-            return await OnGetStatsAsync?.Invoke(this, LocalId);
+            return await OnGetStatsAsync?.Invoke(this, EventArgs.Empty);
         }
 
         public void Pause()
