@@ -36,6 +36,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler<ConnectionState> OnConnectionStateChange;
         public event EventHandlerAsync<DtlsParameters> OnConnectAsync;
         public event EventHandlerAsync<ProduceEventParameters, string> OnProduceAsync;
+        public event EventHandlerAsync<ProduceDataEventParameters, string> OnProduceDataAsync;
+
+        public event EventHandler<Producer> OnNewProducer;
+        public event EventHandler<Consumer> OnNewConsumer;
+        public event EventHandler<DataProducer> OnNewDataProducer;
+        public event EventHandler<DataConsumer> OnNewDataConsumer;
 
         public Transport(Ortc ortc, InternalDirection direction, TransportOptions options, Handler handler,
             ExtendedRtpCapabilities extendedRtpCapabilities, CanProduceByKind canProduceByKind)
@@ -163,6 +169,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 }
                 else
                 {
+                    //// TODO: CHECk - Original code makes checks on types???
                     normalizedEncodings = options.Encodings.Select(encoding =>
                     {
                         var normalizedEncoding = new RtpEncodingParameters 
@@ -201,34 +208,46 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         AppData = options.AppData
                     });
 
-                    ///////// TESTING
                     var producer = new Producer(
-                        "",
-                        "",
-                        null,
-                        null,
-                        null,
-                        false,
-                        false,
-                        false,
-                        null);
+                        id,
+                        handlerSendResult.LocalId,
+                        handlerSendResult.RtpSender,
+                        options.Track,
+                        handlerSendResult.RtpParameters,
+                        (bool)options.StopTracks,
+                        (bool)options.DisableTrackOnPause,
+                        (bool)options.ZeroRtpOnPause,
+                        options.AppData);
 
-
+                    _producers.Add(id, producer);
                     HandleProducer(producer);
+
+                    OnNewProducer?.Invoke(this, producer);
 
                     return producer;
                 }
                 catch (Exception ex)
                 {
-
+                    try
+                    {
+                        await Handler.StopSendingAsync(handlerSendResult.LocalId);
+                    }
+                    catch { }
+                    throw ex;
                 }
             }
             catch (Exception ex)
             {
-
+                if (options.StopTracks.HasValue && (bool)options.StopTracks)
+                {
+                    try
+                    {
+                        options.Track.Stop();
+                    }
+                    catch { }
+                }
+                throw ex;
             }
-
- return null;
         }
 
         public async Task<Consumer> ConsumeAsync(ConsumerOptions options)
@@ -246,23 +265,107 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             else if (ConnectionState == ConnectionState.New)
                 throw new Exception($"no connect listener set into this transport");
 
+            // Ensure the device can consume it.
+            var canConsume = _ortc.CanReceive(rtpParameters, _extendedRtpCapabilities);
+
+            if (!canConsume)
+                throw new Exception("cannot consume this Producer");
+
+            var handlerReceiveResult = await Handler.ReceiveAsync(new HandlerReceiveOptions
+                { 
+                    TrackId = options.Id,
+                    Kind = (MediaKind)options.Kind,
+                    RtpParameters = options.RtpParameters
+                });
 
             var consumer = new Consumer(
-                "",
-                "",
-                "",
-                null,
-                null,
-                null,
-                null);
+                    options.Id,
+                    handlerReceiveResult.LocalId,
+                    options.ProducerId,
+                    handlerReceiveResult.RtpReceiver,
+                    handlerReceiveResult.Track,
+                    options.RtpParameters,
+                    options.AppData);
 
-
+            _consumers.Add(options.Id, consumer);
             HandleConsumer(consumer);
+
+            // If this is the first video Consumer and the Consumer for RTP probation
+            // has not yet been created, create it now.
+            if (!_probatorConsumerCreated && options.Kind == MediaKind.Video)
+            {
+                try
+                {
+                    var probatorRtpParameters = _ortc.GenerateProbatorRtpParameters(consumer.RtpParameters);
+
+                    await Handler.ReceiveAsync(new HandlerReceiveOptions 
+                    {
+                        TrackId = "probator",
+    					Kind = MediaKind.Video,
+						RtpParameters = probatorRtpParameters
+                    });
+
+                    _probatorConsumerCreated = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"consume() | failed to create Consumer for RTP probation:{ex.Message}");
+                }
+            }
+
+            OnNewConsumer?.Invoke(this, consumer);
 
             return consumer;
         }
 
+        public async Task<DataProducer> ProduceDataAsync(DataProducerOptions options)
+        {
+            Console.WriteLine("produceData()");
 
+            if (Direction != InternalDirection.Send)
+                throw new Exception("not a sending Transport");
+            else if (_maxSctpMessageSize is null)
+                throw new Exception("SCTP not enabled by remote Transport");
+
+            if (options.MaxPacketLifeTime != 0 || options.MaxRetransmits != 0 )
+                options.Ordered = false;
+
+            var handlerSendDataChannelResult = await Handler.SendDataChannelAsync(new HandlerSendDataChannelOptions
+            {
+                Ordered = options.Ordered,
+				MaxPacketLifeTime = options.MaxPacketLifeTime,
+			    MaxRetransmits = options.MaxRetransmits,
+				Label = options.Label,
+				Protocol = options.Protocol
+            });
+
+            // This will fill sctpStreamParameters's missing fields with default values.
+            _ortc.ValidateSctpStreamParameters(handlerSendDataChannelResult.SctpStreamParameters);
+
+            
+
+            var id = await OnProduceDataAsync?.Invoke(this, new ProduceDataEventParameters
+            {
+                SctpStreamParameters = handlerSendDataChannelResult.SctpStreamParameters,
+				Label = options.Label,
+				Protocol = options.Protocol,
+				AppData = options.AppData
+            });
+
+            var dataProducer = new DataProducer(
+                id,  
+                handlerSendDataChannelResult.DataChannel, 
+                handlerSendDataChannelResult.SctpStreamParameters, 
+                options.AppData);
+
+            _dataProducers.Add(id, dataProducer);
+            
+            HandleDataProducer(dataProducer);
+
+            OnNewDataProducer?.Invoke(this, dataProducer);
+
+            return dataProducer;
+        }
 
 
         void HandleHandler()
@@ -305,6 +408,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return await Handler.GetSenderStatsAsync(localId);
         }
 
+        private void HandleDataProducer(DataProducer dataProducer)
+        {
+            throw new NotImplementedException();
+        }
 
 
     }

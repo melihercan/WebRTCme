@@ -8,7 +8,7 @@ namespace WebRTCme.Connection.MediaSoup
     public class  RtpCodecParameters
     {
         public string MimeType { get; init; }
-        public int PayloadType { get; init; }
+        public int PayloadType { get; set; }
         public int ClockRate { get; init; }
 
         public int? Channels { get; init; }

@@ -437,7 +437,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 Ordered = options_.Ordered,
                 MaxPacketLifeTime = (ushort?)options_.MaxPacketLifeTime,
-                MaxRetransmits = (ushort?)options_.MaxRestansmits,
+                MaxRetransmits = (ushort?)options_.MaxRetransmits,
                 Protocol = options_.Protocol,
                 Negotiated = true,
                 Id = (short?)_nextSendSctpStreamId
@@ -477,7 +477,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 			    StreamId = options.Id,
 			    Ordered = options.Ordered,
 			    MaxPacketLifeTime = options.MaxPacketLifeTime,
-                MaxRestansmits = options.MaxRetransmits
+                MaxRetransmits = options.MaxRetransmits
 		    };
 
 		    return new HandlerSendDataChannelResult 
@@ -578,7 +578,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 Ordered = options_.SctpStreamParameters.Ordered,
                 MaxPacketLifeTime = (ushort?)options_.SctpStreamParameters.MaxPacketLifeTime,
-                MaxRetransmits = (ushort?)options_.SctpStreamParameters.MaxRestansmits,
+                MaxRetransmits = (ushort?)options_.SctpStreamParameters.MaxRetransmits,
                 Protocol = options_.Protocol,
                 Negotiated = true,
                 Id = (short?)options_.SctpStreamParameters.StreamId

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Utilme.SdpTransform;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.Proxy.Codecs;
 using WebRTCme.Connection.MediaSoup.Proxy.Models;
@@ -12,6 +13,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
     public class Ortc
     {
+
+        const string RTP_PROBATOR_MID = "probator";
+        const int RTP_PROBATOR_SSRC = 1234;
+        const int RTP_PROBATOR_CODEC_PAYLOAD_TYPE = 127;
+
         public void ValidateRtpCapabilities(RtpCapabilities caps)
         {
 
@@ -234,6 +240,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
+        public bool CanReceive(RtpParameters rtpParameters, ExtendedRtpCapabilities extendedRtpCapabilities)
+        {
+            // This may throw.
+            ValidateRtpParameters(rtpParameters);
+
+            if (rtpParameters.Codecs.Length == 0)
+                return false;
+
+            var firstMediaCodec = rtpParameters.Codecs[0];
+            return extendedRtpCapabilities.Codecs
+                .Any(codec => codec.RemotePayloadType == firstMediaCodec.PayloadType);
+        }
+
         public  RtpCodecParameters[] ReduceCodecs(RtpCodecParameters[] codecs, RtpCodecCapability capCodec)
         {
             List<RtpCodecParameters> filteredCodecs = new();
@@ -266,6 +285,29 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             }
 
             return filteredCodecs.ToArray();
+        }
+
+        public RtpParameters GenerateProbatorRtpParameters(RtpParameters inRtpParameters)
+        {
+            // Clone given reference video RTP parameters.
+            var videoRtpParameters = Utils.Clone(inRtpParameters, new RtpParameters());
+
+            // This may throw.
+            ValidateRtpParameters(videoRtpParameters);
+
+            RtpCodecParameters codec = videoRtpParameters.Codecs[0];
+            codec.PayloadType = RTP_PROBATOR_CODEC_PAYLOAD_TYPE;
+
+            var rtpParameters = new RtpParameters
+            {
+                Mid = new Mid { Id = RTP_PROBATOR_MID },
+		        Codecs = new RtpCodecParameters[] { codec },
+		        HeaderExtensions = videoRtpParameters.HeaderExtensions,
+		        Encodings = new RtpEncodingParameters[] { new RtpEncodingParameters { Ssrc = RTP_PROBATOR_SSRC } },
+                Rtcp = new RtcpParameters { Cname = RTP_PROBATOR_MID } 
+            };
+
+            return rtpParameters;
         }
 
         public RtpParameters GetSendingRemoteRtpParameters(MediaKind kind, 
@@ -359,17 +401,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
-
-
-
-
-
-
-
-
-
-
-
+        internal void ValidateSctpStreamParameters(SctpStreamParameters sctpStreamParameters)
+        {
+            throw new NotImplementedException();
+        }
 
         bool MatchHeaderExtensions(RtpHeaderExtension aExt, RtpHeaderExtension bExt)
         {
