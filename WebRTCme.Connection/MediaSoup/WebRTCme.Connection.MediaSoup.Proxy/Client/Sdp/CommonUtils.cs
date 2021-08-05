@@ -83,7 +83,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     {
                         Kind = mediaKind,
                         Uri = extmap.Uri,
-                        PreferedId = extmap.Value
+                        PreferredId = extmap.Value
                     };
                     headerExtensions.Add(headerExtension);
                 }

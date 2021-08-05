@@ -8,7 +8,7 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public string Uri { get; init; }
         public int Number { get; init; }
-        public bool Encrypt { get; init; }
+        public bool? Encrypt { get; set; }
         public object Parameters { get; init; }
     }
 }

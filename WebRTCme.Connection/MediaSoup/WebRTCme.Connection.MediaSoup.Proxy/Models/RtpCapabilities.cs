@@ -6,7 +6,7 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class RtpCapabilities
     {
-        public RtpCodecCapability[] Codecs { get; init; }
-        public RtpHeaderExtension[] HeaderExtensions { get; init; }
+        public RtpCodecCapability[] Codecs { get; set; }
+        public RtpHeaderExtension[] HeaderExtensions { get; set; }
     }
 }

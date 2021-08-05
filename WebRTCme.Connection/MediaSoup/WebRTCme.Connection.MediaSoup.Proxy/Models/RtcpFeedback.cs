@@ -7,6 +7,6 @@ namespace WebRTCme.Connection.MediaSoup
     public class RtcpFeedback
     {
         public string Type { get; init; }
-        public string Parameter { get; init; }
+        public string Parameter { get; set; }
     }
 }

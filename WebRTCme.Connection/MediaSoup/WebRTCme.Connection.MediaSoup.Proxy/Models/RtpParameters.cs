@@ -9,8 +9,8 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public Mid Mid { get; set; }
         public RtpCodecParameters[] Codecs { get; set; } 
-        public RtpHeaderExtensionParameters[] HeaderExtensions { get; init; }
+        public RtpHeaderExtensionParameters[] HeaderExtensions { get; set; }
         public RtpEncodingParameters[] Encodings { get; set; }
-        public RtcpParameters Rtcp { get; init; }
+        public RtcpParameters Rtcp { get; set; }
     }
 }
