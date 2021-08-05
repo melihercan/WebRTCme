@@ -10,30 +10,36 @@ using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.Proxy.Client;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.Services
 {
-    class MediaSoupConnection : IConnection
+    class MediaSoupConnection : IConnection, IMediaSoupServerNotify
     {
         readonly IConfiguration _configuration;
         readonly IMediaSoupServerApi _mediaSoupServerApi;
         readonly ILogger<MediaSoupConnection> _logger;
         readonly IWebRtc _webRtc;
         readonly IJSRuntime _jsRuntime;
+        readonly MediaSoup.Proxy.Models.Device _device;
+
+        Transport _sendTransport;
+        Transport _recvTransport;
+        string _displayName;
+
 
         public MediaSoupConnection(IConfiguration configuration, 
             IMediaSoupServerApi mediaSoupServerApi,
             ILogger<MediaSoupConnection> logger, IWebRtc webRtc, IJSRuntime jsRuntime = null)
         {
-            //_mediaServerProxyFactory = mediaServerProxyFactory;
             _configuration = configuration;
             _mediaSoupServerApi = mediaSoupServerApi;
             _logger = logger;
             _webRtc = webRtc;
             _jsRuntime = jsRuntime;
 
-            //MediaSoupClient.Registry.WebRtc = _webRtcMiddleware.WebRtc;
-            //MediaSoupClient.Registry.JsRuntime = _jsRuntime;
+            _device = GetDevice();
         }
 
 
@@ -41,57 +47,99 @@ namespace WebRTCme.Connection.Services
         {
             return Observable.Create<PeerResponse>(async observer =>
             {
-                //IMediaServerProxy mediaServerProxy = null;
-
-                //ConnectionContext connectionContext = null;
-                //bool isJoined = false;
-
                 var guid = Guid.NewGuid();
+                var forceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp");
+                var produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
+                var consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
+                var useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
+
+                _displayName = userContext.Name;
 
                 try
                 {
+                    _mediaSoupServerApi.NotifyEventAsync += OnNotifyAsync;
+                    _mediaSoupServerApi.RequestEventAsync += OnRequestAsync;
 
+                    await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name, userContext.Room);
 
-                    _mediaSoupServerApi.NotifyEventAsync += MediaSoupServer_OnNotifyAsync;
-                    _mediaSoupServerApi.RequestEventAsync += MediaSoupServerApi_OnRequestsync;
-
-
-                    //var mediaServerName = GetMediaServerFromName(request.ConnectionParameters.MediaServerName);
-                    //mediaServerProxy = GetMediaServerClient(mediaServerName);
-                    //await mediaServerProxy.StartAsync(request);
-                    //await mediaServerProxy.JoinAsync();
-
-                    //await _mediaServerApi.JoinAsync(Guid.NewGuid(), request.ConnectionParameters.UserName,
-                    //    request.ConnectionParameters.RoomName);
-                    await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name,
-                        userContext.Room);
-
-
-                    var mediaSoupDevice = new Device();
-
+                    var mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
 
                     var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
                         await _mediaSoupServerApi.CallAsync(MethodName.GetRouterRtpCapabilities));
                     await mediaSoupDevice.LoadAsync(routerRtpCapabilities);
 
-                    var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
-                        await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
-                            new WebRtcTransportCreateParameters
-                            {
-                                ForceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp"),
-                                Producing = true,
-                                Consuming = false,
-                                SctpCapabilities = new SctpCapabilities
+
+                    // Create mediasoup Transport for sending (unless we don't want to produce).
+                    if (produce)
+                    {
+                        var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
+                            await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
+                                new WebRtcTransportCreateParameters
                                 {
-                                    NumStreams = new NumSctpStreams
-                                    {
-                                        Os = 1024,
-                                        Mis = 1024,
-                                    }
-                                }
+                                    ForceTcp = forceTcp,
+                                    Producing = true,
+                                    Consuming = false,
+                                    SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                }));
+
+                        _sendTransport = mediaSoupDevice.CreateSendTransport(new TransportOptions 
+                        {
+                            Id = transportInfo.Id,
+                            IceParameters = transportInfo.IceParameters,
+                            IceCandidates = transportInfo.IceCandidates,
+                            DtlsParameters = transportInfo.DtlsParameters,
+                            SctpParameters = transportInfo.SctpParameters,
+                            IceServers = new RTCIceServer[] { },
+                            //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                            //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                        });
+
+                        _sendTransport.OnConnectAsync += SendTransport_OnConnectAsync;
+                        _sendTransport.OnProduceAsync += SendTransport_OnProduceAsync;
+                        _sendTransport.OnProduceDataAsync += SendTransport_OnProduceDataAsync;
+
+                    }
+
+                    // Create mediasoup Transport for receiving (unless we don't want to consume).
+                    if (consume)
+                    {
+                        var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
+                            await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
+                                new WebRtcTransportCreateParameters
+                                {
+                                    ForceTcp = forceTcp,
+                                    Producing = false,
+                                    Consuming = true,
+                                    SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                }));
+
+                        _recvTransport = mediaSoupDevice.CreateRecvTransport(new TransportOptions
+                        {
+                            Id = transportInfo.Id,
+                            IceParameters = transportInfo.IceParameters,
+                            IceCandidates = transportInfo.IceCandidates,
+                            DtlsParameters = transportInfo.DtlsParameters,
+                            SctpParameters = transportInfo.SctpParameters,
+                            IceServers = new RTCIceServer[] { },
+                            //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                            //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                        });
+
+                        _recvTransport.OnConnectAsync += RecvTransport_OnConnectAsync;
+                    }
+
+
+                    // Join now into the room.
+                    // NOTE: Don't send our RTP capabilities if we don't want to consume.
+                    var peers = (Peer[])ParseResponse(MethodName.Join,
+                        await _mediaSoupServerApi.CallAsync(MethodName.Join,
+                            new JoinParameters
+                            {
+                                DisplayName = _displayName,
+                                Device = _device,
+                                RtpCapabilities = consume ? mediaSoupDevice.RtpCapabilities : null,
+                                SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
                             }));
-
-
 
 
 
@@ -111,26 +159,49 @@ namespace WebRTCme.Connection.Services
                 {
                     try
                     {
-                        _mediaSoupServerApi.NotifyEventAsync -= MediaSoupServer_OnNotifyAsync;
-                        _mediaSoupServerApi.RequestEventAsync -= MediaSoupServerApi_OnRequestsync;
+                        _mediaSoupServerApi.NotifyEventAsync -= OnNotifyAsync;
+                        _mediaSoupServerApi.RequestEventAsync -= OnRequestAsync;
                         await _mediaSoupServerApi.DisconnectAsync(guid);
                         //await mediaServerProxy.StopAsync();
                     }
                     catch { };
                 };
+
+                Task SendTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
+                {
+                    throw new NotImplementedException();
+                }
+
+                Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
+                {
+                    throw new NotImplementedException();
+                }
+                
+                Task<string> SendTransport_OnProduceDataAsync(object sender, ProduceDataEventParameters params_)
+                {
+                    throw new NotImplementedException();
+                }
+
+                Task RecvTransport_OnConnectAsync(object sender, DtlsParameters e)
+                {
+                    throw new NotImplementedException();
+                }
+
             });
 
-            Task MediaSoupServer_OnNotifyAsync(string method, object data)
-            {
-                throw new NotImplementedException();
-            }
 
-            Task MediaSoupServerApi_OnRequestsync(string method, object data, 
-                IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
-            {
-                throw new NotImplementedException();
-            }
+        }
 
+
+        public Task OnNotifyAsync(string method, object data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OnRequestAsync(string method, object data,
+            IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
+        {
+            throw new NotImplementedException();
         }
 
 
@@ -206,5 +277,30 @@ namespace WebRTCme.Connection.Services
 
         }
 
+
+        MediaSoup.Proxy.Models.Device GetDevice()
+        {
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+                return new MediaSoup.Proxy.Models.Device
+                {
+                    Flag = "Android",
+                    Name = DeviceInfo.Name,
+                    Version = DeviceInfo.Version.ToString()
+                };
+            else if (DeviceInfo.Platform == DevicePlatform.iOS)
+                return new MediaSoup.Proxy.Models.Device
+                {
+                    Flag = "iOS",
+                    Name = DeviceInfo.Name,
+                    Version = DeviceInfo.Version.ToString()
+                };
+            else
+                return new MediaSoup.Proxy.Models.Device
+                {
+                    Flag = "Blazor",
+                    Name = "Browser",
+                    Version = "1.0"
+                };
+        }
     }
 }
