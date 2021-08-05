@@ -230,7 +230,7 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToString(this Candidate candidate, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Candidate candidate, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -263,7 +263,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this IceUfrag iceUfrag, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this IceUfrag iceUfrag, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -274,7 +274,8 @@ namespace Utilme.SdpTransform
                 .Append(SdpSerializer.CRLF);
             return sb.ToString();
         }
-        public static string ToString(this IcePwd icePwd, bool withAttributeCharacter = false)
+        
+        public static string ToAttributeString(this IcePwd icePwd, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -287,7 +288,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this IceOptions iceOptions, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this IceOptions iceOptions, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -306,7 +307,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Mid mid, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Mid mid, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -319,7 +320,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this MsidSemantic msidSemantic, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this MsidSemantic msidSemantic, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -340,7 +341,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Fingerprint fingerprint, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Fingerprint fingerprint, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -355,7 +356,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Group group, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Group group, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -375,7 +376,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Msid msid, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Msid msid, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -390,7 +391,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Ssrc ssrc, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Ssrc ssrc, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -411,7 +412,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this SsrcGroup ssrcGroup, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this SsrcGroup ssrcGroup, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -431,7 +432,7 @@ namespace Utilme.SdpTransform
             return sb.ToString();
         }
 
-        public static string ToString(this Rid rid, bool withAttributeCharacter = false)
+        public static string ToAttributeString(this Rid rid, bool withAttributeCharacter = false)
         {
             StringBuilder sb = new();
             if (withAttributeCharacter)
@@ -455,6 +456,68 @@ namespace Utilme.SdpTransform
             sb.Append(SdpSerializer.CRLF);
 
             return sb.ToString();
+        }
+
+        public static string ToAttributeString(this Rtpmap rtpmap, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Rtpmap.Name)
+                .Append(rtpmap.PayloadType.ToString())
+                .Append(" ")
+                .Append(rtpmap.EncodingName)
+                .Append("/")
+                .Append(rtpmap.ClockRate.ToString());
+            if (rtpmap.Channels.HasValue)
+            {
+                sb
+                    .Append("/")
+                    .Append(rtpmap.Channels);
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+
+        }
+
+        public static string ToAttributeString(this Fmtp fmtp, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(Fmtp.Name)
+                .Append(fmtp.PayloadType.ToString())
+                .Append(" ")
+                .Append(fmtp.Value)
+                .Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+        }
+
+        public static string ToAttributeString(this RtcpFb rtcpFb, bool withAttributeCharacter = false)
+        {
+            StringBuilder sb = new();
+            if (withAttributeCharacter)
+                sb.Append(SdpSerializer.AttributeCharacter);
+            sb
+                .Append(RtcpFb.Name)
+                .Append(rtcpFb.PayloadType.ToString())
+                .Append(" ")
+                .Append(rtcpFb.Type)
+                .Append(SdpSerializer.CRLF);
+            if (rtcpFb.SubType is not null)
+            {
+                sb
+                    .Append(" ")
+                    .Append(rtcpFb.SubType);
+            }
+            sb.Append(SdpSerializer.CRLF);
+
+            return sb.ToString();
+
         }
 
         // Utility method.

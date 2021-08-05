@@ -228,20 +228,20 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         {
             var attributes = new List<string>
             {
-                mediaObject.Mid.ToString(),
-                mediaObject.Msid.ToString(),
-                mediaObject.IceUfrag.ToString(),
-                mediaObject.IcePwd.ToString(),
-                mediaObject.IceOptions.ToString(),
-                mediaObject.Fingerprint.ToString(),
+                mediaObject.Mid.ToAttributeString(),
+                mediaObject.Msid.ToAttributeString(),
+                mediaObject.IceUfrag.ToAttributeString(),
+                mediaObject.IcePwd.ToAttributeString(),
+                mediaObject.IceOptions.ToAttributeString(),
+                mediaObject.Fingerprint.ToAttributeString(),
             };
-            attributes.AddRange(mediaObject.Candidates.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToString()).ToList());
-            attributes.AddRange(mediaObject.Rids.Select(i => i.ToString()).ToList());
+            attributes.AddRange(mediaObject.Candidates.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToAttributeString()).ToList());
+            attributes.AddRange(mediaObject.Rids.Select(i => i.ToAttributeString()).ToList());
 
             return new MediaDescription
             {
