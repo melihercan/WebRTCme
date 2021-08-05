@@ -103,13 +103,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         protected string GetCodecName(RtpCodecParameters codec)
         {
-	        var mimeTypeRegex = new Regex("'^(audio|video)/(.+)");
-            var mimeTypeMatch = mimeTypeRegex.Match(codec.MimeType);
+            var match = Regex.Match(codec.MimeType, "^(audio|video)/(.+)");
+            if (!match.Success || match.Groups.Count != 3)
+                throw new Exception("invalid codec.mimeType");
 
-	        if (!mimeTypeMatch.Success)
-		        throw new Exception("'invalid codec.mimeType");
-
-	        return mimeTypeMatch.Value;
+	        return match.Groups[2].Value;
         }
 
 

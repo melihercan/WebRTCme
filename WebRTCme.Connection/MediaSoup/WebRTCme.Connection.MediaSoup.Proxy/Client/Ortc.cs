@@ -41,18 +41,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         // It throws if invalid.
         public void ValidateRtpCodecCapability(RtpCodecCapability codec)
         {
-            var mimeTypeRegex = new Regex("^(audio|video)/(.+)", RegexOptions.IgnoreCase);
-
             // mimeType is mandatory.
             if (codec.MimeType is null)
                 throw new Exception("missing codec.mimeType");
 
-            var mimeTypeMatch = mimeTypeRegex.Match(codec.MimeType);
-            if (!mimeTypeMatch.Success)
+            var match = Regex.Match(codec.MimeType, "^(audio|video)/(.+)");
+            if (!match.Success || match.Groups.Count != 3)
                 throw new Exception("invalid codec.mimeType");
 
             // Just override kind with media component of mimeType.
-            codec.Kind =  (MediaKind)Enum.Parse(typeof(MediaKind), mimeTypeMatch.Value.ToLower(), true);
+            codec.Kind = (MediaKind)Enum.Parse(typeof(MediaKind), match.Groups[1].Value.ToLower(), true);
 
             // Channels is optional. If unset, set it to 1 (just if audio).
             if (codec.Kind ==  MediaKind.Audio)
@@ -140,16 +138,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public void ValidateRtpCodecParameters(RtpCodecParameters codec)
         {
-            var mimeTypeRegex = new Regex("^(audio|video)/(.+)", RegexOptions.IgnoreCase);
-
             // MimeType is mandatory.
             if (codec.MimeType is null)
                 throw new Exception("missing codec.mimeType");
-            var mimeTypeMatch = mimeTypeRegex.Match(codec.MimeType);
-            if (!mimeTypeMatch.Success)
+
+            var match = Regex.Match(codec.MimeType, "^(audio|video)/(.+)");
+            if (!match.Success || match.Groups.Count != 3)
                 throw new Exception("invalid codec.mimeType");
 
-            var kind = (MediaKind)Enum.Parse(typeof(MediaKind), mimeTypeMatch.Value.ToLower(), true);
+            var kind = (MediaKind)Enum.Parse(typeof(MediaKind), match.Groups[1].Value.ToLower(), true);
 
             // Channels is optional. If unset, set it to 1 (just if audio).
             if (kind == MediaKind.Audio)
@@ -626,10 +623,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
         bool IsRtxCodec(RtpCodecCapability codec) =>
-            new Regex(@"(?i).+/rtx$").IsMatch(codec.MimeType);
+            Regex.IsMatch(codec.MimeType, ".+/rtx$");
 
         bool IsRtxCodec(RtpCodecParameters codec) =>
-            new Regex(@"(?i).+/rtx$").IsMatch(codec.MimeType);
+            Regex.IsMatch(codec.MimeType, ".+/rtx$");
 
         bool MatchCodecs(RtpCodecCapability aCodec, RtpCodecCapability bCodec, bool strict = false, 
             bool modify = false)

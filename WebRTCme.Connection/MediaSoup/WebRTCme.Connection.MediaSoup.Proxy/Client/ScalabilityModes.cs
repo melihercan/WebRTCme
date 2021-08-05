@@ -13,13 +13,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
 		public static ScalabilityMode Parse(string scalabilityMode = "")
 		{
-			var matches = ScalabilityModeRegex.Matches(scalabilityMode);
-			if (matches.Count > 0)
+			var match = ScalabilityModeRegex.Match(scalabilityMode);
+			if (match.Success && match.Groups.Count >= 2)
 			{
 				return new ScalabilityMode 
 				{
-					SpatialLayers = int.Parse(matches[1].Value),
-					TemporalLayers = int.Parse(matches[2].Value)
+					SpatialLayers = int.Parse(match.Groups[1].Value),
+					TemporalLayers = int.Parse(match.Groups[2].Value)
 				};
 			}
 			else
