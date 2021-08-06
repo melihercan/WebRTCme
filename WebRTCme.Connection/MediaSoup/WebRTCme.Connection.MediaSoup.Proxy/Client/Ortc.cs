@@ -65,7 +65,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             // Parameters is optional. If unset, set it to an empty object.
             if (codec.Parameters is null)
-                codec.Parameters = new Dictionary<string, string>();
+                codec.Parameters = new Dictionary<string, object/*string*/>();
 
             // RtcpFeedback is optional. If unset, set it to an empty array.
             if (codec.RtcpFeedback is null)
@@ -273,12 +273,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     IsRtxCodec(localCodec) &&
                     ////                    (bool)(RtxParameters)localCodec.Parameters).Apt?.Equals(extendedCodec.LocalRtxPayloadType));
                     localCodec.Parameters.ContainsKey("apt") &&
-                    int.Parse(localCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
+                    ////int.Parse(localCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
+                    (int)localCodec.Parameters["apt"] == extendedCodec.RemoteRtxPayloadType);
                 var matchingRemoteRtxCodec = remoteCaps.Codecs.FirstOrDefault(remoteCodec =>
                     IsRtxCodec(remoteCodec) &&
                     ////(bool)((RtxParameters)remoteCodec.Parameters).Apt?.Equals(extendedCodec.RemoteRtxPayloadType));
                     remoteCodec.Parameters.ContainsKey("apt") &&
-                    int.Parse(remoteCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
+                    (int)remoteCodec.Parameters["apt"] == extendedCodec.RemoteRtxPayloadType);
+                    ////int.Parse(remoteCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
                 if (matchingLocalRtxCodec is not null && matchingRemoteRtxCodec is not null)
                 {
                     extendedCodec.LocalRtxPayloadType = matchingLocalRtxCodec.PreferredPayloadType;
@@ -352,9 +354,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     //{
                     //    Apt = extendedCodec.RemotePayloadType
                     //},
-                    Parameters = new Dictionary<string, string>() 
+                    Parameters = new Dictionary<string, object/*string*/>() 
                     { 
-                        { "apt", extendedCodec.RemotePayloadType.ToString() } 
+                        { "apt", extendedCodec.RemotePayloadType/*.ToString()*/ } 
                     },
                     RtcpFeedback = new RtcpFeedback[] { }
                 };

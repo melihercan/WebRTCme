@@ -228,7 +228,7 @@ namespace Utilme.SdpTransform
         //  Value = "level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f"
         // }
         // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
-        public static Fmtp ToFmtp(this Dictionary<string, string> dictionary, int payloadType)
+        public static Fmtp ToFmtp(this Dictionary<string, object/*string*/> dictionary, int payloadType)
         {
             Fmtp fmtp = new()
             {
@@ -541,9 +541,9 @@ namespace Utilme.SdpTransform
         //      { "profile-level-id", "42e01f" }
         //  }
 
-        public static Dictionary<string,string> ToDictionary(this Fmtp fmtp)
+        public static Dictionary<string, object/*string*/> ToDictionary(this Fmtp fmtp)
         {
-            Dictionary<string, string> dictionary = new();
+            Dictionary<string, object/*string*/> dictionary = new();
 
             var tokens = fmtp.Value.Split(';');
             foreach (var token in tokens)

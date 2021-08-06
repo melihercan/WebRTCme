@@ -15,8 +15,8 @@ namespace WebRTCme.Connection.MediaSoup
         public int RemotePayloadType { get; set; }
         public int? RemoteRtxPayloadType { get; init; }
 
-        public Dictionary<string, string> LocalParameters { get; set; }
-        public Dictionary<string, string> RemoteParameters { get; set; }
+        public Dictionary<string, object/*string*/> LocalParameters { get; set; }
+        public Dictionary<string, object/*string*/> RemoteParameters { get; set; }
 
         public RtcpFeedback[] RtcpFeedback { get; set; }
 

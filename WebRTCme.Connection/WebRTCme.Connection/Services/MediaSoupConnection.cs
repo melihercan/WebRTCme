@@ -230,6 +230,20 @@ namespace WebRTCme.Connection.Services
                 case MethodName.GetRouterRtpCapabilities:
                     var routerRtpCapabilities = JsonSerializer.Deserialize<RtpCapabilities>(
                         json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                    
+                    // Need to convert object (Parameters.Value) to either string or int.
+                    foreach (var codec in routerRtpCapabilities.Codecs)
+                    {
+                        foreach (var item in codec.Parameters)
+                        {
+                            var jElement = (JsonElement)item.Value;
+                            if (jElement.ValueKind == JsonValueKind.String)
+                                codec.Parameters[item.Key] = jElement.GetString();
+                            else if (jElement.ValueKind == JsonValueKind.Number)
+                                codec.Parameters[item.Key] = jElement.GetInt32();
+                        }
+                    }
+
 
                     //foreach (var codec in routerRtpCapabilities.Codecs)
                     //{

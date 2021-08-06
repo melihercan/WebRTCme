@@ -73,11 +73,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var offer = await pc.CreateOffer();
             pc.Close();
 
-
-      Console.WriteLine($"SDP string:{offer.Sdp}");
-
+//Console.WriteLine($"SDP string:{offer.Sdp}");
             var sdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
-  SdpSerializer.DumpSdp(sdpObject);
+//SdpSerializer.DumpSdp(sdpObject);
 
             ////var x = Encoding.UTF8.GetString(SdpSerializer.WriteSdp(sdpObject));
 

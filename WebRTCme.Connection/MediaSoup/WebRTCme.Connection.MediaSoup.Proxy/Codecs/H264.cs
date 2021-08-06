@@ -96,7 +96,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         //        params1.ProfileLevelId == params2.ProfileLevelId;
         //}
 
-        public static bool IsSameProfile(Dictionary<string, string> params1, Dictionary<string, string> params2)
+        public static bool IsSameProfile(Dictionary<string, object/*string*/> params1, Dictionary<string, object/*string*/> params2)
         {
             var profileLevelId1 = ParseSdpProfileLevelId(params1);
             var profileLevelId2 = ParseSdpProfileLevelId(params2);
@@ -136,8 +136,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         //    });
         //}
 
-        public static string GenerateProfileLevelIdForAnswer(Dictionary<string, string> localSupportedParams,
-            Dictionary<string, string> remoteOfferedParams)
+        public static string GenerateProfileLevelIdForAnswer(Dictionary<string, object/*string*/> localSupportedParams,
+            Dictionary<string, object/*string*/> remoteOfferedParams)
         {
             if (!localSupportedParams.ContainsKey("profile - level - id") && 
                 remoteOfferedParams.ContainsKey("profile-level-id"))
@@ -175,10 +175,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         //        ParseProfileLevelId(params_.ProfileLevelId);
         //}
 
-        public static ProfileLevelId ParseSdpProfileLevelId(Dictionary<string, string> params_)
+        public static ProfileLevelId ParseSdpProfileLevelId(Dictionary<string, object/*string*/> params_)
         {
             return params_.ContainsKey("profile-level-id") ?
-                ParseProfileLevelId(params_["profile-level-id"]) : _defaultProfileLevelId;
+                ParseProfileLevelId(params_["profile-level-id"] as string) : _defaultProfileLevelId;
         }
 
         public static string ProfileLevelIdToString(ProfileLevelId profileLevelId)
@@ -282,9 +282,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         //    return params_.LevelAsymmetryAllowed is not null && params_.LevelAsymmetryAllowed == 1;
         //}
 
-        static bool IsLevelAsymmetryAllowed(Dictionary<string, string> params_)
+        static bool IsLevelAsymmetryAllowed(Dictionary<string, object/*string*/> params_)
         {
-            return params_.ContainsKey("level-asymmetry-allowed") ? params_["level-asymmetry-allowed"] == "1" : false;
+            return params_.ContainsKey("level-asymmetry-allowed") ? (int)params_["level-asymmetry-allowed"] == 1 : false;
         }
 
         static bool IsLessLevel(byte a, byte b)
