@@ -216,6 +216,37 @@ namespace Utilme.SdpTransform
             };
         }
 
+        // Dictionary
+        //  {
+        //      { "level-asymmetry-allowed", "1" },
+        //      { "packetization-mode", "0" },
+        //      { "profile-level-id", "42e01f" }
+        //  }
+        // Fmtp
+        // {
+        //  PayloadType = 108,
+        //  Value = "level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f"
+        // }
+        // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+        public static Fmtp ToFmtp(this Dictionary<string, string> dictionary, int payloadType)
+        {
+            Fmtp fmtp = new()
+            {
+                PayloadType = payloadType,
+                Value = string.Empty
+            };
+
+            foreach (var key in dictionary.Keys)
+            {
+                if (!string.IsNullOrEmpty(fmtp.Value))
+                    fmtp.Value += ";";
+                fmtp.Value += $"{key}={dictionary[key]}";
+            }
+
+            return fmtp;
+        }
+
+
         public static RtcpFb ToRtcpFb(this string str)
         {
             var tokens = str
@@ -495,6 +526,32 @@ namespace Utilme.SdpTransform
                 .Append(SdpSerializer.CRLF);
 
             return sb.ToString();
+        }
+
+        // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+        // Fmtp
+        // {
+        //  PayloadType = 108,
+        //  Value = "level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f"
+        // }
+        // Dictionary
+        //  {
+        //      { "level-asymmetry-allowed", "1" },
+        //      { "packetization-mode", "0" },
+        //      { "profile-level-id", "42e01f" }
+        //  }
+
+        public static Dictionary<string,string> ToDictionary(this Fmtp fmtp)
+        {
+            Dictionary<string, string> dictionary = new();
+
+            var tokens = fmtp.Value.Split(';');
+            foreach (var token in tokens)
+            {
+                var subTokens = token.Split('=');
+                dictionary.Add(subTokens[0], subTokens[1]);
+            }
+            return dictionary;
         }
 
         public static string ToAttributeString(this RtcpFb rtcpFb, bool withAttributeCharacter = false)
