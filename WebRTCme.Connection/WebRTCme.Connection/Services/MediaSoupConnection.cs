@@ -223,11 +223,14 @@ namespace WebRTCme.Connection.Services
             var data = result.Value;
             var json = ((JsonElement)data).GetRawText();
 
+            _logger.LogInformation($"JSON: {json}");
+
             switch (method)
             {
                 case MethodName.GetRouterRtpCapabilities:
                     var routerRtpCapabilities = JsonSerializer.Deserialize<RtpCapabilities>(
                         json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+
                     //foreach (var codec in routerRtpCapabilities.Codecs)
                     //{
                     //    var parametersJson = ((JsonElement)codec.Parameters).GetRawText();
