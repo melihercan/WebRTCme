@@ -90,11 +90,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         };
 
 
-        public static bool IsSameProfile(H264Parameters params1, H264Parameters params2)
-        {
-            return params1.ProfileLevelId is not null && params2.ProfileLevelId is not null &&
-                params1.ProfileLevelId == params2.ProfileLevelId;
-        }
+        //public static bool IsSameProfile(H264Parameters params1, H264Parameters params2)
+        //{
+        //    return params1.ProfileLevelId is not null && params2.ProfileLevelId is not null &&
+        //        params1.ProfileLevelId == params2.ProfileLevelId;
+        //}
 
         public static bool IsSameProfile(Dictionary<string, string> params1, Dictionary<string, string> params2)
         {
@@ -106,35 +106,35 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
 
         }
 
-        public static string GenerateProfileLevelIdForAnswer(H264Parameters localSupportedParams, 
-            H264Parameters remoteOfferedParams)
-        {
-            if (localSupportedParams.ProfileLevelId is null && remoteOfferedParams.ProfileLevelId is null)
-                return null;
+        //public static string GenerateProfileLevelIdForAnswer(H264Parameters localSupportedParams, 
+        //    H264Parameters remoteOfferedParams)
+        //{
+        //    if (localSupportedParams.ProfileLevelId is null && remoteOfferedParams.ProfileLevelId is null)
+        //        return null;
 
 
-            var localProfileLevelId = ParseSdpProfileLevelId(localSupportedParams);
-            var remoteProfileLevelId = ParseSdpProfileLevelId(remoteOfferedParams);
+        //    var localProfileLevelId = ParseSdpProfileLevelId(localSupportedParams);
+        //    var remoteProfileLevelId = ParseSdpProfileLevelId(remoteOfferedParams);
 
-            if (localProfileLevelId is null || remoteProfileLevelId is null
-                || localProfileLevelId != remoteProfileLevelId)
-                return null;
+        //    if (localProfileLevelId is null || remoteProfileLevelId is null
+        //        || localProfileLevelId != remoteProfileLevelId)
+        //        return null;
 
-            var levelAsymmetryAllowed = IsLevelAsymmetryAllowed(localSupportedParams)
-                && IsLevelAsymmetryAllowed(remoteOfferedParams);
+        //    var levelAsymmetryAllowed = IsLevelAsymmetryAllowed(localSupportedParams)
+        //        && IsLevelAsymmetryAllowed(remoteOfferedParams);
 
-            byte localLevel = localProfileLevelId.Level;
-            byte remoteLevel = remoteProfileLevelId.Level;
-            byte minLevel = MinLevel(localLevel, remoteLevel);
+        //    byte localLevel = localProfileLevelId.Level;
+        //    byte remoteLevel = remoteProfileLevelId.Level;
+        //    byte minLevel = MinLevel(localLevel, remoteLevel);
 
-            byte answerLevel = levelAsymmetryAllowed ? localLevel : minLevel;
+        //    byte answerLevel = levelAsymmetryAllowed ? localLevel : minLevel;
 
-            return ProfileLevelIdToString(new ProfileLevelId
-            {
-                Profile = localProfileLevelId.Profile,
-                Level = answerLevel
-            });
-        }
+        //    return ProfileLevelIdToString(new ProfileLevelId
+        //    {
+        //        Profile = localProfileLevelId.Profile,
+        //        Level = answerLevel
+        //    });
+        //}
 
         public static string GenerateProfileLevelIdForAnswer(Dictionary<string, string> localSupportedParams,
             Dictionary<string, string> remoteOfferedParams)
@@ -169,11 +169,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
             });
         }
 
-        public static ProfileLevelId ParseSdpProfileLevelId(H264Parameters params_)
-        {
-            return params_.ProfileLevelId is null ? _defaultProfileLevelId : 
-                ParseProfileLevelId(params_.ProfileLevelId);
-        }
+        //public static ProfileLevelId ParseSdpProfileLevelId(H264Parameters params_)
+        //{
+        //    return params_.ProfileLevelId is null ? _defaultProfileLevelId : 
+        //        ParseProfileLevelId(params_.ProfileLevelId);
+        //}
 
         public static ProfileLevelId ParseSdpProfileLevelId(Dictionary<string, string> params_)
         {
@@ -277,10 +277,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
             );
         }
 
-        static bool IsLevelAsymmetryAllowed(H264Parameters params_)
-        {
-            return params_.LevelAsymmetryAllowed is not null && params_.LevelAsymmetryAllowed == 1;
-        }
+        //static bool IsLevelAsymmetryAllowed(H264Parameters params_)
+        //{
+        //    return params_.LevelAsymmetryAllowed is not null && params_.LevelAsymmetryAllowed == 1;
+        //}
 
         static bool IsLevelAsymmetryAllowed(Dictionary<string, string> params_)
         {
