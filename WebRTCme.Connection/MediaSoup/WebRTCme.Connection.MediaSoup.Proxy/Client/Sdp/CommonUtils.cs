@@ -60,7 +60,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 {
                     if (!codecsDictionary.TryGetValue(fmtp.PayloadType, out var codec))
                         continue;
-                    SetMediaDescriptorParametersObject(codec, fmtp.Value);
+                    ////SetMediaDescriptorParametersObject(codec, fmtp.Value);
+                    codec.Parameters = fmtp.ToDictionary();
                 }
 
                 var rtcpFbAttributes = MediaDescriptionParser.ToRtcpFbAttributes(m);
@@ -97,6 +98,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             return rtpCapabilities;
         }
 
+#if false
         static void SetMediaDescriptorParametersObject(RtpCodecCapability codec, string fmtpValue)
         {
             var tokens = fmtpValue.Split(';');
@@ -184,6 +186,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 codec.Parameters = null;
 
         }
+#endif
 
         internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.Sdp sdp)
         {
@@ -342,11 +345,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 {
                     case "audio/opus":
                         {
-                            var spropStereo = ((CodecParameters)codec.Parameters).Stereo;
+                            var spropStereo = codec.Parameters.ContainsKey("sprop - stereo")
+                                ? codec.Parameters["sprop - stereo"] : null;
                             if (spropStereo is not null)
                             {
-                                parameters = parameters.Where(p => !p.StartsWith("stereo")).ToList();
-                                var stereo = (bool)spropStereo ? 1 : 0;
+                                var stereo = spropStereo == "1" ? 1 : 0;
                                 parameters.Add($"stereo={stereo}");
                             }
                             break;

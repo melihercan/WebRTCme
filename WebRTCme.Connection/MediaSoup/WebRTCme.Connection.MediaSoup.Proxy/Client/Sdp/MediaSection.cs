@@ -111,30 +111,32 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         }
 
 
-        protected string CodecParametersToFmtpValue(CodecParameters codecParameters)
-        {
-            List<string> values = new();
-            
-            if (codecParameters.Stereo.HasValue)
-                values.Add($"stereo={((bool)codecParameters.Stereo ? 1 : 0)}");
-            if (codecParameters.UseInBandFec.HasValue)
-                values.Add($"useinbandfec{((bool)codecParameters.UseInBandFec ? 1 : 0)}");
-            if (codecParameters.UsedTx.HasValue)
-                values.Add($"usedtx={((bool)codecParameters.UsedTx ? 1 : 0)}");
-            if (codecParameters.MaxAverageBitrate.HasValue)
-                values.Add($"maxplaybackrate={(int)codecParameters.MaxPlaybackRate}");
-            if (codecParameters.MaxAverageBitrate.HasValue)
-                values.Add($"maxaveragebitrate={(int)codecParameters.MaxAverageBitrate}");
-            if (codecParameters.Ptime.HasValue)
-                values.Add($"ptime={(int)codecParameters.Ptime}");
-            if (codecParameters.XGoogleStartBitrate.HasValue)
-                values.Add($"x-google-start-bitrate={(int)codecParameters.XGoogleStartBitrate}");
-            if (codecParameters.XGoogleMaxBitrate.HasValue)
-                values.Add($"x-google-max-bitrate={(int)codecParameters.XGoogleMaxBitrate}");
-            if (codecParameters.XGoogleMinBitrate.HasValue)
-                values.Add($"x-google-min-bitrate={(int)codecParameters.XGoogleMinBitrate}");
+        //protected string CodecParametersToFmtpValue(Dictionary<string, string> codecParameters, int payloadType)
+        //{
 
-            return string.Join(";", values.ToArray());
-        }
+
+        //    List<string> values = new();
+            
+        //    if (codecParameters.Stereo.HasValue)
+        //        values.Add($"stereo={((bool)codecParameters.Stereo ? 1 : 0)}");
+        //    if (codecParameters.UseInBandFec.HasValue)
+        //        values.Add($"useinbandfec{((bool)codecParameters.UseInBandFec ? 1 : 0)}");
+        //    if (codecParameters.UsedTx.HasValue)
+        //        values.Add($"usedtx={((bool)codecParameters.UsedTx ? 1 : 0)}");
+        //    if (codecParameters.MaxAverageBitrate.HasValue)
+        //        values.Add($"maxplaybackrate={(int)codecParameters.MaxPlaybackRate}");
+        //    if (codecParameters.MaxAverageBitrate.HasValue)
+        //        values.Add($"maxaveragebitrate={(int)codecParameters.MaxAverageBitrate}");
+        //    if (codecParameters.Ptime.HasValue)
+        //        values.Add($"ptime={(int)codecParameters.Ptime}");
+        //    if (codecParameters.XGoogleStartBitrate.HasValue)
+        //        values.Add($"x-google-start-bitrate={(int)codecParameters.XGoogleStartBitrate}");
+        //    if (codecParameters.XGoogleMaxBitrate.HasValue)
+        //        values.Add($"x-google-max-bitrate={(int)codecParameters.XGoogleMaxBitrate}");
+        //    if (codecParameters.XGoogleMinBitrate.HasValue)
+        //        values.Add($"x-google-min-bitrate={(int)codecParameters.XGoogleMinBitrate}");
+
+        //    return string.Join(";", values.ToArray());
+        //}
     }
 }

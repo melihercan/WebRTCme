@@ -65,7 +65,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             // Parameters is optional. If unset, set it to an empty object.
             if (codec.Parameters is null)
-                codec.Parameters = new object { };
+                codec.Parameters = new Dictionary<string, string>();
 
             // RtcpFeedback is optional. If unset, set it to an empty array.
             if (codec.RtcpFeedback is null)
@@ -260,8 +260,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Channels = matchingLocalCodec.Channels,
                     LocalPayloadType = matchingLocalCodec.PreferredPayloadType,
                     RemotePayloadType = remoteCodec.PreferredPayloadType,
-                    LocalParameters = (CodecParameters)matchingLocalCodec.Parameters,
-                    RemoteParameters = (CodecParameters)remoteCodec.Parameters,
+                    LocalParameters = matchingLocalCodec.Parameters,
+                    RemoteParameters = remoteCodec.Parameters,
                     RtcpFeedback = ReduceRtcpFeedback(matchingLocalCodec, remoteCodec)
                 });
             }
@@ -271,10 +271,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 var matchingLocalRtxCodec = localCaps.Codecs.FirstOrDefault(localCodec =>
                     IsRtxCodec(localCodec) &&
-                    (bool)((RtxParameters)localCodec.Parameters).Apt?.Equals(extendedCodec.LocalRtxPayloadType));
+                    ////                    (bool)(RtxParameters)localCodec.Parameters).Apt?.Equals(extendedCodec.LocalRtxPayloadType));
+                    localCodec.Parameters.ContainsKey("apt") &&
+                    int.Parse(localCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
                 var matchingRemoteRtxCodec = remoteCaps.Codecs.FirstOrDefault(remoteCodec =>
                     IsRtxCodec(remoteCodec) &&
-                    (bool)((RtxParameters)remoteCodec.Parameters).Apt?.Equals(extendedCodec.RemoteRtxPayloadType));
+                    ////(bool)((RtxParameters)remoteCodec.Parameters).Apt?.Equals(extendedCodec.RemoteRtxPayloadType));
+                    remoteCodec.Parameters.ContainsKey("apt") &&
+                    int.Parse(remoteCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
                 if (matchingLocalRtxCodec is not null && matchingRemoteRtxCodec is not null)
                 {
                     extendedCodec.LocalRtxPayloadType = matchingLocalRtxCodec.PreferredPayloadType;
@@ -344,9 +348,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     MimeType = $"{extendedCodec.Kind}/rtx",
                     PreferredPayloadType = extendedCodec.RemotePayloadType,
                     ClockRate = extendedCodec.ClockRate,
-                    Parameters = new RtxParameters
-                    {
-                        Apt = extendedCodec.RemotePayloadType
+                    //Parameters = new RtxParameters
+                    //{
+                    //    Apt = extendedCodec.RemotePayloadType
+                    //},
+                    Parameters = new Dictionary<string, string>() 
+                    { 
+                        { "apt", extendedCodec.RemotePayloadType.ToString() } 
                     },
                     RtcpFeedback = new RtcpFeedback[] { }
                 };
@@ -646,22 +654,32 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             switch (aMimeType)
             {
                 case "video/h264":
-                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
-                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
-                    
-                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                    var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ? 
+                        aCodec.Parameters["packetization-mode"] : null;
+                    var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
+                        bCodec.Parameters["packetization-mode"] : null;
+
+                    if (aPacketizationMode != bPacketizationMode)
                         return false;
+
+                    //var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
+                    //var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
+                    
+                    //if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                    //    return false;
 
                     if (strict)
                     {
-                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
-                            return false;
+                        ////                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
+                        if (!H264.IsSameProfile(aCodec.Parameters, bCodec.Parameters))
+                        return false;
 
                         string selectedProfileLevelId;
                         try
                         {
                             selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
-                                aH264CodecParameters, bH264CodecParameters);
+                                ////aH264CodecParameters, bH264CodecParameters);
+                                aCodec.Parameters, bCodec.Parameters);
                         }
                         catch
                         {
@@ -671,8 +689,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         {
                             if (selectedProfileLevelId is not null)
                             {
-                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
-                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                ////aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                ////bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                aCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                                bCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                            }
+                            else
+                            {
+                                aCodec.Parameters.Remove("profile-level-id");
+                                bCodec.Parameters.Remove("profile-level-id");
+
                             }
                         }
 
@@ -682,10 +708,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 case "video/vp9":
                     if (strict)
                     {
-                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
-                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
+                        //var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
+                        //var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
 
-                        if (aVp9CodecParameters != bVp9CodecParameters)
+                        //if (aVp9CodecParameters != bVp9CodecParameters)
+                        //    return false;
+                        var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
+                            aCodec.Parameters["profile-id"] : null;
+                        var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
+                            bCodec.Parameters["profile-id"] : null;
+
+                        if (aProfileId != bProfileId)
                             return false;
                     }
                     break;
@@ -712,22 +745,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             switch (aMimeType)
             {
                 case "video/h264":
-                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
-                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
+                    var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ?
+                        aCodec.Parameters["packetization-mode"] : null;
+                    var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
+                        bCodec.Parameters["packetization-mode"] : null;
 
-                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                    if (aPacketizationMode != bPacketizationMode)
                         return false;
 
                     if (strict)
                     {
-                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
+                        if (!H264.IsSameProfile(aCodec.Parameters, bCodec.Parameters))
                             return false;
 
                         string selectedProfileLevelId;
                         try
                         {
                             selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
-                                aH264CodecParameters, bH264CodecParameters);
+                                aCodec.Parameters, bCodec.Parameters);
                         }
                         catch
                         {
@@ -737,8 +772,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         {
                             if (selectedProfileLevelId is not null)
                             {
-                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
-                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                aCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                                bCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                            }
+                            else
+                            {
+                                aCodec.Parameters.Remove("profile-level-id");
+                                bCodec.Parameters.Remove("profile-level-id");
                             }
                         }
 
@@ -748,10 +788,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 case "video/vp9":
                     if (strict)
                     {
-                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
-                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
+                        var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
+                            aCodec.Parameters["profile-id"] : null;
+                        var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
+                            bCodec.Parameters["profile-id"] : null;
 
-                        if (aVp9CodecParameters != bVp9CodecParameters)
+                        if (aProfileId != bProfileId)
                             return false;
                     }
                     break;
@@ -779,22 +821,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             switch (aMimeType)
             {
                 case "video/h264":
-                    var aH264CodecParameters = (H264Parameters)aCodec.Parameters;
-                    var bH264CodecParameters = (H264Parameters)bCodec.Parameters;
+                    var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ?
+                        aCodec.Parameters["packetization-mode"] : null;
+                    var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
+                        bCodec.Parameters["packetization-mode"] : null;
 
-                    if (aH264CodecParameters.PacketizationMode != bH264CodecParameters.PacketizationMode)
+                    if (aPacketizationMode != bPacketizationMode)
                         return false;
 
                     if (strict)
                     {
-                        if (!H264.IsSameProfile(aH264CodecParameters, bH264CodecParameters))
+                        if (!H264.IsSameProfile(aCodec.Parameters, bCodec.Parameters))
                             return false;
 
                         string selectedProfileLevelId;
                         try
                         {
                             selectedProfileLevelId = H264.GenerateProfileLevelIdForAnswer(
-                                aH264CodecParameters, bH264CodecParameters);
+                                aCodec.Parameters, bCodec.Parameters);
                         }
                         catch
                         {
@@ -804,8 +848,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         {
                             if (selectedProfileLevelId is not null)
                             {
-                                aH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
-                                bH264CodecParameters.ProfileLevelId = selectedProfileLevelId;
+                                aCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                                bCodec.Parameters["profile-level-id"] = selectedProfileLevelId;
+                            }
+                            else
+                            {
+                                aCodec.Parameters.Remove("profile-level-id");
+                                bCodec.Parameters.Remove("profile-level-id");
                             }
                         }
 
@@ -815,10 +864,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 case "video/vp9":
                     if (strict)
                     {
-                        var aVp9CodecParameters = (VP9Parameters)aCodec.Parameters;
-                        var bVp9CodecParameters = (VP9Parameters)bCodec.Parameters;
+                        var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
+                            aCodec.Parameters["profile-id"] : null;
+                        var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
+                            bCodec.Parameters["profile-id"] : null;
 
-                        if (aVp9CodecParameters != bVp9CodecParameters)
+                        if (aProfileId != bProfileId)
                             return false;
                     }
                     break;
@@ -828,6 +879,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
+#if false
         string GetCodecCapabilityParameterValue(RtpCodecCapability codec, string key)
         {
             string value = string.Empty;
@@ -846,6 +898,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             return value;
         }
+#endif
 
         RtcpFeedback[] ReduceRtcpFeedback(RtpCodecCapability codecA, RtpCodecCapability codecB)
         {

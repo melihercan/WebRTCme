@@ -86,11 +86,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             };
                             _mediaObject.Rtpmaps.Add(rtpmap);
 
-                            Fmtp fmtp = new()
-                            {
-                                PayloadType = codec.PayloadType,
-                                Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
-                            };
+                            Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);
 
@@ -234,11 +230,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 };
                 _mediaObject.Rtpmaps.Add(rtpmap);
 
-                Fmtp fmtp = new()
-                {
-                    PayloadType = codec.PayloadType,
-                    Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
-                };
+                Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                 if (!string.IsNullOrEmpty(fmtp.Value))
                     _mediaObject.Fmtps.Add(fmtp);
 
@@ -328,12 +320,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 };
                 _mediaObject.Rtpmaps.Add(rtpmap);
 
-                Fmtp fmtp = new()
-                {
-                    PayloadType = codec.PayloadType,
-                    Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
-                };
-
+                Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                 
                 if (!string.IsNullOrEmpty(fmtp.Value))
                     _mediaObject.Fmtps.Add(fmtp);

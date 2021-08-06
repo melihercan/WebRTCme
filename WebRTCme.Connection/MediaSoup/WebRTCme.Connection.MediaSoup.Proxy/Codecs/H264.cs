@@ -96,6 +96,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
                 params1.ProfileLevelId == params2.ProfileLevelId;
         }
 
+        public static bool IsSameProfile(Dictionary<string, string> params1, Dictionary<string, string> params2)
+        {
+            var profileLevelId1 = ParseSdpProfileLevelId(params1);
+            var profileLevelId2 = ParseSdpProfileLevelId(params2);
+
+            return profileLevelId1 is not null && profileLevelId2 is not null &&
+                profileLevelId1.Profile == profileLevelId2.Profile;
+
+        }
+
         public static string GenerateProfileLevelIdForAnswer(H264Parameters localSupportedParams, 
             H264Parameters remoteOfferedParams)
         {
@@ -126,10 +136,49 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
             });
         }
 
+        public static string GenerateProfileLevelIdForAnswer(Dictionary<string, string> localSupportedParams,
+            Dictionary<string, string> remoteOfferedParams)
+        {
+            if (!localSupportedParams.ContainsKey("profile - level - id") && 
+                remoteOfferedParams.ContainsKey("profile-level-id"))
+            {
+                Console.WriteLine("generateProfileLevelIdForAnswer() | no profile-level-id in local and remote params");
+                return null;
+            }
+
+            var localProfileLevelId = ParseSdpProfileLevelId(localSupportedParams);
+            var remoteProfileLevelId = ParseSdpProfileLevelId(remoteOfferedParams);
+
+            if (localProfileLevelId is null || remoteProfileLevelId is null
+                || localProfileLevelId.Profile != remoteProfileLevelId.Profile)
+                return null;
+
+            var levelAsymmetryAllowed = IsLevelAsymmetryAllowed(localSupportedParams)
+                && IsLevelAsymmetryAllowed(remoteOfferedParams);
+
+            byte localLevel = localProfileLevelId.Level;
+            byte remoteLevel = remoteProfileLevelId.Level;
+            byte minLevel = MinLevel(localLevel, remoteLevel);
+
+            byte answerLevel = levelAsymmetryAllowed ? localLevel : minLevel;
+
+            return ProfileLevelIdToString(new ProfileLevelId
+            {
+                Profile = localProfileLevelId.Profile,
+                Level = answerLevel
+            });
+        }
+
         public static ProfileLevelId ParseSdpProfileLevelId(H264Parameters params_)
         {
             return params_.ProfileLevelId is null ? _defaultProfileLevelId : 
                 ParseProfileLevelId(params_.ProfileLevelId);
+        }
+
+        public static ProfileLevelId ParseSdpProfileLevelId(Dictionary<string, string> params_)
+        {
+            return params_.ContainsKey("profile-level-id") ?
+                ParseProfileLevelId(params_["profile-level-id"]) : _defaultProfileLevelId;
         }
 
         public static string ProfileLevelIdToString(ProfileLevelId profileLevelId)
@@ -231,6 +280,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         static bool IsLevelAsymmetryAllowed(H264Parameters params_)
         {
             return params_.LevelAsymmetryAllowed is not null && params_.LevelAsymmetryAllowed == 1;
+        }
+
+        static bool IsLevelAsymmetryAllowed(Dictionary<string, string> params_)
+        {
+            return params_.ContainsKey("level-asymmetry-allowed") ? params_["level-asymmetry-allowed"] == "1" : false;
         }
 
         static bool IsLessLevel(byte a, byte b)

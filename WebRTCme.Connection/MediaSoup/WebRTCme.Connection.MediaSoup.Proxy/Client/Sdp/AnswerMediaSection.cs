@@ -68,98 +68,95 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 Channels = codec.Channels > 1 ? codec.Channels : null
                             };
                             _mediaObject.Rtpmaps.Add(rtpmap);
-                            var cp = codec.Parameters as CodecParameters;
-                            CodecParameters codecParameters = new()
-                            {
-                                Stereo = cp.Stereo,
-                                UseInBandFec = cp.UseInBandFec,
-                                UsedTx = cp.UsedTx,
-                                MaxPlaybackRate = cp.MaxPlaybackRate,
-                                MaxAverageBitrate = cp.MaxAverageBitrate,
-                                Ptime = cp.Ptime,
-                                XGoogleStartBitrate = cp.XGoogleStartBitrate,
-                                XGoogleMaxBitrate = cp.XGoogleMaxBitrate,
-                                XGoogleMinBitrate = cp.XGoogleMinBitrate
-                            };
 
-                            if (codecOptions is not null)
-                            {
-                                var offerCodec = offerRtpParameters.Codecs
-                                    .First(c => c.PayloadType == codec.PayloadType);
-                                var ocp = offerCodec.Parameters as CodecParameters;
-                                switch (codec.MimeType.ToLower())
-                                {
-                                    case "audio/opus":
-                                        {
-                                            if (codecOptions.OpusStereo.HasValue)
-                                            {
-                                                ocp.Stereo = 
-                                                    (bool)codecOptions.OpusStereo ? true : false;
-                                                codecParameters.Stereo = 
-                                                    (bool)codecOptions.OpusStereo ? true : false;
-                                            }
+                            //var cp = codec.Parameters as CodecParameters;
+                            //CodecParameters codecParameters = new()
+                            //{
+                            //    Stereo = cp.Stereo,
+                            //    UseInBandFec = cp.UseInBandFec,
+                            //    UsedTx = cp.UsedTx,
+                            //    MaxPlaybackRate = cp.MaxPlaybackRate,
+                            //    MaxAverageBitrate = cp.MaxAverageBitrate,
+                            //    Ptime = cp.Ptime,
+                            //    XGoogleStartBitrate = cp.XGoogleStartBitrate,
+                            //    XGoogleMaxBitrate = cp.XGoogleMaxBitrate,
+                            //    XGoogleMinBitrate = cp.XGoogleMinBitrate
+                            //};
 
-                                            if (codecOptions.OpusFec.HasValue)
-                                            {
-                                                ocp.UseInBandFec = 
-                                                    (bool)codecOptions.OpusFec ? true : false;
-                                                codecParameters.UseInBandFec = 
-                                                    (bool)codecOptions.OpusFec ? true :false;
-                                            }
+                            //if (codecOptions is not null)
+                            //{
+                            //    var offerCodec = offerRtpParameters.Codecs
+                            //        .First(c => c.PayloadType == codec.PayloadType);
+                            //    var ocp = offerCodec.Parameters as CodecParameters;
+                            //    switch (codec.MimeType.ToLower())
+                            //    {
+                            //        case "audio/opus":
+                            //            {
+                            //                if (codecOptions.OpusStereo.HasValue)
+                            //                {
+                            //                    ocp.Stereo = 
+                            //                        (bool)codecOptions.OpusStereo ? true : false;
+                            //                    codecParameters.Stereo = 
+                            //                        (bool)codecOptions.OpusStereo ? true : false;
+                            //                }
 
-                                            if (codecOptions.OpusDtx.HasValue)
-                                            {
-                                                ocp.UsedTx = 
-                                                    (bool)codecOptions.OpusDtx ? true : false;
-                                                codecParameters.UsedTx = 
-                                                    (bool)codecOptions.OpusDtx ? true : false;
-                                            }
+                            //                if (codecOptions.OpusFec.HasValue)
+                            //                {
+                            //                    ocp.UseInBandFec = 
+                            //                        (bool)codecOptions.OpusFec ? true : false;
+                            //                    codecParameters.UseInBandFec = 
+                            //                        (bool)codecOptions.OpusFec ? true :false;
+                            //                }
 
-                                            if (codecOptions.OpusMaxPlaybackRate.HasValue)
-                                            {
-                                                codecParameters.MaxPlaybackRate = codecOptions.OpusMaxPlaybackRate;
-                                            }
+                            //                if (codecOptions.OpusDtx.HasValue)
+                            //                {
+                            //                    ocp.UsedTx = 
+                            //                        (bool)codecOptions.OpusDtx ? true : false;
+                            //                    codecParameters.UsedTx = 
+                            //                        (bool)codecOptions.OpusDtx ? true : false;
+                            //                }
 
-                                            if (codecOptions.OpusMaxAverageBitrate.HasValue)
-                                            {
-                                                codecParameters.MaxAverageBitrate = codecOptions.OpusMaxAverageBitrate;
-                                            }
+                            //                if (codecOptions.OpusMaxPlaybackRate.HasValue)
+                            //                {
+                            //                    codecParameters.MaxPlaybackRate = codecOptions.OpusMaxPlaybackRate;
+                            //                }
 
-                                            if (codecOptions.OpusPtime.HasValue)
-                                            {
-                                                ocp.Ptime = codecOptions.OpusPtime;
-                                                codecParameters.Ptime = codecOptions.OpusPtime;
-                                            }
-                                            break;
-                                        }
+                            //                if (codecOptions.OpusMaxAverageBitrate.HasValue)
+                            //                {
+                            //                    codecParameters.MaxAverageBitrate = codecOptions.OpusMaxAverageBitrate;
+                            //                }
 
-                                    case "video/vp8":
-                                    case "video/vp9":
-                                    case "video/h264":
-                                    case "video/h265":
-                                        {
-                                            if (codecOptions.VideoGoogleStartBitrate is not null)
-                                                codecParameters.XGoogleStartBitrate = 
-                                                    codecOptions.VideoGoogleStartBitrate;
+                            //                if (codecOptions.OpusPtime.HasValue)
+                            //                {
+                            //                    ocp.Ptime = codecOptions.OpusPtime;
+                            //                    codecParameters.Ptime = codecOptions.OpusPtime;
+                            //                }
+                            //                break;
+                            //            }
 
-                                            if (codecOptions.VideoGoogleMaxBitrate is not null)
-                                                codecParameters.XGoogleMaxBitrate = 
-                                                    codecOptions.VideoGoogleMaxBitrate;
+                            //        case "video/vp8":
+                            //        case "video/vp9":
+                            //        case "video/h264":
+                            //        case "video/h265":
+                            //            {
+                            //                if (codecOptions.VideoGoogleStartBitrate is not null)
+                            //                    codecParameters.XGoogleStartBitrate = 
+                            //                        codecOptions.VideoGoogleStartBitrate;
 
-                                            if (codecOptions.VideoGoogleMinBitrate is not null)
-                                                codecParameters.XGoogleMinBitrate = 
-                                                    codecOptions.VideoGoogleMinBitrate;
+                            //                if (codecOptions.VideoGoogleMaxBitrate is not null)
+                            //                    codecParameters.XGoogleMaxBitrate = 
+                            //                        codecOptions.VideoGoogleMaxBitrate;
 
-                                            break;
-                                        }
-                                }
-                            }
+                            //                if (codecOptions.VideoGoogleMinBitrate is not null)
+                            //                    codecParameters.XGoogleMinBitrate = 
+                            //                        codecOptions.VideoGoogleMinBitrate;
 
-                            Fmtp fmtp = new()
-                            {
-                                PayloadType = codec.PayloadType,
-                                Value = CodecParametersToFmtpValue(codec.Parameters as CodecParameters)
-                            };
+                            //                break;
+                            //            }
+                            //    }
+                            //}
+
+                            Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                             
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.Fmtps.Add(fmtp);

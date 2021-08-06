@@ -1,4 +1,5 @@
-﻿using WebRTCme.Connection.MediaSoup.Proxy.Models;
+﻿using System.Collections.Generic;
+using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
 namespace WebRTCme.Connection.MediaSoup
 {
@@ -14,8 +15,8 @@ namespace WebRTCme.Connection.MediaSoup
         public int RemotePayloadType { get; set; }
         public int? RemoteRtxPayloadType { get; init; }
 
-        public CodecParameters LocalParameters { get; set; }
-        public CodecParameters RemoteParameters { get; set; }
+        public Dictionary<string, string> LocalParameters { get; set; }
+        public Dictionary<string, string> RemoteParameters { get; set; }
 
         public RtcpFeedback[] RtcpFeedback { get; set; }
 
