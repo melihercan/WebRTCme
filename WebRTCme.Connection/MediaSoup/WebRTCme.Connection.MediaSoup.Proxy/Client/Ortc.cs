@@ -271,16 +271,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 var matchingLocalRtxCodec = localCaps.Codecs.FirstOrDefault(localCodec =>
                     IsRtxCodec(localCodec) &&
-                    ////                    (bool)(RtxParameters)localCodec.Parameters).Apt?.Equals(extendedCodec.LocalRtxPayloadType));
                     localCodec.Parameters.ContainsKey("apt") &&
-                    ////int.Parse(localCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
-                    (int)localCodec.Parameters["apt"] == extendedCodec.RemoteRtxPayloadType);
+                    (int)localCodec.Parameters["apt"] == extendedCodec.LocalPayloadType);
                 var matchingRemoteRtxCodec = remoteCaps.Codecs.FirstOrDefault(remoteCodec =>
                     IsRtxCodec(remoteCodec) &&
-                    ////(bool)((RtxParameters)remoteCodec.Parameters).Apt?.Equals(extendedCodec.RemoteRtxPayloadType));
                     remoteCodec.Parameters.ContainsKey("apt") &&
-                    (int)remoteCodec.Parameters["apt"] == extendedCodec.RemoteRtxPayloadType);
-                    ////int.Parse(remoteCodec.Parameters["apt"]) == extendedCodec.RemoteRtxPayloadType);
+                    (int)remoteCodec.Parameters["apt"] == extendedCodec.RemotePayloadType);
                 if (matchingLocalRtxCodec is not null && matchingRemoteRtxCodec is not null)
                 {
                     extendedCodec.LocalRtxPayloadType = matchingLocalRtxCodec.PreferredPayloadType;

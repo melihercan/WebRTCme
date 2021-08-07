@@ -18,11 +18,11 @@ namespace Utilme.SdpTransform
             {
                 Foundation = tokens[0],
                 ComponentId = int.Parse(tokens[1]),
-                Transport = (CandidateTransport)Enum.Parse(typeof(CandidateTransport), tokens[2], true),
+                Transport = tokens[2].EnumFromDisplayName<CandidateTransport>(),// (CandidateTransport)Enum.Parse(typeof(CandidateTransport), tokens[2], true),
                 Priority = int.Parse(tokens[3]),
                 ConnectionAddress = tokens[4],
                 Port = int.Parse(tokens[5]),
-                Type = (CandidateType)Enum.Parse(typeof(CandidateType), tokens[7], true),
+                Type = tokens[7].EnumFromDisplayName<CandidateType>(), //(CandidateType)Enum.Parse(typeof(CandidateType), tokens[7], true),
                 RelAddr = tokens[9],
                 RelPort = int.Parse(tokens[11])
             };
@@ -103,7 +103,7 @@ namespace Utilme.SdpTransform
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Fingerprint
             {
-                HashFunction = (HashFunction)Enum.Parse(typeof(HashFunction), tokens[0], true),
+                HashFunction = tokens[0].EnumFromDisplayName<HashFunction>(), //(HashFunction)Enum.Parse(typeof(HashFunction), tokens[0], true),
                 HashValue = HexadecimalStringToByteArray(tokens[1].Replace(":", string.Empty))
             };
 
@@ -181,7 +181,7 @@ namespace Utilme.SdpTransform
             return new Rid
             {
                 Id = tokens[0],
-                Direction = (RidDirection)Enum.Parse(typeof(RidDirection), tokens[1], true),
+                Direction = tokens[1].EnumFromDisplayName<RidDirection>(), //(RidDirection)Enum.Parse(typeof(RidDirection), tokens[1], true),
                 FmtList = fmtList,
                 Restrictions = restrictions
             };
@@ -549,6 +549,9 @@ namespace Utilme.SdpTransform
             foreach (var token in tokens)
             {
                 var subTokens = token.Split('=');
+                if (int.TryParse(subTokens[1], out int n))
+                    dictionary.Add(subTokens[0], n);
+                else
                 dictionary.Add(subTokens[0], subTokens[1]);
             }
             return dictionary;

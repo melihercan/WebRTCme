@@ -60,7 +60,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 {
                     if (!codecsDictionary.TryGetValue(fmtp.PayloadType, out var codec))
                         continue;
-                    ////SetMediaDescriptorParametersObject(codec, fmtp.Value);
                     codec.Parameters = fmtp.ToDictionary();
                 }
 
