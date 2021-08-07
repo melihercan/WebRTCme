@@ -32,7 +32,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Mid = mid;
             _mediaObject.Kind = kind;
 
-            if (plainRtpParameters is not null)
+            if (plainRtpParameters is null)
             {
                 _mediaObject.Connection = new ConnectionData 
                 {

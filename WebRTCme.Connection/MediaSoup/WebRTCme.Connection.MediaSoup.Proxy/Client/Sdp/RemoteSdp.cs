@@ -328,7 +328,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 _dtlsParameters,
                 _sctpParameters,
                 _plainRtpParameters,
-                (bool)_planB,
+                _planB ?? false,
                 new Mid() { Id = "datachannel" },
                 MediaKind.Application,
                 null,

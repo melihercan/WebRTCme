@@ -228,22 +228,34 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public static MediaDescription MediaObjectToSdpMediaDescription(MediaObject mediaObject)
         {
-            var attributes = new List<string>
-            {
-                mediaObject.Mid.ToAttributeString(),
-                mediaObject.Msid.ToAttributeString(),
-                mediaObject.IceUfrag.ToAttributeString(),
-                mediaObject.IcePwd.ToAttributeString(),
-                mediaObject.IceOptions.ToAttributeString(),
-                mediaObject.Fingerprint.ToAttributeString(),
-            };
-            attributes.AddRange(mediaObject.Candidates.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToAttributeString()).ToList());
-            attributes.AddRange(mediaObject.Rids.Select(i => i.ToAttributeString()).ToList());
+            var attributes = new List<string>();
+
+            if (mediaObject.Mid is not null) 
+                attributes.Add(mediaObject.Mid.ToAttributeString());
+            if (mediaObject.Msid is not null)
+                attributes.Add(mediaObject.Msid?.ToAttributeString());
+            if (mediaObject.IceUfrag is not null)
+                attributes.Add(mediaObject.IceUfrag?.ToAttributeString());
+            if (mediaObject.IcePwd is not null)
+                attributes.Add(mediaObject.IcePwd?.ToAttributeString());
+            if (mediaObject.IceOptions is not null)
+                attributes.Add(mediaObject.IceOptions?.ToAttributeString());
+            if (mediaObject.Fingerprint is not null)
+                attributes.Add(mediaObject.Fingerprint?.ToAttributeString());
+            if (mediaObject.Candidates is not null)
+                attributes.AddRange(mediaObject.Candidates.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.Rtpmaps is not null)
+                attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.RtcpFbs is not null)
+                attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.Fmtps is not null)
+                attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.Ssrcs is not null)
+                attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.SsrcGroups is not null)
+                attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToAttributeString()).ToList());
+            if (mediaObject.Rids is not null)
+                attributes.AddRange(mediaObject.Rids.Select(i => i.ToAttributeString()).ToList());
 
             return new MediaDescription
             {

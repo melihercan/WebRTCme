@@ -26,7 +26,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Kind = offerMediaObject.Kind;
             _mediaObject.Protocol = offerMediaObject.Protocol;
 
-            if (plainRtpParameters is not null)
+            if (plainRtpParameters is null)
             {
                 _mediaObject.Connection = new ConnectionData
                 {

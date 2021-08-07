@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.Proxy.Client;
+using WebRTCme.Connection.MediaSoup.Proxy.Enums;
 using WebRTCme.Connection.MediaSoup.Proxy.Models;
 using Xamarin.Essentials;
 
@@ -32,6 +33,9 @@ namespace WebRTCme.Connection.Services
         bool _consume;
         bool _useDataChannel;
 
+        Dictionary<string, Consumer> _consumers = new();
+        Dictionary<string, DataConsumer> _dataConsumers = new();
+        Dictionary<string, PeerParameters> _peers = new();
 
         public MediaSoupConnection(IConfiguration configuration, 
             IMediaSoupServerApi mediaSoupServerApi,
@@ -205,6 +209,8 @@ namespace WebRTCme.Connection.Services
         public async Task OnRequestAsync(string method, object data,
             IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
         {
+
+
             switch (method)
             {
                 case MethodName.NewConsumer:
@@ -214,6 +220,7 @@ namespace WebRTCme.Connection.Services
                     break;
 
                 case MethodName.NewDataConsumer:
+                    DataConsumer dataConsumer = null;
                     {
                         if (!_consume)
                         {
@@ -231,25 +238,71 @@ namespace WebRTCme.Connection.Services
                         var requestData = JsonSerializer.Deserialize<DataConsumerRequestParameters>(
                             json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
 
-                        var dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
+                        var appData = requestData.AppData;
+                        appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
+
+                        dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
                         {
                             Id = requestData.Id,
                             DataProducerId = requestData.DataProducerId,
                             SctpStreamParameters = requestData.SctpStreamParameters,
                             Label = requestData.Label,
                             Protocol = requestData.Protocol,
-                            AppData = requestData.AppData
+                            AppData = appData
                         });
+                        
+                        _dataConsumers.Add(dataConsumer.Id, dataConsumer);
+                        ///// TODO: ADD THIS AFTER "newPeer"
+                        ////var peer = _peers[requestData.PeerId];
+                        ////peer.DataConsumerIds.Add(dataConsumer.Id);
 
-
+                        dataConsumer.OnOpen += DataConsumer_OnOpen;
+                        dataConsumer.OnClose += DataConsumer_OnClose;
+                        dataConsumer.OnTransportClosed += DataConsumer_OnTransportClosed;
+                        dataConsumer.OnError += DataConsumer_OnError;
+                        dataConsumer.OnMessage += DataConsumer_OnMessage;
 
                         accept();
                     }
                     break;
 
+                    //// TODO: HOW TO DEREGISTER EVENTS???
+                    void DataConsumer_OnOpen(object sender, EventArgs e)
+                    {
+                    }
+                    void DataConsumer_OnClose(object sender, EventArgs e)
+                    {
+                        ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
+                        ////peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        _dataConsumers.Remove(dataConsumer.Id);
+                    }
+
+                    void DataConsumer_OnTransportClosed(object sender, EventArgs e)
+                    {
+                        ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
+                        ////peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        _dataConsumers.Remove(dataConsumer.Id);
+
+                    }
+
+                    void DataConsumer_OnError(object sender, IErrorEvent e)
+                    {
+                    }
+
+                    void DataConsumer_OnMessage(object sender, IMessageEvent e)
+                    {
+                        throw new NotImplementedException();
+                    }
+
+
             }
-            
+
+
         }
+
+
+
+
 
 
         public Task<IRTCStatsReport> GetStats(Guid id)
