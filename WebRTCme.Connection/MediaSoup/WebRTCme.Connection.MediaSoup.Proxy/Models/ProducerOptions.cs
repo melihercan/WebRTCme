@@ -12,8 +12,8 @@ namespace WebRTCme.Connection.MediaSoup
         public RtpCodecCapability Codec { get; init; }
         public bool? StopTracks { get; init; }
         public bool? DisableTrackOnPause { get; init; }
-        public bool? ZeroRtpOnPause { get; set; } 
-        public object AppData { get; init; }
+        public bool? ZeroRtpOnPause { get; set; }
+        public Dictionary<string, object> AppData { get; init; }
 
     }
 }

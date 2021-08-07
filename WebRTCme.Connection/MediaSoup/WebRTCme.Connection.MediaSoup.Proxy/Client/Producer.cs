@@ -22,8 +22,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandlerAsync<EventArgs, IRTCStatsReport> OnGetStatsAsync;
 
         public Producer(string id, string localId, IRTCRtpSender rtpSender, IMediaStreamTrack track, 
-            RtpParameters rtpParameters, bool stopTracks, bool disableTrackOnPause, bool zeroRtpOnPause, 
-            object appData)
+            RtpParameters rtpParameters, bool stopTracks, bool disableTrackOnPause, bool zeroRtpOnPause,
+            Dictionary<string, object> appData)
         {
             Id = id;
             LocalId = localId;
@@ -51,7 +51,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public RtpParameters RtpParameters { get; }
         public bool Paused { get; private set; }
         public int MaxSpatialLayer { get; }
-        public object AppData { get; }
+        public Dictionary<string, object> AppData { get; }
 
 
         public void Close()

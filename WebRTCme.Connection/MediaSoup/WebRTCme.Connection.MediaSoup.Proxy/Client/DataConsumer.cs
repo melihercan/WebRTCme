@@ -10,7 +10,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         readonly IRTCDataChannel _dataChannel;
 
         public DataConsumer(string id, string dataProducerId, IRTCDataChannel dataChannel, 
-            SctpStreamParameters sctpStreamParameters, object appData)
+            SctpStreamParameters sctpStreamParameters, Dictionary<string, object> appData)
         {
             Id = id;
             DataProducerId = dataProducerId;
@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             get => _dataChannel.BinaryType;
             set => _dataChannel.BinaryType = value;
         }
-        public object AppData { get; }
+        public Dictionary<string, object> AppData { get; }
 
         public void Close()
         {

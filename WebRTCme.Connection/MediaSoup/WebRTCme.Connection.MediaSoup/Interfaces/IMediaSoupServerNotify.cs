@@ -7,7 +7,7 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public interface IMediaSoupServerNotify
     {
-        delegate void Accept(object data);
+        delegate void Accept(object data = null);
         delegate void Reject(int error, string errorReason);
 
         delegate Task NotifyDelegateAsync(string method, object data);

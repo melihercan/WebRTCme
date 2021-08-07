@@ -8,6 +8,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Models
     {
         public MediaKind Kind { get; init; }
         public RtpParameters RtpParameters { get; init; }
-        public object AppData { get; init; }
+        public Dictionary<string, object> AppData { get; init; }
     }
 }

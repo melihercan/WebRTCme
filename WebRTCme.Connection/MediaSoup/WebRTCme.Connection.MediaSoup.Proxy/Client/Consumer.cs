@@ -14,7 +14,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
 
         public Consumer(string id, string localId, string producerId, IRTCRtpReceiver rtpReceiver,
-            IMediaStreamTrack track, RtpParameters rtpParameters, object appData)
+            IMediaStreamTrack track, RtpParameters rtpParameters, Dictionary<string, object> appData)
         {
             Id = id;
             LocalId = localId;
@@ -39,7 +39,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public IMediaStreamTrack Track { get; }
         public RtpParameters RtpParameters { get; }
         public bool Paused { get; private set;}
-        public object AppData { get; }
+        public Dictionary<string, object> AppData { get; }
 
 
         public void Close()

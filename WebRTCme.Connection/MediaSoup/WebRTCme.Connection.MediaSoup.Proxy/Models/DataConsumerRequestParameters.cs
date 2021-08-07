@@ -4,16 +4,14 @@ using System.Text;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Models
 {
-    public class DataConsumerOptions
+    public class DataConsumerRequestParameters
     {
-        public string Id { get; init; }
+        public string PeerId { get; init; } // null if bot
         public string DataProducerId { get; init; }
-        
+        public string Id { get; init; }
         public SctpStreamParameters SctpStreamParameters { get; init; }
-
         public string Label { get; init; }
         public string Protocol { get; init; }
-        public Dictionary<string,object> AppData { get; init; }
-
+        public Dictionary<string, object> AppData { get; init; }
     }
 }

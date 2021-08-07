@@ -11,7 +11,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Models
         public int MaxRetransmits { get; init; }
         public string Label { get; init; }
         public string Protocol { get; init; }
-        public object AppData { get; init; }
+        public Dictionary<string, object> AppData { get; init; }
 
     }
 }

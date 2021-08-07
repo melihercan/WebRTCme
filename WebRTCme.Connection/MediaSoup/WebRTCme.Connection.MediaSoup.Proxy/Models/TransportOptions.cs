@@ -22,7 +22,7 @@ namespace WebRTCme.Connection.MediaSoup
         public object AdditionalSettings { get; init; }
         
         public object ProprietaryConstraints { get; init; }
-        
-        public object AppData { get; init; }
+
+        public Dictionary<string, object> AppData { get; init; }
     }
 }

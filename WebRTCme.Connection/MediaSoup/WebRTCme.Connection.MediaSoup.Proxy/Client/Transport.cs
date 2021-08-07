@@ -31,7 +31,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public Handler Handler { get; }
 
         public ConnectionState ConnectionState { get; private set; }
-        public object AppData { get; }
+        public Dictionary<string, object> AppData { get; }
 
         public event EventHandler<ConnectionState> OnConnectionStateChange;
         public event EventHandlerAsync<DtlsParameters> OnConnectAsync;

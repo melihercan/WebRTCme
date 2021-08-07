@@ -10,8 +10,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     {
         readonly IRTCDataChannel _dataChannel;
 
-        public DataProducer(string id, IRTCDataChannel dataChannel, SctpStreamParameters sctpStreamParameters, 
-            object appData)
+        public DataProducer(string id, IRTCDataChannel dataChannel, SctpStreamParameters sctpStreamParameters,
+            Dictionary<string, object> appData)
         {
             Id = id;
             _dataChannel = dataChannel;
@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             get => _dataChannel.BufferedAmountLowThreshold;
             set => _dataChannel.BufferedAmountLowThreshold = value;
         }
-        public object AppData { get; }
+        public Dictionary<string, object> AppData { get; }
 
         public void Close()
         {

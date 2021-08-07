@@ -344,11 +344,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 {
                     case "audio/opus":
                         {
-                            var spropStereo = codec.Parameters.ContainsKey("sprop - stereo")
-                                ? codec.Parameters["sprop - stereo"] : null;
-                            if (spropStereo is not null)
+                            var spropStereo = (int)(codec.Parameters.ContainsKey("sprop - stereo")
+                                ? codec.Parameters["sprop - stereo"] : -1);
+                            if (spropStereo != -1)
                             {
-                                var stereo = spropStereo == "1" ? 1 : 0;
+                                var stereo = spropStereo == 1 ? 1 : 0;
                                 parameters.Add($"stereo={stereo}");
                             }
                             break;

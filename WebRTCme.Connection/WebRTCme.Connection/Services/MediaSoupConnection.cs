@@ -28,6 +28,10 @@ namespace WebRTCme.Connection.Services
         Transport _recvTransport;
         string _displayName;
 
+        bool _produce;
+        bool _consume;
+        bool _useDataChannel;
+
 
         public MediaSoupConnection(IConfiguration configuration, 
             IMediaSoupServerApi mediaSoupServerApi,
@@ -49,9 +53,9 @@ namespace WebRTCme.Connection.Services
             {
                 var guid = Guid.NewGuid();
                 var forceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp");
-                var produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
-                var consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
-                var useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
+                _produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
+                _consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
+                _useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
 
                 _displayName = userContext.Name;
 
@@ -70,7 +74,7 @@ namespace WebRTCme.Connection.Services
 
 
                     // Create mediasoup Transport for sending (unless we don't want to produce).
-                    if (produce)
+                    if (_produce)
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
                             await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
@@ -79,7 +83,7 @@ namespace WebRTCme.Connection.Services
                                     ForceTcp = forceTcp,
                                     Producing = true,
                                     Consuming = false,
-                                    SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                    SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
                                 }));
 
                         _sendTransport = mediaSoupDevice.CreateSendTransport(new TransportOptions 
@@ -101,7 +105,7 @@ namespace WebRTCme.Connection.Services
                     }
 
                     // Create mediasoup Transport for receiving (unless we don't want to consume).
-                    if (consume)
+                    if (_consume)
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
                             await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
@@ -110,7 +114,7 @@ namespace WebRTCme.Connection.Services
                                     ForceTcp = forceTcp,
                                     Producing = false,
                                     Consuming = true,
-                                    SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                    SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
                                 }));
 
                         _recvTransport = mediaSoupDevice.CreateRecvTransport(new TransportOptions
@@ -137,8 +141,8 @@ namespace WebRTCme.Connection.Services
                             {
                                 DisplayName = _displayName,
                                 Device = _device,
-                                RtpCapabilities = consume ? mediaSoupDevice.RtpCapabilities : null,
-                                SctpCapabilities = useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                RtpCapabilities = _consume ? mediaSoupDevice.RtpCapabilities : null,
+                                SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
                             }));
 
 
@@ -198,10 +202,53 @@ namespace WebRTCme.Connection.Services
             throw new NotImplementedException();
         }
 
-        public Task OnRequestAsync(string method, object data,
+        public async Task OnRequestAsync(string method, object data,
             IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
         {
-            throw new NotImplementedException();
+            switch (method)
+            {
+                case MethodName.NewConsumer:
+                    {
+
+                    }
+                    break;
+
+                case MethodName.NewDataConsumer:
+                    {
+                        if (!_consume)
+                        {
+                            reject(403, "I do not want to data consume");
+                            return;
+                        }
+                        if (!_useDataChannel)
+                        {
+                            reject(403, "I do not want DataChannels");
+                            return;
+                        }
+
+                        var json = ((JsonElement)data).GetRawText();
+   //_logger.LogInformation($"NewDataConsumer.JSON: {json}");
+                        var requestData = JsonSerializer.Deserialize<DataConsumerRequestParameters>(
+                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+
+                        var dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
+                        {
+                            Id = requestData.Id,
+                            DataProducerId = requestData.DataProducerId,
+                            SctpStreamParameters = requestData.SctpStreamParameters,
+                            Label = requestData.Label,
+                            Protocol = requestData.Protocol,
+                            AppData = requestData.AppData
+                        });
+
+
+
+                        accept();
+                    }
+                    break;
+
+            }
+            
         }
 
 
@@ -223,7 +270,7 @@ namespace WebRTCme.Connection.Services
             var data = result.Value;
             var json = ((JsonElement)data).GetRawText();
 
-            _logger.LogInformation($"JSON: {json}");
+   ////_logger.LogInformation($"JSON: {json}");
 
             switch (method)
             {
@@ -244,43 +291,6 @@ namespace WebRTCme.Connection.Services
                         }
                     }
 
-
-                    //foreach (var codec in routerRtpCapabilities.Codecs)
-                    //{
-                    //    var parametersJson = ((JsonElement)codec.Parameters).GetRawText();
-                    //    if (codec.MimeType.Equals("audio/opus"))
-                    //    {
-                    //        var opus = JsonSerializer.Deserialize<OpusParameters>(parametersJson,
-                    //            JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                    //        codec.Parameters = opus;
-                    //    }
-                    //    if (codec.MimeType.Equals("video/H264"))
-                    //    {
-                    //        var h264 = JsonSerializer.Deserialize<H264Parameters>(parametersJson,
-                    //            JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                    //        codec.Parameters = h264;
-                    //    }
-                    //    else if (codec.MimeType.Equals("video/VP8"))
-                    //    {
-                    //        var vp8 = JsonSerializer.Deserialize<VP8Parameters>(parametersJson,
-                    //            JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                    //        codec.Parameters = vp8;
-                    //    }
-                    //    else if (codec.MimeType.Equals("video/VP9"))
-                    //    {
-                    //        var vp9 = JsonSerializer.Deserialize<VP9Parameters>(parametersJson,
-                    //            JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                    //        codec.Parameters = vp9;
-                    //    }
-                    //    else if (codec.MimeType.Equals("video/rtx"))
-                    //    {
-                    //        var rtx = JsonSerializer.Deserialize<RtxParameters>(parametersJson,
-                    //            JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
-                    //        codec.Parameters = rtx;
-                    //    }
-                    //    else
-                    //        codec.Parameters = null;
-                    //}
                     return routerRtpCapabilities;
 
                 case MethodName.CreateWebRtcTransport:
@@ -288,6 +298,11 @@ namespace WebRTCme.Connection.Services
                         json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
                     return transportInfo;
 
+                case MethodName.Join:
+                    var joinResponse = JsonSerializer.Deserialize<JoinResponse>(
+                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                    var peers = joinResponse.Peers;
+                    return peers;
             }
 
             return null;
