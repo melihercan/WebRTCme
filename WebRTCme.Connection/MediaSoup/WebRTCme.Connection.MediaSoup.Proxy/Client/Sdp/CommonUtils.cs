@@ -257,16 +257,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             if (mediaObject.Rids is not null)
                 attributes.AddRange(mediaObject.Rids.Select(i => i.ToAttributeString()).ToList());
 
+            // MediaDescription attributes should not contain CRLF.
+            attributes = attributes.Select(a => a.Replace(SdpSerializer.CRLF, string.Empty)).ToList();
+
             return new MediaDescription
             {
                 Media = mediaObject.Kind.DisplayName(),
                 Port = mediaObject.Port.ToString(),
                 Proto = mediaObject.Protocol,
-                //Fmts = ???
+                Fmts = mediaObject.Payloads.Split(' ').ToList(),
                 Title = Encoding.UTF8.GetBytes(mediaObject.Kind.DisplayName()),
                 ConnectionInfo = mediaObject.Connection,
                 //Bandwiths = ???
-                //EncriptionKey = ???
+                EncriptionKey = mediaObject.Fingerprint is not null ? 
+                    new EncriptionKey
+                    {
+                        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
+                        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
+                    } : null,
                 Attributes = attributes
             };
         }
