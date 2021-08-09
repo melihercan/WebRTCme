@@ -27,12 +27,12 @@ namespace UtilmeSdpTransform.Serializers
             // Only method must be present
             if (indexOfEnd == -1)
             {
-                encKey.Method = SerializationHelpers.ParseRequiredString("Encription key field: method", remainingSlice);
+                encKey.Method = SerializationHelpers.ParseRequiredString("Encription key field: method", remainingSlice).EnumFromDisplayName<EncryptionKeyMethod>();
                 return encKey;
             }
             else
             {
-                encKey.Method = SerializationHelpers.ParseRequiredString("Encription key field: method", remainingSlice.Slice(0, indexOfEnd));
+                encKey.Method = SerializationHelpers.ParseRequiredString("Encription key field: method", remainingSlice.Slice(0, indexOfEnd)).EnumFromDisplayName<EncryptionKeyMethod>();
                 encKey.Value = SerializationHelpers.ParseRequiredString("Encription key field: value", remainingSlice.Slice(indexOfEnd + 1));
             }
 
@@ -44,11 +44,11 @@ namespace UtilmeSdpTransform.Serializers
             if (value == null)
                 return;
 
-            SerializationHelpers.EnsureFieldIsPresent("Encription key field: method", value.Method);
+            SerializationHelpers.EnsureFieldIsPresent("Encription key field: method", value.Method.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Encription key field: method", value.Method.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Encription key field: method", value.Method.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Encription key field: method", value.Method, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Encription key field: method", value.Method.DisplayName(), ReservedChars);
 #endif
             writer.WriteString($"k={value.Method}");
 

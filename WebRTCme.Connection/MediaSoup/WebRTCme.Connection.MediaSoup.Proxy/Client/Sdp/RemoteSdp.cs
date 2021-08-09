@@ -41,7 +41,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     SessionId = 10000,
                     SessionVersion = 0,
                     NetType = NetType.Internet,
-                    AddrType = IpVersion.Ip4.DisplayName(),
+                    AddrType = AddrType.Ip4,
                     UnicastAddress = "0.0.0.0"
                 },
                 SessionName = new byte[] { (byte)'-' },
@@ -76,7 +76,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             if (plainRtpParameters is not null)
             {
                 _sdp.Origin.UnicastAddress = plainRtpParameters.Ip;
-                _sdp.Origin.AddrType = plainRtpParameters.IpVersion .DisplayName();
+                _sdp.Origin.AddrType = plainRtpParameters.IpVersion;
             }
 
         }

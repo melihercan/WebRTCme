@@ -269,12 +269,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 Title = Encoding.UTF8.GetBytes(mediaObject.Kind.DisplayName()),
                 ConnectionInfo = mediaObject.Connection,
                 //Bandwiths = ???
-                EncriptionKey = mediaObject.Fingerprint is not null ? 
-                    new EncriptionKey
-                    {
-                        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
-                        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
-                    } : null,
+                //EncriptionKey = ???? mediaObject.Fingerprint is not null ? 
+                //    new EncriptionKey
+                //    {
+                //        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
+                //        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
+                //    } : null,
                 Attributes = attributes
             };
         }

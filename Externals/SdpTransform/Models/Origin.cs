@@ -8,7 +8,7 @@
         public ulong SessionId { get; set; }
         public uint SessionVersion { get; set; }
         public NetType NetType { get; set; }
-        public string AddrType { get; set; }
+        public AddrType AddrType { get; set; }
         public string UnicastAddress { get; set; }
     }
 }

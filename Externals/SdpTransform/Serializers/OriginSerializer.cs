@@ -45,7 +45,7 @@ namespace UtilmeSdpTransform.Serializers
             //addrtype
             session.ParsedValue.Origin.AddrType =
                 SerializationHelpers.ParseRequiredString("Origin field: addrtype",
-                SerializationHelpers.NextRequiredDelimitedField("Origin field: addrtype", SdpSerializer.ByteSpace, remainingSlice, out consumed));
+                SerializationHelpers.NextRequiredDelimitedField("Origin field: addrtype", SdpSerializer.ByteSpace, remainingSlice, out consumed)).EnumFromDisplayName<AddrType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // unicast-address
@@ -79,11 +79,11 @@ namespace UtilmeSdpTransform.Serializers
 #else
             SerializationHelpers.CheckForReserverdChars("Origin nettype", value.NetType.DisplayName(), ReservedChars);
 #endif
-            SerializationHelpers.EnsureFieldIsPresent("Origin addrtype", value.AddrType);
+            SerializationHelpers.EnsureFieldIsPresent("Origin addrtype", value.AddrType.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Origin addrtype", value.AddrType.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Origin addrtype", value.AddrType.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Origin addrtype", value.AddrType, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Origin addrtype", value.AddrType.DisplayName(), ReservedChars);
 #endif
             SerializationHelpers.EnsureFieldIsPresent("Origin unicast address", value.UnicastAddress);
 #if NETSTANDARD2_0

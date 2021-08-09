@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace WebRTCme.Connection.MediaSoup
+namespace Utilme.SdpTransform
 {
-    public enum IpVersion
+    public enum AddrType
     {
-        [Display(Name="IP4")]
+        [Display(Name = "IP4")]
         Ip4,
 
         [Display(Name = "IP6")]
         Ip6
+
     }
 }

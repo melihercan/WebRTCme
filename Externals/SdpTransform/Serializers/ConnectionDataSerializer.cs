@@ -25,13 +25,13 @@ namespace UtilmeSdpTransform.Serializers
             // nettype
             connData.NetType =
                 SerializationHelpers.ParseRequiredString("Connection Data field: nettype",
-                SerializationHelpers.NextRequiredDelimitedField("Connection Data field: nettype", SdpSerializer.ByteSpace, remainingSlice, out var consumed));
+                SerializationHelpers.NextRequiredDelimitedField("Connection Data field: nettype", SdpSerializer.ByteSpace, remainingSlice, out var consumed)).EnumFromDisplayName<NetType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // addrtype
             connData.AddrType =
                 SerializationHelpers.ParseRequiredString("Connection Data field: addrtype",
-                SerializationHelpers.NextRequiredDelimitedField("Connection Data field: addrtype", SdpSerializer.ByteSpace, remainingSlice, out consumed));
+                SerializationHelpers.NextRequiredDelimitedField("Connection Data field: addrtype", SdpSerializer.ByteSpace, remainingSlice, out consumed)).EnumFromDisplayName<AddrType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // connection-address
@@ -46,18 +46,18 @@ namespace UtilmeSdpTransform.Serializers
             if (value == null)
                 return;
 
-            SerializationHelpers.EnsureFieldIsPresent("Connection Data nettype", value.NetType);
+            SerializationHelpers.EnsureFieldIsPresent("Connection Data nettype", value.NetType.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType.DisplayName(), ReservedChars);
 #endif
 
-            SerializationHelpers.EnsureFieldIsPresent("Connection Data addrtype", value.AddrType);
+            SerializationHelpers.EnsureFieldIsPresent("Connection Data addrtype", value.AddrType.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Connection Data addrtype", value.AddrType.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data addrtype", value.AddrType.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Connection Data addrtype", value.AddrType, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data addrtype", value.AddrType.DisplayName(), ReservedChars);
 #endif
 
             SerializationHelpers.EnsureFieldIsPresent("Connection Data unicast address", value.ConnectionAddress);
