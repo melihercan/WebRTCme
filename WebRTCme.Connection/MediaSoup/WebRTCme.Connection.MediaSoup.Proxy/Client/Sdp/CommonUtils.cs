@@ -11,7 +11,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
     static class CommonUtils
     {
-        public static RtpCapabilities ExtractRtpCapabilities(Utilme.SdpTransform.Sdp sdp)
+        public static RtpCapabilities ExtractRtpCapabilities(Utilme.SdpTransform.SdpOld sdp)
         {
             Dictionary<int, RtpCodecCapability> codecsDictionary = new();
             List<RtpHeaderExtension> headerExtensions = new();
@@ -187,7 +187,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         }
 #endif
 
-        internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.Sdp sdp)
+        internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.SdpOld sdp)
         {
             var mediaObject = sdp.MediaDescriptions
                 .Select(md => SdpMediaDescriptionToMediaObject(md))

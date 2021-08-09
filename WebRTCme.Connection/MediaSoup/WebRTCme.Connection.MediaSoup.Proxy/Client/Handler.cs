@@ -624,7 +624,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
-        async Task SetupTransportAsync(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
+        async Task SetupTransportAsync(DtlsRole localDtlsRole, Utilme.SdpTransform.SdpOld localSdpObject)
         {
             if (localSdpObject is null)
                 localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(_pc.LocalDescription.Sdp));

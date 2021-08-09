@@ -20,7 +20,7 @@ namespace Utilme.SdpTransform
         public static readonly byte[] CharsetAttributePrefix = Encoding.UTF8.GetBytes("charset:");
 
 
-        public static async Task<Sdp> ReadSdp(PipeReader reader)
+        public static async Task<SdpOld> ReadSdp(PipeReader reader)
         {
             var session = new DeserializationSession();
 
@@ -65,7 +65,7 @@ namespace Utilme.SdpTransform
             return session.ParsedValue;
         }
 
-        public static Sdp ReadSdp(ReadOnlySpan<byte> data)
+        public static SdpOld ReadSdp(ReadOnlySpan<byte> data)
         {
             var session = new DeserializationSession();
             DeserializationState stateFn = Serializer.Instance.ReadValue;
@@ -116,12 +116,12 @@ namespace Utilme.SdpTransform
             return TrimSdpLineCR(line);
         }
 
-        public static void WriteSdp(PipeWriter writer, Sdp value)
+        public static void WriteSdp(PipeWriter writer, SdpOld value)
         {
             Serializer.Instance.WriteValue(writer, value);
         }
 
-        public static byte[] WriteSdp(Sdp value)
+        public static byte[] WriteSdp(SdpOld value)
         {
             var pipe = new Pipe();
             WriteSdp(pipe.Writer, value);
@@ -130,7 +130,7 @@ namespace Utilme.SdpTransform
             return serialized;
         }
 
-        public static void DumpSdp(Sdp sdp)
+        public static void DumpSdp(SdpOld sdp)
         {
             Console.WriteLine("================================ SDP OBJECT START ================================");
             Console.WriteLine($"Version:{sdp.Version}");

@@ -11,12 +11,12 @@ namespace UtilmeSdpTransform.Serializers
 
         public DeserializationState ReadValue(ReadOnlySpan<byte> data, DeserializationSession session)
         {
-            session.ParsedValue = new Sdp();
+            session.ParsedValue = new SdpOld();
             session.ParsedValue.Version = VersionSerializer.Instance.ReadValue(data);
             return OriginSerializer.Instance.ReadValue;
         }
 
-        public void WriteValue(IBufferWriter<byte> writer, Sdp value)
+        public void WriteValue(IBufferWriter<byte> writer, SdpOld value)
         {
             VersionSerializer.Instance.WriteValue(writer, value.Version);
             OriginSerializer.Instance.WriteValue(writer, value.Origin);

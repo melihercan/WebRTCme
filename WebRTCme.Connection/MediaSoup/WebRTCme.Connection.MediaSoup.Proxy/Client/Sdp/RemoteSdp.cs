@@ -19,7 +19,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         Dictionary<Mid, int> _midToIndex = new();
         Mid _firstMid;
 
-        Utilme.SdpTransform.Sdp _sdp;
+        Utilme.SdpTransform.SdpOld _sdp;
 
 
         public RemoteSdp(IceParameters iceParameters, IceCandidate[] iceCandidates, DtlsParameters dtlsParameters, 
@@ -32,7 +32,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _plainRtpParameters = plainRtpParameters;
             _planB = planB;
 
-            _sdp = new Utilme.SdpTransform.Sdp
+            _sdp = new Utilme.SdpTransform.SdpOld
             {
                 Version = 0,
                 Origin = new Origin

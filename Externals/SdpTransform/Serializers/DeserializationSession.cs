@@ -4,6 +4,6 @@ namespace UtilmeSdpTransform.Serializers
 {
     class DeserializationSession
     {
-        public Sdp ParsedValue { get; set; }
+        public SdpOld ParsedValue { get; set; }
     }
 }

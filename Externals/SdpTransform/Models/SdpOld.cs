@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Utilme.SdpTransform
 {
-    public class Sdp
+    public class SdpOld
     {
         /// <summary>
         /// The "v=" field gives the version of the Session Description Protocol.
