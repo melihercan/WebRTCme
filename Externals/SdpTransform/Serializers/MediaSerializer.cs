@@ -27,13 +27,13 @@ namespace UtilmeSdpTransform.Serializers
             // Media
             mDescr.Media =
                  SerializationHelpers.ParseRequiredString("Media field: Media",
-                 SerializationHelpers.NextRequiredDelimitedField("Media field: Media", SdpSerializer.ByteSpace, remainingSlice, out var consumed));
+                 SerializationHelpers.NextRequiredDelimitedField("Media field: Media", SdpSerializer.ByteSpace, remainingSlice, out var consumed)).EnumFromDisplayName<MediaType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // port
-            mDescr.Port =
+            mDescr.Port = int.Parse(
                  SerializationHelpers.ParseRequiredString("Media field: Port",
-                 SerializationHelpers.NextRequiredDelimitedField("Media field: Port", SdpSerializer.ByteSpace, remainingSlice, out consumed));
+                 SerializationHelpers.NextRequiredDelimitedField("Media field: Port", SdpSerializer.ByteSpace, remainingSlice, out consumed)));
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // Proto
@@ -64,18 +64,18 @@ namespace UtilmeSdpTransform.Serializers
             if (value == null)
                 throw new SerializationException("Media field must have value");
 
-            SerializationHelpers.EnsureFieldIsPresent("Media field: Media", value.Media);
+            SerializationHelpers.EnsureFieldIsPresent("Media field: Media", value.Media.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Media field: Media", value.Media.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Media field: Media", value.Media.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Media field: Media", value.Media, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Media field: Media", value.Media.DisplayName(), ReservedChars);
 #endif
 
-            SerializationHelpers.EnsureFieldIsPresent("Media field: Port", value.Port);
+            SerializationHelpers.EnsureFieldIsPresent("Media field: Port", value.Port.ToString());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Media field: Port", value.Port.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Media field: Port", value.Port.ToString().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Media field: Port", value.Port, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Media field: Port", value.Port.ToString(), ReservedChars);
 #endif
 
 

@@ -5,23 +5,55 @@ namespace Utilme.SdpTransform
 {
     public class MediaDescription
     {
-        public string Media { get; set; }
+        public MediaType Media { get; set; }
 
-        public string Port { get; set; }
+        public int Port { get; set; }
 
         public string Proto { get; set; }
 
         public IList<string> Fmts { get; set; }
 
-        public byte[] Title { get; set; }
+        // Session overrides.
 
-        public string TitleString(Encoding encoding) => encoding.GetString(Title);
+        /// <summary>
+        /// i=<session description>
+        /// Optional.
+        /// </summary>
+        public string Information { get; set; }
 
-        public ConnectionData ConnectionInfo { get; set; }
+        /// <summary>
+        /// c=<nettype> <addrtype> <connection-address>
+        /// Either here or in media descriptions, so it is optional here.
+        /// </summary>
+        public ConnectionData ConnectionData { get; set; }
 
-        public IList<Bandwidth> Bandwiths { get; set; }
+        /// <summary>
+        /// b=<bwtype>:<bandwidth>
+        /// Optional.
+        /// </summary>
+        public IList<Bandwidth> Bandwidths { get; set; }
 
+        /// <summary>
+        /// k=<method>
+        /// k=<method>:<encryption key>
+        /// Optional.
+        /// Not recommended, new work is in progress.
+        /// </summary>
         public EncriptionKey EncriptionKey { get; set; }
+
+        // Attributes.
+
+
+
+        ////public byte[] Title { get; set; }
+
+        /////public string TitleString(Encoding encoding) => encoding.GetString(Title);
+
+        ////public ConnectionData ConnectionData { get; set; }
+
+        ////public IList<Bandwidth> Bandwidths { get; set; }
+
+        //public EncriptionKey EncriptionKey { get; set; }
 
         public IList<string> Attributes { get; set; }
     }

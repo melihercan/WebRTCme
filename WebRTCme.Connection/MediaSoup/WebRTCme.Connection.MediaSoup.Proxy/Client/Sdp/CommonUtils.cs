@@ -25,13 +25,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 MediaKind mediaKind = MediaKind.Video;
                 switch (kind)
                 {
-                    case "audio":
+                    ////case "audio":
+                    case MediaType.Audio:
                         mediaKind = MediaKind.Audio;
                         if (gotAudio)
                             continue;
                         gotAudio = true;
                         break;
-                    case "video":
+                    ////case "video":
+                    case MediaType.Video:
                         mediaKind = MediaKind.Video;
                         if (gotVideo)
                             continue;
@@ -262,12 +264,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             return new MediaDescription
             {
-                Media = mediaObject.Kind.DisplayName(),
-                Port = mediaObject.Port.ToString(),
+                Media = mediaObject.Kind.ToSdp(),
+                Port = mediaObject.Port,
                 Proto = mediaObject.Protocol,
                 Fmts = mediaObject.Payloads.Split(' ').ToList(),
-                Title = Encoding.UTF8.GetBytes(mediaObject.Kind.DisplayName()),
-                ConnectionInfo = mediaObject.Connection,
+                Information = mediaObject.Kind.DisplayName(),
+                ConnectionData = mediaObject.Connection,
                 //Bandwiths = ???
                 //EncriptionKey = ???? mediaObject.Fingerprint is not null ? 
                 //    new EncriptionKey

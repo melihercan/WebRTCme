@@ -453,7 +453,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 			    var offer = await _pc.CreateOffer();
 			    var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
                 var offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(localSdpObject.MediaDescriptions
-                    .Single(md => md.Media == "application"));
+                    .Single(md => md.Media == MediaType.Application));
 
                 if (!_transportReady)
 				    await SetupTransportAsync(DtlsRole.Server, localSdpObject);

@@ -57,8 +57,9 @@ namespace Utilme.SdpTransform
         /// <summary>
         /// b=<bwtype>:<bandwidth>
         /// Either here or in media descriptions, so it is optional here.
+        /// Can have multiple entries.
         /// </summary>
-        public Bandwidth Bandwidth { get; set; }
+        public IList<Bandwidth> Bandwidths { get; set; }
 
         /// <summary>
         /// t=<start-time> <stop-time>
@@ -88,6 +89,11 @@ namespace Utilme.SdpTransform
         public EncriptionKey EncriptionKey { get; set; }
 
 
+        // Attributes.
+
+
+        // MediaDescriptions.
+        IList<MediaDescription> MediaDescriptions { get; set; }
 
 
     }

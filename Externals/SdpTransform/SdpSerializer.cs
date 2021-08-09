@@ -217,19 +217,19 @@ namespace Utilme.SdpTransform
                 {
                     Console.WriteLine($"MediaDescriptions.Fmts:{subitem}");
                 }
-                if (item.Title is not null)
+                if (item.Information is not null)
                 {
-                    Console.WriteLine($"MediaDescriptions.Title:{Encoding.UTF8.GetString(item.Title)}");
+                    Console.WriteLine($"MediaDescriptions.Title:{item.Information}");
                 }
-                if (item.ConnectionInfo is not null)
+                if (item.ConnectionData is not null)
                 {
-                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.Nettype:{item.ConnectionInfo.NetType}");
-                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.AddrType:{item.ConnectionInfo.AddrType}");
-                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.ConnectionAddress:{item.ConnectionInfo.ConnectionAddress}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.Nettype:{item.ConnectionData.NetType}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.AddrType:{item.ConnectionData.AddrType}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.ConnectionAddress:{item.ConnectionData.ConnectionAddress}");
                 }
-                if (item.Bandwiths is not null)
+                if (item.Bandwidths is not null)
                 {
-                    foreach (var subitem in item.Bandwiths)
+                    foreach (var subitem in item.Bandwidths)
                     {
                         Console.WriteLine($"MediaDescriptions.Bandwidths.Type:{subitem.Type}");
                         Console.WriteLine($"MediaDescriptions.Bandwidths.Value:{subitem.Value}");

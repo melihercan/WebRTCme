@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Linq;
+using System.Text;
 using Utilme.SdpTransform;
 
 namespace UtilmeSdpTransform.Serializers
@@ -61,11 +62,11 @@ namespace UtilmeSdpTransform.Serializers
             foreach (var media in value.MediaDescriptions)
             {
                 MediaSerializer.Instance.WriteValue(writer, media);
-                MediaTitleSerializer.Instance.WriteValue(writer, media.Title);
-                ConnectionDataSerializer.Instance.WriteValue(writer, media.ConnectionInfo);
+                MediaTitleSerializer.Instance.WriteValue(writer, Encoding.UTF8.GetBytes(media.Information));
+                ConnectionDataSerializer.Instance.WriteValue(writer, media.ConnectionData);
 
                 if (value.BandWiths != null)
-                    foreach (var bandwith in media.Bandwiths)
+                    foreach (var bandwith in media.Bandwidths)
                         BandwithSerializer.Instance.WriteValue(writer, bandwith);
 
                 EncriptionKeySerializer.Instance.WriteValue(writer, media.EncriptionKey);

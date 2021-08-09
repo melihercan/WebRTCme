@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Utilme.SdpTransform;
 
 namespace UtilmeSdpTransform.Serializers
@@ -25,14 +26,14 @@ namespace UtilmeSdpTransform.Serializers
             switch (data[0])
             {
                 case MediaTitleSerializer.Identifier:
-                    media.Title = MediaTitleSerializer.Instance.ReadValue(data);
+                    media.Information = Encoding.UTF8.GetString(MediaTitleSerializer.Instance.ReadValue(data));
                     break;
                 case ConnectionDataSerializer.Identifier:
-                    media.ConnectionInfo = ConnectionDataSerializer.Instance.ReadValue(data);
+                    media.ConnectionData = ConnectionDataSerializer.Instance.ReadValue(data);
                     break;
                 case BandwithSerializer.Identifier:
-                    media.Bandwiths = media.Bandwiths ?? new List<Bandwidth>();
-                    media.Bandwiths.Add(BandwithSerializer.Instance.ReadValue(data));
+                    media.Bandwidths = media.Bandwidths ?? new List<Bandwidth>();
+                    media.Bandwidths.Add(BandwithSerializer.Instance.ReadValue(data));
                     break;
                 case EncriptionKeySerializer.Identifier:
                     media.EncriptionKey = EncriptionKeySerializer.Instance.ReadValue(data);
