@@ -23,7 +23,7 @@ namespace UtilmeSdpTransform.Serializers
             var connData = new ConnectionData();
 
             // nettype
-            connData.Nettype =
+            connData.NetType =
                 SerializationHelpers.ParseRequiredString("Connection Data field: nettype",
                 SerializationHelpers.NextRequiredDelimitedField("Connection Data field: nettype", SdpSerializer.ByteSpace, remainingSlice, out var consumed));
             remainingSlice = remainingSlice.Slice(consumed + 1);
@@ -46,11 +46,11 @@ namespace UtilmeSdpTransform.Serializers
             if (value == null)
                 return;
 
-            SerializationHelpers.EnsureFieldIsPresent("Connection Data nettype", value.Nettype);
+            SerializationHelpers.EnsureFieldIsPresent("Connection Data nettype", value.NetType);
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Nettype.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType.AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Nettype, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.NetType, ReservedChars);
 #endif
 
             SerializationHelpers.EnsureFieldIsPresent("Connection Data addrtype", value.AddrType);
@@ -67,7 +67,7 @@ namespace UtilmeSdpTransform.Serializers
             SerializationHelpers.CheckForReserverdChars("Connection Data unicast address", value.ConnectionAddress, ReservedChars);
 #endif
 
-            var field = $"c={value.Nettype} {value.AddrType} {value.ConnectionAddress}{SdpSerializer.CRLF}";
+            var field = $"c={value.NetType} {value.AddrType} {value.ConnectionAddress}{SdpSerializer.CRLF}";
             writer.WriteString(field);
         }
     }

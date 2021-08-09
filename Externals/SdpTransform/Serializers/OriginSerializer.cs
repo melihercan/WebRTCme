@@ -32,14 +32,14 @@ namespace UtilmeSdpTransform.Serializers
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             //sess-version
-            session.ParsedValue.Origin.SessionVersion = SerializationHelpers.ParseLong("Origin field: sess-version",
+            session.ParsedValue.Origin.SessionVersion = (uint)SerializationHelpers.ParseLong("Origin field: sess-version",
                 SerializationHelpers.NextRequiredDelimitedField("Origin field: sess-version", SdpSerializer.ByteSpace, remainingSlice, out consumed));
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             //nettype
-            session.ParsedValue.Origin.Nettype =
+            session.ParsedValue.Origin.NetType =
                 SerializationHelpers.ParseRequiredString("Origin field: nettype",
-                SerializationHelpers.NextRequiredDelimitedField("Origin field: nettype", SdpSerializer.ByteSpace, remainingSlice, out consumed));
+                SerializationHelpers.NextRequiredDelimitedField("Origin field: nettype", SdpSerializer.ByteSpace, remainingSlice, out consumed)).EnumFromDisplayName<NetType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             //addrtype
@@ -73,11 +73,11 @@ namespace UtilmeSdpTransform.Serializers
 #endif
             }
 
-            SerializationHelpers.EnsureFieldIsPresent("Origin nettype", value.Nettype);
+            SerializationHelpers.EnsureFieldIsPresent("Origin nettype", value.NetType.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Origin nettype", value.Nettype.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Origin nettype", value.NetType.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Origin nettype", value.Nettype, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Origin nettype", value.NetType.DisplayName(), ReservedChars);
 #endif
             SerializationHelpers.EnsureFieldIsPresent("Origin addrtype", value.AddrType);
 #if NETSTANDARD2_0
@@ -92,7 +92,7 @@ namespace UtilmeSdpTransform.Serializers
             SerializationHelpers.CheckForReserverdChars("Origin unicast address", value.UnicastAddress, ReservedChars);
 #endif
 
-            var field = $"o={userName} {value.SessionId} {value.SessionVersion} {value.Nettype} {value.AddrType} {value.UnicastAddress}{SdpSerializer.CRLF}";
+            var field = $"o={userName} {value.SessionId} {value.SessionVersion} {value.NetType} {value.AddrType} {value.UnicastAddress}{SdpSerializer.CRLF}";
             writer.WriteString(field);
         }
     }

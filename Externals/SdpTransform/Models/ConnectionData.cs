@@ -2,7 +2,7 @@
 {
     public class ConnectionData
     {
-        public string Nettype { get; set; }
+        public string NetType { get; set; }
 
         public string AddrType { get; set; }
 

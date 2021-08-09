@@ -30,7 +30,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             {
                 _mediaObject.Connection = new ConnectionData
                 {
-                    Nettype = "IN",
+                    NetType = "IN",
                     AddrType = IpVersion.Ip4.DisplayName(),
                     ConnectionAddress = "127.0.0.1"
                 };
@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             {
                 _mediaObject.Connection = new ConnectionData
                 {
-                    Nettype = "IN",
+                    NetType = "IN",
                     AddrType = plainRtpParameters.IpVersion.DisplayName(),
                     ConnectionAddress = plainRtpParameters.Ip
                 };

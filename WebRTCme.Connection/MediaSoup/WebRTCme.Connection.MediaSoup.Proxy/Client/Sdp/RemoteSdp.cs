@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     UserName = "mediasoup-client",
                     SessionId = 10000,
                     SessionVersion = 0,
-                    Nettype = "IN",
+                    NetType = NetType.Internet,
                     AddrType = IpVersion.Ip4.DisplayName(),
                     UnicastAddress = "0.0.0.0"
                 },

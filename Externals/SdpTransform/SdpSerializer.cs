@@ -137,7 +137,7 @@ namespace Utilme.SdpTransform
             Console.WriteLine($"Origin.UserName:{sdp.Origin.UserName}");
             Console.WriteLine($"Origin.SessionId:{sdp.Origin.SessionId}");
             Console.WriteLine($"Origin.SessionVersion:{sdp.Origin.SessionVersion}");
-            Console.WriteLine($"Origin.Nettype:{sdp.Origin.Nettype}");
+            Console.WriteLine($"Origin.Nettype:{sdp.Origin.NetType}");
             Console.WriteLine($"Origin.AddrType:{sdp.Origin.AddrType}");
             Console.WriteLine($"Origin.UnicastAddress:{sdp.Origin.UnicastAddress}");
             Console.WriteLine($"SessionName:{Encoding.UTF8.GetString(sdp.SessionName)}");
@@ -145,7 +145,7 @@ namespace Utilme.SdpTransform
                 Console.WriteLine($"SessionInformation:{Encoding.UTF8.GetString(sdp.SessionInformation)}");
             if (sdp.ConnectionData is not null)
             {
-                Console.WriteLine($"ConnectionData.Nettype:{sdp.ConnectionData.Nettype}");
+                Console.WriteLine($"ConnectionData.Nettype:{sdp.ConnectionData.NetType}");
                 Console.WriteLine($"ConnectionData.AddrType:{sdp.ConnectionData.AddrType}");
                 Console.WriteLine($"ConnectionData.ConnectionAddress:{sdp.ConnectionData.ConnectionAddress}");
             }
@@ -223,7 +223,7 @@ namespace Utilme.SdpTransform
                 }
                 if (item.ConnectionInfo is not null)
                 {
-                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.Nettype:{item.ConnectionInfo.Nettype}");
+                    Console.WriteLine($"MediaDescriptions.ConnectionInfo.Nettype:{item.ConnectionInfo.NetType}");
                     Console.WriteLine($"MediaDescriptions.ConnectionInfo.AddrType:{item.ConnectionInfo.AddrType}");
                     Console.WriteLine($"MediaDescriptions.ConnectionInfo.ConnectionAddress:{item.ConnectionInfo.ConnectionAddress}");
                 }
