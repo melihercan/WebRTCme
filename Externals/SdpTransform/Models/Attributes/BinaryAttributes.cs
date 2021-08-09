@@ -15,7 +15,8 @@ namespace Utilme.SdpTransform
         public const string RtcpRsizeName = "rtcp-rsize";
         public bool? RtcpRsize { get; set; }
 
-
+        public const string EndOfCandidatesLabel = "end-of-candidates";
+        public bool? EndOfCandidates { get; set; }
 
     }
 }
