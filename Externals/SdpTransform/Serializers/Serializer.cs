@@ -69,10 +69,10 @@ namespace UtilmeSdpTransform.Serializers
                     foreach (var bandwith in media.Bandwidths)
                         BandwithSerializer.Instance.WriteValue(writer, bandwith);
 
-                EncriptionKeySerializer.Instance.WriteValue(writer, media.EncriptionKey);
+                EncriptionKeySerializer.Instance.WriteValue(writer, media.EncryptionKey);
 
-                if (media.Attributes != null)
-                    foreach (var attr in media.Attributes)
+                if (media.AttributesOld != null)
+                    foreach (var attr in media.AttributesOld)
                         AttributeSerializer.Instance.WriteValue(writer, attr);
             }
         }

@@ -12,7 +12,7 @@ namespace Utilme.SdpTransform
         // https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-12
         public static Rtpmap[] ToRtpmapAttributes(MediaDescription mediaDescription)
         {
-            var attributes = mediaDescription.Attributes
+            var attributes = mediaDescription.AttributesOld
                 .Where(a => a.StartsWith("rtpmap:"))
                 .ToArray();
 
@@ -34,7 +34,7 @@ namespace Utilme.SdpTransform
 
         public static Fmtp[] ToFmtpAttributes(MediaDescription mediaDescription)
         {
-            var attributes = mediaDescription.Attributes
+            var attributes = mediaDescription.AttributesOld
                 .Where(a => a.StartsWith("fmtp:"))
                 .ToArray();
 
@@ -54,7 +54,7 @@ namespace Utilme.SdpTransform
 
         public static RtcpFb[] ToRtcpFbAttributes(MediaDescription mediaDescription)
         {
-            var attributes = mediaDescription.Attributes
+            var attributes = mediaDescription.AttributesOld
                 .Where(a => a.StartsWith("rtcp-fb:"))
                 .ToArray();
 
@@ -75,7 +75,7 @@ namespace Utilme.SdpTransform
 
         public static Extmap[] ToExtmapAttributes(MediaDescription mediaDescription)
         {
-            var attributes = mediaDescription.Attributes
+            var attributes = mediaDescription.AttributesOld
                 .Where(a => a.StartsWith("extmap:"))
                 .ToArray();
 

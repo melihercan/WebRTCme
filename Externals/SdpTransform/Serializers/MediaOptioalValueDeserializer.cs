@@ -36,11 +36,11 @@ namespace UtilmeSdpTransform.Serializers
                     media.Bandwidths.Add(BandwithSerializer.Instance.ReadValue(data));
                     break;
                 case EncriptionKeySerializer.Identifier:
-                    media.EncriptionKey = EncriptionKeySerializer.Instance.ReadValue(data);
+                    media.EncryptionKey = EncriptionKeySerializer.Instance.ReadValue(data);
                     break;
                 case AttributeSerializer.Identifier:
-                    media.Attributes = media.Attributes ?? new List<string>();
-                    media.Attributes.Add(AttributeSerializer.Instance.ReadValue(data));
+                    media.AttributesOld = media.AttributesOld ?? new List<string>();
+                    media.AttributesOld.Add(AttributeSerializer.Instance.ReadValue(data));
                     break;
                 case MediaSerializer.Identifier:
                     session.ParsedValue.MediaDescriptions = session.ParsedValue.MediaDescriptions ?? new List<MediaDescription>();

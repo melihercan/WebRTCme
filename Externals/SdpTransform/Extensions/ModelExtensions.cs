@@ -2,12 +2,169 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UtilmeSdpTransform;
 
 namespace Utilme.SdpTransform
 {
     public static class ModelExtensions
     {
+
+        public static Sdp ToSdp(this string str)
+        {
+            Sdp sdp = new();
+
+            var tokens = str.Split(new string[] { Constants.CRLF }, StringSplitOptions.RemoveEmptyEntries);
+            var idx = 0;
+            
+            // Session parameters.
+            foreach (var token in tokens)
+            {
+                if (token.StartsWith(Sdp.ProtocolVersionIndicator))
+                    sdp.ProtocolVersion = token.ToProtocolVersion();
+                else if (token.StartsWith(Sdp.OriginIndicator))
+                    sdp.Origin = token.ToOrigin();
+                else if (token.StartsWith(Sdp.SessionNameIndicator))
+                    sdp.SessionName = token.ToSessionName();
+                else if (token.StartsWith(Sdp.SessionInformationIndicator))
+                    sdp.SessionInformation = token.ToSessionInformation();
+                else if (token.StartsWith(Sdp.UriIndicator))
+                    sdp.Uri = token.ToUri();
+                else if (token.StartsWith(Sdp.EmailAddressIndicator))
+                    sdp.EmailAddresses = token.ToEmailAddresses();
+
+
+                else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
+                    break;
+
+
+                idx++;
+            }
+
+
+            return sdp;
+        }
+
+        public static string ToText(this Sdp sdp)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static int ToProtocolVersion(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.ProtocolVersionIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+            return int.Parse(token);
+        }
+
+        public static Origin ToOrigin(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.OriginIndicator, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Origin
+            {
+                UserName = tokens[0],
+                SessionId = ulong.Parse(tokens[1]),
+                SessionVersion = uint.Parse(tokens[2]),
+                NetType = tokens[3].EnumFromDisplayName<NetType>(),
+                AddrType = tokens[4].EnumFromDisplayName<AddrType>(),
+                UnicastAddress = tokens[5]
+            };
+        }
+
+        public static string ToSessionName(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.SessionNameIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+            return token;
+        }
+
+        public static string ToSessionInformation(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.SessionInformationIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+            return token;
+        }
+
+        public static Uri ToUri(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.UriIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+            return new Uri(token);
+        }
+
+        public static List<string> ToEmailAddresses(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.EmailAddressIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+
+            List<string> emails = new();
+
+            // Email formats:
+            //  x.y@z.org
+            //  x.y@z.org (Name Surname)
+            //  Name Surname <x.y@z.org>
+            var groupA = token.Split(new char[] { ')', '>' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var a in groupA)
+            {
+                if (a.Contains("("))
+                {
+                    var groupB = a.Split(new char[] { '(' }, StringSplitOptions.RemoveEmptyEntries);
+                    var id = groupB[1];
+                    var groupC = groupB[0].Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var emailWithId = $"{groupC[groupC.Length - 1]} ({id})";
+                    if (groupC.Length > 1)
+                    {
+                        var groupD = groupC.Take(groupC.Length - 1).ToArray();
+                        foreach (var d in groupD)
+                            emails.Add(d);
+                    }
+                    emails.Add(emailWithId);
+                }
+                else if (a.Contains("<"))
+                {
+                    var groupB = a.Split(new char[] { '<' }, StringSplitOptions.RemoveEmptyEntries);
+                    var email = groupB[1];
+                    var groupC = groupB[0].Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var numPlainEmails = groupC.Where(g => g.Contains('@')).Count();
+                    var plainEmails = groupC.Take(numPlainEmails);
+                    var id = string.Join(" ", 
+                        groupC.Skip(numPlainEmails).Take(groupC.Count() - numPlainEmails).ToArray());
+                    var emailWithId = $"{id} <{email}>";
+                    foreach (var plainEmail in plainEmails)
+                        emails.Add(plainEmail);
+                    emails.Add(emailWithId);
+                }
+                else
+                {
+                    var groupB = groupA[0].Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var b in groupB)
+                        emails.Add(b);
+                }
+
+            }
+
+
+            return emails;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str

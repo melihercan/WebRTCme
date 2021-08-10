@@ -12,7 +12,7 @@ namespace UtilmeSdpTransform.Serializers
 
         public static readonly EncriptionKeySerializer Instance = new EncriptionKeySerializer();
 
-        public EncriptionKey ReadValue(ReadOnlySpan<byte> data)
+        public EncryptionKey ReadValue(ReadOnlySpan<byte> data)
         {
             var remainingSlice = data;
 
@@ -20,7 +20,7 @@ namespace UtilmeSdpTransform.Serializers
             SerializationHelpers.ParseRequiredHeader("Encription key field", remainingSlice, HeaderBytes);
             remainingSlice = remainingSlice.Slice(HeaderBytes.Length);
 
-            var encKey = new EncriptionKey();
+            var encKey = new EncryptionKey();
 
             // Type
             var indexOfEnd = remainingSlice.IndexOf(SdpSerializer.ByteColon);
@@ -39,7 +39,7 @@ namespace UtilmeSdpTransform.Serializers
             return encKey;
         }
 
-        public void WriteValue(IBufferWriter<byte> writer, EncriptionKey value)
+        public void WriteValue(IBufferWriter<byte> writer, EncryptionKey value)
         {
             if (value == null)
                 return;

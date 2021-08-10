@@ -58,7 +58,7 @@ namespace Utilme.SdpTransform
 
         public IList<TimezoneInfo> TimeZones { get; set; }
 
-        public EncriptionKey EncriptionKey { get; set; }
+        public EncryptionKey EncriptionKey { get; set; }
 
         public IList<string> Attributes { get; set; }
 

@@ -235,12 +235,12 @@ namespace Utilme.SdpTransform
                         Console.WriteLine($"MediaDescriptions.Bandwidths.Value:{subitem.Value}");
                     }
                 }
-                if (item.EncriptionKey is not null)
+                if (item.EncryptionKey is not null)
                 {
-                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Method:{item.EncriptionKey.Method}");
-                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Value:{item.EncriptionKey.Method}");
+                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Method:{item.EncryptionKey.Method}");
+                    Console.WriteLine($"MediaDescriptions.EncriptionKey.Value:{item.EncryptionKey.Method}");
                 }
-                foreach (var subitem in item.Attributes)
+                foreach (var subitem in item.AttributesOld)
                 {
                     Console.WriteLine($"MediaDescriptions.Attributes:{subitem}");
                 }

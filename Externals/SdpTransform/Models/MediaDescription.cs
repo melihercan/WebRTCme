@@ -39,9 +39,10 @@ namespace Utilme.SdpTransform
         /// Optional.
         /// Not recommended, new work is in progress.
         /// </summary>
-        public EncriptionKey EncriptionKey { get; set; }
+        public EncryptionKey EncryptionKey { get; set; }
 
         // Attributes.
+        public Attributes Attributes { get; set; }
 
 
 
@@ -55,6 +56,6 @@ namespace Utilme.SdpTransform
 
         //public EncriptionKey EncriptionKey { get; set; }
 
-        public IList<string> Attributes { get; set; }
+        public IList<string> AttributesOld { get; set; }
     }
 }

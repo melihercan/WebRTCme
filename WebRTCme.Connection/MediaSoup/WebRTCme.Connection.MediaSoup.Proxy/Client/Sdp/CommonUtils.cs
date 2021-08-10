@@ -277,7 +277,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 //        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
                 //        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
                 //    } : null,
-                Attributes = attributes
+                AttributesOld = attributes
             };
         }
 
@@ -285,43 +285,43 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         {
             return new MediaObject
             {
-                Mid = mediaDescription.Attributes
+                Mid = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(Mid.Name))?.ToMid(),
-                Msid = mediaDescription.Attributes
+                Msid = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(Msid.Name))?.ToMsid(),
-                IceUfrag = mediaDescription.Attributes
+                IceUfrag = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(IceUfrag.Name))?.ToIceUfrag(),
-                IcePwd = mediaDescription.Attributes
+                IcePwd = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(IcePwd.Name))?.ToIcePwd(),
-                IceOptions = mediaDescription.Attributes
+                IceOptions = mediaDescription.AttributesOld
                         .SingleOrDefault(a => a.StartsWith(IceOptions.Name))?.ToIceOptions(),
-                Fingerprint = mediaDescription.Attributes
+                Fingerprint = mediaDescription.AttributesOld
                         .SingleOrDefault(a => a.StartsWith(Fingerprint.Name))?.ToFingerprint(),
-                Candidates = mediaDescription.Attributes
+                Candidates = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(Candidate.Name))
                     .Select(c => c.ToCandidate())
                     .ToList(),
-                Rtpmaps = mediaDescription.Attributes
+                Rtpmaps = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(Rtpmap.Name))
                     .Select(r => r.ToRtpmap())
                     .ToList(),
-                RtcpFbs = mediaDescription.Attributes
+                RtcpFbs = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(RtcpFb.Name))
                     .Select(r => r.ToRtcpFb())
                     .ToList(),
-                Fmtps = mediaDescription.Attributes
+                Fmtps = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(Fmtp.Name))
                     .Select(r => r.ToFmtp())
                     .ToList(),
-                Ssrcs = mediaDescription.Attributes
+                Ssrcs = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(Ssrc.Name))
                     .Select(r => r.ToSsrc())
                     .ToList(),
-                SsrcGroups = mediaDescription.Attributes
+                SsrcGroups = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(SsrcGroup.Name))
                     .Select(r => r.ToSsrcGroup())
                     .ToList(),
-                Rids = mediaDescription.Attributes
+                Rids = mediaDescription.AttributesOld
                     .Where(a => a.StartsWith(Rid.Name))
                     .Select(r => r.ToRid())
                     .ToList()
