@@ -32,6 +32,8 @@ namespace Utilme.SdpTransform
                     sdp.Uri = token.ToUri();
                 else if (token.StartsWith(Sdp.EmailAddressIndicator))
                     sdp.EmailAddresses = token.ToEmailAddresses();
+                else if (token.StartsWith(Sdp.PhoneNumberIndicator))
+                    sdp.PhoneNumbers = token.ToPhoneNumbers();
 
 
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
@@ -40,7 +42,6 @@ namespace Utilme.SdpTransform
 
                 idx++;
             }
-
 
             return sdp;
         }
@@ -130,12 +131,12 @@ namespace Utilme.SdpTransform
                 else if (a.Contains("<"))
                 {
                     var groupB = a.Split(new char[] { '<' }, StringSplitOptions.RemoveEmptyEntries);
-                    var email = groupB[1];
                     var groupC = groupB[0].Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     var numPlainEmails = groupC.Where(g => g.Contains('@')).Count();
                     var plainEmails = groupC.Take(numPlainEmails);
                     var id = string.Join(" ", 
                         groupC.Skip(numPlainEmails).Take(groupC.Count() - numPlainEmails).ToArray());
+                    var email = groupB[1];
                     var emailWithId = $"{id} <{email}>";
                     foreach (var plainEmail in plainEmails)
                         emails.Add(plainEmail);
@@ -143,17 +144,72 @@ namespace Utilme.SdpTransform
                 }
                 else
                 {
-                    var groupB = groupA[0].Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var groupB = a.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var b in groupB)
                         emails.Add(b);
                 }
-
             }
-
 
             return emails;
         }
 
+        public static List<string> ToPhoneNumbers(this string str)
+        {
+            var token = str
+                 .Replace(Sdp.PhoneNumberIndicator, string.Empty)
+                 .Replace(Constants.CRLF, string.Empty);
+
+            List<string> phones = new();
+
+            // Phone formats:
+            //  +x.y@z.org
+            //  x.y@z.org (Name Surname)
+            //  Name Surname <x.y@z.org>
+            var groupA = token.Split(new char[] { ')', '>' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var a in groupA)
+            {
+                if (a.Contains("("))
+                {
+                    var groupB = a.Split(new char[] { '(' }, StringSplitOptions.RemoveEmptyEntries);
+                    var id = groupB[1];
+                    var groupC = groupB[0].Trim().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
+                    var phoneWithId = $"+{groupC[groupC.Length - 1].Trim()} ({id})";
+                    if (groupC.Length > 1)
+                    {
+                        var groupD = groupC.Take(groupC.Length - 1).ToArray();
+                        foreach (var d in groupD)
+                            phones.Add($"+{d.Trim()}");
+                    }
+                    phones.Add(phoneWithId);
+                }
+                else if (a.Contains("<"))
+                {
+                    var groupB = a.Split(new char[] { '<' }, StringSplitOptions.RemoveEmptyEntries);
+                    var groupC = Regex.Matches(groupB[0].Trim(), @"\+[\d -]+");
+                    var numPlainPhones = groupC.Count - 1;
+                    var lenPhones = 0;
+//                    var plainPhones = new string[numPlainPhones];
+                    for (var i = 0; i < numPlainPhones; i++)
+                    {
+                        lenPhones += groupC[i].Length;
+                        phones.Add(groupC[i].Value.Trim());
+                    }
+                    lenPhones += groupC[numPlainPhones].Length;
+                    var id = groupB[0].Trim().Substring(lenPhones);
+                    var phone = groupC[1].Value.Trim();
+                    var phoneWithId = $"{id} <{phone.Trim()}>";
+                    phones.Add(phoneWithId);
+                }
+                else
+                {
+                    var groupB = a.Trim().Split(new char[] { '+' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var b in groupB)
+                        phones.Add($"+{b.Trim()}");
+                }
+            }
+
+            return phones;
+        }
 
 
 

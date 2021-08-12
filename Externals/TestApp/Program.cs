@@ -1,6 +1,12 @@
 ﻿using System;
 using Utilme.SdpTransform;
 
+/****
+e=j.doe@example.com d.ercan@gmail.com m.ercan@example.com k.ercan@yahoo.com jd.doe@example.com s.ercan@gmail.com x.y@xxx.com
+e=j.doe@example.com (Jane Doe) d.ercan@gmail.com m.ercan@example.com (Melik) k.ercan@yahoo.com Jane Doe <j.doe@example.com> s.ercan@gmail.com x.y@xxx.com (a b)
+p=+1 617 555-6011 +90 551 205 85 10 (Melik Ercan) +90 534 396 67 67
+
+****/
 namespace TestApp
 {
     class Program
@@ -13,6 +19,7 @@ s=-
 i=A class on computer networking
 u=http://www.cs.princeton.edu/
 e=j.doe@example.com (Jane Doe) d.ercan@gmail.com m.ercan@example.com (Melik) k.ercan@yahoo.com Jane Doe <j.doe@example.com> s.ercan@gmail.com x.y@xxx.com (a b)
+p=+1 617 555-6011 +90 551 205 85 10 (Melik Ercan)  +34 56-5456 +90 534 396 67 67 Derya Ercan <+90 123-456-679>
 t=0 0
 a=group:BUNDLE 0 1
 a=extmap-allow-mixed
