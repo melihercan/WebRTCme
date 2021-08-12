@@ -34,6 +34,10 @@ namespace Utilme.SdpTransform
                     sdp.EmailAddresses = token.ToEmailAddresses();
                 else if (token.StartsWith(Sdp.PhoneNumberIndicator))
                     sdp.PhoneNumbers = token.ToPhoneNumbers();
+                else if (token.StartsWith(Sdp.ConnectionDataIndicator))
+                    sdp.ConnectionData = token.ToConnectionData();
+                else if (token.StartsWith(Sdp.BandwidthIndicator))
+                    sdp.Bandwidths.Add(token.ToBandwidth());
 
 
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
@@ -211,9 +215,30 @@ namespace Utilme.SdpTransform
             return phones;
         }
 
+        public static ConnectionData ToConnectionData(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.ConnectionDataIndicator, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new ConnectionData
+            {
+                NetType = tokens[0].EnumFromDisplayName<NetType>(),
+                AddrType = tokens[1].EnumFromDisplayName<AddrType>(),
+                ConnectionAddress = tokens[2]
+            };
+        }
 
-
-
+        public static Bandwidth ToBandwidth(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.BandwidthIndicator, string.Empty)
+                 .Split(new char[] { ' ', ':', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Bandwidth
+            {
+                Type = tokens[0].EnumFromDisplayName<BandwidthType>(),
+                Value = int.Parse(tokens[1])
+            };
+        }
 
 
 

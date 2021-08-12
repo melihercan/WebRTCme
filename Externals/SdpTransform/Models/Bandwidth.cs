@@ -2,7 +2,7 @@
 {
     public class Bandwidth
     {
-        public string Type { get; set; }
-        public string Value { get; set; }
+        public BandwidthType Type { get; set; }
+        public int Value { get; set; }
     }
 }

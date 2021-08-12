@@ -57,7 +57,7 @@ namespace Utilme.SdpTransform
 
         /// <summary>
         /// c=<nettype> <addrtype> <connection-address>
-        /// Either here or in media descriptions, so it is optional here.
+        /// Either here or in each media descriptions, so it is optional here.
         /// </summary>
         public ConnectionData ConnectionData { get; set; }
         public const string ConnectionDataIndicator = "c=";
@@ -67,7 +67,7 @@ namespace Utilme.SdpTransform
         /// Either here or in media descriptions, so it is optional here.
         /// Can have multiple entries.
         /// </summary>
-        public IList<Bandwidth> Bandwidths { get; set; }
+        public IList<Bandwidth> Bandwidths { get; set; } = new List<Bandwidth>();
         public const string BandwidthIndicator = "b=";
 
 

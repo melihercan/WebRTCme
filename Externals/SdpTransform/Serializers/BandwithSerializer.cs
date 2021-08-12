@@ -25,12 +25,12 @@ namespace UtilmeSdpTransform.Serializers
             // type
             bandwith.Type =
                 SerializationHelpers.ParseRequiredString("Bandwith field: Type",
-                SerializationHelpers.NextRequiredDelimitedField("Bandwith field: Type", SdpSerializer.ByteColon, remainingSlice, out var consumed));
+                SerializationHelpers.NextRequiredDelimitedField("Bandwith field: Type", SdpSerializer.ByteColon, remainingSlice, out var consumed)).EnumFromDisplayName<BandwidthType>();
             remainingSlice = remainingSlice.Slice(consumed + 1);
 
             // value
             bandwith.Value =
-                SerializationHelpers.ParseRequiredString("Bandwith field: value", remainingSlice);
+                int.Parse(SerializationHelpers.ParseRequiredString("Bandwith field: value", remainingSlice));
 
             return bandwith;
         }
@@ -40,18 +40,18 @@ namespace UtilmeSdpTransform.Serializers
             if (value == null)
                 return;
 
-            SerializationHelpers.EnsureFieldIsPresent("Bandwith field Type", value.Type);
+            SerializationHelpers.EnsureFieldIsPresent("Bandwith field Type", value.Type.DisplayName());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Type.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Type.DisplayName().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Type, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Connection Data nettype", value.Type.DisplayName(), ReservedChars);
 #endif
 
-            SerializationHelpers.EnsureFieldIsPresent("Bandwith field value", value.Value);
+            SerializationHelpers.EnsureFieldIsPresent("Bandwith field value", value.Value.ToString());
 #if NETSTANDARD2_0
-            SerializationHelpers.CheckForReserverdChars("Bandwith field value", value.Value.AsSpan(), ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Bandwith field value", value.Value.ToString().AsSpan(), ReservedChars);
 #else
-            SerializationHelpers.CheckForReserverdChars("Bandwith field value", value.Value, ReservedChars);
+            SerializationHelpers.CheckForReserverdChars("Bandwith field value", value.Value.ToString(), ReservedChars);
 #endif
 
             var field = $"b={value.Type}:{value.Value}{SdpSerializer.CRLF}";
