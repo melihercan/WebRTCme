@@ -109,7 +109,7 @@ namespace Utilme.SdpTransform
 
 
         // MediaDescriptions.
-        IList<MediaDescription> MediaDescriptions { get; set; }
+        public IList<MediaDescription> MediaDescriptions { get; set; }
         public const string MediaDescriptionIndicator = "m=";
 
     }

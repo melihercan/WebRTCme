@@ -78,6 +78,24 @@ namespace Utilme.SdpTransform
 
             // Media description fields.
             tokens = tokens.Skip(idx).ToArray();
+            sdp.MediaDescriptions = new List<MediaDescription>();
+
+            MediaDescription md = null;
+
+            foreach (var token in tokens)
+            {
+                if (token.StartsWith(Sdp.MediaDescriptionIndicator))
+                {
+                    if (md is not null)
+                        sdp.MediaDescriptions.Add(md);
+                    md = token.ToMediaDescription();
+                }
+
+
+            }
+
+            if (md is not null)
+                sdp.MediaDescriptions.Add(md);
 
             return sdp;
         }
@@ -373,7 +391,21 @@ namespace Utilme.SdpTransform
             };
         }
 
-
+        
+        
+        public static MediaDescription ToMediaDescription(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.MediaDescriptionIndicator, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new MediaDescription
+            {
+                Media = tokens[0].EnumFromDisplayName<MediaType>(),
+                Port = int.Parse(tokens[1]),
+                Proto = tokens[2],
+                Fmts = tokens.Skip(3).ToList()
+            };
+        }
 
 
 
