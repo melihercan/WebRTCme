@@ -51,6 +51,8 @@ namespace Utilme.SdpTransform
                     sdp.RepeatTimes ??= new List<RepeatTime>();
                     sdp.RepeatTimes.Add(token.ToRepeatTime());
                 }
+                else if (token.StartsWith(Sdp.TimeZoneIndicator))
+                    sdp.TimeZones = token.ToTimeZones();
 
 
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
@@ -286,6 +288,35 @@ namespace Utilme.SdpTransform
                 OffsetsFromStartTime = offsets
             };
         }
+
+        public static List<TimeZone> ToTimeZones(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.TimeZoneIndicator, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (tokens.Length % 2 != 0)
+                throw new FormatException("Timezones should be specified in pairs");
+            var pairs = tokens
+                .Select((token, idx) => new { idx, token })
+                .GroupBy(p => p.idx / 2, p => p.token);
+
+            List<TimeZone> timeZones = new();
+
+            foreach (var pair in pairs)
+            {
+                var array = pair.ToArray();
+                timeZones.Add(new TimeZone 
+                { 
+                    AdjustmentTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(double.Parse(array[0])),
+                    Offset = TimeSpan.FromSeconds(Regex.IsMatch(array[1], @"[dhms]$") ?
+                        ToSeconds(array[1]) : double.Parse(array[1]))
+                });
+            }
+
+            return timeZones;
+        }
+
 
 
 
@@ -874,7 +905,7 @@ namespace Utilme.SdpTransform
             return byteArray;
         }
 
-        public static ulong ToSeconds(this string str)
+        public static long ToSeconds(this string str)
         {
             // Converts strings ending with the following letters to seconds.
             //  <digits>d - days (86400 seconds)
@@ -882,13 +913,13 @@ namespace Utilme.SdpTransform
             //  <digits>m - minutes (60 seconds)
             //  <digits>s - seconds 
             if (str.EndsWith("d"))
-                return ulong.Parse(str.TrimEnd('d')) * 86400;
+                return long.Parse(str.TrimEnd('d')) * 86400;
             else if (str.EndsWith("h"))
-                return ulong.Parse(str.TrimEnd('h')) * 3600;
+                return long.Parse(str.TrimEnd('h')) * 3600;
             else if (str.EndsWith("m"))
-                return ulong.Parse(str.TrimEnd('h')) * 3600;
+                return long.Parse(str.TrimEnd('h')) * 3600;
             else if (str.EndsWith("s"))
-                return ulong.Parse(str.TrimEnd('h')) * 3600;
+                return long.Parse(str.TrimEnd('h')) * 3600;
             else
                 throw new NotSupportedException();
         }

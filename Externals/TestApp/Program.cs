@@ -27,6 +27,7 @@ b=RR:2400
 t=0 0
 t=3837838042 3837838342
 r=7d 1h 0 25h
+z=2882844526 -1h 2898848070 0
 a=group:BUNDLE 0 1
 a=extmap-allow-mixed
 a=msid-semantic: WMS
