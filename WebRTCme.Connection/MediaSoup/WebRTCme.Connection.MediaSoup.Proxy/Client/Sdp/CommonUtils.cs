@@ -288,7 +288,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 Mid = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(Mid.Name))?.ToMid(),
                 Msid = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(Msid.Name))?.ToMsid(),
+                    .SingleOrDefault(a => a.StartsWith(Msid.Label))?.ToMsid(),
                 IceUfrag = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(IceUfrag.Name))?.ToIceUfrag(),
                 IcePwd = mediaDescription.AttributesOld

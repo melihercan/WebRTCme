@@ -6,7 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class MsidSemantic
     {
-        public const string Name = "msid-semantic:";
+        public const string Label = "msid-semantic:";
 
         public string Token { get; init; }
         public const string WebRtcMediaStreamToken = "WMS";

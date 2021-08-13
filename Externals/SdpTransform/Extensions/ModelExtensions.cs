@@ -17,7 +17,7 @@ namespace Utilme.SdpTransform
             var tokens = str.Split(new string[] { Constants.CRLF }, StringSplitOptions.RemoveEmptyEntries);
             var idx = 0;
             
-            // Session parameters.
+            // Session fields.
             foreach (var token in tokens)
             {
                 if (token.StartsWith(Sdp.ProtocolVersionIndicator))
@@ -64,20 +64,20 @@ namespace Utilme.SdpTransform
                         sdp.Attributes.ExtmapAllowMixed = true;
                     else if (attr.StartsWith(Group.Label))
                         sdp.Attributes.Group = attr.ToGroup();
-
-
-
+                    else if (attr.StartsWith(MsidSemantic.Label))
+                        sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
                 }
-
-
-
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
                     break;
                 else
-                    //throw new NotSupportedException($"Unknown SDP field for seesion: {token}");
+                    Console.WriteLine($"==== SDP unsupported session field:{token}");
+                    //throw new NotSupportedException($"Unknown SDP field for session: {token}");
 
                 idx++;
             }
+
+            // Media description fields.
+            tokens = tokens.Skip(idx).ToArray();
 
             return sdp;
         }
@@ -360,6 +360,62 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static MsidSemantic ToMsidSemantic(this string str)
+        {
+            var tokens = str
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(MsidSemantic.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new MsidSemantic
+            {
+                Token = tokens[0],
+                IdList = tokens.Length > 1 ? tokens.Skip(1).ToArray() : null
+            };
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public static Msid ToMsid(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Msid.Label, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Msid
+            {
+                Id = tokens[0],
+                AppData = tokens[1]
+            };
+        }
 
 
 
@@ -443,21 +499,6 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static MsidSemantic ToMsidSemantic(this string str)
-        {
-            var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                .Replace(MsidSemantic.Name, string.Empty)
-                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var idList = new string[tokens.Length -1];
-            for (int i = 0; i < idList.Length; i++)
-                idList[i] = tokens[i + 1];
-            return new MsidSemantic
-            {
-                Token = tokens[0],
-                IdList = idList
-            };
-        }
 
         public static Fingerprint ToFingerprint(this string str)
         {
@@ -474,18 +515,6 @@ namespace Utilme.SdpTransform
         }
 
 
-        public static Msid ToMsid(this string str)
-        {
-            var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Msid.Name, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            return new Msid
-            {
-                Id = tokens[0],
-                AppData = tokens[1]
-            };
-        }
 
         public static Ssrc ToSsrc(this string str)
         {
@@ -706,7 +735,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(MsidSemantic.Name)
+                .Append(MsidSemantic.Label)
                 .Append(msidSemantic.Token)
                 .Append(" ");
             for (int i= 0; i < msidSemantic.IdList.Length; i++)
@@ -742,7 +771,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(MsidSemantic.Name)
+                .Append(MsidSemantic.Label)
                 .Append(group.Semantics)
                 .Append(" ");
             for (int i = 0; i < group.SemanticsExtensions.Length; i++)
@@ -762,7 +791,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Msid.Name)
+                .Append(Msid.Label)
                 .Append(msid.Id)
                 .Append(" ")
                 .Append(msid.AppData)

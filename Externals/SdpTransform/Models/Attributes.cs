@@ -24,5 +24,7 @@ namespace Utilme.SdpTransform
 
         public Group Group { get; set; }
 
+        public MsidSemantic MsidSemantic { get; set; }
+
     }
 }

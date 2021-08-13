@@ -6,7 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class Msid
     {
-        public const string Name = "msid:";
+        public const string Label = "msid:";
 
         public string Id { get; init; }
         public string AppData { get; init; }
