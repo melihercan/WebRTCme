@@ -53,11 +53,28 @@ namespace Utilme.SdpTransform
                 }
                 else if (token.StartsWith(Sdp.TimeZoneIndicator))
                     sdp.TimeZones = token.ToTimeZones();
+                else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
+                    sdp.EncryptionKey = token.ToEncryptionKey();
+                else if (token.StartsWith(Sdp.AttributeIndicator))
+                {
+                    sdp.Attributes ??= new Attributes();
+                    var attr = token.Substring(2);
+
+                    if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
+                        sdp.Attributes.ExtmapAllowMixed = true;
+                    else if (attr.StartsWith(Group.Label))
+                        sdp.Attributes.Group = attr.ToGroup();
+
+
+
+                }
+
 
 
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
                     break;
-
+                else
+                    //throw new NotSupportedException($"Unknown SDP field for seesion: {token}");
 
                 idx++;
             }
@@ -292,8 +309,8 @@ namespace Utilme.SdpTransform
         public static List<TimeZone> ToTimeZones(this string str)
         {
             var tokens = str
-                 .Replace(Sdp.TimeZoneIndicator, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                .Replace(Sdp.TimeZoneIndicator, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (tokens.Length % 2 != 0)
                 throw new FormatException("Timezones should be specified in pairs");
@@ -317,6 +334,40 @@ namespace Utilme.SdpTransform
             return timeZones;
         }
 
+        public static EncryptionKey ToEncryptionKey(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.EncryptionKeyIndicator, string.Empty)
+                .Split(new char[] { ':', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new EncryptionKey
+            {
+                Method = tokens[0].EnumFromDisplayName<EncryptionKeyMethod>(),
+                Value = tokens[1]
+            };
+        }
+
+        public static Group ToGroup(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Group.Label, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Group
+            {
+                Semantics = tokens[0].EnumFromDisplayName<GroupSemantics>(),
+                SemanticsExtensions = tokens.Skip(1).ToArray()
+            };
+        }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -324,9 +375,9 @@ namespace Utilme.SdpTransform
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Candidate.Name, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Candidate.Name, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Candidate
             {
                 Foundation = tokens[0],
@@ -422,21 +473,6 @@ namespace Utilme.SdpTransform
 
         }
 
-        public static Group ToGroup(this string str)
-        {
-            var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Group.Name, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var groupTokens = new string[tokens.Length - 1];
-            for (int i = 1; i < tokens.Length; i++)
-                groupTokens[i - 1] = tokens[i];
-            return new Group
-            {
-                Type = tokens[0],
-                Tokens = groupTokens
-            };
-        }
 
         public static Msid ToMsid(this string str)
         {
@@ -707,12 +743,12 @@ namespace Utilme.SdpTransform
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
                 .Append(MsidSemantic.Name)
-                .Append(group.Type)
+                .Append(group.Semantics)
                 .Append(" ");
-            for (int i = 0; i < group.Tokens.Length; i++)
+            for (int i = 0; i < group.SemanticsExtensions.Length; i++)
             {
-                sb.Append(group.Tokens[i]);
-                if (i != group.Tokens.Length - 1)
+                sb.Append(group.SemanticsExtensions[i]);
+                if (i != group.SemanticsExtensions.Length - 1)
                     sb.Append(" ");
             }
             sb.Append(SdpSerializer.CRLF);

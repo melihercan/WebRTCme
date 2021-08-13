@@ -6,6 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class Attributes
     {
+        // Binary attributes.
         public bool? IceLite { get; set; }
         public const string IceLiteLabel = "ice-lite";
 
@@ -17,6 +18,11 @@ namespace Utilme.SdpTransform
 
         public bool? EndOfCandidates { get; set; }
         public const string EndOfCandidatesLabel = "end-of-candidates";
+
+        public bool? ExtmapAllowMixed { get; set; }
+        public const string ExtmapAllowMixedLabel = "extmap-allow-mixed";
+
+        public Group Group { get; set; }
 
     }
 }

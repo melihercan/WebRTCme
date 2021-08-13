@@ -68,8 +68,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                 _sdp.Group = new Group 
                 {
-                    Type = Group.BundleType,
-                    Tokens = new string[] { }
+                    Semantics = Group.BundleType,
+                    SemanticsExtensions = new string[] { }
                 };
             }
 
@@ -268,7 +268,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             if (_dtlsParameters is null)
                 return;
 
-            _sdp.Group.Tokens = _mediaSections
+            _sdp.Group.SemanticsExtensions = _mediaSections
                 .Where(mediaSection => !mediaSection.Closed)
                 .Select(mediaSection => mediaSection.Mid.Id).ToArray();
         }
