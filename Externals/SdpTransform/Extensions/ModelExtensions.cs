@@ -37,7 +37,20 @@ namespace Utilme.SdpTransform
                 else if (token.StartsWith(Sdp.ConnectionDataIndicator))
                     sdp.ConnectionData = token.ToConnectionData();
                 else if (token.StartsWith(Sdp.BandwidthIndicator))
+                {
+                    sdp.Bandwidths ??= new List<Bandwidth>();
                     sdp.Bandwidths.Add(token.ToBandwidth());
+                }
+                else if (token.StartsWith(Sdp.TimingIndicator))
+                {
+                    sdp.Timings ??= new List<Timing>();
+                    sdp.Timings.Add(token.ToTiming());
+                }
+                else if (token.StartsWith(Sdp.RepeatTimeIndicator))
+                {
+                    sdp.RepeatTimes ??= new List<RepeatTime>();
+                    sdp.RepeatTimes.Add(token.ToRepeatTime());
+                }
 
 
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
@@ -240,8 +253,39 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static Timing ToTiming(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.TimingIndicator, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Timing
+            {
+                StartTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(double.Parse(tokens[0])),
+                StopTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(double.Parse(tokens[1]))
+            };
+        }
 
+        public static RepeatTime ToRepeatTime(this string str)
+        {
+            var tokens = str
+                 .Replace(Sdp.RepeatTimeIndicator, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
+            var offsetsStr = tokens.Skip(2);
+            var offsets = new List<TimeSpan>();
+            foreach (var offsetStr in offsetsStr)
+                offsets.Add(TimeSpan.FromSeconds(Regex.IsMatch(offsetStr, @"[dhms]$") ?
+                    ToSeconds(offsetStr) : double.Parse(offsetStr)));
+
+            return new RepeatTime
+            {
+                RepeatInterval = TimeSpan.FromSeconds(Regex.IsMatch(tokens[0], @"[dhms]$") ?
+                    ToSeconds(tokens[0]) : double.Parse(tokens[0])),
+                ActiveDuration = TimeSpan.FromSeconds(Regex.IsMatch(tokens[1], @"[dhms]$") ?
+                    ToSeconds(tokens[1]) : double.Parse(tokens[1])),
+                OffsetsFromStartTime = offsets
+            };
+        }
 
 
 
@@ -830,5 +874,23 @@ namespace Utilme.SdpTransform
             return byteArray;
         }
 
+        public static ulong ToSeconds(this string str)
+        {
+            // Converts strings ending with the following letters to seconds.
+            //  <digits>d - days (86400 seconds)
+            //  <digits>h - hours (3600 seconds)
+            //  <digits>m - minutes (60 seconds)
+            //  <digits>s - seconds 
+            if (str.EndsWith("d"))
+                return ulong.Parse(str.TrimEnd('d')) * 86400;
+            else if (str.EndsWith("h"))
+                return ulong.Parse(str.TrimEnd('h')) * 3600;
+            else if (str.EndsWith("m"))
+                return ulong.Parse(str.TrimEnd('h')) * 3600;
+            else if (str.EndsWith("s"))
+                return ulong.Parse(str.TrimEnd('h')) * 3600;
+            else
+                throw new NotSupportedException();
+        }
     }
 }

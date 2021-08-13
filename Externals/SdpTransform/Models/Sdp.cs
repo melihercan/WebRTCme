@@ -67,12 +67,13 @@ namespace Utilme.SdpTransform
         /// Either here or in media descriptions, so it is optional here.
         /// Can have multiple entries.
         /// </summary>
-        public IList<Bandwidth> Bandwidths { get; set; } = new List<Bandwidth>();
+        public IList<Bandwidth> Bandwidths { get; set; }
         public const string BandwidthIndicator = "b=";
 
 
         /// <summary>
         /// t=<start-time> <stop-time>
+        /// Time values in seconds since 1900.
         /// Can have multiple entries.
         /// </summary>
         public IList<Timing> Timings { get; set; }

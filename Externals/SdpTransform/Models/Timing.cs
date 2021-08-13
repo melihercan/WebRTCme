@@ -6,7 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class Timing
     {
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan StopTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime StopTime { get; set; }
     }
 }
