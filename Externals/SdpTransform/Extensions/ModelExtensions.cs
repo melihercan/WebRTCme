@@ -69,6 +69,11 @@ namespace Utilme.SdpTransform
                         sdp.Attributes.Group = attr.ToGroup();
                     else if (attr.StartsWith(MsidSemantic.Label))
                         sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
+
+                    else
+                        Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
+                    //throw new NotSupportedException($"Unknown SDP attribute for session: {attr}");
+
                 }
                 else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
                     break;
@@ -106,19 +111,54 @@ namespace Utilme.SdpTransform
                     md.EncryptionKey = token.ToEncryptionKey();
                 else if (token.StartsWith(Sdp.AttributeIndicator))
                 {
-                    sdp.Attributes ??= new Attributes();
+                    md.Attributes ??= new Attributes();
                     var attr = token.Substring(2);
 
                     // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
-                        sdp.Attributes.ExtmapAllowMixed = true;
+                        md.Attributes.ExtmapAllowMixed = true;
                     
                     // Value attributes.
                     else if (attr.StartsWith(Group.Label))
-                        sdp.Attributes.Group = attr.ToGroup();
+                        md.Attributes.Group = attr.ToGroup();
                     else if (attr.StartsWith(MsidSemantic.Label))
-                        sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                        md.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                    else if (attr.StartsWith(Mid.Label))
+                        md.Attributes.Mid = attr.ToMid();
+                    else if (attr.StartsWith(Msid.Label))
+                        md.Attributes.Msid = attr.ToMsid();
+                    else if (attr.StartsWith(Candidate.Label))
+                        md.Attributes.Candidate = attr.ToCandidate();
+                    else if (attr.StartsWith(IceUfrag.Label))
+                        md.Attributes.IceUfrag = attr.ToIceUfrag();
+                    else if (attr.StartsWith(IcePwd.Label))
+                        md.Attributes.IcePwd = attr.ToIcePwd();
+                    else if (attr.StartsWith(IceOptions.Label))
+                        md.Attributes.IceOptions = attr.ToIceOptions();
+                    else if (attr.StartsWith(Fingerprint.Label))
+                        md.Attributes.Fingerprint = attr.ToFingerprint();
+                    else if (attr.StartsWith(Fingerprint.Label))
+                        md.Attributes.Ssrc = attr.ToSsrc();
+                    else if (attr.StartsWith(Ssrc.Label))
+                        md.Attributes.SsrcGroup = attr.ToSsrcGroup();
+                    else if (attr.StartsWith(Rid.Label))
+                        md.Attributes.Rid = attr.ToRid();
+                    else if (attr.StartsWith(Rtpmap.Label))
+                        md.Attributes.Rtpmap = attr.ToRtpmap();
+                    else if (attr.StartsWith(Fmtp.Label))
+                        md.Attributes.Fmtp = attr.ToFmtp();
+                    else if (attr.StartsWith(RtcpFb.Label))
+                        md.Attributes.RtcpFb = attr.ToRtcpFb();
+
+                    else
+                        Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
+                        //throw new NotSupportedException($"Unknown SDP attribute for media description: {attr}");
+
                 }
+                else
+                    Console.WriteLine($"==== SDP unsupported media description field:{token}");
+                    //throw new NotSupportedException($"Unknown SDP field for media description: {token}");
+
             }
 
             if (md is not null)
