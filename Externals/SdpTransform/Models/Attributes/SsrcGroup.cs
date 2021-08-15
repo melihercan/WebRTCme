@@ -6,11 +6,11 @@ namespace Utilme.SdpTransform
 {
     public class SsrcGroup
     {
-        public const string Name = "ssrc-group";
+        public const string Label = "ssrc-group";
 
-        public string Semantics { get; init; }
+        public string Semantics { get; set; }
 
-        public string[] SsrcIds { get; init; }
+        public string[] SsrcIds { get; set; }
 
     }
 }

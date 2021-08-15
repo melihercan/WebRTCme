@@ -9,11 +9,11 @@ namespace Utilme.SdpTransform
     
     public class Ssrc
     {
-        public const string Name = "ssrc:";
+        public const string Label = "ssrc:";
 
-        public uint Id { get; init; }
-        public string Attribute { get; init; }
-        public string Value { get; init; }
+        public uint Id { get; set; }
+        public string Attribute { get; set; }
+        public string Value { get; set; }
 
 
     }

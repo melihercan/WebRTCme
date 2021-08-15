@@ -6,8 +6,8 @@ namespace Utilme.SdpTransform
 {
     public class IceOptions
     {
-        public const string Name = "ice-options:";
+        public const string Label = "ice-options:";
 
-        public string[] Tags { get; init; }
+        public string[] Tags { get; set; }
     }
 }

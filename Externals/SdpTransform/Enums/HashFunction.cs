@@ -22,10 +22,10 @@ namespace Utilme.SdpTransform
         [Display(Name = "sha-512")]
         Sha512,
         
-        [Display(Name = "md5")]
-        Md5,
-        
         [Display(Name = "md2")]
-        Md2
+        Md2,
+
+        [Display(Name = "md5")]
+        Md5
     }
 }

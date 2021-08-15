@@ -6,10 +6,11 @@ namespace Utilme.SdpTransform
 {
     public class Fingerprint
     {
-        public const string Name = "fingerprint:";
+        public const string Label = "fingerprint:";
 
-        public HashFunction HashFunction { get; init; }
-        
-        public byte[] HashValue { get; init; }
+        public HashFunction HashFunction { get; set; }
+
+        // Each byte in upper-case hex, separated by colons.
+        public byte[] HashValue { get; set; }
     }
 }

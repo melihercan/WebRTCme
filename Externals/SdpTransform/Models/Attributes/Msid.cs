@@ -8,8 +8,8 @@ namespace Utilme.SdpTransform
     {
         public const string Label = "msid:";
 
-        public string Id { get; init; }
-        public string AppData { get; init; }
+        public string Id { get; set; }
+        public string AppData { get; set; }
 
     }
 }

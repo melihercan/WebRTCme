@@ -198,7 +198,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 throw new Exception("No active media section found");
 
             var fingerprint = mediaObject.Fingerprint ?? 
-                sdp.Attributes.FirstOrDefault(a => a.StartsWith(Fingerprint.Name)).ToFingerprint();
+                sdp.Attributes.FirstOrDefault(a => a.StartsWith(Fingerprint.Label)).ToFingerprint();
             DtlsRole? role = null;
 
             switch (mediaObject.Setup)
@@ -286,43 +286,43 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             return new MediaObject
             {
                 Mid = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(Mid.Name))?.ToMid(),
+                    .SingleOrDefault(a => a.StartsWith(Mid.Label))?.ToMid(),
                 Msid = mediaDescription.AttributesOld
                     .SingleOrDefault(a => a.StartsWith(Msid.Label))?.ToMsid(),
                 IceUfrag = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(IceUfrag.Name))?.ToIceUfrag(),
+                    .SingleOrDefault(a => a.StartsWith(IceUfrag.Label))?.ToIceUfrag(),
                 IcePwd = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(IcePwd.Name))?.ToIcePwd(),
+                    .SingleOrDefault(a => a.StartsWith(IcePwd.Label))?.ToIcePwd(),
                 IceOptions = mediaDescription.AttributesOld
-                        .SingleOrDefault(a => a.StartsWith(IceOptions.Name))?.ToIceOptions(),
+                        .SingleOrDefault(a => a.StartsWith(IceOptions.Label))?.ToIceOptions(),
                 Fingerprint = mediaDescription.AttributesOld
-                        .SingleOrDefault(a => a.StartsWith(Fingerprint.Name))?.ToFingerprint(),
+                        .SingleOrDefault(a => a.StartsWith(Fingerprint.Label))?.ToFingerprint(),
                 Candidates = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Candidate.Name))
+                    .Where(a => a.StartsWith(Candidate.Label))
                     .Select(c => c.ToCandidate())
                     .ToList(),
                 Rtpmaps = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Rtpmap.Name))
+                    .Where(a => a.StartsWith(Rtpmap.Label))
                     .Select(r => r.ToRtpmap())
                     .ToList(),
                 RtcpFbs = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(RtcpFb.Name))
+                    .Where(a => a.StartsWith(RtcpFb.Label))
                     .Select(r => r.ToRtcpFb())
                     .ToList(),
                 Fmtps = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Fmtp.Name))
+                    .Where(a => a.StartsWith(Fmtp.Label))
                     .Select(r => r.ToFmtp())
                     .ToList(),
                 Ssrcs = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Ssrc.Name))
+                    .Where(a => a.StartsWith(Ssrc.Label))
                     .Select(r => r.ToSsrc())
                     .ToList(),
                 SsrcGroups = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(SsrcGroup.Name))
+                    .Where(a => a.StartsWith(SsrcGroup.Label))
                     .Select(r => r.ToSsrcGroup())
                     .ToList(),
                 Rids = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Rid.Name))
+                    .Where(a => a.StartsWith(Rid.Label))
                     .Select(r => r.ToRid())
                     .ToList()
             };

@@ -30,7 +30,7 @@ namespace Utilme.SdpTransform
         /// Optional.
         /// </summary>
         public string SessionInformation { get; set; }
-        public const string SessionInformationIndicator = "i=";
+        public const string InformationIndicator = "i=";
 
         /// <summary>
         /// u=<uri>

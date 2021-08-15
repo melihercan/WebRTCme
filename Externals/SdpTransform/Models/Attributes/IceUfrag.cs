@@ -6,8 +6,8 @@ namespace Utilme.SdpTransform
 {
     public class IceUfrag
     {
-        public const string Name = "ice-ufrag:";
+        public const string Label = "ice-ufrag:";
 
-        public string Ufrag { get; init; }
+        public string Ufrag { get; set; }
     }
 }

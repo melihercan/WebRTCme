@@ -6,8 +6,8 @@ namespace Utilme.SdpTransform
 {
     public class IcePwd
     {
-        public const string Name = "ice-pwd:";
+        public const string Label = "ice-pwd:";
 
-        public string Password { get; init; }
+        public string Password { get; set; }
     }
 }

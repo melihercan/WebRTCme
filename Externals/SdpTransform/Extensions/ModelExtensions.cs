@@ -26,8 +26,8 @@ namespace Utilme.SdpTransform
                     sdp.Origin = token.ToOrigin();
                 else if (token.StartsWith(Sdp.SessionNameIndicator))
                     sdp.SessionName = token.ToSessionName();
-                else if (token.StartsWith(Sdp.SessionInformationIndicator))
-                    sdp.SessionInformation = token.ToSessionInformation();
+                else if (token.StartsWith(Sdp.InformationIndicator))
+                    sdp.SessionInformation = token.ToInformation();
                 else if (token.StartsWith(Sdp.UriIndicator))
                     sdp.Uri = token.ToUri();
                 else if (token.StartsWith(Sdp.EmailAddressIndicator))
@@ -60,8 +60,11 @@ namespace Utilme.SdpTransform
                     sdp.Attributes ??= new Attributes();
                     var attr = token.Substring(2);
 
+                    // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
                         sdp.Attributes.ExtmapAllowMixed = true;
+
+                    // Value attributes.
                     else if (attr.StartsWith(Group.Label))
                         sdp.Attributes.Group = attr.ToGroup();
                     else if (attr.StartsWith(MsidSemantic.Label))
@@ -90,8 +93,32 @@ namespace Utilme.SdpTransform
                         sdp.MediaDescriptions.Add(md);
                     md = token.ToMediaDescription();
                 }
+                else if (token.StartsWith(Sdp.InformationIndicator))
+                    md.Information = token.ToInformation();
+                else if (token.StartsWith(Sdp.ConnectionDataIndicator))
+                    md.ConnectionData = token.ToConnectionData();
+                else if (token.StartsWith(Sdp.BandwidthIndicator))
+                {
+                    md.Bandwidths ??= new List<Bandwidth>();
+                    md.Bandwidths.Add(token.ToBandwidth());
+                }
+                else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
+                    md.EncryptionKey = token.ToEncryptionKey();
+                else if (token.StartsWith(Sdp.AttributeIndicator))
+                {
+                    sdp.Attributes ??= new Attributes();
+                    var attr = token.Substring(2);
 
-
+                    // Binary attributes.
+                    if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
+                        sdp.Attributes.ExtmapAllowMixed = true;
+                    
+                    // Value attributes.
+                    else if (attr.StartsWith(Group.Label))
+                        sdp.Attributes.Group = attr.ToGroup();
+                    else if (attr.StartsWith(MsidSemantic.Label))
+                        sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                }
             }
 
             if (md is not null)
@@ -137,27 +164,27 @@ namespace Utilme.SdpTransform
             return token;
         }
 
-        public static string ToSessionInformation(this string str)
+        public static string ToInformation(this string str)
         {
             var token = str
-                 .Replace(Sdp.SessionInformationIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.InformationIndicator, string.Empty)
+                .Replace(Constants.CRLF, string.Empty);
             return token;
         }
 
         public static Uri ToUri(this string str)
         {
             var token = str
-                 .Replace(Sdp.UriIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.UriIndicator, string.Empty)
+                .Replace(Constants.CRLF, string.Empty);
             return new Uri(token);
         }
 
         public static List<string> ToEmailAddresses(this string str)
         {
             var token = str
-                 .Replace(Sdp.EmailAddressIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.EmailAddressIndicator, string.Empty)
+                .Replace(Constants.CRLF, string.Empty);
 
             List<string> emails = new();
 
@@ -407,33 +434,17 @@ namespace Utilme.SdpTransform
             };
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        public static Mid ToMid(this string str)
+        {
+            var tokens = str
+                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Mid.Label, string.Empty)
+                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Mid
+            {
+                Id = tokens[0]
+            };
+        }
 
 
         public static Msid ToMsid(this string str)
@@ -450,31 +461,21 @@ namespace Utilme.SdpTransform
         }
 
 
-
-
-
-
-
-
-
-
-
-
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str
                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                .Replace(Candidate.Name, string.Empty)
+                .Replace(Candidate.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Candidate
             {
                 Foundation = tokens[0],
                 ComponentId = int.Parse(tokens[1]),
-                Transport = tokens[2].EnumFromDisplayName<CandidateTransport>(),// (CandidateTransport)Enum.Parse(typeof(CandidateTransport), tokens[2], true),
+                Transport = tokens[2].EnumFromDisplayName<CandidateTransport>(),
                 Priority = int.Parse(tokens[3]),
                 ConnectionAddress = tokens[4],
                 Port = int.Parse(tokens[5]),
-                Type = tokens[7].EnumFromDisplayName<CandidateType>(), //(CandidateType)Enum.Parse(typeof(CandidateType), tokens[7], true),
+                Type = tokens[7].EnumFromDisplayName<CandidateType>(), 
                 RelAddr = tokens[9],
                 RelPort = int.Parse(tokens[11])
             };
@@ -484,7 +485,7 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(IceUfrag.Name, string.Empty)
+                 .Replace(IceUfrag.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new IceUfrag
             {
@@ -496,7 +497,7 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(IcePwd.Name, string.Empty)
+                 .Replace(IcePwd.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new IcePwd
             {
@@ -508,51 +509,33 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(IceOptions.Name, string.Empty)
+                 .Replace(IceOptions.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var tags = new string[tokens.Length];
-            for (var i = 0; i < tokens.Length; i++)
-                tags[i] = tokens[i];
             return new IceOptions
             {
-                Tags = tags
+                Tags = tokens
             };
         }
-
-        public static Mid ToMid(this string str)
-        {
-            var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Mid.Name, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            return new Mid
-            {
-                Id = tokens[0]
-            };
-        }
-
 
         public static Fingerprint ToFingerprint(this string str)
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Fingerprint.Name, string.Empty)
+                 .Replace(Fingerprint.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Fingerprint
             {
-                HashFunction = tokens[0].EnumFromDisplayName<HashFunction>(), //(HashFunction)Enum.Parse(typeof(HashFunction), tokens[0], true),
+                HashFunction = tokens[0].EnumFromDisplayName<HashFunction>(), 
                 HashValue = HexadecimalStringToByteArray(tokens[1].Replace(":", string.Empty))
             };
 
         }
 
-
-
         public static Ssrc ToSsrc(this string str)
         {
             var tokens = str
                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                .Replace(Ssrc.Name, string.Empty)
+                .Replace(Ssrc.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var attributeAndValue = tokens[1].Split(':');
             return new Ssrc
@@ -567,15 +550,12 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                .Replace(SsrcGroup.Name, string.Empty)
+                .Replace(SsrcGroup.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var ssrcIds = new string[tokens.Length - 1];
-            for (int i = 1; i < tokens.Length; i++)
-                ssrcIds[i - 1] = tokens[i];
             return new SsrcGroup
             {
                 Semantics = tokens[0],
-                SsrcIds = ssrcIds
+                SsrcIds = tokens.Skip(1).ToArray()
             };
         }
 
@@ -583,7 +563,7 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                .Replace(Rid.Name, string.Empty)
+                .Replace(Rid.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var subTokens = tokens[2].Split(';');
             var fmtList = subTokens.Where(st => st.StartsWith("pt=")).ToArray();
@@ -591,7 +571,7 @@ namespace Utilme.SdpTransform
             return new Rid
             {
                 Id = tokens[0],
-                Direction = tokens[1].EnumFromDisplayName<RidDirection>(), //(RidDirection)Enum.Parse(typeof(RidDirection), tokens[1], true),
+                Direction = tokens[1].EnumFromDisplayName<RidDirection>(), 
                 FmtList = fmtList,
                 Restrictions = restrictions
             };
@@ -601,7 +581,7 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Rtpmap.Name, string.Empty)
+                 .Replace(Rtpmap.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var subTokens = tokens[1].Split('/');
             return new Rtpmap
@@ -617,7 +597,7 @@ namespace Utilme.SdpTransform
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(Fmtp.Name, string.Empty)
+                 .Replace(Fmtp.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Fmtp
             {
@@ -638,7 +618,7 @@ namespace Utilme.SdpTransform
         //  Value = "level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f"
         // }
         // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
-        public static Fmtp ToFmtp(this Dictionary<string, object/*string*/> dictionary, int payloadType)
+        public static Fmtp ToFmtp(this Dictionary<string, object> dictionary, int payloadType)
         {
             Fmtp fmtp = new()
             {
@@ -656,20 +636,22 @@ namespace Utilme.SdpTransform
             return fmtp;
         }
 
-
         public static RtcpFb ToRtcpFb(this string str)
         {
             var tokens = str
                  .Replace(SdpSerializer.AttributeCharacter, string.Empty)
-                 .Replace(RtcpFb.Name, string.Empty)
+                 .Replace(RtcpFb.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new RtcpFb
             {
                 PayloadType = int.Parse(tokens[0]),
                 Type = tokens[1],
-                SubType = tokens.Length == 3 ? tokens[2] : null
+                SubType = tokens.Length > 2 ? tokens[2] : null
             };
         }
+
+
+
 
         public static string ToAttributeString(this Candidate candidate, bool withAttributeCharacter = false)
         {
@@ -677,7 +659,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Candidate.Name)
+                .Append(Candidate.Label)
                 .Append(candidate.Foundation)
                 .Append(" ")
                 .Append(candidate.ComponentId.ToString())
@@ -710,7 +692,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(IceUfrag.Name)
+                .Append(IceUfrag.Label)
                 .Append(iceUfrag.Ufrag)
                 .Append(SdpSerializer.CRLF);
             return sb.ToString();
@@ -722,7 +704,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(IcePwd.Name)
+                .Append(IcePwd.Label)
                 .Append(icePwd.Password)
                 .Append(SdpSerializer.CRLF);
             
@@ -735,7 +717,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(IceOptions.Name)
+                .Append(IceOptions.Label)
                 .Append("");
             for (int i=0; i<iceOptions.Tags.Length; i++)
             {
@@ -754,7 +736,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Mid.Name)
+                .Append(Mid.Label)
                 .Append(mid.Id)
                 .Append(SdpSerializer.CRLF);
             
@@ -788,7 +770,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Fingerprint.Name)
+                .Append(Fingerprint.Label)
                 .Append(fingerprint.HashFunction.DisplayName())
                 .Append(" ")
                 .Append(BitConverter.ToString(fingerprint.HashValue).Replace("-",":"))
@@ -838,7 +820,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Ssrc.Name)
+                .Append(Ssrc.Label)
                 .Append(ssrc.Id.ToString())
                 .Append(" ")
                 .Append(ssrc.Attribute);
@@ -859,7 +841,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(SsrcGroup.Name)
+                .Append(SsrcGroup.Label)
                 .Append(ssrcGroup.Semantics)
                 .Append(" ");
             for (int i = 0; i < ssrcGroup.SsrcIds.Length; i++)
@@ -879,7 +861,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Rid.Name)
+                .Append(Rid.Label)
                 .Append(rid.Id)
                 .Append(" ")
                 .Append(rid.Direction.DisplayName());
@@ -905,7 +887,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Rtpmap.Name)
+                .Append(Rtpmap.Label)
                 .Append(rtpmap.PayloadType.ToString())
                 .Append(" ")
                 .Append(rtpmap.EncodingName)
@@ -929,7 +911,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(Fmtp.Name)
+                .Append(Fmtp.Label)
                 .Append(fmtp.PayloadType.ToString())
                 .Append(" ")
                 .Append(fmtp.Value)
@@ -973,7 +955,7 @@ namespace Utilme.SdpTransform
             if (withAttributeCharacter)
                 sb.Append(SdpSerializer.AttributeCharacter);
             sb
-                .Append(RtcpFb.Name)
+                .Append(RtcpFb.Label)
                 .Append(rtcpFb.PayloadType.ToString())
                 .Append(" ")
                 .Append(rtcpFb.Type)

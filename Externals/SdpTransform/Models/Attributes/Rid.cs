@@ -7,7 +7,7 @@ namespace Utilme.SdpTransform
         // a=rid:1 recv pt=97;max-width=1280;max-height=720
     public class Rid
     {
-        public const string Name = "rid:";
+        public const string Label = "rid:";
 
         public string Id { get; init; }
 

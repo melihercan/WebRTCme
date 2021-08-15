@@ -6,7 +6,7 @@ namespace Utilme.SdpTransform
 {
     public class Rtpmap
     {
-        public const string Name = "rtpmap:";
+        public const string Label = "rtpmap:";
         public int PayloadType { get; set; }
         public string EncodingName { get; set; }
         public int ClockRate { get; set; }

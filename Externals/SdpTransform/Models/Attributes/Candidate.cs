@@ -10,32 +10,28 @@ namespace Utilme.SdpTransform
     //  a=candidate:2 1 UDP 1694498815 192.0.2.3 45664 typ srflx raddr 10.0.1.1 rport 8998
     public class Candidate
     {
-        public const string Name = "candidate:";
+        public const string Label = "candidate:";
 
-        /// <summary>
-        /// It is <ice-char>
-        /// ice-char: ALPHA / DIGIT / "+" / "/"
-        /// </summary>
-        public string Foundation { get; init; }
+        public string Foundation { get; set; }
 
-        public int ComponentId { get; init; }
+        public int ComponentId { get; set; }
 
-        public CandidateTransport Transport { get; init; }
+        public CandidateTransport Transport { get; set; }
 
-        public int Priority { get; init; }
+        public int Priority { get; set; }
 
-        public string ConnectionAddress { get; init; }
+        public string ConnectionAddress { get; set; }
 
-        public int Port { get; init; }
+        public int Port { get; set; }
 
-        
+
         public const string Typ = "typ";
-        public CandidateType Type { get; init; }
+        public CandidateType Type { get; set; }
 
         public const string Raddr = "raddr";
-        public string RelAddr { get; init; }
+        public string RelAddr { get; set; }
 
         public const string Rport = "rport";
-        public int RelPort { get; init; }
+        public int RelPort { get; set; }
     }
 }
