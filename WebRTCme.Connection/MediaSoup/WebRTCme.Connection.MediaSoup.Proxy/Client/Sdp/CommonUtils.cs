@@ -233,31 +233,31 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             var attributes = new List<string>();
 
             if (mediaObject.Mid is not null) 
-                attributes.Add(mediaObject.Mid.ToAttributeString());
+                attributes.Add(mediaObject.Mid.ToText());
             if (mediaObject.Msid is not null)
-                attributes.Add(mediaObject.Msid?.ToAttributeString());
+                attributes.Add(mediaObject.Msid?.ToText());
             if (mediaObject.IceUfrag is not null)
-                attributes.Add(mediaObject.IceUfrag?.ToAttributeString());
+                attributes.Add(mediaObject.IceUfrag?.ToText());
             if (mediaObject.IcePwd is not null)
-                attributes.Add(mediaObject.IcePwd?.ToAttributeString());
+                attributes.Add(mediaObject.IcePwd?.ToText());
             if (mediaObject.IceOptions is not null)
-                attributes.Add(mediaObject.IceOptions?.ToAttributeString());
+                attributes.Add(mediaObject.IceOptions?.ToText());
             if (mediaObject.Fingerprint is not null)
-                attributes.Add(mediaObject.Fingerprint?.ToAttributeString());
+                attributes.Add(mediaObject.Fingerprint?.ToText());
             if (mediaObject.Candidates is not null)
-                attributes.AddRange(mediaObject.Candidates.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.Candidates.Select(i => i.ToText()).ToList());
             if (mediaObject.Rtpmaps is not null)
-                attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToText()).ToList());
             if (mediaObject.RtcpFbs is not null)
-                attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToText()).ToList());
             if (mediaObject.Fmtps is not null)
-                attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToText()).ToList());
             if (mediaObject.Ssrcs is not null)
-                attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToText()).ToList());
             if (mediaObject.SsrcGroups is not null)
-                attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToText()).ToList());
             if (mediaObject.Rids is not null)
-                attributes.AddRange(mediaObject.Rids.Select(i => i.ToAttributeString()).ToList());
+                attributes.AddRange(mediaObject.Rids.Select(i => i.ToText()).ToList());
 
             // MediaDescription attributes should not contain CRLF.
             attributes = attributes.Select(a => a.Replace(SdpSerializer.CRLF, string.Empty)).ToList();
