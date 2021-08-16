@@ -167,9 +167,12 @@ namespace Utilme.SdpTransform
             return sdp;
         }
 
-        public static string ToText(this Sdp sdp)
+        public static string FromSdp(this Sdp sdp)
         {
-            throw new NotImplementedException();
+            StringBuilder sb = new();
+            sb.Append(ToProtocolVersionText(sdp.ProtocolVersion));
+
+            return sb.ToString();
         }
 
         public static int ToProtocolVersion(this string str)
@@ -179,6 +182,9 @@ namespace Utilme.SdpTransform
                  .Replace(Constants.CRLF, string.Empty);
             return int.Parse(token);
         }
+
+        public static string ToProtocolVersionText(this int version, bool withCRLF = true) =>
+            $"{Sdp.ProtocolVersionIndicator}{version}{(withCRLF ? Constants.CRLF : string.Empty)}";
 
         public static Origin ToOrigin(this string str)
         {
@@ -196,6 +202,11 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static string ToText(this Origin origin, bool withCRLF = true) =>
+            $"{Sdp.OriginIndicator}{origin.UserName} {origin.SessionId} {origin.SessionVersion} " +
+                $"{origin.NetType.DisplayName()} {origin.AddrType.DisplayName()} {origin.UnicastAddress}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static string ToSessionName(this string str)
         {
             var token = str
@@ -203,6 +214,10 @@ namespace Utilme.SdpTransform
                  .Replace(Constants.CRLF, string.Empty);
             return token;
         }
+
+        public static string ToSessionNameText(this string name, bool withCRLF = true) =>
+            $"{Sdp.SessionNameIndicator}{name}{(withCRLF ? Constants.CRLF : string.Empty)}";
+
 
         public static string ToInformation(this string str)
         {
@@ -212,6 +227,9 @@ namespace Utilme.SdpTransform
             return token;
         }
 
+        public static string ToInformationText(this string info, bool withCRLF = true) =>
+            $"{Sdp.InformationIndicator}{info}{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static Uri ToUri(this string str)
         {
             var token = str
@@ -219,6 +237,9 @@ namespace Utilme.SdpTransform
                 .Replace(Constants.CRLF, string.Empty);
             return new Uri(token);
         }
+
+        public static string ToText(this Uri uri, bool withCRLF = true) =>
+            $"{Sdp.UriIndicator}{uri}{(withCRLF ? Constants.CRLF : string.Empty)}";
 
         public static List<string> ToEmailAddresses(this string str)
         {
@@ -273,6 +294,9 @@ namespace Utilme.SdpTransform
 
             return emails;
         }
+
+        public static string ToEmailAddressesText(this IList<string> emails, bool withCRLF = true) =>
+            $"{Sdp.EmailAddressIndicator}{string.Join(" ", emails)}{(withCRLF? Constants.CRLF : string.Empty)}";
 
         public static List<string> ToPhoneNumbers(this string str)
         {
@@ -332,6 +356,9 @@ namespace Utilme.SdpTransform
             return phones;
         }
 
+        public static string ToPhoneNumbersText(this IList<string> phones, bool withCRLF = true) =>
+            $"{Sdp.PhoneNumberIndicator}{string.Join(" ", phones)}{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static ConnectionData ToConnectionData(this string str)
         {
             var tokens = str
@@ -345,6 +372,11 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static string ToText(this ConnectionData connectionData, bool withCRLF = true) =>
+            $"{Sdp.ConnectionDataIndicator}{connectionData.NetType.DisplayName()} " +
+                $"{connectionData.AddrType.DisplayName()} {connectionData.ConnectionAddress}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static Bandwidth ToBandwidth(this string str)
         {
             var tokens = str
@@ -357,6 +389,10 @@ namespace Utilme.SdpTransform
             };
         }
 
+        public static string ToText(this Bandwidth bandwidth, bool withCRLF = true) =>
+            $"{Sdp.BandwidthIndicator}{bandwidth.Type} {bandwidth.Value}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static Timing ToTiming(this string str)
         {
             var tokens = str
@@ -364,10 +400,15 @@ namespace Utilme.SdpTransform
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Timing
             {
-                StartTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(double.Parse(tokens[0])),
-                StopTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(double.Parse(tokens[1]))
+                StartTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(ulong.Parse(tokens[0])),
+                StopTime = new DateTime(1900, 1, 1) + TimeSpan.FromSeconds(ulong.Parse(tokens[1]))
             };
         }
+
+        public static string ToText(this Timing timing, bool withCRLF = true) =>
+            $"{Sdp.TimingIndicator}{(timing.StartTime - new DateTime(1900, 1, 1)).TotalSeconds} " +
+                $"{(timing.StopTime - new DateTime(1900, 1, 1)).TotalSeconds}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
 
         public static RepeatTime ToRepeatTime(this string str)
         {
@@ -390,6 +431,12 @@ namespace Utilme.SdpTransform
                 OffsetsFromStartTime = offsets
             };
         }
+
+        public static string ToText(this RepeatTime repeatTime, bool withCRLF = true) =>
+            $"{Sdp.RepeatTimeIndicator}{repeatTime.RepeatInterval.TotalSeconds} " +
+                $"{repeatTime.ActiveDuration.TotalSeconds} " +
+                $"{string.Join(" ", repeatTime.OffsetsFromStartTime.Select(o => o.TotalSeconds).ToArray())}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
 
         public static List<TimeZone> ToTimeZones(this string str)
         {
@@ -419,6 +466,11 @@ namespace Utilme.SdpTransform
             return timeZones;
         }
 
+        public static string ToText(this IList<TimeZone> timeZones, bool withCRLF = true) =>
+            $"{Sdp.TimeZoneIndicator}" +
+                $"{string.Join(" ", timeZones.Select(z => (z.AdjustmentTime - new DateTime(1900, 1, 1)).TotalSeconds.ToString() + " " + z.Offset.TotalSeconds.ToString()))}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+
         public static EncryptionKey ToEncryptionKey(this string str)
         {
             var tokens = str
@@ -431,6 +483,10 @@ namespace Utilme.SdpTransform
                 Value = tokens[1]
             };
         }
+
+        public static string ToText(this EncryptionKey encryptionKey, bool withCRLF = true) =>
+            $"{Sdp.EncryptionKeyIndicator}{encryptionKey.Method.DisplayName()}:{encryptionKey.Value}" +
+                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
 
         public static Group ToGroup(this string str)
         {
