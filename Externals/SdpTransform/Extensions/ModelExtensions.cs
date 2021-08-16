@@ -171,6 +171,16 @@ namespace Utilme.SdpTransform
         {
             StringBuilder sb = new();
             sb.Append(ToProtocolVersionText(sdp.ProtocolVersion));
+            sb.Append(ToText(sdp.Origin));
+            sb.Append(ToSessionNameText(sdp.SessionName));
+            if (sdp.SessionInformation is not null)
+                sb.Append(ToInformationText(sdp.SessionInformation));
+            if (sdp.Uri is not null)
+                sb.Append(ToText(sdp.Uri));
+            if (sdp.EmailAddresses is not null)
+                sb.Append(ToEmailAddressesText(sdp.EmailAddresses));
+
+
 
             return sb.ToString();
         }
@@ -178,8 +188,8 @@ namespace Utilme.SdpTransform
         public static int ToProtocolVersion(this string str)
         {
             var token = str
-                 .Replace(Sdp.ProtocolVersionIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.ProtocolVersionIndicator, string.Empty)
+                .Replace(Constants.CRLF, string.Empty);
             return int.Parse(token);
         }
 
@@ -189,8 +199,8 @@ namespace Utilme.SdpTransform
         public static Origin ToOrigin(this string str)
         {
             var tokens = str
-                 .Replace(Sdp.OriginIndicator, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                .Replace(Sdp.OriginIndicator, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Origin
             {
                 UserName = tokens[0],
@@ -210,8 +220,8 @@ namespace Utilme.SdpTransform
         public static string ToSessionName(this string str)
         {
             var token = str
-                 .Replace(Sdp.SessionNameIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.SessionNameIndicator, string.Empty)
+                .Replace(Constants.CRLF, string.Empty);
             return token;
         }
 
