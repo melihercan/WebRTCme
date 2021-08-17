@@ -43,7 +43,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         continue;
                 }
 
-                var rtpmapAttributes = MediaDescriptionParser.ToRtpmapAttributes(m);
+                var rtpmapAttributes = m.ToRtpmaps();
                 foreach (var rtpmap in rtpmapAttributes)
                 {
                     var codec = new RtpCodecCapability 
@@ -57,7 +57,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codecsDictionary.Add(codec.PreferredPayloadType, codec);
                 }
 
-                var fmtpAttributes = MediaDescriptionParser.ToFmtpAttributes(m);
+                var fmtpAttributes = m.ToFmtps();
                 foreach (var fmtp in fmtpAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(fmtp.PayloadType, out var codec))
@@ -65,7 +65,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codec.Parameters = fmtp.ToDictionary();
                 }
 
-                var rtcpFbAttributes = MediaDescriptionParser.ToRtcpFbAttributes(m);
+                var rtcpFbAttributes = m.ToRtcpFbs();
                 foreach (var rtcpFb in rtcpFbAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(rtcpFb.PayloadType, out var codec))
@@ -78,7 +78,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codec.RtcpFeedback = new RtcpFeedback[] { feedback };
                 }
 
-                var extmapAttributes = MediaDescriptionParser.ToExtmapAttributes(m);
+                var extmapAttributes = m.ToExtmaps();
                 foreach (var extmap in extmapAttributes)
                 {
                     RtpHeaderExtension headerExtension = new()

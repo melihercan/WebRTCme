@@ -9,6 +9,7 @@ namespace Utilme.SdpTransform
 {
     public static class ModelExtensions
     {
+        // https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-12
 
         public static Sdp ToSdp(this string str)
         {
@@ -690,33 +691,6 @@ namespace Utilme.SdpTransform
                 $"{msid.Id} {msid.AppData}" +
                 $"{Sdp.CRLF}";
 
-        public static Candidate ToCandidate(this string str)
-        {
-            var tokens = str
-                .Replace(Sdp.AttributeIndicator, string.Empty)
-                .Replace(Candidate.Label, string.Empty)
-                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            return new Candidate
-            {
-                Foundation = tokens[0],
-                ComponentId = int.Parse(tokens[1]),
-                Transport = tokens[2].EnumFromDisplayName<CandidateTransport>(),
-                Priority = int.Parse(tokens[3]),
-                ConnectionAddress = tokens[4],
-                Port = int.Parse(tokens[5]),
-                Type = tokens[7].EnumFromDisplayName<CandidateType>(), 
-                RelAddr = tokens[9],
-                RelPort = int.Parse(tokens[11])
-            };
-        }
-
-        public static string ToText(this Candidate candidate) =>
-            $"{Sdp.AttributeIndicator}{Candidate.Label}" +
-                $"{candidate.Foundation} {candidate.ComponentId} {candidate.Transport.DisplayName()} " +
-                $"{candidate.Priority} {candidate.ConnectionAddress} {candidate.Port} {Candidate.Typ} " +
-                $"{candidate.Type.DisplayName()} {Candidate.Raddr} {candidate.RelAddr} " +
-                $"{Candidate.Rport} {candidate.RelPort}" +
-                $"{Sdp.CRLF}";
 
         public static IceUfrag ToIceUfrag(this string str)
         {
@@ -786,6 +760,34 @@ namespace Utilme.SdpTransform
             $"{Sdp.AttributeIndicator}{Fingerprint.Label}" +
                 $"{fingerprint.HashFunction.DisplayName()} " +
                 $"{BitConverter.ToString(fingerprint.HashValue).Replace("-", ":")}" +
+                $"{Sdp.CRLF}";
+
+        public static Candidate ToCandidate(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(Candidate.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Candidate
+            {
+                Foundation = tokens[0],
+                ComponentId = int.Parse(tokens[1]),
+                Transport = tokens[2].EnumFromDisplayName<CandidateTransport>(),
+                Priority = int.Parse(tokens[3]),
+                ConnectionAddress = tokens[4],
+                Port = int.Parse(tokens[5]),
+                Type = tokens[7].EnumFromDisplayName<CandidateType>(),
+                RelAddr = tokens[9],
+                RelPort = int.Parse(tokens[11])
+            };
+        }
+
+        public static string ToText(this Candidate candidate) =>
+            $"{Sdp.AttributeIndicator}{Candidate.Label}" +
+                $"{candidate.Foundation} {candidate.ComponentId} {candidate.Transport.DisplayName()} " +
+                $"{candidate.Priority} {candidate.ConnectionAddress} {candidate.Port} {Candidate.Typ} " +
+                $"{candidate.Type.DisplayName()} {Candidate.Raddr} {candidate.RelAddr} " +
+                $"{Candidate.Rport} {candidate.RelPort}" +
                 $"{Sdp.CRLF}";
 
         public static Ssrc ToSsrc(this string str)
@@ -972,7 +974,95 @@ namespace Utilme.SdpTransform
             return dictionary;
         }
 
-        // Utility method.
+        // Utility methods.
+
+        public static Rtpmap[] ToRtpmaps(this MediaDescription mediaDescription)
+        {
+            var attributes = mediaDescription.AttributesOld
+                .Where(a => a.StartsWith("rtpmap:"))
+                .ToArray();
+
+            List<Rtpmap> rtpmapAttributes = new();
+            foreach (var a in attributes)
+            {
+                var tokens = a.Substring(7).Split(new[] { ' ', '/' }, 4);
+                rtpmapAttributes.Add(new Rtpmap
+                {
+                    PayloadType = int.Parse(tokens[0]),
+                    EncodingName = tokens[1],
+                    ClockRate = int.Parse(tokens[2]),
+                    Channels = tokens.Length == 4 ? int.Parse(tokens[3]) : null
+                });
+            }
+
+            return rtpmapAttributes.ToArray();
+        }
+
+        public static Fmtp[] ToFmtps(this MediaDescription mediaDescription)
+        {
+            var attributes = mediaDescription.AttributesOld
+                .Where(a => a.StartsWith("fmtp:"))
+                .ToArray();
+
+            List<Fmtp> fmtpAttributes = new();
+            foreach (var a in attributes)
+            {
+                var tokens = a.Substring(5).Split(new char[] { ' ' }, 2);
+                fmtpAttributes.Add(new Fmtp
+                {
+                    PayloadType = int.Parse(tokens[0]),
+                    Value = tokens[1],
+                });
+            }
+
+            return fmtpAttributes.ToArray();
+        }
+
+        public static RtcpFb[] ToRtcpFbs(this MediaDescription mediaDescription)
+        {
+            var attributes = mediaDescription.AttributesOld
+                .Where(a => a.StartsWith("rtcp-fb:"))
+                .ToArray();
+
+            List<RtcpFb> rtcpFbAttributes = new();
+            foreach (var a in attributes)
+            {
+                var tokens = a.Substring(8).Split(new char[] { ' ' }, 3);
+                rtcpFbAttributes.Add(new RtcpFb
+                {
+                    PayloadType = int.Parse(tokens[0]),
+                    Type = tokens[1],
+                    SubType = tokens.Length == 3 ? tokens[2] : null
+                });
+            }
+
+            return rtcpFbAttributes.ToArray();
+        }
+
+        public static Extmap[] ToExtmaps(this MediaDescription mediaDescription)
+        {
+            var attributes = mediaDescription.AttributesOld
+                .Where(a => a.StartsWith("extmap:"))
+                .ToArray();
+
+            List<Extmap> extmapAttributes = new();
+            foreach (var a in attributes)
+            {
+                // Direction is optional and attached to Value with '/'.
+                var tokens = a.Substring(7).Split(new char[] { ' ' }, 3);
+                var subtokens = tokens[0].Split(new char[] { '/' }, 2);
+                extmapAttributes.Add(new Extmap
+                {
+                    Value = int.Parse(subtokens[0]),
+                    Direction = subtokens.Length == 2 ? subtokens[1] : null,
+                    Uri = tokens[1],
+                    ExtensionAttributes = tokens.Length == 3 ? tokens[2] : null
+                });
+            }
+
+            return extmapAttributes.ToArray();
+        }
+
         public static byte[] HexadecimalStringToByteArray(String hexadecimalString)
         {
             int length = hexadecimalString.Length;
