@@ -33,7 +33,6 @@ namespace Utilme.SdpTransform
 
         public Msid Msid { get; set; }
 
-
         public IceUfrag IceUfrag { get; set; }
 
         public IcePwd IcePwd { get; set; }
@@ -41,6 +40,10 @@ namespace Utilme.SdpTransform
         public IceOptions IceOptions { get; set; }
 
         public Fingerprint Fingerprint { get; set; }
+
+        public Rtcp Rtcp { get; set; }
+
+        public Setup Setup { get; set; }
 
         public IList<Candidate> Candidates { get; set; }
  

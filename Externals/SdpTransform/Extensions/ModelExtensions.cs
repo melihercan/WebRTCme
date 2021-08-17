@@ -136,6 +136,10 @@ namespace Utilme.SdpTransform
                         md.Attributes.IceOptions = attr.ToIceOptions();
                     else if (attr.StartsWith(Fingerprint.Label))
                         md.Attributes.Fingerprint = attr.ToFingerprint();
+                    else if (attr.StartsWith(Rtcp.Label))
+                        md.Attributes.Rtcp = attr.ToRtcp();
+                    else if (attr.StartsWith(Setup.Label))
+                        md.Attributes.Setup = attr.ToSetup();
                     else if (attr.StartsWith(Candidate.Label))
                     {
                         md.Attributes.Candidates ??= new List<Candidate>();
@@ -272,6 +276,10 @@ namespace Utilme.SdpTransform
                     sb.Append(md.Attributes.IceOptions.ToText());
                 if (md.Attributes.Fingerprint is not null)
                     sb.Append(md.Attributes.Fingerprint.ToText());
+                if (md.Attributes.Rtcp is not null)
+                    sb.Append(md.Attributes.Rtcp.ToText());
+                if (md.Attributes.Setup is not null)
+                    sb.Append(md.Attributes.Setup.ToText());
                 if (md.Attributes.Candidates is not null)
                     foreach (var c in md.Attributes.Candidates)
                         sb.Append(c.ToText());
@@ -781,6 +789,45 @@ namespace Utilme.SdpTransform
                 $"{BitConverter.ToString(fingerprint.HashValue).Replace("-", ":")}" +
                 $"{Sdp.CRLF}";
 
+        public static Rtcp ToRtcp(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(Rtcp.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Rtcp
+            {
+                Port = int.Parse(tokens[0]),
+                NetType = tokens.Length > 3 ? tokens[1].EnumFromDisplayName<NetType>() : null,
+                AddrType = tokens.Length > 3 ? tokens[2].EnumFromDisplayName<AddrType>() : null,
+                ConnectionAddress = tokens.Length > 3 ? tokens[3] : null
+            };
+        }
+
+        public static string ToText(this Rtcp rtcp) =>
+            $"{Sdp.AttributeIndicator}{Rtcp.Label}" +
+                $"{rtcp.Port}{(rtcp.NetType.HasValue ? " " + rtcp.NetType.DisplayName() : string.Empty)}" +
+                $"{(rtcp.AddrType.HasValue ? " " + rtcp.AddrType.DisplayName() : string.Empty)}" +
+                $"{(rtcp.ConnectionAddress is not null ? " " + rtcp.ConnectionAddress : string.Empty)}" +
+                $"{Sdp.CRLF}";
+
+        public static Setup ToSetup(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(Setup.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new Setup
+            {
+                Role = tokens[0].EnumFromDisplayName<SetupRole>()
+            };
+        }
+
+        public static string ToText(this Setup setup) =>
+            $"{Sdp.AttributeIndicator}{Setup.Label}" +
+                $"{setup.Role.DisplayName()}" +
+                $"{Sdp.CRLF}";
+
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str
@@ -1007,15 +1054,12 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Extmap extmap)// =>
-        {
-            var x = 
+        public static string ToText(this Extmap extmap) =>
             $"{Sdp.AttributeIndicator}{Extmap.Label}" +
                  $"{extmap.Value}{(extmap.Direction.HasValue ? extmap.Direction.DisplayName() : string.Empty)} " +
                  $"{extmap.Uri} {extmap.ExtensionAttributes ?? string.Empty}" +
                  $"{Sdp.CRLF}";
-            return x;
-        }
+
 
 
         // Utility methods.
