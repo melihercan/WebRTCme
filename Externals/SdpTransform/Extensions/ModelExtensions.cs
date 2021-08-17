@@ -170,6 +170,8 @@ namespace Utilme.SdpTransform
         public static string ToText(this Sdp sdp)
         {
             StringBuilder sb = new();
+
+            // Session fields.
             sb.Append(ToProtocolVersionText(sdp.ProtocolVersion));
             sb.Append(ToText(sdp.Origin));
             sb.Append(ToSessionNameText(sdp.SessionName));
@@ -179,8 +181,81 @@ namespace Utilme.SdpTransform
                 sb.Append(ToText(sdp.Uri));
             if (sdp.EmailAddresses is not null)
                 sb.Append(ToEmailAddressesText(sdp.EmailAddresses));
+            if (sdp.PhoneNumbers is not null)
+                sb.Append(ToPhoneNumbersText(sdp.PhoneNumbers));
+            if (sdp.ConnectionData is not null)
+                sb.Append(ToText(sdp.ConnectionData));
+            if (sdp.Bandwidths is not null)
+                sdp.Bandwidths.Select(b => sb.Append(ToText(b)));
+            sdp.Timings.Select(t => sb.Append(ToText(t)));
+            if (sdp.RepeatTimes is not null)
+                sdp.RepeatTimes.Select(r => sb.Append(ToText(r)));
+            if (sdp.TimeZones is not null)
+                sb.Append(ToText(sdp.TimeZones));
+            if (sdp.EncryptionKey is not null)
+                sb.Append(ToText(sdp.EncryptionKey));
+            
+            // Session binary attributes.
+            if (sdp.Attributes.ExtmapAllowMixed.HasValue)
+                sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}");
+
+            // Session value attributes.
+            if (sdp.Attributes.Group is not null)
+                sb.Append(ToText(sdp.Attributes.Group));
+            if (sdp.Attributes.MsidSemantic is not null)
+                sb.Append(ToText(sdp.Attributes.MsidSemantic));
 
 
+            // Media description fields.
+            foreach (var md in sdp.MediaDescriptions)
+            {
+                sb.Append(ToText(md));
+
+                if (md.Information is not null)
+                    sb.Append(ToInformationText(md.Information));
+                if (md.ConnectionData is not null)
+                    sb.Append(ToText(md.ConnectionData));
+                if (md.Bandwidths is not null)
+                    md.Bandwidths.Select(b => sb.Append(ToText(b)));
+                if (md.EncryptionKey is not null)
+                    sb.Append(ToText(md.EncryptionKey));
+
+                // Media description binary attributes.
+                if (md.Attributes.ExtmapAllowMixed.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}");
+
+                // Media description value attributes.
+                if (md.Attributes.Group is not null)
+                    sb.Append(ToText(md.Attributes.Group));
+                if (md.Attributes.MsidSemantic is not null)
+                    sb.Append(ToText(md.Attributes.MsidSemantic));
+                if (md.Attributes.Mid is not null)
+                    sb.Append(ToText(md.Attributes.Mid));
+                if (md.Attributes.Msid is not null)
+                    sb.Append(ToText(md.Attributes.Msid));
+                if (md.Attributes.Candidate is not null)
+                    sb.Append(ToText(md.Attributes.Candidate));
+                if (md.Attributes.IceUfrag is not null)
+                    sb.Append(ToText(md.Attributes.IceUfrag));
+                if (md.Attributes.IcePwd is not null)
+                    sb.Append(ToText(md.Attributes.IcePwd));
+                if (md.Attributes.IceOptions is not null)
+                    sb.Append(ToText(md.Attributes.IceOptions));
+                if (md.Attributes.Fingerprint is not null)
+                    sb.Append(ToText(md.Attributes.Fingerprint));
+                if (md.Attributes.Ssrc is not null)
+                    sb.Append(ToText(md.Attributes.Ssrc));
+                if (md.Attributes.SsrcGroup is not null)
+                    sb.Append(ToText(md.Attributes.SsrcGroup));
+                if (md.Attributes.Rid is not null)
+                    sb.Append(ToText(md.Attributes.Rid));
+                if (md.Attributes.Rtpmap is not null)
+                    sb.Append(ToText(md.Attributes.Rtpmap));
+                if (md.Attributes.Fmtp is not null)
+                    sb.Append(ToText(md.Attributes.Fmtp));
+                if (md.Attributes.RtcpFb is not null)
+                    sb.Append(ToText(md.Attributes.RtcpFb));
+            }
 
             return sb.ToString();
         }
