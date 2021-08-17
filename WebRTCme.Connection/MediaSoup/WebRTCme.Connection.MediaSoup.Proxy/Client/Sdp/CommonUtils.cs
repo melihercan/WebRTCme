@@ -11,7 +11,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 {
     static class CommonUtils
     {
-        public static RtpCapabilities ExtractRtpCapabilities(Utilme.SdpTransform.SdpOld sdp)
+        public static RtpCapabilities ExtractRtpCapabilities(Utilme.SdpTransform.Sdp sdp)
         {
             Dictionary<int, RtpCodecCapability> codecsDictionary = new();
             List<RtpHeaderExtension> headerExtensions = new();
@@ -189,16 +189,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         }
 #endif
 
-        internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.SdpOld sdp)
+        internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.Sdp sdp)
         {
             var mediaObject = sdp.MediaDescriptions
                 .Select(md => SdpMediaDescriptionToMediaObject(md))
-                .SingleOrDefault(mo => mo.IceUfrag is not null && mo.Port != 0);
+                .SingleOrDefault(mo => mo.MediaDescription.Attributes.IceUfrag is not null && 
+                    mo.MediaDescription.Port != 0);
             if (mediaObject is null)
                 throw new Exception("No active media section found");
 
-            var fingerprint = mediaObject.Fingerprint ?? 
-                sdp.Attributes.FirstOrDefault(a => a.StartsWith(Fingerprint.Label)).ToFingerprint();
+            var fingerprint = mediaObject.MediaDescription.Attributes.Fingerprint ?? sdp.Attributes.Fingerprint;
             DtlsRole? role = null;
 
             switch (mediaObject.Setup)
@@ -230,107 +230,110 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public static MediaDescription MediaObjectToSdpMediaDescription(MediaObject mediaObject)
         {
-            var attributes = new List<string>();
+            //var attributes = new List<string>();
 
-            if (mediaObject.Mid is not null) 
-                attributes.Add(mediaObject.Mid.ToText());
-            if (mediaObject.Msid is not null)
-                attributes.Add(mediaObject.Msid?.ToText());
-            if (mediaObject.IceUfrag is not null)
-                attributes.Add(mediaObject.IceUfrag?.ToText());
-            if (mediaObject.IcePwd is not null)
-                attributes.Add(mediaObject.IcePwd?.ToText());
-            if (mediaObject.IceOptions is not null)
-                attributes.Add(mediaObject.IceOptions?.ToText());
-            if (mediaObject.Fingerprint is not null)
-                attributes.Add(mediaObject.Fingerprint?.ToText());
-            if (mediaObject.Candidates is not null)
-                attributes.AddRange(mediaObject.Candidates.Select(i => i.ToText()).ToList());
-            if (mediaObject.Rtpmaps is not null)
-                attributes.AddRange(mediaObject.Rtpmaps.Select(i => i.ToText()).ToList());
-            if (mediaObject.RtcpFbs is not null)
-                attributes.AddRange(mediaObject.RtcpFbs.Select(i => i.ToText()).ToList());
-            if (mediaObject.Fmtps is not null)
-                attributes.AddRange(mediaObject.Fmtps.Select(i => i.ToText()).ToList());
-            if (mediaObject.Ssrcs is not null)
-                attributes.AddRange(mediaObject.Ssrcs.Select(i => i.ToText()).ToList());
-            if (mediaObject.SsrcGroups is not null)
-                attributes.AddRange(mediaObject.SsrcGroups.Select(i => i.ToText()).ToList());
-            if (mediaObject.Rids is not null)
-                attributes.AddRange(mediaObject.Rids.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.Mid is not null) 
+            //    attributes.Add(mediaObject.Attributes.Mid.ToText());
+            //if (mediaObject.Attributes.Msid is not null)
+            //    attributes.Add(mediaObject.Attributes.Msid?.ToText());
+            //if (mediaObject.Attributes.IceUfrag is not null)
+            //    attributes.Add(mediaObject.Attributes.IceUfrag?.ToText());
+            //if (mediaObject.Attributes.IcePwd is not null)
+            //    attributes.Add(mediaObject.Attributes.IcePwd?.ToText());
+            //if (mediaObject.Attributes.IceOptions is not null)
+            //    attributes.Add(mediaObject.Attributes.IceOptions?.ToText());
+            //if (mediaObject.Attributes.Fingerprint is not null)
+            //    attributes.Add(mediaObject.Attributes.Fingerprint?.ToText());
+            //if (mediaObject.Attributes.Candidates is not null)
+            //    attributes.AddRange(mediaObject.Attributes.Candidates.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.Rtpmaps is not null)
+            //    attributes.AddRange(mediaObject.Attributes.Rtpmaps.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.RtcpFbs is not null)
+            //    attributes.AddRange(mediaObject.Attributes.RtcpFbs.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.Fmtps is not null)
+            //    attributes.AddRange(mediaObject.Attributes.Fmtps.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.Ssrcs is not null)
+            //    attributes.AddRange(mediaObject.Attributes.Ssrcs.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.SsrcGroups is not null)
+            //    attributes.AddRange(mediaObject.Attributes.SsrcGroups.Select(i => i.ToText()).ToList());
+            //if (mediaObject.Attributes.Rids is not null)
+            //    attributes.AddRange(mediaObject.Attributes.Rids.Select(i => i.ToText()).ToList());
 
-            // MediaDescription attributes should not contain CRLF.
-            attributes = attributes.Select(a => a.Replace(SdpSerializer.CRLF, string.Empty)).ToList();
+            //// MediaDescription attributes should not contain CRLF.
+            //attributes = attributes.Select(a => a.Replace(Utilme.SdpTransform.Sdp.CRLF, string.Empty)).ToList();
 
-            return new MediaDescription
-            {
-                Media = mediaObject.Kind.ToSdp(),
-                Port = mediaObject.Port,
-                Proto = mediaObject.Protocol,
-                Fmts = mediaObject.Payloads.Split(' ').ToList(),
-                Information = mediaObject.Kind.DisplayName(),
-                ConnectionData = mediaObject.Connection,
-                //Bandwiths = ???
-                //EncriptionKey = ???? mediaObject.Fingerprint is not null ? 
-                //    new EncriptionKey
-                //    {
-                //        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
-                //        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
-                //    } : null,
-                AttributesOld = attributes
-            };
+            //return new MediaDescription
+            //{
+            //    Media = mediaObject.Media,
+            //    Port = mediaObject.Port,
+            //    Proto = mediaObject.Protocol,
+            //    Fmts = mediaObject.Payloads.Split(' ').ToList(),
+            //    Information = mediaObject.Kind.DisplayName(),
+            //    ConnectionData = mediaObject.Connection,
+            //    //Bandwiths = ???
+            //    //EncriptionKey = ???? mediaObject.Fingerprint is not null ? 
+            //    //    new EncriptionKey
+            //    //    {
+            //    //        Method = mediaObject.Fingerprint.HashFunction.DisplayName(),
+            //    //        Value = Encoding.UTF8.GetString(mediaObject.Fingerprint.HashValue)
+            //    //    } : null,
+            //    AttributesOld = attributes
+            //};
+            throw new NotImplementedException();
         }
 
         public static MediaObject SdpMediaDescriptionToMediaObject(MediaDescription mediaDescription)
         {
-            return new MediaObject
-            {
-                Mid = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(Mid.Label))?.ToMid(),
-                Msid = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(Msid.Label))?.ToMsid(),
-                IceUfrag = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(IceUfrag.Label))?.ToIceUfrag(),
-                IcePwd = mediaDescription.AttributesOld
-                    .SingleOrDefault(a => a.StartsWith(IcePwd.Label))?.ToIcePwd(),
-                IceOptions = mediaDescription.AttributesOld
-                        .SingleOrDefault(a => a.StartsWith(IceOptions.Label))?.ToIceOptions(),
-                Fingerprint = mediaDescription.AttributesOld
-                        .SingleOrDefault(a => a.StartsWith(Fingerprint.Label))?.ToFingerprint(),
-                Candidates = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Candidate.Label))
-                    .Select(c => c.ToCandidate())
-                    .ToList(),
-                Rtpmaps = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Rtpmap.Label))
-                    .Select(r => r.ToRtpmap())
-                    .ToList(),
-                RtcpFbs = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(RtcpFb.Label))
-                    .Select(r => r.ToRtcpFb())
-                    .ToList(),
-                Fmtps = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Fmtp.Label))
-                    .Select(r => r.ToFmtp())
-                    .ToList(),
-                Ssrcs = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Ssrc.Label))
-                    .Select(r => r.ToSsrc())
-                    .ToList(),
-                SsrcGroups = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(SsrcGroup.Label))
-                    .Select(r => r.ToSsrcGroup())
-                    .ToList(),
-                Rids = mediaDescription.AttributesOld
-                    .Where(a => a.StartsWith(Rid.Label))
-                    .Select(r => r.ToRid())
-                    .ToList()
-            };
+            //return new MediaObject
+            //{
+            //    Mid = mediaDescription.AttributesOld
+            //        .SingleOrDefault(a => a.StartsWith(Mid.Label))?.ToMid(),
+            //    Msid = mediaDescription.AttributesOld
+            //        .SingleOrDefault(a => a.StartsWith(Msid.Label))?.ToMsid(),
+            //    IceUfrag = mediaDescription.AttributesOld
+            //        .SingleOrDefault(a => a.StartsWith(IceUfrag.Label))?.ToIceUfrag(),
+            //    IcePwd = mediaDescription.AttributesOld
+            //        .SingleOrDefault(a => a.StartsWith(IcePwd.Label))?.ToIcePwd(),
+            //    IceOptions = mediaDescription.AttributesOld
+            //            .SingleOrDefault(a => a.StartsWith(IceOptions.Label))?.ToIceOptions(),
+            //    Fingerprint = mediaDescription.AttributesOld
+            //            .SingleOrDefault(a => a.StartsWith(Fingerprint.Label))?.ToFingerprint(),
+            //    Candidates = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(Candidate.Label))
+            //        .Select(c => c.ToCandidate())
+            //        .ToList(),
+            //    Rtpmaps = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(Rtpmap.Label))
+            //        .Select(r => r.ToRtpmap())
+            //        .ToList(),
+            //    RtcpFbs = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(RtcpFb.Label))
+            //        .Select(r => r.ToRtcpFb())
+            //        .ToList(),
+            //    Fmtps = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(Fmtp.Label))
+            //        .Select(r => r.ToFmtp())
+            //        .ToList(),
+            //    Ssrcs = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(Ssrc.Label))
+            //        .Select(r => r.ToSsrc())
+            //        .ToList(),
+            //    SsrcGroups = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(SsrcGroup.Label))
+            //        .Select(r => r.ToSsrcGroup())
+            //        .ToList(),
+            //    Rids = mediaDescription.AttributesOld
+            //        .Where(a => a.StartsWith(Rid.Label))
+            //        .Select(r => r.ToRid())
+            //        .ToList()
+            //};
+            throw new NotImplementedException();
+
         }
 
         public static string GetCname(MediaObject offerMediaObject)
         {
-            var ssrcCnameLine = (offerMediaObject.Ssrcs ?? new List<Ssrc>())
+            var ssrcCnameLine = (offerMediaObject.MediaDescription.Attributes.Ssrcs ?? new List<Ssrc>())
                 .FirstOrDefault(line => line .Attribute == "cname");
             if (ssrcCnameLine is null)
                 return string.Empty;
@@ -348,17 +351,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 if (mimeType != "audio/opus")
                     continue;
 
-                var rtpmap = (answerMediaObject.Rtpmaps ?? new List<Rtpmap>())
+                var rtpmap = (answerMediaObject.MediaDescription.Attributes.Rtpmaps ?? new List<Rtpmap>())
                     .FirstOrDefault(r => r.PayloadType == codec.PayloadType);
                 if (rtpmap is null)
                     continue;
 
-                var fmtp = (answerMediaObject.Fmtps ?? new List<Fmtp>())
+                var fmtp = (answerMediaObject.MediaDescription.Attributes.Fmtps ?? new List<Fmtp>())
                     .FirstOrDefault(f => f.PayloadType == codec.PayloadType);
                 if (fmtp is null)
                 {
                     fmtp = new Fmtp { PayloadType = codec.PayloadType, Value = string.Empty };
-                    answerMediaObject.Fmtps.Add(fmtp);
+                    answerMediaObject.MediaDescription.Attributes.Fmtps.Add(fmtp);
                 }
 
                 var parameters = fmtp.Value.Split(';').ToList();

@@ -74,7 +74,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             pc.Close();
 
 //Console.WriteLine($"SDP string:{offer.Sdp}");
-            var sdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+            var sdpObject = offer.Sdp.ToSdp();
 //SdpSerializer.DumpSdp(sdpObject);
 
             ////var x = Encoding.UTF8.GetString(SdpSerializer.WriteSdp(sdpObject));
@@ -225,7 +225,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             });
 
             var offer = await _pc.CreateOffer();
-            var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+            var localSdpObject = offer.Sdp.ToSdp();
             MediaObject offerMediaObject;
 
             if (!_transportReady)
@@ -244,7 +244,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Console.WriteLine("send() | enabling legacy simulcast for VP9 SVC");
 
                 hackVp9Svc = true;
-                localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+                localSdpObject = offer.Sdp.ToSdp();
                 offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(
                     localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]);
 
@@ -253,7 +253,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 offer = new RTCSessionDescriptionInit
                 {
                     Type = RTCSdpType.Offer,
-                    Sdp = Encoding.UTF8.GetString(SdpSerializer.WriteSdp(localSdpObject))
+                    Sdp = localSdpObject.ToText()
                 };
             }
 
@@ -267,7 +267,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             // Set MID.
             sendingRtpParameters.Mid = new Mid { Id = localId };
 
-            localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(_pc.LocalDescription.Sdp));
+            localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
             offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(
                 localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]);
 
@@ -451,7 +451,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    if (!_hasDataChannelMediaSection)
 		    {
 			    var offer = await _pc.CreateOffer();
-			    var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(offer.Sdp));
+			    var localSdpObject = offer.Sdp.ToSdp();
                 var offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(localSdpObject.MediaDescriptions
                     .Single(md => md.Media == MediaType.Application));
 
@@ -504,11 +504,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    await _pc.SetRemoteDescription(offer);
 
 		    var answer = await _pc.CreateAnswer();
-		    var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(answer.Sdp));
+		    var localSdpObject = answer.Sdp.ToSdp();
 
             var answerMediaObject = localSdpObject.MediaDescriptions
                 .Select(md => CommonUtils.SdpMediaDescriptionToMediaObject(md))
-                .Single(mo => mo.Mid.Id == localId);
+                .Single(mo => mo.MediaDescription.Attributes.Mid.Id == localId);
 
             // May need to modify codec parameters in the answer based on codec
             // parameters in the offer.
@@ -516,7 +516,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             answer = new RTCSessionDescriptionInit
             { 
                 Type = RTCSdpType.Answer, 
-                Sdp = Encoding.UTF8.GetString(SdpSerializer.WriteSdp(localSdpObject))
+                Sdp = localSdpObject.ToText()
             };
 
 		    if (!_transportReady)
@@ -610,7 +610,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 if (!_transportReady)
                 {
-                    var localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(answer.Sdp));
+                    var localSdpObject = answer.Sdp.ToSdp();
                     await SetupTransportAsync(DtlsRole.Client, localSdpObject);
                 }
 
@@ -624,10 +624,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
         }
 
-        async Task SetupTransportAsync(DtlsRole localDtlsRole, Utilme.SdpTransform.SdpOld localSdpObject)
+        async Task SetupTransportAsync(DtlsRole localDtlsRole, Utilme.SdpTransform.Sdp localSdpObject)
         {
             if (localSdpObject is null)
-                localSdpObject = SdpSerializer.ReadSdp(Encoding.UTF8.GetBytes(_pc.LocalDescription.Sdp));
+                localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
 
             // Get our local DTLS parameters.
             var dtlsParameters = CommonUtils.ExtractDtlsParameters(localSdpObject);

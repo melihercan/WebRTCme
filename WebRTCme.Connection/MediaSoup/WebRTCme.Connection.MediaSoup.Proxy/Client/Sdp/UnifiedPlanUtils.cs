@@ -12,7 +12,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         {
 			List<uint> ssrcs = new();
 
-			foreach (var line in offerMediaObject.Ssrcs ?? new List<Ssrc>())
+			foreach (var line in offerMediaObject.MediaDescription.Attributes.Ssrcs ?? new List<Ssrc>())
 			{
 				var ssrc = line.Id;
 				ssrcs.Add(ssrc);
@@ -24,7 +24,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 			Dictionary<uint, uint?> ssrcToRtxSsrc = new();
 
 			// First assume RTX is used.
-			foreach (var line in offerMediaObject.SsrcGroups ?? new List<SsrcGroup>())
+			foreach (var line in offerMediaObject.MediaDescription.Attributes.SsrcGroups ?? new List<SsrcGroup>())
 			{
 				if (line.Semantics != "FID")
 					continue;
@@ -73,7 +73,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				throw new Exception("'numStreams must be greater than 1");
 
 			// Get the SSRC.
-			var ssrcMsidLine = (offerMediaObject.Ssrcs ?? new List<Ssrc>())
+			var ssrcMsidLine = (offerMediaObject.MediaDescription.Attributes.Ssrcs ?? new List<Ssrc>())
 				.FirstOrDefault(line => line.Attribute == "msid");
 
 			if (ssrcMsidLine is null)
@@ -86,7 +86,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 			uint? firstRtxSsrc = null;
 
 			// Get the SSRC for RTX.
-			(offerMediaObject.SsrcGroups ?? new List<SsrcGroup>()).Any(line =>
+			(offerMediaObject.MediaDescription.Attributes.SsrcGroups ?? new List<SsrcGroup>()).Any(line =>
 			{
 				if (line.Semantics != "FID")
 					return false;
@@ -102,7 +102,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				}
 			});
 
-			var ssrcCnameLine = offerMediaObject.Ssrcs
+			var ssrcCnameLine = offerMediaObject.MediaDescription.Attributes.Ssrcs
 				.FirstOrDefault(line => line.Attribute == "cname");
 
 			if (ssrcCnameLine is null)
@@ -120,12 +120,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 					rtxSsrcs.Add((uint)(firstRtxSsrc + i));
 			}
 
-			offerMediaObject.SsrcGroups = new();
-			offerMediaObject.Ssrcs = new();
+			offerMediaObject.MediaDescription.Attributes.SsrcGroups = new List<SsrcGroup>();
+			offerMediaObject.MediaDescription.Attributes.Ssrcs = new List<Ssrc>();
 
 			var x = ssrcs.Select(ssrc => ssrc.ToString()).ToArray();
 
-			offerMediaObject.SsrcGroups.Add(new SsrcGroup 
+			offerMediaObject.MediaDescription.Attributes.SsrcGroups.Add(new SsrcGroup 
 			{
 				Semantics = "SIM",
 				SsrcIds = ssrcs.Select(ssrc => ssrc.ToString()).ToArray()
@@ -135,14 +135,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 			{
 				var ssrc = ssrcs[i];
 
-				offerMediaObject.Ssrcs.Add(new Ssrc
+				offerMediaObject.MediaDescription.Attributes.Ssrcs.Add(new Ssrc
 				{
 					Id = ssrc,
 					Attribute = "cname",
 					Value = cname
 				});
 
-				offerMediaObject.Ssrcs.Add(new Ssrc
+				offerMediaObject.MediaDescription.Attributes.Ssrcs.Add(new Ssrc
 				{
 					Id = ssrc,
 					Attribute = "msid",
@@ -155,21 +155,21 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				var ssrc = ssrcs[i];
 				var rtxSsrc = rtxSsrcs[i];
 
-				offerMediaObject.Ssrcs.Add(new Ssrc
+				offerMediaObject.MediaDescription.Attributes.Ssrcs.Add(new Ssrc
 				{
 					Id = rtxSsrc,
 					Attribute = "cname",
 					Value = cname
 				});
 
-				offerMediaObject.Ssrcs.Add(new Ssrc
+				offerMediaObject.MediaDescription.Attributes.Ssrcs.Add(new Ssrc
 				{
 					Id = rtxSsrc,
 					Attribute = "msid",
 					Value = $"{streamId} ${ trackId}"
 				});
 
-				offerMediaObject.SsrcGroups.Add(new SsrcGroup
+				offerMediaObject.MediaDescription.Attributes.SsrcGroups.Add(new SsrcGroup
 				{
 					Semantics = "FID",
 					SsrcIds = new string[] { $"{ ssrc} ${ rtxSsrc}" }

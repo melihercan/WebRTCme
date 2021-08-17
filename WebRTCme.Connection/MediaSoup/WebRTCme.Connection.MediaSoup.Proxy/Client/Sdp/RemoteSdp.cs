@@ -19,7 +19,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         Dictionary<Mid, int> _midToIndex = new();
         Mid _firstMid;
 
-        Utilme.SdpTransform.SdpOld _sdp;
+        Utilme.SdpTransform.Sdp _sdp;
 
 
         public RemoteSdp(IceParameters iceParameters, IceCandidate[] iceCandidates, DtlsParameters dtlsParameters, 
@@ -32,9 +32,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _plainRtpParameters = plainRtpParameters;
             _planB = planB;
 
-            _sdp = new Utilme.SdpTransform.SdpOld
+            _sdp = new Utilme.SdpTransform.Sdp
             {
-                Version = 0,
+                ProtocolVersion = 0,
                 Origin = new Origin
                 {
                     UserName = "mediasoup-client",
@@ -44,18 +44,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     AddrType = AddrType.Ip4,
                     UnicastAddress = "0.0.0.0"
                 },
-                SessionName = new byte[] { (byte)'-' },
-                Timings = new List<TimingInfo>() { new TimingInfo { StartTime = 0, StopTime = 0 } },
-                SessionBinaryAttributes = new(),
+                SessionName = "-",
+                Timings = new List<Timing>() { new Timing { StartTime = new DateTime(0), StopTime = new DateTime(0) } },
+                Attributes = new(),
                 MediaDescriptions = new List<MediaDescription>()
             };
 
             if (iceParameters is not null && iceParameters.IceLite.HasValue)
-                _sdp.SessionBinaryAttributes.IceLite = true;
+                _sdp.Attributes.IceLite = true;
 
             if (dtlsParameters is not null)
             {
-                _sdp.MsidSemantic = new MsidSemantic 
+                _sdp.Attributes.MsidSemantic = new MsidSemantic 
                 { 
                     Token = MsidSemantic.WebRtcMediaStreamToken, 
                     IdList = new string[] { MsidSemantic.AllIds } 
@@ -64,11 +64,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 var numFingerprints = dtlsParameters.Fingerprints.Length;
                 var fingerprintStr = dtlsParameters.Fingerprints[numFingerprints - 1].Algorithm + " " +
                     dtlsParameters.Fingerprints[numFingerprints - 1].Value;
-                _sdp.Fingerprint = fingerprintStr.ToFingerprint();
+                _sdp.Attributes.Fingerprint = fingerprintStr.ToFingerprint();
 
-                _sdp.Group = new Group 
+                _sdp.Attributes.Group = new Group 
                 {
-                    Semantics = Group.BundleType,
+                    Semantics = GroupSemantics.Bundle,
                     SemanticsExtensions = new string[] { }
                 };
             }
@@ -84,7 +84,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public void UpdateIceParameters(IceParameters iceParameters)
         {
             _iceParameters = iceParameters;
-            _sdp.SessionBinaryAttributes.IceLite = iceParameters.IceLite.HasValue ? true : null;
+            _sdp.Attributes.IceLite = iceParameters.IceLite.HasValue ? true : null;
             foreach (var mediaSection in _mediaSections)
                 mediaSection.SetIceParameters(iceParameters);
         }
@@ -99,8 +99,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public string GetSdp()
         {
             _sdp.Origin.SessionVersion++;
-            return Encoding.UTF8.GetString(SdpSerializer.WriteSdp(_sdp));
+            return _sdp.ToText();
         }
+
 
         public MediaSectionIdx GetNextMediaSectionIdx()
         {
@@ -268,7 +269,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             if (_dtlsParameters is null)
                 return;
 
-            _sdp.Group.SemanticsExtensions = _mediaSections
+            _sdp.Attributes.Group.SemanticsExtensions = _mediaSections
                 .Where(mediaSection => !mediaSection.Closed)
                 .Select(mediaSection => mediaSection.Mid.Id).ToArray();
         }

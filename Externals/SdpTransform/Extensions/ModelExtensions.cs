@@ -14,7 +14,7 @@ namespace Utilme.SdpTransform
         {
             Sdp sdp = new();
 
-            var tokens = str.Split(new string[] { Constants.CRLF }, StringSplitOptions.RemoveEmptyEntries);
+            var tokens = str.Split(new string[] { Sdp.CRLF }, StringSplitOptions.RemoveEmptyEntries);
             var idx = 0;
             
             // Session fields.
@@ -117,7 +117,7 @@ namespace Utilme.SdpTransform
                     // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
                         md.Attributes.ExtmapAllowMixed = true;
-                    
+
                     // Value attributes.
                     else if (attr.StartsWith(Group.Label))
                         md.Attributes.Group = attr.ToGroup();
@@ -127,8 +127,6 @@ namespace Utilme.SdpTransform
                         md.Attributes.Mid = attr.ToMid();
                     else if (attr.StartsWith(Msid.Label))
                         md.Attributes.Msid = attr.ToMsid();
-                    else if (attr.StartsWith(Candidate.Label))
-                        md.Attributes.Candidate = attr.ToCandidate();
                     else if (attr.StartsWith(IceUfrag.Label))
                         md.Attributes.IceUfrag = attr.ToIceUfrag();
                     else if (attr.StartsWith(IcePwd.Label))
@@ -137,18 +135,41 @@ namespace Utilme.SdpTransform
                         md.Attributes.IceOptions = attr.ToIceOptions();
                     else if (attr.StartsWith(Fingerprint.Label))
                         md.Attributes.Fingerprint = attr.ToFingerprint();
-                    else if (attr.StartsWith(Fingerprint.Label))
-                        md.Attributes.Ssrc = attr.ToSsrc();
+                    else if (attr.StartsWith(Candidate.Label))
+                    {
+                        md.Attributes.Candidates ??= new List<Candidate>();
+                        md.Attributes.Candidates.Add(attr.ToCandidate());
+                    }
                     else if (attr.StartsWith(Ssrc.Label))
-                        md.Attributes.SsrcGroup = attr.ToSsrcGroup();
+                    {
+                        md.Attributes.Ssrcs ??= new List<Ssrc>();
+                        md.Attributes.Ssrcs.Add(attr.ToSsrc());
+                    }
+                    else if (attr.StartsWith(SsrcGroup.Label))
+                    {
+                        md.Attributes.SsrcGroups ??= new List<SsrcGroup>();
+                        md.Attributes.SsrcGroups.Add(attr.ToSsrcGroup());
+                    }
                     else if (attr.StartsWith(Rid.Label))
-                        md.Attributes.Rid = attr.ToRid();
+                    {
+                        md.Attributes.Rids ??= new List<Rid>();
+                        md.Attributes.Rids.Add(attr.ToRid());
+                    }
                     else if (attr.StartsWith(Rtpmap.Label))
-                        md.Attributes.Rtpmap = attr.ToRtpmap();
+                    {
+                        md.Attributes.Rtpmaps ??= new List<Rtpmap>();
+                        md.Attributes.Rtpmaps.Add(attr.ToRtpmap());
+                    }
                     else if (attr.StartsWith(Fmtp.Label))
-                        md.Attributes.Fmtp = attr.ToFmtp();
+                    {
+                        md.Attributes.Fmtps ??= new List<Fmtp>();
+                        md.Attributes.Fmtps.Add(attr.ToFmtp());
+                    }
                     else if (attr.StartsWith(RtcpFb.Label))
-                        md.Attributes.RtcpFb = attr.ToRtcpFb();
+                    {
+                        md.Attributes.RtcpFbs ??= new List<RtcpFb>();
+                        md.Attributes.RtcpFbs.Add(attr.ToRtcpFb());
+                    }
 
                     else
                         Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
@@ -197,7 +218,7 @@ namespace Utilme.SdpTransform
             
             // Session binary attributes.
             if (sdp.Attributes.ExtmapAllowMixed.HasValue)
-                sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}");
+                sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}{Sdp.CRLF}");
 
             // Session value attributes.
             if (sdp.Attributes.Group is not null)
@@ -233,8 +254,6 @@ namespace Utilme.SdpTransform
                     sb.Append(ToText(md.Attributes.Mid));
                 if (md.Attributes.Msid is not null)
                     sb.Append(ToText(md.Attributes.Msid));
-                if (md.Attributes.Candidate is not null)
-                    sb.Append(ToText(md.Attributes.Candidate));
                 if (md.Attributes.IceUfrag is not null)
                     sb.Append(ToText(md.Attributes.IceUfrag));
                 if (md.Attributes.IcePwd is not null)
@@ -243,18 +262,20 @@ namespace Utilme.SdpTransform
                     sb.Append(ToText(md.Attributes.IceOptions));
                 if (md.Attributes.Fingerprint is not null)
                     sb.Append(ToText(md.Attributes.Fingerprint));
-                if (md.Attributes.Ssrc is not null)
-                    sb.Append(ToText(md.Attributes.Ssrc));
-                if (md.Attributes.SsrcGroup is not null)
-                    sb.Append(ToText(md.Attributes.SsrcGroup));
-                if (md.Attributes.Rid is not null)
-                    sb.Append(ToText(md.Attributes.Rid));
-                if (md.Attributes.Rtpmap is not null)
-                    sb.Append(ToText(md.Attributes.Rtpmap));
-                if (md.Attributes.Fmtp is not null)
-                    sb.Append(ToText(md.Attributes.Fmtp));
-                if (md.Attributes.RtcpFb is not null)
-                    sb.Append(ToText(md.Attributes.RtcpFb));
+                if (md.Attributes.Candidates is not null)
+                    md.Attributes.Candidates.Select(c => sb.Append(ToText(c)));
+                if (md.Attributes.Ssrcs is not null)
+                    md.Attributes.Ssrcs.Select(s => sb.Append(ToText(s)));
+                if (md.Attributes.SsrcGroups is not null)
+                    md.Attributes.SsrcGroups.Select(sg => sb.Append(ToText(sg)));
+                if (md.Attributes.Rids is not null)
+                    md.Attributes.Rids.Select(r => sb.Append(ToText(r)));
+                if (md.Attributes.Rtpmaps is not null)
+                    md.Attributes.Rtpmaps.Select(r => sb.Append(ToText(r)));
+                if (md.Attributes.Fmtps is not null)
+                    md.Attributes.Fmtps.Select(f => sb.Append(ToText(f)));
+                if (md.Attributes.RtcpFbs is not null)
+                    md.Attributes.RtcpFbs.Select(r => sb.Append(ToText(r)));
             }
 
             return sb.ToString();
@@ -264,12 +285,12 @@ namespace Utilme.SdpTransform
         {
             var token = str
                 .Replace(Sdp.ProtocolVersionIndicator, string.Empty)
-                .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.CRLF, string.Empty);
             return int.Parse(token);
         }
 
-        public static string ToProtocolVersionText(this int version, bool withCRLF = true) =>
-            $"{Sdp.ProtocolVersionIndicator}{version}{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToProtocolVersionText(this int version) =>
+            $"{Sdp.ProtocolVersionIndicator}{version}{Sdp.CRLF}";
 
         public static Origin ToOrigin(this string str)
         {
@@ -287,50 +308,50 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Origin origin, bool withCRLF = true) =>
+        public static string ToText(this Origin origin) =>
             $"{Sdp.OriginIndicator}{origin.UserName} {origin.SessionId} {origin.SessionVersion} " +
                 $"{origin.NetType.DisplayName()} {origin.AddrType.DisplayName()} {origin.UnicastAddress}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static string ToSessionName(this string str)
         {
             var token = str
                 .Replace(Sdp.SessionNameIndicator, string.Empty)
-                .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.CRLF, string.Empty);
             return token;
         }
 
-        public static string ToSessionNameText(this string name, bool withCRLF = true) =>
-            $"{Sdp.SessionNameIndicator}{name}{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToSessionNameText(this string name) =>
+            $"{Sdp.SessionNameIndicator}{name}{Sdp.CRLF}";
 
 
         public static string ToInformation(this string str)
         {
             var token = str
                 .Replace(Sdp.InformationIndicator, string.Empty)
-                .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.CRLF, string.Empty);
             return token;
         }
 
-        public static string ToInformationText(this string info, bool withCRLF = true) =>
-            $"{Sdp.InformationIndicator}{info}{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToInformationText(this string info) =>
+            $"{Sdp.InformationIndicator}{info}{Sdp.CRLF}";
 
         public static Uri ToUri(this string str)
         {
             var token = str
                 .Replace(Sdp.UriIndicator, string.Empty)
-                .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.CRLF, string.Empty);
             return new Uri(token);
         }
 
-        public static string ToText(this Uri uri, bool withCRLF = true) =>
-            $"{Sdp.UriIndicator}{uri}{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this Uri uri) =>
+            $"{Sdp.UriIndicator}{uri}{Sdp.CRLF}";
 
         public static List<string> ToEmailAddresses(this string str)
         {
             var token = str
                 .Replace(Sdp.EmailAddressIndicator, string.Empty)
-                .Replace(Constants.CRLF, string.Empty);
+                .Replace(Sdp.CRLF, string.Empty);
 
             List<string> emails = new();
 
@@ -380,14 +401,14 @@ namespace Utilme.SdpTransform
             return emails;
         }
 
-        public static string ToEmailAddressesText(this IList<string> emails, bool withCRLF = true) =>
-            $"{Sdp.EmailAddressIndicator}{string.Join(" ", emails)}{(withCRLF? Constants.CRLF : string.Empty)}";
+        public static string ToEmailAddressesText(this IList<string> emails) =>
+            $"{Sdp.EmailAddressIndicator}{string.Join(" ", emails)}{Sdp.CRLF}";
 
         public static List<string> ToPhoneNumbers(this string str)
         {
             var token = str
                  .Replace(Sdp.PhoneNumberIndicator, string.Empty)
-                 .Replace(Constants.CRLF, string.Empty);
+                 .Replace(Sdp.CRLF, string.Empty);
 
             List<string> phones = new();
 
@@ -441,8 +462,8 @@ namespace Utilme.SdpTransform
             return phones;
         }
 
-        public static string ToPhoneNumbersText(this IList<string> phones, bool withCRLF = true) =>
-            $"{Sdp.PhoneNumberIndicator}{string.Join(" ", phones)}{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToPhoneNumbersText(this IList<string> phones) =>
+            $"{Sdp.PhoneNumberIndicator}{string.Join(" ", phones)}{Sdp.CRLF}";
 
         public static ConnectionData ToConnectionData(this string str)
         {
@@ -457,10 +478,10 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this ConnectionData connectionData, bool withCRLF = true) =>
+        public static string ToText(this ConnectionData connectionData) =>
             $"{Sdp.ConnectionDataIndicator}{connectionData.NetType.DisplayName()} " +
                 $"{connectionData.AddrType.DisplayName()} {connectionData.ConnectionAddress}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static Bandwidth ToBandwidth(this string str)
         {
@@ -474,9 +495,9 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Bandwidth bandwidth, bool withCRLF = true) =>
+        public static string ToText(this Bandwidth bandwidth) =>
             $"{Sdp.BandwidthIndicator}{bandwidth.Type} {bandwidth.Value}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static Timing ToTiming(this string str)
         {
@@ -490,10 +511,10 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Timing timing, bool withCRLF = true) =>
+        public static string ToText(this Timing timing) =>
             $"{Sdp.TimingIndicator}{(timing.StartTime - new DateTime(1900, 1, 1)).TotalSeconds} " +
                 $"{(timing.StopTime - new DateTime(1900, 1, 1)).TotalSeconds}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static RepeatTime ToRepeatTime(this string str)
         {
@@ -517,11 +538,11 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this RepeatTime repeatTime, bool withCRLF = true) =>
+        public static string ToText(this RepeatTime repeatTime) =>
             $"{Sdp.RepeatTimeIndicator}{repeatTime.RepeatInterval.TotalSeconds} " +
                 $"{repeatTime.ActiveDuration.TotalSeconds} " +
                 $"{string.Join(" ", repeatTime.OffsetsFromStartTime.Select(o => o.TotalSeconds).ToArray())}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static List<TimeZone> ToTimeZones(this string str)
         {
@@ -551,10 +572,10 @@ namespace Utilme.SdpTransform
             return timeZones;
         }
 
-        public static string ToText(this IList<TimeZone> timeZones, bool withCRLF = true) =>
+        public static string ToText(this IList<TimeZone> timeZones) =>
             $"{Sdp.TimeZoneIndicator}" +
                 $"{string.Join(" ", timeZones.Select(z => (z.AdjustmentTime - new DateTime(1900, 1, 1)).TotalSeconds.ToString() + " " + z.Offset.TotalSeconds.ToString()))}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static EncryptionKey ToEncryptionKey(this string str)
         {
@@ -569,9 +590,9 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this EncryptionKey encryptionKey, bool withCRLF = true) =>
+        public static string ToText(this EncryptionKey encryptionKey) =>
             $"{Sdp.EncryptionKeyIndicator}{encryptionKey.Method.DisplayName()}:{encryptionKey.Value}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
 
         public static MediaDescription ToMediaDescription(this string str)
@@ -588,11 +609,11 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this MediaDescription mediaDescription, bool withCRLF = true) =>
+        public static string ToText(this MediaDescription mediaDescription) =>
             $"{Sdp.MediaDescriptionIndicator}" +
                 $"{mediaDescription.Media.DisplayName()} {mediaDescription.Port} {mediaDescription.Proto} " +
                 $"{string.Join(" ", mediaDescription.Fmts.ToArray())}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         
         // Attributes.
@@ -600,7 +621,7 @@ namespace Utilme.SdpTransform
         public static Group ToGroup(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Group.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Group
@@ -610,15 +631,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Group group, bool withAttributeCharacter = true, bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Group.Label}{group.Semantics} " +
+        public static string ToText(this Group group) =>
+            $"{Sdp.AttributeIndicator}{Group.Label}{group.Semantics} " +
                 $"{string.Join(" ", group.SemanticsExtensions)}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static MsidSemantic ToMsidSemantic(this string str)
         {
             var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(MsidSemantic.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new MsidSemantic
@@ -628,18 +649,16 @@ namespace Utilme.SdpTransform
             };
         }
         
-        public static string ToText(this MsidSemantic msidSemantic, bool withAttributeCharacter = true, 
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{MsidSemantic.Label}" +
-                $"{msidSemantic.Token} {string.Join(" ", msidSemantic.IdList)}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
-
-
+        public static string ToText(this MsidSemantic msidSemantic) =>
+            $"{Sdp.AttributeIndicator}{MsidSemantic.Label}" +
+                $"{msidSemantic.Token} " +
+                $"{(msidSemantic.IdList is not null ? string.Join(" ", msidSemantic.IdList) : string.Empty)}" +
+                $"{Sdp.CRLF}";
 
         public static Mid ToMid(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Mid.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Mid
@@ -648,16 +667,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Mid mid, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Mid.Label}" +
+        public static string ToText(this Mid mid) =>
+            $"{Sdp.AttributeIndicator}{Mid.Label}" +
                 $"{mid.Id}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static Msid ToMsid(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Msid.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Msid
@@ -667,16 +685,15 @@ namespace Utilme.SdpTransform
             };
         }
         
-        public static string ToText(this Msid msid, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Msid.Label}" +
+        public static string ToText(this Msid msid) =>
+            $"{Sdp.AttributeIndicator}{Msid.Label}" +
                 $"{msid.Id} {msid.AppData}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(Candidate.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Candidate
@@ -693,19 +710,18 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Candidate candidate, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Candidate.Label}" +
+        public static string ToText(this Candidate candidate) =>
+            $"{Sdp.AttributeIndicator}{Candidate.Label}" +
                 $"{candidate.Foundation} {candidate.ComponentId} {candidate.Transport.DisplayName()} " +
                 $"{candidate.Priority} {candidate.ConnectionAddress} {candidate.Port} {Candidate.Typ} " +
                 $"{candidate.Type.DisplayName()} {Candidate.Raddr} {candidate.RelAddr} " +
                 $"{Candidate.Rport} {candidate.RelPort}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static IceUfrag ToIceUfrag(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(IceUfrag.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new IceUfrag
@@ -714,16 +730,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this IceUfrag iceUfrag, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{IceUfrag.Label}" +
+        public static string ToText(this IceUfrag iceUfrag) =>
+            $"{Sdp.AttributeIndicator}{IceUfrag.Label}" +
                 $"{iceUfrag.Ufrag}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static IcePwd ToIcePwd(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(IcePwd.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new IcePwd
@@ -732,16 +747,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this IcePwd icePwd, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{IcePwd.Label}" +
+        public static string ToText(this IcePwd icePwd) =>
+            $"{Sdp.AttributeIndicator}{IcePwd.Label}" +
                 $"{icePwd.Password}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static IceOptions ToIceOptions(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(IceOptions.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new IceOptions
@@ -750,16 +764,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this IceOptions iceOptions, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-            $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{IceOptions.Label}" +
+        public static string ToText(this IceOptions iceOptions) =>
+            $"{Sdp.AttributeIndicator}{IceOptions.Label}" +
                 $"{string.Join(" ", iceOptions.Tags)}" +
-                $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                $"{Sdp.CRLF}";
 
         public static Fingerprint ToFingerprint(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Fingerprint.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Fingerprint
@@ -769,17 +782,16 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Fingerprint fingerprint, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Fingerprint.Label}" +
-                    $"{fingerprint.HashFunction.DisplayName()} " +
-                    $"{BitConverter.ToString(fingerprint.HashValue).Replace("-", ":")}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this Fingerprint fingerprint) =>
+            $"{Sdp.AttributeIndicator}{Fingerprint.Label}" +
+                $"{fingerprint.HashFunction.DisplayName()} " +
+                $"{BitConverter.ToString(fingerprint.HashValue).Replace("-", ":")}" +
+                $"{Sdp.CRLF}";
 
         public static Ssrc ToSsrc(this string str)
         {
             var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(Ssrc.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var attributeAndValue = tokens[1].Split(':');
@@ -791,17 +803,16 @@ namespace Utilme.SdpTransform
              };
         }
 
-        public static string ToText(this Ssrc ssrc, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Ssrc.Label}" +
-                    $"{ssrc.Id} {ssrc.Attribute} {ssrc.Value ?? string.Empty}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this Ssrc ssrc) =>
+            $"{Sdp.AttributeIndicator}{Ssrc.Label}" +
+                $"{ssrc.Id} {ssrc.Attribute} {ssrc.Value ?? string.Empty}" +
+                $"{Sdp.CRLF}";
         
 
         public static SsrcGroup ToSsrcGroup(this string str)
         {
             var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(SsrcGroup.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new SsrcGroup
@@ -811,16 +822,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this SsrcGroup ssrcGroup, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{SsrcGroup.Label}" +
-                    $"{ssrcGroup.Semantics} {string.Join(" ", ssrcGroup.SsrcIds)}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this SsrcGroup ssrcGroup) =>
+            $"{Sdp.AttributeIndicator}{SsrcGroup.Label}" +
+                $"{ssrcGroup.Semantics} {string.Join(" ", ssrcGroup.SsrcIds)}" +
+                $"{Sdp.CRLF}";
 
         public static Rid ToRid(this string str)
         {
             var tokens = str
-                .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(Rid.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var subTokens = tokens[2].Split(';');
@@ -835,18 +845,17 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Rid rid, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Rid.Label}" +
-                    $"{rid.Id} {rid.Direction.DisplayName()} " +
-                    $"{string.Join(";", rid.FmtList.Select(f => "pt=" + f)).ToArray()}" +
-                    $"{string.Join(";", rid.Restrictions)}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this Rid rid) =>
+            $"{Sdp.AttributeIndicator}{Rid.Label}" +
+                $"{rid.Id} {rid.Direction.DisplayName()} " +
+                $"{string.Join(";", rid.FmtList.Select(f => "pt=" + f)).ToArray()}" +
+                $"{string.Join(";", rid.Restrictions)}" +
+                $"{Sdp.CRLF}";
 
         public static Rtpmap ToRtpmap(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Rtpmap.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var subTokens = tokens[1].Split('/');
@@ -859,17 +868,16 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Rtpmap rtpmap, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Rtpmap.Label}" +
-                    $"{rtpmap.PayloadType} {rtpmap.EncodingName}/{rtpmap.ClockRate}" +
-                    $"{(rtpmap.Channels.HasValue ? "/" + rtpmap.Channels : string.Empty)}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+        public static string ToText(this Rtpmap rtpmap) =>
+            $"{Sdp.AttributeIndicator}{Rtpmap.Label}" +
+                $"{rtpmap.PayloadType} {rtpmap.EncodingName}/{rtpmap.ClockRate}" +
+                $"{(rtpmap.Channels.HasValue ? "/" + rtpmap.Channels : string.Empty)}" +
+                $"{Sdp.CRLF}";
 
         public static Fmtp ToFmtp(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(Fmtp.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new Fmtp
@@ -909,17 +917,16 @@ namespace Utilme.SdpTransform
             return fmtp;
         }
 
-        public static string ToText(this Fmtp fmtp, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{Fmtp.Label}" +
+        public static string ToText(this Fmtp fmtp) =>
+                $"{Sdp.AttributeIndicator}{Fmtp.Label}" +
                     $"{fmtp.PayloadType} {fmtp.Value}" +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                    $"{Sdp.CRLF}";
 
 
         public static RtcpFb ToRtcpFb(this string str)
         {
             var tokens = str
-                 .Replace(SdpSerializer.AttributeCharacter, string.Empty)
+                 .Replace(Sdp.AttributeIndicator, string.Empty)
                  .Replace(RtcpFb.Label, string.Empty)
                  .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return new RtcpFb
@@ -930,11 +937,10 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this RtcpFb rtcpFb, bool withAttributeCharacter = true,
-            bool withCRLF = true) =>
-                $"{(withAttributeCharacter ? Sdp.AttributeIndicator : string.Empty)}{RtcpFb.Label}" +
+        public static string ToText(this RtcpFb rtcpFb) =>
+                $"{Sdp.AttributeIndicator}{RtcpFb.Label}" +
                     $"{rtcpFb.PayloadType} {rtcpFb.Type} {rtcpFb.SubType ?? string.Empty} " +
-                    $"{(withCRLF ? Constants.CRLF : string.Empty)}";
+                    $"{Sdp.CRLF}";
 
 
         // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f

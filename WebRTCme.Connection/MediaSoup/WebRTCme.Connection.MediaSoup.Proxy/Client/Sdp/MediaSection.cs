@@ -26,7 +26,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             _mediaObject = new() 
             { 
-                BinaryAttributes = new()
             };
 
             if (iceParameters is not null)
@@ -36,7 +35,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             
             if (iceCandidates is not null)
             {
-                _mediaObject.Candidates = new();
+                _mediaObject.MediaDescription.Attributes.Candidates = new List<Candidate>();
                 foreach (var iceCandidate in iceCandidates)
                 {
                     Candidate candidate = new()
@@ -49,11 +48,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         Port = iceCandidate.Port,
                         Type = iceCandidate.Type.ToSdp()
                     };
-                    _mediaObject.Candidates.Add(candidate);
+                    _mediaObject.MediaDescription.Attributes.Candidates.Add(candidate);
                 }
             }
 
-            _mediaObject.IceOptions = new IceOptions { Tags = new string[] { "renomination" } };
+            _mediaObject.MediaDescription.Attributes.IceOptions = 
+                new IceOptions { Tags = new string[] { "renomination" } };
 
             if (dtlsParameters is not null)
             {
@@ -62,15 +62,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         }
 
         public MediaObject MediaObject => _mediaObject;
-        public Mid Mid => _mediaObject.Mid;
-        public bool Closed => _mediaObject.Port == 0;
+        public Mid Mid => _mediaObject.MediaDescription.Attributes.Mid;
+        public bool Closed => _mediaObject.MediaDescription.Port == 0;
 
         public virtual void SetDtlsRole(DtlsRole? dtlsRole) => throw new NotImplementedException();
 
         public void SetIceParameters(IceParameters iceParameters)
         {
-            _mediaObject.IceUfrag = new IceUfrag { Ufrag = iceParameters.UsernameFragment };
-            _mediaObject.IcePwd = new IcePwd { Password = iceParameters.Password };
+            _mediaObject.MediaDescription.Attributes.IceUfrag = new IceUfrag { Ufrag = iceParameters.UsernameFragment };
+            _mediaObject.MediaDescription.Attributes.IcePwd = new IcePwd { Password = iceParameters.Password };
         }
 
 
@@ -80,24 +80,30 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Direction = Direction.Inactive;
 
             _mediaObject.Extensions = null;
-            _mediaObject.Ssrcs = null;
-            _mediaObject.SsrcGroups = null;
+            _mediaObject.MediaDescription.Attributes.Ssrcs?.Clear();
+            _mediaObject.MediaDescription.Attributes.Ssrcs = null;
+            _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear();;
+            _mediaObject.MediaDescription.Attributes.SsrcGroups = null;
             _mediaObject.Simulcast = null;
             _mediaObject.Simulcast03 = null;
-            _mediaObject.Rids = null;
+            _mediaObject.MediaDescription.Attributes.Rids?.Clear();
+            _mediaObject.MediaDescription.Attributes.Rids = null;
         }
 
         public void Close()
         {
             _mediaObject.Direction = Direction.Inactive;
-            _mediaObject.Port = 0;
+            _mediaObject.MediaDescription.Port = 0;
 
             _mediaObject.Extensions = null;
-            _mediaObject.Ssrcs = null;
-            _mediaObject.SsrcGroups = null;
+            _mediaObject.MediaDescription.Attributes.Ssrcs?.Clear();
+            _mediaObject.MediaDescription.Attributes.Ssrcs = null;
+            _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear(); ;
+            _mediaObject.MediaDescription.Attributes.SsrcGroups = null;
             _mediaObject.Simulcast = null;
             _mediaObject.Simulcast03 = null;
-            _mediaObject.Rids = null;
+            _mediaObject.MediaDescription.Attributes.Rids?.Clear();
+            _mediaObject.MediaDescription.Attributes.Rids = null;
             _mediaObject.ExtmapAllowMixed = null;
         }
 

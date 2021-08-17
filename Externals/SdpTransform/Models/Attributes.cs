@@ -7,6 +7,9 @@ namespace Utilme.SdpTransform
     public class Attributes
     {
         // Binary attributes.
+        public bool? ExtmapAllowMixed { get; set; }
+        public const string ExtmapAllowMixedLabel = "extmap-allow-mixed";
+
         public bool? IceLite { get; set; }
         public const string IceLiteLabel = "ice-lite";
 
@@ -19,9 +22,9 @@ namespace Utilme.SdpTransform
         public bool? EndOfCandidates { get; set; }
         public const string EndOfCandidatesLabel = "end-of-candidates";
 
-        public bool? ExtmapAllowMixed { get; set; }
-        public const string ExtmapAllowMixedLabel = "extmap-allow-mixed";
 
+        
+        // Value attributes.
         public Group Group { get; set; }
 
         public MsidSemantic MsidSemantic { get; set; }
@@ -30,7 +33,6 @@ namespace Utilme.SdpTransform
 
         public Msid Msid { get; set; }
 
-        public Candidate Candidate { get; set; }
 
         public IceUfrag IceUfrag { get; set; }
 
@@ -40,17 +42,19 @@ namespace Utilme.SdpTransform
 
         public Fingerprint Fingerprint { get; set; }
 
-        public Ssrc Ssrc { get; set; }
+        public IList<Candidate> Candidates { get; set; }
+ 
+        public IList<Ssrc> Ssrcs { get; set; }
 
-        public SsrcGroup SsrcGroup { get; set; }
+        public IList<SsrcGroup> SsrcGroups { get; set; }
 
-        public Rid Rid { get; set; }
+        public IList<Rid> Rids { get; set; }
 
-        public Rtpmap Rtpmap { get; set; }
+        public IList<Rtpmap> Rtpmaps { get; set; }
 
-        public Fmtp Fmtp { get; set; }
+        public IList<Fmtp> Fmtps { get; set; }
 
-        public RtcpFb RtcpFb { get; set; }
+        public IList<RtcpFb> RtcpFbs { get; set; }
 
 
 

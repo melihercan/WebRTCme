@@ -199,6 +199,8 @@ a=ssrc:3235472342 label:1082e3a2-c7ae-40da-a43d-35f52283c889
         {
 
             Sdp sdp = SdpText.ToSdp();
+
+            var text = sdp.ToText();
         }
     }
 }

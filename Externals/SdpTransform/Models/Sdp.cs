@@ -7,7 +7,7 @@ namespace Utilme.SdpTransform
     public class Sdp
     {
         /// <summary>
-        /// 'v=0'
+        /// v=0
         /// </summary>
         public int ProtocolVersion { get; set; }
         public const string ProtocolVersionIndicator = "v=";
@@ -111,6 +111,10 @@ namespace Utilme.SdpTransform
         // MediaDescriptions.
         public IList<MediaDescription> MediaDescriptions { get; set; }
         public const string MediaDescriptionIndicator = "m=";
+
+
+        // Constants.
+        public const string CRLF = "\r\n";
 
     }
 }

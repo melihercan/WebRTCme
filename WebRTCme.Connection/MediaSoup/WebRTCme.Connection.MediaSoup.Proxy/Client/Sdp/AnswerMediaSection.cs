@@ -22,41 +22,41 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             ProducerCodecOptions codecOptions,
             bool extmapAllowMixed) : base(iceParameters, iceCandidates, dtlsParameters, planB)
         {
-            _mediaObject.Mid = offerMediaObject.Mid;
-            _mediaObject.Kind = offerMediaObject.Kind;
-            _mediaObject.Protocol = offerMediaObject.Protocol;
+            _mediaObject.MediaDescription.Attributes.Mid = offerMediaObject.MediaDescription.Attributes.Mid;
+            _mediaObject.MediaDescription.Media = offerMediaObject.MediaDescription.Media;
+            _mediaObject.MediaDescription.Proto = offerMediaObject.MediaDescription.Proto;
 
             if (plainRtpParameters is null)
             {
-                _mediaObject.Connection = new ConnectionData
+                _mediaObject.MediaDescription.ConnectionData = new ConnectionData
                 {
                     NetType = NetType.Internet,
                     AddrType = AddrType.Ip4,
                     ConnectionAddress = "127.0.0.1"
                 };
-                _mediaObject.Port = 7;
+                _mediaObject.MediaDescription.Port = 7;
             }
             else
             {
-                _mediaObject.Connection = new ConnectionData
+                _mediaObject.MediaDescription.ConnectionData = new ConnectionData
                 {
                     NetType = NetType.Internet,
                     AddrType = plainRtpParameters.IpVersion,
                     ConnectionAddress = plainRtpParameters.Ip
                 };
-                _mediaObject.Port = plainRtpParameters.Port;
+                _mediaObject.MediaDescription.Port = plainRtpParameters.Port;
             }
 
 
-            switch (offerMediaObject.Kind)
+            switch (offerMediaObject.MediaDescription.Media)
             {
-                case MediaKind.Audio:
-                case MediaKind.Video:
+                case MediaType.Audio:
+                case MediaType.Video:
                     {
                         _mediaObject.Direction = Direction.Recvonly;
-                        _mediaObject.Rtpmaps = new();
-                        _mediaObject.RtcpFbs = new();
-                        _mediaObject.Fmtps = new();
+                        _mediaObject.MediaDescription.Attributes.Rtpmaps = new List<Rtpmap>();
+                        _mediaObject.MediaDescription.Attributes.RtcpFbs = new List<RtcpFb>();
+                        _mediaObject.MediaDescription.Attributes.Fmtps = new List<Fmtp>();
 
                         foreach (var codec in answerRtpParameters.Codecs)
                         {
@@ -67,7 +67,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                 ClockRate = codec.ClockRate,
                                 Channels = codec.Channels > 1 ? codec.Channels : null
                             };
-                            _mediaObject.Rtpmaps.Add(rtpmap);
+                            _mediaObject.MediaDescription.Attributes.Rtpmaps.Add(rtpmap);
 
                             //var cp = codec.Parameters as CodecParameters;
                             //CodecParameters codecParameters = new()
@@ -159,7 +159,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                             
                             if (!string.IsNullOrEmpty(fmtp.Value))
-                                _mediaObject.Fmtps.Add(fmtp);
+                                _mediaObject.MediaDescription.Attributes.Fmtps.Add(fmtp);
 
                             foreach (var fb in codec.RtcpFeedback)
                             {
@@ -169,11 +169,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                     Type = fb.Type,
                                     SubType = fb.Parameter
                                 };
-                                _mediaObject.RtcpFbs.Add(rtcpFb);
+                                _mediaObject.MediaDescription.Attributes.RtcpFbs.Add(rtcpFb);
                             }
                         }
 
-                        _mediaObject.Payloads += string.Join(" ", answerRtpParameters.Codecs
+                        ((List<string>)_mediaObject.MediaDescription.Fmts).AddRange(answerRtpParameters.Codecs
                             .Select(codec => codec.PayloadType.ToString()));
 
                         _mediaObject.Extensions = new();
@@ -206,13 +206,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         	    List1 = offerMediaObject.Simulcast.List1
                             };
 
-                            _mediaObject.Rids = new();
-                            foreach (var rid in offerMediaObject.Rids)
+                            _mediaObject.MediaDescription.Attributes.Rids = new List<Rid>();
+                            foreach (var rid in offerMediaObject.MediaDescription.Attributes.Rids)
                             {
                                 if (rid.Direction != RidDirection.Send)
                                     continue;
 
-                                _mediaObject.Rids.Add(new Rid
+                                _mediaObject.MediaDescription.Attributes.Rids.Add(new Rid
                                 {
                                     Id = rid.Id,
                             	    Direction = RidDirection.Recv
@@ -229,13 +229,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                     RidDirection.Recv.DisplayName())
                             };
 
-                            _mediaObject.Rids = new();
-                            foreach (var rid in offerMediaObject.Rids)
+                            _mediaObject.MediaDescription.Attributes.Rids = new List<Rid>();
+                            foreach (var rid in offerMediaObject.MediaDescription.Attributes.Rids)
                             {
                                 if (rid.Direction != RidDirection.Send)
                                     continue;
 
-                                _mediaObject.Rids.Add(new Rid
+                                _mediaObject.MediaDescription.Attributes.Rids.Add(new Rid
                                 {
                                     Id = rid.Id,
                             		Direction = RidDirection.Recv
@@ -243,27 +243,27 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             }
                     }
 
-                    _mediaObject.BinaryAttributes.RtcpMux = true;
-                        _mediaObject.BinaryAttributes.RtcpRsize = true;
+                        _mediaObject.MediaDescription.Attributes.RtcpMux = true;
+                        _mediaObject.MediaDescription.Attributes.RtcpRsize = true;
 
-                        if (_planB && _mediaObject.Kind == MediaKind.Video)
+                        if (_planB && _mediaObject.MediaDescription.Media == MediaType.Video)
                             _mediaObject.XGoogleFlag = "conference";
                         break;
                     }
 
-                case MediaKind.Application:
+                case MediaType.Application:
                     {
                         // New spec.
                         if (offerMediaObject.SctpPort.GetType() == typeof(int))
                         {
-                            _mediaObject.Payloads = "webrtc-datachannel";
+                            _mediaObject.MediaDescription.Fmts = new List<string> { "webrtc-datachannel" };
                             _mediaObject.SctpPort = sctpParameters.Port;
                             _mediaObject.MaxMessageSize = sctpParameters.MaxMessageSize;
                         }
                         // Old spec.
                         else if (offerMediaObject.SctpMap is not null)
                         {
-                            _mediaObject.Payloads = sctpParameters.Port.ToString();
+                            _mediaObject.MediaDescription.Fmts = new List<string> { sctpParameters.Port.ToString() };
                             _mediaObject.SctpMap = new()
                             {
                                 App = "webrtc-datachannel",
