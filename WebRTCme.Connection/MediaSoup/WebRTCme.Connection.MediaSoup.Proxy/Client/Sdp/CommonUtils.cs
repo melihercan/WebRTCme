@@ -43,7 +43,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         continue;
                 }
 
-                var rtpmapAttributes = m.ToRtpmaps();
+                var rtpmapAttributes = m.Attributes.Rtpmaps;//  m.ToRtpmaps();
                 foreach (var rtpmap in rtpmapAttributes)
                 {
                     var codec = new RtpCodecCapability 
@@ -57,7 +57,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codecsDictionary.Add(codec.PreferredPayloadType, codec);
                 }
 
-                var fmtpAttributes = m.ToFmtps();
+                var fmtpAttributes = m.Attributes.Fmtps;//.ToFmtps();
                 foreach (var fmtp in fmtpAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(fmtp.PayloadType, out var codec))
@@ -65,7 +65,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codec.Parameters = fmtp.ToDictionary();
                 }
 
-                var rtcpFbAttributes = m.ToRtcpFbs();
+                var rtcpFbAttributes = m.Attributes.RtcpFbs;//.ToRtcpFbs();
                 foreach (var rtcpFb in rtcpFbAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(rtcpFb.PayloadType, out var codec))
@@ -78,13 +78,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codec.RtcpFeedback = new RtcpFeedback[] { feedback };
                 }
 
-                var extmapAttributes = m.ToExtmaps();
+                var extmapAttributes = m.Attributes.Extmaps;//.ToExtmaps();
                 foreach (var extmap in extmapAttributes)
                 {
                     RtpHeaderExtension headerExtension = new()
                     {
                         Kind = mediaKind,
-                        Uri = extmap.Uri,
+                        Uri = extmap.Uri.ToString(),
                         PreferredId = extmap.Value
                     };
                     headerExtensions.Add(headerExtension);

@@ -58,6 +58,6 @@ namespace Utilme.SdpTransform
 
         //public EncriptionKey EncriptionKey { get; set; }
 
-        public IList<string> AttributesOld { get; set; }
+        //public IList<string> AttributesOld { get; set; }
     }
 }

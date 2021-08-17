@@ -56,6 +56,8 @@ namespace Utilme.SdpTransform
 
         public IList<RtcpFb> RtcpFbs { get; set; }
 
+        public IList<Extmap> Extmaps { get; set; }
+
 
 
 

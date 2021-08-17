@@ -10,8 +10,10 @@ namespace Utilme.SdpTransform
         public const string Label = "extmap:";
 
         public int Value { get; set; }
-        public string Direction { get; set; }
-        public string Uri { get; set; }
+        public Direction? Direction { get; set; }
+        public Uri Uri { get; set; }
+
+        // Optional.        
         public string ExtensionAttributes { get; set; }
     }
 }

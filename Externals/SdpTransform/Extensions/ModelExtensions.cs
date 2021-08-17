@@ -924,27 +924,6 @@ namespace Utilme.SdpTransform
                     $"{fmtp.PayloadType} {fmtp.Value}" +
                     $"{Sdp.CRLF}";
 
-
-        public static RtcpFb ToRtcpFb(this string str)
-        {
-            var tokens = str
-                 .Replace(Sdp.AttributeIndicator, string.Empty)
-                 .Replace(RtcpFb.Label, string.Empty)
-                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            return new RtcpFb
-            {
-                PayloadType = int.Parse(tokens[0]),
-                Type = tokens[1],
-                SubType = tokens.Length > 2 ? tokens[2] : null
-            };
-        }
-
-        public static string ToText(this RtcpFb rtcpFb) =>
-                $"{Sdp.AttributeIndicator}{RtcpFb.Label}" +
-                    $"{rtcpFb.PayloadType} {rtcpFb.Type} {rtcpFb.SubType ?? string.Empty} " +
-                    $"{Sdp.CRLF}";
-
-
         // a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
         // Fmtp
         // {
@@ -957,7 +936,6 @@ namespace Utilme.SdpTransform
         //      { "packetization-mode", "0" },
         //      { "profile-level-id", "42e01f" }
         //  }
-
         public static Dictionary<string, object> ToDictionary(this Fmtp fmtp)
         {
             Dictionary<string, object/*string*/> dictionary = new();
@@ -969,99 +947,142 @@ namespace Utilme.SdpTransform
                 if (int.TryParse(subTokens[1], out int n))
                     dictionary.Add(subTokens[0], n);
                 else
-                dictionary.Add(subTokens[0], subTokens[1]);
+                    dictionary.Add(subTokens[0], subTokens[1]);
             }
             return dictionary;
         }
 
+
+        public static RtcpFb ToRtcpFb(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(RtcpFb.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new RtcpFb
+            {
+                PayloadType = int.Parse(tokens[0]),
+                Type = tokens[1],
+                SubType = tokens.Length > 2 ? tokens[2] : null
+            };
+        }
+
+        public static string ToText(this RtcpFb rtcpFb) =>
+            $"{Sdp.AttributeIndicator}{RtcpFb.Label}" +
+                $"{rtcpFb.PayloadType} {rtcpFb.Type} {rtcpFb.SubType ?? string.Empty} " +
+                $"{Sdp.CRLF}";
+
+        public static Extmap ToExtmap(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(Extmap.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var subtokens = tokens[0].Split('/');
+            return new Extmap
+            {
+                Value = int.Parse(subtokens[0]),
+                Direction = subtokens.Length > 1 ? subtokens[1].EnumFromDisplayName<Direction>() : null,
+                Uri = new Uri(tokens[1]),
+                ExtensionAttributes = tokens.Length > 2 ? tokens[2] : null 
+            };
+        }
+
+        public static string ToText(this Extmap extmap) =>
+               $"{Sdp.AttributeIndicator}{Extmap.Label}" +
+                    $"{extmap.Value}{(extmap.Direction.HasValue ? extmap.Direction.DisplayName() : string.Empty)} " +
+                    $"{extmap.Uri} {extmap.ExtensionAttributes ?? string.Empty}" +
+                    $"{Sdp.CRLF}";
+
+
         // Utility methods.
 
-        public static Rtpmap[] ToRtpmaps(this MediaDescription mediaDescription)
-        {
-            var attributes = mediaDescription.AttributesOld
-                .Where(a => a.StartsWith("rtpmap:"))
-                .ToArray();
+        //public static Rtpmap[] ToRtpmaps(this MediaDescription mediaDescription)
+        //{
+        //    var attributes = mediaDescription.AttributesOld
+        //        .Where(a => a.StartsWith("rtpmap:"))
+        //        .ToArray();
 
-            List<Rtpmap> rtpmapAttributes = new();
-            foreach (var a in attributes)
-            {
-                var tokens = a.Substring(7).Split(new[] { ' ', '/' }, 4);
-                rtpmapAttributes.Add(new Rtpmap
-                {
-                    PayloadType = int.Parse(tokens[0]),
-                    EncodingName = tokens[1],
-                    ClockRate = int.Parse(tokens[2]),
-                    Channels = tokens.Length == 4 ? int.Parse(tokens[3]) : null
-                });
-            }
+        //    List<Rtpmap> rtpmapAttributes = new();
+        //    foreach (var a in attributes)
+        //    {
+        //        var tokens = a.Substring(7).Split(new[] { ' ', '/' }, 4);
+        //        rtpmapAttributes.Add(new Rtpmap
+        //        {
+        //            PayloadType = int.Parse(tokens[0]),
+        //            EncodingName = tokens[1],
+        //            ClockRate = int.Parse(tokens[2]),
+        //            Channels = tokens.Length == 4 ? int.Parse(tokens[3]) : null
+        //        });
+        //    }
 
-            return rtpmapAttributes.ToArray();
-        }
+        //    return rtpmapAttributes.ToArray();
+        //}
 
-        public static Fmtp[] ToFmtps(this MediaDescription mediaDescription)
-        {
-            var attributes = mediaDescription.AttributesOld
-                .Where(a => a.StartsWith("fmtp:"))
-                .ToArray();
+        //public static Fmtp[] ToFmtps(this MediaDescription mediaDescription)
+        //{
+        //    var attributes = mediaDescription.AttributesOld
+        //        .Where(a => a.StartsWith("fmtp:"))
+        //        .ToArray();
 
-            List<Fmtp> fmtpAttributes = new();
-            foreach (var a in attributes)
-            {
-                var tokens = a.Substring(5).Split(new char[] { ' ' }, 2);
-                fmtpAttributes.Add(new Fmtp
-                {
-                    PayloadType = int.Parse(tokens[0]),
-                    Value = tokens[1],
-                });
-            }
+        //    List<Fmtp> fmtpAttributes = new();
+        //    foreach (var a in attributes)
+        //    {
+        //        var tokens = a.Substring(5).Split(new char[] { ' ' }, 2);
+        //        fmtpAttributes.Add(new Fmtp
+        //        {
+        //            PayloadType = int.Parse(tokens[0]),
+        //            Value = tokens[1],
+        //        });
+        //    }
 
-            return fmtpAttributes.ToArray();
-        }
+        //    return fmtpAttributes.ToArray();
+        //}
 
-        public static RtcpFb[] ToRtcpFbs(this MediaDescription mediaDescription)
-        {
-            var attributes = mediaDescription.AttributesOld
-                .Where(a => a.StartsWith("rtcp-fb:"))
-                .ToArray();
+        //public static RtcpFb[] ToRtcpFbs(this MediaDescription mediaDescription)
+        //{
+        //    var attributes = mediaDescription.AttributesOld
+        //        .Where(a => a.StartsWith("rtcp-fb:"))
+        //        .ToArray();
 
-            List<RtcpFb> rtcpFbAttributes = new();
-            foreach (var a in attributes)
-            {
-                var tokens = a.Substring(8).Split(new char[] { ' ' }, 3);
-                rtcpFbAttributes.Add(new RtcpFb
-                {
-                    PayloadType = int.Parse(tokens[0]),
-                    Type = tokens[1],
-                    SubType = tokens.Length == 3 ? tokens[2] : null
-                });
-            }
+        //    List<RtcpFb> rtcpFbAttributes = new();
+        //    foreach (var a in attributes)
+        //    {
+        //        var tokens = a.Substring(8).Split(new char[] { ' ' }, 3);
+        //        rtcpFbAttributes.Add(new RtcpFb
+        //        {
+        //            PayloadType = int.Parse(tokens[0]),
+        //            Type = tokens[1],
+        //            SubType = tokens.Length == 3 ? tokens[2] : null
+        //        });
+        //    }
 
-            return rtcpFbAttributes.ToArray();
-        }
+        //    return rtcpFbAttributes.ToArray();
+        //}
 
-        public static Extmap[] ToExtmaps(this MediaDescription mediaDescription)
-        {
-            var attributes = mediaDescription.AttributesOld
-                .Where(a => a.StartsWith("extmap:"))
-                .ToArray();
+        //public static Extmap[] ToExtmaps(this MediaDescription mediaDescription)
+        //{
+        //    var attributes = mediaDescription.AttributesOld
+        //        .Where(a => a.StartsWith("extmap:"))
+        //        .ToArray();
 
-            List<Extmap> extmapAttributes = new();
-            foreach (var a in attributes)
-            {
-                // Direction is optional and attached to Value with '/'.
-                var tokens = a.Substring(7).Split(new char[] { ' ' }, 3);
-                var subtokens = tokens[0].Split(new char[] { '/' }, 2);
-                extmapAttributes.Add(new Extmap
-                {
-                    Value = int.Parse(subtokens[0]),
-                    Direction = subtokens.Length == 2 ? subtokens[1] : null,
-                    Uri = tokens[1],
-                    ExtensionAttributes = tokens.Length == 3 ? tokens[2] : null
-                });
-            }
+        //    List<Extmap> extmapAttributes = new();
+        //    foreach (var a in attributes)
+        //    {
+        //        // Direction is optional and attached to Value with '/'.
+        //        var tokens = a.Substring(7).Split(new char[] { ' ' }, 3);
+        //        var subtokens = tokens[0].Split(new char[] { '/' }, 2);
+        //        extmapAttributes.Add(new Extmap
+        //        {
+        //            Value = int.Parse(subtokens[0]),
+        //            Direction = subtokens.Length == 2 ? subtokens[1] : null,
+        //            Uri = tokens[1],
+        //            ExtensionAttributes = tokens.Length == 3 ? tokens[2] : null
+        //        });
+        //    }
 
-            return extmapAttributes.ToArray();
-        }
+        //    return extmapAttributes.ToArray();
+        //}
 
         public static byte[] HexadecimalStringToByteArray(String hexadecimalString)
         {
