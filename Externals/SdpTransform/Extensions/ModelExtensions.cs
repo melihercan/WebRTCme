@@ -171,6 +171,11 @@ namespace Utilme.SdpTransform
                         md.Attributes.RtcpFbs ??= new List<RtcpFb>();
                         md.Attributes.RtcpFbs.Add(attr.ToRtcpFb());
                     }
+                    else if (attr.StartsWith(Extmap.Label))
+                    {
+                        md.Attributes.Extmaps ??= new List<Extmap>();
+                        md.Attributes.Extmaps.Add(attr.ToExtmap());
+                    }
 
                     else
                         Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
@@ -195,27 +200,27 @@ namespace Utilme.SdpTransform
 
             // Session fields.
             sb.Append(ToProtocolVersionText(sdp.ProtocolVersion));
-            sb.Append(ToText(sdp.Origin));
+            sb.Append(sdp.Origin.ToText());
             sb.Append(ToSessionNameText(sdp.SessionName));
             if (sdp.SessionInformation is not null)
                 sb.Append(ToInformationText(sdp.SessionInformation));
             if (sdp.Uri is not null)
-                sb.Append(ToText(sdp.Uri));
+                sb.Append(sdp.Uri.ToText());
             if (sdp.EmailAddresses is not null)
-                sb.Append(ToEmailAddressesText(sdp.EmailAddresses));
+                sb.Append(sdp.EmailAddresses.ToEmailAddressesText());
             if (sdp.PhoneNumbers is not null)
-                sb.Append(ToPhoneNumbersText(sdp.PhoneNumbers));
+                sb.Append(sdp.PhoneNumbers.ToPhoneNumbersText());
             if (sdp.ConnectionData is not null)
-                sb.Append(ToText(sdp.ConnectionData));
+                sb.Append(sdp.ConnectionData.ToText());
             if (sdp.Bandwidths is not null)
-                sdp.Bandwidths.Select(b => sb.Append(ToText(b)));
-            sdp.Timings.Select(t => sb.Append(ToText(t)));
+                sdp.Bandwidths.Select(b => sb.Append(b.ToText())).ToArray();
+            sdp.Timings.Select(t => sb.Append(t.ToText())).ToArray();
             if (sdp.RepeatTimes is not null)
-                sdp.RepeatTimes.Select(r => sb.Append(ToText(r)));
+                sdp.RepeatTimes.Select(r => sb.Append(r.ToText())).ToArray();
             if (sdp.TimeZones is not null)
-                sb.Append(ToText(sdp.TimeZones));
+                sb.Append(sdp.TimeZones.ToText());
             if (sdp.EncryptionKey is not null)
-                sb.Append(ToText(sdp.EncryptionKey));
+                sb.Append(sdp.EncryptionKey.ToText());
             
             // Session binary attributes.
             if (sdp.Attributes.ExtmapAllowMixed.HasValue)
@@ -223,24 +228,24 @@ namespace Utilme.SdpTransform
 
             // Session value attributes.
             if (sdp.Attributes.Group is not null)
-                sb.Append(ToText(sdp.Attributes.Group));
+                sb.Append(sdp.Attributes.Group.ToText());
             if (sdp.Attributes.MsidSemantic is not null)
-                sb.Append(ToText(sdp.Attributes.MsidSemantic));
+                sb.Append(sdp.Attributes.MsidSemantic.ToText());
 
 
             // Media description fields.
             foreach (var md in sdp.MediaDescriptions)
             {
-                sb.Append(ToText(md));
+                sb.Append(md.ToText());
 
                 if (md.Information is not null)
-                    sb.Append(ToInformationText(md.Information));
+                    sb.Append(md.Information.ToInformationText());
                 if (md.ConnectionData is not null)
-                    sb.Append(ToText(md.ConnectionData));
+                    sb.Append(md.ConnectionData.ToText());
                 if (md.Bandwidths is not null)
-                    md.Bandwidths.Select(b => sb.Append(ToText(b)));
+                    md.Bandwidths.Select(b => sb.Append(b.ToText())).ToArray();
                 if (md.EncryptionKey is not null)
-                    sb.Append(ToText(md.EncryptionKey));
+                    sb.Append(md.EncryptionKey.ToText());
 
                 // Media description binary attributes.
                 if (md.Attributes.ExtmapAllowMixed.HasValue)
@@ -248,35 +253,37 @@ namespace Utilme.SdpTransform
 
                 // Media description value attributes.
                 if (md.Attributes.Group is not null)
-                    sb.Append(ToText(md.Attributes.Group));
+                    sb.Append(md.Attributes.Group.ToText());
                 if (md.Attributes.MsidSemantic is not null)
-                    sb.Append(ToText(md.Attributes.MsidSemantic));
+                    sb.Append(md.Attributes.MsidSemantic.ToText());
                 if (md.Attributes.Mid is not null)
-                    sb.Append(ToText(md.Attributes.Mid));
+                    sb.Append(md.Attributes.Mid.ToText());
                 if (md.Attributes.Msid is not null)
-                    sb.Append(ToText(md.Attributes.Msid));
+                    sb.Append(md.Attributes.Msid.ToText());
                 if (md.Attributes.IceUfrag is not null)
-                    sb.Append(ToText(md.Attributes.IceUfrag));
+                    sb.Append(md.Attributes.IceUfrag.ToText());
                 if (md.Attributes.IcePwd is not null)
-                    sb.Append(ToText(md.Attributes.IcePwd));
+                    sb.Append(md.Attributes.IcePwd.ToText());
                 if (md.Attributes.IceOptions is not null)
-                    sb.Append(ToText(md.Attributes.IceOptions));
+                    sb.Append(md.Attributes.IceOptions.ToText());
                 if (md.Attributes.Fingerprint is not null)
-                    sb.Append(ToText(md.Attributes.Fingerprint));
+                    sb.Append(md.Attributes.Fingerprint.ToText());
                 if (md.Attributes.Candidates is not null)
-                    md.Attributes.Candidates.Select(c => sb.Append(ToText(c)));
+                    md.Attributes.Candidates.Select(c => sb.Append(c.ToText())).ToArray();  // ToArray for immediate execution
                 if (md.Attributes.Ssrcs is not null)
-                    md.Attributes.Ssrcs.Select(s => sb.Append(ToText(s)));
+                    md.Attributes.Ssrcs.Select(s => sb.Append(s.ToText())).ToArray();
                 if (md.Attributes.SsrcGroups is not null)
-                    md.Attributes.SsrcGroups.Select(sg => sb.Append(ToText(sg)));
+                    md.Attributes.SsrcGroups.Select(sg => sb.Append(sg.ToText())).ToArray();
                 if (md.Attributes.Rids is not null)
-                    md.Attributes.Rids.Select(r => sb.Append(ToText(r)));
+                    md.Attributes.Rids.Select(r => sb.Append(r.ToText())).ToArray();
                 if (md.Attributes.Rtpmaps is not null)
-                    md.Attributes.Rtpmaps.Select(r => sb.Append(ToText(r)));
+                    md.Attributes.Rtpmaps.Select(r => sb.Append(r.ToText())).ToArray();
                 if (md.Attributes.Fmtps is not null)
-                    md.Attributes.Fmtps.Select(f => sb.Append(ToText(f)));
+                    md.Attributes.Fmtps.Select(f => sb.Append(f.ToText())).ToArray();
                 if (md.Attributes.RtcpFbs is not null)
-                    md.Attributes.RtcpFbs.Select(r => sb.Append(ToText(r)));
+                    md.Attributes.RtcpFbs.Select(r => sb.Append(r.ToText())).ToArray();
+                if (md.Attributes.Extmaps is not null)
+                    md.Attributes.Extmaps.Select(e => sb.Append(e.ToText())).ToArray();
             }
 
             return sb.ToString();
@@ -988,11 +995,15 @@ namespace Utilme.SdpTransform
             };
         }
 
-        public static string ToText(this Extmap extmap) =>
-               $"{Sdp.AttributeIndicator}{Extmap.Label}" +
-                    $"{extmap.Value}{(extmap.Direction.HasValue ? extmap.Direction.DisplayName() : string.Empty)} " +
-                    $"{extmap.Uri} {extmap.ExtensionAttributes ?? string.Empty}" +
-                    $"{Sdp.CRLF}";
+        public static string ToText(this Extmap extmap)// =>
+        {
+            var x = 
+            $"{Sdp.AttributeIndicator}{Extmap.Label}" +
+                 $"{extmap.Value}{(extmap.Direction.HasValue ? extmap.Direction.DisplayName() : string.Empty)} " +
+                 $"{extmap.Uri} {extmap.ExtensionAttributes ?? string.Empty}" +
+                 $"{Sdp.CRLF}";
+            return x;
+        }
 
 
         // Utility methods.
