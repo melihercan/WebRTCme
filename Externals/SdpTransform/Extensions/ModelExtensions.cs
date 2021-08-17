@@ -213,10 +213,13 @@ namespace Utilme.SdpTransform
             if (sdp.ConnectionData is not null)
                 sb.Append(sdp.ConnectionData.ToText());
             if (sdp.Bandwidths is not null)
-                sdp.Bandwidths.Select(b => sb.Append(b.ToText())).ToArray();
-            sdp.Timings.Select(t => sb.Append(t.ToText())).ToArray();
+                foreach (var b in sdp.Bandwidths)
+                    sb.Append(b.ToText());
+            foreach (var t in sdp.Timings)
+                sb.Append(t.ToText());
             if (sdp.RepeatTimes is not null)
-                sdp.RepeatTimes.Select(r => sb.Append(r.ToText())).ToArray();
+                foreach (var r in sdp.RepeatTimes)
+                    sb.Append(r.ToText());
             if (sdp.TimeZones is not null)
                 sb.Append(sdp.TimeZones.ToText());
             if (sdp.EncryptionKey is not null)
@@ -243,7 +246,8 @@ namespace Utilme.SdpTransform
                 if (md.ConnectionData is not null)
                     sb.Append(md.ConnectionData.ToText());
                 if (md.Bandwidths is not null)
-                    md.Bandwidths.Select(b => sb.Append(b.ToText())).ToArray();
+                    foreach (var b in md.Bandwidths)
+                        sb.Append(b.ToText());
                 if (md.EncryptionKey is not null)
                     sb.Append(md.EncryptionKey.ToText());
 
@@ -269,21 +273,29 @@ namespace Utilme.SdpTransform
                 if (md.Attributes.Fingerprint is not null)
                     sb.Append(md.Attributes.Fingerprint.ToText());
                 if (md.Attributes.Candidates is not null)
-                    md.Attributes.Candidates.Select(c => sb.Append(c.ToText())).ToArray();  // ToArray for immediate execution
+                    foreach (var c in md.Attributes.Candidates)
+                        sb.Append(c.ToText());
                 if (md.Attributes.Ssrcs is not null)
-                    md.Attributes.Ssrcs.Select(s => sb.Append(s.ToText())).ToArray();
+                    foreach (var s in md.Attributes.Ssrcs)
+                        sb.Append(s.ToText());
                 if (md.Attributes.SsrcGroups is not null)
-                    md.Attributes.SsrcGroups.Select(sg => sb.Append(sg.ToText())).ToArray();
+                    foreach (var sg in md.Attributes.SsrcGroups)
+                        sb.Append(sg.ToText());
                 if (md.Attributes.Rids is not null)
-                    md.Attributes.Rids.Select(r => sb.Append(r.ToText())).ToArray();
+                    foreach (var r in md.Attributes.Rids)
+                        sb.Append(r.ToText());
                 if (md.Attributes.Rtpmaps is not null)
-                    md.Attributes.Rtpmaps.Select(r => sb.Append(r.ToText())).ToArray();
+                    foreach (var r in md.Attributes.Rtpmaps)
+                        sb.Append(r.ToText());
                 if (md.Attributes.Fmtps is not null)
-                    md.Attributes.Fmtps.Select(f => sb.Append(f.ToText())).ToArray();
+                    foreach (var f in md.Attributes.Fmtps)
+                        sb.Append(f.ToText());
                 if (md.Attributes.RtcpFbs is not null)
-                    md.Attributes.RtcpFbs.Select(r => sb.Append(r.ToText())).ToArray();
+                    foreach (var r in md.Attributes.RtcpFbs)
+                        sb.Append(r.ToText());
                 if (md.Attributes.Extmaps is not null)
-                    md.Attributes.Extmaps.Select(e => sb.Append(e.ToText())).ToArray();
+                    foreach (var e in md.Attributes.Extmaps)
+                        sb.Append(e.ToText());
             }
 
             return sb.ToString();
