@@ -607,16 +607,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
        Console.WriteLine($"OFFER:{offer.Sdp}");
 
-                try
-                {
                 await _pc.SetRemoteDescription(offer);
-                }
-                catch (Exception ex)
-                {
-                    var m = ex.Message;
-                    Console.WriteLine(m);
-                }
-
                 var answer = await _pc.CreateAnswer();
 
                 if (!_transportReady)
