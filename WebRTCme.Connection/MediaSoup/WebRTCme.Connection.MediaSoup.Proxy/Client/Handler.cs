@@ -609,12 +609,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 try
                 {
-                    await _pc.SetRemoteDescription(offer);
+                await _pc.SetRemoteDescription(offer);
                 }
                 catch (Exception ex)
                 {
                     var m = ex.Message;
+                    Console.WriteLine(m);
                 }
+
                 var answer = await _pc.CreateAnswer();
 
                 if (!_transportReady)
@@ -625,6 +627,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 await _pc.SetLocalDescription(answer);
                 _hasDataChannelMediaSection = true;
+
             }
 
             return new HandlerReceiveDataChannelResult

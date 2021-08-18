@@ -313,7 +313,7 @@ namespace Utilme.SdpTransform
                     foreach (var c in md.Attributes.Candidates)
                         sb.Append(c.ToText());
                 if (md.Attributes.EndOfCandidates.HasValue)
-                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.EndOfCandidatesLabel}");
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.EndOfCandidatesLabel}{Sdp.CRLF}");
                 if (md.Attributes.Ssrcs is not null)
                     foreach (var s in md.Attributes.Ssrcs)
                         sb.Append(s.ToText());
@@ -691,7 +691,7 @@ namespace Utilme.SdpTransform
         }
 
         public static string ToText(this Group group) =>
-            $"{Sdp.AttributeIndicator}{Group.Label}{group.Semantics} " +
+            $"{Sdp.AttributeIndicator}{Group.Label}{group.Semantics.DisplayName()} " +
                 $"{string.Join(" ", group.SemanticsExtensions)}" +
                 $"{Sdp.CRLF}";
 
