@@ -245,8 +245,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 hackVp9Svc = true;
                 localSdpObject = offer.Sdp.ToSdp();
-                offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(
-                    localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]);
+                offerMediaObject = new MediaObject
+                {
+                    MediaDescription = localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]
+                };
 
                 UnifiedPlanUtils.AddLegacySimulcast(offerMediaObject, layers.SpatialLayers);
 
@@ -268,8 +270,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             sendingRtpParameters.Mid = new Mid { Id = localId };
 
             localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
-            offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(
-                localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]);
+            offerMediaObject = new MediaObject
+            {
+                MediaDescription = localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]
+            };
 
             // Set RTCP CNAME.
             sendingRtpParameters.Rtcp.Cname = CommonUtils.GetCname(offerMediaObject);
@@ -446,14 +450,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    // Increase next id.
 		    _nextSendSctpStreamId =	++_nextSendSctpStreamId % NumSctpStreams.Mis;
 
-    		// If this is the first DataChannel we need to create the SDP answer with
-	    	// m=application section.
-		    if (!_hasDataChannelMediaSection)
-		    {
-			    var offer = await _pc.CreateOffer();
-			    var localSdpObject = offer.Sdp.ToSdp();
-                var offerMediaObject = CommonUtils.SdpMediaDescriptionToMediaObject(localSdpObject.MediaDescriptions
-                    .Single(md => md.Media == MediaType.Application));
+            // If this is the first DataChannel we need to create the SDP answer with
+            // m=application section.
+            if (!_hasDataChannelMediaSection)
+            {
+                var offer = await _pc.CreateOffer();
+                var localSdpObject = offer.Sdp.ToSdp();
+                MediaObject offerMediaObject = new()
+                {
+                    MediaDescription = localSdpObject.MediaDescriptions
+                        .Single(md => md.Media == MediaType.Application)
+                };
 
                 if (!_transportReady)
 				    await SetupTransportAsync(DtlsRole.Server, localSdpObject);
@@ -506,9 +513,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    var answer = await _pc.CreateAnswer();
 		    var localSdpObject = answer.Sdp.ToSdp();
 
-            var answerMediaObject = localSdpObject.MediaDescriptions
-                .Select(md => CommonUtils.SdpMediaDescriptionToMediaObject(md))
-                .Single(mo => mo.MediaDescription.Attributes.Mid.Id == localId);
+            MediaObject answerMediaObject = new()
+            {
+                MediaDescription = localSdpObject.MediaDescriptions
+                    .Single(md => md.Attributes.Mid.Id == localId)
+            };
 
             // May need to modify codec parameters in the answer based on codec
             // parameters in the offer.

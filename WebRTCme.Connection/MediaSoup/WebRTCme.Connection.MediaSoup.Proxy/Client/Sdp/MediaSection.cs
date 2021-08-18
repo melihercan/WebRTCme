@@ -24,8 +24,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _dtlsParameters = dtlsParameters;
             _planB = planB;
 
-            _mediaObject = new() 
-            { 
+            _mediaObject = new()
+            {
+                MediaDescription = new()
+                {
+                    Attributes = new()
+                }
             };
 
             if (iceParameters is not null)

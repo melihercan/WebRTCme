@@ -206,7 +206,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _midToIndex.Add(newMediaSection.Mid, _mediaSections.Count - 1);
 
             // Add to the SDP object.
-            _sdp.MediaDescriptions.Add(CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject));
+            _sdp.MediaDescriptions.Add(newMediaSection.MediaObject.MediaDescription);
 
             // Regenerate BUNDLE mids.
             RegenerateBundleMids();
@@ -231,8 +231,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 _midToIndex.Add(newMediaSection.Mid, idx);
 
                 // Update the SDP object.
-                _sdp.MediaDescriptions[idx] = 
-                    CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject);
+                _sdp.MediaDescriptions[idx] = newMediaSection.MediaObject.MediaDescription;
 
                 // Regenerate BUNDLE mids.
                 RegenerateBundleMids();
@@ -248,8 +247,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 _mediaSections[idx] = newMediaSection;
 
                 // Update the SDP object.
-                _sdp.MediaDescriptions[idx] = 
-                    CommonUtils.MediaObjectToSdpMediaDescription(newMediaSection.MediaObject);
+                _sdp.MediaDescriptions[idx] = newMediaSection.MediaObject.MediaDescription;
             }
 
         }

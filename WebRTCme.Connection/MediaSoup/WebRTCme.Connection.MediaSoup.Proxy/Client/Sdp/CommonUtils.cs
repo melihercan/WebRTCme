@@ -49,7 +49,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     var codec = new RtpCodecCapability 
                     {
                         Kind = mediaKind,
-                        MimeType = $"{kind}/{rtpmap.EncodingName}",
+                        MimeType = $"{kind.DisplayName()}/{rtpmap.EncodingName}",
                         PreferredPayloadType = rtpmap.PayloadType,
                         ClockRate = rtpmap.ClockRate,
                         Channels = rtpmap.Channels 
@@ -191,10 +191,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.Sdp sdp)
         {
-            var mediaObject = sdp.MediaDescriptions
-                .Select(md => SdpMediaDescriptionToMediaObject(md))
-                .SingleOrDefault(mo => mo.MediaDescription.Attributes.IceUfrag is not null && 
-                    mo.MediaDescription.Port != 0);
+            MediaObject mediaObject = new()
+            {
+                MediaDescription = sdp.MediaDescriptions
+                    .SingleOrDefault(md => md.Attributes.IceUfrag is not null &&  md.Port != 0)
+            };
             if (mediaObject is null)
                 throw new Exception("No active media section found");
 
@@ -228,8 +229,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 	        };
         }
 
-        public static MediaDescription MediaObjectToSdpMediaDescription(MediaObject mediaObject)
-        {
+        //public static MediaDescription MediaObjectToSdpMediaDescription(MediaObject mediaObject)
+        //{
             //var attributes = new List<string>();
 
             //if (mediaObject.Attributes.Mid is not null) 
@@ -279,11 +280,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             //    //    } : null,
             //    AttributesOld = attributes
             //};
-            throw new NotImplementedException();
-        }
+        //    throw new NotImplementedException();
+        //}
 
-        public static MediaObject SdpMediaDescriptionToMediaObject(MediaDescription mediaDescription)
-        {
+        //public static MediaObject SdpMediaDescriptionToMediaObject(MediaDescription mediaDescription)
+        //{
             //return new MediaObject
             //{
             //    Mid = mediaDescription.AttributesOld
@@ -327,9 +328,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             //        .Select(r => r.ToRid())
             //        .ToList()
             //};
-            throw new NotImplementedException();
+        //    throw new NotImplementedException();
 
-        }
+        //}
 
         public static string GetCname(MediaObject offerMediaObject)
         {
