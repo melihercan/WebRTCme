@@ -19,11 +19,16 @@ namespace Utilme.SdpTransform
         public bool? RtcpRsize { get; set; }
         public const string RtcpRsizeLabel = "rtcp-rsize";
 
+
+        public bool? SendRecv { get; set; }
+        public const string SendRecvLabel = "sendrecv";
+
         public bool? EndOfCandidates { get; set; }
         public const string EndOfCandidatesLabel = "end-of-candidates";
 
 
-        
+
+
         // Value attributes.
         public Group Group { get; set; }
 

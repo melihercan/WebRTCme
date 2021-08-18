@@ -118,6 +118,16 @@ namespace Utilme.SdpTransform
                     // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
                         md.Attributes.ExtmapAllowMixed = true;
+                    else if (attr.StartsWith(Attributes.IceLiteLabel))
+                        md.Attributes.IceLite = true;
+                    else if (attr.StartsWith(Attributes.RtcpMuxLabel))
+                        md.Attributes.RtcpMux = true;
+                    else if (attr.StartsWith(Attributes.RtcpRsizeLabel))
+                        md.Attributes.RtcpRsize = true;
+                    else if (attr.StartsWith(Attributes.SendRecvLabel))
+                        md.Attributes.SendRecv = true;
+                    else if (attr.StartsWith(Attributes.EndOfCandidatesLabel))
+                        md.Attributes.EndOfCandidates = true;
 
                     // Value attributes.
                     else if (attr.StartsWith(Group.Label))
@@ -257,7 +267,15 @@ namespace Utilme.SdpTransform
 
                 // Media description binary attributes.
                 if (md.Attributes.ExtmapAllowMixed.HasValue)
-                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}");
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}{Sdp.CRLF}");
+                if (md.Attributes.IceLite.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.IceLiteLabel}{Sdp.CRLF}");
+                if (md.Attributes.RtcpMux.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.RtcpMuxLabel}{Sdp.CRLF}");
+                if (md.Attributes.RtcpRsize.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.RtcpRsizeLabel}{Sdp.CRLF}");
+                if (md.Attributes.SendRecv.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.SendRecvLabel}{Sdp.CRLF}");
 
                 // Media description value attributes.
                 if (md.Attributes.Group is not null)
@@ -283,6 +301,8 @@ namespace Utilme.SdpTransform
                 if (md.Attributes.Candidates is not null)
                     foreach (var c in md.Attributes.Candidates)
                         sb.Append(c.ToText());
+                if (md.Attributes.EndOfCandidates.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.EndOfCandidatesLabel}");
                 if (md.Attributes.Ssrcs is not null)
                     foreach (var s in md.Attributes.Ssrcs)
                         sb.Append(s.ToText());
