@@ -105,7 +105,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             // Direction is optional. If unset set it to sendrecv.
             if (!ext.Direction.HasValue)
-                ext.Direction = Direction.Sendonly;
+                ext.Direction = Direction.SendOnly;
         }
 
         public void ValidateRtpParameters(RtpParameters params_)
@@ -296,9 +296,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 Direction direction = remoteExt.Direction switch
                 {
-                    Direction.Sendrecv => Direction.Sendrecv,
-                    Direction.Recvonly => Direction.Sendonly,
-                    Direction.Sendonly => Direction.Recvonly,
+                    Direction.SendRecv => Direction.SendRecv,
+                    Direction.RecvOnly => Direction.SendOnly,
+                    Direction.SendOnly => Direction.RecvOnly,
                     Direction.Inactive => Direction.Inactive,
                     _ => throw new NotImplementedException()
                 };
@@ -362,8 +362,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             List<RtpHeaderExtension> headerExtensions = new();
             foreach (var extendedExtensions in extendedRtpCapabilities.HeaderExtensions)
             {
-                if (extendedExtensions.Direction != Direction.Sendrecv
-                    && extendedExtensions.Direction != Direction.Recvonly)
+                if (extendedExtensions.Direction != Direction.SendRecv
+                    && extendedExtensions.Direction != Direction.RecvOnly)
                     continue;
 
                 RtpHeaderExtension ext = new() 
@@ -424,8 +424,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 // Ignore RTP extensions of a different kind and those not valid for sending.
                 if ((extendedExtendion.Kind != kind) ||
-                    (extendedExtendion.Direction != Direction.Sendrecv && 
-                    extendedExtendion.Direction != Direction.Sendonly))
+                    (extendedExtendion.Direction != Direction.SendRecv && 
+                    extendedExtendion.Direction != Direction.SendOnly))
                     continue;
 
                 RtpHeaderExtensionParameters ext = new()
@@ -487,8 +487,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 // Ignore RTP extensions of a different kind and those not valid for sending.
                 if ((extendedExtendion.Kind != kind) ||
-                    (extendedExtendion.Direction != Direction.Sendrecv &&
-                    extendedExtendion.Direction != Direction.Sendonly))
+                    (extendedExtendion.Direction != Direction.SendRecv &&
+                    extendedExtendion.Direction != Direction.SendOnly))
                     continue;
 
                 RtpHeaderExtensionParameters ext = new()

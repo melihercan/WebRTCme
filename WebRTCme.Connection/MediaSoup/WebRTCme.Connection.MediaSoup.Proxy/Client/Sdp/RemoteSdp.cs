@@ -45,7 +45,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     UnicastAddress = "0.0.0.0"
                 },
                 SessionName = "-",
-                Timings = new List<Timing>() { new Timing { StartTime = new DateTime(0), StopTime = new DateTime(0) } },
+                Timings = new List<Timing>() { new Timing 
+                { 
+                    StartTime = new DateTime(1900, 1, 1), 
+                    StopTime = new DateTime(1900, 1, 1) } 
+                },
                 Attributes = new(),
                 MediaDescriptions = new List<MediaDescription>()
             };

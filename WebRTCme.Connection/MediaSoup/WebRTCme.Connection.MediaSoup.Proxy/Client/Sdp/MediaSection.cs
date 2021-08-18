@@ -56,6 +56,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 }
             }
 
+            _mediaObject.MediaDescription.Attributes.EndOfCandidates = true;
             _mediaObject.MediaDescription.Attributes.IceOptions = 
                 new IceOptions { Tags = new string[] { "renomination" } };
 

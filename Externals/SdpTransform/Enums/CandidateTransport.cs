@@ -10,10 +10,10 @@ namespace Utilme.SdpTransform
 {
     public enum CandidateTransport
     {
-        [Display(Name = "UDP")]
+        [Display(Name = "udp")]
         Udp,
 
-        [Display(Name = "TCP")]
+        [Display(Name = "tcp")]
         Tcp
     }
 }

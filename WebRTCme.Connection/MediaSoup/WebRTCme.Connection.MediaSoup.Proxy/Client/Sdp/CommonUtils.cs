@@ -200,20 +200,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 throw new Exception("No active media section found");
 
             var fingerprint = mediaObject.MediaDescription.Attributes.Fingerprint ?? sdp.Attributes.Fingerprint;
-            DtlsRole? role = null;
-
-            switch (mediaObject.Setup)
+            DtlsRole? role = mediaObject.MediaDescription.Attributes.Setup.Role switch
             {
-                case "active":
-                    role = DtlsRole.Client;
-                    break;
-                case "passive":
-                    role = DtlsRole.Server;
-                    break;
-                case "actpass":
-                    role = DtlsRole.Auto;
-                    break;
-            }
+                SetupRole.Active => DtlsRole.Client,
+                SetupRole.Passive => DtlsRole.Server,
+                SetupRole.ActPass => DtlsRole.Auto,
+                _ => null
+            };
 
             return new DtlsParameters 
             {

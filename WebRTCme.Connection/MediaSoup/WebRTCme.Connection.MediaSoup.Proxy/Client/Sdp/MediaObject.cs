@@ -42,12 +42,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public List<RtpHeaderExtensionParameters> Extensions { get; set; }
 
-        public int SctpPort { get; set; }
-        public int MaxMessageSize { get; set; }
+        ////public int SctpPort { get; set; }
+        ////public int MaxMessageSize { get; set; }
 
         public SctpMap SctpMap { get; set; }
 
-        public string Setup { get; set; }
+        //public string Setup { get; set; }
 
         public string XGoogleFlag { get; set; }
 

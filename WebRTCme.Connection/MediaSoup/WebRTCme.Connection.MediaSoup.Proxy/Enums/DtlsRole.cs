@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme.Connection.MediaSoup
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
     public enum DtlsRole
     {
         Auto,

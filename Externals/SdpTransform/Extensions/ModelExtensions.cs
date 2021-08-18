@@ -64,12 +64,16 @@ namespace Utilme.SdpTransform
                     // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
                         sdp.Attributes.ExtmapAllowMixed = true;
+                    else if (attr.StartsWith(Attributes.IceLiteLabel))
+                        sdp.Attributes.IceLite = true;
 
                     // Value attributes.
                     else if (attr.StartsWith(Group.Label))
                         sdp.Attributes.Group = attr.ToGroup();
                     else if (attr.StartsWith(MsidSemantic.Label))
                         sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                    else if (attr.StartsWith(Fingerprint.Label))
+                        sdp.Attributes.Fingerprint = attr.ToFingerprint();
 
                     else
                         Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
@@ -118,8 +122,6 @@ namespace Utilme.SdpTransform
                     // Binary attributes.
                     if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
                         md.Attributes.ExtmapAllowMixed = true;
-                    else if (attr.StartsWith(Attributes.IceLiteLabel))
-                        md.Attributes.IceLite = true;
                     else if (attr.StartsWith(Attributes.RtcpMuxLabel))
                         md.Attributes.RtcpMux = true;
                     else if (attr.StartsWith(Attributes.RtcpRsizeLabel))
@@ -150,6 +152,10 @@ namespace Utilme.SdpTransform
                         md.Attributes.Rtcp = attr.ToRtcp();
                     else if (attr.StartsWith(Setup.Label))
                         md.Attributes.Setup = attr.ToSetup();
+                    else if (attr.StartsWith(SctpPort.Label))
+                        md.Attributes.SctpPort = attr.ToSctpPort();
+                    else if (attr.StartsWith(MaxMessageSize.Label))
+                        md.Attributes.MaxMessageSize = attr.ToMaxMessageSize();
                     else if (attr.StartsWith(Candidate.Label))
                     {
                         md.Attributes.Candidates ??= new List<Candidate>();
@@ -242,13 +248,16 @@ namespace Utilme.SdpTransform
             // Session binary attributes.
             if (sdp.Attributes.ExtmapAllowMixed.HasValue)
                 sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}{Sdp.CRLF}");
+            if (sdp.Attributes.IceLite.HasValue)
+                sb.Append($"{Sdp.AttributeIndicator}{Attributes.IceLiteLabel}{Sdp.CRLF}");
 
             // Session value attributes.
             if (sdp.Attributes.Group is not null)
                 sb.Append(sdp.Attributes.Group.ToText());
             if (sdp.Attributes.MsidSemantic is not null)
                 sb.Append(sdp.Attributes.MsidSemantic.ToText());
-
+            if (sdp.Attributes.Fingerprint is not null)
+                sb.Append(sdp.Attributes.Fingerprint.ToText());
 
             // Media description fields.
             foreach (var md in sdp.MediaDescriptions)
@@ -268,8 +277,6 @@ namespace Utilme.SdpTransform
                 // Media description binary attributes.
                 if (md.Attributes.ExtmapAllowMixed.HasValue)
                     sb.Append($"{Sdp.AttributeIndicator}{Attributes.ExtmapAllowMixedLabel}{Sdp.CRLF}");
-                if (md.Attributes.IceLite.HasValue)
-                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.IceLiteLabel}{Sdp.CRLF}");
                 if (md.Attributes.RtcpMux.HasValue)
                     sb.Append($"{Sdp.AttributeIndicator}{Attributes.RtcpMuxLabel}{Sdp.CRLF}");
                 if (md.Attributes.RtcpRsize.HasValue)
@@ -298,6 +305,10 @@ namespace Utilme.SdpTransform
                     sb.Append(md.Attributes.Rtcp.ToText());
                 if (md.Attributes.Setup is not null)
                     sb.Append(md.Attributes.Setup.ToText());
+                if (md.Attributes.SctpPort is not null)
+                    sb.Append(md.Attributes.SctpPort.ToText());
+                if (md.Attributes.MaxMessageSize is not null)
+                    sb.Append(md.Attributes.MaxMessageSize.ToText());
                 if (md.Attributes.Candidates is not null)
                     foreach (var c in md.Attributes.Candidates)
                         sb.Append(c.ToText());
@@ -826,9 +837,9 @@ namespace Utilme.SdpTransform
 
         public static string ToText(this Rtcp rtcp) =>
             $"{Sdp.AttributeIndicator}{Rtcp.Label}" +
-                $"{rtcp.Port}{(rtcp.NetType.HasValue ? " " + rtcp.NetType.DisplayName() : string.Empty)}" +
-                $"{(rtcp.AddrType.HasValue ? " " + rtcp.AddrType.DisplayName() : string.Empty)}" +
-                $"{(rtcp.ConnectionAddress is not null ? " " + rtcp.ConnectionAddress : string.Empty)}" +
+                $"{rtcp.Port}{(rtcp.NetType.HasValue ? $" {rtcp.NetType.DisplayName()}" : string.Empty)}" +
+                $"{(rtcp.AddrType.HasValue ? $" {rtcp.AddrType.DisplayName()}" : string.Empty)}" +
+                $"{(rtcp.ConnectionAddress is not null ? $" {rtcp.ConnectionAddress}" : string.Empty)}" +
                 $"{Sdp.CRLF}";
 
         public static Setup ToSetup(this string str)
@@ -848,6 +859,43 @@ namespace Utilme.SdpTransform
                 $"{setup.Role.DisplayName()}" +
                 $"{Sdp.CRLF}";
 
+
+        public static SctpPort ToSctpPort(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(SctpPort.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new SctpPort
+            {
+                Port = int.Parse(tokens[0])
+            };
+        }
+
+        public static string ToText(this SctpPort sctpPort) =>
+            $"{Sdp.AttributeIndicator}{SctpPort.Label}" +
+                $"{sctpPort.Port}" +
+                $"{Sdp.CRLF}";
+
+        public static MaxMessageSize ToMaxMessageSize(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(MaxMessageSize.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return new MaxMessageSize
+            {
+                Size = int.Parse(tokens[0])
+            };
+        }
+
+        public static string ToText(this MaxMessageSize size) =>
+            $"{Sdp.AttributeIndicator}{MaxMessageSize.Label}" +
+                $"{size.Size}" +
+                $"{Sdp.CRLF}";
+
+
+
         public static Candidate ToCandidate(this string str)
         {
             var tokens = str
@@ -863,8 +911,8 @@ namespace Utilme.SdpTransform
                 ConnectionAddress = tokens[4],
                 Port = int.Parse(tokens[5]),
                 Type = tokens[7].EnumFromDisplayName<CandidateType>(),
-                RelAddr = tokens[9],
-                RelPort = int.Parse(tokens[11])
+                RelAddr = tokens.Length > 7 ? tokens[9] : null,
+                RelPort = tokens.Length > 7 ? int.Parse(tokens[11]) : null
             };
         }
 
@@ -872,8 +920,9 @@ namespace Utilme.SdpTransform
             $"{Sdp.AttributeIndicator}{Candidate.Label}" +
                 $"{candidate.Foundation} {candidate.ComponentId} {candidate.Transport.DisplayName()} " +
                 $"{candidate.Priority} {candidate.ConnectionAddress} {candidate.Port} {Candidate.Typ} " +
-                $"{candidate.Type.DisplayName()} {Candidate.Raddr} {candidate.RelAddr} " +
-                $"{Candidate.Rport} {candidate.RelPort}" +
+                $"{candidate.Type.DisplayName()}" +
+                $"{(candidate.RelAddr is not null ? $" {Candidate.Raddr} {candidate.RelAddr}" : string.Empty)}" +
+                $"{(candidate.RelPort.HasValue ? $" {Candidate.Rport} {candidate.RelPort}" : string.Empty)}" +
                 $"{Sdp.CRLF}";
 
         public static Ssrc ToSsrc(this string str)

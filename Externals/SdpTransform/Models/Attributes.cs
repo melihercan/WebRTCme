@@ -50,6 +50,10 @@ namespace Utilme.SdpTransform
 
         public Setup Setup { get; set; }
 
+        public SctpPort SctpPort { get; set; }
+
+        public MaxMessageSize MaxMessageSize { get; set; }
+
         public IList<Candidate> Candidates { get; set; }
  
         public IList<Ssrc> Ssrcs { get; set; }

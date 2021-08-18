@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     AddrType = AddrType.Ip4,
                     ConnectionAddress = "127.0.0.1"
                 };
-                if (sctpParameters is not null)
+                if (sctpParameters is null)
                     _mediaObject.MediaDescription.Proto = "UDP/TLS/RTP/SAVPF";
                 else
                     _mediaObject.MediaDescription.Proto = "UDP/DTLS/SCTP";
@@ -63,7 +63,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaKind.Audio:
                 case MediaKind.Video:
                     {
-                        _mediaObject.Direction = Direction.Sendonly;
+                        _mediaObject.Direction = Direction.SendOnly;
                         _mediaObject.MediaDescription.Attributes.Rtpmaps = new List<Rtpmap>();
                         _mediaObject.MediaDescription.Attributes.RtcpFbs = new List<RtcpFb>();
                         _mediaObject.MediaDescription.Attributes.Fmtps = new List<Fmtp>();
@@ -186,8 +186,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         if (!oldDataChannelSpec)
                         {
                             _mediaObject.MediaDescription.Fmts = new List<string> { "webrtc-datachannel" };
-                            _mediaObject.SctpPort = sctpParameters.Port;
-                            _mediaObject.MaxMessageSize = sctpParameters.MaxMessageSize;
+                            _mediaObject.MediaDescription.Attributes.SctpPort = new SctpPort
+                            {
+                                Port = sctpParameters.Port
+                            };
+                            _mediaObject.MediaDescription.Attributes.MaxMessageSize = new MaxMessageSize
+                            {
+                                Size = sctpParameters.MaxMessageSize
+                            };
                         }
                         // Old spec.
                         else
@@ -401,7 +407,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public override void SetDtlsRole(DtlsRole? dtlsRole)
         {
-            _mediaObject.Setup = "actpass";
+            _mediaObject.MediaDescription.Attributes.Setup = new Setup
+            {
+                Role = SetupRole.ActPass
+            };
         }
     }
 }

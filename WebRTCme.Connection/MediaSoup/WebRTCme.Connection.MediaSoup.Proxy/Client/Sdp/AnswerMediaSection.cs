@@ -53,7 +53,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaType.Audio:
                 case MediaType.Video:
                     {
-                        _mediaObject.Direction = Direction.Recvonly;
+                        _mediaObject.Direction = Direction.RecvOnly;
                         _mediaObject.MediaDescription.Attributes.Rtpmaps = new List<Rtpmap>();
                         _mediaObject.MediaDescription.Attributes.RtcpFbs = new List<RtcpFb>();
                         _mediaObject.MediaDescription.Attributes.Fmtps = new List<Fmtp>();
@@ -254,11 +254,17 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaType.Application:
                     {
                         // New spec.
-                        if (offerMediaObject.SctpPort.GetType() == typeof(int))
+                        if (offerMediaObject.MediaDescription.Attributes.SctpPort.GetType() == typeof(int))
                         {
                             _mediaObject.MediaDescription.Fmts = new List<string> { "webrtc-datachannel" };
-                            _mediaObject.SctpPort = sctpParameters.Port;
-                            _mediaObject.MaxMessageSize = sctpParameters.MaxMessageSize;
+                            _mediaObject.MediaDescription.Attributes.SctpPort = new SctpPort
+                            {
+                                Port = sctpParameters.Port
+                            };
+                            _mediaObject.MediaDescription.Attributes.MaxMessageSize = new MaxMessageSize
+                            {
+                                Size = sctpParameters.MaxMessageSize
+                            };
                         }
                         // Old spec.
                         else if (offerMediaObject.SctpMap is not null)
@@ -279,18 +285,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public override void SetDtlsRole(DtlsRole? dtlsRole)
         {
-            switch (dtlsRole)
+            _mediaObject.MediaDescription.Attributes.Setup = new Setup
             {
-                case DtlsRole.Client:
-                    _mediaObject.Setup = "active";
-                    break;
-                case DtlsRole.Server:
-                    _mediaObject.Setup = "passive";
-                    break;
-                case DtlsRole.Auto:
-                    _mediaObject.Setup = "actpass";
-                    break;
-            }
+                Role = dtlsRole switch
+                {
+                    DtlsRole.Client => SetupRole.Active,
+                    DtlsRole.Server => SetupRole.Passive,
+                    DtlsRole.Auto => SetupRole.ActPass,
+                    _ => throw new NotImplementedException()
+                }
+            };
         }
     }
 }
