@@ -33,7 +33,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Mis = 1024,
         };
 
-        public event EventHandler<ConnectionState> OnConnectionStateChange;
+        public event EventHandlerAsync<ConnectionState> OnConnectionStateChangeAsync;
         public event EventHandlerAsync<DtlsParameters> OnConnectAsync;
 
         public Handler(Ortc ortc)
@@ -126,7 +126,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
             });
 
-            _pc.OnIceConnectionStateChange += (s, e) => 
+            _pc.OnIceConnectionStateChange += async (s, e) => 
             {
                 ConnectionState connectionState = _pc.IceConnectionState switch
                 {
@@ -139,7 +139,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     _ => throw new NotImplementedException(),
                 };
 
-                OnConnectionStateChange?.Invoke(this, connectionState);
+                await OnConnectionStateChangeAsync?.Invoke(this, connectionState);
             };
 
         }
@@ -529,7 +529,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             };
 
 		    if (!_transportReady)
-			    await this.SetupTransportAsync(DtlsRole.Client, localSdpObject);
+			    await SetupTransportAsync(DtlsRole.Client, localSdpObject);
 
 		    await _pc.SetLocalDescription(answer);
 

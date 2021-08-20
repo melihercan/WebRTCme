@@ -543,7 +543,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             List<RtpCodecParameters> filteredCodecs = new();
 
             // If no capability codec is given, take the first one (and RTX).
-            if (capCodec is not null)
+            if (capCodec is null)
             {
                 filteredCodecs.Add(codecs[0]);
 

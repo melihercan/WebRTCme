@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
@@ -103,6 +104,7 @@ namespace WebRTCme.Connection.Services
                         });
 
                         _sendTransport.OnConnectAsync += SendTransport_OnConnectAsync;
+                        _sendTransport.OnConnectionStateChangeAsync += SendTransport_OnConnectionStateChangeAsync;
                         _sendTransport.OnProduceAsync += SendTransport_OnProduceAsync;
                         _sendTransport.OnProduceDataAsync += SendTransport_OnProduceDataAsync;
 
@@ -134,8 +136,8 @@ namespace WebRTCme.Connection.Services
                         });
 
                         _recvTransport.OnConnectAsync += RecvTransport_OnConnectAsync;
+                        _recvTransport.OnConnectionStateChangeAsync += RecvTransport_OnConnectionStateChangeAsync;
                     }
-
 
                     // Join now into the room.
                     // NOTE: Don't send our RTP capabilities if we don't want to consume.
@@ -152,7 +154,22 @@ namespace WebRTCme.Connection.Services
                     foreach (var peer in peers)
                         OnNewPeer(peer);
 
-                    //// TODO: START PRODUCERS
+
+
+                    //if (_produce)
+                    //{
+                        //var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        //{
+                        //    Track = userContext.LocalStream.GetAudioTracks().First(),
+                        //    Encodings = new RtpEncodingParameters[] { },
+                        //    CodecOptions = new ProducerCodecOptions 
+                        //    { 
+                        //        OpusStereo = true,
+                        //        OpusDtx = true
+                        //    }
+                        //});
+
+                    //}
 
 
                     //connectionContext = new ConnectionContext
@@ -191,6 +208,26 @@ namespace WebRTCme.Connection.Services
                             }));
                 }
 
+
+                async Task SendTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
+                {
+                    if (connectionState == ConnectionState.Connected)
+                    {
+                        var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        {
+                            Track = userContext.LocalStream.GetAudioTracks().First(),
+                            Encodings = new RtpEncodingParameters[] { },
+                            CodecOptions = new ProducerCodecOptions
+                            {
+                                OpusStereo = true,
+                                OpusDtx = true
+                            }
+                        });
+
+
+                    }
+                }
+
                 Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
                 {
                     _logger.LogInformation($"-------> SendTransport_OnProduceAsync");
@@ -214,6 +251,15 @@ namespace WebRTCme.Connection.Services
                                 DtlsParameters = dtlsParameters
                             }));
                 }
+
+                async Task RecvTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
+                {
+                    //if (connectionState == ConnectionState.Connected)
+                    //{
+
+                    //}
+                }
+
 
             });
 

@@ -33,7 +33,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public ConnectionState ConnectionState { get; private set; }
         public Dictionary<string, object> AppData { get; }
 
-        public event EventHandler<ConnectionState> OnConnectionStateChange;
+        public event EventHandlerAsync<ConnectionState> OnConnectionStateChangeAsync;
         public event EventHandlerAsync<DtlsParameters> OnConnectAsync;
         public event EventHandlerAsync<ProduceEventParameters, string> OnProduceAsync;
         public event EventHandlerAsync<ProduceDataEventParameters, string> OnProduceDataAsync;
@@ -411,19 +411,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         void HandleHandler(/**** TODO: Add bool flag to unregister events****/)
         {
             Handler.OnConnectAsync += Handler_OnConnectAsync;
-            Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
+            Handler.OnConnectionStateChangeAsync += Handler_OnConnectionStateChangeAsync;
 
             async Task Handler_OnConnectAsync(object sender, DtlsParameters e)
             {
                 await OnConnectAsync.Invoke(this, e);
             }
 
-            void Handler_OnConnectionStateChange(object sender, ConnectionState connectionState)
+            async Task Handler_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
             {
                 if (ConnectionState == connectionState)
                     return;
                 ConnectionState = connectionState;
-                OnConnectionStateChange?.Invoke(this, connectionState);
+                await OnConnectionStateChangeAsync?.Invoke(this, connectionState);
             }
         }
 
