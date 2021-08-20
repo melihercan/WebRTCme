@@ -149,6 +149,10 @@ namespace WebRTCme.Connection.Services
                                 SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
                             }));
 
+                    foreach (var peer in peers)
+                        OnNewPeer(peer);
+
+                    //// TODO: START PRODUCERS
 
 
                     //connectionContext = new ConnectionContext
@@ -217,17 +221,32 @@ namespace WebRTCme.Connection.Services
         }
 
 
-        public Task OnNotifyAsync(string method, object data)
+        public async Task OnNotifyAsync(string method, object data)
         {
             _logger.LogInformation($"=======> OnNotifyAsync: {method}");
-            throw new NotImplementedException();
+            
+            switch (method)
+            {
+                case MethodName.NewPeer:
+                    {
+                        var json = ((JsonElement)data).GetRawText();
+                        var peer = JsonSerializer.Deserialize<Peer>(
+                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        OnNewPeer(peer);
+                    }
+                    break;
+
+                default:
+                    _logger.LogError($"-------> UNKNOWN Notification: {method}");
+                    break;
+
+            }
         }
 
         public async Task OnRequestAsync(string method, object data,
             IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
         {
             _logger.LogInformation($"=======> OnRequestAsync: {method}");
-
 
             switch (method)
             {
@@ -274,9 +293,11 @@ namespace WebRTCme.Connection.Services
                         });
 
                         _dataConsumers.Add(dataConsumer.Id, dataConsumer);
-                        ///// TODO: ADD THIS AFTER "newPeer"
-                        ////var peer = _peers[requestData.PeerId];
-                        ////peer.DataConsumerIds.Add(dataConsumer.Id);
+                        if (requestData.PeerId is not null)
+                        {
+                            var peer = _peers[requestData.PeerId];
+                            peer.DataConsumerIds.Add(dataConsumer.Id);
+                        }
 
                         dataConsumer.OnOpen += DataConsumer_OnOpen;
                         dataConsumer.OnClose += DataConsumer_OnClose;
@@ -297,16 +318,16 @@ namespace WebRTCme.Connection.Services
                     void DataConsumer_OnClose(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"-------> DataConsumer_OnClose");
-                        ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
-                        ////peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
+                        peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
                     }
 
                     void DataConsumer_OnTransportClosed(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"-------> DataConsumer_OnTransportClosed");
-                        ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
-                        ////peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
+                        peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
 
                     }
@@ -322,7 +343,9 @@ namespace WebRTCme.Connection.Services
                         throw new NotImplementedException();
                     }
 
-
+                default:
+                    _logger.LogError($"-------> UNKNOWN Request: {method}");
+                    break;
             }
 
 
@@ -396,6 +419,16 @@ namespace WebRTCme.Connection.Services
 
         }
 
+
+        void OnNewPeer(Peer peer)
+        {
+            _peers.Add(peer.Id, new PeerParameters 
+            { 
+                Peer = peer,
+                ConsumerIds = new(),
+                DataConsumerIds =new(),
+            });
+        }
 
         MediaSoup.Proxy.Models.Device GetDevice()
         {

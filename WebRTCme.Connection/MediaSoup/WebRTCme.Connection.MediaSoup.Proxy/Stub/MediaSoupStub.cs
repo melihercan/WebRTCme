@@ -120,7 +120,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     }
                     catch (Exception ex)
                     {
-
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
                     }
                     finally
                     {
@@ -142,7 +142,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     }
                     catch (Exception ex)
                     {
-
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
                     }
                     finally
                     {
@@ -195,6 +195,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     catch (OperationCanceledException) { }
                     catch (Exception ex)
                     {
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
                         //// TODO: HOW TO REPORT THIS ERROR??? ERROR EVENT???
                     }
                 }
