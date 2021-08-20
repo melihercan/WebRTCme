@@ -11,5 +11,6 @@ namespace WebRTCme.Connection.MediaSoup
         public const string Join = "join";
         public const string NewConsumer = "newConsumer";
         public const string NewDataConsumer = "newDataConsumer";
+        public const string ConnectWebRtcTransport = "connectWebRtcTransport";
     }
 }

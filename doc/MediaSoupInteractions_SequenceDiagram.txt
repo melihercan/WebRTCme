@@ -1,0 +1,25 @@
+title MediaSoup interactions
+
+actor WebRTCme
+participant Connection
+participant Proxy
+participant Server
+
+note over Server,Proxy:WebSocket connection\nAll traffic between Connection\n and Server go through Proxy
+
+WebRTCme->Connection:ConnectionRequest
+Connection->Server:ConnectAsync
+
+
+abox over Connection:new Client.Device
+Connection->Server:GetRouterRtpCapabilities
+abox over Connection:Client.Device.LoadAsync
+Connection->Server:CreateWebRtcTransport (produce)
+abox over Connection:Client.Device.CreateSendTransport
+Connection->Server:CreateWebRtcTransport (consume)
+abox over Connection:Client.Device.CreateRecvTransport
+Connection->Server: Join
+note over Server: returns all existing peers
+
+
+

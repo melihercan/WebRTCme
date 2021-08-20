@@ -410,8 +410,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         void HandleHandler(/**** TODO: Add bool flag to unregister events****/)
         {
-            Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
             Handler.OnConnectAsync += Handler_OnConnectAsync;
+            Handler.OnConnectionStateChange += Handler_OnConnectionStateChange;
 
             async Task Handler_OnConnectAsync(object sender, DtlsParameters e)
             {

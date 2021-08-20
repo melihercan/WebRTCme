@@ -175,24 +175,40 @@ namespace WebRTCme.Connection.Services
                     catch { };
                 };
 
-                Task SendTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
+                async Task SendTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
                 {
-                    throw new NotImplementedException();
+                    _logger.LogInformation($"-------> SendTransport_OnConnectAsync");
+                    _ = ParseResponse(MethodName.ConnectWebRtcTransport,
+                        await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
+                            new WebRtcTransportConnectParameters
+                            {
+                                TransportId = _sendTransport.Id,
+                                DtlsParameters = dtlsParameters
+                            }));
                 }
 
                 Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
                 {
+                    _logger.LogInformation($"-------> SendTransport_OnProduceAsync");
                     throw new NotImplementedException();
                 }
                 
                 Task<string> SendTransport_OnProduceDataAsync(object sender, ProduceDataEventParameters params_)
                 {
+                    _logger.LogInformation($"-------> SendTransport_OnProduceDataAsync");
                     throw new NotImplementedException();
                 }
 
-                Task RecvTransport_OnConnectAsync(object sender, DtlsParameters e)
+                async Task RecvTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
                 {
-                    throw new NotImplementedException();
+                    _logger.LogInformation($"-------> RecvTransport_OnConnectAsync");
+                    _ = ParseResponse(MethodName.ConnectWebRtcTransport,
+                        await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
+                            new WebRtcTransportConnectParameters
+                            {
+                                TransportId = _recvTransport.Id,
+                                DtlsParameters = dtlsParameters
+                            }));
                 }
 
             });
@@ -203,12 +219,14 @@ namespace WebRTCme.Connection.Services
 
         public Task OnNotifyAsync(string method, object data)
         {
+            _logger.LogInformation($"=======> OnNotifyAsync: {method}");
             throw new NotImplementedException();
         }
 
         public async Task OnRequestAsync(string method, object data,
             IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
         {
+            _logger.LogInformation($"=======> OnRequestAsync: {method}");
 
 
             switch (method)
@@ -241,6 +259,10 @@ namespace WebRTCme.Connection.Services
                         var appData = requestData.AppData;
                         appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
 
+                        // Invoke accept here, ConsumerDataAsync call assumes DataConsumer is already created.
+                        ////accept();
+
+
                         dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
                         {
                             Id = requestData.Id,
@@ -250,7 +272,7 @@ namespace WebRTCme.Connection.Services
                             Protocol = requestData.Protocol,
                             AppData = appData
                         });
-                        
+
                         _dataConsumers.Add(dataConsumer.Id, dataConsumer);
                         ///// TODO: ADD THIS AFTER "newPeer"
                         ////var peer = _peers[requestData.PeerId];
@@ -269,9 +291,12 @@ namespace WebRTCme.Connection.Services
                     //// TODO: HOW TO DEREGISTER EVENTS???
                     void DataConsumer_OnOpen(object sender, EventArgs e)
                     {
+                        _logger.LogInformation($"-------> DataConsumer_OnOpen");
+
                     }
                     void DataConsumer_OnClose(object sender, EventArgs e)
                     {
+                        _logger.LogInformation($"-------> DataConsumer_OnClose");
                         ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
                         ////peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
@@ -279,6 +304,7 @@ namespace WebRTCme.Connection.Services
 
                     void DataConsumer_OnTransportClosed(object sender, EventArgs e)
                     {
+                        _logger.LogInformation($"-------> DataConsumer_OnTransportClosed");
                         ////var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
                         ////peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
@@ -287,10 +313,12 @@ namespace WebRTCme.Connection.Services
 
                     void DataConsumer_OnError(object sender, IErrorEvent e)
                     {
+                        _logger.LogInformation($"-------> DataConsumer_OnError");
                     }
 
                     void DataConsumer_OnMessage(object sender, IMessageEvent e)
                     {
+                        _logger.LogInformation($"-------> DataConsumer_OnMessage");
                         throw new NotImplementedException();
                     }
 
@@ -317,6 +345,8 @@ namespace WebRTCme.Connection.Services
 
         object ParseResponse(string method, Result<object> result)
         {
+            _logger.LogInformation($"######## CallAsync Response: {method}");
+
             if (!result.IsOk)
                 throw new Exception(result.ErrorMessage);
 
@@ -356,6 +386,10 @@ namespace WebRTCme.Connection.Services
                         json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
                     var peers = joinResponse.Peers;
                     return peers;
+
+                case MethodName.ConnectWebRtcTransport:
+
+                    return null;
             }
 
             return null;

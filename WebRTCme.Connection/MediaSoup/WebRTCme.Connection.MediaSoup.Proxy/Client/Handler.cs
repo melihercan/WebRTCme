@@ -605,7 +605,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Sdp = _remoteSdp.GetSdp() 
                 };
 
-       Console.WriteLine($"OFFER:{offer.Sdp}");
+       ////Console.WriteLine($"OFFER:{offer.Sdp}");
 
                 await _pc.SetRemoteDescription(offer);
                 var answer = await _pc.CreateAnswer();
@@ -618,7 +618,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 await _pc.SetLocalDescription(answer);
                 _hasDataChannelMediaSection = true;
-
             }
 
             return new HandlerReceiveDataChannelResult
