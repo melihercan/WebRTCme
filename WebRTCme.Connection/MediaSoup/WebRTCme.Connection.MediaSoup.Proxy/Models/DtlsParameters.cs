@@ -6,7 +6,7 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class DtlsParameters
     {
-        public DtlsRole? DtlsRole { get; set; } 
+        public DtlsRole? Role { get; set; } 
         public DtlsFingerprint[] Fingerprints { get; set; }
     }
 }

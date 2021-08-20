@@ -95,7 +95,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public void UpdateDtlsRole(DtlsRole role)
         {
-            _dtlsParameters.DtlsRole = role;
+            _dtlsParameters.Role = role;
             foreach (var mediaSection in _mediaSections)
                 mediaSection.SetDtlsRole(role);
         }

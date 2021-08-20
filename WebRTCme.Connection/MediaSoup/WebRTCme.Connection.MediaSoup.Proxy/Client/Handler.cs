@@ -635,7 +635,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var dtlsParameters = CommonUtils.ExtractDtlsParameters(localSdpObject);
 
             // Set our DTLS role.
-            dtlsParameters.DtlsRole = localDtlsRole;
+            dtlsParameters.Role = localDtlsRole;
 
             // Update the remote DTLS role in the SDP.
             _remoteSdp.UpdateDtlsRole(localDtlsRole == DtlsRole.Client ? DtlsRole.Server : DtlsRole.Client);

@@ -160,6 +160,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     {
                         var bytes = await _webSocket.ReceiveAsync(_rxBuffer, _cts.Token);
                         var json = Encoding.UTF8.GetString(_rxBuffer.Array, 0, bytes.Count);
+  Console.WriteLine($">>>>>>>>>>>>> INCOMING MSG: {json}");
                         var jsonDocument = JsonDocument.Parse(json);
                         if (jsonDocument.RootElement.TryGetProperty("response", out _))
                         {

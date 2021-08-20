@@ -62,7 +62,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             if (dtlsParameters is not null)
             {
-                SetDtlsRole(dtlsParameters.DtlsRole);
+                SetDtlsRole(dtlsParameters.Role);
             }
         }
 

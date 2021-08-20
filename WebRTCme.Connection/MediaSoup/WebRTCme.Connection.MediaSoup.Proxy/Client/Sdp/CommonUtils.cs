@@ -210,7 +210,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
             return new DtlsParameters 
             {
-                DtlsRole = role,
+                Role = role,
                 Fingerprints = new DtlsFingerprint[] 
                 { 
                     new DtlsFingerprint
