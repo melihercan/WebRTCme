@@ -21,7 +21,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         Dictionary<MediaKind, RtpParameters> _sendingRtpParametersByKind;
         Dictionary<MediaKind, RtpParameters> _sendingRemoteRtpParametersByKind;
         Dictionary<string, IRTCRtpTransceiver> _mapMidTransceiver = new();
-        IMediaStream _sendStream;
+        //IMediaStream _sendStream;
         bool _hasDataChannelMediaSection;
         int _nextSendSctpStreamId;
         bool _transportReady;
@@ -217,11 +217,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
 
             var mediaSectionIdx = _remoteSdp.GetNextMediaSectionIdx();
+
             var transceiver = _pc.AddTransceiver(options.Track, new RTCRtpTransceiverInit
             {
                 Direction = RTCRtpTransceiverDirection.Sendonly,
-				Streams = new IMediaStream[] { _sendStream },
-                SendEncodings = options.Encodings.Select(e => e.ToWebRtc()).ToArray()
+                Streams = new IMediaStream[] { _window.MediaStream() },
+                SendEncodings = options.Encodings?.Select(e => e.ToWebRtc()).ToArray()
             });
 
             var offer = await _pc.CreateOffer();
@@ -279,7 +280,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             sendingRtpParameters.Rtcp.Cname = CommonUtils.GetCname(offerMediaObject);
 
             // Set RTP encodings by parsing the SDP offer if no encodings are given.
-            if (options.Encodings is not null)
+            if (options.Encodings is null)
             {
                 sendingRtpParameters.Encodings = UnifiedPlanUtils.GetRtpEncodings(offerMediaObject);
             }

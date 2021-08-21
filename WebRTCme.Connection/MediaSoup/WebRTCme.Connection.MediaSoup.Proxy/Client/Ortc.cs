@@ -547,7 +547,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 filteredCodecs.Add(codecs[0]);
 
-                if (IsRtxCodec(codecs[1]))
+                if (codecs.Length > 1 && IsRtxCodec(codecs[1]))
                     filteredCodecs.Add(codecs[1]);
             }
             // Otherwise look for a compatible set of codecs.

@@ -107,13 +107,51 @@ namespace WebRTCme.Bindings.Blazor.Api
                     ((MediaStream)stream).NativeObject
                 }));
 
-        public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init) =>
-            RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(
-                NativeObject, "addTransceiver", kind, init));
+        public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
+        {
+            object nativeInit = init;
+            if (init is not null && init.Streams is not null)
+            {
+                // Convert Streams to native.
+                var nativeStreams = init.Streams.Select(s => ((MediaStream)s).NativeObject).ToArray();
+                nativeInit = new
+                {
+                    init.Direction,
+                    init.SendEncodings,
+                    nativeStreams
+                };
+            }
+            return RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
+                "addTransceiver",
+                new object[]
+                {
+                    kind,
+                    nativeInit
+                }));
+        }
 
-        public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init) =>
-            RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(
-                NativeObject, "addTransceiver", track, init));
+        public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
+        {
+            object nativeInit = init;
+            if (init is not null && init.Streams is not null)
+            {
+                // Convert Streams to native.
+                var nativeStreams = init.Streams.Select(s => ((MediaStream)s).NativeObject).ToArray();
+                nativeInit = new
+                {
+                    init.Direction,
+                    init.SendEncodings,
+                    nativeStreams
+                };
+            }
+            return RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
+                "addTransceiver",
+                new object[]
+                {
+                    ((MediaStreamTrack)track).NativeObject,
+                    nativeInit
+                }));
+        }
 
         public void Close() => JsRuntime.CallJsMethodVoid(NativeObject, "close");
 

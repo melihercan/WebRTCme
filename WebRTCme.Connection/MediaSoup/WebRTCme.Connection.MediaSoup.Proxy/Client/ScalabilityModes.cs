@@ -13,6 +13,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
 		public static ScalabilityMode Parse(string scalabilityMode = "")
 		{
+			scalabilityMode ??= string.Empty;
 			var match = ScalabilityModeRegex.Match(scalabilityMode);
 			if (match.Success && match.Groups.Count >= 2)
 			{
