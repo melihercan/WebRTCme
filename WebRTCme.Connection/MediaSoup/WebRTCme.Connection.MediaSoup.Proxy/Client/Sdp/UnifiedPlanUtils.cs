@@ -10,13 +10,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
     {
         public static RtpEncodingParameters[] GetRtpEncodings(MediaObject offerMediaObject)
         {
-			List<uint> ssrcs = new();
-
-			foreach (var line in offerMediaObject.MediaDescription.Attributes.Ssrcs ?? new List<Ssrc>())
-			{
-				var ssrc = line.Id;
-				ssrcs.Add(ssrc);
-			}
+			List<uint> ssrcs = (offerMediaObject.MediaDescription.Attributes.Ssrcs ?? new List<Ssrc>())
+				.Select(s => s.Id)
+				.Distinct()
+				.ToList();
 
 			if (ssrcs.Count == 0)
 				throw new Exception("no a=ssrc lines found");
