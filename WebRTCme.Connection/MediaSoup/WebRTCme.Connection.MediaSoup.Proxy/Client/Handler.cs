@@ -327,7 +327,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
 
-            await _pc.SetRemoteDescription(answer);
+            try
+            {
+                await _pc.SetRemoteDescription(answer);
+            }
+            catch(Exception ex)
+            {
+                var m = ex.Message;
+            }
 
             // Store in the map.
             _mapMidTransceiver.Add(localId, transceiver);
