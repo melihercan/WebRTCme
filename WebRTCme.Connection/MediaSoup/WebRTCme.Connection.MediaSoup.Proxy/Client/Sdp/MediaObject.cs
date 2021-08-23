@@ -37,7 +37,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public MediaDescription MediaDescription { get; set; }
 
 
-        public Direction Direction { get; set; }
+        ////public Direction Direction { get; set; }
 
 
         ////public List<RtpHeaderExtensionParameters> Extensions { get; set; }

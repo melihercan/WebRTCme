@@ -53,7 +53,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaType.Audio:
                 case MediaType.Video:
                     {
-                        _mediaObject.Direction = Direction.RecvOnly;
+                        _mediaObject.MediaDescription.Attributes.RecvOnly = true;
                         _mediaObject.MediaDescription.Attributes.Rtpmaps = new List<Rtpmap>();
                         _mediaObject.MediaDescription.Attributes.RtcpFbs = new List<RtcpFb>();
                         _mediaObject.MediaDescription.Attributes.Fmtps = new List<Fmtp>();

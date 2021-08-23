@@ -82,7 +82,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public void Disable()
         {
-            _mediaObject.Direction = Direction.Inactive;
+            _mediaObject.MediaDescription.Attributes.SendRecv = null;
+            _mediaObject.MediaDescription.Attributes.SendOnly = null;
+            _mediaObject.MediaDescription.Attributes.RecvOnly = null;
 
             _mediaObject.MediaDescription.Attributes.Extmaps?.Clear();
             _mediaObject.MediaDescription.Attributes.Extmaps = null;
@@ -98,7 +100,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public void Close()
         {
-            _mediaObject.Direction = Direction.Inactive;
+            _mediaObject.MediaDescription.Attributes.SendRecv = null;
+            _mediaObject.MediaDescription.Attributes.SendOnly = null;
+            _mediaObject.MediaDescription.Attributes.RecvOnly = null;
             _mediaObject.MediaDescription.Port = 0;
 
             _mediaObject.MediaDescription.Attributes.Extmaps?.Clear();
