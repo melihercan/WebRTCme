@@ -40,7 +40,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         public Direction Direction { get; set; }
 
 
-        public List<RtpHeaderExtensionParameters> Extensions { get; set; }
+        ////public List<RtpHeaderExtensionParameters> Extensions { get; set; }
 
         ////public int SctpPort { get; set; }
         ////public int MaxMessageSize { get; set; }
@@ -51,7 +51,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         public string XGoogleFlag { get; set; }
 
-        public string ExtmapAllowMixed { get; set; }
+        ////public string ExtmapAllowMixed { get; set; }
 
         public Simulcast Simulcast { get; set; }
         public Simulcast03 Simulcast03 { get; set; }

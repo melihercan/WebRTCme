@@ -260,7 +260,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 };
             }
 
-            Console.WriteLine($"send() | calling pc.setLocalDescription() {offer}");
+            Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
 
             await _pc.SetLocalDescription(offer);
 
@@ -325,7 +325,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Sdp = _remoteSdp.GetSdp()
             };
 
-            Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer}");
+            Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
 
             await _pc.SetRemoteDescription(answer);
 

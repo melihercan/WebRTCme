@@ -106,15 +106,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             .Select(codec => codec.PayloadType.ToString()));
 
 
-                        _mediaObject.Extensions = new();
+                        _mediaObject.MediaDescription.Attributes.Extmaps = new List<Extmap>();
                         foreach (var headerExtension in offerRtpParameters.HeaderExtensions)
                         {
-                            var ext = new RtpHeaderExtensionParameters 
+                            Extmap ext = new()
                             {
-                                Uri = headerExtension.Uri,
-                                Number = headerExtension.Number
+                                Uri = new Uri(headerExtension.Uri),
+                                Value = headerExtension.Number
                             };
-                            _mediaObject.Extensions.Add(ext);
+                            _mediaObject.MediaDescription.Attributes.Extmaps.Add(ext);
                         }
 
                         _mediaObject.MediaDescription.Attributes.RtcpMux = true;

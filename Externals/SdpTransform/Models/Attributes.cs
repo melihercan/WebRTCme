@@ -23,6 +23,12 @@ namespace Utilme.SdpTransform
         public bool? SendRecv { get; set; }
         public const string SendRecvLabel = "sendrecv";
 
+        public bool? SendOnly { get; set; }
+        public const string SendOnlyLabel = "sendonly";
+
+        public bool? RecvOnly { get; set; }
+        public const string RecvOnlyLabel = "recvonly";
+
         public bool? EndOfCandidates { get; set; }
         public const string EndOfCandidatesLabel = "end-of-candidates";
 

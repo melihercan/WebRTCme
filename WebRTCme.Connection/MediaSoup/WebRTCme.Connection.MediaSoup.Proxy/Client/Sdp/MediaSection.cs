@@ -84,7 +84,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
         {
             _mediaObject.Direction = Direction.Inactive;
 
-            _mediaObject.Extensions = null;
+            _mediaObject.MediaDescription.Attributes.Extmaps?.Clear();
+            _mediaObject.MediaDescription.Attributes.Extmaps = null;
             _mediaObject.MediaDescription.Attributes.Ssrcs?.Clear();
             _mediaObject.MediaDescription.Attributes.Ssrcs = null;
             _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear();;
@@ -100,7 +101,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Direction = Direction.Inactive;
             _mediaObject.MediaDescription.Port = 0;
 
-            _mediaObject.Extensions = null;
+            _mediaObject.MediaDescription.Attributes.Extmaps?.Clear();
+            _mediaObject.MediaDescription.Attributes.Extmaps = null;
             _mediaObject.MediaDescription.Attributes.Ssrcs?.Clear();
             _mediaObject.MediaDescription.Attributes.Ssrcs = null;
             _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear(); ;
@@ -109,7 +111,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.Simulcast03 = null;
             _mediaObject.MediaDescription.Attributes.Rids?.Clear();
             _mediaObject.MediaDescription.Attributes.Rids = null;
-            _mediaObject.ExtmapAllowMixed = null;
+            _mediaObject.MediaDescription.Attributes.ExtmapAllowMixed = null;
         }
 
         protected string GetCodecName(RtpCodecParameters codec)

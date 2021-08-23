@@ -91,26 +91,27 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         ((List<string>)_mediaObject.MediaDescription.Fmts).AddRange(answerRtpParameters.Codecs
                             .Select(codec => codec.PayloadType.ToString()));
 
-                        _mediaObject.Extensions = new();
+                        _mediaObject.MediaDescription.Attributes.Extmaps = new List<Extmap>();
                         foreach (var headerExtension in answerRtpParameters.HeaderExtensions)
                         {
                             // Don't add a header extension if not present in the offer.
-                            var found = offerMediaObject.Extensions
-                                .Any(localExt => localExt.Uri == headerExtension.Uri);
+                            var found = offerMediaObject.MediaDescription.Attributes.Extmaps
+                                .Any(localExt => localExt.Uri.ToString() == headerExtension.Uri);
                             if (!found)
                                 continue;
 
-                            var ext = new RtpHeaderExtensionParameters
+                            Extmap ext = new()
                             {
-                                Uri = headerExtension.Uri,
-                                Number = headerExtension.Number
+                                Uri = new Uri(headerExtension.Uri),
+                                Value = headerExtension.Number
                             };
-                            _mediaObject.Extensions.Add(ext);
+                            _mediaObject.MediaDescription.Attributes.Extmaps.Add(ext);
                         }
 
                         // Allow both 1 byte and 2 bytes length header extensions.
-                        if (extmapAllowMixed && offerMediaObject.ExtmapAllowMixed == "extmap-allow-mixed")
-                            _mediaObject.ExtmapAllowMixed = "extmap-allow-mixed";
+                        if (extmapAllowMixed && offerMediaObject.MediaDescription.Attributes.ExtmapAllowMixed.HasValue
+                            && offerMediaObject.MediaDescription.Attributes.ExtmapAllowMixed == true)
+                            _mediaObject.MediaDescription.Attributes.ExtmapAllowMixed = true;
 
                         // Simulcast.
                         if (offerMediaObject.Simulcast is not null)
@@ -156,13 +157,15 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             		Direction = RidDirection.Recv
                                 });
                             }
-                    }
 
-                        _mediaObject.MediaDescription.Attributes.RtcpMux = true;
-                        _mediaObject.MediaDescription.Attributes.RtcpRsize = true;
+                            _mediaObject.MediaDescription.Attributes.RtcpMux = true;
+                            _mediaObject.MediaDescription.Attributes.RtcpRsize = true;
 
-                        if (_planB && _mediaObject.MediaDescription.Media == MediaType.Video)
-                            _mediaObject.XGoogleFlag = "conference";
+                            if (_planB && _mediaObject.MediaDescription.Media == MediaType.Video)
+                                _mediaObject.XGoogleFlag = "conference";
+
+                        }
+
                         break;
                     }
 

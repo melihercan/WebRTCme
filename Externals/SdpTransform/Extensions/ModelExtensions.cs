@@ -128,6 +128,10 @@ namespace Utilme.SdpTransform
                         md.Attributes.RtcpRsize = true;
                     else if (attr.StartsWith(Attributes.SendRecvLabel))
                         md.Attributes.SendRecv = true;
+                    else if (attr.StartsWith(Attributes.SendOnlyLabel))
+                        md.Attributes.SendOnly = true;
+                    else if (attr.StartsWith(Attributes.RecvOnlyLabel))
+                        md.Attributes.RecvOnly = true;
                     else if (attr.StartsWith(Attributes.EndOfCandidatesLabel))
                         md.Attributes.EndOfCandidates = true;
 
@@ -283,6 +287,10 @@ namespace Utilme.SdpTransform
                     sb.Append($"{Sdp.AttributeIndicator}{Attributes.RtcpRsizeLabel}{Sdp.CRLF}");
                 if (md.Attributes.SendRecv.HasValue)
                     sb.Append($"{Sdp.AttributeIndicator}{Attributes.SendRecvLabel}{Sdp.CRLF}");
+                if (md.Attributes.SendOnly.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.SendOnlyLabel}{Sdp.CRLF}");
+                if (md.Attributes.RecvOnly.HasValue)
+                    sb.Append($"{Sdp.AttributeIndicator}{Attributes.RecvOnlyLabel}{Sdp.CRLF}");
 
                 // Media description value attributes.
                 if (md.Attributes.Group is not null)
