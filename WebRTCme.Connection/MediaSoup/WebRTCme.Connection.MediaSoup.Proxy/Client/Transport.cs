@@ -43,7 +43,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public event EventHandler<DataProducer> OnNewDataProducer;
         public event EventHandler<DataConsumer> OnNewDataConsumer;
 
-        public Transport(Ortc ortc, InternalDirection direction, TransportOptions options, Handler handler,
+        public Transport(Ortc ortc, InternalDirection direction, TransportOptions options, 
             ExtendedRtpCapabilities extendedRtpCapabilities, CanProduceByKind canProduceByKind)
         {
             _ortc = ortc;
@@ -52,7 +52,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Id = options.Id;
             Closed = false;
             Direction = direction;
-            Handler = handler;
+            Handler =  new Handler(ortc);
             ConnectionState = ConnectionState.New;
             AppData = options.AppData;
             _extendedRtpCapabilities = extendedRtpCapabilities;
@@ -85,7 +85,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             Closed = true;
 
-            Handler.Close();
 
             // Close all Producers.
             foreach (var producer in _producers.Values)
@@ -114,6 +113,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 dataConsumer.TransportClosed();
             }
             _dataConsumers.Clear();
+
+            Handler.Close();
         }
 
         public Task<IRTCStatsReport> GetStatsAsync()

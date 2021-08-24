@@ -9,7 +9,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     public class Device
     {
         readonly Ortc _ortc;
-        readonly Handler _handler;
+        //readonly Handler _handler;
 
         bool _loaded;
         ExtendedRtpCapabilities _extendedRtpCapabilities;
@@ -20,7 +20,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         public Device()
         {
             _ortc = new();
-            _handler = new(_ortc);
         }
 
         public string HandlerName => "Generic";
@@ -35,9 +34,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             if (_loaded)
                 throw new Exception("Already loaded");
 
+            Handler handler = new(_ortc);
+
             _ortc.ValidateRtpCapabilities(routerRtpCapabilities);
 
-            var nativeRtpCapabilities = await _handler.GetNativeRtpCapabilitiesAsync();
+            var nativeRtpCapabilities = await handler.GetNativeRtpCapabilitiesAsync();
             _ortc.ValidateRtpCapabilities(nativeRtpCapabilities);
 
             _extendedRtpCapabilities = _ortc.GetExtendedRtpCapabilites(nativeRtpCapabilities, routerRtpCapabilities);
@@ -48,10 +49,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _recvRtpCapabilities = _ortc.GetRecvRtpCapabilities(_extendedRtpCapabilities);
             _ortc.ValidateRtpCapabilities(_recvRtpCapabilities);
 
-            _sctpCapabilities = await _handler.GetNativeSctpCapabilitiesAsync();
+            _sctpCapabilities = await handler.GetNativeSctpCapabilitiesAsync();
             _ortc.ValidateSctpCapabilities(_sctpCapabilities);
 
             _loaded = true;
+            handler.Close();
         }
 
         public bool CanProduce(MediaKind kind)
@@ -70,23 +72,23 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public Transport CreateSendTransport(TransportOptions options)
         {
-            return CreateTransport(InternalDirection.Send, options, _handler, _extendedRtpCapabilities, 
+            return CreateTransport(InternalDirection.Send, options, _extendedRtpCapabilities, 
                 _canProduceByKind);
         }
 
         public Transport CreateRecvTransport(TransportOptions options)
         {
-            return CreateTransport(InternalDirection.Recv, options, _handler, _extendedRtpCapabilities,
+            return CreateTransport(InternalDirection.Recv, options, _extendedRtpCapabilities,
                 _canProduceByKind);
         }
 
 
-        Transport CreateTransport(InternalDirection direction, TransportOptions options, Handler handler,
+        Transport CreateTransport(InternalDirection direction, TransportOptions options, ////Handler handler,
             ExtendedRtpCapabilities extendedRtpCapabilities, CanProduceByKind canProduceByKind)
         {
             //// TODO: Original code makes lots of checkings???
             ///
-            var transport = new Transport(_ortc, direction, options, handler, extendedRtpCapabilities, canProduceByKind);
+            var transport = new Transport(_ortc, direction, options, extendedRtpCapabilities, canProduceByKind);
 
             return transport;
         }

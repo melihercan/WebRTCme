@@ -158,16 +158,16 @@ namespace WebRTCme.Connection.Services
 
                     //if (_produce)
                     //{
-                        //var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        //{
-                        //    Track = userContext.LocalStream.GetAudioTracks().First(),
-                        //    Encodings = new RtpEncodingParameters[] { },
-                        //    CodecOptions = new ProducerCodecOptions 
-                        //    { 
-                        //        OpusStereo = true,
-                        //        OpusDtx = true
-                        //    }
-                        //});
+                    //    var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                    //    {
+                    //        Track = userContext.LocalStream.GetAudioTracks().First(),
+                    //        Encodings = new RtpEncodingParameters[] { },
+                    //        CodecOptions = new ProducerCodecOptions
+                    //        {
+                    //            OpusStereo = true,
+                    //            OpusDtx = true
+                    //        }
+                    //    });
 
                     //}
 
@@ -211,21 +211,21 @@ namespace WebRTCme.Connection.Services
 
                 async Task SendTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
                 {
-                    if (connectionState == ConnectionState.Connected)
-                    {
-                        var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        {
-                            Track = userContext.LocalStream.GetAudioTracks().First(),
-                            Encodings = new RtpEncodingParameters[] { },
-                            CodecOptions = new ProducerCodecOptions
-                            {
-                                OpusStereo = true,
-                                OpusDtx = true
-                            }
-                        });
+                    //if (connectionState == ConnectionState.Connected)
+                    //{
+                    //    var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                    //    {
+                    //        Track = userContext.LocalStream.GetAudioTracks().First(),
+                    //        Encodings = new RtpEncodingParameters[] { },
+                    //        CodecOptions = new ProducerCodecOptions
+                    //        {
+                    //            OpusStereo = true,
+                    //            OpusDtx = true
+                    //        }
+                    //    });
 
 
-                    }
+                    //}
                 }
 
                 Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
