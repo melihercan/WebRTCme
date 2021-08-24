@@ -426,7 +426,7 @@ namespace WebRTCme.Connection.Services
                         codec.Parameters.ToStringOrNumber();
                     }
 
-                    return routerRtpCapabilities;
+                     return routerRtpCapabilities;
 
                 case MethodName.CreateWebRtcTransport:
                     var transportInfo = JsonSerializer.Deserialize<TransportInfo>(
