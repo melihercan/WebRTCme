@@ -69,6 +69,37 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             };
                             _mediaObject.MediaDescription.Attributes.Rtpmaps.Add(rtpmap);
 
+                            var codecParameters = Utils.Clone(codec.Parameters, new Dictionary<string, object>() { });
+                            if (codecOptions is not null)
+                            {
+                                var offerCodec = offerRtpParameters.Codecs
+                                    .First(c => c.PayloadType == codec.PayloadType);
+                                switch (codec.MimeType.ToLower())
+                                {
+                                    case "audio/opus":
+                                        { 
+                                            if (codecOptions.OpusStereo.HasValue)
+                                            {
+                                                offerCodec.Parameters["sprop-stereo"] =
+                                                    codecOptions.OpusStereo == true ? 1 : 0;
+                                                codecParameters["stereo"] =
+                                                    codecOptions.OpusStereo == true ? 1 : 0;
+                                            }
+                                        }
+                                        break;
+                                    case "video/vp8":
+                                    case "video/vp9":
+                                    case "video/h264":
+                                    case "video/h265":
+                                        {
+                                
+                                        }
+                                        break;
+                                }
+                            }
+
+
+
 
                             Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
                             

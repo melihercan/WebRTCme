@@ -205,6 +205,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             var sendingRtpParameters =
                 Utils.Clone<RtpParameters>(_sendingRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+            foreach (var codec in sendingRtpParameters.Codecs)
+                codec.Parameters.ToStringOrNumber();
 
             // This may throw.
             sendingRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRtpParameters.Codecs, options.Codec);
@@ -212,6 +214,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var sendingRemoteRtpParameters = 
                 Utils.Clone<RtpParameters>(
                     _sendingRemoteRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+            foreach (var codec in sendingRemoteRtpParameters.Codecs)
+                codec.Parameters.ToStringOrNumber();
 
             // This may throw.
             sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
@@ -270,9 +274,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             // Set MID.
             sendingRtpParameters.Mid = new Mid { Id = localId };
 
-      Console.WriteLine("===================");
-      Console.WriteLine($"{_pc.LocalDescription.Sdp}");
-      Console.WriteLine("===================");
+      //Console.WriteLine("===================");
+      //Console.WriteLine($"{_pc.LocalDescription.Sdp}");
+      //Console.WriteLine("===================");
 
             localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
             offerMediaObject = new MediaObject
