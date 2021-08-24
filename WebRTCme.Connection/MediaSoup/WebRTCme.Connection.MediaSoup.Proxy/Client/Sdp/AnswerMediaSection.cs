@@ -85,6 +85,35 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                                 codecParameters["stereo"] =
                                                     codecOptions.OpusStereo == true ? 1 : 0;
                                             }
+                                            if (codecOptions.OpusFec.HasValue)
+                                            {
+                                                offerCodec.Parameters["useinbandfec"] =
+                                                    codecOptions.OpusFec == true ? 1 : 0;
+                                                codecParameters["useinbandfec"] =
+                                                    codecOptions.OpusFec == true ? 1 : 0;
+                                            }
+                                            if (codecOptions.OpusDtx.HasValue)
+                                            {
+                                                offerCodec.Parameters["usedtx"] =
+                                                    codecOptions.OpusDtx == true ? 1 : 0;
+                                                codecParameters["usedtx"] =
+                                                    codecOptions.OpusDtx == true ? 1 : 0;
+                                            }
+                                            if (codecOptions.OpusMaxPlaybackRate.HasValue)
+                                            {
+                                                codecParameters["maxplaybackrate"] =
+                                                    codecOptions.OpusMaxPlaybackRate;
+                                            }
+                                            if (codecOptions.OpusMaxAverageBitrate.HasValue)
+                                            {
+                                                codecParameters["maxaveragebitrate"] =
+                                                    codecOptions.OpusMaxAverageBitrate;
+                                            }
+                                            if (codecOptions.OpusPtime.HasValue)
+                                            {
+                                                codecParameters["ptime"] =
+                                                    codecOptions.OpusPtime;
+                                            }
                                         }
                                         break;
                                     case "video/vp8":
@@ -92,16 +121,27 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                                     case "video/h264":
                                     case "video/h265":
                                         {
-                                
+                                            if (codecOptions.VideoGoogleStartBitrate.HasValue)
+                                            {
+                                                codecParameters["x-google-start-bitrate"] =
+                                                    codecOptions.VideoGoogleStartBitrate;
+                                            }
+                                            if (codecOptions.VideoGoogleMaxBitrate.HasValue)
+                                            {
+                                                codecParameters["x-google-max-bitrate"] =
+                                                    codecOptions.VideoGoogleMaxBitrate;
+                                            }
+                                            if (codecOptions.VideoGoogleMinBitrate.HasValue)
+                                            {
+                                                codecParameters["x-google-min-bitrate"] =
+                                                    codecOptions.VideoGoogleMinBitrate;
+                                            }
                                         }
                                         break;
                                 }
                             }
 
-
-
-
-                            Fmtp fmtp = codec.Parameters.ToFmtp(codec.PayloadType);
+                            Fmtp fmtp = codecParameters.ToFmtp(codec.PayloadType);
                             
                             if (!string.IsNullOrEmpty(fmtp.Value))
                                 _mediaObject.MediaDescription.Attributes.Fmtps.Add(fmtp);
