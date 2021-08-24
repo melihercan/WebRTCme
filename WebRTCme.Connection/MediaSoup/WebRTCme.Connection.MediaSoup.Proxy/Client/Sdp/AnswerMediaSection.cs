@@ -157,14 +157,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             		Direction = RidDirection.Recv
                                 });
                             }
-
-                            _mediaObject.MediaDescription.Attributes.RtcpMux = true;
-                            _mediaObject.MediaDescription.Attributes.RtcpRsize = true;
-
-                            if (_planB && _mediaObject.MediaDescription.Media == MediaType.Video)
-                                _mediaObject.XGoogleFlag = "conference";
-
                         }
+
+                        _mediaObject.MediaDescription.Attributes.RtcpMux = true;
+                        _mediaObject.MediaDescription.Attributes.RtcpRsize = true;
+
+                        if (_planB && _mediaObject.MediaDescription.Media == MediaType.Video)
+                            _mediaObject.XGoogleFlag = "conference";
 
                         break;
                     }

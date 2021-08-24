@@ -153,9 +153,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 throw new Exception($"cannot produce {options.Track.Kind}");
             else if (options.Track.ReadyState ==  MediaStreamTrackState.Ended)
                 throw new Exception("track ended");
-            else if (ConnectionState == ConnectionState.New)
-                throw new Exception("no connect listener set into this transport");
-
 
             try
             {
@@ -263,8 +260,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 throw new Exception("not a receiving Transport");
             else if (options.Kind != MediaKind.Audio && options.Kind != MediaKind.Video)
                 throw new Exception($"invalid kind {options.Kind}");
-            else if (ConnectionState == ConnectionState.New)
-                throw new Exception($"no connect listener set into this transport");
 
             // Ensure the device can consume it.
             var canConsume = _ortc.CanReceive(rtpParameters, _extendedRtpCapabilities);

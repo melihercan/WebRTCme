@@ -13,7 +13,7 @@ namespace WebRTCme.Connection.MediaSoup
 
         public int? Channels { get; set; }
 
-        public Dictionary<string, object/*string*/> Parameters { get; init; }
+        public Dictionary<string, object> Parameters { get; init; }
         public RtcpFeedback[] RtcpFeedback { get; set; }
 
     }

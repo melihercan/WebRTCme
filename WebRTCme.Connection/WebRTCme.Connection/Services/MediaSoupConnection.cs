@@ -156,20 +156,19 @@ namespace WebRTCme.Connection.Services
 
 
 
-                    //if (_produce)
-                    //{
-                    //    var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                    //    {
-                    //        Track = userContext.LocalStream.GetAudioTracks().First(),
-                    //        Encodings = new RtpEncodingParameters[] { },
-                    //        CodecOptions = new ProducerCodecOptions
-                    //        {
-                    //            OpusStereo = true,
-                    //            OpusDtx = true
-                    //        }
-                    //    });
-
-                    //}
+                    if (_produce)
+                    {
+                        var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        {
+                            Track = userContext.LocalStream.GetAudioTracks().First(),
+                            Encodings = new RtpEncodingParameters[] { },
+                            CodecOptions = new ProducerCodecOptions
+                            {
+                                OpusStereo = true,
+                                OpusDtx = true
+                            }
+                        });
+                    }
 
 
                     //connectionContext = new ConnectionContext
@@ -211,20 +210,9 @@ namespace WebRTCme.Connection.Services
 
                 async Task SendTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
                 {
+                    _logger.LogInformation($"-------> SendTransport_OnConnectionStateChangeAsync");
                     //if (connectionState == ConnectionState.Connected)
                     //{
-                    //    var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                    //    {
-                    //        Track = userContext.LocalStream.GetAudioTracks().First(),
-                    //        Encodings = new RtpEncodingParameters[] { },
-                    //        CodecOptions = new ProducerCodecOptions
-                    //        {
-                    //            OpusStereo = true,
-                    //            OpusDtx = true
-                    //        }
-                    //    });
-
-
                     //}
                 }
 
@@ -254,6 +242,7 @@ namespace WebRTCme.Connection.Services
 
                 async Task RecvTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
                 {
+                    _logger.LogInformation($"-------> RecvTransport_OnConnectionStateChangeAsync");
                     //if (connectionState == ConnectionState.Connected)
                     //{
 
