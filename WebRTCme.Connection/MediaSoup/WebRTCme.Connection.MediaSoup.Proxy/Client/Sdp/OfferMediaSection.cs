@@ -112,7 +112,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             Extmap ext = new()
                             {
                                 Uri = new Uri(headerExtension.Uri),
-                                Value = headerExtension.Number
+                                Value = headerExtension.Id
                             };
                             _mediaObject.MediaDescription.Attributes.Extmaps.Add(ext);
                         }

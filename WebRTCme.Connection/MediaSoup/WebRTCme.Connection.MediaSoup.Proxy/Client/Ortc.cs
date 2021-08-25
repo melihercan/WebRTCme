@@ -431,9 +431,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 RtpHeaderExtensionParameters ext = new()
                 {
                     Uri = extendedExtendion.Uri,
-                    Number = extendedExtendion.SendId,
+                    Id = extendedExtendion.SendId,
                     Encrypt = (bool)extendedExtendion.PreferredEncrypt,
-                    Parameters = new()
                 };
                 headerExtensions.Add(ext);
             }
@@ -494,9 +493,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 RtpHeaderExtensionParameters ext = new()
                 {
                     Uri = extendedExtendion.Uri,
-                    Number = extendedExtendion.SendId,
+                    Id = extendedExtendion.SendId,
                     Encrypt = (bool)extendedExtendion.PreferredEncrypt,
-                    Parameters = new()
                 };
                 headerExtensions.Add(ext);
             }
@@ -585,7 +583,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             var rtpParameters = new RtpParameters
             {
-                Mid = new Mid { Id = RTP_PROBATOR_MID },
+                Mid = RTP_PROBATOR_MID, //// new Mid { Id = RTP_PROBATOR_MID },
                 Codecs = new RtpCodecParameters[] { codec },
                 HeaderExtensions = videoRtpParameters.HeaderExtensions,
                 Encodings = new RtpEncodingParameters[] { new RtpEncodingParameters { Ssrc = RTP_PROBATOR_SSRC } },

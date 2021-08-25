@@ -84,7 +84,7 @@ namespace WebRTCme.Connection.Services
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
                             await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
-                                new WebRtcTransportCreateParameters
+                                new WebRtcTransportCreateRequest
                                 {
                                     ForceTcp = forceTcp,
                                     Producing = true,
@@ -116,7 +116,7 @@ namespace WebRTCme.Connection.Services
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
                             await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
-                                new WebRtcTransportCreateParameters
+                                new WebRtcTransportCreateRequest
                                 {
                                     ForceTcp = forceTcp,
                                     Producing = false,
@@ -144,7 +144,7 @@ namespace WebRTCme.Connection.Services
                     // NOTE: Don't send our RTP capabilities if we don't want to consume.
                     var peers = (Peer[])ParseResponse(MethodName.Join,
                         await _mediaSoupServerApi.CallAsync(MethodName.Join,
-                            new JoinParameters
+                            new JoinRequest
                             {
                                 DisplayName = _displayName,
                                 Device = _device,
@@ -201,7 +201,7 @@ namespace WebRTCme.Connection.Services
                     _logger.LogInformation($"-------> SendTransport_OnConnectAsync");
                     _ = ParseResponse(MethodName.ConnectWebRtcTransport,
                         await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
-                            new WebRtcTransportConnectParameters
+                            new WebRtcTransportConnectRequest
                             {
                                 TransportId = _sendTransport.Id,
                                 DtlsParameters = dtlsParameters
@@ -217,10 +217,20 @@ namespace WebRTCme.Connection.Services
                     //}
                 }
 
-                Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
+                async Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
                 {
                     _logger.LogInformation($"-------> SendTransport_OnProduceAsync");
-                    throw new NotImplementedException();
+
+                    var id = (string)ParseResponse(MethodName.Produce,
+                        await _mediaSoupServerApi.CallAsync(MethodName.Produce,
+                            new ProduceRequest
+                            {
+                                TransportId = _sendTransport.Id,
+                                Kind = params_.Kind,
+                                RtpParameters = params_.RtpParameters,
+                                AppData = params_.AppData
+                            }));
+                    return id;
                 }
                 
                 Task<string> SendTransport_OnProduceDataAsync(object sender, ProduceDataEventParameters params_)
@@ -234,7 +244,7 @@ namespace WebRTCme.Connection.Services
                     _logger.LogInformation($"-------> RecvTransport_OnConnectAsync");
                     _ = ParseResponse(MethodName.ConnectWebRtcTransport,
                         await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
-                            new WebRtcTransportConnectParameters
+                            new WebRtcTransportConnectRequest
                             {
                                 TransportId = _recvTransport.Id,
                                 DtlsParameters = dtlsParameters
@@ -440,8 +450,12 @@ namespace WebRTCme.Connection.Services
                     return peers;
 
                 case MethodName.ConnectWebRtcTransport:
-
                     return null;
+
+                case MethodName.Produce:
+                    var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(
+                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                    return produceResponse.Id;
             }
 
             return null;

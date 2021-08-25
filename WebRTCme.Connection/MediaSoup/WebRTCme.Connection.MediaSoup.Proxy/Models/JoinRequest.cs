@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Models
 {
-    public class JoinParameters
+    public class JoinRequest
     {
         public string DisplayName { get; init; }
         public Device Device { get; init; }

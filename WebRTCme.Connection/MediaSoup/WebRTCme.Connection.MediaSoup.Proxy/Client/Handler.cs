@@ -264,7 +264,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 };
             }
 
-            Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
+            ////Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
 
             await _pc.SetLocalDescription(offer);
 
@@ -272,7 +272,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var localId = transceiver.Mid;
 
             // Set MID.
-            sendingRtpParameters.Mid = new Mid { Id = localId };
+            sendingRtpParameters.Mid = localId;//// new Mid { Id = localId };
 
       //Console.WriteLine("===================");
       //Console.WriteLine($"{_pc.LocalDescription.Sdp}");
@@ -333,7 +333,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Sdp = _remoteSdp.GetSdp()
             };
 
-            Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
+            ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
 
             try
             {
@@ -510,7 +510,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public async Task<HandlerReceiveResult> ReceiveAsync(HandlerReceiveOptions options)
         {
-            var localId = options.RtpParameters.Mid?.Id ?? _mapMidTransceiver.Count.ToString();
+            var localId = options.RtpParameters.Mid/****?.Id****/ ?? _mapMidTransceiver.Count.ToString();
 
 		    _remoteSdp.Receive(
 				localId,
