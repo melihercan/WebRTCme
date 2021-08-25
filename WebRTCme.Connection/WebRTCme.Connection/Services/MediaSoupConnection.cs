@@ -27,6 +27,7 @@ namespace WebRTCme.Connection.Services
         readonly IJSRuntime _jsRuntime;
         readonly MediaSoup.Proxy.Models.Device _device;
 
+        MediaSoup.Proxy.Client.Device _mediaSoupDevice;
         Transport _sendTransport;
         Transport _recvTransport;
         string _displayName;
@@ -37,6 +38,9 @@ namespace WebRTCme.Connection.Services
 
         Dictionary<string, Consumer> _consumers = new();
         Dictionary<string, DataConsumer> _dataConsumers = new();
+        Producer _micProducer;
+        Producer _webcamProducer;
+        Producer _shareProducer;
         Dictionary<string, PeerParameters> _peers = new();
 
         public MediaSoupConnection(IConfiguration configuration, 
@@ -62,6 +66,9 @@ namespace WebRTCme.Connection.Services
                 _produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
                 _consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
                 _useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
+                var forceH264 = _configuration.GetValue<bool>("MediaSoupServer:ForceH264");
+                var forceVP9 = _configuration.GetValue<bool>("MediaSoupServer:ForceVP9");
+                var useSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSimulcast");
 
                 _displayName = userContext.Name;
 
@@ -72,11 +79,11 @@ namespace WebRTCme.Connection.Services
 
                     await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name, userContext.Room);
 
-                    var mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
+                    _mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
 
                     var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
                         await _mediaSoupServerApi.CallAsync(MethodName.GetRouterRtpCapabilities));
-                    await mediaSoupDevice.LoadAsync(routerRtpCapabilities);
+                    await _mediaSoupDevice.LoadAsync(routerRtpCapabilities);
 
 
                     // Create mediasoup Transport for sending (unless we don't want to produce).
@@ -89,10 +96,10 @@ namespace WebRTCme.Connection.Services
                                     ForceTcp = forceTcp,
                                     Producing = true,
                                     Consuming = false,
-                                    SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                    SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
                                 }));
 
-                        _sendTransport = mediaSoupDevice.CreateSendTransport(new TransportOptions 
+                        _sendTransport = _mediaSoupDevice.CreateSendTransport(new TransportOptions 
                         {
                             Id = transportInfo.Id,
                             IceParameters = transportInfo.IceParameters,
@@ -121,10 +128,10 @@ namespace WebRTCme.Connection.Services
                                     ForceTcp = forceTcp,
                                     Producing = false,
                                     Consuming = true,
-                                    SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                    SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
                                 }));
 
-                        _recvTransport = mediaSoupDevice.CreateRecvTransport(new TransportOptions
+                        _recvTransport = _mediaSoupDevice.CreateRecvTransport(new TransportOptions
                         {
                             Id = transportInfo.Id,
                             IceParameters = transportInfo.IceParameters,
@@ -148,8 +155,8 @@ namespace WebRTCme.Connection.Services
                             {
                                 DisplayName = _displayName,
                                 Device = _device,
-                                RtpCapabilities = _consume ? mediaSoupDevice.RtpCapabilities : null,
-                                SctpCapabilities = _useDataChannel ? mediaSoupDevice.SctpCapabilities : null
+                                RtpCapabilities = _consume ? _mediaSoupDevice.RtpCapabilities : null,
+                                SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
                             }));
 
                     foreach (var peer in peers)
@@ -159,7 +166,8 @@ namespace WebRTCme.Connection.Services
 
                     if (_produce)
                     {
-                        var micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        // Handle mic.
+                        _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                         {
                             Track = userContext.LocalStream.GetAudioTracks().First(),
                             Encodings = new RtpEncodingParameters[] { },
@@ -169,9 +177,79 @@ namespace WebRTCme.Connection.Services
                                 OpusDtx = true
                             }
                         });
+
+                        // Handle webcam.
+                        RtpEncodingParameters[] encodings = null;
+                        RtpCodecCapability codec = null;
+                        ProducerCodecOptions codecOptions = new()
+                        {
+                            VideoGoogleStartBitrate = 1000
+                        };
+
+                        if (forceH264)
+                        {
+                            codec = _mediaSoupDevice.RtpCapabilities.Codecs
+                                .FirstOrDefault(c => c.MimeType.ToLower() == "video/h264");
+                            if (codec is null)
+                                throw new Exception("Desired H264 codec+configuration is not supported");
+                        }
+                        else if (forceVP9)
+                        {
+                            codec = _mediaSoupDevice.RtpCapabilities.Codecs
+                                .FirstOrDefault(c => c.MimeType.ToLower() == "video/vp9");
+                            if (codec is null)
+                                throw new Exception("Desired VP9 codec+configuration is not supported");
+                        }
+
+                        if (useSimulcast)
+                        {
+                            // If VP9 is the only available video codec then use SVC.
+                            var firstVideoCodec = _mediaSoupDevice.RtpCapabilities.Codecs
+                                .FirstOrDefault(c => c.Kind == MediaKind.Video);
+                            if ((forceVP9 && codec is not null) ||
+                                firstVideoCodec?.MimeType.ToLower() == "video/vp9")
+                            {
+                                encodings = new RtpEncodingParameters[]
+                                {
+                                    new()
+                                    {
+                                        ScalabilityMode = "S3T3_KEY"
+                                    }
+                                };
+                            }
+                            else
+                            {
+                                encodings = new RtpEncodingParameters[]
+                                {
+                                    new()
+                                    {
+                                        ScaleResolutionDownBy = 4,
+                                        MaxBitrate = 500000
+                                    },
+                                    new()
+                                    {
+                                        ScaleResolutionDownBy = 2,
+                                        MaxBitrate = 1000000
+                                    },
+                                    new()
+                                    {
+                                        ScaleResolutionDownBy = 1,
+                                        MaxBitrate = 5000000
+                                    }
+                                };
+                            }
+                        }
+
+                        _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        {
+                            Track = userContext.LocalStream.GetVideoTracks().First(),
+                            Encodings = encodings ?? new RtpEncodingParameters[] { },
+                            CodecOptions = codecOptions,
+                            Codec = codec
+
+                        });
+
                     }
-
-
                     //connectionContext = new ConnectionContext
                     //{
                     //    ConnectionRequestParameters = request,

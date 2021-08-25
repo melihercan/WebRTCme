@@ -212,9 +212,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         handlerSendResult.RtpSender,
                         options.Track,
                         handlerSendResult.RtpParameters,
-                        (bool)options.StopTracks,
-                        (bool)options.DisableTrackOnPause,
-                        (bool)options.ZeroRtpOnPause,
+                        options.StopTracks ?? false,
+                        options.DisableTrackOnPause ?? false,
+                        options.ZeroRtpOnPause ?? false,
                         options.AppData);
 
                     _producers.Add(id, producer);
