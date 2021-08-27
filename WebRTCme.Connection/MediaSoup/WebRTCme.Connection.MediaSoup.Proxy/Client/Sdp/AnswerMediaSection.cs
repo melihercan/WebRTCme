@@ -60,6 +60,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
                         foreach (var codec in answerRtpParameters.Codecs)
                         {
+            var xxx = codec;
                             Rtpmap rtpmap = new()
                             {
                                 PayloadType = codec.PayloadType,

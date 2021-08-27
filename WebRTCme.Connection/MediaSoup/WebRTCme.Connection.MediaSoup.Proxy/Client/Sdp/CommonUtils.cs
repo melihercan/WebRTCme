@@ -25,14 +25,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 MediaKind mediaKind = MediaKind.Video;
                 switch (kind)
                 {
-                    ////case "audio":
                     case MediaType.Audio:
                         mediaKind = MediaKind.Audio;
                         if (gotAudio)
                             continue;
                         gotAudio = true;
                         break;
-                    ////case "video":
                     case MediaType.Video:
                         mediaKind = MediaKind.Video;
                         if (gotVideo)
@@ -43,7 +41,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         continue;
                 }
 
-                var rtpmapAttributes = m.Attributes.Rtpmaps;//  m.ToRtpmaps();
+                var rtpmapAttributes = m.Attributes.Rtpmaps;
                 foreach (var rtpmap in rtpmapAttributes)
                 {
                     var codec = new RtpCodecCapability 
@@ -57,7 +55,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codecsDictionary.Add(codec.PreferredPayloadType, codec);
                 }
 
-                var fmtpAttributes = m.Attributes.Fmtps;//.ToFmtps();
+                var fmtpAttributes = m.Attributes.Fmtps;
                 foreach (var fmtp in fmtpAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(fmtp.PayloadType, out var codec))
@@ -65,20 +63,24 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     codec.Parameters = fmtp.ToDictionary();
                 }
 
-                var rtcpFbAttributes = m.Attributes.RtcpFbs;//.ToRtcpFbs();
+                var rtcpFbAttributes = m.Attributes.RtcpFbs;
                 foreach (var rtcpFb in rtcpFbAttributes)
                 {
                     if (!codecsDictionary.TryGetValue(rtcpFb.PayloadType, out var codec))
                         continue;
-                    RtcpFeedback feedback = new() 
+                    RtcpFeedback fb = new() 
                     {
                         Type = rtcpFb.Type,
                         Parameter = rtcpFb.SubType
                     };
-                    codec.RtcpFeedback = new RtcpFeedback[] { feedback };
+                    codec.RtcpFeedback ??= new RtcpFeedback[] { };
+                    var rtcpFbList = codec.RtcpFeedback.ToList();
+                    rtcpFbList.Add(fb);
+                    codec.RtcpFeedback = rtcpFbList.ToArray();
                 }
+                
 
-                var extmapAttributes = m.Attributes.Extmaps;//.ToExtmaps();
+                var extmapAttributes = m.Attributes.Extmaps;
                 foreach (var extmap in extmapAttributes)
                 {
                     RtpHeaderExtension headerExtension = new()

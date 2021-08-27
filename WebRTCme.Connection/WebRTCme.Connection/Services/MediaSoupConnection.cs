@@ -167,16 +167,16 @@ namespace WebRTCme.Connection.Services
                     if (_produce)
                     {
                         // Handle mic.
-                        _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        {
-                            Track = userContext.LocalStream.GetAudioTracks().First(),
-                            Encodings = new RtpEncodingParameters[] { },
-                            CodecOptions = new ProducerCodecOptions
-                            {
-                                OpusStereo = true,
-                                OpusDtx = true
-                            }
-                        });
+                        //_micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        //{
+                        //    Track = userContext.LocalStream.GetAudioTracks().First(),
+                        //    Encodings = new RtpEncodingParameters[] { },
+                        //    CodecOptions = new ProducerCodecOptions
+                        //    {
+                        //        OpusStereo = true,
+                        //        OpusDtx = true
+                        //    }
+                        //});
 
                         // Handle webcam.
                         RtpEncodingParameters[] encodings = null;

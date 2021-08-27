@@ -73,7 +73,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var offer = await pc.CreateOffer();
             pc.Close();
 
-//Console.WriteLine($"SDP string:{offer.Sdp}");
+Console.WriteLine($"SDP string:{offer.Sdp}");
             var sdpObject = offer.Sdp.ToSdp();
 //SdpSerializer.DumpSdp(sdpObject);
 
@@ -333,16 +333,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Sdp = _remoteSdp.GetSdp()
             };
 
-            ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
+            Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
 
-            try
-            {
-                await _pc.SetRemoteDescription(answer);
-            }
-            catch(Exception ex)
-            {
-                var m = ex.Message;
-            }
+            await _pc.SetRemoteDescription(answer);
 
             // Store in the map.
             _mapMidTransceiver.Add(localId, transceiver);
