@@ -75,10 +75,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                         Ok = true,
                                         Data = data
                                     };
+                                    var json = JsonSerializer.Serialize(response,
+                                        JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+          Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (REQUEST ACCEPT): {json}");
                                     await _webSocket.SendAsync(
-                                        new ArraySegment<byte>(Encoding.UTF8.GetBytes(
-                                            JsonSerializer.Serialize(response, 
-                                                JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                                        new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
                                         WebSocketMessageType.Text,
                                         true,
                                         _cts.Token);
@@ -103,9 +104,11 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                         ErrorCode = error,
                                         ErrorReason = errorReason
                                     };
+                                    var json = JsonSerializer.Serialize(response,
+                                        JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+         Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (REQUEST ERROR): {json}");
                                     await _webSocket.SendAsync(
-                                        new ArraySegment<byte>(Encoding.UTF8.GetBytes(
-                                            JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                                        new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
                                         WebSocketMessageType.Text,
                                         true,
                                         _cts.Token);
@@ -220,10 +223,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     Method = method,
                     Data = data
                 };
-
+                var json = JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+  Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (CALL): {json}");
                 await _webSocket.SendAsync(
-                    new ArraySegment<byte>(Encoding.UTF8.GetBytes(
-                        JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions))),
+                    new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
                     WebSocketMessageType.Text,
                     true,
                     _cts.Token);

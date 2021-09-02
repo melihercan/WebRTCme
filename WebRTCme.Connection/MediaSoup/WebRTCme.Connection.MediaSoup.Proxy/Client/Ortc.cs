@@ -412,7 +412,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         MimeType = $"{extendedCodec.Kind.DisplayName()}/rtx",
                         PayloadType = (int)extendedCodec.LocalRtxPayloadType,
                         ClockRate = extendedCodec.ClockRate,
-                        Parameters = extendedCodec.LocalParameters,
+                        Parameters = new Dictionary<string, object>
+                        {
+                            {"apt", extendedCodec.LocalPayloadType }
+                        },
                         RtcpFeedback = new RtcpFeedback[] { }
                     };
                     codecs.Add(rtxCodec);
