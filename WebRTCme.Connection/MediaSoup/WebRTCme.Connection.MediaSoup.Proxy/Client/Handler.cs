@@ -73,7 +73,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             var offer = await pc.CreateOffer();
             pc.Close();
 
-Console.WriteLine($"SDP string:{offer.Sdp}");
+////Console.WriteLine($"SDP string:{offer.Sdp}");
             var sdpObject = offer.Sdp.ToSdp();
 //SdpSerializer.DumpSdp(sdpObject);
 
@@ -333,7 +333,7 @@ Console.WriteLine($"SDP string:{offer.Sdp}");
                 Sdp = _remoteSdp.GetSdp()
             };
 
-            Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
+ ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
 
             await _pc.SetRemoteDescription(answer);
 
