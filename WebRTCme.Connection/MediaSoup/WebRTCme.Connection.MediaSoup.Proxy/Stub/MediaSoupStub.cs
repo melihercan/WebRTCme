@@ -44,6 +44,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         {
             _cts = new();
 
+            // This throws in Blazor!!!
+#if false
+            var uri = new Uri(_mediaSoupServerBaseUrl);
+            _webSocket.Options.SetRequestHeader("roomId", room);
+            _webSocket.Options.SetRequestHeader("peerId", name);
+#endif
             var uri = new Uri(new Uri(_mediaSoupServerBaseUrl),
                 $"?roomId={room}" +
                 $"&peerId={name}");
