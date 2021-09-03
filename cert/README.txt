@@ -49,8 +49,8 @@ for /L %i in (44300,1,44399) do netsh http add sslcert ipport=0.0.0.0:%i certhas
 
 ANDROID INSTALLATION
 --------------------
-# Push pfx file to "/sdcard/Download"
-adb push localhost.cer /sdcard/Download
+# Push crt file to "/sdcard/Download"
+adb push localhost.crt /sdcard/Download
 # On phone Settings, Security, Encription & credentials use "Install from SD card"
 
 
