@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.9" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
   </ItemGroup>
 
