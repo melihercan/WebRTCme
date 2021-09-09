@@ -6,6 +6,7 @@ CREATE
 openssl req -config localhost.config -new -out csr.pem
 openssl x509 -req -days 3652 -sha256 -extfile localhost.config -extensions v3_req -in csr.pem -signkey key.pem -out localhost.crt
 openssl pkcs12 -export -out localhost.pfx -inkey key.pem -in localhost.crt -password pass:_localhost_
+openssl x509 -in localhost.crt -out localhost.pem
 
 CHECK
 -----
