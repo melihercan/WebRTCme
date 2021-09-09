@@ -4,6 +4,7 @@ using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Reactive;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
+using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
 {
@@ -44,6 +46,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         {
             _cts = new();
 
+            //// TODO: Bypass only for debugging with self signed certs (local IPs).
+            var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
+
             // This throws in Blazor!!!
 #if false
             var uri = new Uri(_mediaSoupServerBaseUrl);
@@ -55,7 +60,41 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                 $"&peerId={name}");
             _webSocket.Options.AddSubProtocol("protoo");
             _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
-            await _webSocket.ConnectAsync(uri, _cts.Token);
+
+
+
+#if !NETSTANDARD2_0
+            // RemoteCertificateValidationCallback DOES NOT exist on .NetStandard2.0.
+            _webSocket.Options.RemoteCertificateValidationCallback = delegate { return true; };
+            //    (sender, certificate, chain, sslPolicyErrors) =>
+            //{
+            //    ////// MOT CALLED!!!!! CHECK THIS.
+            //    if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+            //        return true;
+            //    else
+            //    {
+            //        if (bypassSslCertificateError)
+            //            return true;
+            //        else
+            //            return false;
+            //    }
+            //};
+#endif
+
+
+            try
+            {
+                await _webSocket.ConnectAsync(uri, _cts.Token);
+            }
+            catch (Exception ex)
+            {
+                var m = ex.Message;
+                foreach (var cert in _webSocket.Options.ClientCertificates)
+                {
+                    var subject = cert.Subject;
+                    var issuer = cert.Issuer;
+                }
+            }
 
             // Task handling incoming requests.
             _ = Task.Run(async () => 

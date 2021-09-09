@@ -26,3 +26,14 @@ using Android.App;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // Add some common permissions, these can be removed if not needed
+
+
+// The “Application (Debuggable = true/false)” assembly attribute controls whether or not the application runs in
+// debugging mode.
+#if false
+#if DEBUG
+[Application(Debuggable = true)]
+#else
+    [Application(Debuggable=false)]
+#endif
+#endif

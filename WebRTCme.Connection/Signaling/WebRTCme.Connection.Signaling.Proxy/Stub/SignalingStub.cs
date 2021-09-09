@@ -47,6 +47,7 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
         {
             _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
 
+            //// TODO: Bypass only for debugging with self signed certs (local IPs).
             var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
             _hubConnection = new HubConnectionBuilder()
@@ -58,8 +59,8 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
                         {
                             if (message is HttpClientHandler clientHandler)
                                 // Bypass SSL certificate.
-                                clientHandler.ServerCertificateCustomValidationCallback +=
-                                        (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                                clientHandler.ServerCertificateCustomValidationCallback =
+                                        (sender, certificate, chain, sslPolicyErrors) => true;
                             return message;
                         };
                     }
