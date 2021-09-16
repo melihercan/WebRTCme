@@ -89,11 +89,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
             catch (Exception ex)
             {
                 var m = ex.Message;
-                foreach (var cert in _webSocket.Options.ClientCertificates)
-                {
-                    var subject = cert.Subject;
-                    var issuer = cert.Issuer;
-                }
             }
 
             // Task handling incoming requests.

@@ -58,3 +58,10 @@ adb push localhost.crt /sdcard/Download
 IOS SIMULATION INSTALLATION
 ----------------
 # Open simulation on Mac, grag and drop the cer file.
+
+IOS PHONE INSTALL
+-----------------
+- email PEM file
+- open on the phone and install
+- General->About->Certificate Trus Serttings, enable full trust
+USE SAFARI - CHROME DOES NOT WORK
