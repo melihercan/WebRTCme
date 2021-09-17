@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Connection.ClientWebSockets
+namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
 {
     public interface IClientWebSocket
     {
-        public IClientWebSocketOptions Options { get; set; }
+        public IClientWebSocketOptions Options { get; }
 
         Task ConnectAsync(Uri uri, CancellationToken cancellationToken);
 

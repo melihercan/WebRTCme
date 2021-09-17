@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Connection.ClientWebSockets
+namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
 {
     public interface IClientWebSocketOptions
     {

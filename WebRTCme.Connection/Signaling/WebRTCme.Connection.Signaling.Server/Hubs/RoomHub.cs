@@ -14,7 +14,6 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
 {
     public class RoomHub : Hub<ISignalingServerNotify>, ISignalingServerApi
     {
-        readonly TurnServerProxyFactory _turnServerProxyFactory;
         readonly ILogger<RoomHub> _logger;
         readonly ITurnServerProxy _turnServer;
 
@@ -30,7 +29,6 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
 
         public RoomHub(TurnServerProxyFactory turnServerProxyFactory, ILogger<RoomHub> logger)
         {
-            _turnServerProxyFactory = turnServerProxyFactory;
             _logger = logger;
             _turnServer = turnServerProxyFactory.Create(TurnServer.StunOnly);
         }

@@ -13,13 +13,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
+using WebRTCme.Connection.MediaSoup.ClientWebSockets;
 using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
 {
     class MediaSoupStub : IMediaSoupServerApi
     {
-        readonly ClientWebSocket _webSocket = new();
+        readonly IClientWebSocket _webSocket;
         readonly ArraySegment<byte> _rxBuffer = new(new byte[16384]);
 
         TaskCompletionSource<ProtooResponseOk> _tcsResponseOk;
@@ -33,21 +34,29 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         public event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
         public event IMediaSoupServerNotify.RequestDelegateAsync RequestEventAsync;
 
-        public MediaSoupStub(IConfiguration configuration, IWebRtc webRtc, ILogger<MediaSoupStub> logger,
-            IJSRuntime jsRuntime = null)
+        public MediaSoupStub(ClientWebSocketFactory clientWebSocketFactory, IConfiguration configuration, 
+            IWebRtc webRtc, ILogger<MediaSoupStub> logger, IJSRuntime jsRuntime = null)
         {
             _mediaSoupServerBaseUrl = configuration["MediaSoupServer:BaseUrl"];
             Registry.WebRtc = webRtc;
             Registry.Logger = logger;
             Registry.JsRuntime = jsRuntime;
+
+            //// TODO: Bypass only for debugging with self signed certs (local IPs).
+            var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
+            if (bypassSslCertificateError)
+            {
+                _webSocket = clientWebSocketFactory.Create(ClientWebSocketSelect.LitePcl);
+                _webSocket.Options.IgnoreServerCertificateErrors = true;
+            }
+            else
+                _webSocket = clientWebSocketFactory.Create(ClientWebSocketSelect.System);
         }
 
         public async Task<Result<Unit>> ConnectAsync(Guid id, string name, string room)
         {
             _cts = new();
 
-            //// TODO: Bypass only for debugging with self signed certs (local IPs).
-            var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
             // This throws in Blazor!!!
 #if false
@@ -60,27 +69,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                 $"&peerId={name}");
             _webSocket.Options.AddSubProtocol("protoo");
             _webSocket.Options.AddSubProtocol("Sec-WebSocket-Protocol");
-
-
-
-#if !NETSTANDARD2_0
-            // RemoteCertificateValidationCallback DOES NOT exist on .NetStandard2.0.
-            _webSocket.Options.RemoteCertificateValidationCallback = delegate { return true; };
-            //    (sender, certificate, chain, sslPolicyErrors) =>
-            //{
-            //    ////// MOT CALLED!!!!! CHECK THIS.
-            //    if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
-            //        return true;
-            //    else
-            //    {
-            //        if (bypassSslCertificateError)
-            //            return true;
-            //        else
-            //            return false;
-            //    }
-            //};
-#endif
-
 
             try
             {
