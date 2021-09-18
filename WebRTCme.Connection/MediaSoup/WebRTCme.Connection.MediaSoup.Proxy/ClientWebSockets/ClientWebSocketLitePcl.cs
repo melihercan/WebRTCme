@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using WebsocketClientLite.PCL;
 
@@ -22,10 +25,10 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                 _baseWebSocket = baseWebSocket;
             }
 
-            public bool IgnoreServerCertificateErrors 
-            { 
-                get => _baseWebSocket.IgnoreServerCertificateErrors; 
-                set => _baseWebSocket.IgnoreServerCertificateErrors = value; 
+            public bool IgnoreServerCertificateErrors
+            {
+                get => _baseWebSocket.IgnoreServerCertificateErrors;
+                set => _baseWebSocket.IgnoreServerCertificateErrors = value;
             }
 
             public void AddSubProtocol(string subProtocol)
@@ -41,6 +44,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
 
         readonly MessageWebSocketRx _baseWebSocket;
         readonly IClientWebSocketOptions _options;
+        Channel<string> _channel;
 
         public ClientWebSocketLitePcl()
         {
@@ -58,11 +62,13 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, 
             CancellationToken cancellationToken)
         {
+            _channel.Writer.Complete();
             return _baseWebSocket.DisconnectAsync();
         }
 
         public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
         {
+            _channel = Channel.CreateBounded<string>(5); 
             TaskCompletionSource<Unit> tcs = new();
 
             using (cancellationToken.Register(() =>
@@ -89,6 +95,26 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                         tcs.TrySetResult(Unit.Default);
                     });
 
+                var receiverDisposable = _baseWebSocket.MessageReceiverObservable.Subscribe(
+                    message =>
+                    {
+                        var ok = _channel.Writer.TryWrite(message);
+                        Debug.Assert(ok);
+                        if (!ok)
+                        {
+                            // TODO: Error logging.
+                            Console.WriteLine($"ERROR: Channel is full");
+                        }
+                    },
+                    ex =>
+                    {
+                        // TODO: Error logging.
+                    },
+                    () =>
+                    {
+                    });
+
+
                 await _baseWebSocket.ConnectAsync(uri);
                 try
                 {
@@ -96,6 +122,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                 }
                 catch (WebSocketException)
                 {
+                    receiverDisposable.Dispose();
                     connectionDisposable.Dispose();
                     throw;
                 }
@@ -103,20 +130,24 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                 {
                     throw;
                 }
+                receiverDisposable.Dispose();
                 connectionDisposable.Dispose();
             }
         }
 
-        public Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, 
+        public async Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, 
             CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var message = await _channel.Reader.ReadAsync(cancellationToken);
+            var bytes = Encoding.UTF8.GetBytes(message);
+            bytes.CopyTo(buffer.Array, 0);
+            return new WebSocketReceiveResult(bytes.Length, WebSocketMessageType.Binary, true);
         }
 
         public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, 
             CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _baseWebSocket.SendTextAsync(Encoding.UTF8.GetString(buffer.ToArray()));
         }
     }
 }
