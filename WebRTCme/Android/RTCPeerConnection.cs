@@ -120,8 +120,23 @@ namespace WebRTCme.Android
                 return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
                     (Webrtc.MediaStreamTrack)track.NativeObject));
             else
-                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
-                    (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative()));
+            //return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+            //    (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative()));
+            {
+                try
+                {
+                    var t = ((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                        (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative());
+                    return RTCRtpTransceiver.Create(t);
+                }
+                catch (Exception ex)
+                {
+                    var m = ex.Message;
+                    throw;
+                }
+            }
+
+
         }
 
 

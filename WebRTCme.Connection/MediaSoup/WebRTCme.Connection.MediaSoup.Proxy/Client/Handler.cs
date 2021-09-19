@@ -125,6 +125,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 IceTransportPolicy = options.IceTransportPolicy,
                 BundlePolicy = RTCBundlePolicy.MaxBundle,
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
+                SdpSemantics = SdpSemantics.UnifiedPlan
             });
 
             _pc.OnIceConnectionStateChange += async (s, e) => 

@@ -185,6 +185,15 @@ namespace WebRTCme.Android
                 return RTCDataChannelState.Closed;
             throw new ArgumentOutOfRangeException(nameof(nativeState), nativeState, null);
         }
+
+        public static MediaStreamTrackState FromNative(this Webrtc.MediaStreamTrack.State nativeState)
+        {
+            if (nativeState == Webrtc.MediaStreamTrack.State.Live)
+                return MediaStreamTrackState.Live;
+            if (nativeState == Webrtc.MediaStreamTrack.State.Ended)
+                return MediaStreamTrackState.Ended;
+            throw new ArgumentOutOfRangeException(nameof(nativeState), nativeState, null);
+        }
     }
 }
 

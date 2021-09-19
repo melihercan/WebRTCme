@@ -99,9 +99,10 @@ namespace WebRTCme.Android
 
         public static Webrtc.RtpTransceiver.RtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
         {
+            RTCRtpEncodingParameters[] initSendEncodings = init.SendEncodings ?? new RTCRtpEncodingParameters[] { };
             var direction = init.Direction is null ? null : ((RTCRtpTransceiverDirection)init.Direction).ToNative();
             var streamIds = init.Streams is null ? null : init.Streams.Select(stream => stream.Id).ToList();
-            var sendEncodings = init.SendEncodings.Select(encodings => encodings.ToNative()).ToList();
+            var sendEncodings = initSendEncodings.Select(encodings => encodings.ToNative()).ToList();
             return new Webrtc.RtpTransceiver.RtpTransceiverInit(direction, streamIds, sendEncodings);
         }
 

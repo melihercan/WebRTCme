@@ -80,7 +80,7 @@ namespace WebRTCme.Android
 
         public bool Readonly => throw new NotImplementedException();
 
-        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
+        public MediaStreamTrackState ReadyState => ((Webrtc.MediaStreamTrack)NativeObject).InvokeState().FromNative();
 
 
         public event EventHandler OnEnded;
