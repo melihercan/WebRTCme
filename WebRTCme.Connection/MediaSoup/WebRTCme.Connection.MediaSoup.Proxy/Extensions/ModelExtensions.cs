@@ -24,7 +24,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy
         // Helper to convert object to either string or number after JSON conversion.
         public static void ToStringOrNumber(this Dictionary<string, object> dictionary)
         {
-            foreach (var item in dictionary)
+            Dictionary<string, object> cloneDictionary = new(dictionary);
+            foreach (var item in cloneDictionary)
             {
                 if (item.Value.GetType() == typeof(JsonElement))
                 {

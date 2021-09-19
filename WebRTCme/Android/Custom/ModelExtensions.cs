@@ -33,28 +33,39 @@ namespace WebRTCme.Android
             return nativeConstrains;
         }
 
-        public static Webrtc.PeerConnection.RTCConfiguration ToNative(this RTCConfiguration configuration) =>
-            new Webrtc.PeerConnection.RTCConfiguration(configuration.IceServers
-                .Select(server => server.ToNative()).ToList())
-            //{
-                //BundlePolicy = configuration.BundlePolicy?.ToNative() ?? Webrtc.PeerConnection.BundlePolicy.Balanced,
-                //Certificate = (Webrtc.RtcCertificatePem)(configuration.Certificates?.ElementAt(0).NativeObject) ??
-                    //Webrtc.RtcCertificatePem.GenerateCertificate(),
-                //IceCandidatePoolSize = configuration.IceCandidatePoolSize ?? 0,
-                //IceTransportsType = configuration.IceTransportPolicy?.ToNative() ?? 
-                    //Webrtc.PeerConnection.IceTransportsType.All,
-                //RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.PeerConnection.RtcpMuxPolicy.Require 
-            //}
-            ;
-            
-        public static Webrtc.PeerConnection.IceServer ToNative(this RTCIceServer iceServer) =>
-            Webrtc.PeerConnection.IceServer.InvokeBuilder(iceServer.Urls.ToList())
-                //.SetTlsCertPolicy(iceServer.CredentialType?.ToNative() ??
-                    //Webrtc.PeerConnection.TlsCertPolicy.TlsCertPolicySecure)
-                //.If(iceServer.Username != null, builder => builder.SetUsername(iceServer.Username))
-                //.If(iceServer.Credential != null, builder => builder.SetPassword(iceServer.Credential))
-                .CreateIceServer();
+        public static Webrtc.PeerConnection.RTCConfiguration ToNative(this RTCConfiguration configuration)
+        {
+            RTCIceServer[] iceServers = configuration.IceServers ?? new RTCIceServer[] { };
+            var nativeConfiguration = new Webrtc.PeerConnection.RTCConfiguration(iceServers
+               .Select(server => server.ToNative()).ToList());
+            if (configuration.BundlePolicy.HasValue)
+                nativeConfiguration.BundlePolicy = configuration.BundlePolicy?.ToNative();
+            if (configuration.Certificates is not null)
+                nativeConfiguration.Certificate = (Webrtc.RtcCertificatePem)
+                    (configuration.Certificates?.ElementAt(0).NativeObject);
+            if (configuration.IceCandidatePoolSize.HasValue)
+                nativeConfiguration.IceCandidatePoolSize = (int)configuration.IceCandidatePoolSize;
+            if (configuration.IceTransportPolicy.HasValue)
+                nativeConfiguration.IceTransportsType = configuration.IceTransportPolicy?.ToNative();
+            if (configuration.RtcpMuxPolicy.HasValue)
+                nativeConfiguration.RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative();
+            if (configuration.SdpSemantics.HasValue)
+                nativeConfiguration.SdpSemantics = configuration.SdpSemantics?.ToNative();
+            return nativeConfiguration;
+        }
 
+        public static Webrtc.PeerConnection.IceServer ToNative(this RTCIceServer iceServer)
+        {
+            var nativeIceServerBuilder = Webrtc.PeerConnection.IceServer.InvokeBuilder(iceServer.Urls.ToList());
+            if (iceServer.CredentialType.HasValue)
+                nativeIceServerBuilder.SetTlsCertPolicy(iceServer.CredentialType?.ToNative());
+            if (iceServer.Username is not null)
+                nativeIceServerBuilder.SetUsername(iceServer.Username);
+            if (iceServer.Credential is not null)
+                nativeIceServerBuilder.SetPassword(iceServer.Credential);
+            var nativeIceServer = nativeIceServerBuilder.CreateIceServer();
+            return nativeIceServer;
+        }
 
         public static Webrtc.DataChannel.Init ToNative(this RTCDataChannelInit dataChannelInit) =>
             new Webrtc.DataChannel.Init
@@ -98,10 +109,10 @@ namespace WebRTCme.Android
             new RTCRtpCodecParameters
             {
                 PayloadType = (byte)nativeCodecParameters.PayloadType,
-                MimeType = "TODO: FIX ME",
+                ////MimeType = "TODO: FIX ME",
                 ClockRate = (ulong)(int)nativeCodecParameters.ClockRate,
                 Channels = (ushort)(int)nativeCodecParameters.NumChannels,
-                SdpFmtpLine = "TODO: FIX ME"
+                ////SdpFmtpLine = "TODO: FIX ME"
             };
 
         public static RTCRtpHeaderExtensionParameters FromNative(this Webrtc.RtpParameters.HeaderExtension
@@ -140,11 +151,11 @@ namespace WebRTCme.Android
             new RTCRtpEncodingParameters
             {
                 Active = nativeEncoding.Active,
-                CodecPayloadType = 0, //// TODO: CHECK THIS
-                Dtx = RTCDtxStatus.Enabled, //// TODO: CHECK THIS
+                ////CodecPayloadType = 0, //// TODO: CHECK THIS
+                ////Dtx = RTCDtxStatus.Enabled, //// TODO: CHECK THIS
                 MaxBitrate = (ulong)(int)nativeEncoding.MaxBitrateBps,
                 MaxFramerate = (double)(int)nativeEncoding.MaxFramerate,
-                Ptime = 0, //// TODO: CHECK THIS
+                ////Ptime = 0, //// TODO: CHECK THIS
                 Rid = nativeEncoding.Rid,
                 ScaleResolutionDownBy = (double)nativeEncoding.ScaleResolutionDownBy
             };

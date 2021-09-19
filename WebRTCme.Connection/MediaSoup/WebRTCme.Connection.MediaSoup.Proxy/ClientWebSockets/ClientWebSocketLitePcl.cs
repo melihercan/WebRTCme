@@ -45,6 +45,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         readonly MessageWebSocketRx _baseWebSocket;
         readonly IClientWebSocketOptions _options;
         Channel<string> _channel;
+        IDisposable _receiverDisposable;
 
         public ClientWebSocketLitePcl()
         {
@@ -62,6 +63,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, 
             CancellationToken cancellationToken)
         {
+            _receiverDisposable.Dispose();
             _channel.Writer.Complete();
             return _baseWebSocket.DisconnectAsync();
         }
@@ -79,7 +81,12 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                 var connectionDisposable = _baseWebSocket.ConnectionStatusObservable.Subscribe(
                     status =>
                     {
-                        if (status == IWebsocketClientLite.PCL.ConnectionStatus.Disconnected ||
+                        Console.WriteLine($"======> Connect: {status}");
+                        if (status == IWebsocketClientLite.PCL.ConnectionStatus.WebsocketConnected)
+                        {
+                            tcs.TrySetResult(Unit.Default);
+                        }
+                        else if (status == IWebsocketClientLite.PCL.ConnectionStatus.Disconnected ||
                             status == IWebsocketClientLite.PCL.ConnectionStatus.Aborted ||
                             status == IWebsocketClientLite.PCL.ConnectionStatus.ConnectionFailed)
                         {
@@ -95,7 +102,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                         tcs.TrySetResult(Unit.Default);
                     });
 
-                var receiverDisposable = _baseWebSocket.MessageReceiverObservable.Subscribe(
+                _receiverDisposable = _baseWebSocket.MessageReceiverObservable.Subscribe(
                     message =>
                     {
                         var ok = _channel.Writer.TryWrite(message);
@@ -122,15 +129,15 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                 }
                 catch (WebSocketException)
                 {
-                    receiverDisposable.Dispose();
+                    _receiverDisposable.Dispose();
                     connectionDisposable.Dispose();
                     throw;
                 }
                 catch 
                 {
+                    _receiverDisposable.Dispose();
                     throw;
                 }
-                receiverDisposable.Dispose();
                 connectionDisposable.Dispose();
             }
         }
@@ -141,7 +148,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
             var message = await _channel.Reader.ReadAsync(cancellationToken);
             var bytes = Encoding.UTF8.GetBytes(message);
             bytes.CopyTo(buffer.Array, 0);
-            return new WebSocketReceiveResult(bytes.Length, WebSocketMessageType.Binary, true);
+            return new WebSocketReceiveResult(bytes.Length, WebSocketMessageType.Text, true);
         }
 
         public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, 

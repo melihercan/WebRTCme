@@ -19,5 +19,7 @@ namespace WebRTCme
         public string PeerIdentity { get; set; }
 
         public RTCRtcpMuxPolicy? RtcpMuxPolicy { get; set; }
+
+        public SdpSemantics? SdpSemantics { get; set; }
     }
 }

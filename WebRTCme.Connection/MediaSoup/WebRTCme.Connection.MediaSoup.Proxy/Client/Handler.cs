@@ -65,8 +65,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             IRTCPeerConnection pc = _window.RTCPeerConnection(new RTCConfiguration 
             { 
                 IceTransportPolicy = RTCIceTransportPolicy.All,
-                BundlePolicy = RTCBundlePolicy.Balanced,// .MaxBundle,
+                BundlePolicy = RTCBundlePolicy.MaxBundle,
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
+                SdpSemantics = SdpSemantics.UnifiedPlan
             });
             pc.AddTransceiver(MediaStreamTrackKind.Audio);
             pc.AddTransceiver(MediaStreamTrackKind.Video);

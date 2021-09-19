@@ -63,6 +63,14 @@ namespace WebRTCme.iOS
                 _ => throw new NotImplementedException()
             };
 
+        public static Webrtc.RTCSdpSemantics ToNative(this SdpSemantics sdpSemantics) =>
+            sdpSemantics switch
+            {
+                SdpSemantics.PlanB => Webrtc.RTCSdpSemantics.PlanB,
+                SdpSemantics.UnifiedPlan => Webrtc.RTCSdpSemantics.UnifiedPlan,
+                _ => throw new NotImplementedException()
+            };
+
 
         public static RTCBundlePolicy FromNative(this Webrtc.RTCBundlePolicy nativeBundlePolicy) =>
             nativeBundlePolicy switch

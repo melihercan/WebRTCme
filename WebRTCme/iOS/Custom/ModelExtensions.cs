@@ -22,7 +22,8 @@ namespace WebRTCme.iOS
                 IceCandidatePoolSize = configuration.IceCandidatePoolSize ?? 0,
                 IceServers = configuration.IceServers.Select(server => server.ToNative()).ToArray(),
                 IceTransportPolicy = configuration.IceTransportPolicy?.ToNative() ?? Webrtc.RTCIceTransportPolicy.All,
-                RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.RTCRtcpMuxPolicy.Require
+                RtcpMuxPolicy = configuration.RtcpMuxPolicy?.ToNative() ?? Webrtc.RTCRtcpMuxPolicy.Require,
+                SdpSemantics = configuration.SdpSemantics?.ToNative() ?? Webrtc.RTCSdpSemantics.PlanB
             };
 
         public static Webrtc.RTCIceServer ToNative(this RTCIceServer iceServer) =>
