@@ -133,12 +133,7 @@ namespace WebRTCme.Connection.Services
                 var peerConnection = peerContext.PeerConnection;
 
                 var offerDescription = await peerConnection.CreateOffer();
-                // Android DOES NOT expose 'Type'!!! I set it manually here. 
-                if (DeviceInfo.Platform == DevicePlatform.Android)
-                    offerDescription.Type = RTCSdpType.Offer;
 
-                // Send offer before setting local description to avoid race condition with ice candidates.
-                // Setting local description triggers ice candidate packets.
                 var sdp = JsonSerializer.Serialize(offerDescription, JsonHelper.WebRtcJsonSerializerOptions);
                 _logger.LogInformation(
                     $"-------> Sending Offer - room:{_connectionContext.UserContext.Room} " +
@@ -219,9 +214,6 @@ namespace WebRTCme.Connection.Services
                 if (description.Type == RTCSdpType.Offer)
                 {
                     var answerDescription = await peerConnection.CreateAnswer();
-                    // Android DOES NOT expose 'Type'!!! I set it manually here. 
-                    if (DeviceInfo.Platform == DevicePlatform.Android)
-                        answerDescription.Type = RTCSdpType.Answer;
 
                     // Setting local description triggers ice candidate packets.
                     var sdp = JsonSerializer.Serialize(answerDescription, JsonHelper.WebRtcJsonSerializerOptions);

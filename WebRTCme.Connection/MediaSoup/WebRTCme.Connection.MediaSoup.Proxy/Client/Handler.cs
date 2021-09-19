@@ -8,6 +8,7 @@ using WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp;
 using WebRTCme.Connection.MediaSoup.Proxy.Models;
 using System.Linq;
 using WebRTCme.Connection.MediaSoup.Proxy;
+using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
