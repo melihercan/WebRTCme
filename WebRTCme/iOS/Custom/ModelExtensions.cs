@@ -84,10 +84,11 @@ namespace WebRTCme.iOS
 
         public static Webrtc.RTCRtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
         {
+            RTCRtpEncodingParameters[] initSendEncodings = init.SendEncodings ?? new RTCRtpEncodingParameters[] { };
             var direction = init.Direction is null ? Webrtc.RTCRtpTransceiverDirection.Inactive : 
                 ((RTCRtpTransceiverDirection)init.Direction).ToNative();
             var streamIds = init.Streams is null ? null : init.Streams.Select(stream => stream.Id).ToArray();
-            var sendEncodings = init.SendEncodings.Select(encodings => encodings.ToNative()).ToArray();
+            var sendEncodings = initSendEncodings.Select(encodings => encodings.ToNative()).ToArray();
             return new Webrtc.RTCRtpTransceiverInit
             {
                 Direction = direction,

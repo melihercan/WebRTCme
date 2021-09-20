@@ -68,7 +68,7 @@ namespace WebRTCme.iOS
 
         public bool Readonly => throw new NotImplementedException();
 
-        public MediaStreamTrackState ReadyState => throw new NotImplementedException();
+        public MediaStreamTrackState ReadyState => ((Webrtc.RTCMediaStreamTrack)NativeObject).ReadyState.FromNative();
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;

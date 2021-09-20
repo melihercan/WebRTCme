@@ -146,11 +146,11 @@
   <ItemGroup>
     <PackageReference Include="System.Buffers">
       <Version>4.5.1</Version>
-      <IncludeAssets>none</IncludeAssets>      
+      <IncludeAssets>none</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Memory">
       <Version>4.5.4</Version>
-      <IncludeAssets>none</IncludeAssets>      
+      <IncludeAssets>none</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2083" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
