@@ -15,8 +15,9 @@ namespace WebRTCme
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters =
             {
-                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
-                new JsonStringEnumMemberConverter()
+                // Order is important. The first converter that can convert will be chosen.
+                new JsonStringEnumMemberConverter(),
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
             }
         };
     }
