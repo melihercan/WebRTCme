@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum RTCRtpTransceiverDirection
     {
-        Sendrecv,
-        Sendonly,
-        Recvonly,
+        [EnumMember(Value = "sendrecv")]
+        SendRecv,
+
+        [EnumMember(Value = "sendonly")]
+        SendOnly,
+
+        [EnumMember(Value = "recvonly")]
+        RecvOnly,
+
+        [EnumMember(Value = "inactive")]
         Inactive
     }
 }

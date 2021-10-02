@@ -46,9 +46,9 @@ namespace WebRTCme.Android
             this RTCRtpTransceiverDirection transceiverDirection) =>
                 transceiverDirection switch
                 {
-                    RTCRtpTransceiverDirection.Sendrecv => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendRecv,
-                    RTCRtpTransceiverDirection.Sendonly => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendOnly,
-                    RTCRtpTransceiverDirection.Recvonly => Webrtc.RtpTransceiver.RtpTransceiverDirection.RecvOnly,
+                    RTCRtpTransceiverDirection.SendRecv => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendRecv,
+                    RTCRtpTransceiverDirection.SendOnly => Webrtc.RtpTransceiver.RtpTransceiverDirection.SendOnly,
+                    RTCRtpTransceiverDirection.RecvOnly => Webrtc.RtpTransceiver.RtpTransceiverDirection.RecvOnly,
                     RTCRtpTransceiverDirection.Inactive => Webrtc.RtpTransceiver.RtpTransceiverDirection.Inactive,
                     _ => throw new NotImplementedException()
                 };
@@ -150,11 +150,11 @@ namespace WebRTCme.Android
             this Webrtc.RtpTransceiver.RtpTransceiverDirection nativeTransceiverDirection)
         {
             if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.SendRecv)
-                return RTCRtpTransceiverDirection.Sendrecv;
+                return RTCRtpTransceiverDirection.SendRecv;
             if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.SendOnly)
-                return RTCRtpTransceiverDirection.Sendonly;
+                return RTCRtpTransceiverDirection.SendOnly;
             if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.RecvOnly)
-                return RTCRtpTransceiverDirection.Recvonly;
+                return RTCRtpTransceiverDirection.RecvOnly;
             if (nativeTransceiverDirection == Webrtc.RtpTransceiver.RtpTransceiverDirection.Inactive)
                 return RTCRtpTransceiverDirection.Inactive;
             throw new ArgumentOutOfRangeException(nameof(nativeTransceiverDirection), nativeTransceiverDirection, null);

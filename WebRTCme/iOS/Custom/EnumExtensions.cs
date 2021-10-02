@@ -44,9 +44,9 @@ namespace WebRTCme.iOS
         public static Webrtc.RTCRtpTransceiverDirection ToNative(this RTCRtpTransceiverDirection direction) =>
             direction switch
             {
-                RTCRtpTransceiverDirection.Sendrecv => Webrtc.RTCRtpTransceiverDirection.SendRecv,
-                RTCRtpTransceiverDirection.Sendonly => Webrtc.RTCRtpTransceiverDirection.SendOnly,
-                RTCRtpTransceiverDirection.Recvonly => Webrtc.RTCRtpTransceiverDirection.RecvOnly,
+                RTCRtpTransceiverDirection.SendRecv => Webrtc.RTCRtpTransceiverDirection.SendRecv,
+                RTCRtpTransceiverDirection.SendOnly => Webrtc.RTCRtpTransceiverDirection.SendOnly,
+                RTCRtpTransceiverDirection.RecvOnly => Webrtc.RTCRtpTransceiverDirection.RecvOnly,
                 RTCRtpTransceiverDirection.Inactive => Webrtc.RTCRtpTransceiverDirection.Inactive,
                 _ => throw new NotImplementedException()
             };
@@ -171,9 +171,9 @@ namespace WebRTCme.iOS
         public static RTCRtpTransceiverDirection FromNative(this Webrtc.RTCRtpTransceiverDirection nativeDirection) =>
             nativeDirection switch
             {
-                Webrtc.RTCRtpTransceiverDirection.SendRecv => RTCRtpTransceiverDirection.Sendrecv,
-                Webrtc.RTCRtpTransceiverDirection.SendOnly => RTCRtpTransceiverDirection.Sendonly,
-                Webrtc.RTCRtpTransceiverDirection.RecvOnly => RTCRtpTransceiverDirection.Recvonly,
+                Webrtc.RTCRtpTransceiverDirection.SendRecv => RTCRtpTransceiverDirection.SendRecv,
+                Webrtc.RTCRtpTransceiverDirection.SendOnly => RTCRtpTransceiverDirection.SendOnly,
+                Webrtc.RTCRtpTransceiverDirection.RecvOnly => RTCRtpTransceiverDirection.RecvOnly,
                 Webrtc.RTCRtpTransceiverDirection.Inactive => RTCRtpTransceiverDirection.Inactive,
                 Webrtc.RTCRtpTransceiverDirection.Stopped => throw new NotImplementedException(),
                 _ => throw new NotImplementedException()

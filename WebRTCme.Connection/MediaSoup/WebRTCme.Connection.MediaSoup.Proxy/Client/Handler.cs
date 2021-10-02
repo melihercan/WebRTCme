@@ -227,7 +227,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             var transceiver = _pc.AddTransceiver(options.Track, new RTCRtpTransceiverInit
             {
-                Direction = RTCRtpTransceiverDirection.Sendonly,
+                Direction = RTCRtpTransceiverDirection.SendOnly,
                 Streams = new IMediaStream[] { _window.MediaStream() },
                 SendEncodings = options.Encodings?.Select(e => e.ToWebRtc()).ToArray()
             });
