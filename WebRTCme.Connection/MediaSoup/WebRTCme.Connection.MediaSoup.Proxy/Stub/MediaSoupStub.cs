@@ -104,7 +104,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                         Data = data
                                     };
                                     var json = JsonSerializer.Serialize(response,
-                                        JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                        JsonHelper.WebRtcJsonSerializerOptions);
           Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (REQUEST ACCEPT): {json}");
                                     await _webSocket.SendAsync(
                                         new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
@@ -133,7 +133,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                         ErrorReason = errorReason
                                     };
                                     var json = JsonSerializer.Serialize(response,
-                                        JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                        JsonHelper.WebRtcJsonSerializerOptions);
          Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (REQUEST ERROR): {json}");
                                     await _webSocket.SendAsync(
                                         new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
@@ -199,13 +199,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                             if (ok)
                             {
                                 var responseOk = JsonSerializer.Deserialize<ProtooResponseOk>(json,
-                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                    JsonHelper.WebRtcJsonSerializerOptions);
                                 _tcsResponseOk?.SetResult(responseOk);
                             }
                             else
                             {
                                 var responseError = JsonSerializer.Deserialize<ProtooResponseError>(json,
-                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                    JsonHelper.WebRtcJsonSerializerOptions);
                                 Registry.Logger.LogError(responseError.ErrorReason);
                                 _tcsResponseOk?.SetException(new Exception($"{responseError.ErrorReason}"));
                             }
@@ -213,13 +213,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                         else if (jsonDocument.RootElement.TryGetProperty("request", out _))
                         {
                             var request = JsonSerializer.Deserialize<ProtooRequest>(json,
-                                JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                JsonHelper.WebRtcJsonSerializerOptions);
                             _tcsRequest?.SetResult(request);
                         }
                         else if (jsonDocument.RootElement.TryGetProperty("notification", out _))
                         {
                             var notification = JsonSerializer.Deserialize<ProtooNotification>(json,
-                                    JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                                    JsonHelper.WebRtcJsonSerializerOptions);
                             _tcsNotification?.SetResult(notification);
                         }
                     }
@@ -251,7 +251,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     Method = method,
                     Data = data
                 };
-                var json = JsonSerializer.Serialize(request, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                var json = JsonSerializer.Serialize(request, JsonHelper.WebRtcJsonSerializerOptions);
   Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (CALL): {json}");
                 await _webSocket.SendAsync(
                     new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),

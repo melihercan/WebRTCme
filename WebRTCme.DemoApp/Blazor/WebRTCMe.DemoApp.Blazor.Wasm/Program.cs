@@ -15,6 +15,11 @@ using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Wasm
 {
+    /// <summary>
+    /// gfdgdkgk
+    /// 
+    /// fgdfg
+    /// </summary>
     public class Program
     {
         public static async Task Main(string[] args)
@@ -59,7 +64,6 @@ namespace WebRTCme.DemoApp.Blazor.Wasm
                     prop.GetValue(jsRuntime, null), typeof(JsonSerializerOptions));
                 value.IgnoreNullValues = true;
                 value.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
             }
             catch (Exception ex)
             {

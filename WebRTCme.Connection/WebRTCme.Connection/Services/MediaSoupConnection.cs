@@ -355,7 +355,7 @@ namespace WebRTCme.Connection.Services
                     {
                         var json = ((JsonElement)data).GetRawText();
                         var peer = JsonSerializer.Deserialize<Peer>(
-                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                            json, JsonHelper.WebRtcJsonSerializerOptions);
                         OnNewPeer(peer);
                     }
                     break;
@@ -397,13 +397,13 @@ namespace WebRTCme.Connection.Services
                         var json = ((JsonElement)data).GetRawText();
    //_logger.LogInformation($"NewDataConsumer.JSON: {json}");
                         var requestData = JsonSerializer.Deserialize<DataConsumerRequestParameters>(
-                            json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                            json, JsonHelper.WebRtcJsonSerializerOptions);
 
                         var appData = requestData.AppData;
                         appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
 
                         // Invoke accept here, ConsumerDataAsync call assumes DataConsumer is already created.
-                        ////accept();
+                        //accept();
 
 
                         dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
@@ -506,7 +506,7 @@ namespace WebRTCme.Connection.Services
             {
                 case MethodName.GetRouterRtpCapabilities:
                     var routerRtpCapabilities = JsonSerializer.Deserialize<RtpCapabilities>(
-                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
                     
                     // Need to convert object (Parameters.Value) to either string or int.
                     foreach (var codec in routerRtpCapabilities.Codecs)
@@ -518,12 +518,12 @@ namespace WebRTCme.Connection.Services
 
                 case MethodName.CreateWebRtcTransport:
                     var transportInfo = JsonSerializer.Deserialize<TransportInfo>(
-                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
                     return transportInfo;
 
                 case MethodName.Join:
                     var joinResponse = JsonSerializer.Deserialize<JoinResponse>(
-                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
                     var peers = joinResponse.Peers;
                     return peers;
 
@@ -532,7 +532,7 @@ namespace WebRTCme.Connection.Services
 
                 case MethodName.Produce:
                     var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(
-                        json, JsonHelper.CamelCaseAndIgnoreNullJsonSerializerOptions);
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceResponse.Id;
             }
 
