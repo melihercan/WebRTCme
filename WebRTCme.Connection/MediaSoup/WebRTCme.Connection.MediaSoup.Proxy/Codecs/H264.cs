@@ -139,8 +139,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
         public static string GenerateProfileLevelIdForAnswer(Dictionary<string, object/*string*/> localSupportedParams,
             Dictionary<string, object/*string*/> remoteOfferedParams)
         {
-            if (!localSupportedParams.ContainsKey("profile - level - id") && 
-                remoteOfferedParams.ContainsKey("profile-level-id"))
+            if (!localSupportedParams.ContainsKey("profile-level-id") && 
+                !remoteOfferedParams.ContainsKey("profile-level-id"))
             {
                 Console.WriteLine("generateProfileLevelIdForAnswer() | no profile-level-id in local and remote params");
                 return null;

@@ -657,9 +657,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 case "video/h264":
                     var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ? 
-                        aCodec.Parameters["packetization-mode"] : null;
+                        (int)aCodec.Parameters["packetization-mode"] : 0;
                     var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
-                        bCodec.Parameters["packetization-mode"] : null;
+                        (int)bCodec.Parameters["packetization-mode"] : 0;
 
                     if (aPacketizationMode != bPacketizationMode)
                         return false;
@@ -716,9 +716,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                         //if (aVp9CodecParameters != bVp9CodecParameters)
                         //    return false;
                         var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
-                            aCodec.Parameters["profile-id"] : null;
+                            (int)aCodec.Parameters["profile-id"] : 0;
                         var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
-                            bCodec.Parameters["profile-id"] : null;
+                            (int)bCodec.Parameters["profile-id"] : 0;
 
                         if (aProfileId != bProfileId)
                             return false;
@@ -748,9 +748,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 case "video/h264":
                     var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ?
-                        aCodec.Parameters["packetization-mode"] : null;
+                        (int)aCodec.Parameters["packetization-mode"] : 0;
                     var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
-                        bCodec.Parameters["packetization-mode"] : null;
+                        (int)bCodec.Parameters["packetization-mode"] : 0;
 
                     if (aPacketizationMode != bPacketizationMode)
                         return false;
@@ -791,9 +791,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     if (strict)
                     {
                         var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
-                            aCodec.Parameters["profile-id"] : null;
+                            (int)aCodec.Parameters["profile-id"] : 0;
                         var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
-                            bCodec.Parameters["profile-id"] : null;
+                            (int)bCodec.Parameters["profile-id"] : 0;
 
                         if (aProfileId != bProfileId)
                             return false;
@@ -823,9 +823,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 case "video/h264":
                     var aPacketizationMode = aCodec.Parameters.ContainsKey("packetization-mode") ?
-                        aCodec.Parameters["packetization-mode"] : null;
+                        (int)aCodec.Parameters["packetization-mode"] : 0;
                     var bPacketizationMode = bCodec.Parameters.ContainsKey("packetization-mode") ?
-                        bCodec.Parameters["packetization-mode"] : null;
+                        (int)bCodec.Parameters["packetization-mode"] : 0;
 
                     if (aPacketizationMode != bPacketizationMode)
                         return false;
@@ -866,9 +866,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     if (strict)
                     {
                         var aProfileId = aCodec.Parameters.ContainsKey("profile-id") ?
-                            aCodec.Parameters["profile-id"] : null;
+                            (int)aCodec.Parameters["profile-id"] : 0;
                         var bProfileId = bCodec.Parameters.ContainsKey("profile-id") ?
-                            bCodec.Parameters["profile-id"] : null;
+                            (int)bCodec.Parameters["profile-id"] : 0;
 
                         if (aProfileId != bProfileId)
                             return false;

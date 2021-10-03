@@ -24,8 +24,8 @@ namespace WebRTCme.Connection.MediaSoup
         public int? MaxFramerate { get; init; }
         public bool? AdaptivePtime { get; init; }
 
-        public Priority Priority { get; init; }
-        public Priority NetworkPriority { get; init; }
+        public Priority? Priority { get; init; }
+        public Priority? NetworkPriority { get; init; }
 
 
     }
