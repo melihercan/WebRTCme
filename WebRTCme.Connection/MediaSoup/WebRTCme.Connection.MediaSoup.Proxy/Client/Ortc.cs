@@ -254,8 +254,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     continue;
                 codecs.Add(new ExtendedRtpCodecCapability 
                 {
-                    Kind = matchingLocalCodec.Kind,
                     MimeType = matchingLocalCodec.MimeType,
+                    Kind = matchingLocalCodec.Kind,
                     ClockRate = matchingLocalCodec.ClockRate,
                     Channels = matchingLocalCodec.Channels,
                     LocalPayloadType = matchingLocalCodec.PreferredPayloadType,
@@ -280,7 +280,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 if (matchingLocalRtxCodec is not null && matchingRemoteRtxCodec is not null)
                 {
                     extendedCodec.LocalRtxPayloadType = matchingLocalRtxCodec.PreferredPayloadType;
-                    extendedCodec.RemotePayloadType = matchingRemoteRtxCodec.PreferredPayloadType;
+                    extendedCodec.RemoteRtxPayloadType = matchingRemoteRtxCodec.PreferredPayloadType;
                 }
             }
 
@@ -327,8 +327,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             {
                 RtpCodecCapability codec = new() 
                 { 
-                    Kind = extendedCodec.Kind,
                     MimeType = extendedCodec.MimeType,
+                    Kind = extendedCodec.Kind,
                     PreferredPayloadType = extendedCodec.RemotePayloadType,
                     ClockRate = extendedCodec.ClockRate,
                     Channels = extendedCodec.Channels,
@@ -342,8 +342,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                 RtpCodecCapability rtxCodec = new()
                 {
-                    Kind = extendedCodec.Kind,
                     MimeType = $"{extendedCodec.Kind.DisplayName()}/rtx",
+                    Kind = extendedCodec.Kind,
                     PreferredPayloadType = extendedCodec.RemotePayloadType,
                     ClockRate = extendedCodec.ClockRate,
                     //Parameters = new RtxParameters
@@ -632,11 +632,19 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return true;
         }
 
-        bool IsRtxCodec(RtpCodecCapability codec) =>
-            Regex.IsMatch(codec.MimeType, ".+/rtx$");
+        bool IsRtxCodec(RtpCodecCapability codec)// =>
+                                                 //Regex.IsMatch(codec.MimeType, ".+/rtx$");
+        {
+            var ok = Regex.IsMatch(codec.MimeType, ".+/rtx$");
+            return ok;
+        }
 
-        bool IsRtxCodec(RtpCodecParameters codec) =>
-            Regex.IsMatch(codec.MimeType, ".+/rtx$");
+        bool IsRtxCodec(RtpCodecParameters codec) //=>
+                                                  //Regex.IsMatch(codec.MimeType, ".+/rtx$");
+        {
+            var ok = Regex.IsMatch(codec.MimeType, ".+/rtx$");
+            return ok;
+        }
 
         bool MatchCodecs(RtpCodecCapability aCodec, RtpCodecCapability bCodec, bool strict = false, 
             bool modify = false)

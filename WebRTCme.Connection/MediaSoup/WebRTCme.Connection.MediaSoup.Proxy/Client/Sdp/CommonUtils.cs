@@ -46,8 +46,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 {
                     var codec = new RtpCodecCapability 
                     {
-                        Kind = mediaKind,
                         MimeType = $"{kind.DisplayName()}/{rtpmap.EncodingName}",
+                        Kind = mediaKind,
                         PreferredPayloadType = rtpmap.PayloadType,
                         ClockRate = rtpmap.ClockRate,
                         Channels = rtpmap.Channels 
