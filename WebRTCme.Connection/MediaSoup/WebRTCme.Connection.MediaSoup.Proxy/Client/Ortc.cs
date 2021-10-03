@@ -344,7 +344,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 {
                     MimeType = $"{extendedCodec.Kind.DisplayName()}/rtx",
                     Kind = extendedCodec.Kind,
-                    PreferredPayloadType = extendedCodec.RemotePayloadType,
+                    PreferredPayloadType = (int)extendedCodec.RemoteRtxPayloadType,
                     ClockRate = extendedCodec.ClockRate,
                     //Parameters = new RtxParameters
                     //{
