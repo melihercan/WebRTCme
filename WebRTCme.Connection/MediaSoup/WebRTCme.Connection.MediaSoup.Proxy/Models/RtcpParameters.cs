@@ -8,6 +8,6 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public string Cname { get; set; }
         public bool? ReducedSize { get; set; }
-        public bool Mux { get; init; }
+        public bool? Mux { get; init; }
     }
 }

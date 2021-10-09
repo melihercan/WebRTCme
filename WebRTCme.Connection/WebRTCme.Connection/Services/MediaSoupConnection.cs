@@ -306,7 +306,7 @@ namespace WebRTCme.Connection.Services
                                 TransportId = _sendTransport.Id,
                                 Kind = params_.Kind,
                                 RtpParameters = params_.RtpParameters,
-                                AppData = params_.AppData
+                                AppData = params_.AppData ?? new Dictionary<string, object>()
                             }));
                     return id;
                 }
@@ -403,7 +403,7 @@ namespace WebRTCme.Connection.Services
                         appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
 
                         // Invoke accept here, ConsumerDataAsync call assumes DataConsumer is already created.
-                        //accept();
+                        ////accept();
 
 
                         dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
