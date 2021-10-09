@@ -1,4 +1,4 @@
-﻿namespace WebRTCme.Connection.MediaSoup.Proxy.Models
+﻿namespace WebRTCme.Connection.MediaSoup
 {
     public class SctpStreamParameters
     {

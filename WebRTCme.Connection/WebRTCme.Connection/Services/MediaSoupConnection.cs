@@ -311,10 +311,22 @@ namespace WebRTCme.Connection.Services
                     return id;
                 }
                 
-                Task<string> SendTransport_OnProduceDataAsync(object sender, ProduceDataEventParameters params_)
+                async Task<string> SendTransport_OnProduceDataAsync(object sender, ProduceDataEventParameters params_)
                 {
                     _logger.LogInformation($"-------> SendTransport_OnProduceDataAsync");
-                    throw new NotImplementedException();
+
+                    var id = (string)ParseResponse(MethodName.ProduceData,
+                        await _mediaSoupServerApi.CallAsync(MethodName.ProduceData,
+                            new ProduceDataRequest
+                            {
+                                TransportId = _sendTransport.Id,
+                                SctpStreamParameters = params_.SctpStreamParameters,
+                                Label = params_.Label,
+                                Protocol = params_.Protocol,
+                                AppData = params_.AppData ?? new Dictionary<string, object>()
+                            }));
+                    return id;
+
                 }
 
                 async Task RecvTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
@@ -534,6 +546,11 @@ namespace WebRTCme.Connection.Services
                     var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceResponse.Id;
+
+                case MethodName.ProduceData:
+                    var produceDataResponse = JsonSerializer.Deserialize<ProduceDataResponse>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return produceDataResponse.Id;
             }
 
             return null;
