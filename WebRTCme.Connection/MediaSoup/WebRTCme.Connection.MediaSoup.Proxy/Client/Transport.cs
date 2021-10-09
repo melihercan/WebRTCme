@@ -364,7 +364,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
-        public async Task<DataConsumer> ConsumerDataAsync(DataConsumerOptions options)
+        public async Task<DataConsumer> ConsumeDataAsync(DataConsumerOptions options)
         {
             Console.WriteLine("consumeData()");
 

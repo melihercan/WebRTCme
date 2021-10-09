@@ -387,10 +387,80 @@ namespace WebRTCme.Connection.Services
             switch (method)
             {
                 case MethodName.NewConsumer:
+                    Consumer consumer = null;
                     {
+                        if (!_consume)
+                        {
+                            reject(403, "I do not want to data consume");
+                            return;
+                        }
+
+                        var json = ((JsonElement)data).GetRawText();
+                        var requestData = JsonSerializer.Deserialize<ConsumerRequestParameters>(
+                            json, JsonHelper.WebRtcJsonSerializerOptions);
+
+                        var appData = requestData.AppData;
+                        appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
+
+                        consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions 
+                        { 
+                            Id = consumer.Id,
+                            ProducerId = consumer.ProducerId,
+                            Kind = consumer.Kind,
+                            RtpParameters = consumer.RtpParameters,
+                            AppData = appData
+                        });
+
+                        _consumers.Add(consumer.Id, consumer);
+                        if (requestData.PeerId is not null)
+                        {
+                            var peer = _peers[requestData.PeerId];
+                            peer.ConsumerIds.Add(consumer.Id);
+                        }
+
+                        consumer.OnClose += Consumer_OnClose;
+                        consumer.OnTransportClosed += Consumer_OnTransportClosed;
+                        consumer.OnTrackEnded += Consumer_OnTrackEnded;
+                        consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
+
+                        accept();
+
+                        // If audio-only mode is enabled, pause it.
+                        ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
+                            ////consumer.Pause();
+
+
 
                     }
                     break;
+
+                    void Consumer_OnClose(object sender, EventArgs e)
+                    {
+                        _logger.LogInformation($"-------> Consumer_OnClose");
+                        var peer = _peers[(string)consumer.AppData[KeyName.PeerId]];
+                        peer.ConsumerIds.Remove(consumer.Id);
+                        _consumers.Remove(consumer.Id);
+                    }
+
+                    void Consumer_OnTransportClosed(object sender, EventArgs e)
+                    {
+                        _logger.LogInformation($"-------> Consumer_OnTransportClose");
+                        var peer = _peers[(string)consumer.AppData[KeyName.PeerId]];
+                        peer.ConsumerIds.Remove(consumer.Id);
+                        _consumers.Remove(consumer.Id);
+                    }
+
+                    void Consumer_OnTrackEnded(object sender, EventArgs e)
+                    {
+                        _logger.LogInformation($"-------> Consumer_OnTrackEnded");
+                    }
+
+                    Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, EventArgs e)
+                    {
+                        _logger.LogInformation($"-------> Consumer_GetStatsAsync");
+                        return default;
+                    }
+
 
                 case MethodName.NewDataConsumer:
                     DataConsumer dataConsumer = null;
@@ -418,7 +488,7 @@ namespace WebRTCme.Connection.Services
                         ////accept();
 
 
-                        dataConsumer = await _recvTransport.ConsumerDataAsync(new DataConsumerOptions 
+                        dataConsumer = await _recvTransport.ConsumeDataAsync(new DataConsumerOptions 
                         {
                             Id = requestData.Id,
                             DataProducerId = requestData.DataProducerId,
@@ -486,10 +556,6 @@ namespace WebRTCme.Connection.Services
 
 
         }
-
-
-
-
 
 
         public Task<IRTCStatsReport> GetStats(Guid id)

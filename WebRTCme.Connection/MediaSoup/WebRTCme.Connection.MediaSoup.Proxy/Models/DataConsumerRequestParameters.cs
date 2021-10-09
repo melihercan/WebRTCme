@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Models
+namespace WebRTCme.Connection.MediaSoup
 {
     public class DataConsumerRequestParameters
     {
