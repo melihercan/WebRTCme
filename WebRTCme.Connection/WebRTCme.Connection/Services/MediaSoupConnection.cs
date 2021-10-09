@@ -40,6 +40,8 @@ namespace WebRTCme.Connection.Services
         Dictionary<string, DataConsumer> _dataConsumers = new();
         Producer _micProducer;
         Producer _webcamProducer;
+        DataProducer _chatDataProducer;
+        DataProducer _botDataProducer;
         Producer _shareProducer;
         Dictionary<string, PeerParameters> _peers = new();
 
@@ -166,7 +168,7 @@ namespace WebRTCme.Connection.Services
 
                     if (_produce)
                     {
-                        // Handle mic.
+                        // Enable mic.
                         _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                         {
                             Track = userContext.LocalStream.GetAudioTracks().First(),
@@ -178,7 +180,7 @@ namespace WebRTCme.Connection.Services
                             }
                         });
 
-                        // Handle webcam.
+                        // Enable webcam.
                         RtpEncodingParameters[] encodings = null;
                         RtpCodecCapability codec = null;
                         ProducerCodecOptions codecOptions = new()
@@ -290,9 +292,38 @@ namespace WebRTCme.Connection.Services
                 async Task SendTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
                 {
                     _logger.LogInformation($"-------> SendTransport_OnConnectionStateChangeAsync");
-                    //if (connectionState == ConnectionState.Connected)
-                    //{
-                    //}
+                    if (connectionState == ConnectionState.Connected)
+                    {
+                        if (_useDataChannel)
+                        {
+                            // Add chat data producer.
+                            _chatDataProducer = await _sendTransport.ProduceDataAsync(new DataProducerOptions
+                            {
+                                Ordered = false,
+                                MaxRetransmits = 1,
+                                Label = "chat",
+                                Protocol = "medium",
+                                AppData = new Dictionary<string, object>() 
+                                {
+                                    { "info", "my-chat-DataProducer" }
+                                }
+                            });
+
+                            // Add bot data producer.
+                            _botDataProducer = await _sendTransport.ProduceDataAsync(new DataProducerOptions
+                            {
+                                Ordered = false,
+                                MaxPacketLifeTime = 2000,
+                                Label = "bot",
+                                Protocol = "medium",
+                                AppData = new Dictionary<string, object>()
+                                {
+                                    { "info", "my-bot-DataProducer" }
+                                }
+                            });
+
+                        }
+                    }
                 }
 
                 async Task<string> SendTransport_OnProduceAsync(object sender, ProduceEventParameters params_)
@@ -341,13 +372,15 @@ namespace WebRTCme.Connection.Services
                             }));
                 }
 
-                async Task RecvTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
+                Task RecvTransport_OnConnectionStateChangeAsync(object sender, ConnectionState connectionState)
                 {
                     _logger.LogInformation($"-------> RecvTransport_OnConnectionStateChangeAsync");
                     //if (connectionState == ConnectionState.Connected)
                     //{
 
                     //}
+
+                    return Task.CompletedTask;
                 }
 
 
@@ -357,7 +390,7 @@ namespace WebRTCme.Connection.Services
         }
 
 
-        public async Task OnNotifyAsync(string method, object data)
+        public Task OnNotifyAsync(string method, object data)
         {
             _logger.LogInformation($"=======> OnNotifyAsync: {method}");
             
@@ -377,6 +410,8 @@ namespace WebRTCme.Connection.Services
                     break;
 
             }
+
+            return Task.CompletedTask;
         }
 
         public async Task OnRequestAsync(string method, object data,
