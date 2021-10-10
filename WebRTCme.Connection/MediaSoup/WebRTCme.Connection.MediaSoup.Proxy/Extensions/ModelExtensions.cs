@@ -9,16 +9,25 @@ namespace WebRTCme.Connection.MediaSoup.Proxy
     {
         public static RTCRtpEncodingParameters ToWebRtc(this RtpEncodingParameters parameters)
         {
-            return new RTCRtpEncodingParameters
+            RTCRtpEncodingParameters params_ = new()
             {
-                CodecPayloadType = (byte)parameters.CodecPayloadType,
-                Dtx = (bool)parameters.Dtx ? RTCDtxStatus.Enabled : RTCDtxStatus.Disabled,
-                MaxBitrate = (ulong)parameters.MaxBitrate,
-                MaxFramerate = Convert.ToDouble(parameters.MaxFramerate),
                 //Ptime = parameters.
                 Rid = parameters.Rid,
-                ScaleResolutionDownBy = Convert.ToDouble(parameters.ScaleResolutionDownBy)
             };
+
+
+            if (parameters.CodecPayloadType.HasValue)
+                params_.CodecPayloadType = (byte)parameters.CodecPayloadType;
+            if (parameters.Dtx.HasValue)
+                params_.Dtx = (bool)parameters.Dtx ? RTCDtxStatus.Enabled : RTCDtxStatus.Disabled;
+            if (parameters.MaxBitrate.HasValue)
+                params_.MaxBitrate = (ulong)parameters.MaxBitrate;
+            if (parameters.MaxFramerate.HasValue)
+                params_.MaxFramerate = Convert.ToDouble(parameters.MaxFramerate);
+            if (parameters.ScaleResolutionDownBy.HasValue)
+                params_.ScaleResolutionDownBy = Convert.ToDouble(parameters.ScaleResolutionDownBy);
+
+            return params_;
         }
 
         // Helper to convert object to either string or number after JSON conversion.

@@ -13,9 +13,9 @@ namespace Utilme.SdpTransform
 
         public RidDirection Direction { get; init; }
 
-        public string[] FmtList { get; init; }          // format of each string: "pt=<value>"
+        public string[] FmtList { get; set; }          // format of each string: "pt=""<value>,<value>"
         
-        public string[] Restrictions { get; init; }     // format of each strings: "<restriction>=<value>"  
+        public string[] Restrictions { get; set; }     // format of each strings: "<restriction>=<value>"  
 
 
 

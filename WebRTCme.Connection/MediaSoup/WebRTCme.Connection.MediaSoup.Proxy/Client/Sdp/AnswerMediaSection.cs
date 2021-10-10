@@ -190,8 +190,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                         {
                             _mediaObject.Simulcast = new()
                             {
-                                Dir1 = RidDirection.Recv,
-                        	    List1 = offerMediaObject.Simulcast.List1
+                                Direction = RidDirection.Recv,
+                        	    IdList = offerMediaObject.Simulcast.IdList
                             };
 
                             _mediaObject.MediaDescription.Attributes.Rids = new List<Rid>();

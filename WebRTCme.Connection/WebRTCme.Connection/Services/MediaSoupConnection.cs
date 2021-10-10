@@ -71,6 +71,9 @@ namespace WebRTCme.Connection.Services
                 var forceH264 = _configuration.GetValue<bool>("MediaSoupServer:ForceH264");
                 var forceVP9 = _configuration.GetValue<bool>("MediaSoupServer:ForceVP9");
                 var useSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSimulcast");
+                var useSharingSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSharingSimulcast");
+                var audioOnly = _configuration.GetValue<bool>("MediaSoupServer:AudioOnly");
+                var e2eKey = _configuration.GetValue<string>("MediaSoupServer:E2eKey");
 
                 _displayName = userContext.Name;
 

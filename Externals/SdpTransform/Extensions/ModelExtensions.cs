@@ -978,23 +978,59 @@ namespace Utilme.SdpTransform
                 .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(Rid.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            var subTokens = tokens[2].Split(';');
-            var fmtList = subTokens.Where(st => st.StartsWith("pt=")).ToArray();
-            var restrictions = subTokens.Skip(fmtList.Length).Take(subTokens.Length - fmtList.Length).ToArray();
-            return new Rid
+            Rid rid = new()
             {
                 Id = tokens[0],
-                Direction = tokens[1].EnumFromDisplayName<RidDirection>(), 
-                FmtList = fmtList,
-                Restrictions = restrictions
+                Direction = tokens[1].EnumFromDisplayName<RidDirection>(),
             };
+
+            if (tokens.Length > 2)
+            {
+                var subTokens = tokens[2].Split(';');
+
+                var fmtSubToken = subTokens.SingleOrDefault(s => s.StartsWith("pt="));
+                if (fmtSubToken is not null)
+                {
+                    var fmtList = fmtSubToken
+                        .Replace("pt=", string.Empty)
+                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    rid.FmtList = fmtList;
+                }
+
+                var restrictions = subTokens.Where(s => !s.StartsWith("pt=")).ToArray();
+                if (restrictions.Length > 0)
+                    rid.Restrictions = restrictions;
+            }
+
+            return rid;
         }
 
         public static string ToText(this Rid rid) =>
             $"{Sdp.AttributeIndicator}{Rid.Label}" +
                 $"{rid.Id} {rid.Direction.DisplayName()} " +
-                $"{string.Join(";", rid.FmtList.Select(f => "pt=" + f)).ToArray()}" +
-                $"{string.Join(";", rid.Restrictions)}" +
+                $"{(rid.FmtList is null ? string.Empty : "pt=" + string.Join(",",rid.FmtList))}" +
+                $"{(rid.Restrictions is null ? string.Empty : ";" + string.Join(";", rid.Restrictions))}" +
+                $"{Sdp.CRLF}";
+
+        public static Simulcast ToSimulcast(this string str)
+        {
+            var tokens = str
+                .Replace(Sdp.AttributeIndicator, string.Empty)
+                .Replace(Simulcast.Label, string.Empty)
+                .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var subTokens = tokens[1].Split(';');
+            return new Simulcast
+            {
+                Direction = tokens[0].EnumFromDisplayName<RidDirection>(),
+                IdList = subTokens
+            };
+
+        }
+
+        public static string ToText(this Simulcast simulcast) =>
+            $"{Sdp.AttributeIndicator}{Simulcast.Label}" +
+                $"{simulcast.Direction.DisplayName()} " +
+                $"{string.Join(";", simulcast.IdList)}" +
                 $"{Sdp.CRLF}";
 
         public static Rtpmap ToRtpmap(this string str)
