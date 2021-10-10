@@ -172,7 +172,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     {
                         var normalizedEncoding = new RtpEncodingParameters 
                         { 
-                            Active = encoding.Active,
+                            Active = encoding.Active.HasValue == true && encoding.Active == false ? false : true,
                             Dtx = encoding.Dtx,
                             ScalabilityMode = encoding.ScalabilityMode,
                             ScaleResolutionDownBy = encoding.ScaleResolutionDownBy,
