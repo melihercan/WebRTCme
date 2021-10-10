@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace WebRTCme.Connection.MediaSoup
 {
     [JsonConverter(typeof(JsonStringEnumMemberConverter))]
-    public enum CameraSelectionType
+    public enum WebcamType
     {
         [EnumMember(Value = "back")]
         [Display(Name = "back")]

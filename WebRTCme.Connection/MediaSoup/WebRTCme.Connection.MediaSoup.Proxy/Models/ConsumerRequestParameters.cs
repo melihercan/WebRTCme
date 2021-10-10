@@ -11,7 +11,7 @@ namespace WebRTCme.Connection.MediaSoup
         public string Id { get; init; }
         public MediaKind? Kind { get; init; }
         public RtpParameters RtpParameters { get; init; }
-        public CameraSelectionType? Type { get; init; }
+        public ConsumerType? Type { get; init; }
         public Dictionary<string, object> AppData { get; init; }
         public bool ProducerPaused { get; init; }
 
