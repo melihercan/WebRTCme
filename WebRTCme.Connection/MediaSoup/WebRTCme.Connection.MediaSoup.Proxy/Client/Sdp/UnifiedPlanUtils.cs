@@ -16,7 +16,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 				.ToList();
 
 			if (ssrcs.Count == 0)
-				throw new Exception("no a=ssrc lines found");
+				throw new Exception("XXXXno a=ssrc lines found");
 
 			Dictionary<uint, uint?> ssrcToRtxSsrc = new();
 
