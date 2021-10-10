@@ -277,9 +277,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             // Set MID.
             sendingRtpParameters.Mid = localId;//// new Mid { Id = localId };
 
-      Console.WriteLine("===================");
-      Console.WriteLine($"{_pc.LocalDescription.Sdp}");
-      Console.WriteLine("===================");
+      ////Console.WriteLine("===================");
+      ////Console.WriteLine($"{_pc.LocalDescription.Sdp}");
+      ////Console.WriteLine("===================");
 
             localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
             offerMediaObject = new MediaObject

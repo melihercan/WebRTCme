@@ -60,6 +60,8 @@ namespace Utilme.SdpTransform
 
         public MaxMessageSize MaxMessageSize { get; set; }
 
+        public Simulcast Simulcast { get; set; }
+
         public IList<Candidate> Candidates { get; set; }
  
         public IList<Ssrc> Ssrcs { get; set; }
@@ -75,7 +77,6 @@ namespace Utilme.SdpTransform
         public IList<RtcpFb> RtcpFbs { get; set; }
 
         public IList<Extmap> Extmaps { get; set; }
-
 
 
 

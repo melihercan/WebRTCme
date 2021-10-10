@@ -160,6 +160,8 @@ namespace Utilme.SdpTransform
                         md.Attributes.SctpPort = attr.ToSctpPort();
                     else if (attr.StartsWith(MaxMessageSize.Label))
                         md.Attributes.MaxMessageSize = attr.ToMaxMessageSize();
+                    else if (attr.StartsWith(Simulcast.Label))
+                        md.Attributes.Simulcast = attr.ToSimulcast();
                     else if (attr.StartsWith(Candidate.Label))
                     {
                         md.Attributes.Candidates ??= new List<Candidate>();
@@ -317,6 +319,8 @@ namespace Utilme.SdpTransform
                     sb.Append(md.Attributes.SctpPort.ToText());
                 if (md.Attributes.MaxMessageSize is not null)
                     sb.Append(md.Attributes.MaxMessageSize.ToText());
+                if (md.Attributes.Simulcast is not null)
+                    sb.Append(md.Attributes.Simulcast.ToText());
                 if (md.Attributes.Candidates is not null)
                     foreach (var c in md.Attributes.Candidates)
                         sb.Append(c.ToText());
