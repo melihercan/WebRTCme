@@ -243,7 +243,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                 case MediaType.Application:
                     {
                         // New spec.
-                        if (offerMediaObject.MediaDescription.Attributes.SctpPort.GetType() == typeof(int))
+                        if (offerMediaObject.MediaDescription.Attributes.SctpPort.Port.GetType() == typeof(int))
                         {
                             _mediaObject.MediaDescription.Fmts = new List<string> { "webrtc-datachannel" };
                             _mediaObject.MediaDescription.Attributes.SctpPort = new SctpPort
