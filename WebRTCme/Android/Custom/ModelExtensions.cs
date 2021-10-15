@@ -93,9 +93,22 @@ namespace WebRTCme.Android
             new Webrtc.RtpParameters.Encoding(parameters.Rid, parameters.Active, 
                 (Java.Lang.Double)parameters.ScaleResolutionDownBy)
             {
-                MaxBitrateBps = (Java.Lang.Integer)(int)parameters.MaxBitrate, 
-                MaxFramerate = (Java.Lang.Integer)parameters.MaxFramerate,
+                MaxBitrateBps = (Java.Lang.Integer)(int)parameters.MaxBitrate,
+                MaxFramerate = (Java.Lang.Integer)(int)parameters.MaxFramerate,
             };
+
+        //{
+        //    var sr = (Java.Lang.Double)parameters.ScaleResolutionDownBy;
+        //    var mb = (Java.Lang.Integer)(int)parameters.MaxBitrate;
+        //    var mf = (Java.Lang.Integer)(int)parameters.MaxFramerate;
+        //    var ret = new Webrtc.RtpParameters.Encoding(parameters.Rid, parameters.Active,
+        //        sr)
+        //    {
+        //        MaxBitrateBps = mb,
+        //        MaxFramerate = mf
+        //    };
+        //    return ret;
+        //}
 
         public static Webrtc.RtpTransceiver.RtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
         {
