@@ -102,6 +102,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             }
                         }
 
+                        _mediaObject.MediaDescription.Fmts ??= new List<string>();
                         ((List<string>)_mediaObject.MediaDescription.Fmts).AddRange(offerRtpParameters.Codecs
                             .Select(codec => codec.PayloadType.ToString()));
 

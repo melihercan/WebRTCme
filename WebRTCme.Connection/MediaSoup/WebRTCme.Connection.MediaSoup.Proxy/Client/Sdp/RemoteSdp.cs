@@ -296,7 +296,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                     _dtlsParameters,
                     null,
                     _plainRtpParameters,
-                    (bool)_planB,
+                    _planB ?? false,
                     mid,
                     kind,
                     offerRtpParameters,

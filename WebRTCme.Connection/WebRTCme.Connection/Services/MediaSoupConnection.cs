@@ -442,10 +442,10 @@ namespace WebRTCme.Connection.Services
 
                         consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions 
                         { 
-                            Id = consumer.Id,
-                            ProducerId = consumer.ProducerId,
-                            Kind = consumer.Kind,
-                            RtpParameters = consumer.RtpParameters,
+                            Id =  requestData.Id,
+                            ProducerId = requestData.ProducerId,
+                            Kind =  requestData.Kind,
+                            RtpParameters = requestData.RtpParameters,
                             AppData = appData
                         });
 

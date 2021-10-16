@@ -954,7 +954,7 @@ namespace Utilme.SdpTransform
 
         public static string ToText(this Ssrc ssrc) =>
             $"{Sdp.AttributeIndicator}{Ssrc.Label}" +
-                $"{ssrc.Id} {ssrc.Attribute} {ssrc.Value ?? string.Empty}" +
+                $"{ssrc.Id} {ssrc.Attribute}{(ssrc.Value == null ? string.Empty : ":" + ssrc.Value)}" +
                 $"{Sdp.CRLF}";
         
 
