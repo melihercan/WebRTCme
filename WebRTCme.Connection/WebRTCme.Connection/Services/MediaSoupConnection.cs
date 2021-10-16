@@ -27,6 +27,8 @@ namespace WebRTCme.Connection.Services
         readonly IJSRuntime _jsRuntime;
         readonly MediaSoup.Proxy.Models.Device _device;
 
+        ConnectionContext _connectionContext;
+
         MediaSoup.Proxy.Client.Device _mediaSoupDevice;
         Transport _sendTransport;
         Transport _recvTransport;
@@ -255,11 +257,12 @@ namespace WebRTCme.Connection.Services
                         });
 
                     }
-                    //connectionContext = new ConnectionContext
-                    //{
-                    //    ConnectionRequestParameters = request,
-                    //    Observer = observer
-                    //};
+
+                    _connectionContext = new ConnectionContext
+                    {
+                        UserContext = userContext,
+                        Observer = observer
+                    };
 
                 }
                 catch (Exception ex)
@@ -450,7 +453,7 @@ namespace WebRTCme.Connection.Services
                         });
 
                         _consumers.Add(consumer.Id, consumer);
-                        if (requestData.PeerId is not null)
+                        ////if (requestData.PeerId is not null)
                         {
                             var peer = _peers[requestData.PeerId];
                             peer.ConsumerIds.Add(consumer.Id);
@@ -465,10 +468,39 @@ namespace WebRTCme.Connection.Services
 
                         // If audio-only mode is enabled, pause it.
                         ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
-                            ////consumer.Pause();
+                        ////consumer.Pause();
 
 
+                        // Consumer is ready. Check if stream is ready (both audio and video).
+                        // TODO: WE can have audio only calls!!!
+                        ////if (requestData.PeerId is not null)
+                        {
+                            var peer = _peers[requestData.PeerId];
+                            var consumers = peer.ConsumerIds
+                                .Select(key => _consumers[key])
+                                .ToList();
 
+                            var audioTrack = 
+                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio).Track;
+                            var videoTrack =
+                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video).Track;
+
+                            // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
+                            if (audioTrack is not null && videoTrack is not null)
+                            {
+                                var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
+                                mediaStream.AddTrack(audioTrack);
+                                mediaStream.AddTrack(videoTrack);
+                                _connectionContext.Observer.OnNext(new PeerResponse
+                                {
+                                    Type = PeerResponseType.PeerJoined,
+                                    Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
+                                    Name = peer.Peer.DsiplayName,
+                                    MediaStream = mediaStream,
+                                    DataChannel = /*isInitiator ? dataChannel :*/ null
+                                });
+                            }
+                        }
                     }
                     break;
 

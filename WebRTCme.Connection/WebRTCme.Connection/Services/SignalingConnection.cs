@@ -19,7 +19,7 @@ namespace WebRTCme.Connection.Services
         readonly ILogger<SignalingConnection> _logger;
         readonly IJSRuntime _jsRuntime;
 
-        ConnectionContext _connectionContext = new();
+        ConnectionContext _connectionContext;// = new();
 
         public SignalingConnection(ISignalingServerApi signalingServerApi, IWebRtc webRtc, 
             ILogger<SignalingConnection> logger, IJSRuntime jsRuntime = null)
