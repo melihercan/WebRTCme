@@ -10,6 +10,7 @@ using System.Reactive;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
@@ -27,9 +28,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         TaskCompletionSource<ProtooRequest> _tcsRequest;
         TaskCompletionSource<ProtooNotification> _tcsNotification;
         CancellationTokenSource _cts;
+
+        Channel<ProtooResponse> _responseChannel = Channel.CreateBounded<ProtooResponse>(4);
+        Channel<ProtooRequest> _requestChannel = Channel.CreateBounded<ProtooRequest>(4);
+        Channel<ProtooNotification> _notificationChannel = Channel.CreateBounded<ProtooNotification>(4);
+        Dictionary<uint, TaskCompletionSource<ProtooResponse>> _apiRequests = new();
+
+
         string _mediaSoupServerBaseUrl;
         static uint _counter;
-        SemaphoreSlim _sem = new(1);
+        ////SemaphoreSlim _sem = new(1);
 
         public event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
         public event IMediaSoupServerNotify.RequestDelegateAsync RequestEventAsync;
@@ -86,8 +94,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                 {
                     try
                     {
-                        _tcsRequest = new();
-                        var request = await _tcsRequest.Task;
+                        ////_tcsRequest = new();
+                        ////var request = await _tcsRequest.Task;
+                        var request = await _requestChannel.Reader.ReadAsync(_cts.Token);
 
                         await RequestEventAsync?.Invoke(request.Method, request.Data,
                             // accept
@@ -95,7 +104,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                             {
                                 try
                                 {
-                                    await _sem.WaitAsync();
+                                    ////await _sem.WaitAsync();
                                     var response = new ProtooResponse
                                     {
                                         Response = true,
@@ -115,7 +124,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                 }
                                 finally
                                 {
-                                    _sem.Release();
+                                    ////_sem.Release();
                                 }
                             },
                             // reject
@@ -123,12 +132,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                             {
                                 try
                                 {
-                                    await _sem.WaitAsync();
+                                    ////await _sem.WaitAsync();
                                     var response = new ProtooResponse
                                     {
                                         Response = true,
                                         Id = request.Id,
-                                        Ok = true,
+                                        Ok = false,
                                         ErrorCode = error,
                                         ErrorReason = errorReason
                                     };
@@ -144,7 +153,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                                 }
                                 finally
                                 {
-                                    _sem.Release();
+                                    ////_sem.Release();
                                 }
                             });
 
@@ -167,9 +176,33 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                 {
                     try
                     {
-                        _tcsNotification = new();
-                        var notification = await _tcsNotification.Task;
+                        ////_tcsNotification = new();
+                        ////var notification = await _tcsNotification.Task;
+                        var notification = await _notificationChannel.Reader.ReadAsync(_cts.Token);
+
                         await NotifyEventAsync?.Invoke(notification.Method, notification.Data);
+                    }
+                    catch (Exception ex)
+                    {
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
+                    }
+                    finally
+                    {
+
+                    }
+                }
+            });
+
+            // Task handling responses.
+            _ = Task.Run(async () =>
+            {
+                while (!_cts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var response = await _responseChannel.Reader.ReadAsync(_cts.Token);
+                        var tcs = _apiRequests[response.Id];
+                        tcs.SetResult(response);
                     }
                     catch (Exception ex)
                     {
@@ -200,27 +233,44 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                             {
                                 var responseOk = JsonSerializer.Deserialize<ProtooResponseOk>(json,
                                     JsonHelper.WebRtcJsonSerializerOptions);
-                                _tcsResponseOk?.SetResult(responseOk);
+                                ////_tcsResponseOk?.SetResult(responseOk);
+                                await _responseChannel.Writer.WriteAsync(new ProtooResponse 
+                                { 
+                                    Response = responseOk.Response,
+                                    Id = responseOk.Id,
+                                    Ok = responseOk.Ok,
+                                    Data = responseOk.Data
+                                });
                             }
                             else
                             {
                                 var responseError = JsonSerializer.Deserialize<ProtooResponseError>(json,
                                     JsonHelper.WebRtcJsonSerializerOptions);
                                 Registry.Logger.LogError(responseError.ErrorReason);
-                                _tcsResponseOk?.SetException(new Exception($"{responseError.ErrorReason}"));
+                                ////_tcsResponseOk?.SetException(new Exception($"{responseError.ErrorReason}"));
+                                await _responseChannel.Writer.WriteAsync(new ProtooResponse
+                                {
+                                    Response = responseError.Response,
+                                    Id = responseError.Id,
+                                    Ok = responseError.Ok,
+                                    ErrorCode = responseError.ErrorCode,
+                                    ErrorReason = responseError.ErrorReason
+                                });
                             }
                         }
                         else if (jsonDocument.RootElement.TryGetProperty("request", out _))
                         {
                             var request = JsonSerializer.Deserialize<ProtooRequest>(json,
                                 JsonHelper.WebRtcJsonSerializerOptions);
-                            _tcsRequest?.SetResult(request);
+                            ////_tcsRequest?.SetResult(request);
+                            await _requestChannel.Writer.WriteAsync(request);
                         }
                         else if (jsonDocument.RootElement.TryGetProperty("notification", out _))
                         {
                             var notification = JsonSerializer.Deserialize<ProtooNotification>(json,
                                     JsonHelper.WebRtcJsonSerializerOptions);
-                            _tcsNotification?.SetResult(notification);
+                            ////_tcsNotification?.SetResult(notification);
+                            await _notificationChannel.Writer.WriteAsync(notification);
                         }
                     }
                     catch (OperationCanceledException) { }
@@ -236,13 +286,13 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         }
 
 
-        public async Task<Result<object>> CallAsync(string method, object data)
+        public async Task<Result<object>> ApiAsync(string method, object data)
         {
             Registry.Logger.LogInformation($"######## CallAsync: {method}");
             try
             {
-                await _sem.WaitAsync();
-                _tcsResponseOk = new();
+                ////await _sem.WaitAsync();
+                ////_tcsResponseOk = new();
 
                 var request = new ProtooRequest
                 {
@@ -252,6 +302,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     Data = data
                 };
                 var json = JsonSerializer.Serialize(request, JsonHelper.WebRtcJsonSerializerOptions);
+
+                TaskCompletionSource<ProtooResponse> tcs = new();
+                _apiRequests.Add(request.Id, tcs);
+
   Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG (CALL): {json}");
                 await _webSocket.SendAsync(
                     new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
@@ -259,9 +313,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                     true,
                     _cts.Token);
 
-                var response = await _tcsResponseOk.Task;
+                ////var response = await _tcsResponseOk.Task;
+                var response = await tcs.Task;
                 if (response.Id != request.Id)
                     throw new Exception($"request.Id:{request.Id} and response.Id:{response.Id} are different!");
+                if (!response.Ok)
+                    throw new Exception(response.ErrorReason);
 
                 return Result<object>.Ok(response.Data);
             }
@@ -271,9 +328,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
             }
             finally
             {
-                _tcsResponseOk.Task.Dispose();
-                _tcsResponseOk = null;
-                _sem.Release();
+                ////_tcsResponseOk.Task.Dispose();
+                ////_tcsResponseOk = null;
+                ////_sem.Release();
             }
         }
 
@@ -281,6 +338,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         {
             _cts.Cancel();
             _cts.Dispose();
+            //// TODO: Dispose _apiRequests tcs
+
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye", CancellationToken.None);
             return Result<Unit>.Ok(Unit.Default);
         }

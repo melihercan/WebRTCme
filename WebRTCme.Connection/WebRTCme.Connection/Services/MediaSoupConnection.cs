@@ -89,7 +89,7 @@ namespace WebRTCme.Connection.Services
                     _mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
 
                     var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
-                        await _mediaSoupServerApi.CallAsync(MethodName.GetRouterRtpCapabilities));
+                        await _mediaSoupServerApi.ApiAsync(MethodName.GetRouterRtpCapabilities));
                     await _mediaSoupDevice.LoadAsync(routerRtpCapabilities);
 
 
@@ -97,7 +97,7 @@ namespace WebRTCme.Connection.Services
                     if (_produce)
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
-                            await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
+                            await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
                                 new WebRtcTransportCreateRequest
                                 {
                                     ForceTcp = forceTcp,
@@ -129,7 +129,7 @@ namespace WebRTCme.Connection.Services
                     if (_consume)
                     {
                         var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
-                            await _mediaSoupServerApi.CallAsync(MethodName.CreateWebRtcTransport,
+                            await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
                                 new WebRtcTransportCreateRequest
                                 {
                                     ForceTcp = forceTcp,
@@ -157,7 +157,7 @@ namespace WebRTCme.Connection.Services
                     // Join now into the room.
                     // NOTE: Don't send our RTP capabilities if we don't want to consume.
                     var peers = (Peer[])ParseResponse(MethodName.Join,
-                        await _mediaSoupServerApi.CallAsync(MethodName.Join,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.Join,
                             new JoinRequest
                             {
                                 DisplayName = _displayName,
@@ -286,7 +286,7 @@ namespace WebRTCme.Connection.Services
                 {
                     _logger.LogInformation($"-------> SendTransport_OnConnectAsync");
                     _ = ParseResponse(MethodName.ConnectWebRtcTransport,
-                        await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.ConnectWebRtcTransport,
                             new WebRtcTransportConnectRequest
                             {
                                 TransportId = _sendTransport.Id,
@@ -337,7 +337,7 @@ namespace WebRTCme.Connection.Services
                     _logger.LogInformation($"-------> SendTransport_OnProduceAsync");
 
                     var id = (string)ParseResponse(MethodName.Produce,
-                        await _mediaSoupServerApi.CallAsync(MethodName.Produce,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.Produce,
                             new ProduceRequest
                             {
                                 TransportId = _sendTransport.Id,
@@ -353,7 +353,7 @@ namespace WebRTCme.Connection.Services
                     _logger.LogInformation($"-------> SendTransport_OnProduceDataAsync");
 
                     var id = (string)ParseResponse(MethodName.ProduceData,
-                        await _mediaSoupServerApi.CallAsync(MethodName.ProduceData,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.ProduceData,
                             new ProduceDataRequest
                             {
                                 TransportId = _sendTransport.Id,
@@ -370,7 +370,7 @@ namespace WebRTCme.Connection.Services
                 {
                     _logger.LogInformation($"-------> RecvTransport_OnConnectAsync");
                     _ = ParseResponse(MethodName.ConnectWebRtcTransport,
-                        await _mediaSoupServerApi.CallAsync(MethodName.ConnectWebRtcTransport,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.ConnectWebRtcTransport,
                             new WebRtcTransportConnectRequest
                             {
                                 TransportId = _recvTransport.Id,

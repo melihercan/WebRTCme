@@ -12,7 +12,7 @@ namespace WebRTCme.Connection.MediaSoup
         Task<Result<Unit>> ConnectAsync(Guid id, string name, string room);
         Task<Result<Unit>> DisconnectAsync(Guid id);
 
-        Task<Result<object>> CallAsync(string method, object data = null);
+        Task<Result<object>> ApiAsync(string method, object data = null);
 
         event IMediaSoupServerNotify.NotifyDelegateAsync NotifyEventAsync;
         event IMediaSoupServerNotify.RequestDelegateAsync RequestEventAsync;
