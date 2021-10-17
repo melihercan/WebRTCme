@@ -203,6 +203,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                         var response = await _responseChannel.Reader.ReadAsync(_cts.Token);
                         var tcs = _apiRequests[response.Id];
                         tcs.SetResult(response);
+                        _apiRequests.Remove(response.Id);
                     }
                     catch (Exception ex)
                     {

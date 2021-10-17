@@ -9,6 +9,7 @@ using WebRTCme.Connection.MediaSoup.Proxy.Models;
 using System.Linq;
 using WebRTCme.Connection.MediaSoup.Proxy;
 using Xamarin.Essentials;
+using System.Threading;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 {
@@ -27,6 +28,14 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         int _nextSendSctpStreamId;
         bool _transportReady;
 
+        // SendAsync and SendDataChannelAsync have a race condition as they both add MediaSection to the list
+        // kept in RemoteSdp as well as both setting offers in WebRTC. There is a call to GetNextMediaSectionIdx
+        // to get index from list and accessing the offer from WebRTC using that index. When index is taken and
+        // before the list is updated, if there comes another write to the list, things will be corrupted.
+        // Use this semaphore to avoid race condition.
+        SemaphoreSlim _sem = new(1);
+
+        static int _instanceNo; 
 
         NumSctpStreams NumSctpStreams = new() 
         {
@@ -39,8 +48,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public Handler(Ortc ortc)
         {
+            int instanceNo = Interlocked.Increment(ref _instanceNo);
+
             _ortc = ortc;
-            Name = "Generic";
+            Name = $"Generic{instanceNo}";
             _window = Registry.WebRtc.Window(Registry.JsRuntime);
         }
 
@@ -195,161 +206,238 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public async Task<HandlerSendResult> SendAsync(HandlerSendOptions options)
         {
-            if (options.Encodings is not null && options.Encodings.Length > 1)
+            try
             {
-                options.Encodings = options.Encodings
-                     .Select((encoding, idx) => 
-                     { 
-                         encoding.Rid = $"r{idx}";
-                         return encoding;
-                     }).ToArray();
-            }
+                await _sem.WaitAsync();
+
+                if (options.Encodings is not null && options.Encodings.Length > 1)
+                {
+                    options.Encodings = options.Encodings
+                         .Select((encoding, idx) =>
+                         {
+                             encoding.Rid = $"r{idx}";
+                             return encoding;
+                         }).ToArray();
+                }
 
 
-            var sendingRtpParameters =
-                Utils.Clone<RtpParameters>(_sendingRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
-            foreach (var codec in sendingRtpParameters.Codecs)
-                codec.Parameters.ToStringOrNumber();
+                var sendingRtpParameters =
+                    Utils.Clone<RtpParameters>(_sendingRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+                foreach (var codec in sendingRtpParameters.Codecs)
+                    codec.Parameters.ToStringOrNumber();
 
-            // This may throw.
-            sendingRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRtpParameters.Codecs, options.Codec);
+                // This may throw.
+                sendingRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRtpParameters.Codecs, options.Codec);
 
-            var sendingRemoteRtpParameters = 
-                Utils.Clone<RtpParameters>(
-                    _sendingRemoteRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
-            foreach (var codec in sendingRemoteRtpParameters.Codecs)
-                codec.Parameters.ToStringOrNumber();
+                var sendingRemoteRtpParameters =
+                    Utils.Clone<RtpParameters>(
+                        _sendingRemoteRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
+                foreach (var codec in sendingRemoteRtpParameters.Codecs)
+                    codec.Parameters.ToStringOrNumber();
 
-            // This may throw.
-            sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
+                // This may throw.
+                sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
 
-            var mediaSectionIdx = _remoteSdp.GetNextMediaSectionIdx();
+                var mediaSectionIdx = _remoteSdp.GetNextMediaSectionIdx();
 
-            var transceiver = _pc.AddTransceiver(options.Track, new RTCRtpTransceiverInit
-            {
-                Direction = RTCRtpTransceiverDirection.SendOnly,
-                Streams = new IMediaStream[] { _window.MediaStream() },
-                SendEncodings = options.Encodings?.Select(e => e.ToWebRtc()).ToArray()
-            });
+                var transceiver = _pc.AddTransceiver(options.Track, new RTCRtpTransceiverInit
+                {
+                    Direction = RTCRtpTransceiverDirection.SendOnly,
+                    Streams = new IMediaStream[] { _window.MediaStream() },
+                    SendEncodings = options.Encodings?.Select(e => e.ToWebRtc()).ToArray()
+                });
 
-            var offer = await _pc.CreateOffer();
-            var localSdpObject = offer.Sdp.ToSdp();
-            MediaObject offerMediaObject;
+                var offer = await _pc.CreateOffer();
+                var localSdpObject = offer.Sdp.ToSdp();
+                MediaObject offerMediaObject;
 
-            if (!_transportReady)
-                await SetupTransportAsync(DtlsRole.Server, localSdpObject);
+                if (!_transportReady)
+                    await SetupTransportAsync(DtlsRole.Server, localSdpObject);
 
-            // Special case for VP9 with SVC.
-            var hackVp9Svc = false;
+                // Special case for VP9 with SVC.
+                var hackVp9Svc = false;
 
-            var layers = ScalabilityModes.Parse(options.Encodings?[0].ScalabilityMode);
+                var layers = ScalabilityModes.Parse(options.Encodings?[0].ScalabilityMode);
 
-            if (options.Encodings is not null &&
-                options.Encodings.Length == 1 &&
-                layers.SpatialLayers > 1 &&
-                sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp9")
-            {
-                Console.WriteLine("send() | enabling legacy simulcast for VP9 SVC");
+                if (options.Encodings is not null &&
+                    options.Encodings.Length == 1 &&
+                    layers.SpatialLayers > 1 &&
+                    sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp9")
+                {
+                    Console.WriteLine("send() | enabling legacy simulcast for VP9 SVC");
 
-                hackVp9Svc = true;
-                localSdpObject = offer.Sdp.ToSdp();
+                    hackVp9Svc = true;
+                    localSdpObject = offer.Sdp.ToSdp();
+                    offerMediaObject = new MediaObject
+                    {
+                        MediaDescription = localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]
+                    };
+
+                    UnifiedPlanUtils.AddLegacySimulcast(offerMediaObject, layers.SpatialLayers);
+
+                    offer = new RTCSessionDescriptionInit
+                    {
+                        Type = RTCSdpType.Offer,
+                        Sdp = localSdpObject.ToText()
+                    };
+                }
+
+                ////Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
+
+                await _pc.SetLocalDescription(offer);
+
+                // We can now get the transceiver.mid.
+                var localId = transceiver.Mid;
+
+                // Set MID.
+                sendingRtpParameters.Mid = localId;//// new Mid { Id = localId };
+
+                ////Console.WriteLine("===================");
+                ////Console.WriteLine($"{_pc.LocalDescription.Sdp}");
+                ////Console.WriteLine("===================");
+
+                localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
                 offerMediaObject = new MediaObject
                 {
                     MediaDescription = localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]
                 };
 
-                UnifiedPlanUtils.AddLegacySimulcast(offerMediaObject, layers.SpatialLayers);
+                // Set RTCP CNAME.
+                sendingRtpParameters.Rtcp.Cname = CommonUtils.GetCname(offerMediaObject);
 
-                offer = new RTCSessionDescriptionInit
+                // Set RTP encodings by parsing the SDP offer if no encodings are given.
+                if (options.Encodings is null)
                 {
-                    Type = RTCSdpType.Offer,
-                    Sdp = localSdpObject.ToText()
+                    sendingRtpParameters.Encodings = UnifiedPlanUtils.GetRtpEncodings(offerMediaObject);
+                }
+                // Set RTP encodings by parsing the SDP offer and complete them with given
+                // one if just a single encoding has been given.
+                else if (options.Encodings.Length == 1)
+                {
+                    var newEncodings = UnifiedPlanUtils.GetRtpEncodings(offerMediaObject);
+
+                    newEncodings[0] = options.Encodings[0];
+
+                    // Hack for VP9 SVC.
+                    if (hackVp9Svc)
+                        newEncodings = new RtpEncodingParameters[] { newEncodings[0] };
+
+                    sendingRtpParameters.Encodings = newEncodings;
+                }
+                // Otherwise if more than 1 encoding are given use them verbatim.
+                else
+                {
+                    sendingRtpParameters.Encodings = options.Encodings;
+                }
+
+                // If VP8 or H264 and there is effective simulcast, add scalabilityMode to
+                // each encoding.
+                if (sendingRtpParameters.Encodings.Length > 1 &&
+                    (sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp8" ||
+                     sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/h264"))
+                {
+                    foreach (var encoding in sendingRtpParameters.Encodings)
+                    {
+                        encoding.ScalabilityMode = "S1T3";
+                    }
+                }
+
+                _remoteSdp.Send(offerMediaObject, mediaSectionIdx.ReuseMid, sendingRtpParameters,
+                    sendingRemoteRtpParameters, options.CodecOptions, true);
+
+                var answer = new RTCSessionDescriptionInit
+                {
+                    Type = RTCSdpType.Answer,
+                    Sdp = _remoteSdp.GetSdp()
+                };
+
+                ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
+
+                await _pc.SetRemoteDescription(answer);
+
+                // Store in the map.
+                _mapMidTransceiver.Add(localId, transceiver);
+
+                return new HandlerSendResult
+                {
+                    LocalId = localId,
+                    RtpParameters = sendingRtpParameters,
+                    RtpSender = transceiver.Sender
                 };
             }
-
-            ////Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
-
-            await _pc.SetLocalDescription(offer);
-
-            // We can now get the transceiver.mid.
-            var localId = transceiver.Mid;
-
-            // Set MID.
-            sendingRtpParameters.Mid = localId;//// new Mid { Id = localId };
-
-      ////Console.WriteLine("===================");
-      ////Console.WriteLine($"{_pc.LocalDescription.Sdp}");
-      ////Console.WriteLine("===================");
-
-            localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
-            offerMediaObject = new MediaObject
+            finally
             {
-                MediaDescription = localSdpObject.MediaDescriptions[mediaSectionIdx.Idx]
-            };
-
-            // Set RTCP CNAME.
-            sendingRtpParameters.Rtcp.Cname = CommonUtils.GetCname(offerMediaObject);
-
-            // Set RTP encodings by parsing the SDP offer if no encodings are given.
-            if (options.Encodings is null)
-            {
-                sendingRtpParameters.Encodings = UnifiedPlanUtils.GetRtpEncodings(offerMediaObject);
-            }
-            // Set RTP encodings by parsing the SDP offer and complete them with given
-            // one if just a single encoding has been given.
-            else if (options.Encodings.Length == 1)
-            {
-                var newEncodings = UnifiedPlanUtils.GetRtpEncodings(offerMediaObject);
-
-                newEncodings[0] = options.Encodings[0];
-
-                // Hack for VP9 SVC.
-                if (hackVp9Svc)
-                    newEncodings = new RtpEncodingParameters[] { newEncodings[0] };
-
-                sendingRtpParameters.Encodings = newEncodings;
-            }
-            // Otherwise if more than 1 encoding are given use them verbatim.
-            else
-            {
-                sendingRtpParameters.Encodings = options.Encodings;
+                _sem.Release();
             }
 
-            // If VP8 or H264 and there is effective simulcast, add scalabilityMode to
-            // each encoding.
-            if (sendingRtpParameters.Encodings.Length > 1 &&
-                (sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/vp8" ||
-                 sendingRtpParameters.Codecs[0].MimeType.ToLower() == "video/h264"))
+        }
+
+        public async Task<HandlerSendDataChannelResult> SendDataChannelAsync(HandlerSendDataChannelOptions options_)
+        {
+            try
             {
-                foreach (var encoding in sendingRtpParameters.Encodings)
+                await _sem.WaitAsync();
+
+                RTCDataChannelInit options = new()
                 {
-                    encoding.ScalabilityMode = "S1T3";
+                    Ordered = options_.Ordered,
+                    MaxPacketLifeTime = (ushort?)options_.MaxPacketLifeTime,
+                    MaxRetransmits = (ushort?)options_.MaxRetransmits,
+                    Protocol = options_.Protocol,
+                    Negotiated = true,
+                    Id = (short?)_nextSendSctpStreamId
+                };
+
+                var dataChannel = _pc.CreateDataChannel(options_.Label, options);
+
+                // Increase next id.
+                _nextSendSctpStreamId = ++_nextSendSctpStreamId % NumSctpStreams.Mis;
+
+                // If this is the first DataChannel we need to create the SDP answer with
+                // m=application section.
+                if (!_hasDataChannelMediaSection)
+                {
+                    var offer = await _pc.CreateOffer();
+                    var localSdpObject = offer.Sdp.ToSdp();
+                    MediaObject offerMediaObject = new()
+                    {
+                        MediaDescription = localSdpObject.MediaDescriptions
+                            .Single(md => md.Media == MediaType.Application)
+                    };
+
+                    if (!_transportReady)
+                        await SetupTransportAsync(DtlsRole.Server, localSdpObject);
+
+                    await _pc.SetLocalDescription(offer);
+                    _remoteSdp.SendSctpAssociation(offerMediaObject);
+
+                    RTCSessionDescriptionInit answer = new()
+                    {
+                        Type = RTCSdpType.Answer,
+                        Sdp = _remoteSdp.GetSdp()
+                    };
+                    await _pc.SetRemoteDescription(answer);
+                    _hasDataChannelMediaSection = true;
                 }
+
+                SctpStreamParameters sctpStreamParameters = new()
+                {
+                    StreamId = options.Id,
+                    Ordered = options.Ordered,
+                    MaxPacketLifeTime = options.MaxPacketLifeTime,
+                    MaxRetransmits = options.MaxRetransmits
+                };
+
+                return new HandlerSendDataChannelResult
+                {
+                    DataChannel = dataChannel,
+                    SctpStreamParameters = sctpStreamParameters
+                };
             }
-
-            _remoteSdp.Send(offerMediaObject, mediaSectionIdx.ReuseMid, sendingRtpParameters,
-                sendingRemoteRtpParameters, options.CodecOptions, true);
-
-            var answer = new RTCSessionDescriptionInit
+            finally
             {
-                Type = RTCSdpType.Answer,
-                Sdp = _remoteSdp.GetSdp()
-            };
-
- ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
-
-            await _pc.SetRemoteDescription(answer);
-
-            // Store in the map.
-            _mapMidTransceiver.Add(localId, transceiver);
-
-            return new HandlerSendResult
-            {
-                LocalId = localId,
-                RtpParameters = sendingRtpParameters,
-                RtpSender = transceiver.Sender
-            };
-
+                _sem.Release();
+            }
         }
 
         public async Task StopSendingAsync(string localId)
@@ -445,64 +533,6 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             return await transceiver.Sender.GetStats();
         }
 
-        public async Task<HandlerSendDataChannelResult> SendDataChannelAsync(HandlerSendDataChannelOptions options_)
-        {
-            RTCDataChannelInit options = new()
-            {
-                Ordered = options_.Ordered,
-                MaxPacketLifeTime = (ushort?)options_.MaxPacketLifeTime,
-                MaxRetransmits = (ushort?)options_.MaxRetransmits,
-                Protocol = options_.Protocol,
-                Negotiated = true,
-                Id = (short?)_nextSendSctpStreamId
-            };
-
-            var dataChannel = _pc.CreateDataChannel(options_.Label, options);
-
-		    // Increase next id.
-		    _nextSendSctpStreamId =	++_nextSendSctpStreamId % NumSctpStreams.Mis;
-
-            // If this is the first DataChannel we need to create the SDP answer with
-            // m=application section.
-            if (!_hasDataChannelMediaSection)
-            {
-                var offer = await _pc.CreateOffer();
-                var localSdpObject = offer.Sdp.ToSdp();
-                MediaObject offerMediaObject = new()
-                {
-                    MediaDescription = localSdpObject.MediaDescriptions
-                        .Single(md => md.Media == MediaType.Application)
-                };
-
-                if (!_transportReady)
-				    await SetupTransportAsync(DtlsRole.Server, localSdpObject);
-
-			    await _pc.SetLocalDescription(offer);
-			    _remoteSdp.SendSctpAssociation(offerMediaObject);
-
-			    RTCSessionDescriptionInit answer = new() 
-                {
-                    Type = RTCSdpType.Answer, 
-                    Sdp = _remoteSdp.GetSdp()
-                };
-			    await _pc.SetRemoteDescription(answer);
-			    _hasDataChannelMediaSection = true;
-		    }
-
-		    SctpStreamParameters sctpStreamParameters = new()
-		    {
-			    StreamId = options.Id,
-			    Ordered = options.Ordered,
-			    MaxPacketLifeTime = options.MaxPacketLifeTime,
-                MaxRetransmits = options.MaxRetransmits
-		    };
-
-		    return new HandlerSendDataChannelResult 
-            { 
-                DataChannel = dataChannel, 
-                SctpStreamParameters = sctpStreamParameters 
-            };
-        }
 
         public async Task<HandlerReceiveResult> ReceiveAsync(HandlerReceiveOptions options)
         {
