@@ -534,7 +534,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
 
 
-        public async Task<HandlerReceiveResult> ReceiveAsync(HandlerReceiveOptions options)
+        public async Task<HandlerReceiveResult> ReceiveAsync(HandlerReceiveOptions options,     Transport transport = null)
         {
             var localId = options.RtpParameters.Mid/****?.Id****/ ?? _mapMidTransceiver.Count.ToString();
 
@@ -550,7 +550,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Type = RTCSdpType.Offer, 
                 Sdp = _remoteSdp.GetSdp() 
             };
-		    await _pc.SetRemoteDescription(offer);
+            await _pc.SetRemoteDescription(offer);
 
 		    var answer = await _pc.CreateAnswer();
 		    var localSdpObject = answer.Sdp.ToSdp();

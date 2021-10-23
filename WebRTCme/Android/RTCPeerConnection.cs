@@ -182,9 +182,25 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpTransceiver[] GetTransceivers() =>
-            ((Webrtc.PeerConnection)NativeObject).Transceivers
-                .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
+        public IRTCRtpTransceiver[] GetTransceivers()
+        =>
+        ((Webrtc.PeerConnection)NativeObject).Transceivers
+            .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
+
+        //{
+        //    var list = new List<IRTCRtpTransceiver>();
+        //    var transceivers = ((Webrtc.PeerConnection)NativeObject).Transceivers;
+        //    foreach (var transceiver in transceivers)
+        //    {
+        //        var mt = transceiver.MediaType;
+        //        var codecs = transceiver.Receiver.Parameters.Codecs;
+        //        var encodings = transceiver.Receiver.Parameters.Encodings;
+        //        list.Add(RTCRtpTransceiver.Create(transceiver));
+        //    }
+
+        //    return list.ToArray();
+
+        //}
 
         public void RemoveTrack(IRTCRtpSender sender) =>
             ((Webrtc.PeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RtpSender);

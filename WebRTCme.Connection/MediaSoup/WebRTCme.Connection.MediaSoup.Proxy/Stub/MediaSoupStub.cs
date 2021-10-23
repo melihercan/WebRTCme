@@ -97,6 +97,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                         ////_tcsRequest = new();
                         ////var request = await _tcsRequest.Task;
                         var request = await _requestChannel.Reader.ReadAsync(_cts.Token);
+Console.WriteLine($"########################## REQUEST: {request.Method}");
 
                         await RequestEventAsync?.Invoke(request.Method, request.Data,
                             // accept

@@ -13,211 +13,219 @@ namespace Utilme.SdpTransform
 
         public static Sdp ToSdp(this string str)
         {
-            Sdp sdp = new();
-
-            var tokens = str.Split(new string[] { Sdp.CRLF }, StringSplitOptions.RemoveEmptyEntries);
-            var idx = 0;
-            
-            // Session fields.
-            foreach (var token in tokens)
+            try
             {
-                if (token.StartsWith(Sdp.ProtocolVersionIndicator))
-                    sdp.ProtocolVersion = token.ToProtocolVersion();
-                else if (token.StartsWith(Sdp.OriginIndicator))
-                    sdp.Origin = token.ToOrigin();
-                else if (token.StartsWith(Sdp.SessionNameIndicator))
-                    sdp.SessionName = token.ToSessionName();
-                else if (token.StartsWith(Sdp.InformationIndicator))
-                    sdp.SessionInformation = token.ToInformation();
-                else if (token.StartsWith(Sdp.UriIndicator))
-                    sdp.Uri = token.ToUri();
-                else if (token.StartsWith(Sdp.EmailAddressIndicator))
-                    sdp.EmailAddresses = token.ToEmailAddresses();
-                else if (token.StartsWith(Sdp.PhoneNumberIndicator))
-                    sdp.PhoneNumbers = token.ToPhoneNumbers();
-                else if (token.StartsWith(Sdp.ConnectionDataIndicator))
-                    sdp.ConnectionData = token.ToConnectionData();
-                else if (token.StartsWith(Sdp.BandwidthIndicator))
-                {
-                    sdp.Bandwidths ??= new List<Bandwidth>();
-                    sdp.Bandwidths.Add(token.ToBandwidth());
-                }
-                else if (token.StartsWith(Sdp.TimingIndicator))
-                {
-                    sdp.Timings ??= new List<Timing>();
-                    sdp.Timings.Add(token.ToTiming());
-                }
-                else if (token.StartsWith(Sdp.RepeatTimeIndicator))
-                {
-                    sdp.RepeatTimes ??= new List<RepeatTime>();
-                    sdp.RepeatTimes.Add(token.ToRepeatTime());
-                }
-                else if (token.StartsWith(Sdp.TimeZoneIndicator))
-                    sdp.TimeZones = token.ToTimeZones();
-                else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
-                    sdp.EncryptionKey = token.ToEncryptionKey();
-                else if (token.StartsWith(Sdp.AttributeIndicator))
-                {
-                    sdp.Attributes ??= new Attributes();
-                    var attr = token.Substring(2);
+                Sdp sdp = new();
 
-                    // Binary attributes.
-                    if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
-                        sdp.Attributes.ExtmapAllowMixed = true;
-                    else if (attr.StartsWith(Attributes.IceLiteLabel))
-                        sdp.Attributes.IceLite = true;
+                var tokens = str.Split(new string[] { Sdp.CRLF }, StringSplitOptions.RemoveEmptyEntries);
+                var idx = 0;
 
-                    // Value attributes.
-                    else if (attr.StartsWith(Group.Label))
-                        sdp.Attributes.Group = attr.ToGroup();
-                    else if (attr.StartsWith(MsidSemantic.Label))
-                        sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
-                    else if (attr.StartsWith(Fingerprint.Label))
-                        sdp.Attributes.Fingerprint = attr.ToFingerprint();
+                // Session fields.
+                foreach (var token in tokens)
+                {
+                    if (token.StartsWith(Sdp.ProtocolVersionIndicator))
+                        sdp.ProtocolVersion = token.ToProtocolVersion();
+                    else if (token.StartsWith(Sdp.OriginIndicator))
+                        sdp.Origin = token.ToOrigin();
+                    else if (token.StartsWith(Sdp.SessionNameIndicator))
+                        sdp.SessionName = token.ToSessionName();
+                    else if (token.StartsWith(Sdp.InformationIndicator))
+                        sdp.SessionInformation = token.ToInformation();
+                    else if (token.StartsWith(Sdp.UriIndicator))
+                        sdp.Uri = token.ToUri();
+                    else if (token.StartsWith(Sdp.EmailAddressIndicator))
+                        sdp.EmailAddresses = token.ToEmailAddresses();
+                    else if (token.StartsWith(Sdp.PhoneNumberIndicator))
+                        sdp.PhoneNumbers = token.ToPhoneNumbers();
+                    else if (token.StartsWith(Sdp.ConnectionDataIndicator))
+                        sdp.ConnectionData = token.ToConnectionData();
+                    else if (token.StartsWith(Sdp.BandwidthIndicator))
+                    {
+                        sdp.Bandwidths ??= new List<Bandwidth>();
+                        sdp.Bandwidths.Add(token.ToBandwidth());
+                    }
+                    else if (token.StartsWith(Sdp.TimingIndicator))
+                    {
+                        sdp.Timings ??= new List<Timing>();
+                        sdp.Timings.Add(token.ToTiming());
+                    }
+                    else if (token.StartsWith(Sdp.RepeatTimeIndicator))
+                    {
+                        sdp.RepeatTimes ??= new List<RepeatTime>();
+                        sdp.RepeatTimes.Add(token.ToRepeatTime());
+                    }
+                    else if (token.StartsWith(Sdp.TimeZoneIndicator))
+                        sdp.TimeZones = token.ToTimeZones();
+                    else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
+                        sdp.EncryptionKey = token.ToEncryptionKey();
+                    else if (token.StartsWith(Sdp.AttributeIndicator))
+                    {
+                        sdp.Attributes ??= new Attributes();
+                        var attr = token.Substring(2);
 
+                        // Binary attributes.
+                        if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
+                            sdp.Attributes.ExtmapAllowMixed = true;
+                        else if (attr.StartsWith(Attributes.IceLiteLabel))
+                            sdp.Attributes.IceLite = true;
+
+                        // Value attributes.
+                        else if (attr.StartsWith(Group.Label))
+                            sdp.Attributes.Group = attr.ToGroup();
+                        else if (attr.StartsWith(MsidSemantic.Label))
+                            sdp.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                        else if (attr.StartsWith(Fingerprint.Label))
+                            sdp.Attributes.Fingerprint = attr.ToFingerprint();
+
+                        else
+                            Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
+                        //throw new NotSupportedException($"Unknown SDP attribute for session: {attr}");
+
+                    }
+                    else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
+                        break;
                     else
-                        Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
-                    //throw new NotSupportedException($"Unknown SDP attribute for session: {attr}");
-
-                }
-                else if (token.StartsWith(Sdp.MediaDescriptionIndicator))
-                    break;
-                else
-                    Console.WriteLine($"==== SDP unsupported session field:{token}");
+                        Console.WriteLine($"==== SDP unsupported session field:{token}");
                     //throw new NotSupportedException($"Unknown SDP field for session: {token}");
 
-                idx++;
-            }
-
-            // Media description fields.
-            tokens = tokens.Skip(idx).ToArray();
-            sdp.MediaDescriptions = new List<MediaDescription>();
-
-            MediaDescription md = null;
-
-            foreach (var token in tokens)
-            {
-                if (token.StartsWith(Sdp.MediaDescriptionIndicator))
-                {
-                    if (md is not null)
-                        sdp.MediaDescriptions.Add(md);
-                    md = token.ToMediaDescription();
+                    idx++;
                 }
-                else if (token.StartsWith(Sdp.InformationIndicator))
-                    md.Information = token.ToInformation();
-                else if (token.StartsWith(Sdp.ConnectionDataIndicator))
-                    md.ConnectionData = token.ToConnectionData();
-                else if (token.StartsWith(Sdp.BandwidthIndicator))
+
+                // Media description fields.
+                tokens = tokens.Skip(idx).ToArray();
+                sdp.MediaDescriptions = new List<MediaDescription>();
+
+                MediaDescription md = null;
+
+                foreach (var token in tokens)
                 {
-                    md.Bandwidths ??= new List<Bandwidth>();
-                    md.Bandwidths.Add(token.ToBandwidth());
-                }
-                else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
-                    md.EncryptionKey = token.ToEncryptionKey();
-                else if (token.StartsWith(Sdp.AttributeIndicator))
-                {
-                    md.Attributes ??= new Attributes();
-                    var attr = token.Substring(2);
+                    if (token.StartsWith(Sdp.MediaDescriptionIndicator))
+                    {
+                        if (md is not null)
+                            sdp.MediaDescriptions.Add(md);
+                        md = token.ToMediaDescription();
+                    }
+                    else if (token.StartsWith(Sdp.InformationIndicator))
+                        md.Information = token.ToInformation();
+                    else if (token.StartsWith(Sdp.ConnectionDataIndicator))
+                        md.ConnectionData = token.ToConnectionData();
+                    else if (token.StartsWith(Sdp.BandwidthIndicator))
+                    {
+                        md.Bandwidths ??= new List<Bandwidth>();
+                        md.Bandwidths.Add(token.ToBandwidth());
+                    }
+                    else if (token.StartsWith(Sdp.EncryptionKeyIndicator))
+                        md.EncryptionKey = token.ToEncryptionKey();
+                    else if (token.StartsWith(Sdp.AttributeIndicator))
+                    {
+                        md.Attributes ??= new Attributes();
+                        var attr = token.Substring(2);
 
-                    // Binary attributes.
-                    if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
-                        md.Attributes.ExtmapAllowMixed = true;
-                    else if (attr.StartsWith(Attributes.RtcpMuxLabel))
-                        md.Attributes.RtcpMux = true;
-                    else if (attr.StartsWith(Attributes.RtcpRsizeLabel))
-                        md.Attributes.RtcpRsize = true;
-                    else if (attr.StartsWith(Attributes.SendRecvLabel))
-                        md.Attributes.SendRecv = true;
-                    else if (attr.StartsWith(Attributes.SendOnlyLabel))
-                        md.Attributes.SendOnly = true;
-                    else if (attr.StartsWith(Attributes.RecvOnlyLabel))
-                        md.Attributes.RecvOnly = true;
-                    else if (attr.StartsWith(Attributes.EndOfCandidatesLabel))
-                        md.Attributes.EndOfCandidates = true;
+                        // Binary attributes.
+                        if (attr.StartsWith(Attributes.ExtmapAllowMixedLabel))
+                            md.Attributes.ExtmapAllowMixed = true;
+                        else if (attr.StartsWith(Attributes.RtcpMuxLabel))
+                            md.Attributes.RtcpMux = true;
+                        else if (attr.StartsWith(Attributes.RtcpRsizeLabel))
+                            md.Attributes.RtcpRsize = true;
+                        else if (attr.StartsWith(Attributes.SendRecvLabel))
+                            md.Attributes.SendRecv = true;
+                        else if (attr.StartsWith(Attributes.SendOnlyLabel))
+                            md.Attributes.SendOnly = true;
+                        else if (attr.StartsWith(Attributes.RecvOnlyLabel))
+                            md.Attributes.RecvOnly = true;
+                        else if (attr.StartsWith(Attributes.EndOfCandidatesLabel))
+                            md.Attributes.EndOfCandidates = true;
 
-                    // Value attributes.
-                    else if (attr.StartsWith(Group.Label))
-                        md.Attributes.Group = attr.ToGroup();
-                    else if (attr.StartsWith(MsidSemantic.Label))
-                        md.Attributes.MsidSemantic = attr.ToMsidSemantic();
-                    else if (attr.StartsWith(Mid.Label))
-                        md.Attributes.Mid = attr.ToMid();
-                    else if (attr.StartsWith(Msid.Label))
-                        md.Attributes.Msid = attr.ToMsid();
-                    else if (attr.StartsWith(IceUfrag.Label))
-                        md.Attributes.IceUfrag = attr.ToIceUfrag();
-                    else if (attr.StartsWith(IcePwd.Label))
-                        md.Attributes.IcePwd = attr.ToIcePwd();
-                    else if (attr.StartsWith(IceOptions.Label))
-                        md.Attributes.IceOptions = attr.ToIceOptions();
-                    else if (attr.StartsWith(Fingerprint.Label))
-                        md.Attributes.Fingerprint = attr.ToFingerprint();
-                    else if (attr.StartsWith(Rtcp.Label))
-                        md.Attributes.Rtcp = attr.ToRtcp();
-                    else if (attr.StartsWith(Setup.Label))
-                        md.Attributes.Setup = attr.ToSetup();
-                    else if (attr.StartsWith(SctpPort.Label))
-                        md.Attributes.SctpPort = attr.ToSctpPort();
-                    else if (attr.StartsWith(MaxMessageSize.Label))
-                        md.Attributes.MaxMessageSize = attr.ToMaxMessageSize();
-                    else if (attr.StartsWith(Simulcast.Label))
-                        md.Attributes.Simulcast = attr.ToSimulcast();
-                    else if (attr.StartsWith(Candidate.Label))
-                    {
-                        md.Attributes.Candidates ??= new List<Candidate>();
-                        md.Attributes.Candidates.Add(attr.ToCandidate());
-                    }
-                    else if (attr.StartsWith(Ssrc.Label))
-                    {
-                        md.Attributes.Ssrcs ??= new List<Ssrc>();
-                        md.Attributes.Ssrcs.Add(attr.ToSsrc());
-                    }
-                    else if (attr.StartsWith(SsrcGroup.Label))
-                    {
-                        md.Attributes.SsrcGroups ??= new List<SsrcGroup>();
-                        md.Attributes.SsrcGroups.Add(attr.ToSsrcGroup());
-                    }
-                    else if (attr.StartsWith(Rid.Label))
-                    {
-                        md.Attributes.Rids ??= new List<Rid>();
-                        md.Attributes.Rids.Add(attr.ToRid());
-                    }
-                    else if (attr.StartsWith(Rtpmap.Label))
-                    {
-                        md.Attributes.Rtpmaps ??= new List<Rtpmap>();
-                        md.Attributes.Rtpmaps.Add(attr.ToRtpmap());
-                    }
-                    else if (attr.StartsWith(Fmtp.Label))
-                    {
-                        md.Attributes.Fmtps ??= new List<Fmtp>();
-                        md.Attributes.Fmtps.Add(attr.ToFmtp());
-                    }
-                    else if (attr.StartsWith(RtcpFb.Label))
-                    {
-                        md.Attributes.RtcpFbs ??= new List<RtcpFb>();
-                        md.Attributes.RtcpFbs.Add(attr.ToRtcpFb());
-                    }
-                    else if (attr.StartsWith(Extmap.Label))
-                    {
-                        md.Attributes.Extmaps ??= new List<Extmap>();
-                        md.Attributes.Extmaps.Add(attr.ToExtmap());
-                    }
+                        // Value attributes.
+                        else if (attr.StartsWith(Group.Label))
+                            md.Attributes.Group = attr.ToGroup();
+                        else if (attr.StartsWith(MsidSemantic.Label))
+                            md.Attributes.MsidSemantic = attr.ToMsidSemantic();
+                        else if (attr.StartsWith(Mid.Label))
+                            md.Attributes.Mid = attr.ToMid();
+                        else if (attr.StartsWith(Msid.Label))
+                            md.Attributes.Msid = attr.ToMsid();
+                        else if (attr.StartsWith(IceUfrag.Label))
+                            md.Attributes.IceUfrag = attr.ToIceUfrag();
+                        else if (attr.StartsWith(IcePwd.Label))
+                            md.Attributes.IcePwd = attr.ToIcePwd();
+                        else if (attr.StartsWith(IceOptions.Label))
+                            md.Attributes.IceOptions = attr.ToIceOptions();
+                        else if (attr.StartsWith(Fingerprint.Label))
+                            md.Attributes.Fingerprint = attr.ToFingerprint();
+                        else if (attr.StartsWith(Rtcp.Label))
+                            md.Attributes.Rtcp = attr.ToRtcp();
+                        else if (attr.StartsWith(Setup.Label))
+                            md.Attributes.Setup = attr.ToSetup();
+                        else if (attr.StartsWith(SctpPort.Label))
+                            md.Attributes.SctpPort = attr.ToSctpPort();
+                        else if (attr.StartsWith(MaxMessageSize.Label))
+                            md.Attributes.MaxMessageSize = attr.ToMaxMessageSize();
+                        else if (attr.StartsWith(Simulcast.Label))
+                            md.Attributes.Simulcast = attr.ToSimulcast();
+                        else if (attr.StartsWith(Candidate.Label))
+                        {
+                            md.Attributes.Candidates ??= new List<Candidate>();
+                            md.Attributes.Candidates.Add(attr.ToCandidate());
+                        }
+                        else if (attr.StartsWith(Ssrc.Label))
+                        {
+                            md.Attributes.Ssrcs ??= new List<Ssrc>();
+                            md.Attributes.Ssrcs.Add(attr.ToSsrc());
+                        }
+                        else if (attr.StartsWith(SsrcGroup.Label))
+                        {
+                            md.Attributes.SsrcGroups ??= new List<SsrcGroup>();
+                            md.Attributes.SsrcGroups.Add(attr.ToSsrcGroup());
+                        }
+                        else if (attr.StartsWith(Rid.Label))
+                        {
+                            md.Attributes.Rids ??= new List<Rid>();
+                            md.Attributes.Rids.Add(attr.ToRid());
+                        }
+                        else if (attr.StartsWith(Rtpmap.Label))
+                        {
+                            md.Attributes.Rtpmaps ??= new List<Rtpmap>();
+                            md.Attributes.Rtpmaps.Add(attr.ToRtpmap());
+                        }
+                        else if (attr.StartsWith(Fmtp.Label))
+                        {
+                            md.Attributes.Fmtps ??= new List<Fmtp>();
+                            md.Attributes.Fmtps.Add(attr.ToFmtp());
+                        }
+                        else if (attr.StartsWith(RtcpFb.Label))
+                        {
+                            md.Attributes.RtcpFbs ??= new List<RtcpFb>();
+                            md.Attributes.RtcpFbs.Add(attr.ToRtcpFb());
+                        }
+                        else if (attr.StartsWith(Extmap.Label))
+                        {
+                            md.Attributes.Extmaps ??= new List<Extmap>();
+                            md.Attributes.Extmaps.Add(attr.ToExtmap());
+                        }
 
-                    else
-                        Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
+                        else
+                            Console.WriteLine($"==== SDP unsupported media description attribute:{attr}");
                         //throw new NotSupportedException($"Unknown SDP attribute for media description: {attr}");
 
-                }
-                else
-                    Console.WriteLine($"==== SDP unsupported media description field:{token}");
+                    }
+                    else
+                        Console.WriteLine($"==== SDP unsupported media description field:{token}");
                     //throw new NotSupportedException($"Unknown SDP field for media description: {token}");
 
+                }
+
+                if (md is not null)
+                    sdp.MediaDescriptions.Add(md);
+
+                return sdp;
             }
-
-            if (md is not null)
-                sdp.MediaDescriptions.Add(md);
-
-            return sdp;
+            catch (Exception ex)
+            {
+                var m = ex.Message;
+                return null;
+            }
         }
 
         public static string ToText(this Sdp sdp)
@@ -914,7 +922,7 @@ namespace Utilme.SdpTransform
                 .Replace(Sdp.AttributeIndicator, string.Empty)
                 .Replace(Candidate.Label, string.Empty)
                 .Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            return new Candidate
+            var candidate = new Candidate
             {
                 Foundation = tokens[0],
                 ComponentId = int.Parse(tokens[1]),
@@ -923,9 +931,23 @@ namespace Utilme.SdpTransform
                 ConnectionAddress = tokens[4],
                 Port = int.Parse(tokens[5]),
                 Type = tokens[7].EnumFromDisplayName<CandidateType>(),
-                RelAddr = tokens.Length > 7 ? tokens[9] : null,
-                RelPort = tokens.Length > 7 ? int.Parse(tokens[11]) : null
             };
+            var idx = 8;
+            if (tokens.Length >= 8 && tokens[8] == Candidate.Raddr)
+            {
+                candidate.RelAddr = tokens[9];
+                candidate.RelPort = int.Parse(tokens[11]);
+                idx += 4;
+            }
+
+            var extensions = new List <(string, string)>(); 
+            while (tokens.Length > idx)
+            {
+                extensions.Add((tokens[idx++], tokens[idx++]));
+            }
+            if (extensions.Count > 0)
+                candidate.Extensions = extensions.ToArray();
+            return candidate;
         }
 
         public static string ToText(this Candidate candidate) =>
@@ -935,6 +957,7 @@ namespace Utilme.SdpTransform
                 $"{candidate.Type.DisplayName()}" +
                 $"{(candidate.RelAddr is not null ? $" {Candidate.Raddr} {candidate.RelAddr}" : string.Empty)}" +
                 $"{(candidate.RelPort.HasValue ? $" {Candidate.Rport} {candidate.RelPort}" : string.Empty)}" +
+                $"{(candidate.Extensions is null ? string.Empty : string.Join("", candidate.Extensions.Select(pair => " " + pair.Item1 + " " + pair.Item2).ToArray()))}" +
                 $"{Sdp.CRLF}";
 
         public static Ssrc ToSsrc(this string str)

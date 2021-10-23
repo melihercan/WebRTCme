@@ -272,7 +272,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     TrackId = options.Id,
                     Kind = (MediaKind)options.Kind,
                     RtpParameters = options.RtpParameters
-                });
+                }
+     , this);
 
             var consumer = new Consumer(
                     options.Id,

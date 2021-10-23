@@ -28,11 +28,16 @@ namespace Utilme.SdpTransform
         public CandidateType Type { get; set; }
 
 
-        // Optional.
+        // Both are optional.
         public const string Raddr = "raddr";
         public string RelAddr { get; set; }
 
         public const string Rport = "rport";
         public int? RelPort { get; set; }
+
+        // Optional extensions, name value pairs separated with space.
+        public (string, string)[] Extensions { get; set; }
+
+
     }
 }

@@ -20,6 +20,11 @@ namespace WebRTCme.Connection.Services
 {
     class MediaSoupConnection : IConnection, IMediaSoupServerNotify
     {
+
+int cnt;
+IMediaStream remMedia; 
+
+
         readonly IConfiguration _configuration;
         readonly IMediaSoupServerApi _mediaSoupServerApi;
         readonly ILogger<MediaSoupConnection> _logger;
@@ -480,17 +485,17 @@ namespace WebRTCme.Connection.Services
                                 .Select(key => _consumers[key])
                                 .ToList();
 
-                            var audioTrack = 
-                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio).Track;
-                            var videoTrack =
-                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video).Track;
+                            var audioConsumer =
+                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio);
+                            var videoConsumer =
+                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
 
                             // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
-                            if (audioTrack is not null && videoTrack is not null)
+                            if (audioConsumer is not null && videoConsumer is not null)
                             {
                                 var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
-                                mediaStream.AddTrack(audioTrack);
-                                mediaStream.AddTrack(videoTrack);
+                                mediaStream.AddTrack(audioConsumer.Track);
+                                mediaStream.AddTrack(videoConsumer.Track);
                                 _connectionContext.Observer.OnNext(new PeerResponse
                                 {
                                     Type = PeerResponseType.PeerJoined,
