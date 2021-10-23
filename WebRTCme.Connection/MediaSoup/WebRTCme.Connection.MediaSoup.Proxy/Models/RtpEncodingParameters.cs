@@ -14,13 +14,17 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public bool? Active { get; set; }
         public uint? Ssrc { get; set; }
+        public int? ScaleResolutionDownBy { get; init; }
+        public int? MaxBitrate { get; init; }
         public string Rid { get; set; }
         public int? CodecPayloadType { get; init; }
         public Rtx Rtx { get; set; }
-        public bool? Dtx { get; set; }
         public string ScalabilityMode { get; set; }
-        public int? ScaleResolutionDownBy { get; init; }
-        public int? MaxBitrate { get; init; }
+        public bool? Dtx { get; set; }
+        ////public string ScalabilityMode { get; set; }
+        ////public int? ScaleResolutionDownBy { get; init; }
+        ////public int? MaxBitrate { get; init; }
+
         public int? MaxFramerate { get; init; }
         public bool? AdaptivePtime { get; init; }
 
