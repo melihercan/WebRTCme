@@ -84,6 +84,13 @@ IMediaStream remMedia;
 
                 _displayName = userContext.Name;
 
+                _connectionContext = new ConnectionContext
+                {
+                    UserContext = userContext,
+                    Observer = observer
+                };
+
+
                 try
                 {
                     _mediaSoupServerApi.NotifyEventAsync += OnNotifyAsync;
@@ -263,11 +270,11 @@ IMediaStream remMedia;
 
                     }
 
-                    _connectionContext = new ConnectionContext
-                    {
-                        UserContext = userContext,
-                        Observer = observer
-                    };
+                    //_connectionContext = new ConnectionContext
+                    //{
+                    //    UserContext = userContext,
+                    //    Observer = observer
+                    //};
 
                 }
                 catch (Exception ex)
@@ -500,7 +507,7 @@ IMediaStream remMedia;
                                 {
                                     Type = PeerResponseType.PeerJoined,
                                     Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
-                                    Name = peer.Peer.DsiplayName,
+                                    Name =  requestData.PeerId,//peer.Peer.DisplayName,
                                     MediaStream = mediaStream,
                                     DataChannel = /*isInitiator ? dataChannel :*/ null
                                 });
