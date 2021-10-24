@@ -43,8 +43,32 @@ namespace WebRTCme.Connection.MediaSoup.Proxy
                         dictionary[item.Key] = jElement.GetString();
                     else if (jElement.ValueKind == JsonValueKind.Number)
                         dictionary[item.Key] = jElement.GetInt32();
+                    else
+                        throw new NotSupportedException();
                 }
             }
         }
+
+        // Helper to convert object to string, number or bool after JSON conversion.
+        public static void ToStringOrNumberOrBool(this Dictionary<string, object> dictionary)
+        {
+            Dictionary<string, object> cloneDictionary = new(dictionary);
+            foreach (var item in cloneDictionary)
+            {
+                if (item.Value.GetType() == typeof(JsonElement))
+                {
+                    var jElement = (JsonElement)item.Value;
+                    if (jElement.ValueKind == JsonValueKind.String)
+                        dictionary[item.Key] = jElement.GetString();
+                    else if (jElement.ValueKind == JsonValueKind.Number)
+                        dictionary[item.Key] = jElement.GetInt32();
+                    else if (jElement.ValueKind == JsonValueKind.False || jElement.ValueKind == JsonValueKind.True)
+                        dictionary[item.Key] = jElement.GetBoolean();
+                    else
+                        throw new NotSupportedException();
+                }
+            }
+        }
+
     }
 }

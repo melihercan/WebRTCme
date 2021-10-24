@@ -436,7 +436,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Uri = extendedExtendion.Uri,
                     Id = extendedExtendion.SendId,
                     Encrypt = (bool)extendedExtendion.PreferredEncrypt,
-                    Parameters = new object()
+                    Parameters = new()
                 };
                 headerExtensions.Add(ext);
             }

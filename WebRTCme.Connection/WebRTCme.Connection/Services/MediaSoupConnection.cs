@@ -441,77 +441,83 @@ IMediaStream remMedia;
             {
                 case MethodName.NewConsumer:
                     Consumer consumer = null;
+                    if (!_consume)
                     {
-                        if (!_consume)
+                        reject(403, "I do not want to data consume");
+                        return;
+                    }
+
+                    var consumerJson = ((JsonElement)data).GetRawText();
+                    var consumerRequestData = JsonSerializer.Deserialize<ConsumerRequestParameters>(
+                        consumerJson, JsonHelper.WebRtcJsonSerializerOptions);
+                    
+                    // Convert elements with Dictionary<string, object> to string or number or bool.
+                    consumerRequestData.AppData.ToStringOrNumberOrBool();
+                    foreach (var codec in consumerRequestData.RtpParameters.Codecs)
+                        codec.Parameters.ToStringOrNumberOrBool();
+                    foreach (var headerExtension in consumerRequestData.RtpParameters.HeaderExtensions)
+                        headerExtension.Parameters.ToStringOrNumberOrBool();
+
+
+                    var consumerAppData = consumerRequestData.AppData;
+                    consumerAppData.Add(KeyName.PeerId, consumerRequestData.PeerId);  // trick
+
+                    consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions
+                    {
+                        Id = consumerRequestData.Id,
+                        ProducerId = consumerRequestData.ProducerId,
+                        Kind = consumerRequestData.Kind,
+                        RtpParameters = consumerRequestData.RtpParameters,
+                        AppData = consumerAppData
+                    });
+
+                    _consumers.Add(consumer.Id, consumer);
+                    ////if (requestData.PeerId is not null)
+                    {
+                        var peer = _peers[consumerRequestData.PeerId];
+                        peer.ConsumerIds.Add(consumer.Id);
+                    }
+
+                    consumer.OnClose += Consumer_OnClose;
+                    consumer.OnTransportClosed += Consumer_OnTransportClosed;
+                    consumer.OnTrackEnded += Consumer_OnTrackEnded;
+                    consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
+
+                    accept();
+
+                    // If audio-only mode is enabled, pause it.
+                    ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
+                    ////consumer.Pause();
+
+
+                    // Consumer is ready. Check if stream is ready (both audio and video).
+                    // TODO: WE can have audio only calls!!!
+                    ////if (requestData.PeerId is not null)
+                    {
+                        var consumerPeer = _peers[consumerRequestData.PeerId];
+                        var consumers = consumerPeer.ConsumerIds
+                            .Select(key => _consumers[key])
+                            .ToList();
+
+                        var audioConsumer =
+                            consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio);
+                        var videoConsumer =
+                            consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
+
+                        // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
+                        if (audioConsumer is not null && videoConsumer is not null)
                         {
-                            reject(403, "I do not want to data consume");
-                            return;
-                        }
-
-                        var json = ((JsonElement)data).GetRawText();
-                        var requestData = JsonSerializer.Deserialize<ConsumerRequestParameters>(
-                            json, JsonHelper.WebRtcJsonSerializerOptions);
-
-                        var appData = requestData.AppData;
-                        appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
-
-                        consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions 
-                        { 
-                            Id =  requestData.Id,
-                            ProducerId = requestData.ProducerId,
-                            Kind =  requestData.Kind,
-                            RtpParameters = requestData.RtpParameters,
-                            AppData = appData
-                        });
-
-                        _consumers.Add(consumer.Id, consumer);
-                        ////if (requestData.PeerId is not null)
-                        {
-                            var peer = _peers[requestData.PeerId];
-                            peer.ConsumerIds.Add(consumer.Id);
-                        }
-
-                        consumer.OnClose += Consumer_OnClose;
-                        consumer.OnTransportClosed += Consumer_OnTransportClosed;
-                        consumer.OnTrackEnded += Consumer_OnTrackEnded;
-                        consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
-
-                        accept();
-
-                        // If audio-only mode is enabled, pause it.
-                        ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
-                        ////consumer.Pause();
-
-
-                        // Consumer is ready. Check if stream is ready (both audio and video).
-                        // TODO: WE can have audio only calls!!!
-                        ////if (requestData.PeerId is not null)
-                        {
-                            var peer = _peers[requestData.PeerId];
-                            var consumers = peer.ConsumerIds
-                                .Select(key => _consumers[key])
-                                .ToList();
-
-                            var audioConsumer =
-                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio);
-                            var videoConsumer =
-                                consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
-
-                            // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
-                            if (audioConsumer is not null && videoConsumer is not null)
+                            var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
+                            mediaStream.AddTrack(audioConsumer.Track);
+                            mediaStream.AddTrack(videoConsumer.Track);
+                            _connectionContext.Observer.OnNext(new PeerResponse
                             {
-                                var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
-                                mediaStream.AddTrack(audioConsumer.Track);
-                                mediaStream.AddTrack(videoConsumer.Track);
-                                _connectionContext.Observer.OnNext(new PeerResponse
-                                {
-                                    Type = PeerResponseType.PeerJoined,
-                                    Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
-                                    Name =  requestData.PeerId,//peer.Peer.DisplayName,
-                                    MediaStream = mediaStream,
-                                    DataChannel = /*isInitiator ? dataChannel :*/ null
-                                });
-                            }
+                                Type = PeerResponseType.PeerJoined,
+                                Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
+                                Name = consumerRequestData.PeerId,//peer.Peer.DisplayName,
+                                MediaStream = mediaStream,
+                                DataChannel = /*isInitiator ? dataChannel :*/ null
+                            });
                         }
                     }
                     break;
@@ -546,55 +552,56 @@ IMediaStream remMedia;
 
                 case MethodName.NewDataConsumer:
                     DataConsumer dataConsumer = null;
+                    if (!_consume)
                     {
-                        if (!_consume)
-                        {
-                            reject(403, "I do not want to data consume");
-                            return;
-                        }
-                        if (!_useDataChannel)
-                        {
-                            reject(403, "I do not want DataChannels");
-                            return;
-                        }
-
-                        var json = ((JsonElement)data).GetRawText();
-   //_logger.LogInformation($"NewDataConsumer.JSON: {json}");
-                        var requestData = JsonSerializer.Deserialize<DataConsumerRequestParameters>(
-                            json, JsonHelper.WebRtcJsonSerializerOptions);
-
-                        var appData = requestData.AppData;
-                        appData.Add(KeyName.PeerId, requestData.PeerId);  // trick
-
-                        // Invoke accept here, ConsumerDataAsync call assumes DataConsumer is already created.
-                        ////accept();
-
-
-                        dataConsumer = await _recvTransport.ConsumeDataAsync(new DataConsumerOptions 
-                        {
-                            Id = requestData.Id,
-                            DataProducerId = requestData.DataProducerId,
-                            SctpStreamParameters = requestData.SctpStreamParameters,
-                            Label = requestData.Label,
-                            Protocol = requestData.Protocol,
-                            AppData = appData
-                        });
-
-                        _dataConsumers.Add(dataConsumer.Id, dataConsumer);
-                        if (requestData.PeerId is not null)
-                        {
-                            var peer = _peers[requestData.PeerId];
-                            peer.DataConsumerIds.Add(dataConsumer.Id);
-                        }
-
-                        dataConsumer.OnOpen += DataConsumer_OnOpen;
-                        dataConsumer.OnClose += DataConsumer_OnClose;
-                        dataConsumer.OnTransportClosed += DataConsumer_OnTransportClosed;
-                        dataConsumer.OnError += DataConsumer_OnError;
-                        dataConsumer.OnMessage += DataConsumer_OnMessage;
-
-                        accept();
+                        reject(403, "I do not want to data consume");
+                        return;
                     }
+                    if (!_useDataChannel)
+                    {
+                        reject(403, "I do not want DataChannels");
+                        return;
+                    }
+
+                    var dataConsumerJson = ((JsonElement)data).GetRawText();
+                    //_logger.LogInformation($"NewDataConsumer.JSON: {json}");
+                    var dataConsumerRequestData = JsonSerializer.Deserialize<DataConsumerRequestParameters>(
+                        dataConsumerJson, JsonHelper.WebRtcJsonSerializerOptions);
+
+                    // Convert elements with Dictionary<string, object> to string or number or bool.
+                    dataConsumerRequestData.AppData.ToStringOrNumberOrBool();
+
+                    var appData = dataConsumerRequestData.AppData;
+                    appData.Add(KeyName.PeerId, dataConsumerRequestData.PeerId);  // trick
+
+                    // Invoke accept here, ConsumerDataAsync call assumes DataConsumer is already created.
+                    ////accept();
+
+
+                    dataConsumer = await _recvTransport.ConsumeDataAsync(new DataConsumerOptions
+                    {
+                        Id = dataConsumerRequestData.Id,
+                        DataProducerId = dataConsumerRequestData.DataProducerId,
+                        SctpStreamParameters = dataConsumerRequestData.SctpStreamParameters,
+                        Label = dataConsumerRequestData.Label,
+                        Protocol = dataConsumerRequestData.Protocol,
+                        AppData = appData
+                    });
+
+                    _dataConsumers.Add(dataConsumer.Id, dataConsumer);
+                    if (dataConsumerRequestData.PeerId is not null)
+                    {
+                        var dataConsumerPeer = _peers[dataConsumerRequestData.PeerId];
+                        dataConsumerPeer.DataConsumerIds.Add(dataConsumer.Id);
+                    }
+
+                    dataConsumer.OnOpen += DataConsumer_OnOpen;
+                    dataConsumer.OnClose += DataConsumer_OnClose;
+                    dataConsumer.OnTransportClosed += DataConsumer_OnTransportClosed;
+                    dataConsumer.OnError += DataConsumer_OnError;
+                    dataConsumer.OnMessage += DataConsumer_OnMessage;
+
+                    accept();
                     break;
 
                     //// TODO: HOW TO DEREGISTER EVENTS???
