@@ -507,6 +507,21 @@ IMediaStream remMedia;
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
+                            var pauseProducerResponse = (PauseProducerResponse)ParseResponse(MethodName.PauseProducer,
+                                await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
+                                    new PauseProducerRequest
+                                    {
+                                        ProducerId = _webcamProducer.Id
+                                    })); ;
+
+
+                            var resumeProducerResponse = (ResumeProducerResponse)ParseResponse(MethodName.ResumeProducer,
+                                await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
+                                    new ResumeProducerRequest
+                                    {
+                                        ProducerId = _webcamProducer.Id
+                                    })); ;
+
                             var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
                             mediaStream.AddTrack(audioConsumer.Track);
                             mediaStream.AddTrack(videoConsumer.Track);
@@ -701,6 +716,16 @@ IMediaStream remMedia;
                     var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceResponse.Id;
+
+                case MethodName.PauseProducer:
+                    var pauseProducerResponse = JsonSerializer.Deserialize<PauseProducerRequest>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return pauseProducerResponse;
+
+                case MethodName.ResumeProducer:
+                    var resumeProducerResponse = JsonSerializer.Deserialize<ResumeProducerRequest>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return resumeProducerResponse;
 
                 case MethodName.ProduceData:
                     var produceDataResponse = JsonSerializer.Deserialize<ProduceDataResponse>(

@@ -575,7 +575,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
 		    await _pc.SetLocalDescription(answer);
 
-		    var transceiver = _pc.GetTransceivers()
+var transceivers = _pc.GetTransceivers();
+
+
+            var transceiver = transceivers //_pc.GetTransceivers()
 			    .FirstOrDefault(t => t.Mid == localId);
 
 		    if (transceiver is null)
