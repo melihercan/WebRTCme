@@ -525,6 +525,23 @@ IMediaStream remMedia;
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
+
+                            _ = ParseResponse(MethodName.PauseConsumer,
+                                await _mediaSoupServerApi.ApiAsync(MethodName.PauseConsumer,
+                                    new PauseConsumerRequest
+                                    {
+                                        ConsumerId = videoConsumer.Id
+                                    })); ;
+
+
+                            _ = ParseResponse(MethodName.ResumeConsumer,
+                                await _mediaSoupServerApi.ApiAsync(MethodName.ResumeConsumer,
+                                    new ResumeConsumerRequest
+                                    {
+                                        ConsumerId = videoConsumer.Id
+                                    })); ;
+
+
                             var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
                             mediaStream.AddTrack(audioConsumer.Track);
                             mediaStream.AddTrack(videoConsumer.Track);
@@ -734,6 +751,17 @@ IMediaStream remMedia;
                     var produceDataResponse = JsonSerializer.Deserialize<ProduceDataResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceDataResponse.Id;
+
+                case MethodName.PauseConsumer:
+                    var pauseConsumerResponse = JsonSerializer.Deserialize<PauseConsumerRequest>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return pauseConsumerResponse;
+
+                case MethodName.ResumeConsumer:
+                    var resumeConsumerResponse = JsonSerializer.Deserialize<ResumeConsumerRequest>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return resumeConsumerResponse;
+
             }
 
             return null;
