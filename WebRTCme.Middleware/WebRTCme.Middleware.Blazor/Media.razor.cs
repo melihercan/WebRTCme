@@ -48,7 +48,7 @@ namespace WebRTCme.Middleware
             base.OnAfterRender(firstRender);
 
             if (Stream is not null)// && VideoElementReference.Id is not null)
-                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, AudioMuted);
+                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, VideoMuted);
         }
 
         public void Dispose()
