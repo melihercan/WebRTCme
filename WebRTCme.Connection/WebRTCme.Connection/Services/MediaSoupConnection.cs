@@ -268,20 +268,22 @@ IMediaStream remMedia;
 
                         });
 
-                        _ = ParseResponse(MethodName.PauseProducer,
-                            await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
-                                new PauseProducerRequest
-                                {
-                                    ProducerId = _webcamProducer.Id
-                                })); ;
+
+                        ///// DIDN't halp to get producer stream to go 
+                        //_ = ParseResponse(MethodName.PauseProducer,
+                        //    await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
+                        //        new PauseProducerRequest
+                        //        {
+                        //            ProducerId = _webcamProducer.Id
+                        //        })); ;
 
 
-                        _ = ParseResponse(MethodName.ResumeProducer,
-                            await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
-                                new ResumeProducerRequest
-                                {
-                                    ProducerId = _webcamProducer.Id
-                                })); ;
+                        //_ = ParseResponse(MethodName.ResumeProducer,
+                        //    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
+                        //        new ResumeProducerRequest
+                        //        {
+                        //            ProducerId = _webcamProducer.Id
+                        //        })); ;
 
 
                     }
