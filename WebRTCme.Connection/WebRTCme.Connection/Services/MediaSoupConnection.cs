@@ -526,20 +526,20 @@ IMediaStream remMedia;
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
 
-                            _ = ParseResponse(MethodName.PauseConsumer,
-                                await _mediaSoupServerApi.ApiAsync(MethodName.PauseConsumer,
-                                    new PauseConsumerRequest
-                                    {
-                                        ConsumerId = videoConsumer.Id
-                                    })); ;
+                            //_ = ParseResponse(MethodName.PauseConsumer,
+                            //    await _mediaSoupServerApi.ApiAsync(MethodName.PauseConsumer,
+                            //        new PauseConsumerRequest
+                            //        {
+                            //            ConsumerId = videoConsumer.Id
+                            //        })); ;
 
 
-                            _ = ParseResponse(MethodName.ResumeConsumer,
-                                await _mediaSoupServerApi.ApiAsync(MethodName.ResumeConsumer,
-                                    new ResumeConsumerRequest
-                                    {
-                                        ConsumerId = videoConsumer.Id
-                                    })); ;
+                            //_ = ParseResponse(MethodName.ResumeConsumer,
+                            //    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeConsumer,
+                            //        new ResumeConsumerRequest
+                            //        {
+                            //            ConsumerId = videoConsumer.Id
+                            //        })); ;
 
 
                             var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
