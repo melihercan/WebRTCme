@@ -480,6 +480,9 @@ IMediaStream remMedia;
                     var consumerAppData = consumerRequestData.AppData;
                     consumerAppData.Add(KeyName.PeerId, consumerRequestData.PeerId);  // trick
 
+                    accept();
+
+
                     consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions
                     {
                         Id = consumerRequestData.Id,
@@ -488,6 +491,7 @@ IMediaStream remMedia;
                         RtpParameters = consumerRequestData.RtpParameters,
                         AppData = consumerAppData
                     });
+
 
                     _consumers.Add(consumer.Id, consumer);
                     ////if (requestData.PeerId is not null)
@@ -501,7 +505,7 @@ IMediaStream remMedia;
                     consumer.OnTrackEnded += Consumer_OnTrackEnded;
                     consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
 
-                    accept();
+                    ////accept();
 
                     // If audio-only mode is enabled, pause it.
                     ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
