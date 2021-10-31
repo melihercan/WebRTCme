@@ -259,14 +259,23 @@ IMediaStream remMedia;
                             }
                         }
 
-                        _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        try
                         {
-                            Track = userContext.LocalStream.GetVideoTracks().First(),
-                            Encodings = encodings ?? new RtpEncodingParameters[] { },
-                            CodecOptions = codecOptions,
-                            Codec = codec
+                            _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                            {
+                                Track = userContext.LocalStream.GetVideoTracks().First(),
+                                Encodings = encodings ?? new RtpEncodingParameters[] { },
+                                CodecOptions = codecOptions,
+                                Codec = codec
 
-                        });
+                            });
+                        }
+                        catch(Exception ex)
+                        {
+                            var m = ex.Message;
+                        }
+
+                  _logger.LogInformation("COnnection completed");
 
 
                         ///// DIDN't halp to get producer stream to go 
@@ -293,6 +302,7 @@ IMediaStream remMedia;
                     //    UserContext = userContext,
                     //    Observer = observer
                     //};
+
 
                 }
                 catch (Exception ex)
@@ -528,7 +538,10 @@ IMediaStream remMedia;
 
                         if (consumer.Kind == MediaKind.Video)
                         {
+                            await Task.Delay(1000);
                             _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
+                            _logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
+
                         }
 
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
