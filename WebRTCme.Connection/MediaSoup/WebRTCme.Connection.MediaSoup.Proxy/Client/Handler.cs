@@ -134,7 +134,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             _pc = _window.RTCPeerConnection(new RTCConfiguration 
             { 
                 IceServers = options.IceServers,
-                IceTransportPolicy = options.IceTransportPolicy,
+                IceTransportPolicy = options.IceTransportPolicy.HasValue ? options.IceTransportPolicy : RTCIceTransportPolicy.All,
                 BundlePolicy = RTCBundlePolicy.MaxBundle,
                 RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
                 SdpSemantics = SdpSemantics.UnifiedPlan
