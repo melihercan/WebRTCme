@@ -522,6 +522,11 @@ IMediaStream remMedia;
                         var videoConsumer =
                             consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
 
+                        if (consumer.Kind == MediaKind.Video)
+                        {
+                            _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
+                        }
+
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
