@@ -282,7 +282,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     };
                 }
 
-                ////Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
+                Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
 
                 await _pc.SetLocalDescription(offer);
 
