@@ -492,6 +492,8 @@ IMediaStream remMedia;
 
                     ////accept();
 
+    ////await Task.Delay(1000);
+
 
                     consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions
                     {
@@ -538,9 +540,12 @@ IMediaStream remMedia;
 
                         if (consumer.Kind == MediaKind.Video)
                         {
-                            await Task.Delay(1000);
+                            ////await Task.Delay(1000);
+                            ///
+
+                            //// TODO: THERE IS A TIMING ISSUE. WITHOUT THE ABOVE DELAY, _webcamProducer is nul!!! CHECK THIS
                             _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
-                            _logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
+                            ////_logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
 
                         }
 

@@ -282,7 +282,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     };
                 }
 
-                Console.WriteLine($"send() | calling pc.setLocalDescription() {offer.Sdp}");
+      Console.WriteLine($"send() - {options.Track.Kind} | calling pc.setLocalDescription() {offer.Sdp}");
 
                 await _pc.SetLocalDescription(offer);
 
@@ -351,7 +351,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Sdp = _remoteSdp.GetSdp()
                 };
 
-                ////Console.WriteLine($"send() | calling pc.setRemoteDescription() {answer.Sdp}");
+          Console.WriteLine($"send() {options.Track.Kind} | calling pc.setRemoteDescription() {answer.Sdp}");
 
                 await _pc.SetRemoteDescription(answer);
 
@@ -550,6 +550,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 Type = RTCSdpType.Offer, 
                 Sdp = _remoteSdp.GetSdp() 
             };
+      Console.WriteLine($"receive() - {options.Kind} | calling pc.setRemoteDescription() {offer.Sdp}");
+
             await _pc.SetRemoteDescription(offer);
 
 		    var answer = await _pc.CreateAnswer();
@@ -573,7 +575,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 		    if (!_transportReady)
 			    await SetupTransportAsync(DtlsRole.Client, localSdpObject);
 
-		    await _pc.SetLocalDescription(answer);
+       Console.WriteLine($"receive() - {options.Kind} | calling pc.setLocalDescription() {answer.Sdp}");
+            await _pc.SetLocalDescription(answer);
 
 var transceivers = _pc.GetTransceivers();
 
