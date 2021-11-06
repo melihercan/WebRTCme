@@ -297,6 +297,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 ////Console.WriteLine($"{_pc.LocalDescription.Sdp}");
                 ////Console.WriteLine("===================");
 
+    if (options.Track.Kind == MediaStreamTrackKind.Video)
+           Console.WriteLine("PUT A BP HERE...");
+
+
                 localSdpObject = _pc.LocalDescription.Sdp.ToSdp();
                 offerMediaObject = new MediaObject
                 {

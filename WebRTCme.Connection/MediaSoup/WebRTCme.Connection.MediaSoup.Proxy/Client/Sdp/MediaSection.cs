@@ -92,7 +92,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.MediaDescription.Attributes.Ssrcs = null;
             _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear();;
             _mediaObject.MediaDescription.Attributes.SsrcGroups = null;
-            _mediaObject.Simulcast = null;
+            _mediaObject.MediaDescription.Attributes.Simulcast = null;
             _mediaObject.Simulcast03 = null;
             _mediaObject.MediaDescription.Attributes.Rids?.Clear();
             _mediaObject.MediaDescription.Attributes.Rids = null;
@@ -111,7 +111,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
             _mediaObject.MediaDescription.Attributes.Ssrcs = null;
             _mediaObject.MediaDescription.Attributes.SsrcGroups?.Clear(); ;
             _mediaObject.MediaDescription.Attributes.SsrcGroups = null;
-            _mediaObject.Simulcast = null;
+            _mediaObject.MediaDescription.Attributes.Simulcast = null;
             _mediaObject.Simulcast03 = null;
             _mediaObject.MediaDescription.Attributes.Rids?.Clear();
             _mediaObject.MediaDescription.Attributes.Rids = null;

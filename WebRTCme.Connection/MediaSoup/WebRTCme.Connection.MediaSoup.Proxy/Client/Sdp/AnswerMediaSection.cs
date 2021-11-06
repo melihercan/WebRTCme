@@ -186,12 +186,16 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
                             _mediaObject.MediaDescription.Attributes.ExtmapAllowMixed = true;
 
                         // Simulcast.
-                        if (offerMediaObject.Simulcast is not null)
+
+                 //// DEBUG HACK
+       if (offerMediaObject.MediaDescription.Media == MediaType.Video)
+        Console.WriteLine("PUT A BP HERE...");
+                        if (offerMediaObject.MediaDescription.Attributes.Simulcast is not null)
                         {
-                            _mediaObject.Simulcast = new()
+                            _mediaObject.MediaDescription.Attributes.Simulcast = new()
                             {
                                 Direction = RidDirection.Recv,
-                        	    IdList = offerMediaObject.Simulcast.IdList
+                        	    IdList = offerMediaObject.MediaDescription.Attributes.Simulcast.IdList
                             };
 
                             _mediaObject.MediaDescription.Attributes.Rids = new List<Rid>();

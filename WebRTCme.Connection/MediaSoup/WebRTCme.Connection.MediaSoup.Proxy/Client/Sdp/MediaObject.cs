@@ -53,7 +53,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
 
         ////public string ExtmapAllowMixed { get; set; }
 
-        public Simulcast Simulcast { get; set; }
+        ////public Simulcast Simulcast { get; set; }
         public Simulcast03 Simulcast03 { get; set; }
 
 
