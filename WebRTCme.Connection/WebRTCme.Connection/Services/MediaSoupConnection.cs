@@ -185,6 +185,7 @@ IMediaStream remMedia;
 
                     if (_produce)
                     {
+                    await Task.Delay(1000);
                         // Enable mic.
                         _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                         {
