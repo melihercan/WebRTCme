@@ -19,5 +19,9 @@ namespace WebRTCme.Connection.MediaSoup
         public const string PauseConsumer = "pauseConsumer";
         public const string ResumeConsumer = "resumeConsumer";
         public const string NewPeer = "newPeer";
+        public const string GetTransportStats = "getTransportStats";
+        public const string GetProducerStats = "getProducerStats";
+        public const string GetConsumerStats = "getConsumerStats";
+
     }
 }

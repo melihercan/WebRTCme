@@ -541,18 +541,66 @@ IMediaStream remMedia;
 
                         if (consumer.Kind == MediaKind.Video)
                         {
-                            ////await Task.Delay(1000);
-                            ///
 
                             //// TODO: THERE IS A TIMING ISSUE. WITHOUT THE ABOVE DELAY, _webcamProducer is nul!!! CHECK THIS
                             _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
                             ////_logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
+
+
+                            ////_webcamProducer.Track = _connectionContext.UserContext.LocalStream.GetVideoTracks().First();
 
                         }
 
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
+
+//// TESSTING
+         _ = Task.Run(async () => 
+         {
+             while (true)
+             {
+                 try
+                 {
+                     await Task.Delay(2000);
+
+                     //var txStats = await _sendTransport.GetStatsAsync();
+                     //var rxStats = await _recvTransport.GetStatsAsync();
+
+
+                     //var sendTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
+                     //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats, 
+                     //new GetTransportStatsRequest { TransportId = _sendTransport.Id }));
+
+                     //var recvTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
+                     //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats,
+                     //new GetTransportStatsRequest { TransportId = _recvTransport.Id }));
+
+                     var micProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
+                         await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                         new GetProducerStatsRequest { ProducerId = _micProducer.Id }));
+
+
+                     ////var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
+                         ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                         ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
+
+
+                 }
+                 catch (Exception ex)
+                 {
+                     Console.WriteLine($"@@@@@@@@@@@@@@@@@@@@@ EXCEPTION: {ex.Message}");
+                     var m = ex.Message;
+                 }
+             }
+
+         });
+
+
+
+
+
+
 
                             //_ = ParseResponse(MethodName.PauseConsumer,
                             //    await _mediaSoupServerApi.ApiAsync(MethodName.PauseConsumer,
@@ -766,12 +814,12 @@ IMediaStream remMedia;
                     return produceResponse.Id;
 
                 case MethodName.PauseProducer:
-                    var pauseProducerResponse = JsonSerializer.Deserialize<PauseProducerRequest>(
+                    var pauseProducerResponse = JsonSerializer.Deserialize<PauseProducerResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return pauseProducerResponse;
 
                 case MethodName.ResumeProducer:
-                    var resumeProducerResponse = JsonSerializer.Deserialize<ResumeProducerRequest>(
+                    var resumeProducerResponse = JsonSerializer.Deserialize<ResumeProducerResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return resumeProducerResponse;
 
@@ -781,14 +829,29 @@ IMediaStream remMedia;
                     return produceDataResponse.Id;
 
                 case MethodName.PauseConsumer:
-                    var pauseConsumerResponse = JsonSerializer.Deserialize<PauseConsumerRequest>(
+                    var pauseConsumerResponse = JsonSerializer.Deserialize<PauseConsumerResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return pauseConsumerResponse;
 
                 case MethodName.ResumeConsumer:
-                    var resumeConsumerResponse = JsonSerializer.Deserialize<ResumeConsumerRequest>(
+                    var resumeConsumerResponse = JsonSerializer.Deserialize<ResumeConsumerResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return resumeConsumerResponse;
+
+                case MethodName.GetTransportStats:
+                    var getTransportStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return getTransportStatsResponse;
+
+                case MethodName.GetProducerStats:
+                    var getProducerStatsResponse = JsonSerializer.Deserialize<GetProducerStatsResponse[]>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return getProducerStatsResponse;
+
+                case MethodName.GetConsumerStats:
+                    var getConsumerStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    return getConsumerStatsResponse;
 
             }
 
