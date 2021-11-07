@@ -100,9 +100,9 @@ namespace WebRTCme
         public ConstrainDOMString ResizeMode { get; set; }
 
         // Shared screen tracks.
-        public CursorOptions Cursor { get; set; }
+        public CursorOptions? Cursor { get; set; }
 
-        public DisplaySurfaceOptions DisplaySurface { get; set; }
+        public DisplaySurfaceOptions? DisplaySurface { get; set; }
 
         [JsonConverter(typeof(JsonConstrainBooleanConverter))]
         public ConstrainBoolean LogicalSurface { get; set; }

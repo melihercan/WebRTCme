@@ -200,16 +200,49 @@ IMediaStream remMedia;
 
                     // Enable webcam.
                         var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
+                        //var videoInputDevices = (await mediaDevices.EnumerateDevices())
+                        //    .Where(d => d.Kind == MediaDeviceInfoKind.VideoInput)
+                        //    .ToArray();
+
                         var webcamStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
                         {
                             Video = new MediaStreamContraintsUnion { Value = true }
-                        });
-                        
+                            //Video = new MediaStreamContraintsUnion
+                            //{
+                            //    Object = new MediaTrackConstraints
+                            //    {
+                            //        DeviceId = new ConstrainDOMString
+                            //        {
+                            //            Ideal = new ConstrainDOMStringUnion
+                            //            {
+                            //                 Value = videoInputDevices[0].DeviceId
+                            //            }
+                            //        },
+                            //        Width = new ConstrainULong 
+                            //        { 
+                            //            Object = new ConstrainULongRange 
+                            //            { 
+                            //                Ideal = 1280
+                            //            }
+                            //        },
+                            //        Height = new ConstrainULong
+                            //        {
+                            //            Object = new ConstrainULongRange
+                            //            {
+                            //                Ideal = 720
+                            //            }
+                            //        }
+
+                            //    }
+                            //}
+                        }); ;
+
+////                        var tracks = webcamStream.GetVideoTracks();
                         var webcamTrack = webcamStream.GetVideoTracks()[0];
 
-                        var cap = webcamTrack.GetCapabilities();
-                        var constraints = webcamTrack.GetConstraints();
-                        var settings = webcamTrack.GetSettings();
+                        //var caps = webcamTrack.GetCapabilities();
+                        //var constraints = webcamTrack.GetConstraints();
+                        //var settings = webcamTrack.GetSettings();
 
 
 
@@ -279,7 +312,7 @@ IMediaStream remMedia;
                         {
                             _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                             {
-                                Track = userContext.LocalStream.GetVideoTracks().First(),
+                                Track = webcamTrack,//// userContext.LocalStream.GetVideoTracks().First(),
                                 Encodings = encodings ?? new RtpEncodingParameters[] { },
                                 CodecOptions = codecOptions,
                                 Codec = codec
