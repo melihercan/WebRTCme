@@ -70,135 +70,150 @@ IMediaStream remMedia;
         {
             return Observable.Create<PeerResponse>(async observer =>
             {
-                var guid = Guid.NewGuid();
-                var forceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp");
-                _produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
-                _consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
-                _useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
-                var forceH264 = _configuration.GetValue<bool>("MediaSoupServer:ForceH264");
-                var forceVP9 = _configuration.GetValue<bool>("MediaSoupServer:ForceVP9");
-                var useSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSimulcast");
-                var useSharingSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSharingSimulcast");
-                var audioOnly = _configuration.GetValue<bool>("MediaSoupServer:AudioOnly");
-                var e2eKey = _configuration.GetValue<string>("MediaSoupServer:E2eKey");
+            var guid = Guid.NewGuid();
+            var forceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp");
+            _produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
+            _consume = _configuration.GetValue<bool>("MediaSoupServer:Consume");
+            _useDataChannel = _configuration.GetValue<bool>("MediaSoupServer:UseDataChannel");
+            var forceH264 = _configuration.GetValue<bool>("MediaSoupServer:ForceH264");
+            var forceVP9 = _configuration.GetValue<bool>("MediaSoupServer:ForceVP9");
+            var useSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSimulcast");
+            var useSharingSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSharingSimulcast");
+            var audioOnly = _configuration.GetValue<bool>("MediaSoupServer:AudioOnly");
+            var e2eKey = _configuration.GetValue<string>("MediaSoupServer:E2eKey");
 
-                _displayName = userContext.Name;
+            _displayName = userContext.Name;
 
-                _connectionContext = new ConnectionContext
+            _connectionContext = new ConnectionContext
+            {
+                UserContext = userContext,
+                Observer = observer
+            };
+
+
+            try
+            {
+                _mediaSoupServerApi.NotifyEventAsync += OnNotifyAsync;
+                _mediaSoupServerApi.RequestEventAsync += OnRequestAsync;
+
+                await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name, userContext.Room);
+
+                _mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
+
+                var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
+                    await _mediaSoupServerApi.ApiAsync(MethodName.GetRouterRtpCapabilities));
+                await _mediaSoupDevice.LoadAsync(routerRtpCapabilities);
+
+
+                // Create mediasoup Transport for sending (unless we don't want to produce).
+                if (_produce)
                 {
-                    UserContext = userContext,
-                    Observer = observer
-                };
-
-
-                try
-                {
-                    _mediaSoupServerApi.NotifyEventAsync += OnNotifyAsync;
-                    _mediaSoupServerApi.RequestEventAsync += OnRequestAsync;
-
-                    await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name, userContext.Room);
-
-                    _mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
-
-                    var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
-                        await _mediaSoupServerApi.ApiAsync(MethodName.GetRouterRtpCapabilities));
-                    await _mediaSoupDevice.LoadAsync(routerRtpCapabilities);
-
-
-                    // Create mediasoup Transport for sending (unless we don't want to produce).
-                    if (_produce)
-                    {
-                        var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
-                            await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
-                                new WebRtcTransportCreateRequest
-                                {
-                                    ForceTcp = forceTcp,
-                                    Producing = true,
-                                    Consuming = false,
-                                    SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
-                                }));
-
-                        _sendTransport = _mediaSoupDevice.CreateSendTransport(new TransportOptions 
-                        {
-                            Id = transportInfo.Id,
-                            IceParameters = transportInfo.IceParameters,
-                            IceCandidates = transportInfo.IceCandidates,
-                            DtlsParameters = transportInfo.DtlsParameters,
-                            SctpParameters = transportInfo.SctpParameters,
-                            IceServers = new RTCIceServer[] { },
-                            //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
-                            //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
-                        });
-
-                        _sendTransport.OnConnectAsync += SendTransport_OnConnectAsync;
-                        _sendTransport.OnConnectionStateChangeAsync += SendTransport_OnConnectionStateChangeAsync;
-                        _sendTransport.OnProduceAsync += SendTransport_OnProduceAsync;
-                        _sendTransport.OnProduceDataAsync += SendTransport_OnProduceDataAsync;
-
-                    }
-
-                    // Create mediasoup Transport for receiving (unless we don't want to consume).
-                    if (_consume)
-                    {
-                        var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
-                            await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
-                                new WebRtcTransportCreateRequest
-                                {
-                                    ForceTcp = forceTcp,
-                                    Producing = false,
-                                    Consuming = true,
-                                    SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
-                                }));
-
-                        _recvTransport = _mediaSoupDevice.CreateRecvTransport(new TransportOptions
-                        {
-                            Id = transportInfo.Id,
-                            IceParameters = transportInfo.IceParameters,
-                            IceCandidates = transportInfo.IceCandidates,
-                            DtlsParameters = transportInfo.DtlsParameters,
-                            SctpParameters = transportInfo.SctpParameters,
-                            IceServers = new RTCIceServer[] { },
-                            //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
-                            //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
-                        });
-
-                        _recvTransport.OnConnectAsync += RecvTransport_OnConnectAsync;
-                        _recvTransport.OnConnectionStateChangeAsync += RecvTransport_OnConnectionStateChangeAsync;
-                    }
-
-                    // Join now into the room.
-                    // NOTE: Don't send our RTP capabilities if we don't want to consume.
-                    var peers = (Peer[])ParseResponse(MethodName.Join,
-                        await _mediaSoupServerApi.ApiAsync(MethodName.Join,
-                            new JoinRequest
+                    var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
+                            new WebRtcTransportCreateRequest
                             {
-                                DisplayName = _displayName,
-                                Device = _device,
-                                RtpCapabilities = _consume ? _mediaSoupDevice.RtpCapabilities : null,
+                                ForceTcp = forceTcp,
+                                Producing = true,
+                                Consuming = false,
                                 SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
                             }));
 
-                    foreach (var peer in peers)
-                        OnNewPeer(peer);
-
-
-
-                    if (_produce)
+                    _sendTransport = _mediaSoupDevice.CreateSendTransport(new TransportOptions
                     {
-                    await Task.Delay(1000);
-                        // Enable mic.
-                        _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        {
-                            Track = userContext.LocalStream.GetAudioTracks().First(),
-                            Encodings = new RtpEncodingParameters[] { },
-                            CodecOptions = new ProducerCodecOptions
-                            {
-                                OpusStereo = true,
-                                OpusDtx = true
-                            }
-                        });
+                        Id = transportInfo.Id,
+                        IceParameters = transportInfo.IceParameters,
+                        IceCandidates = transportInfo.IceCandidates,
+                        DtlsParameters = transportInfo.DtlsParameters,
+                        SctpParameters = transportInfo.SctpParameters,
+                        IceServers = new RTCIceServer[] { },
+                        //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                        //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                    });
 
-                        // Enable webcam.
+                    _sendTransport.OnConnectAsync += SendTransport_OnConnectAsync;
+                    _sendTransport.OnConnectionStateChangeAsync += SendTransport_OnConnectionStateChangeAsync;
+                    _sendTransport.OnProduceAsync += SendTransport_OnProduceAsync;
+                    _sendTransport.OnProduceDataAsync += SendTransport_OnProduceDataAsync;
+
+                }
+
+                // Create mediasoup Transport for receiving (unless we don't want to consume).
+                if (_consume)
+                {
+                    var transportInfo = (TransportInfo)ParseResponse(MethodName.CreateWebRtcTransport,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.CreateWebRtcTransport,
+                            new WebRtcTransportCreateRequest
+                            {
+                                ForceTcp = forceTcp,
+                                Producing = false,
+                                Consuming = true,
+                                SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
+                            }));
+
+                    _recvTransport = _mediaSoupDevice.CreateRecvTransport(new TransportOptions
+                    {
+                        Id = transportInfo.Id,
+                        IceParameters = transportInfo.IceParameters,
+                        IceCandidates = transportInfo.IceCandidates,
+                        DtlsParameters = transportInfo.DtlsParameters,
+                        SctpParameters = transportInfo.SctpParameters,
+                        IceServers = new RTCIceServer[] { },
+                        //// AdditionalSettings = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                        //// ProprietaryConstraints = TODO: this goes to Handler.Run and as parametere to RTCPeerConnection???
+                    });
+
+                    _recvTransport.OnConnectAsync += RecvTransport_OnConnectAsync;
+                    _recvTransport.OnConnectionStateChangeAsync += RecvTransport_OnConnectionStateChangeAsync;
+                }
+
+                // Join now into the room.
+                // NOTE: Don't send our RTP capabilities if we don't want to consume.
+                var peers = (Peer[])ParseResponse(MethodName.Join,
+                    await _mediaSoupServerApi.ApiAsync(MethodName.Join,
+                        new JoinRequest
+                        {
+                            DisplayName = _displayName,
+                            Device = _device,
+                            RtpCapabilities = _consume ? _mediaSoupDevice.RtpCapabilities : null,
+                            SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
+                        }));
+
+                foreach (var peer in peers)
+                    OnNewPeer(peer);
+
+
+
+                if (_produce)
+                {
+                    await Task.Delay(1000);
+                    // Enable mic.
+                    //_micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                    //{
+                    //    Track = userContext.LocalStream.GetAudioTracks().First(),
+                    //    Encodings = new RtpEncodingParameters[] { },
+                    //    CodecOptions = new ProducerCodecOptions
+                    //    {
+                    //        OpusStereo = true,
+                    //        OpusDtx = true
+                    //    }
+                    //});
+
+                    // Enable webcam.
+                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
+                        var webcamStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
+                        {
+                            Video = new MediaStreamContraintsUnion { Value = true }
+                        });
+                        
+                        var webcamTrack = webcamStream.GetVideoTracks()[0];
+
+                        var cap = webcamTrack.GetCapabilities();
+                        var constraints = webcamTrack.GetConstraints();
+                        var settings = webcamTrack.GetSettings();
+
+
+
+
                         RtpEncodingParameters[] encodings = null;
                         RtpCodecCapability codec = null;
                         ProducerCodecOptions codecOptions = new()
@@ -276,7 +291,7 @@ IMediaStream remMedia;
                             var m = ex.Message;
                         }
 
-                  _logger.LogInformation("COnnection completed");
+                  _logger.LogInformation("Connection completed");
 
 
                         ///// DIDN't halp to get producer stream to go 
@@ -303,6 +318,61 @@ IMediaStream remMedia;
                     //    UserContext = userContext,
                     //    Observer = observer
                     //};
+
+///////////////////TESTING
+      _ = Task.Run(async () =>
+                    {
+                        while (true)
+                        {
+                            try
+                            {
+                                await Task.Delay(2000);
+
+                                //var txStats = await _sendTransport.GetStatsAsync();
+                                //var rxStats = await _recvTransport.GetStatsAsync();
+
+
+                                //var sendTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
+                                //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats, 
+                                //new GetTransportStatsRequest { TransportId = _sendTransport.Id }));
+
+                                //var recvTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
+                                //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats,
+                                //new GetTransportStatsRequest { TransportId = _recvTransport.Id }));
+
+                                //var micProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
+                                //    await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                                //    new GetProducerStatsRequest { ProducerId = _micProducer.Id }));
+
+
+                                ////var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
+                                    ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                                    ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
+
+                                //_consumers.Values.ToList().ForEach(async consumer =>
+                                //{
+                                //    var consumerStats = (GetConsumerStatsResponse[])ParseResponse(MethodName.GetConsumerStats,
+                                //        await _mediaSoupServerApi.ApiAsync(MethodName.GetConsumerStats,
+                                //        new GetConsumerStatsRequest { ConsumerId = consumer.Id }));
+                                //});
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"@@@@@@@@@@@@@@@@@@@@@ EXCEPTION: {ex.Message}");
+                                var m = ex.Message;
+                            }
+                        }
+
+                    });
+
+
+
+
+
+
+
 
 
                 }

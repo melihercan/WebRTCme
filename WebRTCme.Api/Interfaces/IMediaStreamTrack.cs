@@ -37,7 +37,7 @@ namespace WebRTCme
 
         MediaTrackCapabilities GetCapabilities();
 
-        MediaTrackConstraints GetContraints();
+        MediaTrackConstraints GetConstraints();
 
         MediaTrackSettings GetSettings();
 

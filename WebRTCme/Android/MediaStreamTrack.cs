@@ -102,7 +102,7 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public MediaTrackConstraints GetContraints()
+        public MediaTrackConstraints GetConstraints()
         {
             throw new NotImplementedException();
         }

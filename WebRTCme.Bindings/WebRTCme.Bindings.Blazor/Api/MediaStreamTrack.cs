@@ -60,8 +60,8 @@ namespace WebRTCme.Bindings.Blazor.Api
         public MediaTrackCapabilities GetCapabilities() =>
             JsRuntime.CallJsMethod<MediaTrackCapabilities>(NativeObject, "getCapabilities");
 
-        public MediaTrackConstraints GetContraints() =>
-            JsRuntime.CallJsMethod<MediaTrackConstraints>(NativeObject, "getContraints");
+        public MediaTrackConstraints GetConstraints() =>
+            JsRuntime.CallJsMethod<MediaTrackConstraints>(NativeObject, "getConstraints");
 
         public MediaTrackSettings GetSettings() =>
             JsRuntime.CallJsMethod<MediaTrackSettings>(NativeObject, "getSettings");
