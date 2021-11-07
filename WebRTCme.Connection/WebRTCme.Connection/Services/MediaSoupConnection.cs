@@ -582,8 +582,15 @@ IMediaStream remMedia;
 
 
                      ////var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
-                         ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
-                         ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
+                     ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                     ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
+
+                     _consumers.Values.ToList().ForEach(async consumer => 
+                     {
+                         var consumerStats = (GetConsumerStatsResponse[])ParseResponse(MethodName.GetConsumerStats,
+                             await _mediaSoupServerApi.ApiAsync(MethodName.GetConsumerStats,
+                             new GetConsumerStatsRequest { ConsumerId = consumer.Id }));
+                     });
 
 
                  }
@@ -839,7 +846,7 @@ IMediaStream remMedia;
                     return resumeConsumerResponse;
 
                 case MethodName.GetTransportStats:
-                    var getTransportStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse>(
+                    var getTransportStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse[]>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return getTransportStatsResponse;
 
@@ -849,7 +856,7 @@ IMediaStream remMedia;
                     return getProducerStatsResponse;
 
                 case MethodName.GetConsumerStats:
-                    var getConsumerStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse>(
+                    var getConsumerStatsResponse = JsonSerializer.Deserialize<GetConsumerStatsResponse[]>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return getConsumerStatsResponse;
 
