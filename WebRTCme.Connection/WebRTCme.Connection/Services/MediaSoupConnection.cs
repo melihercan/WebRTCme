@@ -187,16 +187,16 @@ IMediaStream remMedia;
                 {
                     await Task.Delay(1000);
                         // Enable mic.
-                        //_micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        //{
-                        //    Track = userContext.LocalStream.GetAudioTracks().First(),
-                        //    Encodings = new RtpEncodingParameters[] { },
-                        //    CodecOptions = new ProducerCodecOptions
-                        //    {
-                        //        OpusStereo = true,
-                        //        OpusDtx = true
-                        //    }
-                        //});
+                        _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        {
+                            Track = userContext.LocalStream.GetAudioTracks().First(),
+                            Encodings = new RtpEncodingParameters[] { },
+                            CodecOptions = new ProducerCodecOptions
+                            {
+                                OpusStereo = true,
+                                OpusDtx = true
+                            }
+                        });
 
                         // Enable webcam.
                         var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
@@ -352,8 +352,9 @@ IMediaStream remMedia;
                     //    Observer = observer
                     //};
 
-///////////////////TESTING
-      _ = Task.Run(async () =>
+#if false
+                    ///////////////////TESTING
+                    _ = Task.Run(async () =>
                     {
                         while (true)
                         {
@@ -401,7 +402,7 @@ IMediaStream remMedia;
                         }
 
                     });
-
+#endif
 
 
 
