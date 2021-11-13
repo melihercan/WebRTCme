@@ -320,7 +320,33 @@
     public.callMethodAsync = async function (parent, method, ...args) {
         let parentObject = getParentObject(parent);
         let methodObject = getPropertyObject(parentObject, method);
-        let ret = await methodObject.apply(parentObject, args);
+
+    /////// VERY UGLY HACK FOR RTCPeerConnection.getStats till I sort callback functions from JS.
+    let ret = undefined;
+
+    if (method === 'getStats') {
+            let cameraStats = await methodObject.apply(parentObject, args);
+            let statsString = '';
+            cameraStats?.forEach(res => {
+                statsString += '<h3>Report type=';
+                statsString += res.type;
+                statsString += '</h3>\n';
+                statsString += 'id ' + res.id + '<br>\n';
+                statsString += 'time ' + res.timestamp + '<br>\n';
+                Object.keys(res).forEach(k => {
+                    if (k !== 'timestamp' && k !== 'type' && k !== 'id') {
+                        statsString += k + ': ' + res[k] + '<br>\n';
+                    }
+                });
+            });
+            ret = statsString;
+    }
+    else
+
+
+
+
+        /****let****/ ret = await methodObject.apply(parentObject, args);
         if (ret !== undefined) {
             if (ret !== null && typeof(ret) === 'object') {
                 let objectRef = addObjectRef(ret);

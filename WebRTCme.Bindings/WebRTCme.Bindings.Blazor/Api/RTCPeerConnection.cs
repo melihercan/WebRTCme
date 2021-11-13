@@ -253,5 +253,18 @@ namespace WebRTCme.Bindings.Blazor.Api
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription) =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "setRemoteDescription", sessionDescription)
             .AsTask();
+
+
+
+        /// <summary>
+     /// ///////////////////////////////// THIS IS A HACK, REMOVE THIS ONCE JS callbacks are implemented.
+        /// Currenlty the call is implemented in JsInterop.js file, remove that too
+      /// </summary>
+        /// <returns></returns>
+     public async Task<string> GetStatsHack()
+    {
+         return await JsRuntime.CallJsMethodAsync<string>(NativeObject, "getStats");
+    }
+
     }
 }

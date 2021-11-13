@@ -186,19 +186,19 @@ IMediaStream remMedia;
                 if (_produce)
                 {
                     await Task.Delay(1000);
-                    // Enable mic.
-                    //_micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                    //{
-                    //    Track = userContext.LocalStream.GetAudioTracks().First(),
-                    //    Encodings = new RtpEncodingParameters[] { },
-                    //    CodecOptions = new ProducerCodecOptions
-                    //    {
-                    //        OpusStereo = true,
-                    //        OpusDtx = true
-                    //    }
-                    //});
+                        // Enable mic.
+                        //_micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
+                        //{
+                        //    Track = userContext.LocalStream.GetAudioTracks().First(),
+                        //    Encodings = new RtpEncodingParameters[] { },
+                        //    CodecOptions = new ProducerCodecOptions
+                        //    {
+                        //        OpusStereo = true,
+                        //        OpusDtx = true
+                        //    }
+                        //});
 
-                    // Enable webcam.
+                        // Enable webcam.
                         var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
                         //var videoInputDevices = (await mediaDevices.EnumerateDevices())
                         //    .Where(d => d.Kind == MediaDeviceInfoKind.VideoInput)
@@ -361,7 +361,9 @@ IMediaStream remMedia;
                             {
                                 await Task.Delay(2000);
 
-                                //var txStats = await _sendTransport.GetStatsAsync();
+                                var txStats = await _sendTransport.GetStatsAsync();
+                                Console.WriteLine(txStats);
+
                                 //var rxStats = await _recvTransport.GetStatsAsync();
 
 
@@ -378,9 +380,9 @@ IMediaStream remMedia;
                                 //    new GetProducerStatsRequest { ProducerId = _micProducer.Id }));
 
 
-                                ////var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
-                                    ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
-                                    ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
+                                //var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
+                                //await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
+                                //    new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
 
                                 //_consumers.Values.ToList().ForEach(async consumer =>
                                 //{
@@ -647,18 +649,19 @@ IMediaStream remMedia;
 
                             //// TODO: THERE IS A TIMING ISSUE. WITHOUT THE ABOVE DELAY, _webcamProducer is nul!!! CHECK THIS
                             _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
+
+                            ////await Task.Delay(2000);
                             ////_logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
-
-
-                            ////_webcamProducer.Track = _connectionContext.UserContext.LocalStream.GetVideoTracks().First();
-
+                               
                         }
 
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
                         if (audioConsumer is not null && videoConsumer is not null)
                         {
 
-//// TESSTING
+
+#if false
+                            //// TESTING
          _ = Task.Run(async () => 
          {
              while (true)
@@ -705,7 +708,7 @@ IMediaStream remMedia;
              }
 
          });
-
+#endif
 
 
 
@@ -731,6 +734,7 @@ IMediaStream remMedia;
                             var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
                             mediaStream.AddTrack(audioConsumer.Track);
                             mediaStream.AddTrack(videoConsumer.Track);
+             ////mediaStream.AddTrack(_webcamProducer.Track);
                             _connectionContext.Observer.OnNext(new PeerResponse
                             {
                                 Type = PeerResponseType.PeerJoined,

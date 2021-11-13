@@ -200,9 +200,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         }
 
-        public Task<IRTCStatsReport> GetTransportStatsAsync()
+        public Task</*****IRTCStatsReport****/string> GetTransportStatsAsync()
         {
-            return _pc.GetStats();
+            ////return _pc.GetStats();
+            return _pc.GetStatsHack();
         }
 
         public async Task<HandlerSendResult> SendAsync(HandlerSendOptions options)

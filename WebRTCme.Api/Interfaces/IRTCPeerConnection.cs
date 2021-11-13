@@ -87,6 +87,13 @@ namespace WebRTCme
         Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription);
 
         Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription);
+
+
+
+
+        Task<string> GetStatsHack();
+
+
     }
 
 }
