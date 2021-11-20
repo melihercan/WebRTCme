@@ -1,8 +1,8 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
 
 	<PropertyGroup>
-    <!--<TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; MonoAndroid10.0; Xamarin.iOS10; net6.0-android; net6.0-ios; </TargetFrameworks>-->
-    <TargetFrameworks>netstandard2.0; netstandard2.1; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; MonoAndroid10.0; Xamarin.iOS10; net6.0-android; net6.0-ios; </TargetFrameworks>
+    <!--<TargetFrameworks>netstandard2.0; netstandard2.1; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>-->
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>9.0</LangVersion>		
@@ -36,15 +36,15 @@
     </ProjectReference>-->
     <Compile Include="Blazor\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.18" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.21" />
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="5.0.10" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="5.0.12" />
   </ItemGroup>
 
 
@@ -53,8 +53,8 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.18" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.21" />
   </ItemGroup>
 
 
@@ -63,25 +63,25 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
     </ProjectReference>
     <Compile Include="iOS\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.18" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.21" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
-      <PrivateAssets>All</PrivateAssets>
+      <!--<PrivateAssets>All</PrivateAssets>-->
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0-preview.3.21201.13" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0-android' ">
     <ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj">
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0-preview.3.21201.13" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0-ios' ">
@@ -89,8 +89,8 @@
     <ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj">
     </ProjectReference>
     <Compile Include="iOS\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0-preview.3.21201.13" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.0" />
   </ItemGroup>
 
 
