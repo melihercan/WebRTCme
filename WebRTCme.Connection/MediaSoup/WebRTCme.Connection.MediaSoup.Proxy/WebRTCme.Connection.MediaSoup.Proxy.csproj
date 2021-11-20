@@ -13,7 +13,6 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Externals\AJP.JsonElementExtensions\AJP.JsonElementExtensions.csproj" />
     <ProjectReference Include="..\..\..\Externals\SdpTransform\SdpTransform.csproj" />
     <ProjectReference Include="..\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
   </ItemGroup>
