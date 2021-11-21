@@ -1150,10 +1150,15 @@ namespace Utilme.SdpTransform
             foreach (var token in tokens)
             {
                 var subTokens = token.Split('=');
-                if (int.TryParse(subTokens[1], out int n))
-                    dictionary.Add(subTokens[0], n);
+                if (subTokens.Length == 1)
+                    dictionary.Add(subTokens[0], null);
                 else
-                    dictionary.Add(subTokens[0], subTokens[1]);
+                {
+                    if (int.TryParse(subTokens[1], out int n))
+                        dictionary.Add(subTokens[0], n);
+                    else
+                        dictionary.Add(subTokens[0], subTokens[1]);
+                }
             }
             return dictionary;
         }
