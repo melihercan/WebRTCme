@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; net6.0</TargetFrameworks>
+	  <!--<TargetFrameworks>net5.0; net6.0</TargetFrameworks>-->
+	  <!--<TargetFramework>net5.0</TargetFramework>-->
+    <TargetFramework>net6.0</TargetFramework>
 
-    <!-- Uncomment this if you deploy to Linux server to avoid: 
+	  <!-- Uncomment this if you deploy to Linux server to avoid: 
         "Failed to find a valid digest in the 'integrity' attribute for resource" issue for js or text files.
         It is due to CRLF differences: https://github.com/dotnet/aspnetcore/issues/19796 -->
     <!--BlazorCacheBootResources>false</BlazorCacheBootResources-->
