@@ -42,6 +42,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
         }
         public Dictionary<string, object> AppData { get; }
 
+        public IRTCDataChannel DataChannel => _dataChannel;
+
         public void Close()
         {
             if (Closed)

@@ -185,11 +185,22 @@ IMediaStream remMedia;
 
                 if (_produce)
                 {
-                    await Task.Delay(1000);
+                    ////await Task.Delay(1000);
+
+                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
+                        var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
+                        {
+                            Audio = new MediaStreamContraintsUnion { Value = true },
+                            Video = new MediaStreamContraintsUnion { Value = true }
+
+                        });
+
+
                         // Enable mic.
+                        var micTrack = mediaStream.GetAudioTracks()[0];
                         _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                         {
-                            Track = userContext.LocalStream.GetAudioTracks().First(),
+                            Track = micTrack, //// userContext.LocalStream.GetAudioTracks().First(),
                             Encodings = new RtpEncodingParameters[] { },
                             CodecOptions = new ProducerCodecOptions
                             {
@@ -199,14 +210,14 @@ IMediaStream remMedia;
                         });
 
                         // Enable webcam.
-                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
+////                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
                         //var videoInputDevices = (await mediaDevices.EnumerateDevices())
                         //    .Where(d => d.Kind == MediaDeviceInfoKind.VideoInput)
                         //    .ToArray();
 
-                        var webcamStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
-                        {
-                            Video = new MediaStreamContraintsUnion { Value = true }
+                        //var webcamStream =  await mediaDevices.GetUserMedia(new MediaStreamConstraints
+                        //{
+                          //  Video = new MediaStreamContraintsUnion { Value = true }
                             //Video = new MediaStreamContraintsUnion
                             //{
                             //    Object = new MediaTrackConstraints
@@ -235,10 +246,10 @@ IMediaStream remMedia;
 
                             //    }
                             //}
-                        }); ;
+                        //});
 
 ////                        var tracks = webcamStream.GetVideoTracks();
-                        var webcamTrack = webcamStream.GetVideoTracks()[0];
+                        var webcamTrack =  mediaStream.GetVideoTracks()[0]; ////webcamStream.GetVideoTracks()[0];
 
                         //var caps = webcamTrack.GetCapabilities();
                         //var constraints = webcamTrack.GetConstraints();
@@ -833,12 +844,24 @@ IMediaStream remMedia;
                     //// TODO: HOW TO DEREGISTER EVENTS???
                     void DataConsumer_OnOpen(object sender, EventArgs e)
                     {
-                        _logger.LogInformation($"-------> DataConsumer_OnOpen");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnOpen");
+                        if (dataConsumer.DataChannel.Label == "chat")
+                        {
+                            _connectionContext.Observer.OnNext(new PeerResponse
+                            {
+                                Type = PeerResponseType.PeerJoined,
+                                Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
+                                Name = dataConsumerRequestData.PeerId,//peer.Peer.DisplayName,
+                                MediaStream = null,
+                                DataChannel = dataConsumer.DataChannel
+                            });
+
+                        }
 
                     }
                     void DataConsumer_OnClose(object sender, EventArgs e)
                     {
-                        _logger.LogInformation($"-------> DataConsumer_OnClose");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnClose");
                         var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
                         peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
@@ -846,7 +869,7 @@ IMediaStream remMedia;
 
                     void DataConsumer_OnTransportClosed(object sender, EventArgs e)
                     {
-                        _logger.LogInformation($"-------> DataConsumer_OnTransportClosed");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnTransportClosed");
                         var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
                         peer.DataConsumerIds.Remove(dataConsumer.Id);
                         _dataConsumers.Remove(dataConsumer.Id);
@@ -855,12 +878,12 @@ IMediaStream remMedia;
 
                     void DataConsumer_OnError(object sender, IErrorEvent e)
                     {
-                        _logger.LogInformation($"-------> DataConsumer_OnError");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnError {e.Message}");
                     }
 
                     void DataConsumer_OnMessage(object sender, IMessageEvent e)
                     {
-                        _logger.LogInformation($"-------> DataConsumer_OnMessage");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnMessage");
                         throw new NotImplementedException();
                     }
 
