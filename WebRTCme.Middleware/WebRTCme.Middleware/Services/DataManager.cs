@@ -53,7 +53,7 @@ namespace WebRTCme.Middleware.Services
         {
             IRTCDataChannel dataChannel = null;
             IRTCDataChannel consumerDataChannel = null;
-            if (_peers is not null)
+            if (_peers.Count != 0)
                 dataChannel = _peers[peerUserName];
             else
                 consumerDataChannel = _consumerPeers[peerUserName];
@@ -68,7 +68,7 @@ namespace WebRTCme.Middleware.Services
             foreach (var peer in _peers)
             {
                 var peerUserName = peer.Key;
-                if (_peers is not null)
+                if (_peers.Count != 0)
                     dataChannel = _peers[peerUserName];
                 else
                     consumerDataChannel = _consumerPeers[peerUserName];
@@ -125,7 +125,7 @@ namespace WebRTCme.Middleware.Services
         {
             // TODO: ADD MUTEX OR LOCK????
 
-            if (_peers is not null)
+            if (_peers.Count != 0)
             {
                 var dataChannels = _peers.Select(p => p.Value);
                 foreach (var dataChannel in dataChannels)
