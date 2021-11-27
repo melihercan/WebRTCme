@@ -1,3 +1,10 @@
+# MEDIASOUP UPDATE 27 Nov 21
+Coming soon should have been faster than this but recently I am very busy with an ongoing project. Therefore I could spend time on this project only during weekends.
+Today I verified that the MediaSoup Blazor is working :). Here is the screenshot of 6 clients connected. 
+I would like to take more time to refactor the APIs considering that MediaSoup approach is different than peer to peer (mesh topology) WebRTC I already provided.
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/doc/MediaSoup_6Clients.JPEG)
+
+
 # COMING SOON NEW NUGETS
 I am actively working on this project to evolve this framework from demo level to production quality level. The upcoming improvements in the pipeline:
 - Bug fixes
