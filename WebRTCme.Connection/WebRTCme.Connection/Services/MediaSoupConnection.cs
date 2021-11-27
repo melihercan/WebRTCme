@@ -894,7 +894,6 @@ IMediaStream remMedia;
                     void DataConsumer_OnMessage(object sender, IMessageEvent e)
                     {
                         _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnMessage");
-                        throw new NotImplementedException();
                     }
 
                 default:
