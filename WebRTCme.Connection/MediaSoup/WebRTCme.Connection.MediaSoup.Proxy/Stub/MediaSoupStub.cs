@@ -29,9 +29,9 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         TaskCompletionSource<ProtooNotification> _tcsNotification;
         CancellationTokenSource _cts;
 
-        Channel<ProtooResponse> _responseChannel = Channel.CreateBounded<ProtooResponse>(4);
-        Channel<ProtooRequest> _requestChannel = Channel.CreateBounded<ProtooRequest>(4);
-        Channel<ProtooNotification> _notificationChannel = Channel.CreateBounded<ProtooNotification>(4);
+        Channel<ProtooResponse> _responseChannel = Channel.CreateBounded<ProtooResponse>(10);
+        Channel<ProtooRequest> _requestChannel = Channel.CreateBounded<ProtooRequest>(50);
+        Channel<ProtooNotification> _notificationChannel = Channel.CreateBounded<ProtooNotification>(10);
         Dictionary<uint, TaskCompletionSource<ProtooResponse>> _apiRequests = new();
 
 
