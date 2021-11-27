@@ -20,5 +20,12 @@ namespace WebRTCme.Connection
 
         public string ErrorMessage { get; init; }
 
+        //// TODO: NEW API WITH PRODUCERS AND CONSUMER LOGUC 
+        //// FOR NOW, THESE EXTRA DATA CHANNELS ARE DEFINED.
+        public IRTCDataChannel ProducerDataChannel { get; init; }
+
+        public IRTCDataChannel ConsumerDataChannel { get; init; }
+
+
     }
 }

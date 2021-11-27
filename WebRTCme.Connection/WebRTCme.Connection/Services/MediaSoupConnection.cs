@@ -853,11 +853,11 @@ IMediaStream remMedia;
                                 Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
                                 Name = dataConsumerRequestData.PeerId,//peer.Peer.DisplayName,
                                 MediaStream = null,
-                                DataChannel = dataConsumer.DataChannel
+                                DataChannel = null,
+                                ProducerDataChannel = _chatDataProducer.DataChannel,
+                                ConsumerDataChannel = dataConsumer.DataChannel
                             });
-
                         }
-
                     }
                     void DataConsumer_OnClose(object sender, EventArgs e)
                     {

@@ -11,7 +11,8 @@ namespace WebRTCme.Middleware
     {
         public ObservableCollection<DataParameters> DataParametersList { get; set; }
 
-        void AddPeer(string peerUserName, IRTCDataChannel dataChannel);
+        void AddPeer(string peerUserName, IRTCDataChannel dataChannel, IRTCDataChannel producerDataChannel = null,
+            IRTCDataChannel consumerDataChannel = null);
 
         void RemovePeer(string peerUserName);
 
