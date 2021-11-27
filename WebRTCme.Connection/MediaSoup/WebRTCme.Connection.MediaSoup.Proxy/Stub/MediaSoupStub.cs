@@ -30,6 +30,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
         CancellationTokenSource _cts;
 
         Channel<ProtooResponse> _responseChannel = Channel.CreateBounded<ProtooResponse>(10);
+        //// TODO: It seems media soup server is sending all available consumers and data consumers in a stream
+        /// of requests one after anohter. To avoid message overflow consider using unbounded channel!!!
         Channel<ProtooRequest> _requestChannel = Channel.CreateBounded<ProtooRequest>(50);
         Channel<ProtooNotification> _notificationChannel = Channel.CreateBounded<ProtooNotification>(10);
         Dictionary<uint, TaskCompletionSource<ProtooResponse>> _apiRequests = new();
