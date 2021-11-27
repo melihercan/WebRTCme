@@ -486,6 +486,16 @@ IMediaStream remMedia;
                                 }
                             });
 
+                            _connectionContext.Observer.OnNext(new PeerResponse
+                            {
+                                Type = PeerResponseType.ProducerDataChannel,
+                                Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
+                                Name = "DataProducer",// dataConsumerRequestData.PeerId,//peer.Peer.DisplayName,
+                                MediaStream = null,
+                                DataChannel = null,
+                                ProducerDataChannel = _chatDataProducer.DataChannel,
+                                ConsumerDataChannel = null
+                            });
                         }
                     }
                 }
@@ -849,12 +859,12 @@ IMediaStream remMedia;
                         {
                             _connectionContext.Observer.OnNext(new PeerResponse
                             {
-                                Type = PeerResponseType.PeerJoined,
+                                Type = PeerResponseType.ConsumerDataChannel,
                                 Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
                                 Name = dataConsumerRequestData.PeerId,//peer.Peer.DisplayName,
                                 MediaStream = null,
                                 DataChannel = null,
-                                ProducerDataChannel = _chatDataProducer.DataChannel,
+                                ProducerDataChannel = null,
                                 ConsumerDataChannel = dataConsumer.DataChannel
                             });
                         }

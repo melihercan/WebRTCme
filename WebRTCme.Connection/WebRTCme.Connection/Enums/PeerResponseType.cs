@@ -9,6 +9,9 @@ namespace WebRTCme.Connection
         PeerJoined,
         PeerLeft,
         PeerMedia,
-        PeerError
+        PeerError,
+
+        ProducerDataChannel,
+        ConsumerDataChannel,
     }
 }

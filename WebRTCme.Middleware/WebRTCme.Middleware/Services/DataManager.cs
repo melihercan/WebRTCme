@@ -22,7 +22,7 @@ namespace WebRTCme.Middleware.Services
         /*internal*/ private Dictionary<string/*PeerUserName*/, IRTCDataChannel> _peers = new();
 
         IRTCDataChannel _producerDataChannel;
-        Dictionary<string, IRTCDataChannel> _consumerPeers;
+        Dictionary<string, IRTCDataChannel> _consumerPeers = new();
 
         private Dictionary<(string peerUserName, Guid guid), Stream>
             _incomingFileStreamDispatcher = new();
@@ -43,7 +43,10 @@ namespace WebRTCme.Middleware.Services
         public void AddPeer(string peerUserName, IRTCDataChannel dataChannel, IRTCDataChannel producerDataChannel,
             IRTCDataChannel consumerDataChannel)
         {
-            AddOrRemovePeer(peerUserName, dataChannel, producerDataChannel, consumerDataChannel, isRemove: false);
+            if (producerDataChannel is not null)
+                _producerDataChannel = producerDataChannel;
+            else
+                AddOrRemovePeer(peerUserName, dataChannel, consumerDataChannel, isRemove: false);
         }
 
         public void RemovePeer(string peerUserName)
@@ -54,7 +57,7 @@ namespace WebRTCme.Middleware.Services
                 dataChannel = _peers[peerUserName];
             else
                 consumerDataChannel = _consumerPeers[peerUserName];
-            AddOrRemovePeer(peerUserName, dataChannel, _producerDataChannel, consumerDataChannel, isRemove: true);
+            AddOrRemovePeer(peerUserName, dataChannel, consumerDataChannel, isRemove: true);
         }
 
         public void ClearPeers()
@@ -69,9 +72,10 @@ namespace WebRTCme.Middleware.Services
                     dataChannel = _peers[peerUserName];
                 else
                     consumerDataChannel = _consumerPeers[peerUserName];
-                AddOrRemovePeer(peerUserName, dataChannel, _producerDataChannel, consumerDataChannel, isRemove: true);
+                AddOrRemovePeer(peerUserName, dataChannel, consumerDataChannel, isRemove: true);
             }
             _peers.Clear();
+            _consumerPeers.Clear();
             DataParametersList.Clear();
         }
 
@@ -134,8 +138,8 @@ namespace WebRTCme.Middleware.Services
         }
 
 
-        void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, IRTCDataChannel producerDataChannel,
-            IRTCDataChannel consumerDataChannel, bool isRemove)
+        void AddOrRemovePeer(string peerUserName, IRTCDataChannel dataChannel, IRTCDataChannel consumerDataChannel, 
+            bool isRemove)
         {
             if (isRemove)
             {

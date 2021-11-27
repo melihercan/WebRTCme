@@ -160,6 +160,15 @@ namespace WebRTCme.Middleware
 
                                 _dataManager.AddPeer(peerResponse.Name, dataChannel);
                             }
+                            //else
+                            //{
+                            //    var producerDataChannel = peerResponse.ProducerDataChannel;
+                            //    var consumerDataChannel = peerResponse.ConsumerDataChannel;
+                            //    Console.WriteLine($"--------------- ProducerDataChannel: {producerDataChannel.Label} " +
+                            //        $"state:{producerDataChannel.ReadyState}");
+
+                            //    _dataManager.AddPeer(peerResponse.Name, null, producerDataChannel, consumerDataChannel);
+                            //}
                             break;
 
                         case PeerResponseType.PeerLeft:
@@ -181,6 +190,14 @@ namespace WebRTCme.Middleware
                         case PeerResponseType.PeerMedia:
                             // Nothing to do on chat.
                             _logger.LogInformation($"************* APP PeerMedia");
+                            break;
+
+                        case PeerResponseType.ProducerDataChannel:
+                            _dataManager.AddPeer(peerResponse.Name, null, peerResponse.ProducerDataChannel, null);
+                            break;
+
+                        case PeerResponseType.ConsumerDataChannel:
+                            _dataManager.AddPeer(peerResponse.Name, null, null, peerResponse.ConsumerDataChannel);
                             break;
 
                     }
