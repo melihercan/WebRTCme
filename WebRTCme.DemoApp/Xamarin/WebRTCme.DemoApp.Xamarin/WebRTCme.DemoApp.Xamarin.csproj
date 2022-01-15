@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2244" />  
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2291" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />  
     <PackageReference Include="Xamarinme.Hosting" Version="1.0.3" />  
   </ItemGroup>

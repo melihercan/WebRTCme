@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.1" />
     <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.1" />
     <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
