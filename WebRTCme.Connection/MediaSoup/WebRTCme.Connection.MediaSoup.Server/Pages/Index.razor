@@ -1,7 +1,22 @@
 ﻿@page "/"
+@inject INodeJSService NodeJsService
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+<h1>WebRTCme MediaSoup server</h1>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await NodeJsService.InvokeFromFileAsync("./Scripts/mediaSoupServer", "runServer");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"EXCEPTION: {ex.Message}");
+        }
+
+        await base.OnInitializedAsync();
+    }
+}
