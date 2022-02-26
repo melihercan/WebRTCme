@@ -1,12 +1,12 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 
 	<PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; MonoAndroid10.0; Xamarin.iOS10 </TargetFrameworks>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; MonoAndroid12.0; Xamarin.iOS10 </TargetFrameworks>
 		<!--<TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; MonoAndroid10.0; Xamarin.iOS10; net6.0-android; net6.0-ios; </TargetFrameworks>-->
 		<!--<TargetFrameworks>netstandard2.0; netstandard2.1; net5; MonoAndroid10.0; Xamarin.iOS10; </TargetFrameworks>-->
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<LangVersion>9.0</LangVersion>		
+		<LangVersion>10.0</LangVersion>		
     <RootNamespace>WebRTCme</RootNamespace>		
     <Authors>melihercan</Authors>		
     <Description>WebRTC library for Xamarin Forms and Blazor applications with a single common API.</Description>		
@@ -36,7 +36,7 @@
     <!--<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
     </ProjectReference>-->
     <Compile Include="Blazor\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
     <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
   </ItemGroup>
 
@@ -44,8 +44,8 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj">
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
-    <PackageReference Include="Microsoft.JSInterop" Version="5.0.13" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+    <PackageReference Include="Microsoft.JSInterop" Version="5.0.14" />
   </ItemGroup>
 
 
@@ -54,7 +54,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
     <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
   </ItemGroup>
 
@@ -64,7 +64,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
     </ProjectReference>
     <Compile Include="iOS\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
     <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
   </ItemGroup>
 
@@ -73,8 +73,8 @@
       <!--<PrivateAssets>All</PrivateAssets>-->
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
-    <PackageReference Include="Microsoft.JSInterop" Version="6.0.1" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.2" />
   </ItemGroup>
 
   <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0-android' ">

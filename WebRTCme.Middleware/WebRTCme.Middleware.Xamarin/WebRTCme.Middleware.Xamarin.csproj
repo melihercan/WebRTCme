@@ -1,7 +1,7 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	
   <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid10.0; Xamarin.iOS10</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRTCme.Middleware.Xamarin</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -63,9 +63,9 @@
 
 
 	<ItemGroup>
-	  <PackageReference Include="Xamarin.CommunityToolkit" Version="1.3.2" />
-	  <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
-	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2291" />
+	  <PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.0" />
+	  <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2337" />
 	</ItemGroup>
 	
 	

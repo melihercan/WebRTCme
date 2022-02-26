@@ -32,5 +32,24 @@ namespace WebRTCme.Connection.MediaSoup
                 MediaType.Application => MediaKind.Application,
                 _ => throw new NotImplementedException()
             };
+
+        public static CandidateTransport ToSdp(this RTCIceProtocol protocol) =>
+            protocol switch
+            {
+                RTCIceProtocol.Udp => CandidateTransport.Udp,
+                RTCIceProtocol.Tcp => CandidateTransport.Tcp,
+                _ => throw new NotImplementedException(),
+            };
+
+        public static CandidateType ToSdp(this RTCIceCandidateType type) =>
+            type switch
+            {
+                RTCIceCandidateType.Host => CandidateType.Host,
+                RTCIceCandidateType.Srflx => CandidateType.Srflx,
+                RTCIceCandidateType.Prflx => CandidateType.Prflx,
+                RTCIceCandidateType.Relay => CandidateType.Relay,
+                _ => throw new NotImplementedException(),
+            };
+
     }
 }
