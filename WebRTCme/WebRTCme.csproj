@@ -37,7 +37,7 @@
     </ProjectReference>-->
     <Compile Include="Blazor\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.23" />
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
@@ -45,7 +45,7 @@
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="5.0.14" />
+    <PackageReference Include="Microsoft.JSInterop" Version="5.0.15" />
   </ItemGroup>
 
 
@@ -55,7 +55,7 @@
     </ProjectReference>
     <Compile Include="Android\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.23" />
   </ItemGroup>
 
 
@@ -65,7 +65,7 @@
     </ProjectReference>
     <Compile Include="iOS\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="3.1.22" />
+    <PackageReference Include="Microsoft.JSInterop" Version="3.1.23" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
@@ -74,7 +74,7 @@
     </ProjectReference>
     <Compile Include="Blazor\**\*.cs" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
-    <PackageReference Include="Microsoft.JSInterop" Version="6.0.2" />
+    <PackageReference Include="Microsoft.JSInterop" Version="6.0.3" />
   </ItemGroup>
 
   <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0-android' ">
