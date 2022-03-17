@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /WebRTCme.SignallingServer/appsettings.json
+/WebRTCme.Connection/MediaSoup/WebRTCme.Connection.MediaSoup.Server/package-lock.json

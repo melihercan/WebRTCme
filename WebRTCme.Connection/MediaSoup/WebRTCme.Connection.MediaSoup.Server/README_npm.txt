@@ -1,5 +1,5 @@
 WINDOWS REQUIRES THE FOLLOWING SETTINGS:
-- install node 
+- install latest node (64 bit)
 - install python27
 - vs2019 is required (2022 is not recognized in mediasoup build script!!!)
 - set following environmental variables
@@ -10,7 +10,8 @@ Hard coded values may require some changes based on your environment.
 
 To create node_modules, right click 'package.json' and select 'Restore Packages'.
 
-For some reason heapdump is reporting problems. To solve it run:
-'npm install heapdump' from command line.
+For some reason heapdump is reporting problems. To solve it:
+- remove node_modules\heapdump folder
+- then run 'npm install heapdump' from command line.
 
 
