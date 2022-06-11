@@ -29,12 +29,12 @@ dotnet dev-certs https -v --trust
 IIS EXPRESS INSTALLATION (SYSTEM)
 ---------------------------------
 # Install new certificate for IIS Express
-# Exporting cert to store
+# Importing cert to store
 - Key is required by IIS, so exporting CER file to LocalComputer\Personal will not work. Search "Manage computer certificates" and open it. 
   Right click on "Personal/Certificates" and import pfx file.
-- Export cer file to LocalComputer "Trusted Root Certificates Authorities".
+- Import crt file to LocalComputer "Trusted Root Certificates Authorities".
 
-certhash: (get it from Thumprint) ee607218eafba6e178482c7d475195b12ba7098e
+certhash: (get it from Thumprint) 54ee37f6d8ea85680fcebb336f7c9539b4036fce
 Application ID : {214124cd-d05b-4309-9af9-9caa44b2b74a}
 
 # Open administrative command window and go to "\Program Files (x86)\IIS Express".
@@ -45,7 +45,7 @@ netsh http show sslcert
 for /L %i in (44300,1,44399) do IisExpressAdminCmd.exe deleteSslUrl -url:https://localhost:%i/
 
 # add new certificates
-for /L %i in (44300,1,44399) do netsh http add sslcert ipport=0.0.0.0:%i certhash=ee607218eafba6e178482c7d475195b12ba7098e appid={214124cd-d05b-4309-9af9-9caa44b2b74a}
+for /L %i in (44300,1,44399) do netsh http add sslcert ipport=0.0.0.0:%i certhash=54ee37f6d8ea85680fcebb336f7c9539b4036fce appid={214124cd-d05b-4309-9af9-9caa44b2b74a}
 
 
 ANDROID INSTALLATION
