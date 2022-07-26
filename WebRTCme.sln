@@ -74,6 +74,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Maui", "Maui", "{13FA7562-5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Maui.iOS", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj", "{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Maui.Android", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj", "{75009AFA-7DA5-4A3D-AD02-C54455177C0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -342,6 +344,18 @@ Global
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhone.Build.0 = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhone.Build.0 = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -373,6 +387,7 @@ Global
 		{4A07FB39-D7D1-4B4D-941C-9A3D3D5C2CCD} = {4DEFC4B0-15A4-4687-B3AE-FD0C97E54F59}
 		{13FA7562-58C6-4156-A6E6-04C43CF0F0BA} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38} = {13FA7562-58C6-4156-A6E6-04C43CF0F0BA}
+		{75009AFA-7DA5-4A3D-AD02-C54455177C0F} = {13FA7562-58C6-4156-A6E6-04C43CF0F0BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FC3188C-A3C9-42FC-AF35-0CDCE91C707A}

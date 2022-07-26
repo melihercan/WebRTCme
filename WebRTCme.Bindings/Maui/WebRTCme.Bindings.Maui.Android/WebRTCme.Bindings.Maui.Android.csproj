@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <!--<Nullable>enable</Nullable>-->
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="Jars\AboutJars.txt" />
+	<None Include="Additions\AboutAdditions.txt" />
+	<LibraryProjectZip Include="Jars\libwebrtc.aar" />
+  </ItemGroup>
+
+</Project>
