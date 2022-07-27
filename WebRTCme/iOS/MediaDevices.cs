@@ -28,8 +28,11 @@ namespace WebRTCme.iOS
                     Kind = MediaDeviceInfoKind.VideoInput,
                     Label = device.LocalizedName
                 });
-
+#if XAMARINIOS
             var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Audio)
+#else
+            var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType("TODO: FIXME")
+#endif
                 .Select(device => new MediaDeviceInfo
                 {
                     DeviceId = device.UniqueID,

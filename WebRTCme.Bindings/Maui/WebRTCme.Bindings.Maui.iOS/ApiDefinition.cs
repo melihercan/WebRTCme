@@ -1097,7 +1097,7 @@ namespace Webrtc
     delegate void RTCFileVideoCapturerErrorBlock(NSError arg0);
 
     // @interface RTCFileVideoCapturer : RTCVideoCapturer
-    [iOS(10, 0)]
+    ////[iOS(10, 0)]
     [BaseType(typeof(RTCVideoCapturer))]
     interface RTCFileVideoCapturer
     {
@@ -1119,7 +1119,7 @@ namespace Webrtc
     }
 
     // @interface RTCMTLVideoView : UIView <RTCVideoRenderer>
-    [iOS(9, 0)]
+    ////[iOS(9, 0)]
     [BaseType(typeof(UIView))]
     [Protocol]
     interface RTCMTLVideoView : RTCVideoRenderer
