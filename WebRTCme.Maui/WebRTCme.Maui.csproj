@@ -1,6 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<!--<Project Sdk="Microsoft.NET.Sdk">-->
+<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 
-	<PropertyGroup>
+		<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
@@ -38,11 +39,11 @@
 		<!--<SingleProject>true</SingleProject>-->
 	</PropertyGroup>
 
-	<PropertyGroup Condition=" '$(TargetFramework)' == 'MonoAndroid'">
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'MonoAndroid12.0'">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS'">
+	<PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
