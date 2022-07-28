@@ -1,0 +1,109 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios</TargetFrameworks>
+		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>-->
+		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
+		<!--<UseMaui>true</UseMaui>
+		net5.0;netstandard2.0;netstandard2.1;MonoAndroid12.0;Xamarin.iOS10;-->
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<!--<LangVersion>latest</LangVersion>-->
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<!--<PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) ">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>-->
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<!--<EnableDefaultCompileItems>false</EnableDefaultCompileItems>-->
+		<!--<UseMaui>true</UseMaui>-->
+		<!--<SingleProject>true</SingleProject>-->
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'MonoAndroid'">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS'">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0-android'">
+		<UseMaui>true</UseMaui>
+		<!--<SingleProject>true</SingleProject>-->
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
+		<UseMaui>true</UseMaui>
+		<!--<SingleProject>true</SingleProject>-->
+	</PropertyGroup>
+
+	<!--<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>-->
+
+	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.0'))">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.1'))">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid12.0'">
+		<Compile Include="**\Android\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+		<Compile Include="**\iOS\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android'">
+		<Compile Include="**\Android\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
+		<Compile Include="**\iOS\**\*.cs" />
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<!--<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+	</ItemGroup>-->	
+
+</Project>

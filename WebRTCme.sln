@@ -72,9 +72,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Connection.Signali
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Maui", "Maui", "{13FA7562-58C6-4156-A6E6-04C43CF0F0BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Maui.iOS", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj", "{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.iOS", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj", "{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Maui.Android", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj", "{75009AFA-7DA5-4A3D-AD02-C54455177C0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.Android", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj", "{75009AFA-7DA5-4A3D-AD02-C54455177C0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Maui", "WebRTCme.Maui\WebRTCme.Maui.csproj", "{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -356,6 +358,18 @@ Global
 		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhone.Build.0 = Release|Any CPU
 		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{75009AFA-7DA5-4A3D-AD02-C54455177C0F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|iPhone.Build.0 = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
