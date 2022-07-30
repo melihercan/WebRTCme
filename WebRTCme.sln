@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme", "WebRTCme\WebRTCme.csproj", "{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin", "Xamarin", "{A779D425-8A47-4C76-B96B-C5F00E90C934}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.DemoApp", "WebRTCme.DemoApp", "{47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}"
@@ -76,7 +74,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.iOS"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.Android", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj", "{75009AFA-7DA5-4A3D-AD02-C54455177C0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Maui", "WebRTCme.Maui\WebRTCme.Maui.csproj", "{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme", "WebRTCme\WebRTCme.csproj", "{1FB7C2CA-A417-45FB-B316-7A9F31111EA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,18 +86,6 @@ Global
 		Release|iPhoneSimulator = Release|iPhoneSimulator
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|iPhone.Build.0 = Release|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{47CF7B0B-B7D4-48CC-86A1-68A52D059DF7}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78D9CB41-2BC4-4BB1-AA0B-68E141E64C10}.Debug|iPhone.ActiveCfg = Debug|Any CPU

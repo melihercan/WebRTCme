@@ -72,7 +72,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj">
 	  </ProjectReference>
-	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj">
+	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.ORG.csproj">
 	  </ProjectReference>
 	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
 	  </ProjectReference>
