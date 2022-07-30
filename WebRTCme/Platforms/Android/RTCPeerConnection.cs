@@ -1,16 +1,11 @@
 ﻿using Org.Webrtc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.PeerConnection.IObserver
+    internal class RTCPeerConnection : NativeBase<Webrtc.PeerConnection>, /*ApiBase,*/ IRTCPeerConnection, 
+        Webrtc.PeerConnection.IObserver
     {
         private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
         {
@@ -34,51 +29,39 @@ namespace WebRTCme.Android
             }
         }
 
-        public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
-            new RTCPeerConnection(configuration);
+        //public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
+        //    new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(RTCConfiguration configuration) //=> 
-        {
-            var x = configuration.ToNative();
-            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory
-                .CreatePeerConnection(x, this);
-        }
+        public RTCPeerConnection(RTCConfiguration configuration) : base() =>
+            NativeObject = WebRtc.NativePeerConnectionFactory.CreatePeerConnection(configuration.ToNative(), this);
 
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
-        public RTCPeerConnectionState ConnectionState =>
-            ((Webrtc.PeerConnection)NativeObject).ConnectionState().FromNative();
+        public RTCPeerConnectionState ConnectionState => NativeObject.ConnectionState().FromNative();
 
-        public RTCSessionDescriptionInit CurrentLocalDescription =>
-            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
+        public RTCSessionDescriptionInit CurrentLocalDescription => NativeObject.LocalDescription.FromNative();
 
-        public RTCSessionDescriptionInit CurrentRemoteDescription =>
-            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
+        public RTCSessionDescriptionInit CurrentRemoteDescription => NativeObject.RemoteDescription.FromNative();
 
-        public RTCIceConnectionState IceConnectionState =>
-            ((Webrtc.PeerConnection)NativeObject).InvokeIceConnectionState().FromNative();
+        public RTCIceConnectionState IceConnectionState => NativeObject.InvokeIceConnectionState().FromNative();
 
-        public RTCIceGatheringState IceGatheringState =>
-            ((Webrtc.PeerConnection)NativeObject).InvokeIceGatheringState().FromNative();
+        public RTCIceGatheringState IceGatheringState => NativeObject.InvokeIceGatheringState().FromNative();
 
-        public RTCSessionDescriptionInit LocalDescription =>
-            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
+        public RTCSessionDescriptionInit LocalDescription => NativeObject.LocalDescription.FromNative();
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
-        public RTCSessionDescriptionInit PendingLocalDescription =>
-            ((Webrtc.PeerConnection)NativeObject).LocalDescription.FromNative();
+        public RTCSessionDescriptionInit PendingLocalDescription => NativeObject.LocalDescription.FromNative();
 
-        public RTCSessionDescriptionInit PendingRemoteDescription =>
-            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
+        public RTCSessionDescriptionInit PendingRemoteDescription => NativeObject.RemoteDescription.FromNative();
 
-        public RTCSessionDescriptionInit RemoteDescription =>
-            ((Webrtc.PeerConnection)NativeObject).RemoteDescription.FromNative();
+        public RTCSessionDescriptionInit RemoteDescription => NativeObject.RemoteDescription.FromNative();
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
-        public RTCSignalingState SignalingState =>
-            ((Webrtc.PeerConnection)NativeObject).InvokeSignalingState().FromNative();
+        public RTCSignalingState SignalingState => NativeObject.InvokeSignalingState().FromNative();
+
+        object INativeObject.NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -96,40 +79,40 @@ namespace WebRTCme.Android
         {
             var x = candidate.ToNative();
             System.Diagnostics.Debug.WriteLine($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SET ICE: {x.AdapterType} {x.Sdp} {x.SdpMid} {x.SdpMLineIndex} {x.ServerUrl}");
-            ((Webrtc.PeerConnection)NativeObject).AddIceCandidate(x);
+            NativeObject.AddIceCandidate(x);
             return Task.CompletedTask;
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(((Webrtc.PeerConnection)NativeObject).AddTrack(
+            RTCRtpSender.Create(NativeObject.AddTrack(
                 track.NativeObject as Webrtc.MediaStreamTrack, new List<string> { stream.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
                     kind.ToNative()));
             else
-                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
                     kind.ToNative(), init.ToNative()));
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
                     (Webrtc.MediaStreamTrack)track.NativeObject));
             else
-                return RTCRtpTransceiver.Create(((Webrtc.PeerConnection)NativeObject).AddTransceiver(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
                     (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative()));
         }
 
-        public void Close() => ((Webrtc.PeerConnection)NativeObject).Close();
+        public void Close() => NativeObject.Close();
 
         public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.PeerConnection)NativeObject).CreateAnswer(
+            NativeObject.CreateAnswer(
                 new SdpObserverProxy(tcs), 
                 new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var answer = await tcs.Task;
@@ -139,12 +122,12 @@ namespace WebRTCme.Android
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
-                RTCDataChannel.Create(((Webrtc.PeerConnection)NativeObject).CreateDataChannel(label, options.ToNative()));
+                RTCDataChannel.Create(NativeObject.CreateDataChannel(label, options.ToNative()));
 
         public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.PeerConnection)NativeObject).CreateOffer(
+            NativeObject.CreateOffer(
                 new SdpObserverProxy(tcs), 
                 new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var offer = await tcs.Task;
@@ -169,11 +152,11 @@ namespace WebRTCme.Android
         }
 
         public IRTCRtpReceiver[] GetReceivers() =>
-            ((Webrtc.PeerConnection)NativeObject).Receivers
+            NativeObject.Receivers
                 .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
 
         public IRTCRtpSender[] GetSenders() =>
-            ((Webrtc.PeerConnection)NativeObject).Senders
+            NativeObject.Senders
                 .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
 
 
@@ -182,10 +165,9 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpTransceiver[] GetTransceivers()
-        =>
-        ((Webrtc.PeerConnection)NativeObject).Transceivers
-            .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
+        public IRTCRtpTransceiver[] GetTransceivers() =>
+            NativeObject.Transceivers
+                .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
         //{
         //    var list = new List<IRTCRtpTransceiver>();
@@ -203,7 +185,7 @@ namespace WebRTCme.Android
         //}
 
         public void RemoveTrack(IRTCRtpSender sender) =>
-            ((Webrtc.PeerConnection)NativeObject).RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
+            NativeObject.RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
 
         public void RestartIce()
         {
@@ -211,7 +193,7 @@ namespace WebRTCme.Android
         }
 
         public void SetConfiguration(RTCConfiguration configuration) =>
-            ((Webrtc.PeerConnection)NativeObject).SetConfiguration(configuration.ToNative());
+            NativeObject.SetConfiguration(configuration.ToNative());
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {
@@ -221,7 +203,7 @@ namespace WebRTCme.Android
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            ((Webrtc.PeerConnection)NativeObject).SetLocalDescription(
+            NativeObject.SetLocalDescription(
                 new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
