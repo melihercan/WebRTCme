@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCRtpSender : ApiBase, IRTCRtpSender
+    internal class RTCRtpSender : NativeBase<Webrtc.IRTCRtpSender>, IRTCRtpSender
     {
         public static IRTCRtpSender Create(Webrtc.IRTCRtpSender nativeRtpSender) => new RTCRtpSender(nativeRtpSender);
 

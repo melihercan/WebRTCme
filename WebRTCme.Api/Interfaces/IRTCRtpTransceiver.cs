@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpTransceiver : INativeObject 
+    public interface IRTCRtpTransceiver : IDisposable // INativeObject 
     {
         RTCRtpTransceiverDirection CurrentDirection { get; }
 

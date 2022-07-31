@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCDataChannelEvent : INativeObject
+    public interface IRTCDataChannelEvent : IDisposable // INativeObject
     {
         IRTCDataChannel Channel { get; }
     }

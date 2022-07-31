@@ -10,14 +10,15 @@ using Xamarin.Essentials;
 using Webrtc = Org.Webrtc;
 using Android.Media;
 using Android.Hardware.Camera2;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class MediaDevices : ApiBase, IMediaDevices
+    internal class MediaDevices : NativeBase<object>, IMediaDevices
     {
         public static IMediaDevices Create() => new MediaDevices();
 
-        private MediaDevices() { }
+        public MediaDevices() { }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 
@@ -93,5 +94,10 @@ namespace WebRTCme.Android
 
         public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
             Task.FromResult(MediaStream.Create(constraints));
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

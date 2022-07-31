@@ -11,7 +11,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCDataChannel : ApiBase, IRTCDataChannel
+    internal class RTCDataChannel : NativeBase, IRTCDataChannel
     {
         public static IRTCDataChannel Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDataChannel) =>
             new RTCDataChannel(jsRuntime, jsObjectRefDataChannel);

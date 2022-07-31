@@ -2,7 +2,7 @@
 
 namespace WebRTCme
 {
-    public interface IRTCDtlsTransport : INativeObject
+    public interface IRTCDtlsTransport : IDisposable // INativeObject
     {
         IRTCIceTransport IceTransport { get; }
 

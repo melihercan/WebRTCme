@@ -10,7 +10,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class Blob : ApiBase, IBlob
+    internal class Blob : NativeBase, IBlob
     {
         //public static IBlob Create(IJSRuntime jsRuntime, byte[] array, BlobPropertyBag options)
         //{

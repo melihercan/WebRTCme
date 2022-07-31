@@ -10,7 +10,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCIdentityAssertion : ApiBase, IRTCIdentityAssertion
+    internal class RTCIdentityAssertion : NativeBase, IRTCIdentityAssertion
     {
         internal static IRTCIdentityAssertion Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefIdentityAssertion) => 
             new RTCIdentityAssertion(jsRuntime, jsObjectRefIdentityAssertion);

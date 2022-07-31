@@ -2,15 +2,16 @@
 using System;
 using WebRTCme;
 using System.Threading.Tasks;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCRtpSender : ApiBase, IRTCRtpSender
+    internal class RTCRtpSender : NativeBase<Webrtc.RtpSender>, IRTCRtpSender
     {
         internal static IRTCRtpSender Create(Webrtc.RtpSender nativeRtpSender) =>
             new RTCRtpSender(nativeRtpSender);
 
-        private RTCRtpSender(Webrtc.RtpSender nativeRtpSender) : base(nativeRtpSender)
+        public RTCRtpSender(Webrtc.RtpSender nativeRtpSender) : base(nativeRtpSender)
         {
         }
 

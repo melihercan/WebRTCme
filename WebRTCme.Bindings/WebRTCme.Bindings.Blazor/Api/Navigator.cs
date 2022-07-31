@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class Navigator : ApiBase, INavigator
+    internal class Navigator : NativeBase, INavigator
     {
         public static INavigator Create(IJSRuntime jsRuntime) =>
             new Navigator(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator"));

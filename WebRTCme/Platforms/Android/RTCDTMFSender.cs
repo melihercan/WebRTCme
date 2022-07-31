@@ -1,17 +1,18 @@
 ﻿using Org.Webrtc;
 using System;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
+    internal class RTCDTMFSender : NativeBase<Webrtc.DtmfSender>, IRTCDTMFSender
     {
 
         public static IRTCDTMFSender Create(Webrtc.DtmfSender nativeDtmfSender) =>
             new RTCDTMFSender(nativeDtmfSender);
 
-        private RTCDTMFSender(DtmfSender nativeDtmfSender) : base(nativeDtmfSender)
+        public RTCDTMFSender(DtmfSender nativeDtmfSender) : base(nativeDtmfSender)
         {
         }
 

@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCIceTransport : ApiBase, IRTCIceTransport
+    internal class RTCIceTransport : NativeBase, IRTCIceTransport
     {
         public static IRTCIceTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) =>
             new RTCIceTransport(jsRuntime, jsObjectRefRtcStatsReport);

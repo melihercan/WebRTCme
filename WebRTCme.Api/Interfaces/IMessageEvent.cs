@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMessageEvent
+    public interface IMessageEvent : IDisposable
     {
         object Data { get; }
 

@@ -8,7 +8,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCStatsReport : ApiBase, IRTCStatsReport
+    internal class RTCStatsReport : NativeBase, IRTCStatsReport
     {
         internal static IRTCStatsReport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new RTCStatsReport(jsRuntime, jsObjectRefRtcStatsReport);

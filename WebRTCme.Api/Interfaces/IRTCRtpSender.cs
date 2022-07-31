@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpSender : INativeObject
+    public interface IRTCRtpSender : IDisposable // INativeObject
     {
         IRTCDTMFSender Dtmf { get; }
 

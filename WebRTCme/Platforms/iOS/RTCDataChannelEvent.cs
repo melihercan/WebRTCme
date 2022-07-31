@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
+    internal class RTCDataChannelEvent : NativeBase<Webrtc.RTCDataChannel>, IRTCDataChannelEvent
     {
         private readonly Webrtc.RTCDataChannel _nativeDataChannel;
 

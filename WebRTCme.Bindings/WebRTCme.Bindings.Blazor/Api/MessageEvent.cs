@@ -8,7 +8,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class MessageEvent : ApiBase, IMessageEvent
+    internal class MessageEvent : NativeBase, IMessageEvent
     {
         public static IMessageEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new MessageEvent(jsRuntime, jsObjectRefRtcStatsReport);

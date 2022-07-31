@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCRtpTransceiver : ApiBase, IRTCRtpTransceiver
+    internal class RTCRtpTransceiver : NativeBase, IRTCRtpTransceiver
     {
         public static IRTCRtpTransceiver Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpTransceiver) =>
             new RTCRtpTransceiver(jsRuntime, jsObjectRefRtpTransceiver);

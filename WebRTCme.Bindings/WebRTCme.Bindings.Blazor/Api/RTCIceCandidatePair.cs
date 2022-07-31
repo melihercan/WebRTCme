@@ -10,7 +10,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCIceCandidatePair : ApiBase, IRTCIceCandidatePair
+    internal class RTCIceCandidatePair : NativeBase, IRTCIceCandidatePair
     {
         public static IRTCIceCandidatePair Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) =>
             new RTCIceCandidatePair(jsRuntime, jsObjectRefRtcStatsReport);

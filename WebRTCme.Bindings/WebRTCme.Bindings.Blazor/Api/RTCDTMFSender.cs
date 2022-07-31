@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
+    internal class RTCDTMFSender : NativeBase, IRTCDTMFSender
     {
 
         internal static IRTCDTMFSender Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDTMFSender) => 

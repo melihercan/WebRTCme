@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace WebRTCme
 {
-    public interface IRTCStatsReport : INativeObject
+    public interface IRTCStatsReport : IDisposable // INativeObject
     {
         /////////////////////////////// TODO; CHANGE
         /// Call to this function returns RTCStatsReport but itr does not reveal yhe following entries directly.

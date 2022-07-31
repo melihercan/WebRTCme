@@ -8,7 +8,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class MediaRecorder : ApiBase, IMediaRecorder
+    internal class MediaRecorder : NativeBase, IMediaRecorder
     {
         //// TODO: REFACTOR WHOLE BLAZOR API BY USING System.Private.Runtime.InteropServices.JavaScript and use HostObject.
         //private readonly JSObject _jsObjectMediaRecorder;

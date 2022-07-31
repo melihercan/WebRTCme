@@ -21,7 +21,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public IRTCRtpReceiver Receiver 
         {
             get => RTCRtpReceiver.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "receiver"));
-            set => SetNativeProperty("receiver", value.NativeObject);
+            set => SetNativeProperty("receiver", ((RTCRtpReceiver)value).NativeObject);
         }
         
         public IMediaStream[] Streams 
@@ -48,7 +48,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public IRTCRtpTransceiver Transceiver 
         {
             get => RTCRtpTransceiver.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transceiver"));
-            set => SetNativeProperty("transceiver", value.NativeObject);
+            set => SetNativeProperty("transceiver", ((RTCRtpReceiver)value).NativeObject);
         }
     }
 }

@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class ErrorEvent : ApiBase, IErrorEvent
+    internal class ErrorEvent : NativeBase, IErrorEvent
     {
         public static IErrorEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new ErrorEvent(jsRuntime, jsObjectRefRtcStatsReport);

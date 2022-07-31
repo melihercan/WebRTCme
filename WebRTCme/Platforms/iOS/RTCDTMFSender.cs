@@ -1,9 +1,10 @@
 ﻿using System;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCDTMFSender : ApiBase, IRTCDTMFSender
+    internal class RTCDTMFSender : NativeBase<Webrtc.IRTCDtmfSender>, IRTCDTMFSender
     {
         public static IRTCDTMFSender Create(Webrtc.IRTCDtmfSender nativeDtmfSender) =>
             new RTCDTMFSender(nativeDtmfSender);

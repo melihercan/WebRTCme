@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCDataChannel : ApiBase, IRTCDataChannel, Webrtc.IRTCDataChannelDelegate
+    internal class RTCDataChannel : NativeBase<Webrtc.RTCDataChannel>, IRTCDataChannel, Webrtc.IRTCDataChannelDelegate
     {
         public static IRTCDataChannel Create(Webrtc.RTCDataChannel nativeDataChannel) => 
             new RTCDataChannel(nativeDataChannel);

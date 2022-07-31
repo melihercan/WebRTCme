@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCDTMFSender : INativeObject
+    public interface IRTCDTMFSender : IDisposable // INativeObject
     {
         string ToneBuffer { get; }
 

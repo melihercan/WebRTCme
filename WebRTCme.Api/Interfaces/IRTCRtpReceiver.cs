@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCRtpReceiver : INativeObject
+    public interface IRTCRtpReceiver : IDisposable // INativeObject
     {
         IMediaStreamTrack Track { get; }
 

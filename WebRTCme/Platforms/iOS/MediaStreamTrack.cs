@@ -6,10 +6,11 @@ using UIKit;
 using AVFoundation;
 using System.Linq;
 using System.Threading.Tasks;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
+    internal class MediaStreamTrack : NativeBase<Webrtc.RTCMediaStreamTrack>, IMediaStreamTrack
     {
         const string Audio = "audio";
         const string Video = "video";
@@ -42,11 +43,8 @@ namespace WebRTCme.iOS
             return new MediaStreamTrack(nativeMediaStreamTrack);
         }
 
-        private MediaStreamTrack(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
+        public MediaStreamTrack(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
         { }
-
-
-
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

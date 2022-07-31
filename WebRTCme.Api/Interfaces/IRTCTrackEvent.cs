@@ -1,9 +1,10 @@
-﻿using System.Dynamic;
+﻿using System;
+using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCTrackEvent : INativeObject
+    public interface IRTCTrackEvent : IDisposable // INativeObject
     {
         IRTCRtpReceiver Receiver { get; }
 

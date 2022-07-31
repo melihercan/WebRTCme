@@ -6,10 +6,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCIceCandidate : ApiBase, IRTCIceCandidate
+    internal class RTCIceCandidate : NativeBase<Webrtc.RTCIceCandidate>, IRTCIceCandidate
     {
         public static IRTCIceCandidate Create(Webrtc.RTCIceCandidate nativeIceCandidate) =>
             new RTCIceCandidate(nativeIceCandidate);

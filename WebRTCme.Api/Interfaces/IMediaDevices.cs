@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IMediaDevices : INativeObject
+    public interface IMediaDevices : IDisposable // INativeObject
     {
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 

@@ -10,7 +10,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    public class Window : ApiBase, IWindow
+    public class Window : NativeBase, IWindow
     {
         public static IWindow Create(IJSRuntime jsRuntime) =>
             new Window(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", null));

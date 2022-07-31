@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IMediaRecorder : INativeObject
+    public interface IMediaRecorder : IDisposable // INativeObject
     {
         string MimeType { get; } 
         

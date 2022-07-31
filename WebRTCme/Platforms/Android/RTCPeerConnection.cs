@@ -196,7 +196,7 @@ namespace WebRTCme.Android
          */
 
         public void RemoveTrack(IRTCRtpSender sender) =>
-            NativeObject.RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
+            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.RtpSender);
 
 
         public void RestartIce()

@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCPeerConnectionIceEvent : ApiBase, IRTCPeerConnectionIceEvent
+    internal class RTCPeerConnectionIceEvent : NativeBase, IRTCPeerConnectionIceEvent
     {
         public static IRTCPeerConnectionIceEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) =>
             new RTCPeerConnectionIceEvent(jsRuntime, jsObjectRef);

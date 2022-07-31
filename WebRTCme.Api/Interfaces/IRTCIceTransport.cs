@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WebRTCme
 {
-    public interface IRTCIceTransport : INativeObject
+    public interface IRTCIceTransport : IDisposable // INativeObject
     {
         RTCIceComponent Component { get; }
 

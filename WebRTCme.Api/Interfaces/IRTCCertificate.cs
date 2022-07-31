@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCCertificate : INativeObject
+    public interface IRTCCertificate : IDisposable // INativeObject
     {
         ulong Expires { get; }
     }

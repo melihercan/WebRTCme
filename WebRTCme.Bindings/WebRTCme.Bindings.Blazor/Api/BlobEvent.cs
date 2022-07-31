@@ -7,7 +7,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class BlobEvent : ApiBase, IBlobEvent
+    internal class BlobEvent : NativeBase, IBlobEvent
     {
         public static IBlobEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeBlobEvent) =>
             new BlobEvent(jsRuntime, jsObjectRefNativeBlobEvent);

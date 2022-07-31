@@ -4,15 +4,16 @@ using WebRTCme;
 using Org.Webrtc;
 using System.Linq;
 using System.Text.Json;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCIceCandidate : ApiBase, IRTCIceCandidate
+    internal class RTCIceCandidate : NativeBase<Webrtc.IceCandidate>, IRTCIceCandidate
     {
         public static IRTCIceCandidate Create(Webrtc.IceCandidate nativeIceCandidate) =>
             new RTCIceCandidate(nativeIceCandidate);
 
-        private RTCIceCandidate(IceCandidate nativeIceCandidate) : base(nativeIceCandidate)
+        public RTCIceCandidate(IceCandidate nativeIceCandidate) : base(nativeIceCandidate)
         {
         }
 

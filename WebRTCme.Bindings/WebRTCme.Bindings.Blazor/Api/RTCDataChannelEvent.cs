@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
+    internal class RTCDataChannelEvent : NativeBase, IRTCDataChannelEvent
     {
         public static IRTCDataChannelEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new RTCDataChannelEvent(jsRuntime, jsObjectRefRtcStatsReport);

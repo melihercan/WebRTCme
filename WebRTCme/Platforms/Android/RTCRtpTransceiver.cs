@@ -2,10 +2,11 @@
 using System;
 using WebRTCme;
 using Org.Webrtc;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCRtpTransceiver : ApiBase, IRTCRtpTransceiver
+    internal class RTCRtpTransceiver : NativeBase<Webrtc.RtpTransceiver>, IRTCRtpTransceiver
     {
 
         public static IRTCRtpTransceiver Create(Webrtc.RtpTransceiver nativeTransceiver) =>

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class Window : ApiBase, IWindow
+    internal class Window : NativeBase<object>, IWindow
     {
         public static IWindow Create() => new Window();
 
@@ -19,6 +20,11 @@ namespace WebRTCme.Android
             new Android.RTCPeerConnection(configuration);
 
         public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
         {
             throw new NotImplementedException();
         }

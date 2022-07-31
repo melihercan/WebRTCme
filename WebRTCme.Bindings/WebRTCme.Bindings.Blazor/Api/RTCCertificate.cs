@@ -11,7 +11,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCCertificate : ApiBase, IRTCCertificate
+    internal class RTCCertificate : NativeBase, IRTCCertificate
     {
         public static IRTCCertificate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefCertificate) => 
             new RTCCertificate(jsRuntime, jsObjectRefCertificate);

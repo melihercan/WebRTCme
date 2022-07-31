@@ -42,7 +42,7 @@ namespace WebRTCme.Android
                 nativeConfiguration.BundlePolicy = configuration.BundlePolicy?.ToNative();
             if (configuration.Certificates is not null)
                 nativeConfiguration.Certificate = (Webrtc.RtcCertificatePem)
-                    (configuration.Certificates?.ElementAt(0).NativeObject);
+                    ((RTCCertificate)configuration.Certificates?.ElementAt(0)).NativeObject;
             if (configuration.IceCandidatePoolSize.HasValue)
                 nativeConfiguration.IceCandidatePoolSize = (int)configuration.IceCandidatePoolSize;
             if (configuration.IceTransportPolicy.HasValue)

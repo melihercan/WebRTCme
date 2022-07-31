@@ -1,17 +1,18 @@
 ﻿using System;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class RTCDataChannelEvent : ApiBase, IRTCDataChannelEvent
+    internal class RTCDataChannelEvent : NativeBase<Webrtc.DataChannel>, IRTCDataChannelEvent
     {
         private readonly Webrtc.DataChannel _nativeDataChannel;
 
         public static IRTCDataChannelEvent Create(Webrtc.DataChannel nativeDataChannel) =>
             new RTCDataChannelEvent(nativeDataChannel);
 
-        private RTCDataChannelEvent(Webrtc.DataChannel nativeDataChannel)
+        public RTCDataChannelEvent(Webrtc.DataChannel nativeDataChannel)
         {
             _nativeDataChannel = nativeDataChannel;
         }

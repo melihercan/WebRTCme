@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class Window : ApiBase, IWindow
+    internal class Window : NativeBase<object>, IWindow
     {
         public static IWindow Create() => new Window();
 

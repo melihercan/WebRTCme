@@ -11,7 +11,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCDtlsTransport : ApiBase, IRTCDtlsTransport
+    internal class RTCDtlsTransport : NativeBase, IRTCDtlsTransport
     {
         public static IRTCDtlsTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDtlsTransport) => 
             new RTCDtlsTransport(jsRuntime, jsObjectRefDtlsTransport);

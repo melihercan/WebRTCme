@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class MediaStreamTrackEvent : ApiBase, IMediaStreamTrackEvent
+    internal class MediaStreamTrackEvent : NativeBase, IMediaStreamTrackEvent
     {
 
         public static IMediaStreamTrackEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 

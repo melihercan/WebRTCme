@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCPeerConnectionIceEvent : ApiBase, IRTCPeerConnectionIceEvent
+    internal class RTCPeerConnectionIceEvent : NativeBase<Webrtc.RTCIceCandidate>, IRTCPeerConnectionIceEvent
     {
         private readonly Webrtc.RTCIceCandidate _nativeIceCandidate;
 

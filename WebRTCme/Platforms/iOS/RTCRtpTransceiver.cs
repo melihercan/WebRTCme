@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCRtpTransceiver : ApiBase, IRTCRtpTransceiver
+    internal class RTCRtpTransceiver : NativeBase<Webrtc.IRTCRtpTransceiver>, IRTCRtpTransceiver
     {
         public static IRTCRtpTransceiver Create(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) => 
             new RTCRtpTransceiver(nativeRtpTransceiver);

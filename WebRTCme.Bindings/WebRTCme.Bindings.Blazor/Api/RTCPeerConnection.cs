@@ -230,7 +230,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         }
 
         public void RemoveTrack(IRTCRtpSender sender) => JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack",
-            sender.NativeObject);
+            ((RTCRtpSender)sender).NativeObject);
 
         public void RestartIce() => JsRuntime.CallJsMethodVoid(NativeObject, "restartIce");
 

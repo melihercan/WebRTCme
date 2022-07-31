@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class MediaStreamTrack : ApiBase, IMediaStreamTrack
+    internal class MediaStreamTrack : NativeBase<Webrtc.MediaStreamTrack>, IMediaStreamTrack
     {
         const string Audio = "audio";
         const string Video = "video";
@@ -51,7 +52,7 @@ namespace WebRTCme.Android
             return new MediaStreamTrack(nativeMediaStreamTrack);
         }
 
-        private MediaStreamTrack(Webrtc.MediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
+        public MediaStreamTrack(Webrtc.MediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
         { }
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

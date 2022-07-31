@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCTrackEvent : ApiBase, IRTCTrackEvent
+    internal class RTCTrackEvent : NativeBase<Webrtc.RTCMediaStreamTrack>, IRTCTrackEvent
     {
         private readonly Webrtc.RTCMediaStreamTrack _nativeTrack;
 

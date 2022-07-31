@@ -1,10 +1,11 @@
 ﻿using Webrtc = Org.Webrtc;
 using System;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCCertificate : ApiBase, IRTCCertificate
+    internal class RTCCertificate : NativeBase<Webrtc.RtcCertificatePem>, IRTCCertificate
     {
 
         public static IRTCCertificate Create(Webrtc.RtcCertificatePem nativeCertificatePem) =>

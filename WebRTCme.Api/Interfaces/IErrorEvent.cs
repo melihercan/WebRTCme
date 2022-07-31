@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IErrorEvent : INativeObject
+    public interface IErrorEvent : IDisposable // INativeObject
     {
         string Message { get; }
 

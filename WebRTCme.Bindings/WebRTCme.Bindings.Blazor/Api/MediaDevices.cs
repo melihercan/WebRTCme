@@ -9,7 +9,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class MediaDevices : ApiBase, IMediaDevices
+    internal class MediaDevices : NativeBase, IMediaDevices
     {
         public static IMediaDevices Create(IJSRuntime jsRuntime) =>
             new MediaDevices(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator.mediaDevices"));

@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCCertificate : ApiBase, IRTCCertificate
+    internal class RTCCertificate : NativeBase<Webrtc.RTCCertificate>, IRTCCertificate
     {
 
         public static IRTCCertificate Create(Webrtc.RTCCertificate nativeCertificate) => 
             new RTCCertificate(nativeCertificate);
 
-        private RTCCertificate(Webrtc.RTCCertificate nativeCertificate) : base(nativeCertificate)
+        public RTCCertificate(Webrtc.RTCCertificate nativeCertificate) : base(nativeCertificate)
         {
         }
 

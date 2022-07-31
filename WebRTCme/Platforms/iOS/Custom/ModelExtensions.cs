@@ -17,7 +17,7 @@ namespace WebRTCme.iOS
                 nativeConfiguration.BundlePolicy = ((RTCBundlePolicy)configuration.BundlePolicy).ToNative();
             if (configuration.Certificates is not null)
                 nativeConfiguration.Certificate = (Webrtc.RTCCertificate)
-                    (configuration.Certificates?.ElementAt(0).NativeObject);
+                    ((RTCCertificate)configuration.Certificates?.ElementAt(0)).NativeObject;
             if (configuration.IceCandidatePoolSize.HasValue)
                 nativeConfiguration.IceCandidatePoolSize = (int)configuration.IceCandidatePoolSize;
             nativeConfiguration.IceServers = iceServers.Select(server => server.ToNative()).ToArray();

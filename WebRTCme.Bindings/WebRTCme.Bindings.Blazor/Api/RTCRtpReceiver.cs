@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCRtpReceiver : ApiBase, IRTCRtpReceiver
+    internal class RTCRtpReceiver : NativeBase, IRTCRtpReceiver
     {
         internal static IRTCRtpReceiver Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpReceiver) => 
             new RTCRtpReceiver(jsRuntime, jsObjectRefRtpReceiver);

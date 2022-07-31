@@ -3,10 +3,11 @@ using System;
 using WebRTCme;
 using Org.Webrtc;
 using System.Linq;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCTrackEvent : ApiBase, IRTCTrackEvent
+    internal class RTCTrackEvent : NativeBase<Webrtc.RtpReceiver>, IRTCTrackEvent
     {
         private readonly Webrtc.RtpReceiver _nativeRtpReceiver;
         private readonly Webrtc.MediaStream[] _nativeMediaStreams;

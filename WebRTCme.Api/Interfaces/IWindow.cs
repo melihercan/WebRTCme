@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IWindow : INativeObject
+    public interface IWindow : IDisposable // INativeObject
     {
         INavigator Navigator();
 

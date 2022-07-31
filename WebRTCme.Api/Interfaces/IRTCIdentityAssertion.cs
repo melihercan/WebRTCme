@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public interface IRTCIdentityAssertion : INativeObject
+    public interface IRTCIdentityAssertion : IDisposable // INativeObject
     {
         string Idp { get; set; }
         

@@ -6,7 +6,7 @@ using WebRTCme.Bindings.Blazor.Interops;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class DOMException : ApiBase, IDOMException
+    internal class DOMException : NativeBase, IDOMException
     {
         public static IDOMException Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeDomException) =>
             new DOMException(jsRuntime, jsObjectRefNativeDomException);

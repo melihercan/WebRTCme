@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 using System.Linq;
 using CoreAudioKit;
 using AudioUnit;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class MediaDevices : ApiBase, IMediaDevices
+    internal class MediaDevices : NativeBase<object>, IMediaDevices
     {
         public static IMediaDevices Create() => new MediaDevices();
 
-        private MediaDevices() { }
+        public MediaDevices() { }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 

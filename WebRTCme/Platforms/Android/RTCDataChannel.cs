@@ -3,15 +3,16 @@ using System;
 using WebRTCme;
 using Org.Webrtc;
 using System.Text;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCDataChannel : ApiBase, IRTCDataChannel, Webrtc.DataChannel.IObserver
+    internal class RTCDataChannel : NativeBase<Webrtc.DataChannel>, IRTCDataChannel, Webrtc.DataChannel.IObserver
     {
         public static IRTCDataChannel Create(Webrtc.DataChannel nativeDataChannel) =>
             new RTCDataChannel(nativeDataChannel);
 
-        private RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
+        public RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
         {
             nativeDataChannel.RegisterObserver(this);
         }

@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using WebRTCme;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class MessageEvent : ApiBase, IMessageEvent
+    internal class MessageEvent : NativeBase<object>, IMessageEvent
     {
         public static IMessageEvent Create(object data) =>
             new MessageEvent(data);
 
-        private MessageEvent(object data) : base(data) { }
+        public MessageEvent(object data) : base(data) { }
 
         public object Data => NativeObject;
 
