@@ -12,25 +12,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class Blob : NativeBase, IBlob
     {
-        //public static IBlob Create(IJSRuntime jsRuntime, byte[] array, BlobPropertyBag options)
-        //{
-        //    var jsObjectRef = jsRuntime.CreateJsObject("window", "Blob", array, options);
-        //    return new Blob(jsRuntime, jsObjectRef);
-        //}
-
-
-        //public static IBlob Create(IJSRuntime jsRuntime, string[] array, BlobPropertyBag options)
-        //{
-        //    var jsObjectRef = jsRuntime.CreateJsObject("window", "Blob", array, options);
-        //    return new Blob(jsRuntime, jsObjectRef);
-        //}
-
-        public static IBlob Create(IJSRuntime jsRuntime, JsObjectRef nativeBlobJsObjectRef)
-        {
-            return new Blob(jsRuntime, nativeBlobJsObjectRef);
-        }
-
-        private Blob(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
+        public Blob(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
         { 
         }
 
@@ -59,7 +41,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         {
             if (end == 0) 
                 end = Size;
-            return Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "slice", start, end, contentType));
+            return new Blob(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "slice", start, end, contentType));
         }
 
         public async Task<string> Text()

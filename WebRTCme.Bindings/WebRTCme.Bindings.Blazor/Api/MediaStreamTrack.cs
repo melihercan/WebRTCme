@@ -11,10 +11,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class MediaStreamTrack : NativeBase, IMediaStreamTrack
     {
-        public static IMediaStreamTrack Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStreamTrack) =>
-            new MediaStreamTrack(jsRuntime, jsObjectRefMediaStreamTrack);
-            
-        private MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public MediaStreamTrack(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListener("ended", (s, e) => OnEnded?.Invoke(s, e));
             AddNativeEventListener("mute", (s, e) => OnMute?.Invoke(s, e));
@@ -55,7 +52,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             JsRuntime.InvokeVoidAsync("applyConstraints", contraints).AsTask();
 
         public IMediaStreamTrack Clone() =>
-            Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
+            new MediaStreamTrack(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
         public MediaTrackCapabilities GetCapabilities() =>
             JsRuntime.CallJsMethod<MediaTrackCapabilities>(NativeObject, "getCapabilities");

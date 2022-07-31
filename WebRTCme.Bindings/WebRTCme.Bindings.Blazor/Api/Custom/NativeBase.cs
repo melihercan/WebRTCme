@@ -10,7 +10,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    public abstract class NativeBase // : INativeObject
+    public abstract class NativeBase
     {
         protected NativeBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
@@ -88,10 +88,5 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         protected void SetNativeProperty(string propertyName, object value) => JsRuntime.SetJsProperty(
             NativeObject, propertyName, value);
-
-        public object GetNativeObject()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

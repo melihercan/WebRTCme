@@ -13,7 +13,7 @@ namespace WebRTCme.iOS
         public static IRTCDataChannelEvent Create(Webrtc.RTCDataChannel nativeDataChannel) => 
             new RTCDataChannelEvent(nativeDataChannel);
 
-        private RTCDataChannelEvent(Webrtc.RTCDataChannel nativeDataChannel)
+        public RTCDataChannelEvent(Webrtc.RTCDataChannel nativeDataChannel)
         {
             _nativeDataChannel = nativeDataChannel;
         }

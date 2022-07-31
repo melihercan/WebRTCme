@@ -12,11 +12,6 @@ namespace WebRTCme.Android
     {
         public static INavigator Create() => new Navigator();
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public Navigator() { }
 
         public IMediaDevices MediaDevices => Android.MediaDevices.Create();

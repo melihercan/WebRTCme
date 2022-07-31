@@ -63,7 +63,7 @@ namespace WebRTCme.iOS
             return self;
         }
 
-        private MediaStream(Webrtc.RTCMediaStream nativeMediaStream) : base(nativeMediaStream) { }
+        public MediaStream(Webrtc.RTCMediaStream nativeMediaStream) : base(nativeMediaStream) { }
 
         public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 

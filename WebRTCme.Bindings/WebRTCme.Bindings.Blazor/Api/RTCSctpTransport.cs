@@ -13,12 +13,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCSctpTransport : NativeBase, IRTCSctpTransport
     {
-        internal static IRTCSctpTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefSctpTransport)
-        {
-            return new RTCSctpTransport(jsRuntime, jsObjectRefSctpTransport);
-        }
-
-        private RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public RTCSctpTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListenerForValue<RTCSctpTransportState>("statechange", (s, e) => OnStateChange?.Invoke(s, e));
         }
@@ -30,7 +25,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public RTCSctpTransportState State => GetNativeProperty<RTCSctpTransportState>("state");
 
         public IRTCSctpTransport Transport =>
-            RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
+            new RTCSctpTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
         public event EventHandler<RTCSctpTransportState> OnStateChange;
     }

@@ -14,9 +14,9 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IRTCDataChannelEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new RTCDataChannelEvent(jsRuntime, jsObjectRefRtcStatsReport);
 
-        private RTCDataChannelEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCDataChannelEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public IRTCDataChannel Channel => 
-            RTCDataChannel.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "channel"));
+            new RTCDataChannel(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "channel"));
     }
 }

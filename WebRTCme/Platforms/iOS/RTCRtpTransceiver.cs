@@ -13,7 +13,7 @@ namespace WebRTCme.iOS
         public static IRTCRtpTransceiver Create(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) => 
             new RTCRtpTransceiver(nativeRtpTransceiver);
 
-        private RTCRtpTransceiver(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
+        public RTCRtpTransceiver(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
 
         public RTCRtpTransceiverDirection CurrentDirection => NativeObject.Direction
             .FromNative();

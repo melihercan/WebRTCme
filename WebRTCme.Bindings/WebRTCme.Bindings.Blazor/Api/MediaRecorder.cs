@@ -22,13 +22,16 @@ namespace WebRTCme.Bindings.Blazor.Api
             //_jsObjectMediaRecorder = new HostObject("MediaRecorder");
         //}
 
-        public static IMediaRecorder Create(IJSRuntime jsRuntime, IMediaStream stream, MediaRecorderOptions options)
+        public MediaRecorder(IJSRuntime jsRuntime, IMediaStream stream, MediaRecorderOptions options) : 
+            this(jsRuntime,
+                jsRuntime.CreateJsObject("window", "MediaRecorder", ((MediaStream)stream).NativeObject, options), 
+                stream, 
+                options)
         {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaRecorder", ((MediaStream)stream).NativeObject, options);
-            return new MediaRecorder(jsRuntime, jsObjectRef, stream, options);
+
         }
 
-        private MediaRecorder(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, IMediaStream stream, 
+        public MediaRecorder(IJSRuntime jsRuntime, JsObjectRef jsObjectRef, IMediaStream stream, 
             MediaRecorderOptions options) : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListenerForObjectRef("dataavailable", (s, e) => OnDataAvailable?.Invoke(s, e),
@@ -46,7 +49,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public RecordingState State => GetNativeProperty<RecordingState>("state");
 
         public IMediaStream Stream => 
-            MediaStream.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "stream"));
+            new MediaStream(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "stream"));
 
         public bool IgnoreMutedMedia 
         { 

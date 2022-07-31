@@ -11,10 +11,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCRtpTransceiver : NativeBase, IRTCRtpTransceiver
     {
-        public static IRTCRtpTransceiver Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpTransceiver) =>
-            new RTCRtpTransceiver(jsRuntime, jsObjectRefRtpTransceiver);
-
-        private RTCRtpTransceiver(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCRtpTransceiver(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public RTCRtpTransceiverDirection CurrentDirection =>
             GetNativeProperty<RTCRtpTransceiverDirection>("currentDirection");
@@ -28,10 +25,10 @@ namespace WebRTCme.Bindings.Blazor.Api
         public string Mid => GetNativeProperty<string>("mid");
 
         public IRTCRtpReceiver Receiver => 
-            RTCRtpReceiver.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "receiver"));
+            new RTCRtpReceiver(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "receiver"));
 
         public IRTCRtpSender Sender =>
-            RTCRtpSender.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sender"));
+            new RTCRtpSender(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sender"));
 
         public bool Stopped => GetNativeProperty<bool>("stopped");
 

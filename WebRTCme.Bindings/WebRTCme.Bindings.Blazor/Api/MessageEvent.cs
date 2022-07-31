@@ -13,7 +13,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IMessageEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new MessageEvent(jsRuntime, jsObjectRefRtcStatsReport);
 
-        private MessageEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public MessageEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public object Data => GetNativeProperty<string>("data");
 

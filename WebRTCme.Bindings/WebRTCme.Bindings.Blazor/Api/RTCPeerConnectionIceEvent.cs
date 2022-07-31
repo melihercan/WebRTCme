@@ -14,7 +14,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IRTCPeerConnectionIceEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) =>
             new RTCPeerConnectionIceEvent(jsRuntime, jsObjectRef);
 
-        private RTCPeerConnectionIceEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public RTCPeerConnectionIceEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         { }
 
         public IRTCIceCandidate Candidate
@@ -23,7 +23,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             {
                 // 'null' is valid and indicates end of ICE gathering process.
                 var jsPropertyObjectRef = JsRuntime.GetJsPropertyObjectRef(NativeObject, "candidate");
-                return jsPropertyObjectRef == null ? null : RTCIceCandidate.Create(JsRuntime, jsPropertyObjectRef);
+                return jsPropertyObjectRef == null ? null : new RTCIceCandidate(JsRuntime, jsPropertyObjectRef);
             }
         }
     }

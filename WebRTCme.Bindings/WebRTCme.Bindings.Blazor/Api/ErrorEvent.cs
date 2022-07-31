@@ -14,7 +14,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IErrorEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
             new ErrorEvent(jsRuntime, jsObjectRefRtcStatsReport);
 
-        private ErrorEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public ErrorEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public string Message => GetNativeProperty<string>("message");
 

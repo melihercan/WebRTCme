@@ -16,7 +16,7 @@ namespace WebRTCme.Android
             Webrtc.MediaStream[] nativeMediaStreams) =>
                 new RTCTrackEvent(nativeRtpReceiver, nativeMediaStreams);
 
-        private RTCTrackEvent(Webrtc.RtpReceiver nativeRtpReceiver, Webrtc.MediaStream[] nativeMediaStreams)
+        public RTCTrackEvent(Webrtc.RtpReceiver nativeRtpReceiver, Webrtc.MediaStream[] nativeMediaStreams)
         {
             _nativeRtpReceiver = nativeRtpReceiver;
             _nativeMediaStreams = nativeMediaStreams;

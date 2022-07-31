@@ -11,7 +11,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IDOMException Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeDomException) =>
             new DOMException(jsRuntime, jsObjectRefNativeDomException);
 
-        private DOMException(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public DOMException(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
         public string Message => GetNativeProperty<string>("message");

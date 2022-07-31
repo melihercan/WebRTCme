@@ -12,7 +12,7 @@ namespace WebRTCme.Android
         public static IRTCRtpTransceiver Create(Webrtc.RtpTransceiver nativeTransceiver) =>
             new RTCRtpTransceiver(nativeTransceiver);
 
-        private RTCRtpTransceiver(RtpTransceiver nativeTransceiver) : base(nativeTransceiver)
+        public RTCRtpTransceiver(RtpTransceiver nativeTransceiver) : base(nativeTransceiver)
         {
         }
 

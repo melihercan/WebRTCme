@@ -12,20 +12,17 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCIceCandidatePair : NativeBase, IRTCIceCandidatePair
     {
-        public static IRTCIceCandidatePair Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) =>
-            new RTCIceCandidatePair(jsRuntime, jsObjectRefRtcStatsReport);
-
-        private RTCIceCandidatePair(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCIceCandidatePair(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public IRTCIceCandidate Local 
         {
-            get => RTCIceCandidate.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "local"));
+            get => new RTCIceCandidate(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "local"));
             set => SetNativeProperty("local", value);
         }
         
         public IRTCIceCandidate Remote 
         {
-            get => RTCIceCandidate.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "remote"));
+            get => new RTCIceCandidate(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "remote"));
             set => SetNativeProperty("remote", value);
         }
     }

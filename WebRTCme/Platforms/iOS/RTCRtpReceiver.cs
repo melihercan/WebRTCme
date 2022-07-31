@@ -11,7 +11,7 @@ namespace WebRTCme.iOS
     {
         public static IRTCRtpReceiver Create(Webrtc.IRTCRtpReceiver nativeRtpReceiver) => new RTCRtpReceiver(nativeRtpReceiver);
 
-        private RTCRtpReceiver(Webrtc.IRTCRtpReceiver nativeRtpReceiver) : base(nativeRtpReceiver)  { }
+        public RTCRtpReceiver(Webrtc.IRTCRtpReceiver nativeRtpReceiver) : base(nativeRtpReceiver)  { }
 
         public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track);
 

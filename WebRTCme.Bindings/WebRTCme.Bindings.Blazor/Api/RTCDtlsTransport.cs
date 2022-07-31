@@ -13,13 +13,10 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCDtlsTransport : NativeBase, IRTCDtlsTransport
     {
-        public static IRTCDtlsTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDtlsTransport) => 
-            new RTCDtlsTransport(jsRuntime, jsObjectRefDtlsTransport);
-
-        private RTCDtlsTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCDtlsTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public IRTCIceTransport IceTransport => 
-            RTCIceTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "iceTransport"));
+            new RTCIceTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "iceTransport"));
 
         public RTCDtlsTransportState State => GetNativeProperty<RTCDtlsTransportState>("state");
     }

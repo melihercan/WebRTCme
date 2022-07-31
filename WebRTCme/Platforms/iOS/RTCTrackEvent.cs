@@ -13,7 +13,7 @@ namespace WebRTCme.iOS
         public static IRTCTrackEvent Create(Webrtc.RTCMediaStreamTrack nativeTrack) => 
             new RTCTrackEvent(nativeTrack);
 
-        private RTCTrackEvent(Webrtc.RTCMediaStreamTrack nativeTrack)
+        public RTCTrackEvent(Webrtc.RTCMediaStreamTrack nativeTrack)
         {
             _nativeTrack = nativeTrack;
         }

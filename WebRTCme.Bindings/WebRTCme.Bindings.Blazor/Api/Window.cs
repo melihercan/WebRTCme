@@ -15,14 +15,16 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IWindow Create(IJSRuntime jsRuntime) =>
             new Window(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", null));
 
-        private Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public Window(IJSRuntime jsRuntime) : this(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", null)) { }
 
-        public INavigator Navigator() => Api.Navigator.Create(JsRuntime);
+        public Window(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
-        public IMediaStream MediaStream() =>   Api.MediaStream.Create(JsRuntime);
+        public INavigator Navigator() => new Navigator(JsRuntime);
+
+        public IMediaStream MediaStream() =>   new MediaStream(JsRuntime);
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
-            Api.RTCPeerConnection.Create(JsRuntime, configuration);
+            new RTCPeerConnection(JsRuntime, configuration);
 
 
         //// TODO: REFACTOR WHOLE BLAZOR API BY USING System.Private.Runtime.InteropServices.JavaScript and use HostObject.
@@ -33,7 +35,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         ///
 
         public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null) =>
-            Api.MediaRecorder.Create(JsRuntime, stream, options);
+            new MediaRecorder(JsRuntime, stream, options);
 
     }
 }

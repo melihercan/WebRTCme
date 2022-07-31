@@ -11,11 +11,14 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class Navigator : NativeBase, INavigator
     {
-        public static INavigator Create(IJSRuntime jsRuntime) =>
-            new Navigator(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator"));
-        
-        private Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public Navigator(IJSRuntime jsRuntime) : this(jsRuntime, jsRuntime.GetJsPropertyObjectRef("window", "navigator"))
+        {
+        }
 
-        public IMediaDevices MediaDevices => Api.MediaDevices.Create(JsRuntime);
+        public Navigator(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        {
+        }
+
+        public IMediaDevices MediaDevices => new MediaDevices(JsRuntime);
     }
 }

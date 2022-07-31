@@ -10,10 +10,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCStatsReport : NativeBase, IRTCStatsReport
     {
-        internal static IRTCStatsReport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) => 
-            new RTCStatsReport(jsRuntime, jsObjectRefRtcStatsReport);
-
-        private RTCStatsReport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCStatsReport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public string Id 
         {

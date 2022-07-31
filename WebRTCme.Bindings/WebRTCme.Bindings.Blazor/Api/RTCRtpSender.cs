@@ -12,25 +12,22 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCRtpSender : NativeBase, IRTCRtpSender
     {
-        public static IRTCRtpSender Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtpSender) => 
-            new RTCRtpSender(jsRuntime, jsObjectRefRtpSender);
-
-        private RTCRtpSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCRtpSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public IRTCDTMFSender Dtmf =>
-            RTCDTMFSender.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "dtmf"));
+            new RTCDTMFSender(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "dtmf"));
 
         public IMediaStreamTrack Track =>
-            MediaStreamTrack.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "track"));
+            new MediaStreamTrack(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "track"));
 
         public IRTCDtlsTransport Transport =>
-            RTCDtlsTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
+            new RTCDtlsTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
         public RTCRtpSendParameters GetParameters() =>
             JsRuntime.CallJsMethod<RTCRtpSendParameters>(NativeObject, "getParameters");
 
         public async Task<IRTCStatsReport> GetStats() =>
-            await Task.FromResult(RTCStatsReport.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+            await Task.FromResult(new RTCStatsReport(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 NativeObject, "getStats")));
 
         public Task SetParameters(RTCRtpSendParameters parameters) =>

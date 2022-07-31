@@ -12,14 +12,12 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCPeerConnection : NativeBase, IRTCPeerConnection
     {
-        public static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
+        public RTCPeerConnection(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration) : 
+            this(jsRuntime, jsRuntime.CreateJsObject("window", "RTCPeerConnection", rtcConfiguration))
         {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "RTCPeerConnection", rtcConfiguration);
-            return new RTCPeerConnection(jsRuntime, jsObjectRef);
         }
 
-        private RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef)
-            : base(jsRuntime, jsObjectRef)
+        public RTCPeerConnection(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
         {
             AddNativeEventListener("connectionstatechange", (s, e) => OnConnectionStateChanged?.Invoke(s, e));
             AddNativeEventListenerForObjectRef("datachannel", (s, e) => OnDataChannel?.Invoke(s, e),
@@ -54,7 +52,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public Task<IRTCIdentityAssertion> PeerIdentity => GetPeerIdentity();
         private async Task<IRTCIdentityAssertion> GetPeerIdentity() =>
-            await Task.FromResult(RTCIdentityAssertion.Create(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
+            await Task.FromResult(new RTCIdentityAssertion(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
                 NativeObject, "peerIdentity")));
 
         public RTCSessionDescriptionInit PendingLocalDescription =>
@@ -67,7 +65,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             GetNativeProperty<RTCSessionDescriptionInit>("remoteDescription");
 
         public IRTCSctpTransport Sctp =>
-            RTCSctpTransport.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
+            new RTCSctpTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
 
         public RTCSignalingState SignalingState => GetNativeProperty<RTCSignalingState>("signallingState");
 
@@ -100,7 +98,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate/*.NativeObject*/).AsTask();
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",
+            new RTCRtpSender(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "addTrack",
                 new object[]
                 {
                     ((MediaStreamTrack)track).NativeObject,
@@ -121,7 +119,7 @@ namespace WebRTCme.Bindings.Blazor.Api
                     nativeStreams
                 };
             }
-            return RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
+            return new RTCRtpTransceiver(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
                 "addTransceiver",
                 new object[]
                 {
@@ -144,7 +142,7 @@ namespace WebRTCme.Bindings.Blazor.Api
                     nativeStreams
                 };
             }
-            return RTCRtpTransceiver.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
+            return new RTCRtpTransceiver(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
                 "addTransceiver",
                 new object[]
                 {
@@ -165,7 +163,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null) =>
-            RTCDataChannel.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "createDataChannel",
+            new RTCDataChannel(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "createDataChannel",
                 new object[]
                 {
                     label,
@@ -183,7 +181,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         /*static*/
         public async Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
-            await Task.FromResult(RTCCertificate.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+            await Task.FromResult(new RTCCertificate(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 "RTCPeerConnection", "generateCertificate", keygenAlgorithm)));
 
         public RTCConfiguration GetConfiguration() =>
@@ -197,7 +195,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetReceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getReceivers");
             var jsObjectRefRtpReceiversArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetReceivers);
             var rtpReceivers = jsObjectRefRtpReceiversArray
-                .Select(jsObjectRef => RTCRtpReceiver.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new RTCRtpReceiver(JsRuntime, jsObjectRef))
                 .ToArray();
             JsRuntime.DeleteJsObjectRef(jsObjectRefGetReceivers.JsObjectRefId);
             return rtpReceivers;
@@ -208,14 +206,14 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetSenders = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getSenders");
             var jsObjectRefRtpSendersArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetSenders);
             var rtpSenders = jsObjectRefRtpSendersArray
-                .Select(jsObjectRef => RTCRtpSender.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new RTCRtpSender(JsRuntime, jsObjectRef))
                 .ToArray();
             JsRuntime.DeleteJsObjectRef(jsObjectRefGetSenders.JsObjectRefId);
             return rtpSenders;
         }
 
         public async Task<IRTCStatsReport> GetStats() =>
-            await Task.FromResult(RTCStatsReport.Create(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
+            await Task.FromResult(new RTCStatsReport(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
                 NativeObject, "getStats")));
 
         public IRTCRtpTransceiver[] GetTransceivers()
@@ -223,7 +221,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetTransceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTransceivers");
             var jsObjectRefRtpTransceiverArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetTransceivers);
             var rtpTransceivers = jsObjectRefRtpTransceiverArray
-                .Select(jsObjectRef => RTCRtpTransceiver.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new RTCRtpTransceiver(JsRuntime, jsObjectRef))
                 .ToArray();
             JsRuntime.DeleteJsObjectRef(jsObjectRefGetTransceivers.JsObjectRefId);
             return rtpTransceivers;

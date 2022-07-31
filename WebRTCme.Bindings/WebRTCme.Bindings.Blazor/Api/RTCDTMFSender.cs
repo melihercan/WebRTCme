@@ -11,11 +11,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCDTMFSender : NativeBase, IRTCDTMFSender
     {
-
-        internal static IRTCDTMFSender Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDTMFSender) => 
-            new RTCDTMFSender(jsRuntime, jsObjectRefDTMFSender);
-
-        private RTCDTMFSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public RTCDTMFSender(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListener("tonechange", (s, e) => OnToneChange?.Invoke(s, e));
         }

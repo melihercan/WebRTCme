@@ -12,10 +12,10 @@ namespace WebRTCme.Bindings.Blazor.Api
         public static IBlobEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeBlobEvent) =>
             new BlobEvent(jsRuntime, jsObjectRefNativeBlobEvent);
 
-        private BlobEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public BlobEvent(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
 
-        public IBlob Data => Blob.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "data"));
+        public IBlob Data => new Blob(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "data"));
 
         public double Timecode => GetNativeProperty<double>("timecode");
     }

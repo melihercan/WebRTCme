@@ -13,10 +13,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCDataChannel : NativeBase, IRTCDataChannel
     {
-        public static IRTCDataChannel Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefDataChannel) =>
-            new RTCDataChannel(jsRuntime, jsObjectRefDataChannel);
-
-        private RTCDataChannel(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public RTCDataChannel(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListener("bufferedamountlow", (s, e) => OnBufferedAmountLow?.Invoke(s, e));
             AddNativeEventListener("close", (s, e) => OnClose?.Invoke(s, e));

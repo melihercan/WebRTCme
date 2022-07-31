@@ -13,10 +13,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCIceTransport : NativeBase, IRTCIceTransport
     {
-        public static IRTCIceTransport Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefRtcStatsReport) =>
-            new RTCIceTransport(jsRuntime, jsObjectRefRtcStatsReport);
-
-        private RTCIceTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public RTCIceTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListener("gatheringstatechange", (s, e) => OnGatheringStateChange?.Invoke(s, e));
             AddNativeEventListener("selectedcandidatepairchange", (s, e) => 
@@ -41,7 +38,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetLocalCandidates = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getLocalCandidates");
             var jsObjectRefIceCandidateArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetLocalCandidates);
             var iceCandidates = jsObjectRefIceCandidateArray
-                .Select(jsObjectRef => RTCIceCandidate.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new RTCIceCandidate(JsRuntime, jsObjectRef))
                 .ToArray();
             JsRuntime.DeleteJsObjectRef(jsObjectRefGetLocalCandidates.JsObjectRefId);
             return iceCandidates;
@@ -55,7 +52,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetRemoteCandidates = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getRemoteCandidates");
             var jsObjectRefIceCandidateArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetRemoteCandidates);
             var iceCandidates = jsObjectRefIceCandidateArray
-                .Select(jsObjectRef => RTCIceCandidate.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new RTCIceCandidate(JsRuntime, jsObjectRef))
                 .ToArray();
             JsRuntime.DeleteJsObjectRef(jsObjectRefGetRemoteCandidates.JsObjectRefId);
             return iceCandidates;
@@ -65,7 +62,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             JsRuntime.CallJsMethod<RTCIceParameters>(NativeObject, "getRemoteParameters");
 
         public IRTCIceCandidatePair GetSelectedCandidatePair() =>
-            RTCIceCandidatePair.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
+            new RTCIceCandidatePair(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 
                 "getSelectedCandidatePair"));
     }
 }

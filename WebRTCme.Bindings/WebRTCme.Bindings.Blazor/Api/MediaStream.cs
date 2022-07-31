@@ -13,14 +13,11 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class MediaStream : NativeBase, IMediaStream
     {
+        public MediaStream(IJSRuntime jsRuntime) : this(jsRuntime, jsRuntime.CreateJsObject("window", "MediaStream"))
+        {
+        }
 
-        public static IMediaStream Create(IJSRuntime jsRuntime) =>
-            new MediaStream(jsRuntime, jsRuntime.CreateJsObject("window", "MediaStream"));
-
-        public static IMediaStream Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefMediaStream) =>
-            new MediaStream(jsRuntime, jsObjectRefMediaStream);
-
-        private MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
+        public MediaStream(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) 
         {
             AddNativeEventListenerForObjectRef("addtrack", (s, e) => OnAddTrack?.Invoke(s, e), 
                 MediaStreamTrackEvent.Create);
@@ -39,26 +36,26 @@ namespace WebRTCme.Bindings.Blazor.Api
             JsRuntime.CallJsMethodVoid(NativeObject, "addTrack", ((MediaStreamTrack)track).NativeObject);
 
         public IMediaStream Clone() =>
-            Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
+            new MediaStream(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
         public IMediaStreamTrack[] GetAudioTracks()
         {
             var jsObjectRefGetAudioTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getAudioTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetAudioTracks);
             return jsObjectRefMediaStreamTrackArray
-                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new MediaStreamTrack(JsRuntime, jsObjectRef))
                 .ToArray();
         }
 
         public IMediaStreamTrack GetTrackById(string id) =>
-            MediaStreamTrack.Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTranckById", id));
+            new MediaStreamTrack(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTranckById", id));
 
         public IMediaStreamTrack[] GetTracks()
         {
             var jsObjectRefGetTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetTracks);
             return jsObjectRefMediaStreamTrackArray
-                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new MediaStreamTrack(JsRuntime, jsObjectRef))
                 .ToArray();
         }
 
@@ -67,7 +64,7 @@ namespace WebRTCme.Bindings.Blazor.Api
             var jsObjectRefGetVideoTracks = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getVideoTracks");
             var jsObjectRefMediaStreamTrackArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetVideoTracks);
             return jsObjectRefMediaStreamTrackArray
-                .Select(jsObjectRef => MediaStreamTrack.Create(JsRuntime, jsObjectRef))
+                .Select(jsObjectRef => new MediaStreamTrack(JsRuntime, jsObjectRef))
                 .ToArray();
         }
 

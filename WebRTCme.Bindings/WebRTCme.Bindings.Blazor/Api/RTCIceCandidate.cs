@@ -11,10 +11,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 {
     internal class RTCIceCandidate : NativeBase, IRTCIceCandidate
     {
-        public static IRTCIceCandidate Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) =>
-            new RTCIceCandidate(jsRuntime, jsObjectRef);
-
-        private RTCIceCandidate(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCIceCandidate(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
 
         public string Candidate => GetNativeProperty<string>("candidate");
 

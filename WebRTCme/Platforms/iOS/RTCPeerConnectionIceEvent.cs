@@ -13,7 +13,7 @@ namespace WebRTCme.iOS
         public static IRTCPeerConnectionIceEvent Create(Webrtc.RTCIceCandidate nativeIceCandidate) => 
             new RTCPeerConnectionIceEvent(nativeIceCandidate);
 
-        private RTCPeerConnectionIceEvent(Webrtc.RTCIceCandidate nativeIceCandidate)
+        public RTCPeerConnectionIceEvent(Webrtc.RTCIceCandidate nativeIceCandidate)
         {
             _nativeIceCandidate = nativeIceCandidate;
         }
