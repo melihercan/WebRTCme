@@ -15,14 +15,14 @@ namespace WebRTCme.Android
         {
         }
 
-        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(((Webrtc.RtpSender)NativeObject).Dtmf());
+        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(NativeObject.Dtmf());
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.RtpSender)NativeObject).Track());
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
 
-        public RTCRtpSendParameters GetParameters() => ((Webrtc.RtpSender)NativeObject).Parameters.FromNativeToSend();
+        public RTCRtpSendParameters GetParameters() => NativeObject.Parameters.FromNativeToSend();
 
         public Task<IRTCStatsReport> GetStats()
         {

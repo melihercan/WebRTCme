@@ -18,6 +18,6 @@ namespace WebRTCme.iOS
         public event EventHandler OnToneChange;
 
         public void InsertDTMF(string tones, ulong duration = 100, ulong interToneGap = 70) =>
-            ((Webrtc.RTCDtmfSender)NativeObject).InsertDtmf(tones, (double)duration, (double)interToneGap);
+            NativeObject.InsertDtmf(tones, (double)duration, (double)interToneGap);
     }
 }

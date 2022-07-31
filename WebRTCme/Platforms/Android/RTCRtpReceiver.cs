@@ -16,7 +16,7 @@ namespace WebRTCme.Android
         {
         }
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.RtpReceiver)NativeObject).Track());
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
@@ -26,7 +26,7 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public RTCRtpReceiveParameters GetParameters() => ((Webrtc.RtpReceiver)NativeObject).Parameters.FromNativeToReceive();
+        public RTCRtpReceiveParameters GetParameters() => NativeObject.Parameters.FromNativeToReceive();
 
         public Task<IRTCStatsReport> GetStats()
         {

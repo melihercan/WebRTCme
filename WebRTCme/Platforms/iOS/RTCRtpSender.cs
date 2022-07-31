@@ -15,9 +15,9 @@ namespace WebRTCme.iOS
         {
         }
 
-        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(((Webrtc.IRTCRtpSender)NativeObject).DtmfSender);
+        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(NativeObject.DtmfSender);
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(((Webrtc.IRTCRtpSender)NativeObject).Track);
+        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track);
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
@@ -26,7 +26,7 @@ namespace WebRTCme.iOS
             throw new NotImplementedException();
         }
 
-        public RTCRtpSendParameters GetParameters() => ((Webrtc.IRTCRtpSender)NativeObject).Parameters
+        public RTCRtpSendParameters GetParameters() => NativeObject.Parameters
             .FromNativeToSend();
 
         public Task<IRTCStatsReport> GetStats()

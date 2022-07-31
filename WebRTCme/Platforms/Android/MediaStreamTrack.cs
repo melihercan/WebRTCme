@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using WebRTCme;
-using WebRTCme.Platforms.Android.Custom;
+﻿using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
@@ -22,7 +17,7 @@ namespace WebRTCme.Android
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateAudioSource(
+                    var nativeAudioSource = WebRtc.NativePeerConnectionFactory.CreateAudioSource(
                         (constraints ?? new MediaTrackConstraints
                         {
                             EchoCancellation = new ConstrainBoolean { Value = false },
@@ -30,14 +25,14 @@ namespace WebRTCme.Android
                             NoiseSuppression = new ConstrainBoolean { Value = false }
                         }).ToNative());
                     nativeMediaSource = nativeAudioSource;
-                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    nativeMediaStreamTrack = WebRtc.NativePeerConnectionFactory
                         .CreateAudioTrack(id, nativeAudioSource);
                 break;
 
                 case MediaStreamTrackKind.Video:
-                    var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);
+                    var nativeVideoSource = WebRtc.NativePeerConnectionFactory.CreateVideoSource(false);
                     nativeMediaSource = nativeVideoSource;
-                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    nativeMediaStreamTrack = WebRtc.NativePeerConnectionFactory
                         .CreateVideoTrack(id, nativeVideoSource);
                     break;
             }
@@ -58,20 +53,20 @@ namespace WebRTCme.Android
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled 
         { 
-            get => ((Webrtc.MediaStreamTrack)NativeObject).Enabled();
-            set => ((Webrtc.MediaStreamTrack)NativeObject).SetEnabled(value);
+            get => NativeObject.Enabled();
+            set => NativeObject.SetEnabled(value);
         }
 
-        public string Id => ((Webrtc.MediaStreamTrack)NativeObject).Id();
+        public string Id => NativeObject.Id();
 
         public bool Isolated => throw new NotImplementedException();
 
-        public MediaStreamTrackKind Kind => ((Webrtc.MediaStreamTrack)NativeObject).Kind() switch
+        public MediaStreamTrackKind Kind => NativeObject.Kind() switch
         {
             Audio => MediaStreamTrackKind.Audio,
             Video => MediaStreamTrackKind.Video,
             _ => throw new Exception(
-                $"Invalid RTCMediaStreamTrack.Kind: {((Webrtc.MediaStreamTrack)NativeObject).Kind()}")
+                $"Invalid RTCMediaStreamTrack.Kind: {NativeObject.Kind()}")
 
         };
 
@@ -81,7 +76,7 @@ namespace WebRTCme.Android
 
         public bool Readonly => throw new NotImplementedException();
 
-        public MediaStreamTrackState ReadyState => ((Webrtc.MediaStreamTrack)NativeObject).InvokeState().FromNative();
+        public MediaStreamTrackState ReadyState => NativeObject.InvokeState().FromNative();
 
 
         public event EventHandler OnEnded;

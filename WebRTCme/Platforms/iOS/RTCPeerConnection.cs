@@ -66,7 +66,7 @@ namespace WebRTCme.iOS
 #if true
             var nativeConfiguration = configuration.ToNative();
             var nativeConstraints = new Webrtc.RTCMediaConstraints(null, null); //NativeDefaultRTCMediaConstraints;
-            NativeObject = WebRTCme.WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
+            NativeObject = WebRtc.NativePeerConnectionFactory.PeerConnectionWithConfiguration(
                 nativeConfiguration,
                 nativeConstraints,
                 this);
@@ -76,39 +76,39 @@ namespace WebRTCme.iOS
         public bool CanTrickleIceCandidates => throw new NotSupportedException();
 
         public RTCPeerConnectionState ConnectionState =>
-            ((Webrtc.RTCPeerConnection)NativeObject).ConnectionState.FromNative();
+            NativeObject.ConnectionState.FromNative();
 
         public RTCSessionDescriptionInit CurrentLocalDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
+            NativeObject.LocalDescription.FromNative();
 
         public RTCSessionDescriptionInit CurrentRemoteDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
+            NativeObject.RemoteDescription.FromNative();
 
         public RTCIceConnectionState IceConnectionState =>
-            ((Webrtc.RTCPeerConnection)NativeObject).IceConnectionState.FromNative();
+            NativeObject.IceConnectionState.FromNative();
 
         public RTCIceGatheringState IceGatheringState =>
-            ((Webrtc.RTCPeerConnection)NativeObject).IceGatheringState.FromNative();
+            NativeObject.IceGatheringState.FromNative();
 
         public RTCSessionDescriptionInit LocalDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
+            NativeObject.LocalDescription.FromNative();
 
         public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
 
         public RTCSessionDescriptionInit PendingLocalDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).LocalDescription.FromNative();
+            NativeObject.LocalDescription.FromNative();
 
         public RTCSessionDescriptionInit PendingRemoteDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
+            NativeObject.RemoteDescription.FromNative();
 
         public RTCSessionDescriptionInit RemoteDescription =>
-            ((Webrtc.RTCPeerConnection)NativeObject).RemoteDescription.FromNative();
+            NativeObject.RemoteDescription.FromNative();
 
 
         public IRTCSctpTransport Sctp => throw new NotImplementedException();
 
         public RTCSignalingState SignalingState =>
-            ((Webrtc.RTCPeerConnection)NativeObject).SignalingState.FromNative();
+            NativeObject.SignalingState.FromNative();
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -120,48 +120,48 @@ namespace WebRTCme.iOS
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
         public RTCIceServer[] GetDefaultIceServers() =>
-            ((Webrtc.RTCPeerConnection)NativeObject).Configuration.IceServers
+            NativeObject.Configuration.IceServers
                 .Select(nativeIceServer => nativeIceServer.FromNative())
                 .ToArray();
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
             var x = candidate.ToNative();
-            ((Webrtc.RTCPeerConnection)NativeObject).AddIceCandidate(x/*candidate.ToNative()*/);
+            NativeObject.AddIceCandidate(x/*candidate.ToNative()*/);
             return Task.CompletedTask;
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTrack(
+            RTCRtpSender.Create(NativeObject.AddTrack(
                 ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverOfType(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverOfType(
                     kind.ToNative()));
             else
-                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverOfType(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverOfType(
                     kind.ToNative(), init.ToNative()));
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverWithTrack(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack));
             else
-                return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverWithTrack(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, init.ToNative()));
         }
 
 
-        public void Close() => ((Webrtc.RTCPeerConnection)NativeObject).Close();
+        public void Close() => NativeObject.Close();
 
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.RTCPeerConnection)NativeObject).AnswerForConstraints(
+            NativeObject.AnswerForConstraints(
                 new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, err) => 
                 { 
@@ -180,7 +180,7 @@ namespace WebRTCme.iOS
 
             var dataChannel =
             RTCDataChannel.Create(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
-              (Webrtc.RTCPeerConnection)NativeObject,
+              NativeObject,
     //            RTCDataChannel.Create(((Webrtc.RTCPeerConnection)NativeObject).DataChannelForLabel(
     label,
 //    config
@@ -196,7 +196,7 @@ namespace WebRTCme.iOS
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            ((Webrtc.RTCPeerConnection)NativeObject).OfferForConstraints(
+            NativeObject.OfferForConstraints(
                 new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, nsError) =>
                 {
@@ -217,7 +217,7 @@ namespace WebRTCme.iOS
                         keygenAlgorithm.Keys.ToArray()))));
 
         public RTCConfiguration GetConfiguration() =>
-            ((Webrtc.RTCPeerConnection)NativeObject).Configuration.FromNative();
+            NativeObject.Configuration.FromNative();
 
         public void GetIdentityAssertion()
         {
@@ -225,11 +225,11 @@ namespace WebRTCme.iOS
         }
 
         public IRTCRtpReceiver[] GetReceivers() =>
-            ((Webrtc.RTCPeerConnection)NativeObject).Receivers
+            NativeObject.Receivers
                 .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
 
         public IRTCRtpSender[] GetSenders() =>
-            ((Webrtc.RTCPeerConnection)NativeObject).Senders
+            NativeObject.Senders
                 .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
 
         public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
@@ -238,11 +238,11 @@ namespace WebRTCme.iOS
         }
 
         public IRTCRtpTransceiver[] GetTransceivers() =>
-            ((Webrtc.RTCPeerConnection) NativeObject).Transceivers
+            NativeObject.Transceivers
                  .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
 
         public void RemoveTrack(IRTCRtpSender sender) =>
-            ((Webrtc.RTCPeerConnection)NativeObject).RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.IRTCRtpSender);
+            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.IRTCRtpSender);
 
         public void RestartIce()
         {
@@ -250,7 +250,7 @@ namespace WebRTCme.iOS
         }
 
         public void SetConfiguration(RTCConfiguration configuration) =>
-            ((Webrtc.RTCPeerConnection) NativeObject).SetConfiguration(configuration.ToNative());
+            NativeObject.SetConfiguration(configuration.ToNative());
 
         public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
         {
@@ -260,7 +260,7 @@ namespace WebRTCme.iOS
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) 
         {
             var tcs = new TaskCompletionSource<object>();
-            ((Webrtc.RTCPeerConnection)NativeObject).SetLocalDescription(
+            NativeObject.SetLocalDescription(
                 sessionDescription.ToNative(),
                 (nsError) =>
                 {
@@ -276,7 +276,7 @@ namespace WebRTCme.iOS
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            ((Webrtc.RTCPeerConnection)NativeObject).SetRemoteDescription(
+            NativeObject.SetRemoteDescription(
                 sessionDescription.ToNative(),
                 (nsError) =>
                 {

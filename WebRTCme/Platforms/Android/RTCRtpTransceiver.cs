@@ -16,22 +16,22 @@ namespace WebRTCme.Android
         {
         }
 
-        public RTCRtpTransceiverDirection CurrentDirection => 
-            ((Webrtc.RtpTransceiver)NativeObject).CurrentDirection.FromNative();
+        public RTCRtpTransceiverDirection CurrentDirection =>
+            NativeObject.CurrentDirection.FromNative();
 
         public RTCRtpTransceiverDirection Direction
         {
-            get => ((Webrtc.RtpTransceiver)NativeObject).Direction.FromNative();
-            set => ((Webrtc.RtpTransceiver)NativeObject).SetDirection(Direction.ToNative());
+            get => NativeObject.Direction.FromNative();
+            set => NativeObject.SetDirection(Direction.ToNative());
         }
 
-        public string Mid => ((Webrtc.RtpTransceiver)NativeObject).Mid;
+        public string Mid => NativeObject.Mid;
 
-        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(((Webrtc.RtpTransceiver)NativeObject).Receiver);
+        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(NativeObject.Receiver);
 
-        public IRTCRtpSender Sender => RTCRtpSender.Create(((Webrtc.RtpTransceiver)NativeObject).Sender);
+        public IRTCRtpSender Sender => RTCRtpSender.Create(NativeObject.Sender);
 
-        public bool Stopped => ((Webrtc.RtpTransceiver)NativeObject).IsStopped;
+        public bool Stopped => NativeObject.IsStopped;
 
 
         public void SetCodecPreferences(RTCRtpCodecCapability[] codecs)
@@ -39,6 +39,6 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public void Stop() => ((Webrtc.RtpTransceiver)NativeObject).Stop();
+        public void Stop() => NativeObject.Stop();
     }
 }

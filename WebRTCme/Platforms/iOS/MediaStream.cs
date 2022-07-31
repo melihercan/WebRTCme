@@ -67,7 +67,7 @@ namespace WebRTCme.iOS
 
         public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
-        public string Id => ((Webrtc.RTCMediaStream)NativeObject).StreamId;
+        public string Id => NativeObject.StreamId;
 
         public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
         public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
@@ -96,10 +96,10 @@ namespace WebRTCme.iOS
                 switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
-                        ((Webrtc.RTCMediaStream)NativeObject).AddAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
+                        NativeObject.AddAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
                         break;
                     case MediaStreamTrackKind.Video:
-                        ((Webrtc.RTCMediaStream)NativeObject).AddVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
+                        NativeObject.AddVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
                         break;
                 }
             };
@@ -112,10 +112,10 @@ namespace WebRTCme.iOS
                 switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
-                        ((Webrtc.RTCMediaStream)NativeObject).RemoveAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
+                        NativeObject.RemoveAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
                         break;
                     case MediaStreamTrackKind.Video:
-                        ((Webrtc.RTCMediaStream)NativeObject).RemoveVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
+                        NativeObject.RemoveVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
                         break;
                 }
             };

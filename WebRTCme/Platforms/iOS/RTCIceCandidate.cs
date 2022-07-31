@@ -17,7 +17,7 @@ namespace WebRTCme.iOS
 
         private RTCIceCandidate(Webrtc.RTCIceCandidate nativeIceCandidate) : base(nativeIceCandidate) { }
 
-        public string Candidate => ((Webrtc.RTCIceCandidate)NativeObject).Sdp;
+        public string Candidate => NativeObject.Sdp;
 
         public RTCIceComponent Component => Candidate
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
@@ -79,9 +79,9 @@ namespace WebRTCme.iOS
             }
         }
 
-        public string SdpMid => ((Webrtc.RTCIceCandidate)NativeObject).SdpMid;
+        public string SdpMid => NativeObject.SdpMid;
 
-        public ushort? SdpMLineIndex => (ushort)((Webrtc.RTCIceCandidate)NativeObject).SdpMLineIndex;
+        public ushort? SdpMLineIndex => (ushort)NativeObject.SdpMLineIndex;
 
         public RTCIceTcpCandidateType? TcpType
         {

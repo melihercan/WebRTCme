@@ -22,15 +22,15 @@ namespace WebRTCme.iOS
             switch (mediaStreamTrackKind)
             {
                 case MediaStreamTrackKind.Audio:
-                    var nativeAudioSource = WebRTCme.WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(
+                    var nativeAudioSource = WebRtc.NativePeerConnectionFactory.AudioSourceWithConstraints(
                         /*null*/new Webrtc.RTCMediaConstraints(null, null));
-                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    nativeMediaStreamTrack = WebRtc.NativePeerConnectionFactory
                         .AudioTrackWithSource(nativeAudioSource, id);
                     break;
 
                 case MediaStreamTrackKind.Video:
-                    var nativeVideoSource = WebRTCme.WebRtc.NativePeerConnectionFactory.VideoSource;
-                    nativeMediaStreamTrack = WebRTCme.WebRtc.NativePeerConnectionFactory
+                    var nativeVideoSource = WebRtc.NativePeerConnectionFactory.VideoSource;
+                    nativeMediaStreamTrack = WebRtc.NativePeerConnectionFactory
                         .VideoTrackWithSource(nativeVideoSource, id);
                     break;
             }
@@ -48,7 +48,7 @@ namespace WebRTCme.iOS
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Id => ((Webrtc.RTCMediaStreamTrack)NativeObject).TrackId;
+        public string Id => NativeObject.TrackId;
 
         public bool Isolated => throw new NotImplementedException();
 
@@ -66,7 +66,7 @@ namespace WebRTCme.iOS
 
         public bool Readonly => throw new NotImplementedException();
 
-        public MediaStreamTrackState ReadyState => ((Webrtc.RTCMediaStreamTrack)NativeObject).ReadyState.FromNative();
+        public MediaStreamTrackState ReadyState => NativeObject.ReadyState.FromNative();
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;

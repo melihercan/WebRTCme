@@ -19,25 +19,25 @@ namespace WebRTCme.iOS
 
         public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public uint BufferedAmount => (uint)((Webrtc.RTCDataChannel)NativeObject).BufferedAmount;
+        public uint BufferedAmount => (uint)NativeObject.BufferedAmount;
 
         public uint BufferedAmountLowThreshold { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public ushort Id => (ushort)((Webrtc.RTCDataChannel)NativeObject).ChannelId;
+        public ushort Id => (ushort)NativeObject.ChannelId;
 
-        public string Label => ((Webrtc.RTCDataChannel)NativeObject).Label;
+        public string Label => NativeObject.Label;
 
-        public ushort? MaxPacketLifeTime => ((Webrtc.RTCDataChannel)NativeObject).MaxPacketLifeTime;
+        public ushort? MaxPacketLifeTime => NativeObject.MaxPacketLifeTime;
 
-        public ushort? MaxRetransmits => ((Webrtc.RTCDataChannel)NativeObject).MaxRetransmits;
+        public ushort? MaxRetransmits => NativeObject.MaxRetransmits;
 
-        public bool Negotiated => ((Webrtc.RTCDataChannel)NativeObject).IsNegotiated;
+        public bool Negotiated => NativeObject.IsNegotiated;
 
-        public bool Ordered => ((Webrtc.RTCDataChannel)NativeObject).IsOrdered;
+        public bool Ordered => NativeObject.IsOrdered;
 
-        public string Protocol => ((Webrtc.RTCDataChannel)NativeObject).Protocol;
+        public string Protocol => NativeObject.Protocol;
 
-        public RTCDataChannelState ReadyState => ((Webrtc.RTCDataChannel)NativeObject).ReadyState.FromNative();
+        public RTCDataChannelState ReadyState => NativeObject.ReadyState.FromNative();
 
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
@@ -46,7 +46,7 @@ namespace WebRTCme.iOS
         public event EventHandler<IMessageEvent> OnMessage;
         public event EventHandler OnOpen;
 
-        public void Close() => ((Webrtc.RTCDataChannel)NativeObject).Close();
+        public void Close() => NativeObject.Close();
 
         public void Send(object data)
         {
@@ -59,8 +59,8 @@ namespace WebRTCme.iOS
             else
                 throw new ArgumentException($"{data.GetType()} type is not supported");
 
-      var state = ((Webrtc.RTCDataChannel)NativeObject).ReadyState;
-            var result = ((Webrtc.RTCDataChannel)NativeObject).SendData(buffer);
+      var state = NativeObject.ReadyState;
+            var result = NativeObject.SendData(buffer);
         }
 
         #region NativeEvents

@@ -79,8 +79,8 @@ namespace WebRTCme.Android
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"{id}"));
             }
 
-            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
-                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
+            var nativeMediaStream = WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in mediaStreamTracks)
                 self.AddTrack(track);
@@ -91,7 +91,7 @@ namespace WebRTCme.Android
 
         public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
-        public string Id => ((Webrtc.MediaStream)NativeObject).Id;
+        public string Id => NativeObject.Id;
 
         public event EventHandler<IMediaStreamTrackEvent> OnAddTrack;
         public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
@@ -108,7 +108,7 @@ namespace WebRTCme.Android
         public IMediaStreamTrack[] GetVideoTracks()
         {
             var videoTracks = new List<IMediaStreamTrack>();
-            foreach (Webrtc.MediaStreamTrack track in ((Webrtc.MediaStream)NativeObject).VideoTracks)
+            foreach (Webrtc.MediaStreamTrack track in NativeObject.VideoTracks)
                 videoTracks.Add(MediaStreamTrack.Create(track));
             return videoTracks.ToArray();
         }
@@ -116,7 +116,7 @@ namespace WebRTCme.Android
         public IMediaStreamTrack[] GetAudioTracks()
         {
             var audioTracks = new List<IMediaStreamTrack>();
-            foreach (Webrtc.MediaStreamTrack track in ((Webrtc.MediaStream)NativeObject).AudioTracks)
+            foreach (Webrtc.MediaStreamTrack track in NativeObject.AudioTracks)
                 audioTracks.Add(MediaStreamTrack.Create(track));
             return audioTracks.ToArray();
         }
@@ -126,10 +126,10 @@ namespace WebRTCme.Android
             switch(track.Kind)
             {
                 case MediaStreamTrackKind.Video:
-                    ((Webrtc.MediaStream)NativeObject).AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
+                    NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
                     break;
                 case MediaStreamTrackKind.Audio:
-                    ((Webrtc.MediaStream)NativeObject).AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
+                    NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
                     break;
             };
         }
@@ -139,10 +139,10 @@ namespace WebRTCme.Android
             switch (track.Kind)
             {
                 case MediaStreamTrackKind.Video:
-                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
+                    NativeObject.RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
                     break;
                 case MediaStreamTrackKind.Audio:
-                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
+                    NativeObject.RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
                     break;
             };
         }

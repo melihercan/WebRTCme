@@ -17,7 +17,7 @@ namespace WebRTCme.Android
         {
         }
 
-        public string Candidate => ((Webrtc.IceCandidate)NativeObject).Sdp;
+        public string Candidate => NativeObject.Sdp;
 
         public RTCIceComponent Component => Candidate
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
@@ -80,9 +80,9 @@ namespace WebRTCme.Android
             }
         }
         
-        public string SdpMid => ((Webrtc.IceCandidate)NativeObject).SdpMid;
+        public string SdpMid => NativeObject.SdpMid;
 
-        public ushort? SdpMLineIndex => (ushort)((Webrtc.IceCandidate)NativeObject).SdpMLineIndex;
+        public ushort? SdpMLineIndex => (ushort)NativeObject.SdpMLineIndex;
 
         public RTCIceTcpCandidateType? TcpType
         {

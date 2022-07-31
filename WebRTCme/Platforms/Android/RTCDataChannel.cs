@@ -19,13 +19,13 @@ namespace WebRTCme.Android
 
         public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public uint BufferedAmount => (uint)((Webrtc.DataChannel)NativeObject).BufferedAmount();
+        public uint BufferedAmount => (uint)NativeObject.BufferedAmount();
 
         public uint BufferedAmountLowThreshold { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public ushort Id => (ushort)((Webrtc.DataChannel)NativeObject).Id();
+        public ushort Id => (ushort)NativeObject.Id();
 
-        public string Label => ((Webrtc.DataChannel)NativeObject).Label();
+        public string Label => NativeObject.Label();
 
         public ushort? MaxPacketLifeTime => throw new NotImplementedException();
 
@@ -37,7 +37,7 @@ namespace WebRTCme.Android
 
         public string Protocol => throw new NotImplementedException();
 
-        public RTCDataChannelState ReadyState => ((Webrtc.DataChannel)NativeObject).InvokeState().FromNative();
+        public RTCDataChannelState ReadyState => NativeObject.InvokeState().FromNative();
 
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
@@ -46,22 +46,22 @@ namespace WebRTCme.Android
         public event EventHandler<IMessageEvent> OnMessage;
         public event EventHandler OnOpen;
 
-        public void Close() => ((Webrtc.DataChannel)NativeObject).Close();
+        public void Close() => NativeObject.Close();
 
         public void Send(object data)
         {
-            Webrtc.DataChannel.Buffer buffer = null;
+            DataChannel.Buffer buffer = null;
 
             if (data.GetType() == typeof(byte[]))
-                buffer = new Webrtc.DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap((byte[])data), true);
+                buffer = new DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap((byte[])data), true);
             else if (data.GetType() == typeof(string))
-                buffer = new Webrtc.DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap(
+                buffer = new DataChannel.Buffer(Java.Nio.ByteBuffer.Wrap(
                     Encoding.UTF8.GetBytes((string)data)), false);
             else
                 throw new ArgumentException($"{data.GetType()} type is not supported");
 
-       var state = ((Webrtc.DataChannel)NativeObject).InvokeState();
-            var result = ((Webrtc.DataChannel)NativeObject).Send(buffer);
+            var state = NativeObject.InvokeState();
+            var result = NativeObject.Send(buffer);
         }
 
         #region NativeEvents
@@ -83,7 +83,7 @@ namespace WebRTCme.Android
 
         public void OnStateChange()
         {
-            var nativeState = ((Webrtc.DataChannel)NativeObject).InvokeState();
+            var nativeState = NativeObject.InvokeState();
             if (nativeState == Webrtc.DataChannel.State.Open)
                 OnOpen?.Invoke(this, EventArgs.Empty);
             else if (nativeState == Webrtc.DataChannel.State.Closing)
