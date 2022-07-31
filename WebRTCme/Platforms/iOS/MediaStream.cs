@@ -5,10 +5,11 @@ using WebRTCme;
 using System.Linq;
 using AVFoundation;
 using System.Threading.Tasks;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class MediaStream : ApiBase, IMediaStream
+    internal class MediaStream : NativeBase<Webrtc.RTCMediaStream>, IMediaStream
     {
         public static IMediaStream Create()
         {
@@ -80,11 +81,11 @@ namespace WebRTCme.iOS
 
         public IMediaStreamTrack GetTrackById(string id) => GetTracks().ToList().Find(track => track.Id == id);
 
-        public IMediaStreamTrack[] GetVideoTracks() => ((Webrtc.RTCMediaStream)NativeObject).VideoTracks
+        public IMediaStreamTrack[] GetVideoTracks() => NativeObject.VideoTracks
             .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
             .ToArray();
 
-        public IMediaStreamTrack[] GetAudioTracks() => ((Webrtc.RTCMediaStream)NativeObject).AudioTracks
+        public IMediaStreamTrack[] GetAudioTracks() => NativeObject.AudioTracks
             .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
             .ToArray();
 
@@ -95,10 +96,10 @@ namespace WebRTCme.iOS
                 switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
-                        ((Webrtc.RTCMediaStream)NativeObject).AddAudioTrack((Webrtc.RTCAudioTrack)track.NativeObject);
+                        ((Webrtc.RTCMediaStream)NativeObject).AddAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
                         break;
                     case MediaStreamTrackKind.Video:
-                        ((Webrtc.RTCMediaStream)NativeObject).AddVideoTrack((Webrtc.RTCVideoTrack)track.NativeObject);
+                        ((Webrtc.RTCMediaStream)NativeObject).AddVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
                         break;
                 }
             };
@@ -111,10 +112,10 @@ namespace WebRTCme.iOS
                 switch (track.Kind)
                 {
                     case MediaStreamTrackKind.Audio:
-                        ((Webrtc.RTCMediaStream)NativeObject).RemoveAudioTrack((Webrtc.RTCAudioTrack)track.NativeObject);
+                        ((Webrtc.RTCMediaStream)NativeObject).RemoveAudioTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCAudioTrack);
                         break;
                     case MediaStreamTrackKind.Video:
-                        ((Webrtc.RTCMediaStream)NativeObject).RemoveVideoTrack((Webrtc.RTCVideoTrack)track.NativeObject);
+                        ((Webrtc.RTCMediaStream)NativeObject).RemoveVideoTrack(((MediaStreamTrack)track).NativeObject as Webrtc.RTCVideoTrack);
                         break;
                 }
             };

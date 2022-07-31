@@ -10,10 +10,11 @@ using Xamarin.Essentials;
 #endif
 using System.Linq;
 using Android.OS;
+using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class MediaStream : ApiBase, IMediaStream
+    internal class MediaStream : NativeBase<Webrtc.MediaStream>, IMediaStream
     {
         public static IMediaStream Create(Webrtc.MediaStream nativeMediaStream) => new MediaStream(nativeMediaStream);
 
@@ -86,7 +87,7 @@ namespace WebRTCme.Android
             return self;
         }
 
-        private MediaStream(Webrtc.MediaStream nativeMediaStream) : base(nativeMediaStream) { }
+        public MediaStream(Webrtc.MediaStream nativeMediaStream) : base(nativeMediaStream) { }
 
         public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
@@ -125,10 +126,10 @@ namespace WebRTCme.Android
             switch(track.Kind)
             {
                 case MediaStreamTrackKind.Video:
-                    ((Webrtc.MediaStream)NativeObject).AddTrack(track.NativeObject as Webrtc.VideoTrack);
+                    ((Webrtc.MediaStream)NativeObject).AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
                     break;
                 case MediaStreamTrackKind.Audio:
-                    ((Webrtc.MediaStream)NativeObject).AddTrack(track.NativeObject as Webrtc.AudioTrack);
+                    ((Webrtc.MediaStream)NativeObject).AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
                     break;
             };
         }
@@ -138,10 +139,10 @@ namespace WebRTCme.Android
             switch (track.Kind)
             {
                 case MediaStreamTrackKind.Video:
-                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(track.NativeObject as Webrtc.VideoTrack);
+                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.VideoTrack);
                     break;
                 case MediaStreamTrackKind.Audio:
-                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(track.NativeObject as Webrtc.AudioTrack);
+                    ((Webrtc.MediaStream)NativeObject).RemoveTrack(((MediaStreamTrack)track).NativeObject as Webrtc.AudioTrack);
                     break;
             };
         }

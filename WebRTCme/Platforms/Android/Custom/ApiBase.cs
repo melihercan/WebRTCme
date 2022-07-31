@@ -17,5 +17,10 @@ namespace WebRTCme.Android
         }
 
         public object NativeObject { get; set; }
+
+        public object GetNativeObject()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

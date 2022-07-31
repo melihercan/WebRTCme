@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebRTCme
 {
-    public interface IRTCPeerConnection : INativeObject
+    public interface IRTCPeerConnection : IDisposable // INativeObject
     {
         bool CanTrickleIceCandidates { get; }
 
@@ -33,7 +33,6 @@ namespace WebRTCme
         IRTCSctpTransport Sctp { get; }
 
         RTCSignalingState SignalingState { get; }
-
 
         event EventHandler OnConnectionStateChanged;
         event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -88,12 +87,6 @@ namespace WebRTCme
 
         Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription);
 
-
-
-
         Task<string> GetStatsHack();
-
-
     }
-
 }

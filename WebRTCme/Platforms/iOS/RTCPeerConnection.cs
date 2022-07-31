@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme;
+using WebRTCme.Platforms.iOS.Custom;
 
 namespace WebRTCme.iOS
 {
-    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection, Webrtc.IRTCPeerConnectionDelegate
+    internal class RTCPeerConnection : NativeBase<Webrtc.RTCPeerConnection>, IRTCPeerConnection, Webrtc.IRTCPeerConnectionDelegate
     {
         /// <summary>
         /// //////////////REMOVE THIS ONCE BLAZOR CALLBACKS IMPLEMENTED
@@ -47,7 +48,7 @@ namespace WebRTCme.iOS
         public static IRTCPeerConnection Create(RTCConfiguration configuration) => 
             new RTCPeerConnection(configuration);
 
-        private RTCPeerConnection(RTCConfiguration configuration)
+        public RTCPeerConnection(RTCConfiguration configuration)
         {
 #if false
             var rtcConfig = new Webrtc.RTCConfiguration();
@@ -132,7 +133,7 @@ namespace WebRTCme.iOS
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             RTCRtpSender.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTrack(
-                track.NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
+                ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
@@ -148,10 +149,10 @@ namespace WebRTCme.iOS
         {
             if (init is null)
                 return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
-                    (Webrtc.RTCMediaStreamTrack)track.NativeObject));
+                    ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack));
             else
                 return RTCRtpTransceiver.Create(((Webrtc.RTCPeerConnection)NativeObject).AddTransceiverWithTrack(
-                    (Webrtc.RTCMediaStreamTrack)track.NativeObject, init.ToNative()));
+                    ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, init.ToNative()));
         }
 
 

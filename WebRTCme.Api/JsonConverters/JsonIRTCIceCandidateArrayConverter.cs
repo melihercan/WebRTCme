@@ -59,6 +59,11 @@ namespace WebRTCme
             throw new NotImplementedException();
         }
 
+        public object GetNativeObject()
+        {
+            throw new NotImplementedException();
+        }
+
         public string ToJson()
         {
             throw new NotImplementedException();

@@ -10,9 +10,9 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    public abstract class ApiBase : INativeObject
+    public abstract class NativeBase // : INativeObject
     {
-        protected ApiBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
+        protected NativeBase(IJSRuntime jsRuntime, JsObjectRef jsObjectRef = null)
         {
             JsRuntime = jsRuntime;
             NativeObject = jsObjectRef;

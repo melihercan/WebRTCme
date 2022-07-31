@@ -35,45 +35,14 @@ namespace WebRTCme.Middleware
             var cameraDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
             _isCamera = cameraDevices.Any(device => device.ModelID == videoTrack.Id);
 
-            var nativeVideoTrack = videoTrack.NativeObject as Webrtc.RTCVideoTrack;
-
             if (_isCamera)
             {
                 _cameraView = new Webrtc.RTCCameraPreviewView();
                 AddSubview(_cameraView);
 
-                var nativeVideoSource = nativeVideoTrack.Source;
                 /*var*/ _videoCapturer = new Webrtc.RTCCameraVideoCapturer();
-                _videoCapturer.Delegate = nativeVideoSource;
+                IosSupport.SetCameraTrack(_cameraView, videoTrack, _videoCapturer);
 
-                var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
-                    ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
-                    // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelID from
-                    // RTCCameraVideoCapturer.CaptureDevices list.
-                    .Single(device => device.ModelID == videoTrack.Id);
-
-                var formats = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice);
-                System.Diagnostics.Debug.WriteLine($"============= Capture Formats =============== ");
-                int index = 0;
-                foreach (var f in formats)
-                {
-                    CMVideoFormatDescription desc = (CMVideoFormatDescription)f.FormatDescription;
-                    var dim = desc.Dimensions;
-                    var maxSupportedFps = 0d;
-                    foreach (var fpsRange in f.VideoSupportedFrameRateRanges)
-                        maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
-                    System.Diagnostics.Debug.WriteLine($"index:{index++} width:{dim.Width} height:{dim.Height} fpsMax:{maxSupportedFps}");
-                }
-
-
-                var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice)[6/*0*/];
-                CMVideoFormatDescription videoFormatDescription = (CMVideoFormatDescription)format.FormatDescription;
-                var capturerDimensions = videoFormatDescription.Dimensions;
-                var capturerSize = new CGSize(capturerDimensions.Width, capturerDimensions.Height);
-                var fps = 30;
-                _videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
-
-                _cameraView.CaptureSession = _videoCapturer.CaptureSession;
             }
             else
             {
@@ -81,8 +50,58 @@ namespace WebRTCme.Middleware
                 _rendererView.Delegate = this;
                 AddSubview(_rendererView);
 
-                nativeVideoTrack.AddRenderer(_rendererView);
+                IosSupport.SetRendererTrack(_rendererView, videoTrack);
             }
+
+
+            //var nativeVideoTrack = videoTrack.NativeObject as Webrtc.RTCVideoTrack;
+
+            //if (_isCamera)
+            //{
+            //    _cameraView = new Webrtc.RTCCameraPreviewView();
+            //    AddSubview(_cameraView);
+
+            //    var nativeVideoSource = nativeVideoTrack.Source;
+            //    /*var*/ _videoCapturer = new Webrtc.RTCCameraVideoCapturer();
+            //    _videoCapturer.Delegate = nativeVideoSource;
+
+            //    var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
+            //        ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
+            //        // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelID from
+            //        // RTCCameraVideoCapturer.CaptureDevices list.
+            //        .Single(device => device.ModelID == videoTrack.Id);
+
+            //    var formats = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice);
+            //    System.Diagnostics.Debug.WriteLine($"============= Capture Formats =============== ");
+            //    int index = 0;
+            //    foreach (var f in formats)
+            //    {
+            //        CMVideoFormatDescription desc = (CMVideoFormatDescription)f.FormatDescription;
+            //        var dim = desc.Dimensions;
+            //        var maxSupportedFps = 0d;
+            //        foreach (var fpsRange in f.VideoSupportedFrameRateRanges)
+            //            maxSupportedFps = Math.Max(maxSupportedFps, fpsRange.MaxFrameRate);
+            //        System.Diagnostics.Debug.WriteLine($"index:{index++} width:{dim.Width} height:{dim.Height} fpsMax:{maxSupportedFps}");
+            //    }
+
+            //    var format = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice)[6/*0*/];
+            //    CMVideoFormatDescription videoFormatDescription = (CMVideoFormatDescription)format.FormatDescription;
+            //    var capturerDimensions = videoFormatDescription.Dimensions;
+            //    var capturerSize = new CGSize(capturerDimensions.Width, capturerDimensions.Height);
+            //    var fps = 30;
+            //    _videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
+
+            //    _cameraView.CaptureSession = _videoCapturer.CaptureSession;
+            //}
+            //else
+            //{
+            //    _rendererView = new Webrtc.RTCEAGLVideoView();
+            //    _rendererView.Delegate = this;
+            //    AddSubview(_rendererView);
+
+            //    nativeVideoTrack.AddRenderer(_rendererView);
+            //}
+
 
             SetNeedsLayout();
         }

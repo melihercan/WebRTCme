@@ -24,7 +24,7 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public static IMediaRecorder Create(IJSRuntime jsRuntime, IMediaStream stream, MediaRecorderOptions options)
         {
-            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaRecorder", stream.NativeObject, options);
+            var jsObjectRef = jsRuntime.CreateJsObject("window", "MediaRecorder", ((MediaStream)stream).NativeObject, options);
             return new MediaRecorder(jsRuntime, jsObjectRef, stream, options);
         }
 

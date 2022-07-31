@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace WebRTCme
 {
 
-    public interface IMediaStreamTrack : INativeObject
+    public interface IMediaStreamTrack : IDisposable // INativeObject
     {
         public string ContentHint { get; set; }
         

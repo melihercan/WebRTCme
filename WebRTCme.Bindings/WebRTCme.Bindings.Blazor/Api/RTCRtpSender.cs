@@ -38,10 +38,10 @@ namespace WebRTCme.Bindings.Blazor.Api
 
         public void SetStreams(IMediaStream[] mediaStreams) =>
             JsRuntime.CallJsMethodVoid(
-                NativeObject, "setStreams", mediaStreams.Select(stream => stream.NativeObject).ToArray());
+                NativeObject, "setStreams", mediaStreams.Select(stream => ((MediaStream)stream).NativeObject).ToArray());
 
         public Task ReplaceTrack(IMediaStreamTrack newTrack = null) =>
-            JsRuntime.CallJsMethodVoidAsync(NativeObject, "replaceTrack", newTrack?.NativeObject).AsTask();
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "replaceTrack", ((MediaStreamTrack)newTrack)?.NativeObject).AsTask();
 
         /*static*/
         public RTCRtpCapabilities GetCapabilities(string kind) =>

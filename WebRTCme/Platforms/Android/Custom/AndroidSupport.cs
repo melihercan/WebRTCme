@@ -21,6 +21,31 @@ namespace WebRTCme
         {
             return WebRtc.NativeEglBase;
         }
+
+        public static void SetTrack(IMediaStreamTrack videoTrack, Webrtc.SurfaceViewRenderer rendererView, 
+            global::Android.Content.Context context/*, Webrtc.IEglBaseContext eglBaseContext*/)
+        {
+            var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.VideoTrack;
+
+            var cameraEnum = new Webrtc.Camera2Enumerator(context);
+            var cameraDevices = cameraEnum.GetDeviceNames();
+            var isCamera = cameraDevices.Any(device => device == videoTrack.Id);
+
+            if (isCamera)
+            {
+                var nativeVideoSource = AndroidSupport.GetNativeVideoSource(videoTrack);
+                var videoCapturer = cameraEnum.CreateCapturer(videoTrack.Id, null);
+                videoCapturer.Initialize(
+                    Webrtc.SurfaceTextureHelper.Create(
+                        "CameraVideoCapturerThread",
+                        GetNativeEglBase().EglBaseContext),
+                    context,
+                    nativeVideoSource.CapturerObserver);
+                videoCapturer.StartCapture(480, 640, 30);
+            }
+
+            nativeVideoTrack.AddSink(rendererView);
+        }
     }
 }
 

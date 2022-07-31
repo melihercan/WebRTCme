@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCTrackEvent : ApiBase, IRTCTrackEvent
+    internal class RTCTrackEvent : NativeBase, IRTCTrackEvent
     {
 
         public static IRTCTrackEvent Create(IJSRuntime jsRuntime, JsObjectRef jsObjectRefNativeTrackEvent) => 
@@ -36,13 +36,13 @@ namespace WebRTCme.Bindings.Blazor.Api
                 JsRuntime.DeleteJsObjectRef(jsObjectRefStreams.JsObjectRefId);
                 return streams;
             }
-            set => SetNativeProperty("streams", value.Select(stream => stream.NativeObject).ToArray());
+            set => SetNativeProperty("streams", value.Select(stream => ((MediaStream)stream).NativeObject).ToArray());
         }
 
         public IMediaStreamTrack Track 
         {
             get => MediaStreamTrack.Create(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "track"));
-            set => SetNativeProperty("track", value.NativeObject);
+            set => SetNativeProperty("track", ((MediaStreamTrack)value).NativeObject);
         }
         
         public IRTCRtpTransceiver Transceiver 

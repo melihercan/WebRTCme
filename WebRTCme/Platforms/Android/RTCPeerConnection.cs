@@ -4,9 +4,11 @@ using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class RTCPeerConnection : NativeBase<Webrtc.PeerConnection>, /*ApiBase,*/ IRTCPeerConnection, 
+    internal class RTCPeerConnection : NativeBase<Webrtc.PeerConnection>, IRTCPeerConnection, 
         Webrtc.PeerConnection.IObserver
     {
+        private List<IRTCRtpTransceiver> _transceivers;
+
         private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
         {
             get
@@ -28,9 +30,6 @@ namespace WebRTCme.Android
                 return nativeConstraints;
             }
         }
-
-        //public static IRTCPeerConnection Create(RTCConfiguration configuration) =>
-        //    new RTCPeerConnection(configuration);
 
         public RTCPeerConnection(RTCConfiguration configuration) : base() =>
             NativeObject = WebRtc.NativePeerConnectionFactory.CreatePeerConnection(configuration.ToNative(), this);
@@ -61,7 +60,7 @@ namespace WebRTCme.Android
 
         public RTCSignalingState SignalingState => NativeObject.InvokeSignalingState().FromNative();
 
-        object INativeObject.NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //object INativeObject.NativeObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -84,27 +83,25 @@ namespace WebRTCme.Android
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(NativeObject.AddTrack(
-                track.NativeObject as Webrtc.MediaStreamTrack, new List<string> { stream.Id }));
+            RTCRtpSender.Create(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, 
+                new List<string> { stream.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
-                    kind.ToNative()));
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(kind.ToNative()));
             else
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
-                    kind.ToNative(), init.ToNative()));
+                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
             if (init is null)
                 return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
-                    (Webrtc.MediaStreamTrack)track.NativeObject));
+                    ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack));
             else
                 return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
-                    (Webrtc.MediaStreamTrack)track.NativeObject, init.ToNative()));
+                    ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, init.ToNative()));
         }
 
         public void Close() => NativeObject.Close();
@@ -112,24 +109,20 @@ namespace WebRTCme.Android
         public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            NativeObject.CreateAnswer(
-                new SdpObserverProxy(tcs), 
-                new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
+            NativeObject.CreateAnswer(new SdpObserverProxy(tcs), new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var answer = await tcs.Task;
             // Android DOES NOT expose 'Type'!!! Set it manually here.
-                answer.Type = RTCSdpType.Answer;
+            answer.Type = RTCSdpType.Answer;
             return answer;
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
-                RTCDataChannel.Create(NativeObject.CreateDataChannel(label, options.ToNative()));
+            RTCDataChannel.Create(NativeObject.CreateDataChannel(label, options.ToNative()));
 
         public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
-            NativeObject.CreateOffer(
-                new SdpObserverProxy(tcs), 
-                new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
+            NativeObject.CreateOffer(new SdpObserverProxy(tcs), new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var offer = await tcs.Task;
             // Android DOES NOT expose 'Type'!!! I set it manually here. 
             offer.Type = RTCSdpType.Offer;
@@ -151,14 +144,11 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpReceiver[] GetReceivers() =>
-            NativeObject.Receivers
-                .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
+        public IRTCRtpReceiver[] GetReceivers() => 
+            NativeObject.Receivers.Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
 
         public IRTCRtpSender[] GetSenders() =>
-            NativeObject.Senders
-                .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
-
+            NativeObject.Senders.Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
 
         public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
@@ -184,8 +174,30 @@ namespace WebRTCme.Android
 
         //}
 
+
+        /*
+         * //This is the comparison class
+    CompareLogic compareLogic = new CompareLogic();
+
+    //Create a couple objects to compare
+    Person person1 = new Person();
+    person1.DateCreated = DateTime.Now;
+    person1.Name = "Greg";
+
+    Person person2 = new Person();
+    person2.Name = "John";
+    person2.DateCreated = person1.DateCreated;
+
+    ComparisonResult result = compareLogic.Compare(person1, person2);
+
+    //These will be different, write out the differences
+    if (!result.AreEqual)
+        Console.WriteLine(result.DifferencesString);
+         */
+
         public void RemoveTrack(IRTCRtpSender sender) =>
             NativeObject.RemoveTrack(sender.NativeObject as Webrtc.RtpSender);
+
 
         public void RestartIce()
         {
@@ -203,21 +215,19 @@ namespace WebRTCme.Android
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            NativeObject.SetLocalDescription(
-                new SdpObserverProxy(tcs), sessionDescription.ToNative());
+            NativeObject.SetLocalDescription(new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
-            ((Webrtc.PeerConnection)NativeObject).SetRemoteDescription(
-                new SdpObserverProxy(tcs), sessionDescription.ToNative());
+            NativeObject.SetRemoteDescription(new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
 
-        #region NativeEvents
+#region NativeEvents
         public void OnAddStream(Webrtc.MediaStream p0)
         {
             // Depreceted. Convert to OnTrack.
@@ -358,10 +368,10 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        #endregion
+#endregion
 
 
-        #region SdpObserver
+#region SdpObserver
         private class SdpObserverProxy : Java.Lang.Object, Webrtc.ISdpObserver
         {
             private readonly TaskCompletionSource<RTCSessionDescriptionInit> _tcsCreate;

@@ -10,7 +10,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class RTCPeerConnection : ApiBase, IRTCPeerConnection
+    internal class RTCPeerConnection : NativeBase, IRTCPeerConnection
     {
         public static IRTCPeerConnection Create(IJSRuntime jsRuntime, RTCConfiguration rtcConfiguration)
         {

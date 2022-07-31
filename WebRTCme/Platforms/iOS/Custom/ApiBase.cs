@@ -14,5 +14,10 @@ namespace WebRTCme.iOS
         protected ApiBase(object nativeObject) => NativeObject = nativeObject;
 
         public object NativeObject { get; set; }
+
+        public object GetNativeObject()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

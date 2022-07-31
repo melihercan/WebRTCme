@@ -11,7 +11,7 @@ using WebRTCme;
 
 namespace WebRTCme.Bindings.Blazor.Api
 {
-    internal class MediaStream : ApiBase, IMediaStream
+    internal class MediaStream : NativeBase, IMediaStream
     {
 
         public static IMediaStream Create(IJSRuntime jsRuntime) =>
@@ -36,7 +36,7 @@ namespace WebRTCme.Bindings.Blazor.Api
         public event EventHandler<IMediaStreamTrackEvent> OnRemoveTrack;
 
         public void AddTrack(IMediaStreamTrack track) =>
-            JsRuntime.CallJsMethodVoid(NativeObject, "addTrack", track.NativeObject);
+            JsRuntime.CallJsMethodVoid(NativeObject, "addTrack", ((MediaStreamTrack)track).NativeObject);
 
         public IMediaStream Clone() =>
             Create(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
@@ -72,6 +72,6 @@ namespace WebRTCme.Bindings.Blazor.Api
         }
 
         public void RemoveTrack(IMediaStreamTrack track) =>
-            JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack", track.NativeObject);
+            JsRuntime.CallJsMethodVoid(NativeObject, "removeTrack", ((MediaStreamTrack)track).NativeObject);
     }
 }

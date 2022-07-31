@@ -18,7 +18,7 @@ namespace WebRTCme.Middleware
         private readonly Context _context;
         private readonly Webrtc.SurfaceViewRenderer _rendererView;
         private readonly Webrtc.IEglBaseContext _eglBaseContext;
-        private bool _isCamera;
+        //private bool _isCamera;
 
         public MediaView(Context context) : base(context)
         {
@@ -34,26 +34,27 @@ namespace WebRTCme.Middleware
 
         public void SetTrack(IMediaStreamTrack videoTrack)
         {
-            var nativeVideoTrack = videoTrack.NativeObject as Webrtc.VideoTrack;
+            AndroidSupport.SetTrack(videoTrack, _rendererView, _context/*, _eglBaseContext*/);
+            //var nativeVideoTrack = videoTrack.NativeObject as Webrtc.VideoTrack;
 
-            var cameraEnum = new Webrtc.Camera2Enumerator(_context);
-            var cameraDevices = cameraEnum.GetDeviceNames(); 
-            _isCamera = cameraDevices.Any(device => device == videoTrack.Id);
+            //var cameraEnum = new Webrtc.Camera2Enumerator(_context);
+            //var cameraDevices = cameraEnum.GetDeviceNames(); 
+            //var isCamera = cameraDevices.Any(device => device == videoTrack.Id);
 
-            if (_isCamera)
-            {
-                var nativeVideoSource = AndroidSupport.GetNativeVideoSource(videoTrack);
-                var videoCapturer = cameraEnum.CreateCapturer(videoTrack.Id, null);
-                videoCapturer.Initialize(
-                    Webrtc.SurfaceTextureHelper.Create(
-                        "CameraVideoCapturerThread",
-                        _eglBaseContext),
-                    _context,
-                    nativeVideoSource.CapturerObserver);
-                videoCapturer.StartCapture(480, 640, 30);
-            }
+            //if (isCamera)
+            //{
+            //    var nativeVideoSource = AndroidSupport.GetNativeVideoSource(videoTrack);
+            //    var videoCapturer = cameraEnum.CreateCapturer(videoTrack.Id, null);
+            //    videoCapturer.Initialize(
+            //        Webrtc.SurfaceTextureHelper.Create(
+            //            "CameraVideoCapturerThread",
+            //            _eglBaseContext),
+            //        _context,
+            //        nativeVideoSource.CapturerObserver);
+            //    videoCapturer.StartCapture(480, 640, 30);
+            //}
 
-            nativeVideoTrack.AddSink(_rendererView);
+            //nativeVideoTrack.AddSink(_rendererView);
         }
 
         protected override void OnLayout(bool changed, int l, int t, int r, int b)
