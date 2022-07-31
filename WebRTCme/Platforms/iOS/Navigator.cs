@@ -13,6 +13,6 @@ namespace WebRTCme.iOS
 
         public Navigator() { }
 
-        public IMediaDevices MediaDevices => iOS.MediaDevices.Create();
+        public IMediaDevices MediaDevices => new iOS.MediaDevices();
     }
 }

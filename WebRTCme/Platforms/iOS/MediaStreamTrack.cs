@@ -38,11 +38,6 @@ namespace WebRTCme.iOS
             return new MediaStreamTrack(nativeMediaStreamTrack);
         }
 
-        public static IMediaStreamTrack Create(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack)  
-        {
-            return new MediaStreamTrack(nativeMediaStreamTrack);
-        }
-
         public MediaStreamTrack(Webrtc.RTCMediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
         { }
 

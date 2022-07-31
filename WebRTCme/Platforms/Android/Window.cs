@@ -10,11 +10,9 @@ namespace WebRTCme.Android
 {
     internal class Window : NativeBase<object>, IWindow
     {
-        public static IWindow Create() => new Window();
-
         public INavigator Navigator() => Android.Navigator.Create();
 
-        public IMediaStream MediaStream() => Android.MediaStream.Create();
+        public IMediaStream MediaStream() => new MediaStream();
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             new Android.RTCPeerConnection(configuration);

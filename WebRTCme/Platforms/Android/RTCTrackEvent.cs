@@ -12,22 +12,18 @@ namespace WebRTCme.Android
         private readonly Webrtc.RtpReceiver _nativeRtpReceiver;
         private readonly Webrtc.MediaStream[] _nativeMediaStreams;
 
-        public static IRTCTrackEvent Create(Webrtc.RtpReceiver nativeRtpReceiver, 
-            Webrtc.MediaStream[] nativeMediaStreams) =>
-                new RTCTrackEvent(nativeRtpReceiver, nativeMediaStreams);
-
         public RTCTrackEvent(Webrtc.RtpReceiver nativeRtpReceiver, Webrtc.MediaStream[] nativeMediaStreams)
         {
             _nativeRtpReceiver = nativeRtpReceiver;
             _nativeMediaStreams = nativeMediaStreams;
         }
 
-        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(_nativeRtpReceiver);
+        public IRTCRtpReceiver Receiver => new RTCRtpReceiver(_nativeRtpReceiver);
 
         public IMediaStream[] Streams =>
-            _nativeMediaStreams.Select(nativeMediaStream => MediaStream.Create(nativeMediaStream)).ToArray();
+            _nativeMediaStreams.Select(nativeMediaStream => new MediaStream(nativeMediaStream)).ToArray();
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(_nativeRtpReceiver.Track());
+        public IMediaStreamTrack Track => new MediaStreamTrack(_nativeRtpReceiver.Track());
 
         public IRTCRtpTransceiver Transceiver => throw new NotImplementedException();
 

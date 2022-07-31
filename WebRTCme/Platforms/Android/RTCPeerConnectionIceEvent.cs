@@ -9,9 +9,6 @@ namespace WebRTCme.Android
     {
         private readonly Webrtc.IceCandidate _nativeIceCandidate;
 
-        public static IRTCPeerConnectionIceEvent Create(Webrtc.IceCandidate nativeIceCandidate) =>
-            new RTCPeerConnectionIceEvent(nativeIceCandidate);
-        
         public RTCPeerConnectionIceEvent(Webrtc.IceCandidate nativeIceCandidate) =>
             _nativeIceCandidate = nativeIceCandidate;
 

@@ -9,9 +9,6 @@ namespace WebRTCme.Android
 {
     internal class RTCDataChannel : NativeBase<Webrtc.DataChannel>, IRTCDataChannel, Webrtc.DataChannel.IObserver
     {
-        public static IRTCDataChannel Create(Webrtc.DataChannel nativeDataChannel) =>
-            new RTCDataChannel(nativeDataChannel);
-
         public RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
         {
             nativeDataChannel.RegisterObserver(this);
@@ -76,9 +73,9 @@ namespace WebRTCme.Android
             var bytes = new byte[p0.Data.Remaining()];
             p0.Data.Get(bytes);
             if (p0.Binary)
-                OnMessage?.Invoke(this, MessageEvent.Create(bytes));
+                OnMessage?.Invoke(this, new MessageEvent(bytes));
             else
-                OnMessage?.Invoke(this, MessageEvent.Create(Encoding.UTF8.GetString(bytes)));
+                OnMessage?.Invoke(this, new MessageEvent(Encoding.UTF8.GetString(bytes)));
         }
 
         public void OnStateChange()

@@ -9,14 +9,11 @@ namespace WebRTCme.Android
 {
     internal class RTCRtpReceiver : NativeBase<Webrtc.RtpReceiver>, IRTCRtpReceiver
     {
-        public static IRTCRtpReceiver Create(Webrtc.RtpReceiver nativeReceiver) =>
-            new RTCRtpReceiver(nativeReceiver);
-
         public RTCRtpReceiver(RtpReceiver nativeReceiver) : base(nativeReceiver)
         {
         }
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track());
+        public IMediaStreamTrack Track => new MediaStreamTrack(NativeObject.Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 

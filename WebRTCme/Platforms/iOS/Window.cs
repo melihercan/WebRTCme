@@ -9,14 +9,12 @@ namespace WebRTCme.iOS
 {
     internal class Window : NativeBase<object>, IWindow
     {
-        public static IWindow Create() => new Window();
-
         public INavigator Navigator() => iOS.Navigator.Create();
 
-        public IMediaStream MediaStream() => iOS.MediaStream.Create();
+        public IMediaStream MediaStream() => new iOS.MediaStream();
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
-            iOS.RTCPeerConnection.Create(configuration);
+            new iOS.RTCPeerConnection(configuration);
 
         public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
         {

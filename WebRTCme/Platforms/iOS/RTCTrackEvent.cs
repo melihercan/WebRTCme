@@ -10,9 +10,6 @@ namespace WebRTCme.iOS
     {
         private readonly Webrtc.RTCMediaStreamTrack _nativeTrack;
 
-        public static IRTCTrackEvent Create(Webrtc.RTCMediaStreamTrack nativeTrack) => 
-            new RTCTrackEvent(nativeTrack);
-
         public RTCTrackEvent(Webrtc.RTCMediaStreamTrack nativeTrack)
         {
             _nativeTrack = nativeTrack;
@@ -22,7 +19,7 @@ namespace WebRTCme.iOS
 
         public IMediaStream[] Streams => throw new NotImplementedException();
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(_nativeTrack);
+        public IMediaStreamTrack Track => new MediaStreamTrack(_nativeTrack);
 
         public IRTCRtpTransceiver Transceiver => throw new NotImplementedException();
     }

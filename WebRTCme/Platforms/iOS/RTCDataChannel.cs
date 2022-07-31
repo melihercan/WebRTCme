@@ -9,10 +9,7 @@ namespace WebRTCme.iOS
 {
     internal class RTCDataChannel : NativeBase<Webrtc.RTCDataChannel>, IRTCDataChannel, Webrtc.IRTCDataChannelDelegate
     {
-        public static IRTCDataChannel Create(Webrtc.RTCDataChannel nativeDataChannel) => 
-            new RTCDataChannel(nativeDataChannel);
-
-        private RTCDataChannel(Webrtc.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) 
+        public RTCDataChannel(Webrtc.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) 
         {
             nativeDataChannel.Delegate = this;
         }
@@ -86,11 +83,11 @@ namespace WebRTCme.iOS
         {
             if (buffer.IsBinary)
             {
-                OnMessage?.Invoke(this, MessageEvent.Create(buffer.Data.ToArray()));
+                OnMessage?.Invoke(this, new MessageEvent(buffer.Data.ToArray()));
             }
             else
             {
-                OnMessage?.Invoke(this, MessageEvent.Create(buffer.Data.ToString()));
+                OnMessage?.Invoke(this, new MessageEvent(buffer.Data.ToString()));
             }
         }
 

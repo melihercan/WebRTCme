@@ -10,9 +10,6 @@ namespace WebRTCme.iOS
 {
     internal class RTCRtpTransceiver : NativeBase<Webrtc.IRTCRtpTransceiver>, IRTCRtpTransceiver
     {
-        public static IRTCRtpTransceiver Create(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) => 
-            new RTCRtpTransceiver(nativeRtpTransceiver);
-
         public RTCRtpTransceiver(Webrtc.IRTCRtpTransceiver nativeRtpTransceiver) : base(nativeRtpTransceiver) { }
 
         public RTCRtpTransceiverDirection CurrentDirection => NativeObject.Direction
@@ -26,9 +23,9 @@ namespace WebRTCme.iOS
 
         public string Mid => NativeObject.Mid;
 
-        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(NativeObject.Receiver);
+        public IRTCRtpReceiver Receiver => new RTCRtpReceiver(NativeObject.Receiver);
 
-        public IRTCRtpSender Sender => RTCRtpSender.Create(NativeObject.Sender);
+        public IRTCRtpSender Sender => new RTCRtpSender(NativeObject.Sender);
 
         public bool Stopped => NativeObject.IsStopped;
 

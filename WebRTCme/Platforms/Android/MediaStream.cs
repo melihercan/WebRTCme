@@ -16,15 +16,9 @@ namespace WebRTCme.Android
 {
     internal class MediaStream : NativeBase<Webrtc.MediaStream>, IMediaStream
     {
-        public static IMediaStream Create(Webrtc.MediaStream nativeMediaStream) => new MediaStream(nativeMediaStream);
-
-        public static IMediaStream Create()
-        {
-            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
-                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
-            var self = new MediaStream(nativeMediaStream);
-            return self;
-        }
+        public MediaStream() : this(WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRtc.Id}"))
+        { }
 
         public static IMediaStream Create(IMediaStream stream)
         {
@@ -33,8 +27,8 @@ namespace WebRTCme.Android
 
         public static IMediaStream Create(IMediaStreamTrack[] tracks)
         {
-            var nativeMediaStream = WebRTCme.WebRtc.NativePeerConnectionFactory
-                .CreateLocalMediaStream($"{WebRTCme.WebRtc.Id}");
+            var nativeMediaStream = WebRtc.NativePeerConnectionFactory
+                .CreateLocalMediaStream($"{WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in tracks)
                 self.AddTrack(track);
@@ -109,7 +103,7 @@ namespace WebRTCme.Android
         {
             var videoTracks = new List<IMediaStreamTrack>();
             foreach (Webrtc.MediaStreamTrack track in NativeObject.VideoTracks)
-                videoTracks.Add(MediaStreamTrack.Create(track));
+                videoTracks.Add(new MediaStreamTrack(track));
             return videoTracks.ToArray();
         }
 
@@ -117,7 +111,7 @@ namespace WebRTCme.Android
         {
             var audioTracks = new List<IMediaStreamTrack>();
             foreach (Webrtc.MediaStreamTrack track in NativeObject.AudioTracks)
-                audioTracks.Add(MediaStreamTrack.Create(track));
+                audioTracks.Add(new MediaStreamTrack(track));
             return audioTracks.ToArray();
         }
 

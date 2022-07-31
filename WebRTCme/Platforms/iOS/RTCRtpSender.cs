@@ -9,15 +9,12 @@ namespace WebRTCme.iOS
 {
     internal class RTCRtpSender : NativeBase<Webrtc.IRTCRtpSender>, IRTCRtpSender
     {
-        public static IRTCRtpSender Create(Webrtc.IRTCRtpSender nativeRtpSender) => new RTCRtpSender(nativeRtpSender);
-
         public RTCRtpSender(Webrtc.IRTCRtpSender nativeRtpSender) : base(nativeRtpSender)
-        {
-        }
+        { }
 
-        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(NativeObject.DtmfSender);
+        public IRTCDTMFSender Dtmf => new RTCDTMFSender(NativeObject.DtmfSender);
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track);
+        public IMediaStreamTrack Track => new MediaStreamTrack(NativeObject.Track);
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 

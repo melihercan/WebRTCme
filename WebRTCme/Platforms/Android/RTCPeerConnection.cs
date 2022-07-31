@@ -83,24 +83,24 @@ namespace WebRTCme.Android
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, 
+            new RTCRtpSender(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, 
                 new List<string> { stream.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(kind.ToNative()));
+                return new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative()));
             else
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
+                return new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiver(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack));
             else
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiver(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiver(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, init.ToNative()));
         }
 
@@ -117,7 +117,7 @@ namespace WebRTCme.Android
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options) =>
-            RTCDataChannel.Create(NativeObject.CreateDataChannel(label, options.ToNative()));
+            new RTCDataChannel(NativeObject.CreateDataChannel(label, options.ToNative()));
 
         public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
@@ -145,10 +145,10 @@ namespace WebRTCme.Android
         }
 
         public IRTCRtpReceiver[] GetReceivers() => 
-            NativeObject.Receivers.Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
+            NativeObject.Receivers.Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver)).ToArray();
 
         public IRTCRtpSender[] GetSenders() =>
-            NativeObject.Senders.Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
+            NativeObject.Senders.Select(nativeSender => new RTCRtpSender(nativeSender)).ToArray();
 
         public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
@@ -157,7 +157,7 @@ namespace WebRTCme.Android
 
         public IRTCRtpTransceiver[] GetTransceivers() =>
             NativeObject.Transceivers
-                .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
+                .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();
 
         //{
         //    var list = new List<IRTCRtpTransceiver>();
@@ -242,15 +242,15 @@ namespace WebRTCme.Android
                 audioTrack.SetEnabled(true);
                 audioTrack.SetVolume(10);
             }
-            OnTrack?.Invoke(this, RTCTrackEvent.Create(p0, p1));
+            OnTrack?.Invoke(this, new RTCTrackEvent(p0, p1));
         }
 
         void Webrtc.PeerConnection.IObserver.OnDataChannel(Webrtc.DataChannel p0) =>
-            OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(p0));
+            OnDataChannel?.Invoke(this, new RTCDataChannelEvent(p0));
 
         void Webrtc.PeerConnection.IObserver.OnIceCandidate(Webrtc.IceCandidate p0)
         {
-            OnIceCandidate?.Invoke(this, RTCPeerConnectionIceEvent.Create(p0));
+            OnIceCandidate?.Invoke(this, new RTCPeerConnectionIceEvent(p0));
         }
 
         public void OnIceCandidatesRemoved(Webrtc.IceCandidate[] p0)

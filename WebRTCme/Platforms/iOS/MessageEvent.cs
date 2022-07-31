@@ -8,9 +8,6 @@ namespace WebRTCme.iOS
 {
     internal class MessageEvent : NativeBase<object>, IMessageEvent
     {
-        public static IMessageEvent Create(object data) =>
-            new MessageEvent(data);
-
         public MessageEvent(object data) : base(data) { }
 
         public object Data => NativeObject;

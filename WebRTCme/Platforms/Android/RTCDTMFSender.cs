@@ -8,7 +8,6 @@ namespace WebRTCme.Android
 {
     internal class RTCDTMFSender : NativeBase<Webrtc.DtmfSender>, IRTCDTMFSender
     {
-
         public static IRTCDTMFSender Create(Webrtc.DtmfSender nativeDtmfSender) =>
             new RTCDTMFSender(nativeDtmfSender);
 

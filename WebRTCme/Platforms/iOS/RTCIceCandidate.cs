@@ -12,9 +12,6 @@ namespace WebRTCme.iOS
 {
     internal class RTCIceCandidate : NativeBase<Webrtc.RTCIceCandidate>, IRTCIceCandidate
     {
-        public static IRTCIceCandidate Create(Webrtc.RTCIceCandidate nativeIceCandidate) =>
-            new RTCIceCandidate(nativeIceCandidate);
-
         public RTCIceCandidate(Webrtc.RTCIceCandidate nativeIceCandidate) : base(nativeIceCandidate) { }
 
         public string Candidate => NativeObject.Sdp;

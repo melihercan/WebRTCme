@@ -63,7 +63,7 @@ namespace WebRTCme
             //adm.Release();
         }
 
-        public IWindow Window(IJSRuntime jsRuntime) => global::WebRTCme.Android.Window.Create();
+        public IWindow Window(IJSRuntime jsRuntime) => new global::WebRTCme.Android.Window();
 
         private static IAudioDeviceModule CreateJavaAudioDevice(Context context)
         {

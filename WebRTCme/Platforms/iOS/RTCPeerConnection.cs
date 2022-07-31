@@ -45,9 +45,6 @@ namespace WebRTCme.iOS
             }
         }
 
-        public static IRTCPeerConnection Create(RTCConfiguration configuration) => 
-            new RTCPeerConnection(configuration);
-
         public RTCPeerConnection(RTCConfiguration configuration)
         {
 #if false
@@ -132,26 +129,26 @@ namespace WebRTCme.iOS
         }
 
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            RTCRtpSender.Create(NativeObject.AddTrack(
+            new RTCRtpSender(NativeObject.AddTrack(
                 ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverOfType(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiverOfType(
                     kind.ToNative()));
             else
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverOfType(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiverOfType(
                     kind.ToNative(), init.ToNative()));
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
             if (init is null)
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverWithTrack(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiverWithTrack(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack));
             else
-                return RTCRtpTransceiver.Create(NativeObject.AddTransceiverWithTrack(
+                return new RTCRtpTransceiver(NativeObject.AddTransceiverWithTrack(
                     ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, init.ToNative()));
         }
 
@@ -179,8 +176,8 @@ namespace WebRTCme.iOS
             var nativeOptions = options.ToNative();
 
             var dataChannel =
-            RTCDataChannel.Create(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
-              NativeObject,
+                new RTCDataChannel(Webrtc.RTCPeerConnection_DataChannel.DataChannelForLabel(
+                    NativeObject,
     //            RTCDataChannel.Create(((Webrtc.RTCPeerConnection)NativeObject).DataChannelForLabel(
     label,
 //    config
@@ -226,11 +223,11 @@ namespace WebRTCme.iOS
 
         public IRTCRtpReceiver[] GetReceivers() =>
             NativeObject.Receivers
-                .Select(nativeReceiver => RTCRtpReceiver.Create(nativeReceiver)).ToArray();
+                .Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver)).ToArray();
 
         public IRTCRtpSender[] GetSenders() =>
             NativeObject.Senders
-                .Select(nativeSender => RTCRtpSender.Create(nativeSender)).ToArray();
+                .Select(nativeSender => new RTCRtpSender(nativeSender)).ToArray();
 
         public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
@@ -239,7 +236,7 @@ namespace WebRTCme.iOS
 
         public IRTCRtpTransceiver[] GetTransceivers() =>
             NativeObject.Transceivers
-                 .Select(nativeTransceiver => RTCRtpTransceiver.Create(nativeTransceiver)).ToArray();
+                 .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();
 
         public void RemoveTrack(IRTCRtpSender sender) =>
             NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.IRTCRtpSender);
@@ -301,9 +298,9 @@ namespace WebRTCme.iOS
         {
             // Depreceted. Convert to OnTrack.
             foreach (var track in stream.VideoTracks)
-                OnTrack?.Invoke(this, RTCTrackEvent.Create(track));
+                OnTrack?.Invoke(this, new RTCTrackEvent(track));
             foreach (var track in stream.AudioTracks)
-                OnTrack?.Invoke(this, RTCTrackEvent.Create(track));
+                OnTrack?.Invoke(this, new RTCTrackEvent(track));
         }
 
         public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
@@ -372,7 +369,7 @@ namespace WebRTCme.iOS
 
         public void DidGenerateIceCandidate(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate candidate)
         {
-            OnIceCandidate?.Invoke(this, RTCPeerConnectionIceEvent.Create(candidate));
+            OnIceCandidate?.Invoke(this, new RTCPeerConnectionIceEvent(candidate));
         }
 
         public void DidRemoveIceCandidates(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCIceCandidate[] candidates)
@@ -382,7 +379,7 @@ namespace WebRTCme.iOS
 
         public void DidOpenDataChannel(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCDataChannel dataChannel)
         {
-            OnDataChannel?.Invoke(this, RTCDataChannelEvent.Create(dataChannel));
+            OnDataChannel?.Invoke(this, new RTCDataChannelEvent(dataChannel));
         }
 
         public void DidChangeStandardizedIceConnectionState(Webrtc.RTCPeerConnection peerConnection,

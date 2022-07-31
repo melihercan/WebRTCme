@@ -16,8 +16,6 @@ namespace WebRTCme.Android
 {
     internal class MediaDevices : NativeBase<object>, IMediaDevices
     {
-        public static IMediaDevices Create() => new MediaDevices();
-
         public MediaDevices() { }
 
         public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;

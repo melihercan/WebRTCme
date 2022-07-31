@@ -58,7 +58,7 @@ namespace WebRTCme.iOS
             {
                 BundlePolicy = nativeConfiguration.BundlePolicy.FromNative(),
                 Certificates = new IRTCCertificate[]
-                    { RTCCertificate.Create(nativeConfiguration.Certificate) },
+                    { new RTCCertificate(nativeConfiguration.Certificate) },
                 IceCandidatePoolSize = (byte)nativeConfiguration.IceCandidatePoolSize,
                 IceServers = nativeConfiguration.IceServers.Select(nativeServer => nativeServer.FromNative()).ToArray(),
                 IceTransportPolicy = nativeConfiguration.IceTransportPolicy.FromNative(),

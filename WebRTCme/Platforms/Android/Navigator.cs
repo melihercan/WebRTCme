@@ -14,6 +14,6 @@ namespace WebRTCme.Android
 
         public Navigator() { }
 
-        public IMediaDevices MediaDevices => Android.MediaDevices.Create();
+        public IMediaDevices MediaDevices => new MediaDevices();
     }
 }

@@ -9,15 +9,12 @@ namespace WebRTCme.Android
     {
         private readonly Webrtc.DataChannel _nativeDataChannel;
 
-        public static IRTCDataChannelEvent Create(Webrtc.DataChannel nativeDataChannel) =>
-            new RTCDataChannelEvent(nativeDataChannel);
-
         public RTCDataChannelEvent(Webrtc.DataChannel nativeDataChannel)
         {
             _nativeDataChannel = nativeDataChannel;
         }
 
-        public IRTCDataChannel Channel => RTCDataChannel.Create(_nativeDataChannel);
+        public IRTCDataChannel Channel => new RTCDataChannel(_nativeDataChannel);
 
     }
 }

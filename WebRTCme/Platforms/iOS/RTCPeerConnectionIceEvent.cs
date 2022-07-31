@@ -10,16 +10,13 @@ namespace WebRTCme.iOS
     {
         private readonly Webrtc.RTCIceCandidate _nativeIceCandidate;
 
-        public static IRTCPeerConnectionIceEvent Create(Webrtc.RTCIceCandidate nativeIceCandidate) => 
-            new RTCPeerConnectionIceEvent(nativeIceCandidate);
-
         public RTCPeerConnectionIceEvent(Webrtc.RTCIceCandidate nativeIceCandidate)
         {
             _nativeIceCandidate = nativeIceCandidate;
         }
 
         public IRTCIceCandidate Candidate =>
-            RTCIceCandidate.Create(_nativeIceCandidate);
+            new RTCIceCandidate(_nativeIceCandidate);
 
     }
 }

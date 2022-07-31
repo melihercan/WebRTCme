@@ -42,11 +42,6 @@ namespace WebRTCme.Android
             return mediaStreamTrack;
         }
 
-        public static IMediaStreamTrack Create(Webrtc.MediaStreamTrack nativeMediaStreamTrack)
-        {
-            return new MediaStreamTrack(nativeMediaStreamTrack);
-        }
-
         public MediaStreamTrack(Webrtc.MediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
         { }
 

@@ -11,13 +11,8 @@ namespace WebRTCme.iOS
 {
     internal class MediaStream : NativeBase<Webrtc.RTCMediaStream>, IMediaStream
     {
-        public static IMediaStream Create()
-        {
-            var nativeMediaStream =
-                WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}");
-            var self = new MediaStream(nativeMediaStream);
-            return self;
-        }
+        public MediaStream() : this(WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}"))
+        { }
 
         public static IMediaStream Create(IMediaStream stream)
         {
@@ -63,7 +58,8 @@ namespace WebRTCme.iOS
             return self;
         }
 
-        public MediaStream(Webrtc.RTCMediaStream nativeMediaStream) : base(nativeMediaStream) { }
+        public MediaStream(Webrtc.RTCMediaStream nativeMediaStream) : base(nativeMediaStream) 
+        { }
 
         public bool Active => GetTracks().All(track => track.ReadyState == MediaStreamTrackState.Live);
 
@@ -82,11 +78,11 @@ namespace WebRTCme.iOS
         public IMediaStreamTrack GetTrackById(string id) => GetTracks().ToList().Find(track => track.Id == id);
 
         public IMediaStreamTrack[] GetVideoTracks() => NativeObject.VideoTracks
-            .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
+            .Select(nativeTrack => new MediaStreamTrack(nativeTrack))
             .ToArray();
 
         public IMediaStreamTrack[] GetAudioTracks() => NativeObject.AudioTracks
-            .Select(nativeTrack => MediaStreamTrack.Create(nativeTrack))
+            .Select(nativeTrack => new MediaStreamTrack(nativeTrack))
             .ToArray();
 
         public void AddTrack(IMediaStreamTrack track)

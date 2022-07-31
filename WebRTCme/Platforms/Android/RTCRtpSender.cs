@@ -8,16 +8,13 @@ namespace WebRTCme.Android
 {
     internal class RTCRtpSender : NativeBase<Webrtc.RtpSender>, IRTCRtpSender
     {
-        internal static IRTCRtpSender Create(Webrtc.RtpSender nativeRtpSender) =>
-            new RTCRtpSender(nativeRtpSender);
-
         public RTCRtpSender(Webrtc.RtpSender nativeRtpSender) : base(nativeRtpSender)
         {
         }
 
-        public IRTCDTMFSender Dtmf => RTCDTMFSender.Create(NativeObject.Dtmf());
+        public IRTCDTMFSender Dtmf => new RTCDTMFSender(NativeObject.Dtmf());
 
-        public IMediaStreamTrack Track => MediaStreamTrack.Create(NativeObject.Track());
+        public IMediaStreamTrack Track => new MediaStreamTrack(NativeObject.Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 

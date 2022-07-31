@@ -6,12 +6,8 @@ namespace WebRTCme.iOS
 {
     internal class RTCDTMFSender : NativeBase<Webrtc.IRTCDtmfSender>, IRTCDTMFSender
     {
-        public static IRTCDTMFSender Create(Webrtc.IRTCDtmfSender nativeDtmfSender) =>
-            new RTCDTMFSender(nativeDtmfSender);
-
         public RTCDTMFSender(Webrtc.IRTCDtmfSender nativeDtmfSender) : base(nativeDtmfSender)
-        {
-        }
+        { }
 
         public string ToneBuffer => throw new NotImplementedException();
 

@@ -8,10 +8,6 @@ namespace WebRTCme.Android
 {
     internal class RTCRtpTransceiver : NativeBase<Webrtc.RtpTransceiver>, IRTCRtpTransceiver
     {
-
-        public static IRTCRtpTransceiver Create(Webrtc.RtpTransceiver nativeTransceiver) =>
-            new RTCRtpTransceiver(nativeTransceiver);
-
         public RTCRtpTransceiver(RtpTransceiver nativeTransceiver) : base(nativeTransceiver)
         {
         }
@@ -27,9 +23,9 @@ namespace WebRTCme.Android
 
         public string Mid => NativeObject.Mid;
 
-        public IRTCRtpReceiver Receiver => RTCRtpReceiver.Create(NativeObject.Receiver);
+        public IRTCRtpReceiver Receiver => new RTCRtpReceiver(NativeObject.Receiver);
 
-        public IRTCRtpSender Sender => RTCRtpSender.Create(NativeObject.Sender);
+        public IRTCRtpSender Sender => new RTCRtpSender(NativeObject.Sender);
 
         public bool Stopped => NativeObject.IsStopped;
 
