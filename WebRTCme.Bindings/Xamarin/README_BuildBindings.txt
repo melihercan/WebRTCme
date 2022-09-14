@@ -24,3 +24,73 @@ iOS
 	ApiDefinitions.cs
 	StructsAndEnums.cs
 - (import all files to binding project)
+
+WINDOWS
+=======
+https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/development/index.md
+https://webrtc.googlesource.com/src/+/main/docs/native-code/development/prerequisite-sw/index.md
+https://developpaper.com/compiling-webrtc-under-windows/
+
+- install Chromium depot tools: https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+- create 'webrtc' folder, go there and 
+    o Set env variables:
+	  - GYP_MSVS_VERSION=2022
+	  - DEPOT_TOOLS_WIN_TOOLCHAIN=0
+	  - GYP_MSVS_OVERRIDE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community
+	  - vs2022_install=C:\Program Files\Microsoft Visual Studio\2022\Community
+	  - GYP_GENERATORS=msvs-ninja,ninja
+	o fetch --nohooks webrtc
+	o gclient sync
+	o cd src
+	  ## view available branches
+	o git branch -r 
+	o git checkout branch-heads/4844 (m99) (or latest mxxx)
+	o gclient sync
+	  ## Compile vs2022 release
+	o gn gen out\Release-vs2022 --ide=vs2022 --args="is_debug=false target_os=\"win\" target_cpu=\"x64\" is_component_build=false is_clang=false use_lld=false treat_warnings_as_errors=false use_rtti=true rtc_include_tests=false rtc_build_examples=false"
+	o ninja -C out\Release-vs2022
+
+
+MACOS
+=====
+https://groups.google.com/g/discuss-webrtc/c/MQbTcKvk-y4
+https://github.com/tmthecoder/WebRTC-macOS
+fetch --nohooks webrtc
+gclient sync
+gn gen out/mac_release --args='is_debug=false'
+ninja -C out/mac_release rtc_sdk_objc
+
+
+https://github.com/tmthecoder/WebRTC-macOS
+Building
+To Build your own WebRTC Framework, similar to the one I have build, the instructions are as follows:
+
+Clone the WebRTC Source:
+
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+export PATH=$PATH:/path/to/depot_tools
+
+fetch --nohooks webrtc_ios
+
+gclient sync
+Generate the macOS Targets (x86_64 and arm64)
+
+gn gen out/mac_x64 --args='target_os="mac" target_cpu="x64" is_component_build=false is_debug=false rtc_libvpx_build_vp9=false enable_stripping=true rtc_enable_protobuf=false'
+
+gn gen out/mac_arm64 --args='target_os="mac" target_cpu="arm64" is_component_build=false is_debug=false rtc_libvpx_build_vp9=false enable_stripping=true rtc_enable_protobuf=false'
+
+Build both frameworks:
+
+ninja -C out/mac_x64 mac_framework_objc
+
+ninja -C out/mac_arm64 mac_framework_objc
+Merge the frameworks using lipo:
+
+cd ..
+
+cp -R src/out/mac_x64/WebRTC.framework WebRTC.framework
+
+lipo -create -output WebRTC.framework/WebRTC src/out/mac_x64/WebRTC.framework/WebRTC src/out/mac_arm64/WebRTC.framework/WebRTC
+The outputted WebRTC.framework can be imported into an Xcode Project and will support both Intel and Apple Silicon Macs
+
+

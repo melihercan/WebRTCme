@@ -1,4 +1,6 @@
-﻿using Org.Webrtc;
+﻿using Android.Content;
+using Org.Webrtc;
+using System.Linq;
 using WebRTCme.Platforms.Android.Custom;
 using Webrtc = Org.Webrtc;
 
@@ -7,9 +9,18 @@ namespace WebRTCme.Android
     internal class RTCPeerConnection : NativeBase<Webrtc.PeerConnection>, IRTCPeerConnection, 
         Webrtc.PeerConnection.IObserver
     {
-        private List<IRTCRtpTransceiver> _transceivers;
+        // TODO: THERE IS A PROBLEM TO BE SORTED!!!
+        // If you create a RTCRtp Sender, Receiver or Transceiver and then access the list
+        // of Senders, Receivers or Transceivers via RTCPeerConnection NativeObject,  
+        // native objects of Sender, Receiver and Transceivers are all disposed!!!
 
-        private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
+        // Caches to prevent new instance creation of already existed platform independent objects that have
+        // same native base.
+        //private Dictionary<Webrtc.RtpSender, IRTCRtpSender> _sendersDictionary = new();
+        //private Dictionary<Webrtc.RtpReceiver, IRTCRtpReceiver> _receiversDictionary = new();
+        //private Dictionary<Webrtc.RtpTransceiver, IRTCRtpTransceiver> _transceiversDictionary = new();
+
+         private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
         {
             get
             {
@@ -82,26 +93,44 @@ namespace WebRTCme.Android
             return Task.CompletedTask;
         }
 
-        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
-            new RTCRtpSender(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, 
+        public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
+        {
+            RTCRtpSender sender = null;
+
+            sender = new RTCRtpSender(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject,
                 new List<string> { stream.Id }));
+
+            return sender;
+        }
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
+            RTCRtpTransceiver transceiver;
+
             if (init is null)
-                return new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative()));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative()));
             else
-                return new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
+
+            //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
+
+            return transceiver;
         }
 
         public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init)
         {
+            RTCRtpTransceiver transceiver;   
+
             if (init is null)
-                return new RTCRtpTransceiver(NativeObject.AddTransceiver(
-                    ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(
+                    ((MediaStreamTrack)track).NativeObject));
             else
-                return new RTCRtpTransceiver(NativeObject.AddTransceiver(
-                    ((MediaStreamTrack)track).NativeObject as Webrtc.MediaStreamTrack, init.ToNative()));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(
+                    ((MediaStreamTrack)track).NativeObject, init.ToNative()));
+
+            //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
+
+            return transceiver;
         }
 
         public void Close() => NativeObject.Close();
@@ -144,11 +173,25 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpReceiver[] GetReceivers() => 
+
+        public IRTCRtpReceiver[] GetReceivers() =>
             NativeObject.Receivers.Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver)).ToArray();
+
+        //public IRTCRtpReceiver[] GetReceivers()
+        //{
+        //    RefreshReceiversDictionary();
+        //    return _receiversDictionary.Values.ToArray();
+        //}
 
         public IRTCRtpSender[] GetSenders() =>
             NativeObject.Senders.Select(nativeSender => new RTCRtpSender(nativeSender)).ToArray();
+
+
+        //public IRTCRtpSender[] GetSenders()
+        //{
+        //    RefreshSendersDictionary();
+        //    return _sendersDictionary.Values.ToArray();
+        //}
 
         public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
         {
@@ -159,44 +202,17 @@ namespace WebRTCme.Android
             NativeObject.Transceivers
                 .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();
 
+        //public IRTCRtpTransceiver[] GetTransceivers()
         //{
-        //    var list = new List<IRTCRtpTransceiver>();
-        //    var transceivers = ((Webrtc.PeerConnection)NativeObject).Transceivers;
-        //    foreach (var transceiver in transceivers)
-        //    {
-        //        var mt = transceiver.MediaType;
-        //        var codecs = transceiver.Receiver.Parameters.Codecs;
-        //        var encodings = transceiver.Receiver.Parameters.Encodings;
-        //        list.Add(RTCRtpTransceiver.Create(transceiver));
-        //    }
-
-        //    return list.ToArray();
-
+        //    RefreshTransceiversDictionary();
+        //    return _transceiversDictionary.Values.ToArray();
         //}
 
-
-        /*
-         * //This is the comparison class
-    CompareLogic compareLogic = new CompareLogic();
-
-    //Create a couple objects to compare
-    Person person1 = new Person();
-    person1.DateCreated = DateTime.Now;
-    person1.Name = "Greg";
-
-    Person person2 = new Person();
-    person2.Name = "John";
-    person2.DateCreated = person1.DateCreated;
-
-    ComparisonResult result = compareLogic.Compare(person1, person2);
-
-    //These will be different, write out the differences
-    if (!result.AreEqual)
-        Console.WriteLine(result.DifferencesString);
-         */
-
-        public void RemoveTrack(IRTCRtpSender sender) =>
-            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.RtpSender);
+        public void RemoveTrack(IRTCRtpSender sender)
+        {
+            //_sendersDictionary.Remove(((RTCRtpSender)sender).NativeObject);
+            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject);
+        }
 
 
         public void RestartIce()
@@ -390,9 +406,35 @@ namespace WebRTCme.Android
 
             public void OnSetSuccess() => _tcsSet?.SetResult(null);
         }
-#endregion
+        #endregion
 
+    //    private void RefreshSendersDictionary()
+    //    {
+    //        var removed = _sendersDictionary.Keys.Except(NativeObject.Senders);
+    //        removed.ToList().ForEach(r => _sendersDictionary.Remove(r));
+
+    //        var added = NativeObject.Senders.Except(_sendersDictionary.Keys);
+    //        added.ToList().ForEach(a => _sendersDictionary.Add(a, new RTCRtpSender(a)));
+    //    }
+
+    //    private void RefreshReceiversDictionary()
+    //    {
+    //        var removed = _receiversDictionary.Keys.Except(NativeObject.Receivers);
+    //        removed.Select(r => _receiversDictionary.Remove(r));
+
+    //        var added = NativeObject.Receivers.Except(_receiversDictionary.Keys);
+    //        added.ToList().ForEach(a => _receiversDictionary.Add(a, new RTCRtpReceiver(a)));
+    //    }
+
+    //    private void RefreshTransceiversDictionary()
+    //    {
+    //        var removed = _transceiversDictionary.Keys.Except(NativeObject.Transceivers);
+    //        removed.Select(r => _transceiversDictionary.Remove(r)); //// TODO: Dispose value???
+
+    //        var added = NativeObject.Transceivers.Except(_transceiversDictionary.Keys);
+    //        added.ToList().ForEach(a => _transceiversDictionary.Add(a, new RTCRtpTransceiver(a)));
+
+    //        //var notChanged = _transceiversDictionary.Keys.Intersect(NativeObject.Transceivers);
+    //    }
     }
-
-
 }
