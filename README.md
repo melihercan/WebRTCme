@@ -1,3 +1,10 @@
+# DESKTOP UPDATE 14 Sep 22
+Bindings and WebRTCme basic libraries will soon have support for desktop (Windows and MacOS initially).
+
+# .NET MAUI UPDATE 14 Sep 22
+I have added .NET MAUI support to Bindings and WebRTCme base libraries.
+No MAUI support on Middleware or on Demo Apps yet.
+
 # MEDIASOUP UPDATE 27 Nov 21
 Coming soon should have been faster than this but recently I am very busy with an ongoing project. Therefore I could spend time on this project only during weekends.
 Today I verified that the MediaSoup Blazor is working :). Here is the screenshot of 6 clients connected. 
