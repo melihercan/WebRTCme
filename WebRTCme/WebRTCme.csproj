@@ -1,12 +1,13 @@
 ﻿<!--<Project Sdk="Microsoft.NET.Sdk">-->
 <Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-windows10.0.22621.0;net6.0-macos</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 	</PropertyGroup>
 
@@ -38,6 +39,14 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-windows10.0.22621.0'">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
 		<UseMaui>true</UseMaui>
 	</PropertyGroup>
 
@@ -102,6 +111,21 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.7" />
 	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-windows10.0.22621.0'">
+		<Compile Include="**\Windows\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Desktop\WebRTCme.Bindings.Desktop.Windows\WebRTCme.Bindings.Desktop.Windows.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.7" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
+		<Compile Include="**\macOS\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Desktop\WebRTCme.Bindings.Desktop.macOS\WebRTCme.Bindings.Desktop.macOS.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.7" />
+	</ItemGroup>
+
 
 	<ItemGroup>
 		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
