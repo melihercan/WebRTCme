@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Api\" />
+    <PackageReference Include="SIPSorcery" Version="6.0.11" />
+    <PackageReference Include="SIPSorceryMedia" Version="3.0.2" />
   </ItemGroup>
 
   <ItemGroup>
