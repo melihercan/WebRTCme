@@ -28,14 +28,14 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <AndroidResource Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <AndroidResource Include="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <AndroidResource Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
         <!-- Custom Fonts -->
         <MauiFont Include="Resources\Fonts\*" />
@@ -45,7 +45,27 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AndroidResource Remove="Platforms\Android\Resources\values\colors.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiFont Remove="Resources\Fonts\OpenSans-Regular.ttf" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiImage Remove="Resources\Images\dotnet_bot.svg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AndroidResource Include="Resources\Fonts\OpenSans-Regular.ttf" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\WebRTCme.Middleware.Maui.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <TransformFile Include="Platforms\Android\Resources\values\colors.xml" />
     </ItemGroup>
 
 </Project>

@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-macos</TargetFramework>
+    <TargetFramework>net6.0-maccatalyst</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <SupportedOSPlatformVersion>13.1</SupportedOSPlatformVersion>
+    <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Api\" />
+    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
 
 </Project>
