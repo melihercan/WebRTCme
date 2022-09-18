@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0-android;net6.0-ios</TargetFrameworks>
+        <TargetFrameworks>net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.22621.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
         <OutputType>Exe</OutputType>
@@ -16,56 +17,42 @@
 
         <!-- App Identifier -->
         <ApplicationId>com.companyname.webrtcme.demoapp.maui</ApplicationId>
-        <ApplicationIdGuid>2DBE8871-2D6C-4102-8EC6-D0B3A725475C</ApplicationIdGuid>
+        <ApplicationIdGuid>3D60F9C0-02BD-427F-9DED-82EDCEE7EF30</ApplicationIdGuid>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-        <!-- App Icon -->
-        <AndroidResource Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-        <AndroidResource Include="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
-        <!-- Splash Screen -->
-        <AndroidResource Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
-        <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
-        <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*" />
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
 
-        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-    </ItemGroup>
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
 
-    <ItemGroup>
-      <AndroidResource Remove="Platforms\Android\Resources\values\colors.xml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <MauiFont Remove="Resources\Fonts\OpenSans-Regular.ttf" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <MauiImage Remove="Resources\Images\dotnet_bot.svg" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <AndroidResource Include="Resources\Fonts\OpenSans-Regular.ttf" />
-    </ItemGroup>
+		
 
     <ItemGroup>
       <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\WebRTCme.Middleware.Maui.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <TransformFile Include="Platforms\Android\Resources\values\colors.xml" />
-    </ItemGroup>
 
 </Project>

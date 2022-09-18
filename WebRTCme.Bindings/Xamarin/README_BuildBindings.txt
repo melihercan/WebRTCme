@@ -44,10 +44,10 @@ https://developpaper.com/compiling-webrtc-under-windows/
 	o cd src
 	  ## view available branches
 	o git branch -r 
-	o git checkout branch-heads/4844 (m99) (or latest mxxx)
+	o git checkout branch-heads/4844 ##(m99) (or latest mxxx)
 	o gclient sync
 	  ## Compile vs2022 release
-	o gn gen out\Release-vs2022 --ide=vs2022 --args="is_debug=false target_os=\"win\" target_cpu=\"x64\" is_component_build=false is_clang=false use_lld=false treat_warnings_as_errors=false use_rtti=true rtc_include_tests=false rtc_build_examples=false"
+	o gn gen out\Release-vs2022 --ide=vs2022 --args="is_debug=false target_os=\"win\" target_cpu=\"x64\" is_component_build=false is_clang=false use_lld=false treat_warnings_as_errors=false use_rtti=true rtc_include_tests=false rtc_build_examples=true"
 	o ninja -C out\Release-vs2022
 
 

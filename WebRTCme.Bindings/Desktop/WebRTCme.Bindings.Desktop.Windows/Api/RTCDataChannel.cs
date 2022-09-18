@@ -9,6 +9,9 @@ namespace WebRTCme.Bindings.Desktop.Windows.Api
 {
     internal class RTCDataChannel : NativeBase<SIPSorcery.Net.RTCDataChannel>, IRTCDataChannel
     {
+        public RTCDataChannel(SIPSorcery.Net.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) =>
+            NativeObject = nativeDataChannel;
+
         public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public uint BufferedAmount => throw new NotImplementedException();
