@@ -7,18 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.3" />
-    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\WebRTCme.Connection.Signaling\WebRTCme.Connection.Signaling.csproj" />
-  </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.7" />
-    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.9" />
+		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.Connection.Signaling\WebRTCme.Connection.Signaling.csproj" />
+	</ItemGroup>
 
 </Project>

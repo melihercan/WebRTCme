@@ -5,6 +5,10 @@
     <!--<TargetFrameworks>net5.0;</TargetFrameworks>-->
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Blazored.Modal" Version="7.0.0" />
+  </ItemGroup>
+
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -16,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.9" />
     <PackageReference Include="Blazored.Modal" Version="6.0.1" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
   </ItemGroup>
