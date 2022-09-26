@@ -140,11 +140,6 @@
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.7" />
 	</ItemGroup>-->
 
-
-	<ItemGroup>
-		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
-	</ItemGroup>
-
 	<ItemGroup>
 	  <None Include="..\doc\me.png" Link="me.png">
 	    <PackagePath></PackagePath>

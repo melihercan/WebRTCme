@@ -17,4 +17,8 @@
 		</NativeReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
+	</ItemGroup>
+
 </Project>
