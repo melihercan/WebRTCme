@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.Desktop.Windows.Custom
+namespace WebRTCme.Bindings.Maui.Windows.Custom
 {
     internal static class ModelExtensions
     {
@@ -12,6 +12,5 @@ namespace WebRTCme.Bindings.Desktop.Windows.Custom
         {
             throw new NotImplementedException();
         }
-
     }
 }

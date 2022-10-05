@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Bindings.Desktop.Windows.Custom;
+using WebRTCme.Bindings.Maui.Windows.Custom;
 
-namespace WebRTCme.Bindings.Desktop.Windows.Api
+namespace WebRTCme.Bindings.Maui.Windows.Api
 {
     internal class RTCDataChannel : NativeBase<SIPSorcery.Net.RTCDataChannel>, IRTCDataChannel
     {
@@ -56,4 +56,5 @@ namespace WebRTCme.Bindings.Desktop.Windows.Api
             throw new NotImplementedException();
         }
     }
+
 }

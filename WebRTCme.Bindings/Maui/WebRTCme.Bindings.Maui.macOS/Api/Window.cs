@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.Desktop.macOS.Api
+namespace WebRTCme.Bindings.Maui.macOS.Api
 {
     public class Window : IWindow
     {

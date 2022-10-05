@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.Desktop.Windows.Api
+namespace WebRTCme.Bindings.Maui.Windows.Api
 {
     public class Window : IWindow
     {
@@ -33,4 +33,5 @@ namespace WebRTCme.Bindings.Desktop.Windows.Api
             throw new NotImplementedException();
         }
     }
+
 }

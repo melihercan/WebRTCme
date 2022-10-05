@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.Desktop.Windows.Custom
+namespace WebRTCme.Bindings.Maui.Windows.Custom
 {
     internal abstract class NativeBase<T>
     {
@@ -15,4 +15,5 @@ namespace WebRTCme.Bindings.Desktop.Windows.Custom
         public T NativeObject { get; init; }
 
     }
+
 }

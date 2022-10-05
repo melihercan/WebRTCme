@@ -31,10 +31,10 @@
 		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-windows10.0.22621.0'">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Desktop\WebRTCme.Bindings.Desktop.Windows\WebRTCme.Bindings.Desktop.Windows.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Desktop\WebRTCme.Bindings.Desktop.macOS\WebRTCme.Bindings.Desktop.macOS.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\WebRTCme.Bindings.Maui.macOS.csproj" />
 	</ItemGroup>
 </Project>
