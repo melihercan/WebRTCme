@@ -45,5 +45,15 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
             return nativeIceServer;
         }
 
+        public static SIPSorcery.Net.RTCDataChannelInit ToNative(this RTCDataChannelInit dataChannelInit) =>
+            new SIPSorcery.Net.RTCDataChannelInit
+            {
+                ordered = dataChannelInit.Ordered ?? true,
+                maxRetransmits = dataChannelInit.MaxRetransmits ?? 0,
+                protocol = dataChannelInit.Protocol ?? string.Empty,
+                negotiated = dataChannelInit.Negotiated ?? false,
+                id = dataChannelInit.Id.HasValue ? (ushort)dataChannelInit.Id.Value : (ushort)0//WebRTCme.WebRtc.Id
+            };
+
     }
 }

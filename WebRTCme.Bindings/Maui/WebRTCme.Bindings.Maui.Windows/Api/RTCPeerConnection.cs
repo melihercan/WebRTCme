@@ -67,19 +67,22 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
             throw new NotImplementedException();
         }
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
+        public void Close() => NativeObject.Close("");
 
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null)
         {
             throw new NotImplementedException();
         }
 
-        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null)
+        public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options)
         {
-            throw new NotImplementedException();
+            SIPSorcery.Net.RTCDataChannel nativeDataChannel = null;
+            Task.Run(() =>
+            {
+                nativeDataChannel = NativeObject.createDataChannel(label, options?.ToNative()).Result;
+            }).Wait();//// RunSynchronously();
+
+            return new RTCDataChannel(nativeDataChannel);
         }
 
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options = null)
@@ -89,7 +92,6 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm)
