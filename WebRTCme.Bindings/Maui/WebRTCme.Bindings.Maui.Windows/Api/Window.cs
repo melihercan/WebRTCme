@@ -28,10 +28,8 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
             throw new NotImplementedException();
         }
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null)
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
+            new Windows.Api.RTCPeerConnection(configuration);
     }
 
 }

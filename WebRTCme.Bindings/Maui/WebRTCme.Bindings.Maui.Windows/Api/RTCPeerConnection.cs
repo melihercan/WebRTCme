@@ -10,7 +10,7 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
     internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>, IRTCPeerConnection
     {
         public RTCPeerConnection(RTCConfiguration configuration) : base() =>
-            NativeObject = new SIPSorcery.Net.RTCPeerConnection(configuration.ToNative());
+            NativeObject = new SIPSorcery.Net.RTCPeerConnection(configuration?.ToNative());
 
         public bool CanTrickleIceCandidates => throw new NotImplementedException();
 
