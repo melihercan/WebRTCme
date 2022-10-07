@@ -71,7 +71,8 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options = null)
         {
-            throw new NotImplementedException();
+            var nativeAnswerDescription = NativeObject.createAnswer(options?.ToNative());
+            return Task.FromResult(nativeAnswerDescription.FromNative());
         }
 
         public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options)
@@ -87,7 +88,8 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options = null)
         {
-            throw new NotImplementedException();
+            var nativeOfferDescription = NativeObject.createOffer(options?.ToNative());
+            return Task.FromResult(nativeOfferDescription.FromNative());
         }
 
         public void Dispose()
@@ -161,12 +163,12 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
-            throw new NotImplementedException();
+            return NativeObject.setLocalDescription(sessionDescription.ToNative());
         }
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(NativeObject.setRemoteDescription(sessionDescription.ToNative()));
         }
     }
 

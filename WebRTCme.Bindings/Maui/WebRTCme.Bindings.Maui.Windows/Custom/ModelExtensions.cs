@@ -18,11 +18,11 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
             SIPSorcery.Net.RTCConfiguration nativeConfiguration = new()
             {
                 iceServers = iceServers.Select(s => s.ToNative()).ToList(),
-                iceTransportPolicy = configuration.IceTransportPolicy.HasValue ? 
+                iceTransportPolicy = configuration.IceTransportPolicy.HasValue ?
                     configuration.IceTransportPolicy.Value.ToNative() : SIPSorcery.Net.RTCIceTransportPolicy.all,
-                bundlePolicy = configuration.BundlePolicy.HasValue ? 
+                bundlePolicy = configuration.BundlePolicy.HasValue ?
                     configuration.BundlePolicy.Value.ToNative() : SIPSorcery.Net.RTCBundlePolicy.balanced,
-                rtcpMuxPolicy = configuration.RtcpMuxPolicy.HasValue ? 
+                rtcpMuxPolicy = configuration.RtcpMuxPolicy.HasValue ?
                     configuration.RtcpMuxPolicy.Value.ToNative() : SIPSorcery.Net.RTCRtcpMuxPolicy.require,
                 //certificates = 
                 //certificates2 = 
@@ -38,7 +38,7 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
             {
                 urls = iceServer.Urls[0],
                 username = iceServer.Username,
-                credentialType = iceServer.CredentialType.HasValue ? 
+                credentialType = iceServer.CredentialType.HasValue ?
                     iceServer.CredentialType.Value.ToNative() : SIPSorcery.Net.RTCIceCredentialType.password,
                 credential = iceServer.Credential,
             };
@@ -55,5 +55,30 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
                 id = dataChannelInit.Id.HasValue ? (ushort)dataChannelInit.Id.Value : (ushort)0//WebRTCme.WebRtc.Id
             };
 
+        public static SIPSorcery.Net.RTCOfferOptions ToNative(this RTCOfferOptions offerOptions) =>
+            new SIPSorcery.Net.RTCOfferOptions
+            {
+                X_ExcludeIceCandidates = false
+            };
+
+        public static SIPSorcery.Net.RTCAnswerOptions ToNative(this RTCAnswerOptions answerOptions) =>
+            new SIPSorcery.Net.RTCAnswerOptions
+            {
+                X_ExcludeIceCandidates = false
+            };
+
+        public static SIPSorcery.Net.RTCSessionDescriptionInit ToNative(this RTCSessionDescriptionInit sessionDescription) =>
+            new SIPSorcery.Net.RTCSessionDescriptionInit
+            {
+                type = sessionDescription.Type.ToNative(),
+                sdp = sessionDescription.Sdp
+            };
+
+        public static RTCSessionDescriptionInit FromNative(this SIPSorcery.Net.RTCSessionDescriptionInit nativeSessionDescription) =>
+            new RTCSessionDescriptionInit
+            {
+                Type = nativeSessionDescription.type.FromNative(),
+                Sdp = nativeSessionDescription.sdp,
+            };
     }
 }
