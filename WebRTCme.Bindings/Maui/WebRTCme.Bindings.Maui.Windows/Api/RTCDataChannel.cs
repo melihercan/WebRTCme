@@ -9,30 +9,46 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 {
     internal class RTCDataChannel : NativeBase<SIPSorcery.Net.RTCDataChannel>, IRTCDataChannel
     {
-        public RTCDataChannel(SIPSorcery.Net.RTCDataChannel nativeDataChannel) : base(nativeDataChannel) =>
+        public RTCDataChannel(SIPSorcery.Net.RTCDataChannel nativeDataChannel) : base(nativeDataChannel)
+        {
             NativeObject = nativeDataChannel;
 
-        public BinaryType BinaryType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            NativeObject.onopen += NativeOnOpen;
+            NativeObject.onclose += NativeOnClose;
+            NativeObject.onmessage += NativeOnMessage;
+            NativeObject.onerror += NativeOnError;
+        }
 
-        public uint BufferedAmount => throw new NotImplementedException();
 
-        public uint BufferedAmountLowThreshold { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public BinaryType BinaryType 
+        {
+            get => (BinaryType)Enum.Parse(typeof(BinaryType), NativeObject.binaryType);
+            set => NativeObject.binaryType = value.ToString(); 
+        }
 
-        public ushort Id => throw new NotImplementedException();
+        public uint BufferedAmount => (uint)NativeObject.bufferedAmount;
 
-        public string Label => throw new NotImplementedException();
+        public uint BufferedAmountLowThreshold 
+        { 
+            get => (uint)NativeObject.bufferedAmountLowThreshold; 
+            set => NativeObject.bufferedAmountLowThreshold = value; 
+        }
 
-        public ushort? MaxPacketLifeTime => throw new NotImplementedException();
+        public ushort Id => NativeObject.id.Value;
 
-        public ushort? MaxRetransmits => throw new NotImplementedException();
+        public string Label => NativeObject.label;
 
-        public bool Negotiated => throw new NotImplementedException();
+        public ushort? MaxPacketLifeTime => NativeObject.maxPacketLifeTime;
 
-        public bool Ordered => throw new NotImplementedException();
+        public ushort? MaxRetransmits => NativeObject.maxRetransmits;
 
-        public string Protocol => throw new NotImplementedException();
+        public bool Negotiated => NativeObject.negotiated;
 
-        public RTCDataChannelState ReadyState => throw new NotImplementedException();
+        public bool Ordered => NativeObject.ordered;
+
+        public string Protocol => NativeObject.protocol;
+
+        public RTCDataChannelState ReadyState => NativeObject.readyState.FromNative();
 
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
@@ -43,18 +59,57 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public void Close()
         {
-            throw new NotImplementedException();
+            NativeObject.close();
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            NativeObject.onopen -= NativeOnOpen;
+            NativeObject.onclose -= NativeOnClose;
+            NativeObject.onmessage -= NativeOnMessage;
+            NativeObject.onerror -= NativeOnError;
         }
 
         public void Send(object data)
         {
             throw new NotImplementedException();
         }
+
+        #region NativeEvents
+        private void NativeOnOpen()
+        {
+            OnOpen?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void NativeOnClose()
+        {
+            OnClose?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void NativeOnMessage(SIPSorcery.Net.RTCDataChannel dc, 
+            SIPSorcery.Net.DataChannelPayloadProtocols protocol, byte[] data)
+        {
+            OnMessage?.Invoke(this, new MessageEvent(protocol switch
+            {
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_DCEP => throw new NotImplementedException(),
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_String => Encoding.UTF8.GetString(data),
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_Binary_Partial => data,
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_Binary => data,
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_String_Partial => Encoding.UTF8.GetString(data),
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_String_Empty => throw new NotImplementedException(),
+                SIPSorcery.Net.DataChannelPayloadProtocols.WebRTC_Binary_Empty => throw new NotImplementedException(),
+                _ => throw new NotImplementedException(),
+            }));
+        }
+
+        private void NativeOnError(string obj)
+        {
+            OnError?.Invoke(this, new ErrorEvent(obj));
+        }
+
+
+
+        #endregion
     }
 
 }

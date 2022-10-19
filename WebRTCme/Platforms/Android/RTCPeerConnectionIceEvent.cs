@@ -13,7 +13,7 @@ namespace WebRTCme.Android
             _nativeIceCandidate = nativeIceCandidate;
 
         public IRTCIceCandidate Candidate => 
-            RTCIceCandidate.Create(_nativeIceCandidate);
+            new RTCIceCandidate(_nativeIceCandidate);
 
     }
 }

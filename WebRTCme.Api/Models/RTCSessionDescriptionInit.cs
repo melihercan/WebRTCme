@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCSessionDescriptionInit
+    public record RTCSessionDescriptionInit
     {
         public RTCSdpType Type { set;  get; }
 

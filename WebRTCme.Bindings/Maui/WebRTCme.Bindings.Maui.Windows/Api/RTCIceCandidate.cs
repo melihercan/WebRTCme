@@ -1,27 +1,24 @@
-﻿using Webrtc = Org.Webrtc;
-using System;
-using WebRTCme;
-using Org.Webrtc;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
-using WebRTCme.Platforms.Android.Custom;
+using System.Threading.Tasks;
+using WebRTCme.Bindings.Maui.Windows.Custom;
 
-namespace WebRTCme.Android
+namespace WebRTCme.Bindings.Maui.Windows.Api
 {
-    internal class RTCIceCandidate : NativeBase<Webrtc.IceCandidate>, IRTCIceCandidate
+    internal class RTCIceCandidate : NativeBase<SIPSorcery.Net.RTCIceCandidate>, IRTCIceCandidate
     {
-        //public static IRTCIceCandidate Create(Webrtc.IceCandidate nativeIceCandidate) =>
-        //    new RTCIceCandidate(nativeIceCandidate);
-
-        public RTCIceCandidate(Webrtc.IceCandidate nativeIceCandidate) : base(nativeIceCandidate)
+        public RTCIceCandidate(SIPSorcery.Net.RTCIceCandidate nativeIceCandidate) : base(nativeIceCandidate)
         {
         }
 
-        public string Candidate => NativeObject.Sdp;
+        public string Candidate => NativeObject.candidate;
 
         public RTCIceComponent Component => Candidate
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[1] == "1" 
+            .Split(" ", StringSplitOptions.RemoveEmptyEntries)[1] == "1"
                 ? RTCIceComponent.Rtp : RTCIceComponent.Rtcp;
 
         public string Foundation => Candidate
@@ -79,10 +76,10 @@ namespace WebRTCme.Android
                     return Convert.ToUInt16(array[index + 1]);
             }
         }
-        
-        public string SdpMid => NativeObject.SdpMid;
 
-        public ushort? SdpMLineIndex => (ushort)NativeObject.SdpMLineIndex;
+        public string SdpMid => NativeObject.sdpMid;
+
+        public ushort? SdpMLineIndex => NativeObject.sdpMLineIndex;
 
         public RTCIceTcpCandidateType? TcpType
         {
@@ -96,13 +93,13 @@ namespace WebRTCme.Android
                     return null;
                 else
                     return (RTCIceTcpCandidateType)Enum.Parse(
-                        typeof(RTCIceTcpCandidateType), 
+                        typeof(RTCIceTcpCandidateType),
                         array[index + 1],
                         true);
             }
         }
 
-        public RTCIceCandidateType Type   => (RTCIceCandidateType)Enum.Parse(
+        public RTCIceCandidateType Type => (RTCIceCandidateType)Enum.Parse(
             typeof(RTCIceCandidateType),
             Candidate
                 .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
@@ -112,5 +109,20 @@ namespace WebRTCme.Android
         public string UsernameFragment => null;
 
         public string ToJson() => JsonSerializer.Serialize(this);
+
+
+
+
+
+
+
+
+
+
+
+        public void Dispose()
+        {
+        }
+
     }
 }

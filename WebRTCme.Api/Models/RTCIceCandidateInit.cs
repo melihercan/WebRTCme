@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCIceCandidateInit
+    public record RTCIceCandidateInit
     {
         public string Candidate { get; init; }
 

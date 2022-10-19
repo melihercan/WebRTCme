@@ -58,6 +58,27 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
                 _ => throw new NotImplementedException(),
             };
 
+        public static RTCPeerConnectionState FromNative(this SIPSorcery.Net.RTCPeerConnectionState nativeConnectionState) =>
+            nativeConnectionState switch
+            {
+                SIPSorcery.Net.RTCPeerConnectionState.closed => RTCPeerConnectionState.Closed,
+                SIPSorcery.Net.RTCPeerConnectionState.failed => RTCPeerConnectionState.Failed,
+                SIPSorcery.Net.RTCPeerConnectionState.disconnected => RTCPeerConnectionState.Disconnected,
+                SIPSorcery.Net.RTCPeerConnectionState.@new => RTCPeerConnectionState.New,
+                SIPSorcery.Net.RTCPeerConnectionState.connecting => RTCPeerConnectionState.Connecting,
+                SIPSorcery.Net.RTCPeerConnectionState.connected => RTCPeerConnectionState.Connected,
+                _ => throw new NotImplementedException(),
+            };
 
+        public static RTCDataChannelState FromNative(this SIPSorcery.Net.RTCDataChannelState nativeTCDataChannelState) =>
+            nativeTCDataChannelState switch
+            {
+                SIPSorcery.Net.RTCDataChannelState.connecting => RTCDataChannelState.Connecting,
+                SIPSorcery.Net.RTCDataChannelState.open => RTCDataChannelState.Open,
+                SIPSorcery.Net.RTCDataChannelState.closing => RTCDataChannelState.Closing,
+                SIPSorcery.Net.RTCDataChannelState.closed => RTCDataChannelState.Closed,
+                _ => throw new NotImplementedException(),
+            };
+             
     }
 }

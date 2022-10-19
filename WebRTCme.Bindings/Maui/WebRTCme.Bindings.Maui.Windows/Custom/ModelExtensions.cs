@@ -74,11 +74,21 @@ namespace WebRTCme.Bindings.Maui.Windows.Custom
                 sdp = sessionDescription.Sdp
             };
 
+        public static SIPSorcery.Net.RTCIceCandidateInit ToNative(this RTCIceCandidateInit iceCandidate) =>
+            new SIPSorcery.Net.RTCIceCandidateInit
+            {
+                candidate = iceCandidate.Candidate,
+                sdpMid = iceCandidate.SdpMid,
+                sdpMLineIndex = iceCandidate.SdpMLineIndex.HasValue ? iceCandidate.SdpMLineIndex!.Value : (ushort)0,
+                usernameFragment = iceCandidate.UsernameFragment,
+            };
+
         public static RTCSessionDescriptionInit FromNative(this SIPSorcery.Net.RTCSessionDescriptionInit nativeSessionDescription) =>
             new RTCSessionDescriptionInit
             {
                 Type = nativeSessionDescription.type.FromNative(),
                 Sdp = nativeSessionDescription.sdp,
             };
+
     }
 }
