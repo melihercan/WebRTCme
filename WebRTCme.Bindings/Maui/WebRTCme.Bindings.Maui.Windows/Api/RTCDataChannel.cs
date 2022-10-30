@@ -72,7 +72,9 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
 
         public void Send(object data)
         {
-            throw new NotImplementedException();
+            //// TODO: binary or string data????
+            var bytes = data as byte[];
+            NativeObject.send(bytes);
         }
 
         #region NativeEvents

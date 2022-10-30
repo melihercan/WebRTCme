@@ -48,7 +48,7 @@ internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>,
 
     public RTCSessionDescriptionInit RemoteDescription => throw new NotImplementedException();
 
-    public IRTCSctpTransport Sctp => throw new NotImplementedException();
+    public IRTCSctpTransport Sctp => throw new NotImplementedException();//// NativeObject.sctp.ToNative();
 
     public RTCSignalingState SignalingState => throw new NotImplementedException();
 
@@ -193,46 +193,46 @@ internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>,
      */
     void NativeOnConnectionStateChange(SIPSorcery.Net.RTCPeerConnectionState connectionState)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnConnectionStateChange: {connectionState}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnConnectionStateChange: {connectionState}");
         OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     void NativeOnIceCandidate(SIPSorcery.Net.RTCIceCandidate iceCandidate)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceCandidate: {iceCandidate}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceCandidate: {iceCandidate}");
         OnIceCandidate?.Invoke(this, new RTCPeerConnectionIceEvent(iceCandidate));
     }
 
     private void NativeOnDataChannel(SIPSorcery.Net.RTCDataChannel obj)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnDataChannel: {obj}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnDataChannel: {obj}");
         OnDataChannel?.Invoke(this, new RTCDataChannelEvent(obj));
     }
 
     private void NativeOnSignalingStateChange()
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnSignalingStateChange");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnSignalingStateChange");
     }
 
     private void NativeOnNegotiationNeeded()
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnNegotiationNeeded");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnNegotiationNeeded");
     }
 
     private void NativeOnIceGatheringStateChange(SIPSorcery.Net.RTCIceGatheringState obj)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceGatheringStateChange: {obj}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceGatheringStateChange: {obj}");
     }
 
     private void NativeOnIceConnectionStateChange(SIPSorcery.Net.RTCIceConnectionState obj)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceConnectionStateChange: {obj}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceConnectionStateChange: {obj}");
     }
 
 
     private void NativeOnIceCandidateError(SIPSorcery.Net.RTCIceCandidate arg1, string arg2)
     {
-        System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceCandidateError: {arg1}, {arg2}");
+        //System.Diagnostics.Debug.WriteLine($"############################################ NativeOnIceCandidateError: {arg1}, {arg2}");
     }
 
 
