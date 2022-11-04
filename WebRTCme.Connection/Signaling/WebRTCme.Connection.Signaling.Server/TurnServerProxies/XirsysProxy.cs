@@ -48,12 +48,12 @@ namespace WebRTCme.Connection.Signaling.Server.TurnServerProxies
                 throw new Exception("Xirsys turn server reported error");
 
             var iceServers = xirsysTurnResponse.V.IceServers
-                .Select(xirsisIceServer => new RTCIceServer 
+                .Select(xirsysIceServer => new RTCIceServer 
                 { 
-                    Credential = xirsisIceServer.Credential,
+                    Credential = xirsysIceServer.Credential,
                     CredentialType = RTCIceCredentialType.Password,
-                    Urls = new string[] { xirsisIceServer.Url },
-                    Username = xirsisIceServer.Username
+                    Urls = new string[] { xirsysIceServer.Url },
+                    Username = xirsysIceServer.Username
                 }).ToArray();
             return iceServers;
         }
