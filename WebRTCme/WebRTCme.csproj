@@ -1,8 +1,8 @@
 ﻿<!--<Project Sdk="Microsoft.NET.Sdk">-->
 <Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-windows10.0.22621.0;net6.0-maccatalyst</TargetFrameworks>
-		<!--<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;net6.0-android;net6.0-ios;net6.0-windows10.0.22621.0;net6.0-maccatalyst</TargetFrameworks>-->
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.22621.0</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
