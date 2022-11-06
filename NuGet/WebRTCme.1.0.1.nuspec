@@ -18,7 +18,7 @@
         <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
         <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework="xamarinios10">
+      <group targetFramework="xamarin.ios10">
         <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
         <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
@@ -61,7 +61,7 @@
 	  </dependencies>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="Java.Interop" targetFramework="monoandroid12" />
-      <frameworkAssembly assemblyName="System.Drawing.Common.dll" targetFramework="xamarinios10" />
+      <frameworkAssembly assemblyName="System.Drawing.Common.dll" targetFramework="xamarin.ios10" />
     </frameworkAssemblies>
   </metadata>
   <files>
@@ -70,7 +70,7 @@
     <file src="..\WebRTCme.Api\bin\Release\netstandard2.1\WebRTCme.Api.dll" target="lib\netstandard2.1\WebRTCme.Api.dll" />
     
     <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\monoandroid12.0\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\xamarinios10\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\xamarin.ios10\WebRTCme.Api.dll" />
     
     <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
     <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0\WebRTCme.Api.dll" />
@@ -81,7 +81,7 @@
     <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Api.dll" />
 
     <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid12.0\WebRTCme.Bindings.Xamarin.Android.dll" />
-	  <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarinios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
+	  <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarin.ios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
 
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.1\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.1\WebRTCme.Bindings.Blazor.dll" />
@@ -104,7 +104,7 @@
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\bin\Release\net6.0-maccatalyst\WebRTCme.Bindings.Maui.macOS.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Bindings.Maui.macOS.dll" />
 
     <file src="..\WebRTCme\bin\Release\monoandroid12.0\WebRTCme.dll" target="lib\monoandroid12.0\WebRTCme.dll" />
-    <file src="..\WebRTCme\bin\Release\xamarin.ios10\WebRTCme.dll" target="lib\xamarinios10\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\xamarin.ios10\WebRTCme.dll" target="lib\xamarin.ios10\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\netstandard2.0\WebRTCme.dll" target="lib\netstandard2.0\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\netstandard2.1\WebRTCme.dll" target="lib\netstandard2.1\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\net5.0\WebRTCme.dll" target="lib\net5.0\WebRTCme.dll" />
