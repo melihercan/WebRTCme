@@ -19,7 +19,7 @@
     <PackageTags>WebRTC .NET Blazor</PackageTags>
     <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
     <Version>1.0.1</Version>
-    <Copyright>melihercan 2021</Copyright>
+    <Copyright>melihercan 2022</Copyright>
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

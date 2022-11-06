@@ -10,69 +10,110 @@
     <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
     <description>WebRTC library for Xamarin Forms and Blazor applications with a single common API.</description>
     <releaseNotes>Bug fixes.</releaseNotes>
-    <copyright>melihercan 2021</copyright>
-    <tags>WebRTC Xamarin Android iOS .NET Blazor</tags>
+    <copyright>melihercan 2022</copyright>
+    <tags>WebRTC .NET Xamarin MAUI Android iOS Windows macOS Blazor</tags>
     <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme" />
     <dependencies>
-      <group targetFramework="MonoAndroid10.0">
-        <dependency id="Microsoft.JSInterop" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      <group targetFramework="monoandroid12.0">
+        <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework="Xamarin.iOS1.0">
-        <dependency id="Microsoft.JSInterop" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      <group targetFramework="xamarinios10">
+        <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework="net5.0">
-        <dependency id="Microsoft.AspNetCore.Components" version="5.0.6" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.AspNetCore.Components.Web" version="5.0.6" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="5.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="5.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="5.0.6" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      <group targetFramework=".netstandard2.0">
+        <dependency id="Microsoft.AspNetCore.Components" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework=".NETStandard2.0">
-        <dependency id="Microsoft.AspNetCore.Components" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="5.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="5.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
+      <group targetFramework=".netstandard2.1">
+        <dependency id="Microsoft.AspNetCore.Components" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="3.1.29" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
       </group>
-      <group targetFramework=".NETStandard2.1">
-        <dependency id="Microsoft.AspNetCore.Components" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="5.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="5.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="3.1.12" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.6.1" exclude="Build,Analyzers" />
-      </group>
-    </dependencies>
+	    <group targetFramework="net5.0">
+		    <dependency id="Microsoft.AspNetCore.Components" version="5.0.17" exclude="Build,Analyzers" />
+		    <dependency id="Microsoft.AspNetCore.Components.Web" version="5.0.17" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="5.0.17" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
+	    </group>
+	    <group targetFramework="net6.0">
+		    <dependency id="Microsoft.AspNetCore.Components" version="6.0.9" exclude="Build,Analyzers" />
+		    <dependency id="Microsoft.AspNetCore.Components.Web" version="6.0.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net6.0-android31.0">
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net6.0-ios15.4">
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net6.0-windows10.0.22621">
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net6.0-maccatalyst15.4">
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+	    </group>
+	  </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="Java.Interop" targetFramework="MonoAndroid10.0" />
-      <frameworkAssembly assemblyName="System.Drawing.Common.dll" targetFramework="Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="Java.Interop" targetFramework="monoandroid12" />
+      <frameworkAssembly assemblyName="System.Drawing.Common.dll" targetFramework="xamarinios10" />
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
+
     <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\netstandard2.0\WebRTCme.Api.dll" />
     <file src="..\WebRTCme.Api\bin\Release\netstandard2.1\WebRTCme.Api.dll" target="lib\netstandard2.1\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\monoandroid10.0\WebRTCme.Api.dll" />
+    
+    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\monoandroid12.0\WebRTCme.Api.dll" />
     <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\xamarinios10\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid10.0\WebRTCme.Bindings.Xamarin.Android.dll" />
+    
+    <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0\WebRTCme.Api.dll" />
+
+    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-android31.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-ios15.4\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Api.dll" />
+
+    <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid12.0\WebRTCme.Bindings.Xamarin.Android.dll" />
 	  <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarinios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net5.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
+
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.1\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.1\WebRTCme.Bindings.Blazor.dll" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net5.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net5.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net6.0\WebRTCme.Bindings.Blazor.dll" target="lib\net6.0\WebRTCme.Bindings.Blazor.dll" />
+
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
+
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\bin\Release\net6.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net6.0-android31.0\WebRTCme.Bindings.Maui.Android.dll" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net6.0-android31.0\libwebrtc.aar" />
+    
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net6.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net6.0-ios15.4\WebRTCme.Bindings.Maui.iOS.dll" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\bin\Release\net6.0-windows10.0.22621.0\WebRTCme.Bindings.Maui.Windows.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.Bindings.Maui.Windows.dll" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\bin\Release\net6.0-maccatalyst\WebRTCme.Bindings.Maui.macOS.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Bindings.Maui.macOS.dll" />
+
+    <file src="..\WebRTCme\bin\Release\monoandroid12.0\WebRTCme.dll" target="lib\monoandroid12.0\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\xamarin.ios10\WebRTCme.dll" target="lib\xamarinios10\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\netstandard2.0\WebRTCme.dll" target="lib\netstandard2.0\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\netstandard2.1\WebRTCme.dll" target="lib\netstandard2.1\WebRTCme.dll" />
-    <file src="..\WebRTCme\bin\Release\net5\WebRTCme.dll" target="lib\net5.0\WebRTCme.dll" />
-    <file src="..\WebRTCme\bin\Release\monoandroid10.0\WebRTCme.dll" target="lib\monoandroid10.0\WebRTCme.dll" />
-    <file src="..\WebRTCme\bin\Release\xamarin.ios10\WebRTCme.dll" target="lib\xamarinios10\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net5.0\WebRTCme.dll" target="lib\net5.0\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0\WebRTCme.dll" target="lib\net6.0\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0-android\WebRTCme.dll" target="lib\net6.0-android31.0\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0-ios\WebRTCme.dll" target="lib\net6.0-ios15.4\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0-windows10.0.22621.0\WebRTCme.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0-maccatalyst\WebRTCme.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.dll" />
+    
     <file src="..\doc\me.png" target="me.png" />
   </files>
 </package>

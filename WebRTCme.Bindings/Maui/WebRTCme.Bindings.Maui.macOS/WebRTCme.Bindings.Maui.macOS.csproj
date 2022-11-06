@@ -4,6 +4,7 @@
 	  <TargetFramework>net6.0-maccatalyst</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <SupportedOSPlatformVersion>13.1</SupportedOSPlatformVersion>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 
