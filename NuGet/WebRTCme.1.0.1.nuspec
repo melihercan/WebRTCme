@@ -53,6 +53,8 @@
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net6.0-windows10.0.22621">
+        <dependency id="SIPSorcery" version="6.0.11" exclude="Build,Analyzers" />
+        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net6.0-maccatalyst15.4">
