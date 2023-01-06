@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace WebRTCme.Bindings.macOS.Custom
 {
-    internal class NativeBase
+    internal abstract class NativeBase<T>
     {
+        protected NativeBase() { }
+
+        protected NativeBase(T nativeObject) => NativeObject = nativeObject;
+
+        public T NativeObject { get; init; }
+
     }
 }

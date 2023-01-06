@@ -28,9 +28,7 @@ namespace WebRTCme.Bindings.macOS.Api
             throw new NotImplementedException();
         }
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null)
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
+            new RTCPeerConnection(configuration);
     }
 }

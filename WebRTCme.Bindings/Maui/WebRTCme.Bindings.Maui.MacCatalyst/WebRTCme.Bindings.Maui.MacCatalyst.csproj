@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	  <TargetFrameworks>net6.0-maccatalyst; net7.0-maccatalyst</TargetFrameworks>
@@ -7,6 +7,11 @@
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="SIPSorcery" Version="6.0.11" />
+		<PackageReference Include="SIPSorceryMedia" Version="3.0.2" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />

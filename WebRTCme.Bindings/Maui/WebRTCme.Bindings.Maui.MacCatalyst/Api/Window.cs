@@ -28,9 +28,7 @@ namespace WebRTCme.Bindings.Maui.MacCatalyst.Api
             throw new NotImplementedException();
         }
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration = null)
-        {
-            throw new NotImplementedException();
-        }
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
+            new RTCPeerConnection(configuration);
     }
 }

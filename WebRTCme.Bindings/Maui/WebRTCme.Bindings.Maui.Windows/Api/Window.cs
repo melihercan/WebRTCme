@@ -29,7 +29,7 @@ namespace WebRTCme.Bindings.Maui.Windows.Api
         }
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
-            new Windows.Api.RTCPeerConnection(configuration);
+            new RTCPeerConnection(configuration);
     }
 
 }
