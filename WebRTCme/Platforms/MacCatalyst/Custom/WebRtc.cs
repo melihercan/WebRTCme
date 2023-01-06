@@ -16,7 +16,7 @@ namespace WebRTCme
 #if NETSTANDARD
         public IWindow Window(IJSRuntime jsRuntime) => throw new NotImplementedException();
 #else
-        public IWindow Window(IJSRuntime jsRuntime) => new WebRTCme.Bindings.Maui.macOS.Api.Window();
+        public IWindow Window(IJSRuntime jsRuntime) => new WebRTCme.Bindings.Maui.MacCatalyst.Api.Window();
 #endif
 
 

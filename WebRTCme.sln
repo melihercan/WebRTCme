@@ -11,11 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Api", "WebRTCme.Ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Bindings", "WebRTCme.Bindings", "{761DF7FB-69F0-441D-B18F-B9803E48F6A5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{A957C062-0BC5-42F0-86F9-4D04AD9E6BBD}"
-	ProjectSection(SolutionItems) = preProject
-		WebRTCme.Bindings\NuGet\WebRTCme.Bindings.nuspec = WebRTCme.Bindings\NuGet\WebRTCme.Bindings.nuspec
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin", "Xamarin", "{5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware", "WebRTCme.Middleware", "{1B143511-677C-4946-A201-C8D429A563A5}"
@@ -78,7 +73,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.DemoApp.Maui", "We
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.Windows", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj", "{30149F52-DC1A-4FE0-88CB-8CC5BBB62A2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.macOS", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\WebRTCme.Bindings.Maui.macOS.csproj", "{79AD858C-C5FC-4FB3-B3C8-89EC084EE906}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Maui.MacCatalyst", "WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj", "{79AD858C-C5FC-4FB3-B3C8-89EC084EE906}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.macOS", "WebRTCme.Bindings\WebRTCme.Bindings.macOS\WebRTCme.Bindings.macOS.csproj", "{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -414,13 +411,24 @@ Global
 		{79AD858C-C5FC-4FB3-B3C8-89EC084EE906}.Release|iPhone.Build.0 = Release|Any CPU
 		{79AD858C-C5FC-4FB3-B3C8-89EC084EE906}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{79AD858C-C5FC-4FB3-B3C8-89EC084EE906}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|iPhone.Build.0 = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A779D425-8A47-4C76-B96B-C5F00E90C934} = {47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}
-		{A957C062-0BC5-42F0-86F9-4D04AD9E6BBD} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
 		{5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
 		{5ACBD735-F68F-4699-A1E4-CC96660C045C} = {5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87}
 		{25994A74-2A57-46DC-B6CA-999F9C5885A1} = {5C0A0B6B-ADC0-4BC7-8F10-1F4D4DCCFC87}
@@ -450,6 +458,7 @@ Global
 		{D35476C4-7936-4446-AA80-BEC7D641DF28} = {47EF2BFA-1BDD-45FD-BA01-B40ABC5D58E3}
 		{30149F52-DC1A-4FE0-88CB-8CC5BBB62A2C} = {13FA7562-58C6-4156-A6E6-04C43CF0F0BA}
 		{79AD858C-C5FC-4FB3-B3C8-89EC084EE906} = {13FA7562-58C6-4156-A6E6-04C43CF0F0BA}
+		{09AB9CE4-4405-464F-A2E8-0A9F8AE8B14E} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FC3188C-A3C9-42FC-AF35-0CDCE91C707A}

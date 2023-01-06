@@ -65,3 +65,14 @@ IOS PHONE INSTALL
 - open on the phone and install
 - General->About->Certificate Trus Serttings, enable full trust
 USE SAFARI - CHROME DOES NOT WORK
+
+LINUX INSTALLATION
+------------------
+Installing a certificate in PEM form
+Assuming a PEM-formatted root CA certificate is in local-ca.crt, follow the steps below to install it.
+
+Note: It is important to have the .crt extension on the file, otherwise it will not be processed.
+
+$ sudo apt-get install -y ca-certificates
+$ sudo cp local-ca.crt /usr/local/share/ca-certificates
+$ sudo update-ca-certificates

@@ -1,7 +1,7 @@
 ﻿ <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; net6.0</TargetFrameworks>
+    <TargetFrameworks>net5.0; net6.0; net7.0</TargetFrameworks>
     <!--<TargetFrameworks>net5.0</TargetFrameworks>-->
     <RazorLangVersion>3.0</RazorLangVersion>
     <RootNamespace>WebRTCme.Middleware.Blazor</RootNamespace>
@@ -33,7 +33,13 @@
      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
    </ItemGroup>
 
-   <ItemGroup>
+	 <ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.1" />
+		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.1" />
+		 <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+	 </ItemGroup>
+
+	 <ItemGroup>
     <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
     </ProjectReference>
   </ItemGroup>

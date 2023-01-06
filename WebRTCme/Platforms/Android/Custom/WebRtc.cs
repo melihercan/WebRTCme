@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebRTCme.Android;
 using Webrtc = Org.Webrtc;
-#if! NET6_0
+#if! (NET6_0 || NET7_0)
 using Xamarin.Essentials;
 #endif
 

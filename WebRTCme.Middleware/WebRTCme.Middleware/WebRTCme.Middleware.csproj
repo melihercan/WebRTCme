@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
 	  <LangVersion>10.0</LangVersion>
 	  <Authors>melihercan</Authors>
@@ -28,6 +28,9 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
   </ItemGroup>
 
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
 	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
@@ -46,7 +49,7 @@
       <PackageReference Include="System.Text.Json" Version="6.0.6" />
 	  <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-    <!--<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />-->
+    <!--<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />-->
 	</ItemGroup>
 
 </Project>

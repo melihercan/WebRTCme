@@ -58,6 +58,13 @@
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net6.0-maccatalyst15.4">
+        <dependency id="SIPSorcery" version="6.0.11" exclude="Build,Analyzers" />
+        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net6.0-macos">
+        <dependency id="SIPSorcery" version="6.0.11" exclude="Build,Analyzers" />
+        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
 	    </group>
 	  </dependencies>
@@ -100,10 +107,11 @@
 
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\bin\Release\net6.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net6.0-android31.0\WebRTCme.Bindings.Maui.Android.dll" />
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net6.0-android31.0\libwebrtc.aar" />
-    
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net6.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net6.0-ios15.4\WebRTCme.Bindings.Maui.iOS.dll" />
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\bin\Release\net6.0-windows10.0.22621.0\WebRTCme.Bindings.Maui.Windows.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.Bindings.Maui.Windows.dll" />
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\bin\Release\net6.0-maccatalyst\WebRTCme.Bindings.Maui.macOS.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Bindings.Maui.macOS.dll" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\bin\Release\net6.0-maccatalyst\WebRTCme.Bindings.Maui.MacCatalyst.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Bindings.Maui.MacCatalyst.dll" />
+
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.macOS\bin\Release\net6.0-macos\WebRTCme.Bindings.macOS.dll" target="lib\net6.0-macos\WebRTCme.Bindings.macOS.dll" />
 
     <file src="..\WebRTCme\bin\Release\monoandroid12.0\WebRTCme.dll" target="lib\monoandroid12.0\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\xamarin.ios10\WebRTCme.dll" target="lib\xamarin.ios10\WebRTCme.dll" />
@@ -115,6 +123,7 @@
     <file src="..\WebRTCme\bin\Release\net6.0-ios\WebRTCme.dll" target="lib\net6.0-ios15.4\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\net6.0-windows10.0.22621.0\WebRTCme.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\net6.0-maccatalyst\WebRTCme.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net6.0-macos\WebRTCme.dll" target="lib\net6.0-macos\WebRTCme.dll" />
     
     <file src="..\doc\me.png" target="me.png" />
   </files>

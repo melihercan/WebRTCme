@@ -5,7 +5,7 @@ using WebRTCme;
 using Webrtc = Org.Webrtc;
 using Android.Media;
 using Android.Hardware.Camera2;
-#if! NET6_0
+#if! (NET6_0 || NET7_0) 
 using Xamarin.Essentials;
 #endif
 using System.Linq;

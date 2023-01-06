@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-android</TargetFramework>
+    <TargetFrameworks>net6.0-android; net7.0-android</TargetFrameworks>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <!--<Nullable>enable</Nullable>-->
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Transforms\EnumFields.xml" />
+    <None Remove="Transforms\EnumMethods.xml" />
+    <None Remove="Transforms\Metadata.xml" />
+  </ItemGroup>
 
   <ItemGroup>
 	<None Include="Jars\AboutJars.txt" />

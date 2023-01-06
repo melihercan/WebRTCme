@@ -35,6 +35,6 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\WebRTCme.Bindings.Maui.macOS.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
 	</ItemGroup>
 </Project>

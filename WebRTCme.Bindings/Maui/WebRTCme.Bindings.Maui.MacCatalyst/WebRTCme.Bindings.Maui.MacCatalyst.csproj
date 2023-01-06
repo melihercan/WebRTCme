@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net6.0-maccatalyst; net7.0-maccatalyst</TargetFrameworks>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <SupportedOSPlatformVersion>13.1</SupportedOSPlatformVersion>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <!--<Nullable>enable</Nullable>-->
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
+	</ItemGroup>
+
+</Project>

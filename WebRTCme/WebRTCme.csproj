@@ -1,7 +1,7 @@
 ﻿<!--<Project Sdk="Microsoft.NET.Sdk">-->
 <Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;net7.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net7.0-android;net6.0-ios;net7.0-ios;net6.0-maccatalyst;net7.0-maccatalyst;net6.0-macos;net7.0-macos</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.22621.0</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<SingleProject>true</SingleProject>
@@ -11,6 +11,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'macos'">10.14</SupportedOSPlatformVersion>
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 	</PropertyGroup>
 
@@ -29,6 +30,9 @@
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
+	</PropertyGroup>
+
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'MonoAndroid12.0'">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -41,7 +45,15 @@
 		<UseMaui>true</UseMaui>
 	</PropertyGroup>
 
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0-android'">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0-ios'">
 		<UseMaui>true</UseMaui>
 	</PropertyGroup>
 
@@ -49,11 +61,11 @@
 		<UseMaui>true</UseMaui>
 	</PropertyGroup>
 
-	<!--<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
-		<UseMaui>true</UseMaui>
-	</PropertyGroup>-->
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">
 		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
 	</PropertyGroup>
 
 	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.0'))">
@@ -61,7 +73,7 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.29" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 	
 	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.1'))">
@@ -69,7 +81,7 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.29" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
@@ -77,7 +89,7 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="5.0.17" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
@@ -85,7 +97,15 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<Compile Include="**\Blazor\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid12.0'">
@@ -93,7 +113,7 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.29" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
@@ -101,7 +121,7 @@
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.29" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android'">
@@ -111,11 +131,25 @@
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
+		<Compile Include="**\Android\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
 		<Compile Include="**\iOS\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-ios'">
+		<Compile Include="**\iOS\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-windows10.0.22621.0'">
@@ -125,20 +159,40 @@
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-windows10.0.22621.0'">
+		<Compile Include="**\Windows\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">
 		<Compile Include="**\MacCatalyst\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.macOS\WebRTCme.Bindings.Maui.macOS.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-maccatalyst'">
+		<Compile Include="**\MacCatalyst\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+	</ItemGroup>
 
-	<!--<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
 		<Compile Include="**\macOS\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Desktop\WebRTCme.Bindings.Desktop.macOS\WebRTCme.Bindings.Desktop.macOS.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.7" />
-	</ItemGroup>-->
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.macOS\WebRTCme.Bindings.macOS.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.9" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-macos'">
+		<Compile Include="**\macOS\**\*.cs" />
+		<Compile Include="*.cs" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.macOS\WebRTCme.Bindings.macOS.csproj" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <None Include="..\doc\me.png" Link="me.png">

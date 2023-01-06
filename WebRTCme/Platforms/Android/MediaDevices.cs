@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme;
-#if! NET6_0
+#if! (NET6_0 || NET7_0)
 using Xamarin.Essentials;
 #endif
 using Webrtc = Org.Webrtc;
