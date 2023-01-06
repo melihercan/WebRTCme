@@ -35,6 +35,12 @@ is:
 - Use 'nuget pack {current}.nuspec' command to generate the desired NuGet.
 For this purpose the 'NuGet' folder is created and NuGet generations will be done there.
 
+BUILD PACKAGE
+=============
+nuget pack <name>.nuspec
+
+
+
 
 
 
