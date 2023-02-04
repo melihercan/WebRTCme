@@ -2,10 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
-    <LangVersion>10.0</LangVersion>
+    <!--<LangVersion>10.0</LangVersion>-->
   </PropertyGroup>
 
-  <ItemGroup>
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
     <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
     <PackageReference Include="WebsocketClientLite.PCL" Version="6.3.0" />
 	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />

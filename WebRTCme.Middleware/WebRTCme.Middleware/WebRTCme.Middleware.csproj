@@ -3,7 +3,7 @@
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
-	  <LangVersion>10.0</LangVersion>
+	  <!--<LangVersion>10.0</LangVersion>-->
 	  <Authors>melihercan</Authors>
 	  <Version>1.0.1</Version>
 	  <Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
@@ -19,7 +19,11 @@
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 	  <!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->
   </ItemGroup>
 

@@ -6,7 +6,7 @@
 		<RootNamespace>WebRTCme.Middleware.Xamarin</RootNamespace>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
-		<LangVersion>9.0</LangVersion>
+		<LangVersion>Latest</LangVersion>
 		<Authors>melihercan</Authors>
 		<Description>Services layer between Xamarin Forms applications and WebRTCme library.</Description>
 		<Copyright>melihercan 2021</Copyright>
@@ -19,6 +19,10 @@
 		<PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
 		<Version>1.0.1</Version>
 	</PropertyGroup>
+
+	<!--<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>-->
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
