@@ -65,7 +65,7 @@
 	<ItemGroup>
 	  <PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.5" />
 	  <PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
-	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2515" />
+	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2545" />
 	</ItemGroup>
 	
 	

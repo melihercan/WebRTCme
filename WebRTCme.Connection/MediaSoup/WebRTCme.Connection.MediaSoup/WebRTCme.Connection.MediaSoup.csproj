@@ -6,8 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\..\..\Externals\Result\Result.csproj" />
-    <ProjectReference Include="..\..\..\Externals\SdpTransform\SdpTransform.csproj" />-->
     <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 

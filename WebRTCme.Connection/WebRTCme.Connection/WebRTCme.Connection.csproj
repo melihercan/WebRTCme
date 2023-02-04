@@ -32,8 +32,6 @@
 
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\..\Externals\Result\Result.csproj" />
-    <ProjectReference Include="..\..\Externals\SdpTransform\SdpTransform.csproj" />-->
     <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
     <ProjectReference Include="..\MediaSoup\WebRTCme.Connection.MediaSoup.Proxy\WebRTCme.Connection.MediaSoup.Proxy.csproj" />
     <ProjectReference Include="..\Signaling\WebRTCme.Connection.Signaling.Proxy\WebRTCme.Connection.Signaling.Proxy.csproj" />
