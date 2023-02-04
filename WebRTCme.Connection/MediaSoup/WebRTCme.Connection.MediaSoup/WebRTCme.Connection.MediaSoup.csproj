@@ -9,12 +9,29 @@
     <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-    <PackageReference Include="Utilme.Result" Version="1.0.1" />
-    <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.12" />-->
+	</ItemGroup>
 
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
+		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />-->
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2" />-->
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	    <PackageReference Include="System.Reactive" Version="5.0.0" />
+		<PackageReference Include="Utilme.Result" Version="1.0.1" />
+		<PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2" />
+	</ItemGroup>
 
 </Project>

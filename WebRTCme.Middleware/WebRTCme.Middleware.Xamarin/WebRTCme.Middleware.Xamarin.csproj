@@ -1,11 +1,11 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	
-  <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRTCme.Middleware.Xamarin</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<AssemblyName>WebRTCme.Middleware.Xamarin</AssemblyName>
 		<LangVersion>9.0</LangVersion>
 		<Authors>melihercan</Authors>
 		<Description>Services layer between Xamarin Forms applications and WebRTCme library.</Description>
@@ -22,68 +22,61 @@
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />
-    <UpToDateCheckInput Include="Services\*.cs" />
-    <UpToDateCheckInput Include="Helpers\*.cs" />
-    <UpToDateCheckInput Include="Extensions\*.cs" />
-    <UpToDateCheckInput Include="Popups\*.cs" />
-    <UpToDateCheckInput Include="Android\**\*.cs" />
+		<UpToDateCheckInput Include="Services\*.cs" />
+		<UpToDateCheckInput Include="Helpers\*.cs" />
+		<UpToDateCheckInput Include="Extensions\*.cs" />
+		<UpToDateCheckInput Include="Popups\*.cs" />
+		<UpToDateCheckInput Include="Android\**\*.cs" />
 		<UpToDateCheckInput Include="iOS\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="*.cs" />
-    <Compile Include="Services\*.cs" />
-    <Compile Include="Helpers\*.cs" />
-    <Compile Include="Extensions\*.cs" />
-    <Compile Include="Popups\*.cs" />
-  </ItemGroup>
+		<Compile Include="Services\*.cs" />
+		<Compile Include="Helpers\*.cs" />
+		<Compile Include="Extensions\*.cs" />
+		<Compile Include="Popups\*.cs" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Update="Popups\GenericPopup.xaml.cs">
+			<DependentUpon>GenericPopup.xaml</DependentUpon>
+		</Compile>
+		<EmbeddedResource Update="Popups\GenericPopup.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</EmbeddedResource>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Popups\GenericPopup.xaml.cs">
-      <DependentUpon>GenericPopup.xaml</DependentUpon>
-    </Compile>
-    <EmbeddedResource Update="Popups\GenericPopup.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
-    </ProjectReference>
-    <Compile Include="Android\**\*.cs" />
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
+		</ProjectReference>
+		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-    <ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
-    </ProjectReference>
-    <Compile Include="iOS\**\*.cs" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
+		</ProjectReference>
+		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
-
 	<ItemGroup>
-	  <PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.5" />
-	  <PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
-	  <PackageReference Include="Xamarin.Forms" Version="5.0.0.2545" />
-	</ItemGroup>
-	
-	
-	<ItemGroup>
-	  <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
-	  </ProjectReference>
+		<PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.5" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
+		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2545" />
 	</ItemGroup>
 	
 	
 	<ItemGroup>
-	  <None Include="..\..\doc\me.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
+		<ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
+		</ProjectReference>
 	</ItemGroup>
 	
 	
-	
-
+	<ItemGroup>
+		<None Include="..\..\doc\me.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
   
 </Project>

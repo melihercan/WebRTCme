@@ -23,7 +23,7 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android'">
 		<PackageReference Include="Xamarin.AndroidX.Browser">
-		  <Version>1.4.0.2</Version>
+		  <Version>1.4.0.3</Version>
 		</PackageReference>
 		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
 	</ItemGroup>

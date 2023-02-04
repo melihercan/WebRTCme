@@ -6,29 +6,23 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
     <PackageReference Include="Utilme.Result" Version="1.0.1" />
     <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
-  </ItemGroup>
+		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+	</ItemGroup>
 
 
   <ItemGroup>
