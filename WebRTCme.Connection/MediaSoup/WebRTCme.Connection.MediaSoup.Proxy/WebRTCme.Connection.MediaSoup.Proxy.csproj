@@ -16,11 +16,6 @@
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <ProjectReference Include="..\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
-  </ItemGroup>
-
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
   </ItemGroup>
 
