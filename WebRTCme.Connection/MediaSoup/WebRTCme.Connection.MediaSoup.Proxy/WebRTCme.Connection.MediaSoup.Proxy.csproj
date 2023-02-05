@@ -28,4 +28,8 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
+	</ItemGroup>
+
 </Project>
