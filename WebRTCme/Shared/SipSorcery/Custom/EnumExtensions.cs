@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.SipSorcery.Api.Custom
+namespace WebRTCme.Shared.SipSorcery.Custom
 {
     public static class EnumExtensions
     {
@@ -79,6 +79,6 @@ namespace WebRTCme.Bindings.SipSorcery.Api.Custom
                 SIPSorcery.Net.RTCDataChannelState.closed => RTCDataChannelState.Closed,
                 _ => throw new NotImplementedException(),
             };
-             
+
     }
 }

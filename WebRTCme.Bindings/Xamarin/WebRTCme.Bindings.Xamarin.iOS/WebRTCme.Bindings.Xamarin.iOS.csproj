@@ -52,11 +52,5 @@
       <Kind>Framework</Kind>
     </NativeReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj">
-      <Project>{a3edba7e-eead-42b5-bbf5-2b0b94c5f409}</Project>
-      <Name>WebRTCme.Api</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.ObjCBinding.CSharp.targets" />
 </Project>

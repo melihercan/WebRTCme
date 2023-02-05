@@ -5,9 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Bindings.SipSorcery.Api.Custom;
+using WebRTCme.Shared.SipSorcery.Custom;
 
-namespace WebRTCme.Bindings.SipSorcery.Api;
+namespace WebRTCme.Shared.SipSorcery;
 
 internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>, IRTCPeerConnection
 {

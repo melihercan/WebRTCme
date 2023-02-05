@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.SipSorcery.Api.Custom
+namespace WebRTCme.Shared.SipSorcery.Custom
 {
     internal abstract class NativeBase<T>
     {

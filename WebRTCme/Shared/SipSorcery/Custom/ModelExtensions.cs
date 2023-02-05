@@ -1,4 +1,6 @@
-﻿namespace WebRTCme.Bindings.SipSorcery.Api.Custom
+﻿using WebRTCme.Shared.SipSorcery.Custom;
+
+namespace WebRTCme.Shared.SipSorcery.Custom
 {
     internal static class ModelExtensions
     {

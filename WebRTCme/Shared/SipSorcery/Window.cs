@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebRTCme.Bindings.SipSorcery.Api
+namespace WebRTCme.Shared.SipSorcery
 {
     public class Window : IWindow
     {
@@ -28,7 +28,7 @@ namespace WebRTCme.Bindings.SipSorcery.Api
             throw new NotImplementedException();
         }
 
-        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) => 
+        public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);
     }
 

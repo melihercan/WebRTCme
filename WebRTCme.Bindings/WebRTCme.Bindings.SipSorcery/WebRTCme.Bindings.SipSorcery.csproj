@@ -12,9 +12,5 @@
 		<PackageReference Include="SIPSorceryMedia" Version="3.0.2" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
-	</ItemGroup>
-
 
 </Project>

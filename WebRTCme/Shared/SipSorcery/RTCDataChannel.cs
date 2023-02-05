@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Bindings.SipSorcery.Api.Custom;
+using WebRTCme.Shared.SipSorcery.Custom;
 
-namespace WebRTCme.Bindings.SipSorcery.Api
+namespace WebRTCme.Shared.SipSorcery
 {
     internal class RTCDataChannel : NativeBase<SIPSorcery.Net.RTCDataChannel>, IRTCDataChannel
     {
@@ -20,18 +20,18 @@ namespace WebRTCme.Bindings.SipSorcery.Api
         }
 
 
-        public BinaryType BinaryType 
+        public BinaryType BinaryType
         {
             get => (BinaryType)Enum.Parse(typeof(BinaryType), NativeObject.binaryType);
-            set => NativeObject.binaryType = value.ToString(); 
+            set => NativeObject.binaryType = value.ToString();
         }
 
         public uint BufferedAmount => (uint)NativeObject.bufferedAmount;
 
-        public uint BufferedAmountLowThreshold 
-        { 
-            get => (uint)NativeObject.bufferedAmountLowThreshold; 
-            set => NativeObject.bufferedAmountLowThreshold = value; 
+        public uint BufferedAmountLowThreshold
+        {
+            get => (uint)NativeObject.bufferedAmountLowThreshold;
+            set => NativeObject.bufferedAmountLowThreshold = value;
         }
 
         public ushort Id => NativeObject.id.Value;
@@ -88,7 +88,7 @@ namespace WebRTCme.Bindings.SipSorcery.Api
             OnClose?.Invoke(this, EventArgs.Empty);
         }
 
-        private void NativeOnMessage(SIPSorcery.Net.RTCDataChannel dc, 
+        private void NativeOnMessage(SIPSorcery.Net.RTCDataChannel dc,
             SIPSorcery.Net.DataChannelPayloadProtocols protocol, byte[] data)
         {
             OnMessage?.Invoke(this, new MessageEvent(protocol switch

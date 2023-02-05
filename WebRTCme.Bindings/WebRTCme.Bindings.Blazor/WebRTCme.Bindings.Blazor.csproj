@@ -54,9 +54,6 @@
 	</ItemGroup>
 
 
-	<ItemGroup>
-    <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
-  </ItemGroup>
 
 	<ItemGroup>
 	  <None Include="..\..\doc\me.png">

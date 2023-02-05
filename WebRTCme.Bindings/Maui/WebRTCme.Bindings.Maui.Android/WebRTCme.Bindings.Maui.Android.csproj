@@ -18,8 +18,4 @@
 	<LibraryProjectZip Include="Jars\libwebrtc.aar" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
-  </ItemGroup>
-
 </Project>
