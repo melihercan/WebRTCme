@@ -203,4 +203,159 @@
 	</ItemGroup>
 
 
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\Custom\BlazorSupport.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\Custom\NativeBase.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\Blob.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\BlobEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\DOMException.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\ErrorEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MediaDevices.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MediaRecorder.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MediaStream.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MediaStreamTrack.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MediaStreamTrackEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\MessageEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\Navigator.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCCertificate.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCDataChannel.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCDataChannelEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCDtlsTransport.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCDTMFSender.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCIceCandidate.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCIceCandidatePair.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCIceTransport.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCIdentityAssertion.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCPeerConnection.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCPeerConnectionIceEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCRtpReceiver.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCRtpSender.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCRtpTransceiver.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCSctpTransport.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCStatsReport.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\RTCTrackEvent.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Remove="Platforms\Blazor\Window.cs" />
+	</ItemGroup>
+
+
 </Project>
