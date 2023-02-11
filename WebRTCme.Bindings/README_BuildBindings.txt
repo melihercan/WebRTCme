@@ -1,3 +1,8 @@
+WHICH BRANCH WITH RESPECT TO CHRMOMIUM
+======================================
+WebRTC follows the same release cycle as Chromium and the chromium dashboard provides a list of milestones 
+(hence the M) and their associated branches: https://chromiumdash.appspot.com/branches 
+
 CREATION
 ========
 - (from home folder) mkdir webrtc
@@ -93,4 +98,9 @@ cp -R src/out/mac_x64/WebRTC.framework WebRTC.framework
 lipo -create -output WebRTC.framework/WebRTC src/out/mac_x64/WebRTC.framework/WebRTC src/out/mac_arm64/WebRTC.framework/WebRTC
 The outputted WebRTC.framework can be imported into an Xcode Project and will support both Intel and Apple Silicon Macs
 
+
+USEFUL LINKS
+============
+https://webrtc.github.io/webrtc-org/native-code/native-apis/
+https://w3c.github.io/webrtc-pc/
 
