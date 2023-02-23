@@ -1,3 +1,6 @@
+# UPDATE 11 Feb 23
+Started adding documentation to the [Wiki](https://github.com/melihercan/WebRTCme/wiki)
+
 # DESKTOP UPDATE 14 Sep 22
 Bindings and WebRTCme basic libraries will soon have support for desktop (Windows and MacOS initially).
 
