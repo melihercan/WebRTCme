@@ -25,5 +25,5 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack -c Release WebRTCme.Api/WebRTCme.Api.csproj  
     - name: Publish NuGet package to GitHub packages
-      run: dotnet nuget push "WebRTCme.Api/bin/Release/WebRTCme.Api.1.0.1.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+      run: dotnet nuget push "WebRTCme.Api/bin/Release/WebRTCme.Api.1.0.1.nupkg" --api-key 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 --source "github"
       
