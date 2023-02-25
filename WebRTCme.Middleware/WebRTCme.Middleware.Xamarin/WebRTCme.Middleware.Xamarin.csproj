@@ -9,7 +9,7 @@
 		<LangVersion>Latest</LangVersion>
 		<Authors>melihercan</Authors>
 		<Description>Services layer between Xamarin Forms applications and WebRTCme library.</Description>
-		<Copyright>melihercan 2021</Copyright>
+		<Copyright>melihercan 2023</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware/WebRTCme.Middleware.Xamarin</RepositoryUrl>
@@ -65,7 +65,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.5" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
 		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2545" />
 	</ItemGroup>
 	

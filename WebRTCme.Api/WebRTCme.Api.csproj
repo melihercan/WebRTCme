@@ -8,7 +8,7 @@
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <Authors>melihercan</Authors>
 	  <Description>WebRTCme API library.</Description>
-	  <Copyright>melihercan 2021</Copyright>
+	  <Copyright>melihercan 2023</Copyright>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
 	  <PackageIcon>me.png</PackageIcon>
@@ -17,7 +17,7 @@
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>WebRTC Xamarin Android iOS .NET Blazor</PackageTags>
 	  <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
-	  <Version>1.1.0</Version>
+	  <Version>1.0.1</Version>
   </PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">

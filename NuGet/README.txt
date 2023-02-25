@@ -40,7 +40,10 @@ BUILD PACKAGE
 nuget pack <name>.nuspec
 
 
-
+LINKS
+=====
+https://stackoverflow.com/questions/15882770/creating-one-nuget-package-from-multiple-projects-in-one-solution
+https://josef.codes/dotnet-pack-include-referenced-projects/
 
 
 

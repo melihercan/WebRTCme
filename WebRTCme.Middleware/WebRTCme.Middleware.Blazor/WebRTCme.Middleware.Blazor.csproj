@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>melihercan</Authors>
     <Description>Services layer between Blazor applications and WebRTCme library.</Description>
-    <Copyright>melihercan 2021</Copyright>
+    <Copyright>melihercan 2023</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
     <PackageIcon>me.png</PackageIcon>
@@ -21,13 +21,13 @@
 
 
    <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.13" />
-     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.13" />
+     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.14" />
+     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.14" />
    </ItemGroup>
 
 	 <ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.2" />
-		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.2" />
+		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.3" />
+		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.3" />
 	 </ItemGroup>
 
 	 <ItemGroup>
