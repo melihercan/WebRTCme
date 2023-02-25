@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; net6.0; net7.0</TargetFrameworks>
-    <!--<TargetFrameworks>net5.0;</TargetFrameworks>-->
+    <TargetFrameworks>net6.0; net7.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,10 +11,6 @@
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.17" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">

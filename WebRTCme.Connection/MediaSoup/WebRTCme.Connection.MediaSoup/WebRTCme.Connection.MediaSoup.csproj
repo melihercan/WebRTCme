@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
   </PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -16,9 +16,6 @@
 		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.12" />-->
 	</ItemGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />-->
-	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
 		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->

@@ -58,8 +58,9 @@ namespace Webrtc
 		[DllImport("__Internal")]
 		public static extern void RTCEnableMetrics();
 
-		[DllImport("__Internal")]
-		/*public*/ static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
+		/// /[DllImport("__Internal")]
+		/*public*/
+		////static extern RTCMetricsSampleInfo[] RTCGetAndResetMetrics();
 
 		[DllImport("__Internal")]
 		public static extern bool RTCInitializeSSL();

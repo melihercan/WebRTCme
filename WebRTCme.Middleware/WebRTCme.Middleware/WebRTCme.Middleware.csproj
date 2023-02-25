@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
     <RootNamespace>WebRTCme.Middleware</RootNamespace>
-	  <!--<LangVersion>10.0</LangVersion>-->
 	  <Authors>melihercan</Authors>
 	  <Version>1.0.1</Version>
 	  <Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
@@ -23,20 +22,10 @@
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-	  <!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
-	  <!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->
-  </ItemGroup>
-
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-	  <!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />-->
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2" />-->
 	</ItemGroup>
 
 	<ItemGroup>

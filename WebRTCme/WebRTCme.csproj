@@ -1,7 +1,7 @@
 ﻿<!--<Project Sdk="Microsoft.NET.Sdk">-->
 <Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0;net7.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net7.0-android;net6.0-ios;net7.0-ios;net6.0-maccatalyst;net7.0-maccatalyst;net6.0-macos;net7.0-macos</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net6.0;net7.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net7.0-android;net6.0-ios;net7.0-ios;net6.0-maccatalyst;net7.0-maccatalyst;net6.0-macos;net7.0-macos</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.22621.0</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<SingleProject>true</SingleProject>
@@ -15,15 +15,7 @@
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
@@ -68,27 +60,11 @@
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
 	</PropertyGroup>
 
-	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.0'))">
-		<Compile Include="**\Blazor\**\*.cs" />
-		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="3.1.32" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
-	</ItemGroup>
-	
 	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.1'))">
 		<Compile Include="**\Blazor\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
 		<PackageReference Include="Microsoft.JSInterop" Version="3.1.32" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-		<Compile Include="**\Blazor\**\*.cs" />
-		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="5.0.17" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
 	</ItemGroup>
 

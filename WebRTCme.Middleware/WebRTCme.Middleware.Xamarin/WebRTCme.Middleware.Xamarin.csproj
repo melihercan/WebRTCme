@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0; netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<RootNamespace>WebRTCme.Middleware.Xamarin</RootNamespace>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -20,9 +20,9 @@
 		<Version>1.0.1</Version>
 	</PropertyGroup>
 
-	<!--<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<LangVersion>latest</LangVersion>
-	</PropertyGroup>-->
+	</PropertyGroup>
 
 	<ItemGroup>
 		<UpToDateCheckInput Include="*.cs" />

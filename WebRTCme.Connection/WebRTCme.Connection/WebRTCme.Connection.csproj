@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; net5.0; net6.0; net7.0</TargetFrameworks>
-    <!--<LangVersion>10.0</LangVersion>-->
+    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
   </PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -10,9 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net5')) ">
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
