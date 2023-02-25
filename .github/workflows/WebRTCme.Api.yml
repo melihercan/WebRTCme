@@ -25,7 +25,7 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack -c Release WebRTCme.Api/WebRTCme.Api.csproj  
     - name: Add source
-      run: dotnet nuget add source --username melihercan --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/melihercan/index.json"
+      run: dotnet nuget add source --username melihercan --password "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" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/melihercan/index.json"
     - name: Publish NuGet package to GitHub packages
       run: dotnet nuget push "WebRTCme.Api/bin/Release/WebRTCme.Api.1.0.1.nupkg" --source "github" --api-key "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"
       
