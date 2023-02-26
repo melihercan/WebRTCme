@@ -1,6 +1,6 @@
 name: WebRtcNativeWindows
 
-on: [workflow_dispatch]
+on: workflow_dispatch
   
 jobs:
   build:
@@ -9,9 +9,7 @@ jobs:
 
     steps:
     - name: Checking...
-      run: |
-        dir
-        echo $env:GITHUB_WORKSPACE
+      run: echo $env:GITHUB_WORKSPACE
     - name: Create 'depot_tools' folder
       run: mkdir .\depot_tools
     ##- name: Download and extract 'depot_tools'
@@ -23,9 +21,7 @@ jobs:
     - name: dir
       run: dir 
     - name: Export 'depot_tools' path
-      run: |
-        set PATH=$env:GITHUB_WORKSPACE\depot_tools; %PATH%
-        set
+      run: set PATH=$env:GITHUB_WORKSPACE\depot_tools; %PATH%
     - name: Execute 'gclient'
       run: gclient
     - name: Check 'python'
