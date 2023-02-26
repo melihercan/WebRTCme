@@ -9,8 +9,10 @@ jobs:
 
     steps:
     - name: Checking...
-      run: echo $env:GITHUB_WORKSPACE
+      shell: cmd
+      run: echo $GITHUB_WORKSPACE
     - name: Create 'depot_tools' folder
+      shell: cmd
       run: mkdir .\depot_tools
     ##- name: Download and extract 'depot_tools'
       ##uses: gamedev-thingy/Download-Extract@v2
@@ -19,11 +21,15 @@ jobs:
         ##destination: .\depot_tools
         ##ZIPname: depot_tools
     - name: dir
+      shell: cmd
       run: dir 
     - name: Export 'depot_tools' path
-      run: set PATH=$env:GITHUB_WORKSPACE\depot_tools; %PATH%
+      shell: cmd
+      run: set PATH=$GITHUB_WORKSPACE\depot_tools; %PATH%
     - name: Execute 'gclient'
+      shell: cmd
       run: gclient
     - name: Check 'python'
+      shell: cmd
       run: where python
     
