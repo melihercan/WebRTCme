@@ -23,6 +23,7 @@ jobs:
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
     - name: Execute 'gclient'
+      shell: cmd
       run: gclient
     - name: set
       run: |
