@@ -14,18 +14,18 @@ jobs:
     - name: Create 'depot_tools' folder
       shell: cmd
       run: mkdir .\depot_tools
-    ##- name: Download and extract 'depot_tools'
-      ##uses: gamedev-thingy/Download-Extract@v2
-      ##with:
-        ##url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        ##destination: .\depot_tools
-        ##ZIPname: depot_tools
+    - name: Download and extract 'depot_tools'
+      uses: gamedev-thingy/Download-Extract@v2
+      with:
+        url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
+        destination: .\depot_tools
+        ZIPname: depot_tools
     - name: dir
       shell: cmd
       run: dir 
     - name: Export 'depot_tools' path
       shell: cmd
-      run: set PATH=%GITHUB_WORKSPACE%\depot_tools; %PATH%
+      run: set PATH=%GITHUB_WORKSPACE%\depot_tools;%PATH%
     - name: Execute 'gclient'
       shell: cmd
       run: gclient
