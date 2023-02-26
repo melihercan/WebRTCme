@@ -10,11 +10,11 @@ jobs:
     steps:
     - name: Download and extract 'depot_tools'
       uses: gamedev-thingy/Download-Extract@v2
-        with:
-          url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-          destination: ./depot_tools
-          ZIPname: depot_tools.zip
-      - name: dir
-        shell: cmd
-        run: dir    
+      with:
+        url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
+        destination: ./depot_tools
+        ZIPname: depot_tools.zip
+    - name: dir
+      shell: cmd
+      run: dir    
     
