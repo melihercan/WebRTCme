@@ -22,7 +22,10 @@ jobs:
       run: dir 
     - name: Export 'depot_tools' path
       shell: cmd
-      run: set PATH=${GITHUB_WORKSPACE}\dept_tools; %PATH%
+      run: |
+        set
+        set PATH=${GITHUB_WORKSPACE}\dept_tools; %PATH%
+        set
     - name: Execute 'gclient'
       shell: cmd
       run: gclient
