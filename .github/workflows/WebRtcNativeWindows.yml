@@ -9,26 +9,24 @@ jobs:
 
     steps:
     - name: Checking...
-      shell: cmd
-      run: echo %GITHUB_WORKSPACE%
+      run: |
+        echo $env:GITHUB_WORKSPACE
+        dir env:
     - name: Create 'depot_tools' folder
-      shell: cmd
       run: mkdir .\depot_tools
-    - name: Download and extract 'depot_tools'
-      uses: gamedev-thingy/Download-Extract@v2
-      with:
-        url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        destination: .\depot_tools
-        ZIPname: depot_tools
+    #- name: Download and extract 'depot_tools'
+      #uses: gamedev-thingy/Download-Extract@v2
+      #with:
+        #url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
+        #destination: .\depot_tools
+        #ZIPname: depot_tools
     - name: dir
-      shell: cmd
       run: dir .\depot_tools 
     - name: Export 'depot_tools' path
-      shell: cmd
-      run: set PATH=%GITHUB_WORKSPACE%\depot_tools;%PATH%
+      run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
     - name: echo
       shell: cmd
-      run: echo %PATH%
+      run: dir env:
     - name: Execute 'gclient'
       shell: cmd
       run: gclient
