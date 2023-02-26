@@ -24,7 +24,7 @@ jobs:
       shell: cmd
       run: |
         set
-        set PATH=${GITHUB_WORKSPACE}\dept_tools; %PATH%
+        set PATH=$env:GITHUB_WORKSPACE\depot_tools; %PATH%
         set
     - name: Execute 'gclient'
       shell: cmd
