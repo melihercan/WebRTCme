@@ -11,7 +11,6 @@ jobs:
     - name: Checking...
       run: |
         dir
-        echo $GITHUB_WORKSPACE
         echo $env:GITHUB_WORKSPACE
     - name: Create 'depot_tools' folder
       run: mkdir .\depot_tools
@@ -22,17 +21,13 @@ jobs:
         ##destination: .\depot_tools
         ##ZIPname: depot_tools
     - name: dir
-      shell: cmd
       run: dir 
     - name: Export 'depot_tools' path
-      shell: cmd
       run: |
-        set PATH=$GITHUB_WORKSPACE\depot_tools; %PATH%
+        set PATH=$env:GITHUB_WORKSPACE\depot_tools; %PATH%
         set
     - name: Execute 'gclient'
-      shell: cmd
       run: gclient
     - name: Check 'python'
-      shell: cmd
       run: where python
     
