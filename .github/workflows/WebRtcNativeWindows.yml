@@ -14,9 +14,8 @@ jobs:
         echo $GITHUB_WORKSPACE
         echo $env:GITHUB_WORKSPACE
     - name: Create 'depot_tools' folder
-      ##shell: cmd
       run: mkdir .\depot_tools
-    - name: Download and extract 'depot_tools'
+    ##- name: Download and extract 'depot_tools'
       ##uses: gamedev-thingy/Download-Extract@v2
       ##with:
         ##url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
