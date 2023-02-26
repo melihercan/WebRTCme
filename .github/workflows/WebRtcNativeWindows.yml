@@ -8,10 +8,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checking...
-      run: |
-        echo $env:GITHUB_WORKSPACE
-        dir env:
     - name: Create 'depot_tools' folder
       run: mkdir .\depot_tools
     - name: Download and extract 'depot_tools'
@@ -20,17 +16,13 @@ jobs:
         url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
         destination: .\depot_tools
         ZIPname: depot_tools
-    - name: dir
-      run: dir .\depot_tools 
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
-    - name: echo
-      shell: cmd
-      run: set
     - name: Execute 'gclient'
       run: |
-        $env: = 1
+        $env:DEPOT_TOOLS_UPDATE = 1
         gclient
     - name: Check 'python'
+      shell: cmd
       run: where python
     
