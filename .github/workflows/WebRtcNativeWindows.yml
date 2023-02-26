@@ -36,6 +36,7 @@ jobs:
     - name: set
       run: |
         dir .\depot_tools
+        type D:\a\WebRTCme\WebRTCme\depot_tools\python3_bin_reldir.txt
     - name: Check 'python'
       shell: cmd
       run: where python
