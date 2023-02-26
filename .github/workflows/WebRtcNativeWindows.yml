@@ -15,5 +15,5 @@ jobs:
       with:
         msbuild-architecture: x64
     - name: VS C++ MFC/ATL support 
-      run: winget install --id Microsoft.VisualStudio.2022.Enterprise "--quiet --add Microsoft.VisualStudio.Workload.NativeDesktop"
+      run: &'C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe' modify --add Microsoft.VisualStudio.Workload.NativeDesktop --downloadThenInstall --quiet
     
