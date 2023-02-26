@@ -28,7 +28,9 @@ jobs:
       shell: cmd
       run: set
     - name: Execute 'gclient'
-      run: gclient
+      run: |
+        $env: = 1
+        gclient
     - name: Check 'python'
       run: where python
     
