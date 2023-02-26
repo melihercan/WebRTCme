@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Checking...
       shell: cmd
-      run: echo $GITHUB_WORKSPACE
+      run: echo %GITHUB_WORKSPACE%
     - name: Create 'depot_tools' folder
       shell: cmd
       run: mkdir .\depot_tools
@@ -25,7 +25,7 @@ jobs:
       run: dir 
     - name: Export 'depot_tools' path
       shell: cmd
-      run: set PATH=$GITHUB_WORKSPACE\depot_tools; %PATH%
+      run: set PATH=%GITHUB_WORKSPACE%\depot_tools; %PATH%
     - name: Execute 'gclient'
       shell: cmd
       run: gclient
