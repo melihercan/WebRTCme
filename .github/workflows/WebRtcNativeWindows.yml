@@ -8,12 +8,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3    
     - name: Download and extract 'depot_tools'
       uses: gamedev-thingy/Download-Extract@v2
       with:
         url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        destination: ./depot_tools
+        destination: .
         ZIPname: depot_tools
     - name: dir
       shell: cmd
