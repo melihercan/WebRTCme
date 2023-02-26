@@ -35,7 +35,7 @@ jobs:
       run: gclient
     - name: set
       run: |
-        dir env:
+        dir .\depot_tools
     - name: Check 'python'
       shell: cmd
       run: where python
