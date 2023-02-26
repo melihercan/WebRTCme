@@ -25,12 +25,9 @@ jobs:
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
     - name: echo
-      shell: cmd
       run: dir env:
     - name: Execute 'gclient'
-      shell: cmd
       run: gclient
     - name: Check 'python'
-      shell: cmd
       run: where python
     
