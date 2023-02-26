@@ -2,7 +2,7 @@ name: WebRtcNativeWindows
 
 on: workflow_dispatch
 
-env: |
+env:
   DEPOT_TOOLS_UPDATE: 1
   DEPOT_TOOLS_WIN_TOOLCHAIN: 0 
   
