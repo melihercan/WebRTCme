@@ -18,10 +18,11 @@ jobs:
         ZIPname: depot_tools
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
-    - name: Execute 'gclient'
+    - name: Set 'depot_tools' update environmental variable
       run: |
-        [Environment]::SetEnvironmentVariable('DEPOT_TOOLS_UPDATE', '1', 'Machine')
-        gclient
+        [Environment]::SetEnvironmentVariable('DEPOT_TOOLS_UPDATE', '1', 'User')
+    - name: Execute 'gclient'
+      run: gclient
     - name: set
       shell: cmd
       run: set
