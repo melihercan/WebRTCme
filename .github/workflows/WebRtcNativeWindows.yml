@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1    
+      with:
+        msbuild-architecture: x64
     - name: Create 'depot_tools' folder
       run: mkdir .\depot_tools
     - name: Download and extract 'depot_tools'
