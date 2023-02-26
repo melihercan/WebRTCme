@@ -11,26 +11,9 @@ jobs:
      
     steps:
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1    
+      uses: microsoft/setup-msbuild@v1.1  
       with:
         msbuild-architecture: x64
-    - name: Create 'depot_tools' folder
-      run: mkdir .\depot_tools
-    - name: Download and extract 'depot_tools'
-      uses: gamedev-thingy/Download-Extract@v2
-      with:
-        url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        destination: .\depot_tools
-        ZIPname: depot_tools
-    - name: Export 'depot_tools' path
-      run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
-    - name: Execute 'gclient'
-      shell: cmd
-      run: gclient
-    - name: set
-      run: |
-        dir env:
-    - name: Check 'python'
-      shell: cmd
-      run: where python
+    - name: VS C++ MFC/ATL support 
+      run: C:\Program Files (x86)\Microsoft Visual Studio\Installer --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended
     
