@@ -22,10 +22,13 @@ jobs:
         ZIPname: depot_tools
     - name: dir
       shell: cmd
-      run: dir 
+      run: dir .\depot_tools 
     - name: Export 'depot_tools' path
       shell: cmd
       run: set PATH=%GITHUB_WORKSPACE%\depot_tools;%PATH%
+    - name: echo
+      shell: cmd
+      run: echo %PATH%
     - name: Execute 'gclient'
       shell: cmd
       run: gclient
