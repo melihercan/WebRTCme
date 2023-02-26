@@ -8,7 +8,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: mkdir
+    - name: Create 'depot_tools' folder
       shell: cmd
       run: mkdir .\depot_tools
     - name: Download and extract 'depot_tools'
@@ -19,5 +19,14 @@ jobs:
         ZIPname: depot_tools
     - name: dir
       shell: cmd
-      run: dir    
+      run: dir 
+    - name: Export 'depot_tools' path
+      shell: cmd
+      run: set PATH=${GITHUB_WORKSPACE}\dept_tools; %PATH%
+    - name: Execute 'gclient'
+      shell: cmd
+      run: gclient
+    - name: Check 'python'
+      shell: cmd
+      run: where python
     
