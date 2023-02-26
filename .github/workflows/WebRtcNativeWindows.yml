@@ -24,8 +24,8 @@ jobs:
     - name: Execute 'gclient'
       run: gclient
     - name: set
-      shell: cmd
-      run: set
+      run: |
+        dir env:
     - name: Check 'python'
       shell: cmd
       run: where python
