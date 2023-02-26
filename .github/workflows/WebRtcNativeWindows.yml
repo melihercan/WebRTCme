@@ -20,7 +20,7 @@ jobs:
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
     - name: Execute 'gclient'
       run: |
-        $env:DEPOT_TOOLS_UPDATE = 1
+        [Environment]::SetEnvironmentVariable('DEPOT_TOOLS_UPDATE', '1', 'Machine')
         gclient
     - name: Check 'python'
       shell: cmd
