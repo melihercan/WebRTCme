@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: WebRtcNativeWindows
 
 on:
   push:
@@ -9,15 +9,16 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: Download and extract 'depot_tools'
+      uses: gamedev-thingy/Download-Extract@v2
+        with:
+          url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
+          destination: ./depot_tools
+          ZIPname: depot_tools.zip
+      - name: dir
+        shell: cmd
+        run: dir    
+    
