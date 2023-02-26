@@ -13,7 +13,7 @@ jobs:
       with:
         url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
         destination: ./depot_tools
-        ZIPname: depot_tools.zip
+        ZIPname: depot_tools
     - name: dir
       shell: cmd
       run: dir    
