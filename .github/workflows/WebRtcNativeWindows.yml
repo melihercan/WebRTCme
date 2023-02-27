@@ -6,6 +6,7 @@ env:
   DEPOT_TOOLS_WIN_TOOLCHAIN: 0
   GYP_GENERATORS: msvs-ninja,ninja
   GYP_MSVS_OVERRIDE_PATH: C:\"Program Files"\"Microsoft Visual Studio"\2022\Enterprise
+  vs2022_install: C:\"Program Files"\"Microsoft Visual Studio"\2022\Enterprise
   GYP_MSVS_VERSION: 2022
   PYTHON_BIN_ABSDIR: C:\hostedtoolcache\windows\Python\3.9.13\x64
   
@@ -32,13 +33,28 @@ jobs:
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
     - name: Execute 'gclient'
-      shell: cmd
       run: gclient
-    - name: set
+    
+    - name: Configure Git
       run: |
-        dir .\depot_tools
-        type D:\a\WebRTCme\WebRTCme\depot_tools\python3_bin_reldir.txt
-    - name: Check 'python'
-      shell: cmd
-      run: where python3
+        git config --global user.name "melihercan"
+        git config --global user.email "melihercan@gmail.com"
+        git config --global core.autocrlf false
+        git config --global core.filemode false
+        git config --global branch.autosetuprebase always
+        
+    - name: Get the code
+      run: |
+        mkdir webrtc-checkout
+        cd webrtc-checkout
+        fetch --nohooks webrtc
+        gclient sync
+        cd src
+        git checkout branch-heads/5841
+        
+    - name: Generate Ninja project and build
+      run: |
+        gn gen out/Default --args='is_debug=false'
+        autoninja all -C out/Default
+        
     
