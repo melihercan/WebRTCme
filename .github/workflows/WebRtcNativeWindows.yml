@@ -57,7 +57,7 @@ jobs:
         fetch --nohooks webrtc
         gclient sync
         cd src
-        git checkout branch-heads/5841
+        git checkout branch-heads/5481
         
     - name: Generate Ninja project and build
       run: |
