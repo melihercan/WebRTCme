@@ -23,15 +23,15 @@ jobs:
       run: C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\setup.exe modify --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --downloadThenInstall --quiet
     
     - name: Create 'depot_tools' folder
-      run: mkdir .\depot_tools
+      run: mkdir c:\depot_tools
     - name: Download and extract 'depot_tools'
       uses: gamedev-thingy/Download-Extract@v2
       with:
         url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        destination: .\depot_tools
+        destination: c:\depot_tools
         ZIPname: depot_tools
     - name: Export 'depot_tools' path
-      run: Add-Content $env:GITHUB_PATH $env:GITHUB_WORKSPACE\depot_tools
+      run: Add-Content $env:GITHUB_PATH c:\depot_tools
     - name: Execute 'gclient'
       run: gclient
     
@@ -48,6 +48,7 @@ jobs:
         
     - name: Get the code
       run: |
+        c:
         mkdir webrtc-checkout
         cd webrtc-checkout
         fetch --nohooks webrtc
