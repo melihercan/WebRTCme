@@ -1,3 +1,5 @@
+## !!!IMPORTANT!!! Using C: drive as default D: has only 14BG available space
+
 name: WebRtcNativeWindows
 
 on: workflow_dispatch
@@ -23,13 +25,14 @@ jobs:
       run: C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\setup.exe modify --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --downloadThenInstall --quiet
     
     - name: Create 'depot_tools' folder
-      run: mkdir c:\depot_tools
-    - name: Download and extract 'depot_tools'
-      uses: gamedev-thingy/Download-Extract@v2
-      with:
-        url: "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-        destination: c:\depot_tools
-        ZIPname: depot_tools
+      run: |
+        c:
+        mkdir \depot_tools
+        cd \depot_folder
+        Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile .\depot_tools.zip
+        7z x -y depot_tools.zip
+        del depot_tools.zip
+        c:
     - name: Export 'depot_tools' path
       run: Add-Content $env:GITHUB_PATH c:\depot_tools
     - name: Execute 'gclient'
