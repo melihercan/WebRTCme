@@ -28,7 +28,7 @@ jobs:
       run: |
         c:
         mkdir \depot_tools
-        cd \depot_folder
+        cd \depot_tools
         Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile .\depot_tools.zip
         7z x -y depot_tools.zip
         del depot_tools.zip
