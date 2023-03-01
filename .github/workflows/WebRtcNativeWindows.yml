@@ -61,6 +61,7 @@ jobs:
         
     - name: Generate Ninja project and build
       run: |
+        cd c:\webrtc-checkout\src
         gn gen out/Default --args='is_debug=false'
         autoninja all -C out/Default
         
