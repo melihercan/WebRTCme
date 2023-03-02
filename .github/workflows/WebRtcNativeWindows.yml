@@ -21,8 +21,8 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1  
       with:
         msbuild-architecture: x64
-    - name: VS C++ MFC/ATL support 
-      run: C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\setup.exe modify --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --downloadThenInstall --quiet
+##    - name: VS C++ MFC/ATL support 
+##      run: C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\setup.exe modify --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --downloadThenInstall --quiet
     
     - name: Create 'depot_tools' folder
       run: |
