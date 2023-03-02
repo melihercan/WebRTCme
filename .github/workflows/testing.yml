@@ -12,4 +12,6 @@ jobs:
 
     steps:
     - name: Get-Volume
-      run: Get-Volume
+      run: |
+        Get-Volume
+        dir C:\"Program Files"\"Microsoft Visual Studio"\2022\Enterprise\"DIA SDK"\bin\amd64
