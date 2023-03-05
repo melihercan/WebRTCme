@@ -21,8 +21,6 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1  
       with:
         msbuild-architecture: x64
-##    - name: VS C++ MFC/ATL support 
-##      run: C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\setup.exe modify --add Microsoft.VisualStudio.Component.VC.ATLMFC --includeRecommended --downloadThenInstall --quiet
     
     - name: Create 'depot_tools' folder
       run: |
@@ -44,7 +42,7 @@ jobs:
         git config --global core.filemode false
         git config --global branch.autosetuprebase always
         
-    - name: Get the code
+    - name: Get the code and build
       run: |
         mkdir c:\webrtc-checkout
         cd c:\webrtc-checkout
@@ -52,11 +50,8 @@ jobs:
         gclient sync
         cd src
         git checkout branch-heads/5481
-        
-    - name: Generate Ninja project and build
-      run: |
-        cd c:\webrtc-checkout\src
         gn gen out/Default --args='is_debug=false'
-        autoninja all -C out/Default
+        autoninja -C out/Default
+        
         
     
