@@ -17,6 +17,8 @@ jobs:
     runs-on: windows-latest
      
     steps:
+    - uses: actions/checkout@v3    
+    
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1  
       with:
@@ -52,6 +54,15 @@ jobs:
         git checkout branch-heads/5481
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
+        copy out\Default\Default\obj\webrtc.lib 
         
+    - name: Copy WebRTC library
+      run: |
+        copy c:\webrtc-checkout\src\out\Default\obj\webrtc.lib non-code\artifacts\webrtc\windows\.
+        
+    - uses: actions/upload-artifact@v3
+      with: 
+        name: Upload WebRTC library to artifacts
+        path: non-code\artifacts\webrtc\windows\webrtc.lib
         
     
