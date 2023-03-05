@@ -54,7 +54,6 @@ jobs:
         git checkout branch-heads/5481
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
-        copy out\Default\Default\obj\webrtc.lib 
         
     - name: Copy WebRTC library
       run: |
