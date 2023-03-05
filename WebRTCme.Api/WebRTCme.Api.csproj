@@ -5,7 +5,7 @@
     <RootNamespace>WebRTCme</RootNamespace>
 	  <!--<LangVersion>11.0</LangVersion>-->
 	  <UserSecretsId>a419948c-ce76-4240-bd44-60047b666b15</UserSecretsId>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	  <Authors>melihercan</Authors>
 	  <Description>WebRTCme API library.</Description>
 	  <Copyright>melihercan 2023</Copyright>

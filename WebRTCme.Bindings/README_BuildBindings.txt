@@ -3,6 +3,9 @@ WHICH BRANCH WITH RESPECT TO CHRMOMIUM
 WebRTC follows the same release cycle as Chromium and the chromium dashboard provides a list of milestones 
 (hence the M) and their associated branches: https://chromiumdash.appspot.com/branches 
 
+To build follow instructions:
+https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/index.md
+
 CREATION
 ========
 - (from home folder) mkdir webrtc
@@ -103,4 +106,10 @@ USEFUL LINKS
 ============
 https://webrtc.github.io/webrtc-org/native-code/native-apis/
 https://w3c.github.io/webrtc-pc/
+https://groups.google.com/g/discuss-webrtc/c/YZaNOPdWG2Y
+
+
+BUILD ARGS
+==========
+gn args out\Default --list --short
 
