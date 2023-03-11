@@ -25,8 +25,7 @@ jobs:
         ##git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     - name: Export 'depot_tools' path
       run: |
-        ##echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
-        echo "home/depot_tools/" >> $GITHUB_PATH        
+        echo "/Users/runner/work/WebRTCme/WebRTCme/depot_tools/" >> $GITHUB_PATH        
         echo $PATH
     - name: Execute 'gclient'
       run: gclient
@@ -49,6 +48,7 @@ jobs:
         git checkout branch-heads/5481
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
+        ##echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
         
     - name: Copy WebRTC library
       run: |
