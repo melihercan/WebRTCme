@@ -43,11 +43,10 @@ jobs:
         git checkout branch-heads/5481
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
-        ##echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
         
     - name: Copy WebRTC library
       run: |
-        copy webrtc-checkout/src/out/Default/obj/webrtc.lib non-code/artifacts/webrtc/macos\.
+        copy webrtc-checkout/src/out/Default/obj/webrtc.lib non-code/artifacts/webrtc/macos/.
         
     - uses: actions/upload-artifact@v3
       with: 
