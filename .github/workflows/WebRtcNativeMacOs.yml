@@ -19,16 +19,11 @@ jobs:
     - uses: actions/checkout@v3    
     
     - name: Create 'depot_tools'
-      run: |
-        mkdir depot_tools
-        cd depot_tools
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+      run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     - name: Export 'depot_tools' path
       run: echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
     - name: Execute 'gclient'
-      run: |
-        echo $PATH
-        gclient
+      run: gclient
     
     - name: Configure Git
       run: |
