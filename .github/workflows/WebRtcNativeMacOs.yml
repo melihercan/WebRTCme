@@ -25,12 +25,8 @@ jobs:
         ##git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     - name: Export 'depot_tools' path
       run: |
-        echo "ZERO"
-        echo $GITHUB_PATH      
-        echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
-        echo "FIRST"
-        echo $GITHUB_PATH
-        echo "SECOND"
+        ##echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
+        echo "home/depot_tools/" >> $GITHUB_PATH        
         echo $PATH
     - name: Execute 'gclient'
       run: gclient
