@@ -26,6 +26,7 @@ jobs:
     - name: Export 'depot_tools' path
       run: |
         echo $GITHUB_WORKSPACE/depot_tool >> $GITHUB_PATH
+        echo $GITHUB_PATH
         echo $PATH
     - name: Execute 'gclient'
       run: gclient
