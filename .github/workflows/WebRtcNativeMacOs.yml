@@ -25,6 +25,7 @@ jobs:
         ##git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     - name: Export 'depot_tools' path
       run: |
+        echo $GITHUB_PATH      
         echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
         echo "FIRST"
         echo $GITHUB_PATH
