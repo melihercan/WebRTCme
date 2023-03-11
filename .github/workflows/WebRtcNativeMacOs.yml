@@ -24,11 +24,11 @@ jobs:
         cd depot_tools
         ##git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     - name: Export 'depot_tools' path
-      run: |
-        echo "/Users/runner/work/WebRTCme/WebRTCme/depot_tools/" >> $GITHUB_PATH        
-        echo $PATH
+      run: echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
     - name: Execute 'gclient'
-      run: gclient
+      run: |
+        echo $PATH
+        gclient
     
     - name: Configure Git
       run: |
