@@ -28,11 +28,11 @@ jobs:
       run: |
         mkdir webrtc-checkout
         cd webrtc-checkout
-        fetch --nohooks webrtc
+        fetch --nohooks webrtc_android
         gclient sync
         cd src
         git checkout branch-heads/5481
-        gn gen out/Default --args='is_debug=false'
+        gn gen out/Default --args='is_debug=false target_os=android target_cpu=arm'
         autoninja -C out/Default
         
     - name: Copy WebRTC library
