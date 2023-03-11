@@ -1,0 +1,46 @@
+name: WebRtcNativeLinux
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+     
+    steps:
+    - uses: actions/checkout@v3    
+    
+    - name: Create 'depot_tools'
+      run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+    - name: Export 'depot_tools' path
+      run: echo "${{github.workspace}}/depot_tools/" >> $GITHUB_PATH
+    - name: Execute 'gclient'
+      run: gclient
+    
+    - name: Configure Git
+      run: |
+        git config --global user.name "melihercan"
+        git config --global user.email "melihercan@gmail.com"
+        git config --global core.autocrlf false
+        git config --global core.filemode false
+        git config --global branch.autosetuprebase always
+        
+    - name: Get the code and build
+      run: |
+        mkdir webrtc-checkout
+        cd webrtc-checkout
+        fetch --nohooks webrtc
+        gclient sync
+        cd src
+        git checkout branch-heads/5481
+        gn gen out/Default --args='is_debug=false'
+        autoninja -C out/Default
+        
+    - name: Copy WebRTC library
+      run: |
+        copy webrtc-checkout/src/out/Default/obj/webrtc.lib non-code/artifacts/webrtc/linux/.
+        
+    - uses: actions/upload-artifact@v3
+      with: 
+        name: Upload WebRTC library to artifacts
+        path: non-code/artifacts/webrtc/linux/webrtc.lib
+        
