@@ -23,6 +23,9 @@ jobs:
         mkdir depot_tools
         cd depot_tools
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+    - name: Export 'depot_tools' path
+      run: |
+        echo $GITHUB_WORKSPACE/depot_tool >> $GITHUB_PATH
         echo $PATH
     - name: Execute 'gclient'
       run: gclient
