@@ -9,7 +9,7 @@ env:
   ##vs2022_install: C:\Program Files\Microsoft Visual Studio\2022\Enterprise
   ##GYP_MSVS_VERSION: 2022
   ##PYTHON_BIN_ABSDIR: C:\hostedtoolcache\windows\Python\3.9.13\x64
-  PATH: $GITHUB_WORKSPACE/depot_tools:$PATH
+  ##PATH: $GITHUB_WORKSPACE/depot_tools:$PATH
   
 jobs:
   build:
