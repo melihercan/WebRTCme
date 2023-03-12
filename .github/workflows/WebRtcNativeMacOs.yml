@@ -41,6 +41,7 @@ jobs:
         gclient sync
         cd src
         git checkout branch-heads/5481
+        gclient sync
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
         
