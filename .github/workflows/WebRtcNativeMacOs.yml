@@ -47,11 +47,11 @@ jobs:
         
     - name: Copy WebRTC library
       run: |
-        copy webrtc-checkout/src/out/Default/obj/webrtc.lib non-code/artifacts/webrtc/macos/.
+        cp webrtc-checkout/src/out/Default/obj/libwebrtc.a non-code/artifacts/webrtc/macos/.
         
     - uses: actions/upload-artifact@v3
       with: 
         name: Upload WebRTC library to artifacts
-        path: non-code/artifacts/webrtc/macos/webrtc.lib
+        path: non-code/artifacts/webrtc/macos/libwebrtc.a
         
     
