@@ -32,15 +32,16 @@ jobs:
         gclient sync
         cd src
         git checkout branch-heads/5481
+        gclient sync
         gn gen out/Default --args='is_debug=false'
         autoninja -C out/Default
         
     - name: Copy WebRTC library
       run: |
-        copy webrtc-checkout/src/out/Default/obj/webrtc.lib non-code/artifacts/webrtc/linux/.
+        cp webrtc-checkout/src/out/Default/obj/libwebrtc.a non-code/artifacts/webrtc/linux/.
         
     - uses: actions/upload-artifact@v3
       with: 
         name: Upload WebRTC library to artifacts
-        path: non-code/artifacts/webrtc/linux/webrtc.lib
+        path: non-code/artifacts/webrtc/linux/libwebrtc.a
         
