@@ -1,5 +1,4 @@
-﻿<!--<Project Sdk="Microsoft.NET.Sdk">-->
-<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net6.0;net7.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net7.0-android;net6.0-ios;net7.0-ios;net6.0-maccatalyst;net7.0-maccatalyst;net6.0-macos;net7.0-macos</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.22621.0</TargetFrameworks>
@@ -72,7 +71,7 @@
 		<Compile Include="**\Blazor\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
 	</ItemGroup>
 
@@ -80,7 +79,7 @@
 		<Compile Include="**\Blazor\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
 	</ItemGroup>
 
@@ -104,28 +103,28 @@
 		<Compile Include="**\Android\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
 		<Compile Include="**\Android\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-ios'">
 		<Compile Include="**\iOS\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-ios'">
 		<Compile Include="**\iOS\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-windows10.0.22621.0'">
@@ -133,7 +132,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-windows10.0.22621.0'">
@@ -141,7 +140,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'">
@@ -149,7 +148,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-maccatalyst'">
@@ -157,7 +156,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-macos'">
@@ -165,7 +164,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="6.0.14" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.16" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-macos'">
@@ -173,7 +172,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.3" />
+		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>

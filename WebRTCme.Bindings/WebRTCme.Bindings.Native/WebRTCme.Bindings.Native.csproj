@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!--<Project Sdk="MSBuild.Sdk.Extras/3.0.44">-->
+  <PropertyGroup>
+    <TargetFrameworks>net7.0; net7.0-windows; net7.0-macos; net7.0-tvos</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0-tvos'">
+		<DefineConstants>LINUX</DefineConstants>
+	</PropertyGroup>
+	
+
+</Project>

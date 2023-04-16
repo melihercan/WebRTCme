@@ -1,0 +1,12 @@
+https://github.com/olegtarasov/CrossplatformNativeTest
+
+
+
+
+CUSTOM TFM AND WORKLOADS
+========================
+https://github.com/trungnt2910/DotnetBrowser
+https://github.com/trungnt2910/DotnetFoo
+https://github.com/GtkSharp/GtkSharp/issues/349
+https://github.com/trungnt2910/GtkWorkload
+https://github.com/dotnet/designs/blob/main/accepted/2020/workloads/workloads.md

@@ -107,6 +107,8 @@ USEFUL LINKS
 https://webrtc.github.io/webrtc-org/native-code/native-apis/
 https://w3c.github.io/webrtc-pc/
 https://groups.google.com/g/discuss-webrtc/c/YZaNOPdWG2Y
+https://groups.google.com/g/discuss-webrtc/c/SWIP9-PdmYw
+https://github.com/webrtc-sdk/libwebrtc
 
 
 BUILD ARGS

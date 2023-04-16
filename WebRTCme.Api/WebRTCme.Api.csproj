@@ -29,11 +29,11 @@
 	</ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.16" />
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -49,7 +49,7 @@
 
   <ItemGroup>
     <PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.0" />
+	  <PackageReference Include="System.Text.Json" Version="7.0.2" />
   </ItemGroup>
 
 </Project>

@@ -14,17 +14,17 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.14" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.14" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.16" PrivateAssets="all" />
   </ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Net.Http.Json" Version="7.0.0" />
+		<PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
 	</ItemGroup>
 
 

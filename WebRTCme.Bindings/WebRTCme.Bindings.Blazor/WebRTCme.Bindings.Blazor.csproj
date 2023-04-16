@@ -28,12 +28,12 @@
 	</ItemGroup>
 
     <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-        <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.14" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.14" />
+        <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.16" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
     </ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
 	</ItemGroup>
 
 
