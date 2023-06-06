@@ -73,7 +73,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.SipSorcer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Connection.MediaSoup", "WebRTCme.Connection\MediaSoup\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj", "{C52EE7AC-9E9A-4D34-BB17-2ECC7B758040}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRTCme.Bindings.Native", "WebRTCme.Bindings\WebRTCme.Bindings.Native\WebRTCme.Bindings.Native.csproj", "{BA527794-8833-4F4C-B7CD-7E608F0FB993}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Native", "WebRTCme.Bindings\WebRTCme.Bindings.Native\WebRTCme.Bindings.Native.csproj", "{BA527794-8833-4F4C-B7CD-7E608F0FB993}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1C30C95B-8A14-4699-99D9-988EA49F94E9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRtcInteropTestApp", "Tests\WebRtcInteropTestApp\WebRtcInteropTestApp.csproj", "{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -411,6 +415,18 @@ Global
 		{BA527794-8833-4F4C-B7CD-7E608F0FB993}.Release|iPhone.Build.0 = Release|Any CPU
 		{BA527794-8833-4F4C-B7CD-7E608F0FB993}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{BA527794-8833-4F4C-B7CD-7E608F0FB993}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|iPhone.Build.0 = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -446,6 +462,7 @@ Global
 		{CB2E5A24-FCED-4575-8465-FEA48791D3E5} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
 		{C52EE7AC-9E9A-4D34-BB17-2ECC7B758040} = {203A5ABE-3B6C-42B3-8E6A-F3ADFC3F0886}
 		{BA527794-8833-4F4C-B7CD-7E608F0FB993} = {761DF7FB-69F0-441D-B18F-B9803E48F6A5}
+		{C1749CF4-D178-4C9D-A972-5E9D3F11AD3C} = {1C30C95B-8A14-4699-99D9-988EA49F94E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FC3188C-A3C9-42FC-AF35-0CDCE91C707A}

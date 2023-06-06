@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0; net7.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <LangVersion>latest</LangVersion>  
+	  <LangVersion>latest</LangVersion>
     <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 

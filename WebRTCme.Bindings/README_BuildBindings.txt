@@ -59,6 +59,16 @@ https://developpaper.com/compiling-webrtc-under-windows/
 	o ninja -C out\Release-vs2022
 
 
+TO CREATE DLL AND VS2022 PROJECT
+================================
+PS F:\dev\webrtc-checkout\src> (Get-Content BUILD.gn).replace('rtc_static_library', 'rtc_shared_library') | Set-Content BUILD.gn
+PS F:\dev\webrtc-checkout\src> (Get-Content BUILD.gn) -notmatch 'complete_static_lib' | Set-Content BUILD.gn
+PS F:\dev\webrtc-checkout\src> (Get-Content webrtc.gni).replace('!build_with_chromium && is_component_build', 'false') | Set-Content webrtc.gni
+PS F:\dev\webrtc-checkout\src> (Get-Content rtc_tools\BUILD.gn) -notmatch ':frame_analyzer' | Set-Content rtc_tools\BUILD.gn
+PS F:\dev\webrtc-checkout\src> gn gen out/vs2022 --ide=vs2022 --args="is_component_build=true rtc_enable_symbol_export=true rtc_include_tests=false rtc_build_tools=false rtc_build_examples=false"
+
+
+
 MACOS
 =====
 https://groups.google.com/g/discuss-webrtc/c/MQbTcKvk-y4

@@ -5,7 +5,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
 	  <!--<XamarinOutputType>Binding</XamarinOutputType>-->	  
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>	  
   </PropertyGroup>
 
   <ItemGroup>

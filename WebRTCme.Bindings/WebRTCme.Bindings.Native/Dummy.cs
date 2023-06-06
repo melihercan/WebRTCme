@@ -9,8 +9,13 @@ namespace WebRTCme.Bindings.Native
 {
     public class Dummy
     {
-        [DllImport(Registry.NativeLib)]
-        public static extern void DummyXxx();
+        //[DllImport(Registry.NativeLib)]
+        //public static extern void DummyXxx();
+
+
+
+        [DllImport(Registry.InteropLib)]
+        public static extern IntPtr CreateBuiltinAudioEncoderFactory();
 
     }
 }
