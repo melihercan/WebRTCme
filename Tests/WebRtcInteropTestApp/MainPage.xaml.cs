@@ -1,4 +1,6 @@
-﻿namespace WebRtcInteropTestApp
+﻿using WebRTCme.Bindings.Native;
+
+namespace WebRtcInteropTestApp
 {
     public partial class MainPage : ContentPage
     {
@@ -19,6 +21,9 @@
                 CounterBtn.Text = $"Clicked {count} times";
 
             SemanticScreenReader.Announce(CounterBtn.Text);
+
+            var xxx = Dummy.CreateBuiltinAudioEncoderFactory();
+
         }
     }
 }

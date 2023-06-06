@@ -15,7 +15,7 @@ public static class Registry
 
 #if WINDOWS
     public const string NativeLib = NativeLibWindows;
-    public const string InteropLib = NativeLibWindows;
+    public const string InteropLib = InteropLibWindows;
 #elif MACOS
     public const string NativeLib = NativeLibMacOs;
     public const string InteropLib = InteropLibMacOs;

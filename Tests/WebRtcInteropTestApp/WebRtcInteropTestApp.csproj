@@ -54,4 +54,8 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\..\WebRTCme.Bindings\WebRTCme.Bindings.Native\WebRTCme.Bindings.Native.csproj" />
+	</ItemGroup>
+
 </Project>

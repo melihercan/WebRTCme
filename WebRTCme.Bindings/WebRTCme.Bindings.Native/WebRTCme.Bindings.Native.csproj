@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<!--<Project Sdk="MSBuild.Sdk.Extras/3.0.44">-->
   <PropertyGroup>
-    <TargetFrameworks>net7.0; net7.0-windows; net7.0-macos; net7.0-tvos</TargetFrameworks>
+    <TargetFrameworks>net7.0; net7.0-windows; net7.0-macos; net7.0-tvos16.4</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0-tvos'">
@@ -10,7 +11,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="webrtc.dll.EXPORTS.txt" />
+	  <Content Include="WebRtcInterop.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="webrtc.dll">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 	
 
