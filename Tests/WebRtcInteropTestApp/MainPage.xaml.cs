@@ -22,8 +22,12 @@ namespace WebRtcInteropTestApp
 
             SemanticScreenReader.Announce(CounterBtn.Text);
 
-            var xxx = Dummy.CreateBuiltinAudioEncoderFactory();
+            var aef = Interop.CreateBuiltinAudioEncoderFactory();
 
+            var vef = Interop.CreateBuiltinVideoEncoderFactory();
+            var vdf = Interop.CreateBuiltinVideoDecoderFactory();
+
+            
         }
     }
 }
