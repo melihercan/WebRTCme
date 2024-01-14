@@ -1,3 +1,12 @@
+#UPDATE 14 Jan 24
+Adding
+- .NET 8 support
+- Full MAUI support
+Dropping
+- .NET 6 & .NET7
+- Xamarin
+
+
 # UPDATE 11 Feb 23
 Started adding documentation to the [Wiki](https://github.com/melihercan/WebRTCme/wiki)
 
