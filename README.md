@@ -2,6 +2,7 @@
 Adding
 - .NET 8 support
 - Full MAUI support
+
 Dropping
 - .NET 6 & .NET7
 - Xamarin
