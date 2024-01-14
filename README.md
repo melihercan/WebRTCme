@@ -4,7 +4,7 @@ Adding
 - Full MAUI support
 
 Dropping
-- .NET 6 & .NET7
+- .NET 6 & .NET 7
 - Xamarin
 
 
