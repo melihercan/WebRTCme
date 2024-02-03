@@ -1,50 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
-    <RootNamespace>WebRTCme.Middleware</RootNamespace>
-	  <Authors>melihercan</Authors>
-	  <Version>1.0.1</Version>
-	  <Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
-	  <Copyright>melihercan 2023</Copyright>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
-	  <PackageIcon>me.png</PackageIcon>
-	  <PackageIconUrl />
-	  <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
-	  <PackageTags>WebRTC .NET Blazor Xamarin</PackageTags>
-	  <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1; net6.0; net7.0; net8.0</TargetFrameworks>
+		<RootNamespace>WebRTCme.Middleware</RootNamespace>
+		<Authors>melihercan</Authors>
+		<Version>1.0.1</Version>
+		<Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
+		<Copyright>melihercan 2023</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<PackageIconUrl />
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC .NET Blazor Xamarin</PackageTags>
+		<PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-  </ItemGroup>
-
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+	<ItemGroup>
+		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+		<ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
-	  <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
+		<None Include="..\..\doc\me.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\doc\me.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
-      <PackageReference Include="System.Text.Json" Version="7.0.2" />
-	  <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
+		<PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
+		<PackageReference Include="System.Text.Json" Version="8.0.1" />
+		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
 	</ItemGroup>
 
 </Project>

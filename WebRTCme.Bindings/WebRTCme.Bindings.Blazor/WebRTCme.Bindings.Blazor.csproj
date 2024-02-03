@@ -1,22 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
-    <AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
-    <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>melihercan</Authors>
-    <Description>Blazor bindings using JSInterop.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
-    <PackageIcon>me.png</PackageIcon>
-    <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Bindings/WebRTCme.Bindings.Blazor</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>WebRTC .NET Blazor</PackageTags>
-    <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
-    <Version>1.0.1</Version>
-    <Copyright>melihercan 2022</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+		<AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
+		<RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>melihercan</Authors>
+		<Description>Blazor bindings using JSInterop.</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Bindings/WebRTCme.Bindings.Blazor</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC .NET Blazor</PackageTags>
+		<PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+		<Version>1.0.1</Version>
+		<Copyright>melihercan 2022</Copyright>
+	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 		<LangVersion>latest</LangVersion>
@@ -27,37 +27,32 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.32" />
 	</ItemGroup>
 
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-        <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.16" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
-    </ItemGroup>
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.26" />
 	</ItemGroup>
 
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.15" />
+	</ItemGroup>
 
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
+	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\doc\me.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
+		<SupportedPlatform Include="browser" />
+		<Folder Include="Resources\" />
+		<None Include="..\..\doc\me.png" Pack="True" PackagePath="" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
-      <HintPath>Resources\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="System.Private.Runtime.InteropServices.JavaScript">
+			<HintPath>Resources\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
 
 </Project>

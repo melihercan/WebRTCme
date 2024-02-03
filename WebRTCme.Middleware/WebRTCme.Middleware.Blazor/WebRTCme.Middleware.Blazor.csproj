@@ -1,53 +1,55 @@
-﻿ <Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0; net7.0</TargetFrameworks>
-    <RazorLangVersion>3.0</RazorLangVersion>
-    <RootNamespace>WebRTCme.Middleware.Blazor</RootNamespace>
-    <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>melihercan</Authors>
-    <Description>Services layer between Blazor applications and WebRTCme library.</Description>
-    <Copyright>melihercan 2023</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
-    <PackageIcon>me.png</PackageIcon>
-    <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware/WebRTCme.Midddleware.Blazor</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>WebRTC .NET Blazor</PackageTags>
-    <Version>1.0.1</Version>
-    <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
-  </PropertyGroup>
-
-
-   <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-     <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.16" />
-     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
-   </ItemGroup>
-
-	 <ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.5" />
-		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
-	 </ItemGroup>
-
-	 <ItemGroup>
-    <ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
-    </ProjectReference>
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0; net7.0; net8.0</TargetFrameworks>
+		<RazorLangVersion>3.0</RazorLangVersion>
+		<RootNamespace>WebRTCme.Middleware.Blazor</RootNamespace>
+		<AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>melihercan</Authors>
+		<Description>Services layer between Blazor applications and WebRTCme library.</Description>
+		<Copyright>melihercan 2023</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware/WebRTCme.Midddleware.Blazor</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC .NET Blazor</PackageTags>
+		<Version>1.0.1</Version>
+		<PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
+	</PropertyGroup>
 
 
-  <ItemGroup>
-    <None Include="..\..\doc\me.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.26" />
+	</ItemGroup>
 
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.15" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BlazorDialog" Version="1.5.0" />
-    <PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
+	</ItemGroup>
 
- </Project>
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\doc\me.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BlazorDialog" Version="2.3.0" />
+		<PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+	</ItemGroup>
+
+</Project>
