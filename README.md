@@ -1,3 +1,14 @@
+# UPDATE 08 Feb 24 (V2.0.0)
+Added
+- .NET 8 support
+- Full MAUI support
+
+Dropped
+- .NET 6 & .NET 7
+- Xamarin
+
+Will release the new NuGet packages soon...
+
 # UPDATE 14 Jan 24
 Adding
 - .NET 8 support
