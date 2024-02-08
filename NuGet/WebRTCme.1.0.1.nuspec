@@ -44,7 +44,6 @@
 		    <dependency id="Microsoft.AspNetCore.Components" version="6.0.9" exclude="Build,Analyzers" />
 		    <dependency id="Microsoft.AspNetCore.Components.Web" version="6.0.9" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
-        <dependency id="Xamarin.Essentials" version="1.7.3" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net6.0-android31.0">
         <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />

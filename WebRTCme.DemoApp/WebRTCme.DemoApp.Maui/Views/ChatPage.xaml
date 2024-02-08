@@ -16,9 +16,9 @@
 			            ItemsSource="{Binding DataParametersList}" />
 
         <StackLayout Orientation="Horizontal" Grid.Row="1" Padding="10" BackgroundColor="#EFEFEF">
-            <Entry HorizontalOptions="FillAndExpand" HeightRequest="25" Placeholder="Message" 
-				Text="{Binding OutgoingText}"/>
-            <Button Text="Send" Command="{Binding SendCommand}"/>
+            <Entry HorizontalOptions="FillAndExpand" HeightRequest="40" Placeholder="Message" 
+				Text="{Binding OutgoingText}" TextColor="Black"/>
+            <Button Text="Send" Command="{Binding SendMessageCommand}"/>
         </StackLayout>
     </Grid>
 </ContentPage>

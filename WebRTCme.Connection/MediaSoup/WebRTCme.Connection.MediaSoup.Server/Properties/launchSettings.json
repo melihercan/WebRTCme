@@ -17,7 +17,7 @@
     },
     "WebRTCme.Connection.MediaSoup.Server": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
       "applicationUrl": "https://192.168.1.48:5011;http://192.168.1.48:5010",
       "environmentVariables": {

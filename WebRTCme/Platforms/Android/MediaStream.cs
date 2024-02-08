@@ -5,9 +5,9 @@ using WebRTCme;
 using Webrtc = Org.Webrtc;
 using Android.Media;
 using Android.Hardware.Camera2;
-#if! (NET6_0 || NET7_0) 
-using Xamarin.Essentials;
-#endif
+////#if! (NET6_0 || NET7_0 || NET8_0) 
+////using Xamarin.Essentials;
+////#endif
 using System.Linq;
 using Android.OS;
 using WebRTCme.Platforms.Android.Custom;

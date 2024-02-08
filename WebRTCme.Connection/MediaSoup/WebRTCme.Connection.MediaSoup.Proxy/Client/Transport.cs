@@ -250,7 +250,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public async Task<Consumer> ConsumeAsync(ConsumerOptions options)
         {
-            Console.WriteLine("Consume()");
+            Console.WriteLine($"Consume() {options.Kind}");
 
             var rtpParameters = Utils.Clone<RtpParameters>(options.RtpParameters, null);
 
@@ -273,7 +273,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     Kind = (MediaKind)options.Kind,
                     RtpParameters = options.RtpParameters
                 }
-     , this);
+                , this);
 
             var consumer = new Consumer(
                     options.Id,
@@ -301,7 +301,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
     					Kind = MediaKind.Video,
 						RtpParameters = probatorRtpParameters
                     });
-
+                    //// TODO: ANDROID TRACK IS DISPOSED !!!!!!!!!!!!!!!!!!!
                     _probatorConsumerCreated = true;
                 }
                 catch (Exception ex)
@@ -312,6 +312,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
             OnNewConsumer?.Invoke(this, consumer);
 
+            Console.WriteLine($"Consume() ---------- END");
+            //Console.WriteLine($"Consume() ---------- END {consumer.Kind}");
+            if (options.Kind == MediaKind.Video)
+                Console.WriteLine("Consume() ---------- END Video");
             return consumer;
         }
 

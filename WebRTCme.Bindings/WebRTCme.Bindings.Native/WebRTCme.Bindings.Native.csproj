@@ -1,17 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<!--<Project Sdk="MSBuild.Sdk.Extras/3.0.44">-->
   <PropertyGroup>
-	  <TargetFrameworks>net7.0; net7.0-windows; net7.0-macos</TargetFrameworks>
+	  <TargetFrameworks>net8.0; net8.0-windows; net8.0-macos</TargetFrameworks>
 	  <!-- TODO: HOW TO ADD LINUX, BY USING tvos ??? -->
-	  <!--TargetFrameworks>net7.0; net7.0-windows; net7.0-macos; net7.0-tvos16.4</TargetFrameworks-->
-    <ImplicitUsings>enable</ImplicitUsings>
+	  <ImplicitUsings>enable</ImplicitUsings>
 
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0-tvos16.4'">
 		<DefineConstants>LINUX</DefineConstants>
 	</PropertyGroup>
-
 	<ItemGroup>
 	  <Content Include="WebRtcInterop.dll">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -53,13 +53,13 @@ namespace WebRTCme.Android
                     _ => throw new NotImplementedException()
                 };
 
-        public static Webrtc.SessionDescription.SdpType ToNative(this RTCSdpType type) =>
+        public static Webrtc.SessionDescription.Type ToNative(this RTCSdpType type) =>
             type switch
             {
-                RTCSdpType.Answer => Webrtc.SessionDescription.SdpType.Answer,
-                RTCSdpType.Offer => Webrtc.SessionDescription.SdpType.Offer,
-                RTCSdpType.Pranswer => Webrtc.SessionDescription.SdpType.Pranswer,
-                RTCSdpType.Rollback => Webrtc.SessionDescription.SdpType.Rollback,
+                RTCSdpType.Answer => Webrtc.SessionDescription.Type.Answer,
+                RTCSdpType.Offer => Webrtc.SessionDescription.Type.Offer,
+                RTCSdpType.Pranswer => Webrtc.SessionDescription.Type.Pranswer,
+                RTCSdpType.Rollback => Webrtc.SessionDescription.Type.Rollback,
                 _ => throw new NotImplementedException()
             };
 
@@ -160,15 +160,15 @@ namespace WebRTCme.Android
             throw new ArgumentOutOfRangeException(nameof(nativeTransceiverDirection), nativeTransceiverDirection, null);
         }
 
-        public static RTCSdpType FromNative(this Webrtc.SessionDescription.SdpType nativeType)
+        public static RTCSdpType FromNative(this Webrtc.SessionDescription.Type nativeType)
         {
-            if (nativeType == Webrtc.SessionDescription.SdpType.Answer)
+            if (nativeType == Webrtc.SessionDescription.Type.Answer)
                 return RTCSdpType.Answer;
-            if (nativeType == Webrtc.SessionDescription.SdpType.Offer)
+            if (nativeType == Webrtc.SessionDescription.Type.Offer)
                 return RTCSdpType.Offer;
-            if (nativeType == Webrtc.SessionDescription.SdpType.Pranswer)
+            if (nativeType == Webrtc.SessionDescription.Type.Pranswer)
                 return RTCSdpType.Pranswer;
-            if (nativeType == Webrtc.SessionDescription.SdpType.Rollback)
+            if (nativeType == Webrtc.SessionDescription.Type.Rollback)
                 return RTCSdpType.Rollback;
             throw new ArgumentOutOfRangeException(nameof(nativeType), nativeType, null);
         }

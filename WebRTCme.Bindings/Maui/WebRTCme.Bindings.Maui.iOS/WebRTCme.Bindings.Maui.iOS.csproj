@@ -1,22 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0-ios; net7.0-ios</TargetFrameworks>
-    <!--<Nullable>enable</Nullable>-->
+    <TargetFramework>net8.0-ios</TargetFramework>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
-	  <!--<XamarinOutputType>Binding</XamarinOutputType>-->	  
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>	  
   </PropertyGroup>
 
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
 
-	<ItemGroup>
-		<NativeReference Include="WebRTC.framework">
-			<Kind>Framework</Kind>
-		</NativeReference>
-	</ItemGroup>
-
+  <ItemGroup>
+    <NativeReference Include="WebRTC.framework">
+      <Kind>Framework</Kind>
+      <Frameworks></Frameworks>
+      <LinkerFlags></LinkerFlags>
+      <WeakFrameworks></WeakFrameworks>
+      <ForceLoad>False</ForceLoad>
+      <NeedsGccExceptionHandling>False</NeedsGccExceptionHandling>
+      <IsCxx>False</IsCxx>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
+  </ItemGroup>
 </Project>

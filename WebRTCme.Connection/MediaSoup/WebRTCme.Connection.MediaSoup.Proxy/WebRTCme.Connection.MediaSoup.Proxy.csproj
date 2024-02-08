@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -9,19 +9,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-    <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
-    <PackageReference Include="WebsocketClientLite.PCL" Version="6.3.0" />
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-  </ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
+    <PackageReference Include="WebsocketClientLite.PCL" Version="6.4.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

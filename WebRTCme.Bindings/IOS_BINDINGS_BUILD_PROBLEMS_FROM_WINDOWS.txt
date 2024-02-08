@@ -1,0 +1,22 @@
+This has been almost always problematic.
+
+- Earlier, Xamarin.iOS binding (VS v16.9) build was not possible, and the workaround was:
+
+Close all the VS instances
+Go to your VS installation folder (usually C:\Program Files (x86)\Microsoft Visual Studio\2019\<Version>\)
+Then go to MSBuild\Xamarin\iOS
+Edit the file Xamarin.iOS.ObjCBinding.CSharp.After.props
+Remove the following line from it an save: <Import Project="$(MSBuildThisFileDirectory)Xamarin.Messaging.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)Xamarin.Messaging.Build.targets') And '$(MessagingBuildTargetsImported)' != 'true'" />
+Open VS and try again
+
+- For VS2022 v17.7.5, Xamarin.iOS binding build ends up with:
+1>C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Xamarin\iOS\Xamarin.Shared.targets(1628,3): warning : It's currently not supported to build a binding project from Windows unless a connection to a Mac is available.
+Although the PC is connected to MAC :)
+The above workaround is not working any more and I couldn't find a workaround yet.
+
+For now I will build it on macOS and copy/use DLL instead of the project.
+
+- For VS2022 v17.7.5, MAUI.iOS binding build also fails, and the workaround is to remove SessionId field:
+https://github.com/xamarin/xamarin-macios/issues/18308#issuecomment-1563052193
+
+

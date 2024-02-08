@@ -58,8 +58,12 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
-		</ProjectReference>
+		<!--<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
+		</ProjectReference>-->
+		<Reference Include="WebRTCme.Bindings.Xamarin.iOS">
+			<HintPath>..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.dll</HintPath>
+		</Reference>
+
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 

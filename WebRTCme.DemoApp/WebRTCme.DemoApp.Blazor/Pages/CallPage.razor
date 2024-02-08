@@ -1,0 +1,25 @@
+﻿@page "/CallPage"
+@page "/CallPage/{ConnectionParametersJson}"
+@layout BlankLayout
+
+<h1 class="text-center">Call</h1>
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnShareScreenAsync">
+    @CallViewModel.ShareScreenButtonText
+</button>
+
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnRecordAsync">
+    @CallViewModel.RecordButtonText
+</button>
+
+
+<div class="mx-4 d-flex flex-wrap">
+    @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)
+    {
+        <div class="p-2">
+            <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label" Hangup="@mediaParameters.Hangup"
+                   VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"
+                   CameraType="@mediaParameters.CameraType"  ShowContols="@mediaParameters.ShowControls" />
+        </div>
+    }
+</div>
+

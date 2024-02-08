@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
-    <AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
+	<TargetFrameworks>net8.0</TargetFrameworks>
+	<AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>melihercan</Authors>
     <Description>Blazor bindings using JSInterop.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,30 +13,15 @@
     <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Bindings/WebRTCme.Bindings.Blazor</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>WebRTC .NET Blazor</PackageTags>
-    <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
-    <Version>1.0.1</Version>
-    <Copyright>melihercan 2022</Copyright>
+    <PackageReleaseNotes>New major release.</PackageReleaseNotes>
+    <Version>2.0.0</Version>
+    <Copyright>melihercan 2024</Copyright>
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2.1'))">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.32" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.32" />
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
 	</ItemGroup>
-
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
-        <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.16" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
-    </ItemGroup>
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
-	</ItemGroup>
-
-
 
 	<ItemGroup>
 	  <None Include="..\..\doc\me.png">

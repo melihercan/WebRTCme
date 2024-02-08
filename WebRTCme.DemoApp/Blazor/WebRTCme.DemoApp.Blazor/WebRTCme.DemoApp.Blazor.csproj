@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0; net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +19,10 @@
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

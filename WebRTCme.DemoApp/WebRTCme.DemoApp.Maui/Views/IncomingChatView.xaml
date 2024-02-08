@@ -9,8 +9,9 @@
             <StackLayout VerticalOptions="FillAndExpand" Padding="10" Spacing="0">
                 <Label Text="{Binding PeerUserName}" TextColor="{Binding PeerUserNameTextColor}"
                        FontSize="Caption" FontAttributes="Italic"/>
-                <Label Margin="0,5,0,0" Text="{Binding Message}"/>
-                <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="Micro" FontAttributes="Italic"/>
+                <Label Margin="0,5,0,0" Text="{Binding Object.Text}" TextColor="Black"/>
+                <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="Micro" 
+                       FontAttributes="Italic" TextColor="Black"/>
             </StackLayout>
         </Grid>
     </Grid>

@@ -19,7 +19,7 @@ namespace WebRTCme
         {
             var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.RTCVideoTrack;
             var nativeVideoSource = nativeVideoTrack.Source;
-            _videoCapturer.Delegate = nativeVideoSource;
+            _videoCapturer.Delegate = (Webrtc.IRTCVideoCapturerDelegate)nativeVideoSource;
 
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
@@ -52,10 +52,10 @@ namespace WebRTCme
 
         }
 
-        public static void SetRendererTrack(Webrtc.RTCEAGLVideoView rendererView, IMediaStreamTrack videoTrack)
+        public static void SetRendererTrack(Webrtc.RTCMTLVideoView/****RTCEAGLVideoView****/ rendererView, IMediaStreamTrack videoTrack)
         {
             var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.RTCVideoTrack;
-            nativeVideoTrack.AddRenderer(rendererView);
+            nativeVideoTrack.AddRenderer((Webrtc.IRTCVideoRenderer)rendererView);
         }
 
     }

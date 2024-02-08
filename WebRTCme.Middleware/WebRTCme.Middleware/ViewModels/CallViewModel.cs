@@ -126,6 +126,12 @@ namespace WebRTCme.Middleware
                                         CameraType = CameraType.Default,
                                         ShowControls = false
                                     });
+
+                                    //// TESTING
+                                    //var first = _mediaStreamManager.MediaStreamParametersList[0];
+                                    //_mediaStreamManager.Remove("Android");
+                                    //_mediaStreamManager.Remove("Blazor");
+                                    //_mediaStreamManager.Add(first);
                                 }));
 
                                 _reRender?.Invoke();

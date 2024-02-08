@@ -239,7 +239,7 @@ namespace WebRTCme.iOS
                  .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();
 
         public void RemoveTrack(IRTCRtpSender sender) =>
-            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.IRTCRtpSender);
+            NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.RTCRtpSender);
 
         public void RestartIce()
         {
@@ -313,10 +313,13 @@ namespace WebRTCme.iOS
             OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
         }
 
+
+        ////bool _isConnected = false;
+
         public void DidChangeIceConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCIceConnectionState newState)
         {
-            //System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState: {newState}");
+            System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.IceConnectionState: {newState}");
 
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
@@ -326,19 +329,23 @@ namespace WebRTCme.iOS
             //    Timer timer = null;
             //    int count = 5;
 
-
-            //    // Make sure that state is connected with several attempts.
-            //    timer = new Timer(new TimerCallback((state) =>
+            //    if (!_isConnected)
             //    {
-            //        if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState == 
-            //            Webrtc.RTCPeerConnectionState.Connected || --count == 0)
+
+            //        // Make sure that state is connected on several checks.
+            //        timer = new Timer(new TimerCallback((state) =>
             //        {
-            //            timer.Dispose();
-            //            System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED {count}");
-            //            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
-            //            return;
-            //        }
-            //    }), null, 10, 50);
+            //            if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState ==
+            //                Webrtc.RTCPeerConnectionState.Connected || --count == 0)
+            //            {
+            //                timer.Dispose();
+            //                System.Diagnostics.Debug.WriteLine($"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection GENERATED CONNECTED {count}");
+            //                OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+            //                _isConnected = true;
+            //                return;
+            //            }
+            //        }), null, 10, 50);
+            //    }
             //    return;
             //}
             //else if (newState == Webrtc.RTCIceConnectionState.Disconnected)
@@ -346,17 +353,22 @@ namespace WebRTCme.iOS
             //    Timer timer = null;
             //    int count = 5;
 
-            //    // Make sure that state is disconnected with several attempsts.
-            //    timer = new Timer(new TimerCallback((state) =>
+            //    if (_isConnected)
             //    {
-            //        if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState ==
-            //            Webrtc.RTCPeerConnectionState.Disconnected || --count == 0)
+
+            //        // Make sure that state is disconnected on several checks.
+            //        timer = new Timer(new TimerCallback((state) =>
             //        {
-            //            timer.Dispose();
-            //            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
-            //            return;
-            //        }
-            //    }), null, 10, 50);
+            //            if (((Webrtc.RTCPeerConnection)NativeObject).ConnectionState ==
+            //                Webrtc.RTCPeerConnectionState.Disconnected || --count == 0)
+            //            {
+            //                timer.Dispose();
+            //                OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+            //                _isConnected = false;
+            //                return;
+            //            }
+            //        }), null, 10, 50);
+            //    }
             //    return;
             //}
         }
@@ -388,11 +400,12 @@ namespace WebRTCme.iOS
 
         }
 
-        // This event is optional in iOS. Decide about the connection in 'DidChangeIceConnectionState'.
+        // This event is optional in iOS by default. Alternatively 'DidChangeIceConnectionState' can be used to
+        // generate this event. The code is currently commented out in DidChangeIceConnectionState.
         public void DidChangeConnectionState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCPeerConnectionState newState)
         {
-            //System.Diagnostics.Debug.WriteLine($"=============================== PeerConnection.RTCPeerConnectionState: {newState}");
+            System.Diagnostics.Debug.WriteLine($"=============================== PeerConnection.RTCPeerConnectionState: {newState}");
             OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 

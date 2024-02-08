@@ -9,15 +9,15 @@
                 SelectedItem="{Binding SelectedConnectionTypeName}"/>
         <Entry Placeholder="enter room name" Text="{Binding ConnectionParameters.Room}"/>
         <Entry Placeholder="enter user name" Text="{Binding ConnectionParameters.Name}"/>
-        <StackLayout Orientation="Horizontal" Margin="40,40">
-            <Button Text="Join call" Padding="10,0"
+        <StackLayout Orientation="Horizontal" Margin="40,20">
+            <Button Text="Join call" 
                     Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
-            <Button Text="Join chat" Padding="10,0"
+            <Button Text="Join chat" 
                     Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
         </StackLayout>
 
-        <middleware:Media HorizontalOptions="Fill"
+        <!--<middleware:Media HorizontalOptions="Fill"
                           HeightRequest="100"
-                          BackgroundColor="Red" />
+                          BackgroundColor="Red" />-->
     </StackLayout>
 </ContentPage>

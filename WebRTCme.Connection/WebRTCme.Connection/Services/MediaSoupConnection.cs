@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using Microsoft.Maui.Devices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using WebRTCme.Connection.MediaSoup.Proxy;
 using WebRTCme.Connection.MediaSoup.Proxy.Client;
 using WebRTCme.Connection.MediaSoup.Proxy.Enums;
 using WebRTCme.Connection.MediaSoup.Proxy.Models;
-using Xamarin.Essentials;
+////using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.Services
 {
@@ -333,6 +334,7 @@ IMediaStream remMedia;
                         catch(Exception ex)
                         {
                             var m = ex.Message;
+                            throw;
                         }
 
                   _logger.LogInformation("Connection completed");
@@ -567,7 +569,8 @@ IMediaStream remMedia;
         public Task OnNotifyAsync(string method, object data)
         {
             _logger.LogInformation($"=======> OnNotifyAsync: {method}");
-            
+            Console.WriteLine($"=======> OnNotifyAsync: {method}");
+
             switch (method)
             {
                 case MethodName.NewPeer:
@@ -592,6 +595,7 @@ IMediaStream remMedia;
             IMediaSoupServerNotify.Accept accept, IMediaSoupServerNotify.Reject reject)
         {
             _logger.LogInformation($"=======> OnRequestAsync: {method}");
+            Console.WriteLine($"=======> OnRequestAsync: {method}");
 
             switch (method)
             {
@@ -620,8 +624,9 @@ IMediaStream remMedia;
 
                     ////accept();
 
-    ////await Task.Delay(1000);
+                    ////await Task.Delay(1000);
 
+                    Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: {consumerRequestData.Kind}");
 
                     consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions
                     {
@@ -631,6 +636,7 @@ IMediaStream remMedia;
                         RtpParameters = consumerRequestData.RtpParameters,
                         AppData = consumerAppData
                     });
+                    Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: after ConsumeAsync {consumerRequestData.Kind} {consumer.Kind}");
 
 
                     _consumers.Add(consumer.Id, consumer);
@@ -645,7 +651,9 @@ IMediaStream remMedia;
                     consumer.OnTrackEnded += Consumer_OnTrackEnded;
                     consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
 
+                    Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: before accept {consumerRequestData.Kind} {consumer.Kind}");
                     accept();
+                    Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: after accept {consumerRequestData.Kind} {consumer.Kind}");
 
                     // If audio-only mode is enabled, pause it.
                     ////if (consumer.Kind == MediaKind.Video && get 'audioOnly' from config)
@@ -660,21 +668,32 @@ IMediaStream remMedia;
                         var consumers = consumerPeer.ConsumerIds
                             .Select(key => _consumers[key])
                             .ToList();
+                        foreach (var c in consumers)
+                        {
+                            Console.WriteLine($"--------------------------- CONSUMER: {c.Kind}");
+                        }
 
                         var audioConsumer =
                             consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio);
                         var videoConsumer =
                             consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
 
+                        Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: {consumerRequestData.Kind} {consumer.Kind}");
                         if (consumer.Kind == MediaKind.Video)
                         {
 
                             //// TODO: THERE IS A TIMING ISSUE. WITHOUT THE ABOVE DELAY, _webcamProducer is nul!!! CHECK THIS
-                            _logger.LogInformation($"--------------------------- NEW VIDEO TRACK - muted: {consumer.Track.Muted} ");
+                            Console.WriteLine($"--------------------------- NEW VIDEO TRACK");
+                            _logger.LogInformation($"--------------------------- NEW VIDEO TRACK");
 
                             ////await Task.Delay(2000);
                             ////_logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
-                               
+
+                        }
+                        else if (consumer.Kind == MediaKind.Audio)
+                        {
+                            Console.WriteLine($"--------------------------- NEW AUDIO TRACK");
+                            _logger.LogInformation($"--------------------------- NEW AUDIO TRACK");
                         }
 
                         // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
@@ -901,6 +920,9 @@ IMediaStream remMedia;
                     break;
             }
 
+            _logger.LogInformation($"=======> OnRequestAsync: {method} ~~~~~~~~~~~~~~~~~~~~~~ END");
+            Console.WriteLine($"=======> OnRequestAsync: {method} ~~~~~~~~~~~~~~~~~~~~~~ END");
+
 
         }
 
@@ -1016,6 +1038,32 @@ IMediaStream remMedia;
                 DataConsumerIds =new(),
             });
         }
+
+        //        MediaSoup.Proxy.Models.Device GetDevice()
+        //        {
+        //#if ANDROID
+        //            return new MediaSoup.Proxy.Models.Device
+        //                {
+        //                    Flag = "Android",
+        //                    Name = DeviceInfoExt.Name,
+        //                    Version = DeviceInfoExt.Version.ToString()
+        //                };
+        //#elif IOS
+        //            return new MediaSoup.Proxy.Models.Device
+        //                {
+        //                    Flag = "iOS",
+        //                    Name = DeviceInfoExt.Name,
+        //                    Version = DeviceInfoExt.Version.ToString()
+        //                };
+        //#else
+        //            return new MediaSoup.Proxy.Models.Device
+        //            {
+        //                Flag = "Blazor",
+        //                Name = "Browser",
+        //                Version = "1.0"
+        //            };
+        //#endif
+        //        }
 
         MediaSoup.Proxy.Models.Device GetDevice()
         {

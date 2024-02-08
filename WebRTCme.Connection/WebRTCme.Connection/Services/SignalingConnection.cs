@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WebRTCme.Connection.Signaling;
-using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.Services
 {
@@ -123,7 +122,8 @@ namespace WebRTCme.Connection.Services
         {
             try
             {
-                _logger.LogInformation(
+                System.Diagnostics.Debug.WriteLine(
+////        _logger.LogInformation(
                     $">>>>>>>> OnPeerJoined - room:{_connectionContext.UserContext.Room} " +
                     $"user:{_connectionContext.UserContext.Name} " +
                     $"peerUser:{peerName}");
@@ -135,7 +135,8 @@ namespace WebRTCme.Connection.Services
                 var offerDescription = await peerConnection.CreateOffer();
 
                 var sdp = JsonSerializer.Serialize(offerDescription, JsonHelper.WebRtcJsonSerializerOptions);
-                _logger.LogInformation(
+                System.Diagnostics.Debug.WriteLine(
+////        _logger.LogInformation(
                     $"-------> Sending Offer - room:{_connectionContext.UserContext.Room} " +
                     $"user:{_connectionContext.UserContext.Name} " +
                     $"peerUser:{peerName}");// sdp:{offerDescription.Sdp}");
@@ -204,7 +205,8 @@ namespace WebRTCme.Connection.Services
                 }
                 var peerConnection = peerContext.PeerConnection;
 
-                _logger.LogInformation(
+                System.Diagnostics.Debug.WriteLine(
+////        _logger.LogInformation(
                     $"<-------- OnPeerSdp - room:{_connectionContext.UserContext.Room} " +
                     $"user:{_connectionContext.UserContext.Name} " +
                     $"peerUser:{peerName}"); //peedSdp:{peerSdp}");
@@ -217,7 +219,8 @@ namespace WebRTCme.Connection.Services
 
                     // Setting local description triggers ice candidate packets.
                     var sdp = JsonSerializer.Serialize(answerDescription, JsonHelper.WebRtcJsonSerializerOptions);
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+////                _logger.LogInformation(
                         $"-------> Sending Answer - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name}  " +
                         $"peerUser:{peerName}");// sdp:{answerDescription.Sdp}");
@@ -253,7 +256,8 @@ namespace WebRTCme.Connection.Services
             {
                 var peerContext = _connectionContext.PeerContexts.Single(context => context.Id.Equals(peerId));
                 peerName = peerContext.Name;
-                _logger.LogInformation(
+                System.Diagnostics.Debug.WriteLine(
+////        _logger.LogInformation(
                     $"<-------- OnPeerIceCandidate - room:{_connectionContext.UserContext.Room} " +
                     $"user:{_connectionContext.UserContext.Name} " +
                     $"peerUser:{peerName} " +
@@ -381,7 +385,8 @@ namespace WebRTCme.Connection.Services
 
                 void OnConnectionStateChanged(object s, EventArgs e)
                 {
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+                    ////_logger.LogInformation(
                         $"######## OnConnectionStateChanged - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName} " +
@@ -401,7 +406,8 @@ namespace WebRTCme.Connection.Services
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+                    ////_logger.LogInformation(
                         $"######## OnDataChannel - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName} " +
@@ -437,7 +443,8 @@ namespace WebRTCme.Connection.Services
                             //UsernameFragment = ???
                         };
                         var ice = JsonSerializer.Serialize(iceCandidate, JsonHelper.WebRtcJsonSerializerOptions);
-                        _logger.LogInformation(
+                        System.Diagnostics.Debug.WriteLine(
+                    ////_logger.LogInformation(
                             $"--------> Sending ICE Candidate - room:{_connectionContext.UserContext.Room} " +
                             $"user:{_connectionContext.UserContext.Name} " +
                             $"peerUser:{peerName} " +
@@ -449,7 +456,8 @@ namespace WebRTCme.Connection.Services
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+////                _logger.LogInformation(
                         $"######## OnIceConnectionStateChange - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName} " +
@@ -473,7 +481,8 @@ namespace WebRTCme.Connection.Services
                 }
                 void OnSignallingStateChange(object s, EventArgs e)
                 {
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+////                _logger.LogInformation(
                         $"######## OnSignallingStateChange - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName}, " +
@@ -488,7 +497,8 @@ namespace WebRTCme.Connection.Services
                 }
                 void OnTrack(object s, IRTCTrackEvent e)
                 {
-                    _logger.LogInformation(
+                    System.Diagnostics.Debug.WriteLine(
+////                _logger.LogInformation(
                         $"######## OnTrack - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName} " +

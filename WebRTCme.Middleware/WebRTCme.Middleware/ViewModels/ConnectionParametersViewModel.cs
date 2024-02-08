@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Connections;
+using Microsoft.Maui.Devices;
 using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,7 +14,7 @@ using System.Windows.Input;
 using WebRTCme;
 using WebRTCme.Connection;
 using WebRTCme.Middleware;
-using Xamarin.Essentials;
+////using Xamarin.Essentials;
 
 namespace WebRTCme.Middleware
 {

@@ -63,6 +63,7 @@ typedef NS_ENUM(NSInteger, RTCEncryptionKeyType) {
 
 /** Represents the chosen SDP semantics for the RTCPeerConnection. */
 typedef NS_ENUM(NSInteger, RTCSdpSemantics) {
+  // TODO(https://crbug.com/webrtc/13528): Remove support for Plan B.
   RTCSdpSemanticsPlanB,
   RTCSdpSemanticsUnifiedPlan,
 };
@@ -84,7 +85,7 @@ RTC_OBJC_EXPORT
 @property(nonatomic, nullable) RTC_OBJC_TYPE(RTCCertificate) * certificate;
 
 /** Which candidates the ICE agent is allowed to use. The W3C calls it
- * |iceTransportPolicy|, while in C++ it is called |type|. */
+ * `iceTransportPolicy`, while in C++ it is called `type`. */
 @property(nonatomic, assign) RTCIceTransportPolicy iceTransportPolicy;
 
 /** The media-bundling policy to use when gathering ICE candidates. */
@@ -95,11 +96,6 @@ RTC_OBJC_EXPORT
 @property(nonatomic, assign) RTCTcpCandidatePolicy tcpCandidatePolicy;
 @property(nonatomic, assign) RTCCandidateNetworkPolicy candidateNetworkPolicy;
 @property(nonatomic, assign) RTCContinualGatheringPolicy continualGatheringPolicy;
-
-/** If set to YES, don't gather IPv6 ICE candidates.
- *  Default is NO.
- */
-@property(nonatomic, assign) BOOL disableIPV6;
 
 /** If set to YES, don't gather IPv6 ICE candidates on Wi-Fi.
  *  Only intended to be used on specific devices. Certain phones disable IPv6
@@ -144,7 +140,7 @@ RTC_OBJC_EXPORT
  */
 @property(nonatomic, assign) BOOL shouldPresumeWritableWhenFullyRelayed;
 
-/* This flag is only effective when |continualGatheringPolicy| is
+/* This flag is only effective when `continualGatheringPolicy` is
  * RTCContinualGatheringPolicyGatherContinually.
  *
  * If YES, after the ICE transport type is changed such that new types of
@@ -161,27 +157,24 @@ RTC_OBJC_EXPORT
  */
 @property(nonatomic, copy, nullable) NSNumber *iceCheckMinInterval;
 
-/** Configure the SDP semantics used by this PeerConnection. Note that the
- *  WebRTC 1.0 specification requires UnifiedPlan semantics. The
- *  RTCRtpTransceiver API is only available with UnifiedPlan semantics.
+/**
+ * Configure the SDP semantics used by this PeerConnection. By default, this
+ * is RTCSdpSemanticsUnifiedPlan which is compliant to the WebRTC 1.0
+ * specification. It is possible to overrwite this to the deprecated
+ * RTCSdpSemanticsPlanB SDP format, but note that RTCSdpSemanticsPlanB will be
+ * deleted at some future date, see https://crbug.com/webrtc/13528.
  *
- *  PlanB will cause RTCPeerConnection to create offers and answers with at
- *  most one audio and one video m= section with multiple RTCRtpSenders and
- *  RTCRtpReceivers specified as multiple a=ssrc lines within the section. This
- *  will also cause RTCPeerConnection to ignore all but the first m= section of
- *  the same media type.
+ * RTCSdpSemanticsUnifiedPlan will cause RTCPeerConnection to create offers and
+ * answers with multiple m= sections where each m= section maps to one
+ * RTCRtpSender and one RTCRtpReceiver (an RTCRtpTransceiver), either both audio
+ * or both video. This will also cause RTCPeerConnection to ignore all but the
+ * first a=ssrc lines that form a Plan B stream.
  *
- *  UnifiedPlan will cause RTCPeerConnection to create offers and answers with
- *  multiple m= sections where each m= section maps to one RTCRtpSender and one
- *  RTCRtpReceiver (an RTCRtpTransceiver), either both audio or both
- *  video. This will also cause RTCPeerConnection) to ignore all but the first a=ssrc
- *  lines that form a Plan B stream.
- *
- *  For users who wish to send multiple audio/video streams and need to stay
- *  interoperable with legacy WebRTC implementations or use legacy APIs,
- *  specify PlanB.
- *
- *  For all other users, specify UnifiedPlan.
+ * RTCSdpSemanticsPlanB will cause RTCPeerConnection to create offers and
+ * answers with at most one audio and one video m= section with multiple
+ * RTCRtpSenders and RTCRtpReceivers specified as multiple a=ssrc lines within
+ * the section. This will also cause RTCPeerConnection to ignore all but the
+ * first m= section of the same media type.
  */
 @property(nonatomic, assign) RTCSdpSemantics sdpSemantics;
 
@@ -219,6 +212,54 @@ RTC_OBJC_EXPORT
  * Time interval between video RTCP reports.
  */
 @property(nonatomic, assign) int rtcpVideoReportIntervalMs;
+
+/**
+ * Allow implicit rollback of local description when remote description
+ * conflicts with local description.
+ * See: https://w3c.github.io/webrtc-pc/#dom-peerconnection-setremotedescription
+ */
+@property(nonatomic, assign) BOOL enableImplicitRollback;
+
+/**
+ * Control if "a=extmap-allow-mixed" is included in the offer.
+ * See: https://www.chromestatus.com/feature/6269234631933952
+ */
+@property(nonatomic, assign) BOOL offerExtmapAllowMixed;
+
+/**
+ * Defines the interval applied to ALL candidate pairs
+ * when ICE is strongly connected, and it overrides the
+ * default value of this interval in the ICE implementation;
+ */
+@property(nonatomic, copy, nullable) NSNumber *iceCheckIntervalStrongConnectivity;
+
+/**
+ * Defines the counterpart for ALL pairs when ICE is
+ * weakly connected, and it overrides the default value of
+ * this interval in the ICE implementation
+ */
+@property(nonatomic, copy, nullable) NSNumber *iceCheckIntervalWeakConnectivity;
+
+/**
+ * The min time period for which a candidate pair must wait for response to
+ * connectivity checks before it becomes unwritable. This parameter
+ * overrides the default value in the ICE implementation if set.
+ */
+@property(nonatomic, copy, nullable) NSNumber *iceUnwritableTimeout;
+
+/**
+ * The min number of connectivity checks that a candidate pair must sent
+ * without receiving response before it becomes unwritable. This parameter
+ * overrides the default value in the ICE implementation if set.
+ */
+@property(nonatomic, copy, nullable) NSNumber *iceUnwritableMinChecks;
+
+/**
+ * The min time period for which a candidate pair must wait for response to
+ * connectivity checks it becomes inactive. This parameter overrides the
+ * default value in the ICE implementation if set.
+ */
+@property(nonatomic, copy, nullable) NSNumber *iceInactiveTimeout;
 
 - (instancetype)init;
 

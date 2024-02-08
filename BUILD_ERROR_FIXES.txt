@@ -1,0 +1,4 @@
+MAUI iOS bindings solution:
+https://github.com/xamarin/xamarin-macios/issues/18308#issuecomment-1563052193
+
+https://github.com/xamarin/xamarin-macios/issues/19173#issuecomment-1765906924

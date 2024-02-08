@@ -17,7 +17,7 @@
     },
     "WebRTCme.Connection.Signaling.Server": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
       "applicationUrl": "https://192.168.1.48:5053;http://192.168.1.48:5052",
       "environmentVariables": {

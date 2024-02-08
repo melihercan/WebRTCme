@@ -21,7 +21,7 @@
 	<attr path="/api/package[@name='org.webrtc.voiceengine']"
 		  name="managedName">Org.Webrtc.VoiceEngine</attr>-->
 
-	<attr path="/api/package[@name='org.webrtc']/interface[@name='CameraSession']"
+	<!--<attr path="/api/package[@name='org.webrtc']/interface[@name='CameraSession']"
 		  name="visibility">public</attr>
 
 	<attr path="/api/package[@name='org.webrtc']/class[@name='SessionDescription.Type']"
@@ -33,7 +33,7 @@
 	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getFrameSizePixels']" />
 	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMinStartBitrateBps']" />
 	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMinBitrateBps']" />
-	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMaxBitrateBps']" />
+	<remove-node path="/api/package[@name='org.webrtc']/class[@name='VideoEncoder.ResolutionBitrateLimits']/method[@name='getMaxBitrateBps']" />-->
 
 
 </metadata>

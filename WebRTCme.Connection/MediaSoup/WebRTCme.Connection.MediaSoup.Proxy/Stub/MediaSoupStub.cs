@@ -15,7 +15,8 @@ using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.ClientWebSockets;
-using Xamarin.Essentials;
+////using Xamarin.Essentials;
+using Microsoft.Maui.Devices;
 
 namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
 {
@@ -167,7 +168,6 @@ Console.WriteLine($"########################## REQUEST: {request.Method}");
                     }
                     finally
                     {
-
                     }
                 }
             });

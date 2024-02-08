@@ -8,16 +8,35 @@
         <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
                     Wrap="Wrap"
                     Direction="Row"
-                    JustifyContent="Center">
+                    JustifyContent="Center"
+                    >
             <BindableLayout.ItemTemplate>
                 <DataTemplate>
                     <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
-                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
-                                  CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
-                                  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+                                      VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
+                                      CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
+                                      VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+                                      />
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
         </FlexLayout>
-       
+
+        <!--<StackLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
+                     >
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
+                                      VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
+                                      CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
+                                      HeightRequest="50"
+                                      />
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </StackLayout>-->
+
     </ContentPage.Content>
 </ContentPage>
+    
+<!-- 
+                                      VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+-->    

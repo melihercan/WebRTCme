@@ -1,0 +1,44 @@
+﻿@page "/"
+
+<h3 class="my-5 text-center">Connection Parameters</h3>
+
+<EditForm Model="@ConnectionParametersViewModel.ConnectionParameters" 
+          OnValidSubmit="@ConnectionParametersViewModel.Join">
+    
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label class="col-6 text-right">Connection server:</label>
+        <InputSelect @bind-Value="ConnectionParametersViewModel.SelectedConnectionTypeName">
+            @foreach (var connectionType in ConnectionParametersViewModel.ConnectionTypeNames)
+            {
+                <option value="@connectionType">@connectionType</option>
+            }
+        </InputSelect>
+     </div>
+
+
+    <div>
+        <label class="col-6 text-right">Room name:</label>
+        <InputText id="roomId" placeholder="enter room name" 
+        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Room" />
+    </div>
+
+    <div>
+        <label class="col-6 text-right">User name:</label>
+        <InputText id="userId" placeholder="enter user name" 
+        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Name" />
+    </div>
+
+    <div class="mt-5 text-center">
+        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = true)"> 
+            Join call
+        </button>
+        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = false)"> 
+            Join chat
+        </button>
+    </div>
+</EditForm>
+
+

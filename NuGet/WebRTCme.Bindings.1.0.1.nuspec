@@ -2,95 +2,57 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>WebRTCme.Bindings</id>
-    <version>1.0.1</version>
+    <version>2.0.0</version>
     <authors>melihercan</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <icon>me.png</icon>
     <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
-    <description>WebRTC bindings for Xamarin Forms (Android and iOS), MAUI (Android, iOS, Windows and macOS) and Blazor applications.</description>
+    <description>WebRTC bindings for MAUI (Android, iOS, Windows, MacCatalyst), macOS and Blazor applications.</description>
     <releaseNotes>
-      Bug fixes.
-      WebRTC Android SDK from commit: 934b5e2ac651df0160c31e33b72f2b1fdfb73f21
-      WebRTC iOS SDK from commit: f9a6148e0498abdbe74eb6edf6aac78667d29499
+      New major release.
+      WebRTC Android SDK branch-heads/6045(m119)
+      WebRTC iOS SDK  branch-heads/6045(m119)
     </releaseNotes>
-    <copyright>melihercan 2022</copyright>
-    <tags>WebRTC .NET Bindings Xamarin MAUI Android iOS Windows macOS Blazor</tags>
+    <copyright>melihercan 2024</copyright>
+    <tags>WebRTC .NET Bindings MAUI Android iOS Windows macOS Blazor</tags>
     <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Bindings" />
     <dependencies>
-      <group targetFramework="monoandroid12.0">
-      </group>
-      <group targetFramework="xamarin.ios10">
-      </group>
-      <group targetFramework=".netstandard2.0">
-        <dependency id="Microsoft.AspNetCore.Components" version="3.1.29" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.29" exclude="Build,Analyzers" />
-      </group>
-      <group targetFramework=".netstandard2.1">
-        <dependency id="Microsoft.AspNetCore.Components" version="3.1.29" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.AspNetCore.Components.Web" version="3.1.29" exclude="Build,Analyzers" />
-      </group>
-	    <group targetFramework="net5.0">
-		    <dependency id="Microsoft.AspNetCore.Components" version="5.0.17" exclude="Build,Analyzers" />
-		    <dependency id="Microsoft.AspNetCore.Components.Web" version="5.0.17" exclude="Build,Analyzers" />
+	    <group targetFramework="net8.0">
+		    <dependency id="Microsoft.AspNetCore.Components" version="8.0.1" exclude="Build,Analyzers" />
+		    <dependency id="Microsoft.AspNetCore.Components.Web" version="8.0.1" exclude="Build,Analyzers" />
 	    </group>
-	    <group targetFramework="net6.0">
-		    <dependency id="Microsoft.AspNetCore.Components" version="6.0.9" exclude="Build,Analyzers" />
-		    <dependency id="Microsoft.AspNetCore.Components.Web" version="6.0.9" exclude="Build,Analyzers" />
+      <group targetFramework="net8.0-android28.0">
 	    </group>
-      <group targetFramework="net6.0-android31.0">
+      <group targetFramework="net8.0-ios12.4">
 	    </group>
-      <group targetFramework="net6.0-ios15.4">
-	    </group>
-      <group targetFramework="net6.0-windows10.0.22621">
-		  <dependency id="SIPSorcery" version="6.0.11" exclude="Build,Analyzers" />
+      <group targetFramework="net8.0-windows10.0.22621.0">
+		  <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
 		  <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
 	  </group>
-      <group targetFramework="net6.0-maccatalyst15.4">
+      <group targetFramework="net8.0-maccatalyst13.1">
+		  <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
+		  <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
 	    </group>
-      <group targetFramework="net6.0-macos13.0">
+      <group targetFramework="net8.0-macos10.14">
+		  <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
+		  <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
 	    </group>
 	  </dependencies>
   </metadata>
   <files>
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\netstandard2.0\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.1\WebRTCme.Api.dll" target="lib\netstandard2.1\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net8.0-android28.0\libwebrtc.aar" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\bin\Release\net8.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net8.0-android28.0\WebRTCme.Bindings.Maui.Android.dll" />
     
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\monoandroid12.0\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\netstandard2.0\WebRTCme.Api.dll" target="lib\xamarin.ios10\WebRTCme.Api.dll" />
-    
-    <file src="..\WebRTCme.Api\bin\Release\net5.0\WebRTCme.Api.dll" target="lib\net5.0\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0\WebRTCme.Api.dll" />
-
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-android31.0\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-ios15.4\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Api.dll" />
-    <file src="..\WebRTCme.Api\bin\Release\net6.0\WebRTCme.Api.dll" target="lib\net6.0-macos13.0\WebRTCme.Api.dll" />
-
-    <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\bin\Release\WebRTCme.Bindings.Xamarin.Android.dll" target="lib\monoandroid12.0\WebRTCme.Bindings.Xamarin.Android.dll" />
-	  <file src="..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\bin\Release\WebRTCme.Bindings.Xamarin.iOS.dll" target="lib\xamarin.ios10\WebRTCme.Bindings.Xamarin.iOS.dll" />
-
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.0\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.0\WebRTCme.Bindings.Blazor.dll" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\netstandard2.1\WebRTCme.Bindings.Blazor.dll" target="lib\netstandard2.1\WebRTCme.Bindings.Blazor.dll" />
-    
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net5.0\WebRTCme.Bindings.Blazor.dll" target="lib\net5.0\WebRTCme.Bindings.Blazor.dll" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net6.0\WebRTCme.Bindings.Blazor.dll" target="lib\net6.0\WebRTCme.Bindings.Blazor.dll" />
-
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net6.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.dll" />
 
     <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net8.0\WebRTCme.Bindings.Blazor.dll" target="lib\net8.0\WebRTCme.Bindings.Blazor.dll" />
 
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\bin\Release\net6.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net6.0-android31.0\WebRTCme.Bindings.Maui.Android.dll" />
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net6.0-android31.0\libwebrtc.aar" />
-    
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net6.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net6.0-ios15.4\WebRTCme.Bindings.Maui.iOS.dll" />
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\bin\Release\net6.0-windows10.0.22621.0\WebRTCme.Bindings.Maui.Windows.dll" target="lib\net6.0-windows10.0.22621\WebRTCme.Bindings.Maui.Windows.dll" />
-    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\bin\Release\net6.0-maccatalyst\WebRTCme.Bindings.Maui.MacCatalyst.dll" target="lib\net6.0-maccatalyst15.4\WebRTCme.Bindings.Maui.MacCatalyst.dll" />
-    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.macOS\bin\Release\net6.0-macos\WebRTCme.Bindings.macOS.dll" target="lib\net6.0-macos13.0\WebRTCme.Bindings.macOS.dll" />
 
     <file src="..\doc\me.png" target="me.png" />
   </files>

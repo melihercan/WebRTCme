@@ -94,7 +94,7 @@ namespace WebRTCme.Android
                 (Java.Lang.Double)parameters.ScaleResolutionDownBy)
             {
                 MaxBitrateBps = (Java.Lang.Integer)(int)parameters.MaxBitrate,
-                MaxFramerate = (Java.Lang.Integer)(int)parameters.MaxFramerate,
+                MaxFramerate = parameters.MaxFramerate == null ? null : (Java.Lang.Integer)(int)parameters.MaxFramerate,
             };
 
         //{

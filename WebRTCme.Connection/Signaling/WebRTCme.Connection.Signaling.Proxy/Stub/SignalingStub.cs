@@ -2,16 +2,16 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Devices;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Reactive;
-using System.Text;
+////using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.Signaling;
-using Xamarin.Essentials;
+////using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.Signaling.Proxy.Stub
 {
@@ -45,9 +45,10 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
 
         public SignalingStub(IConfiguration configuration)
         {
-            _signallingServerBaseUrl = configuration["SignallingServer:BaseUrl"];
+            _signallingServerBaseUrl = configuration["SignalingServer:BaseUrl"];
 
             //// TODO: Bypass only for debugging with self signed certs (local IPs).
+			////var bypassSslCertificateError = WebRTCme.DeviceInfoExt.IsAnroid;
             var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
 
             _hubConnection = new HubConnectionBuilder()

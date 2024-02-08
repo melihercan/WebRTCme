@@ -1,5 +1,5 @@
 /*
- *  Copyright 2021 The WebRTC project authors. All Rights Reserved.
+ *  Copyright 2023 The WebRTC project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -15,6 +15,7 @@
 #import "RTCMacros.h"
 #import "RTCMutableI420Buffer.h"
 #import "RTCMutableYUVPlanarBuffer.h"
+#import "RTCSSLCertificateVerifier.h"
 #import "RTCVideoCapturer.h"
 #import "RTCVideoCodecInfo.h"
 #import "RTCVideoDecoder.h"
@@ -27,6 +28,7 @@
 #import "RTCVideoFrameBuffer.h"
 #import "RTCVideoRenderer.h"
 #import "RTCYUVPlanarBuffer.h"
+#import "RTCAudioDevice.h"
 #import "RTCAudioSession.h"
 #import "RTCAudioSessionConfiguration.h"
 #import "RTCCameraVideoCapturer.h"
@@ -54,6 +56,7 @@
 #import "RTCDataChannelConfiguration.h"
 #import "RTCFieldTrials.h"
 #import "RTCIceCandidate.h"
+#import "RTCIceCandidateErrorEvent.h"
 #import "RTCIceServer.h"
 #import "RTCLegacyStatsReport.h"
 #import "RTCMediaConstraints.h"
@@ -85,8 +88,10 @@
 #import "RTCVideoCodecConstants.h"
 #import "RTCVideoDecoderVP8.h"
 #import "RTCVideoDecoderVP9.h"
+#import "RTCVideoDecoderAV1.h"
 #import "RTCVideoEncoderVP8.h"
 #import "RTCVideoEncoderVP9.h"
+#import "RTCVideoEncoderAV1.h"
 #import "RTCNativeI420Buffer.h"
 #import "RTCNativeMutableI420Buffer.h"
 #import "RTCCallbackLogger.h"
