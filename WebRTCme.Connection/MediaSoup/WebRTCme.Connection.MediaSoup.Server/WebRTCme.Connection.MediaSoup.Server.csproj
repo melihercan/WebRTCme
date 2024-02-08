@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-	</PropertyGroup>
+  <PropertyGroup>
+	  <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
+  </ItemGroup>
 
 </Project>

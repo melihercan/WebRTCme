@@ -1,25 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1; net6.0; net7.0; net8.0</TargetFrameworks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1; net6.0; net7.0</TargetFrameworks>
+  </PropertyGroup>
 
 	<PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net6')) ">
+  </ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net7')) ">
+	</ItemGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Utilme.Result" Version="1.0.1" />
-		<PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
-		<PackageReference Include="System.Reactive.Core" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Utilme.Result" Version="1.0.1" />
+    <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
+		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
 	</ItemGroup>
 
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
-		<ProjectReference Include="..\MediaSoup\WebRTCme.Connection.MediaSoup.Proxy\WebRTCme.Connection.MediaSoup.Proxy.csproj" />
-		<ProjectReference Include="..\Signaling\WebRTCme.Connection.Signaling.Proxy\WebRTCme.Connection.Signaling.Proxy.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
+    <ProjectReference Include="..\MediaSoup\WebRTCme.Connection.MediaSoup.Proxy\WebRTCme.Connection.MediaSoup.Proxy.csproj" />
+    <ProjectReference Include="..\Signaling\WebRTCme.Connection.Signaling.Proxy\WebRTCme.Connection.Signaling.Proxy.csproj" />
+  </ItemGroup>
 
 </Project>

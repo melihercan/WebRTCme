@@ -1,5 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
-
+	
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1; MonoAndroid12.0; Xamarin.iOS10</TargetFrameworks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -52,27 +52,35 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.Android\WebRTCme.Bindings.Xamarin.Android.csproj">
+		</ProjectReference>
 		<Compile Include="Android\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Xamarin\WebRTCme.Bindings.Xamarin.iOS\WebRTCme.Bindings.Xamarin.iOS.csproj">
+		</ProjectReference>
 		<Compile Include="iOS\**\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.6" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.8.1" />
-		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2622" />
+		<PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.5" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
+		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2578" />
 	</ItemGroup>
-
+	
+	
 	<ItemGroup>
-		<ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+		<ProjectReference Include="..\WebRTCme.Middleware\WebRTCme.Middleware.csproj">
+		</ProjectReference>
 	</ItemGroup>
-
+	
+	
 	<ItemGroup>
-		<None Include="..\..\doc\me.png" Pack="True" PackagePath=""/>
+		<None Include="..\..\doc\me.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
-
+  
 </Project>

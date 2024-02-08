@@ -1,54 +1,53 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
-		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<EmbeddedResource Include="appsettings.json">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</EmbeddedResource>
-		<EmbeddedResource Include="Images\me.png" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="appsettings.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\me.png" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Xamarin.Forms" Version="5.0.0.2622" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.8.1" />
-		<PackageReference Include="Xamarinme.Hosting" Version="1.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2578" />  
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.5" />  
+    <PackageReference Include="Xamarinme.Hosting" Version="1.0.3" />  
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Xamarin\WebRTCme.Middleware.Xamarin.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\WebRTCme.Middleware\WebRTCme.Middleware.Xamarin\WebRTCme.Middleware.Xamarin.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Views\ChatPage.xaml.cs">
-			<DependentUpon>ChatPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Views\ConnectionParametersPage.xaml.cs">
-			<DependentUpon>ConnectionParametersPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Views\CallPage.xaml.cs">
-			<DependentUpon>CallPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Views\SystemChatView.xaml.cs">
-			<DependentUpon>SystemChatView.xaml</DependentUpon>
-		</Compile>
-		<Compile Update="Views\OutgoingChatView.xaml.cs">
-			<DependentUpon>OutgoingChatView.xaml</DependentUpon>
-		</Compile>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\ChatPage.xaml.cs">
+      <DependentUpon>ChatPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ConnectionParametersPage.xaml.cs">
+      <DependentUpon>ConnectionParametersPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CallPage.xaml.cs">
+      <DependentUpon>CallPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\SystemChatView.xaml.cs">
+      <DependentUpon>SystemChatView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\OutgoingChatView.xaml.cs">
+      <DependentUpon>OutgoingChatView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-	<ItemGroup>
-		<EmbeddedResource Update="Views\IncomingChatView.xaml">
-			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Views\CallPage.xaml">
-			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-		</EmbeddedResource>
-	</ItemGroup>
-
+  <ItemGroup>
+    <EmbeddedResource Update="Views\IncomingChatView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\CallPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

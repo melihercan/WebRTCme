@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net6.0; net7.0;net8.0</TargetFrameworks>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<LangVersion>latest</LangVersion>
-		<!--<Nullable>enable</Nullable>-->
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0; net7.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <LangVersion>latest</LangVersion>
+    <!--<Nullable>enable</Nullable>-->
+  </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SIPSorcery" Version="6.2.0" />
+		<PackageReference Include="SIPSorcery" Version="6.0.12" />
 		<PackageReference Include="SIPSorceryMedia" Version="3.0.2" />
 	</ItemGroup>
 
