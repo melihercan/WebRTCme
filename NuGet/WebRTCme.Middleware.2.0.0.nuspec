@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>WebRTCme.Middleware</id>
+    <version>2.0.0</version>
+    <authors>melihercan</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <icon>me.png</icon>
+    <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
+    <description>WebRTC middleware for .NET MAUI and Blazor applications.</description>
+    <releaseNotes>New major release.</releaseNotes>
+    <copyright>melihercan 2024</copyright>
+    <tags>WebRTC .NET MAUI Android iOS Blazor</tags>
+    <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware" />
+    <dependencies>
+      
+      <group targetFramework="net8.0-android28.0">
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="8.0.0"  exclude="Build,Analyzers"/>
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Maui.Essentials" version="8.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive" version="6.0.0" exclude="Build,Analyzers" />
+        <dependency id="Utilme.Result" version="1.0.1"  exclude="Build,Analyzers"/>
+        <dependency id="Utilme.SdpTransform" version="1.0.0" exclude="Build,Analyzers" />
+    		<dependency id="Microsoft.Maui.Controls" version="8.0.6"  exclude="Build,Analyzers"/>
+		    <dependency id="Microsoft.Maui.Controls.Compatibility" version="8.0.6"  exclude="Build,Analyzers"/>
+		    <dependency id="CommunityToolkit.Maui" version="7.0.1"  exclude="Build,Analyzers"/>
+    	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
+        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+ 		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
+	    </group>
+      <group targetFramework="net8.0-ios12.4">
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="8.0.0"  exclude="Build,Analyzers"/>
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Maui.Essentials" version="8.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive" version="6.0.0" exclude="Build,Analyzers" />
+        <dependency id="Utilme.Result" version="1.0.1"  exclude="Build,Analyzers"/>
+        <dependency id="Utilme.SdpTransform" version="1.0.0" exclude="Build,Analyzers" />
+    		<dependency id="Microsoft.Maui.Controls" version="8.0.6"  exclude="Build,Analyzers"/>
+		    <dependency id="Microsoft.Maui.Controls.Compatibility" version="8.0.6"  exclude="Build,Analyzers"/>
+		    <dependency id="CommunityToolkit.Maui" version="7.0.1"  exclude="Build,Analyzers"/>
+    	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
+        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+ 		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
+	    </group>
+      
+	    <group targetFramework="net8.0">
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Debug" version="8.0.0"  exclude="Build,Analyzers"/>
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Maui.Essentials" version="8.0.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reactive" version="6.0.0" exclude="Build,Analyzers" />
+        <dependency id="Utilme.Result" version="1.0.1"  exclude="Build,Analyzers"/>
+        <dependency id="Utilme.SdpTransform" version="1.0.0" exclude="Build,Analyzers" />
+		    <dependency id="Microsoft.AspNetCore.Components" version="8.0.1" exclude="Build,Analyzers" />
+		    <dependency id="Microsoft.AspNetCore.Components.Web" version="8.0.1" exclude="Build,Analyzers" />
+    	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
+        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+ 		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
+	    </group>
+      
+    </dependencies>
+  </metadata>
+  
+  <files>
+
+    <file src="..\WebRTCme.Api\bin\Release\net8.0\WebRTCme.Api.dll" target="lib\net8.0-android28.0\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net8.0\WebRTCme.Api.dll" target="lib\net8.0-ios12.4\WebRTCme.Api.dll" />
+    <file src="..\WebRTCme.Api\bin\Release\net8.0\WebRTCme.Api.dll" target="lib\net8.0\WebRTCme.Api.dll" />
+
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net8.0-android28.0\libwebrtc.aar" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\bin\Release\net8.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net8.0-android28.0\WebRTCme.Bindings.Maui.Android.dll" />
+    
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.dll" />
+
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net8.0\WebRTCme.Bindings.Blazor.dll" target="lib\net8.0\WebRTCme.Bindings.Blazor.dll" />
+
+    <file src="..\WebRTCme\bin\Release\net8.0-android\WebRTCme.dll" target="lib\net8.0-android28.0\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net8.0-ios\WebRTCme.dll" target="lib\net8.0-ios12.4\WebRTCme.dll" />
+    <file src="..\WebRTCme\bin\Release\net8.0\WebRTCme.dll" target="lib\net8.0\WebRTCme.dll" />
+
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-android\WebRTCme.Middleware.Maui.dll" target="lib\net8.0-android28.0\WebRTCme.Middleware.Maui.dll" />
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.Middleware.Maui.dll" target="lib\net8.0-ios12.4\WebRTCme.Middleware.Maui.dll" />
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net8.0\WebRTCme.Middleware.Blazor.dll" target="lib\net8.0\WebRTCme.Middleware.Blazor.dll" />
+
+    <file src="..\WebRTCme.Connection\Signaling\WebRTCme.Connection.Signaling.Proxy\bin\Release\net8.0\WebRTCme.Connection.Signaling.Proxy.dll" target="lib\net8.0-android28.0\WebRTCme.Connection.Signaling.Proxy.dll" />
+    <file src="..\WebRTCme.Connection\Signaling\WebRTCme.Connection.Signaling.Proxy\bin\Release\net8.0\WebRTCme.Connection.Signaling.Proxy.dll" target="lib\net8.0-ios12.4\WebRTCme.Connection.Signaling.Proxy.dll" />
+    <file src="..\WebRTCme.Connection\Signaling\WebRTCme.Connection.Signaling.Proxy\bin\Release\net8.0\WebRTCme.Connection.Signaling.Proxy.dll" target="lib\net8.0\WebRTCme.Connection.Signaling.Proxy.dll" />
+
+    <file src="..\doc\me.png" target="me.png" />
+  </files>
+</package>

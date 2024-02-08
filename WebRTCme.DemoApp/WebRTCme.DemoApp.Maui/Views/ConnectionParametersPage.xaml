@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:middleware="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware.Maui"
+             Title="Connection Parameters"
+             x:Class="WebRTCme.DemoApp.Maui.Views.ConnectionParametersPage">
+    <StackLayout VerticalOptions="Center" Margin="40,0" Spacing="20">
+        <Picker Title="select connection server" ItemsSource="{Binding ConnectionTypeNames}" 
+                SelectedItem="{Binding SelectedConnectionTypeName}"/>
+        <Entry Placeholder="enter room name" Text="{Binding ConnectionParameters.Room}"/>
+        <Entry Placeholder="enter user name" Text="{Binding ConnectionParameters.Name}"/>
+        <StackLayout Orientation="Horizontal" Margin="40,40">
+            <Button Text="Join call" Padding="10,0"
+                    Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
+            <Button Text="Join chat" Padding="10,0"
+                    Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
+        </StackLayout>
+
+        <middleware:Media HorizontalOptions="Fill"
+                          HeightRequest="100"
+                          BackgroundColor="Red" />
+    </StackLayout>
+</ContentPage>

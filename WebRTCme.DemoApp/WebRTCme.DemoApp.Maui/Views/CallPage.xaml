@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:middleware="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware.Maui"
+             x:Class="WebRTCme.DemoApp.Maui.Views.CallPage">
+    <ContentPage.Content>
+
+        <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Center">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
+                                  VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
+                                  CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
+                                  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+       
+    </ContentPage.Content>
+</ContentPage>

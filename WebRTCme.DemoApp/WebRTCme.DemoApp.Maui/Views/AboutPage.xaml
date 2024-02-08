@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:extensions="clr-namespace:WebRTCme.DemoApp.Maui.Extensions"
+             Title="About"
+             x:Class="WebRTCme.DemoApp.Maui.Views.AboutPage">
+
+    <StackLayout VerticalOptions="CenterAndExpand">
+        <Label Text="WebRTCme Demo app" Padding="0,0,0,20" FontSize="28" FontAttributes="Bold" 
+                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+        <Image Aspect="AspectFit" HeightRequest="100"
+                        Source="{extensions:ImageResourceMarkupExtension WebRTCme.DemoApp.Maui.Images.me.png}" />
+        <BoxView HeightRequest="20"/>
+        <Label Text="© melihercan @2021" FontSize="12" 
+                        FontAttributes="Italic" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+    </StackLayout>
+
+
+</ContentPage>
