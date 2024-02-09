@@ -8,7 +8,7 @@
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <icon>me.png</icon>
     <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
-    <description>Blazor bindings using JSInterop.</description>
+    <description>The Blazor bindings NuGet package is automatically included, which provides web static assets for JavaScript Interop.</description>
     <releaseNotes>New major release.</releaseNotes>
     <copyright>melihercan 2024</copyright>
     <tags>WebRTC .NET Blazor</tags>

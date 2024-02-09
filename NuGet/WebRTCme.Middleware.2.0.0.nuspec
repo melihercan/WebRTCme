@@ -108,7 +108,7 @@
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" />
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.dll" />
 
-    <!-- WebRTCme.Bindings.Blazor is provided by a separate package as it requires webstaticassets. Dependency is added above so that it will be included automatically. -->
+    <!-- WebRTCme.Bindings.Blazor is provided in a separate package as it requires webstaticassets. Dependency is added above so that it will be included automatically. -->
 
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-android\WebRTCme.dll" target="lib\net8.0-android28.0\WebRTCme.dll" />
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.dll" target="lib\net8.0-ios12.4\WebRTCme.dll" />
