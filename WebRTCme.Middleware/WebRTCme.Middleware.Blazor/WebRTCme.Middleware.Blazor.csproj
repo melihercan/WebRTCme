@@ -29,6 +29,8 @@
 	 <ItemGroup>
 	   <Content Remove="E:\.nuget\blazordialog\2.1.0\contentFiles\any\net6.0\wwwroot\styles.css" />
 	   <Content Remove="E:\.nuget\blazordialog\2.1.0\contentFiles\any\net6.0\wwwroot\styles.min.css" />
+	   <Content Remove="E:\.nuget\blazordialog\2.3.0\contentFiles\any\net6.0\wwwroot\styles.css" />
+	   <Content Remove="E:\.nuget\blazordialog\2.3.0\contentFiles\any\net6.0\wwwroot\styles.min.css" />
 	 </ItemGroup>
 
 	 <ItemGroup>

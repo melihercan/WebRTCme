@@ -88,7 +88,6 @@
         <dependency id="Microsoft.Extensions.Logging.Abstractions" version="8.0.0"  exclude="Build,Analyzers"/>
         <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
-        <dependency id="WebRTCme.Middleware.Blazor" version="2.0.0" exclude="Build,Analyzers" />
         <dependency id="WebRTCme.Bindings.Blazor" version="2.0.0" exclude="Build,Analyzers" />
 	    </group>
       
@@ -133,8 +132,7 @@
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.Middleware.dll" target="lib\net8.0-ios12.4\WebRTCme.Middleware.dll" />
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Maui\bin\Release\net8.0-ios\WebRTCme.Middleware.Maui.dll" target="lib\net8.0-ios12.4\WebRTCme.Middleware.Maui.dll" />
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net8.0\WebRTCme.Middleware.dll" target="lib\net8.0\WebRTCme.Middleware.dll" />
-
-    <!-- WebRTCme.Middleware.Blazor is provided by a separate package as it requires webstaticassets. Dependency is added above so that it will be included automatically. -->
+    <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net8.0\WebRTCme.Middleware.Blazor.dll" target="lib\net8.0\WebRTCme.Middleware.Blazor.dll" />
 
     <file src="..\doc\me.png" target="me.png" />
   </files>
