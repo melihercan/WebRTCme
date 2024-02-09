@@ -4,7 +4,7 @@
 	<TargetFrameworks>net8.0</TargetFrameworks>
 	<AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>melihercan</Authors>
     <Description>Blazor bindings using JSInterop.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
