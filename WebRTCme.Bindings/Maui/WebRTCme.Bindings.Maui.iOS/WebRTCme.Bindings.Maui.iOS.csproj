@@ -4,6 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <SupportedOSPlatformVersion>12.4</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
