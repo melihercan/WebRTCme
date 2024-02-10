@@ -1,0 +1,1 @@
+- WebsocketClientLite.PCL version 6.4.0 should be used. Do NOT update to the latest!!!
