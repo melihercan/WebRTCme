@@ -15,35 +15,35 @@
     <repository type="git" url="https://github.com/melihercan/WebRTCme/tree/master/WebRTCme" />
     <dependencies>
       <group targetFramework="net8.0-android28.0">
-        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-ios12.4">
-        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-windows10.0.22621">
         <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
         <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="6.0.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-maccatalyst13.1">
         <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
         <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-macos10.14">
         <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
         <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
 	    <group targetFramework="net8.0">
 		    <dependency id="Microsoft.AspNetCore.Components" version="8.0.1" exclude="Build,Analyzers" />
 		    <dependency id="Microsoft.AspNetCore.Components.Web" version="8.0.1" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.JSInterop" version="7.0.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
         <dependency id="WebRTCme.Bindings.Blazor" version="2.0.0" exclude="Build,Analyzers" />
 	    </group>
@@ -62,9 +62,9 @@
     <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\Jars\libwebrtc.aar" target="lib\net8.0-android28.0\libwebrtc.aar" />
     <file src="..\WebRTCme\bin\Release\net8.0-android\WebRTCme.Bindings.Maui.Android.dll" target="lib\net8.0-android28.0\WebRTCme.Bindings.Maui.Android.dll" />
     
-    <file src="..\WebRTCme\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\manifest" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\manifest" />
-    <file src="..\WebRTCme\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\Info.plist" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\Info.plist" />
-    <file src="..\WebRTCme\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\manifest" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\manifest" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\Info.plist" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\Info.plist" />
+    <file src="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.resources\WebRTC.framework\WebRTC" />
     <file src="..\WebRTCme\bin\Release\net8.0-ios\WebRTCme.Bindings.Maui.iOS.dll" target="lib\net8.0-ios12.4\WebRTCme.Bindings.Maui.iOS.dll" />
 
     <!-- WebRTCme.Bindings.Blazor is provided in a separate package as it requires webstaticassets. Dependency is added above so that it will be included automatically. -->

@@ -8,7 +8,7 @@
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <icon>me.png</icon>
     <projectUrl>https://github.com/melihercan/WebRTCme</projectUrl>
-    <description>WebRTC bindings for MAUI (Android, iOS) and Blazor applications.</description>
+    <description>WebRTC bindings for MAUI (Android, iOS) and Blazor libraries.</description>
     <releaseNotes>
       New major release.
       WebRTC Android SDK branch-heads/6045(m119)

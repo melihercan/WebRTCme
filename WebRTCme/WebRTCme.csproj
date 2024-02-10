@@ -46,7 +46,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.6" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.6" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
+		<PackageReference Include="Microsoft.JSInterop" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
@@ -55,7 +55,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.6" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.6" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
+		<PackageReference Include="Microsoft.JSInterop" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.22621.0'">
@@ -65,7 +65,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.6" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.6" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
+		<PackageReference Include="Microsoft.JSInterop" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-maccatalyst'">
@@ -75,7 +75,7 @@
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.6" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.6" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
+		<PackageReference Include="Microsoft.JSInterop" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-macos'">
@@ -83,7 +83,7 @@
 		<Compile Include="*.cs" />
 		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.5" />
+		<PackageReference Include="Microsoft.JSInterop" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -12,8 +12,9 @@
     <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
-  </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
+	</ItemGroup>
 
 </Project>
