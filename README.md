@@ -1,4 +1,4 @@
-# 10 Feb 24 V2.0.0 HAS BEEN RELEASED
+# 10 Feb 24 - V2.0.0 HAS BEEN RELEASED
 This release brings major upgrades with breaking changes, including platform and tool changes. For further details and the project's history, please refer to the previous [README](https://github.com/melihercan/WebRTCme/blob/master/README_V1.md). 
 
 Added: 
