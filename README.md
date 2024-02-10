@@ -18,11 +18,17 @@ Currently, MediaSoup is only working with Blazor. There are issues on both Andro
 
 There are three NuGet packages available for different use cases: 
 
+WebRTCme.Bindings: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Bindings.svg)](https://www.nuget.org/packages/WebRTCme.Bindings)
+
+WebRTCme: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.svg)](https://www.nuget.org/packages/WebRTCme)
+
+WebRTCme.Middleware: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.svg)](https://www.nuget.org/packages/WebRTCme.Middleware)
+
 ## Use case 1 - Native WebRTC Bindings
 - Use the Bindings NuGet package
 - Does not include a cross-platform API
 - Only provides native platform-specific APIs
-- For desktop, please use directly
+- For desktop, use [SIPSorcery](https://sipsorcery-org.github.io/sipsorcery/) directly
 
 ## Use case 2 - Cross-platform library 
 - Use the WebRTCme NuGet package
