@@ -21,12 +21,13 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net8.0\WebRTCme.Bindings.Blazor.dll" target="lib\net8.0\WebRTCme.Bindings.Blazor.dll" />
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
-    <file src="C:\dev\WebRTCme\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
-    <file src="C:\dev\WebRTCme\doc\me.png" target="me.png" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\bin\Release\net8.0\WebRTCme.Bindings.Blazor.dll" target="lib\net8.0\WebRTCme.Bindings.Blazor.dll" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\wwwroot\JsInterop.js" target="staticwebassets\JsInterop.js" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.WebRTCme.Bindings.Blazor.Microsoft.AspNetCore.StaticWebAssets.props" target="build\Microsoft.AspNetCore.StaticWebAssets.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.build.WebRTCme.Bindings.Blazor.props" target="build\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildMultiTargeting.WebRTCme.Bindings.Blazor.props" target="buildMultiTargeting\WebRTCme.Bindings.Blazor.props" />
+    <file src="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\obj\Release\net8.0\staticwebassets\msbuild.buildTransitive.WebRTCme.Bindings.Blazor.props" target="buildTransitive\WebRTCme.Bindings.Blazor.props" />
+    
+    <file src="..\me.png" target="me.png" />
   </files>
 </package>

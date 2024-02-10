@@ -137,6 +137,6 @@
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net8.0\WebRTCme.Middleware.dll" target="lib\net8.0\WebRTCme.Middleware.dll" />
     <file src="..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\bin\Release\net8.0\WebRTCme.Middleware.Blazor.dll" target="lib\net8.0\WebRTCme.Middleware.Blazor.dll" />
 
-    <file src="..\doc\me.png" target="me.png" />
+    <file src="..\me.png" target="me.png" />
   </files>
 </package>

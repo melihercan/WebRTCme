@@ -76,6 +76,6 @@
     <file src="..\WebRTCme\bin\Release\net8.0-macos\WebRTCme.dll" target="lib\net8.0-macos10.14\WebRTCme.dll" />
     <file src="..\WebRTCme\bin\Release\net8.0\WebRTCme.dll" target="lib\net8.0\WebRTCme.dll" />
     
-    <file src="..\doc\me.png" target="me.png" />
+    <file src="..\me.png" target="me.png" />
   </files>
 </package>

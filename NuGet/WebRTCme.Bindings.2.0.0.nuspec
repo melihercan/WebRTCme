@@ -40,6 +40,6 @@
 
     <!-- WebRTCme.Bindings.Blazor is provided in a separate package as it requires webstaticassets. Dependency is added above so that it will be included automatically. -->
 
-    <file src="..\doc\me.png" target="me.png" />
+    <file src="..\me.png" target="me.png" />
   </files>
 </package>
