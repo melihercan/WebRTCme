@@ -37,7 +37,7 @@ WebRTCme.Middleware: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middlewar
 
 ## Use case 3 - Middleware
 - Use the Middleware NuGet package
-- This package contains the bindings, the core library, and the signaling servers
+- This package contains the bindings, core library, media elements and signaling server clients
 - You can directly create your app on top of this middleware
 
 
