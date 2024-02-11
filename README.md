@@ -16,6 +16,8 @@ Special thanks and credits to [Gøran Yri](https://github.com/EagleDelux) for hi
 Currently, MediaSoup is only working with Blazor. There are issues on both Android and iOS that I hope to fix soon.
 
 
+![alt text](https://github.com/melihercan/WebRTCme/blob/master/non-code/docs/LibrariesAndPackages.png)
+
 There are three NuGet packages available for different use cases: 
 
 WebRTCme.Bindings: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Bindings.svg)](https://www.nuget.org/packages/WebRTCme.Bindings)
