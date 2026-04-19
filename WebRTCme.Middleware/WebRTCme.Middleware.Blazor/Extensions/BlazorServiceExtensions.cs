@@ -13,8 +13,9 @@ namespace WebRTCme.Middleware
     {
         public static IServiceCollection AddBlazorMiddleware(this IServiceCollection services)
         {
-            // This is scoped. Copied 'BlazorDialogStore' to Externals as 2 and creating explicitly as Singleton.
-            ////services.AddBlazorDialog();
+            // Call AddBlazorDialog() to register all required BlazorDialog services (e.g. ILocationChangingHandler).
+            // Then replace IBlazorDialogStore with our Singleton version to avoid Scoped lifetime issues.
+            services.AddBlazorDialog();
             services.AddSingleton<IBlazorDialogStore, BlazorDialogStore2>();
             services.AddSingleton<IBlazorDialogService, BlazorDialogService>();
 
