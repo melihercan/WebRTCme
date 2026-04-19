@@ -5,6 +5,7 @@ namespace WebRTCme.Android
 {
     internal class MediaStreamTrack : NativeBase<Webrtc.MediaStreamTrack>, IMediaStreamTrack
     {
+        public void Dispose() { }
         const string Audio = "audio";
         const string Video = "video";
 

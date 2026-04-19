@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme.Platforms.Android.Custom
 {
-    internal abstract class NativeBase<T> : Java.Lang.Object//, INativeObject<T>
+    internal abstract class NativeBase<T>//, INativeObject<T>
     {
         protected NativeBase() { }
 

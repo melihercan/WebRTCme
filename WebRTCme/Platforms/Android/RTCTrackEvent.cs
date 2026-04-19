@@ -9,6 +9,7 @@ namespace WebRTCme.Android
 {
     internal class RTCTrackEvent : NativeBase<Webrtc.RtpReceiver>, IRTCTrackEvent
     {
+        public void Dispose() { }
         private readonly Webrtc.RtpReceiver _nativeRtpReceiver;
         private readonly Webrtc.MediaStream[] _nativeMediaStreams;
 

@@ -10,6 +10,7 @@ namespace WebRTCme.Android
 {
     internal class Window : NativeBase<object>, IWindow
     {
+        public void Dispose() { }
         public INavigator Navigator() => Android.Navigator.Create();
 
         public IMediaStream MediaStream() => new MediaStream();

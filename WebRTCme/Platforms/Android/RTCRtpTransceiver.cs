@@ -8,6 +8,7 @@ namespace WebRTCme.Android
 {
     internal class RTCRtpTransceiver : NativeBase<Webrtc.RtpTransceiver>, IRTCRtpTransceiver
     {
+        public void Dispose() { }
         public RTCRtpTransceiver(Webrtc.RtpTransceiver nativeTransceiver) : base(nativeTransceiver)
         {
         }

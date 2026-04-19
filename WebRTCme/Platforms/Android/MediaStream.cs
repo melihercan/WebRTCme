@@ -16,6 +16,7 @@ namespace WebRTCme.Android
 {
     internal class MediaStream : NativeBase<Webrtc.MediaStream>, IMediaStream
     {
+        public void Dispose() { }
         public MediaStream() : this(WebRtc.NativePeerConnectionFactory
                 .CreateLocalMediaStream($"{WebRtc.Id}"))
         { }

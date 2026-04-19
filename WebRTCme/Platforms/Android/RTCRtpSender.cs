@@ -8,6 +8,7 @@ namespace WebRTCme.Android
 {
     internal class RTCRtpSender : NativeBase<Webrtc.RtpSender>, IRTCRtpSender
     {
+        public void Dispose() { }
         public RTCRtpSender(Webrtc.RtpSender nativeRtpSender) : base(nativeRtpSender)
         {
         }

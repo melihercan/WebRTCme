@@ -7,6 +7,7 @@ namespace WebRTCme.Android
 {
     internal class RTCCertificate : NativeBase<Webrtc.RtcCertificatePem>, IRTCCertificate
     {
+        public void Dispose() { }
 
         public static IRTCCertificate Create(Webrtc.RtcCertificatePem nativeCertificatePem) =>
             new RTCCertificate(nativeCertificatePem);

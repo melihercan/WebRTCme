@@ -8,6 +8,7 @@ namespace WebRTCme.Android
 {
     internal class MessageEvent : NativeBase<object>, IMessageEvent
     {
+        public void Dispose() { }
         public static IMessageEvent Create(object data) =>
             new MessageEvent(data);
 

@@ -10,6 +10,7 @@ namespace WebRTCme.Android
 
     internal class Navigator : NativeBase<object>, INavigator
     {
+        public void Dispose() { }
         public static INavigator Create() => new Navigator();
 
         public Navigator() { }

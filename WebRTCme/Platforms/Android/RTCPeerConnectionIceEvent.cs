@@ -7,6 +7,7 @@ namespace WebRTCme.Android
 {
     internal class RTCPeerConnectionIceEvent : NativeBase<Webrtc.IceCandidate>, IRTCPeerConnectionIceEvent
     {
+        public void Dispose() { }
         private readonly Webrtc.IceCandidate _nativeIceCandidate;
 
         public RTCPeerConnectionIceEvent(Webrtc.IceCandidate nativeIceCandidate) =>

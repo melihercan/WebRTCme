@@ -7,6 +7,7 @@ namespace WebRTCme.Android
 {
     internal class RTCDataChannelEvent : NativeBase<Webrtc.DataChannel>, IRTCDataChannelEvent
     {
+        public void Dispose() { }
         private readonly Webrtc.DataChannel _nativeDataChannel;
 
         public RTCDataChannelEvent(Webrtc.DataChannel nativeDataChannel)

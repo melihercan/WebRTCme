@@ -6,9 +6,10 @@ using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Android
 {
-    internal class RTCPeerConnection : NativeBase<Webrtc.PeerConnection>, IRTCPeerConnection, 
+    internal class RTCPeerConnection : Java.Lang.Object, IRTCPeerConnection, 
         Webrtc.PeerConnection.IObserver
     {
+        public Webrtc.PeerConnection NativeObject { get; init; }
         // TODO: THERE IS A PROBLEM TO BE SORTED!!!
         // If you create a RTCRtp Sender, Receiver or Transceiver and then access the list
         // of Senders, Receivers or Transceivers via RTCPeerConnection NativeObject,  
@@ -42,7 +43,7 @@ namespace WebRTCme.Android
             }
         }
 
-        public RTCPeerConnection(RTCConfiguration configuration) : base() =>
+        public RTCPeerConnection(RTCConfiguration configuration) =>
             NativeObject = WebRtc.NativePeerConnectionFactory.CreatePeerConnection(configuration.ToNative(), this);
 
         public bool CanTrickleIceCandidates => throw new NotImplementedException();

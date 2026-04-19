@@ -7,10 +7,13 @@ using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
 {
-    internal class RTCDataChannel : NativeBase<Webrtc.DataChannel>, IRTCDataChannel, Webrtc.DataChannel.IObserver
+    internal class RTCDataChannel : Java.Lang.Object, IRTCDataChannel, Webrtc.DataChannel.IObserver
     {
-        public RTCDataChannel(Webrtc.DataChannel nativeDataChannel) : base(nativeDataChannel)
+        public Webrtc.DataChannel NativeObject { get; init; }
+
+        public RTCDataChannel(Webrtc.DataChannel nativeDataChannel)
         {
+            NativeObject = nativeDataChannel;
             nativeDataChannel.RegisterObserver(this);
         }
 

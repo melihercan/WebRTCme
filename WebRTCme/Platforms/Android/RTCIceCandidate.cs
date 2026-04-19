@@ -10,6 +10,7 @@ namespace WebRTCme.Android
 {
     internal class RTCIceCandidate : NativeBase<Webrtc.IceCandidate>, IRTCIceCandidate
     {
+        public void Dispose() { }
         //public static IRTCIceCandidate Create(Webrtc.IceCandidate nativeIceCandidate) =>
         //    new RTCIceCandidate(nativeIceCandidate);
 
