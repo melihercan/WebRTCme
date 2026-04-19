@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!--<TargetFrameworks>net6.0; net7.0</TargetFrameworks>-->
-	  <TargetFrameworks>net8.0</TargetFrameworks>
+	  <TargetFrameworks>net10.0</TargetFrameworks>
 	  <RazorLangVersion>3.0</RazorLangVersion>
     <RootNamespace>WebRTCme.Middleware.Blazor</RootNamespace>
     <AssemblyName>WebRTCme.Middleware.Blazor</AssemblyName>
@@ -21,9 +21,9 @@
   </PropertyGroup>
 
 
-	 <ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
-		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.1" />
-		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
+	 <ItemGroup Condition=" $(TargetFramework.StartsWith('net10')) ">
+		 <PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.6" />
+		 <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.6" />
 	 </ItemGroup>
 
 	 <ItemGroup>
@@ -48,9 +48,9 @@
 
 
   <ItemGroup>
-    <PackageReference Include="BlazorDialog" Version="2.3.0" />
+    <PackageReference Include="BlazorDialog" Version="4.1.0" />
     <PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.6" />
   </ItemGroup>
 
  </Project>

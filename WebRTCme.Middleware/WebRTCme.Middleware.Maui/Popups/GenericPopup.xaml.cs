@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
 
 namespace WebRTCme.Middleware.Maui.Popups
@@ -55,21 +57,22 @@ namespace WebRTCme.Middleware.Maui.Popups
                 CancelButton.IsVisible = true;
             }
 
-            return await Shell.Current.ShowPopupAsync(this) as GenericPopupOut;
+            await ((Microsoft.Maui.Controls.Page)Application.Current!.Windows[0].Page!).ShowPopupAsync(this);
+            return _out;
         }
 
-        private void OkButton_Clicked(object sender, EventArgs e)
+        private async void OkButton_Clicked(object sender, EventArgs e)
         {
             _out.Ok = true;
             _out.Entry = _in.EntryPlaceholder is null ? null : Entry.Text;
-            Close(_out);
+            await CloseAsync();
         }
 
-        private void CancelButton_Clicked(object sender, EventArgs e)
+        private async void CancelButton_Clicked(object sender, EventArgs e)
         {
             _out.Ok = false;
             _out.Entry = null;
-            Close(_out);
+            await CloseAsync();
         }
     }
 }

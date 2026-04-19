@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-	<TargetFrameworks>net8.0</TargetFrameworks>
+	<TargetFrameworks>net10.0</TargetFrameworks>
 	<AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -18,9 +18,9 @@
     <Copyright>melihercan 2024</Copyright>
   </PropertyGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('net8')) ">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('net10')) ">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

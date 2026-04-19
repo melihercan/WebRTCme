@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
   </PropertyGroup>
 
 	<ItemGroup>
     <PackageReference Include="Utilme.Result" Version="1.0.1" />
     <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
-		<PackageReference Include="System.Reactive.Core" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+		<PackageReference Include="System.Reactive.Core" Version="6.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.6" />
 	</ItemGroup>
 
 

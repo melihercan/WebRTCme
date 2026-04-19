@@ -1,15 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-	<PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.6" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.6" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.6" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.6" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.6" />
+	<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.51" />
   </ItemGroup>
 
 	<ItemGroup>

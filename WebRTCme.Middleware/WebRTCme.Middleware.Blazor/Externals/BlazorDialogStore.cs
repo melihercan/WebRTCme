@@ -47,13 +47,15 @@ namespace BlazorDialog
             throw new NotImplementedException();
         }
 
-        public void Unregister(Dialog blazorDialog)
+        public void Remove(Dialog blazorDialog)
         {
             if (blazorDialog.Id != null && registeredDialogs.ContainsKey(blazorDialog.Id))
             {
                 registeredDialogs.Remove(blazorDialog.Id);
             }
         }
+
+        public void Unregister(Dialog blazorDialog) => Remove(blazorDialog);
 
         public Task UnregisterComponentDialog(string id)
         {
