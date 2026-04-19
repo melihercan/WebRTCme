@@ -988,17 +988,20 @@ namespace Webrtc
 	////[Verify (ConstantsInterfaceAssociation)]
 	partial interface Constants
 	{
+		// Symbols below are no longer exported by the current WebRTC.framework binary.
+		// Declaring them as [Field] with "__Internal" causes the native linker to emit
+		// -u <symbol> initial-undefines and fail on arm64 with .NET 10 iOS workloads.
 		// extern NSString *const _Nonnull kRTCAudioSessionErrorDomain;
-		[Field ("kRTCAudioSessionErrorDomain", "__Internal")]
-		NSString kRTCAudioSessionErrorDomain { get; }
+		////[Field ("kRTCAudioSessionErrorDomain", "__Internal")]
+		////NSString kRTCAudioSessionErrorDomain { get; }
 
 		// extern const NSInteger kRTCAudioSessionErrorLockRequired;
-		[Field ("kRTCAudioSessionErrorLockRequired", "__Internal")]
-		nint kRTCAudioSessionErrorLockRequired { get; }
+		////[Field ("kRTCAudioSessionErrorLockRequired", "__Internal")]
+		////nint kRTCAudioSessionErrorLockRequired { get; }
 
 		// extern const NSInteger kRTCAudioSessionErrorConfiguration;
-		[Field ("kRTCAudioSessionErrorConfiguration", "__Internal")]
-		nint kRTCAudioSessionErrorConfiguration { get; }
+		////[Field ("kRTCAudioSessionErrorConfiguration", "__Internal")]
+		////nint kRTCAudioSessionErrorConfiguration { get; }
 	}
 
 	// @protocol RTCAudioSessionDelegate <NSObject>
@@ -2387,17 +2390,18 @@ namespace Webrtc
 		NSDictionary<NSNumber, NSNumber> Samples { get; }
 	}
 
-    ////[Static]
-    ////[Verify (ConstantsInterfaceAssociation)]
-    partial interface Constants
+	////[Static]
+	////[Verify (ConstantsInterfaceAssociation)]
+	partial interface Constants
 	{
+		// Symbols below are no longer exported by the current WebRTC.framework binary.
 		// extern NSString *const _Nonnull kRTCPeerConnectionErrorDomain;
-		[Field ("kRTCPeerConnectionErrorDomain", "__Internal")]
-		NSString kRTCPeerConnectionErrorDomain { get; }
+		////[Field ("kRTCPeerConnectionErrorDomain", "__Internal")]
+		////NSString kRTCPeerConnectionErrorDomain { get; }
 
 		// extern const int kRTCSessionDescriptionErrorCode;
-		[Field ("kRTCSessionDescriptionErrorCode", "__Internal")]
-		int kRTCSessionDescriptionErrorCode { get; }
+		////[Field ("kRTCSessionDescriptionErrorCode", "__Internal")]
+		////int kRTCSessionDescriptionErrorCode { get; }
 	}
 
 	// typedef void (^RTCCreateSessionDescriptionCompletionHandler)(RTCSessionDescription * _Nullable, NSError * _Nullable);
@@ -2818,8 +2822,9 @@ namespace Webrtc
 		NSString kRTCOpusCodecName { get; }
 
 		// extern const NSString *const _Nonnull kRTCIsacCodecName;
-		[Field ("kRTCIsacCodecName", "__Internal")]
-		NSString kRTCIsacCodecName { get; }
+		// Isac codec was removed from libwebrtc; symbol no longer exported.
+		////[Field ("kRTCIsacCodecName", "__Internal")]
+		////NSString kRTCIsacCodecName { get; }
 
 		// extern const NSString *const _Nonnull kRTCL16CodecName;
 		[Field ("kRTCL16CodecName", "__Internal")]
@@ -3131,13 +3136,14 @@ namespace Webrtc
     ////{
     ////}
 
-    ////[Static]
-    ////[Verify (ConstantsInterfaceAssociation)]
-    partial interface Constants
+	////[Static]
+	////[Verify (ConstantsInterfaceAssociation)]
+	partial interface Constants
 	{
+		// Symbol no longer exported by the current WebRTC.framework binary.
 		// extern NSString *const _Nonnull kRTCRtpTransceiverErrorDomain;
-		[Field ("kRTCRtpTransceiverErrorDomain", "__Internal")]
-		NSString kRTCRtpTransceiverErrorDomain { get; }
+		////[Field ("kRTCRtpTransceiverErrorDomain", "__Internal")]
+		////NSString kRTCRtpTransceiverErrorDomain { get; }
 	}
 
 	// @interface RTCRtpTransceiverInit : NSObject
