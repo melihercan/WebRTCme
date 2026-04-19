@@ -92,9 +92,20 @@
 
 	<ItemGroup>
 	  <None Include="..\me.png" Link="me.png">
-	    <PackagePath></PackagePath>
-	    <Pack>True</Pack>
+		<PackagePath></PackagePath>
+		<Pack>True</Pack>
 	  </None>
 	</ItemGroup> 	
+
+	<!--
+	  Make every platform's source files visible in Solution Explorer
+	  regardless of which TFM is currently active. Files that are already
+	  part of <Compile> for the active TFM are excluded so they are not
+	  listed twice. bin/obj are excluded by the SDK's default None excludes.
+	-->
+	<ItemGroup>
+		<None Include="Platforms\**\*.cs" Exclude="@(Compile)" />
+		<None Include="Shared\**\*.cs" Exclude="@(Compile)" />
+	</ItemGroup>
 
 </Project>
