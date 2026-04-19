@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
@@ -190,13 +190,11 @@ Global
 		{4A07FB39-D7D1-4B4D-941C-9A3D3D5C2CCD}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{4A07FB39-D7D1-4B4D-941C-9A3D3D5C2CCD}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|iPhone.ActiveCfg = Debug|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|iPhone.Build.0 = Debug|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhone.ActiveCfg = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhone.Build.0 = Release|Any CPU
 		{3A693BF7-9747-4DC6-A0C8-84B6B33EFE38}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
