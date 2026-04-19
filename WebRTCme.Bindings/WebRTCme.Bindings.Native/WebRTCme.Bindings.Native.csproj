@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	  <TargetFrameworks>net10.0; net10.0-windows; net10.0-macos10.14</TargetFrameworks>
+	  <TargetFrameworks>net10.0; net10.0-windows; net10.0-macos26.0</TargetFrameworks>
 	  <!-- TODO: HOW TO ADD LINUX, BY USING tvos ??? -->
 	  <ImplicitUsings>enable</ImplicitUsings>
 
