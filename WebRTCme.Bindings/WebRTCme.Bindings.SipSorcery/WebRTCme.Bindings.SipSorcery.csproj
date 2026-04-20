@@ -11,5 +11,9 @@
 		<PackageReference Include="SIPSorceryMedia" Version="3.0.2" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+		<PackageReference Include="SIPSorceryMedia.Windows" Version="0.0.24-pre" />
+	</ItemGroup>
+
 
 </Project>
