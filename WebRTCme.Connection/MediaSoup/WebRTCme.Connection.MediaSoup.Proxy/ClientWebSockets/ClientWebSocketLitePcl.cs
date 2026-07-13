@@ -10,7 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using WebsocketClientLite.PCL;
+using IWebsocketClientLite;
+using WebsocketClientLite;
 
 namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
 {
@@ -18,44 +19,39 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
     {
         private class ClientWebSocketOptionsLitePcl : IClientWebSocketOptions
         {
-            readonly MessageWebSocketRx _baseWebSocket;
-
-            public ClientWebSocketOptionsLitePcl(MessageWebSocketRx baseWebSocket)
+            public bool IgnoreServerCertificateErrors { get; set; }
+            public List<string> Subprotocols { get; } = new() { "protoo", "Sec-WebSocket-Protocol" };
+            public Dictionary<string, string> Headers { get; } = new()
             {
-                _baseWebSocket = baseWebSocket;
-            }
+                { "Pragma", "no-cache" },
+                { "Cache-Control", "no-cache" }
+            };
 
-            public bool IgnoreServerCertificateErrors
+            bool IClientWebSocketOptions.IgnoreServerCertificateErrors
             {
-                get => _baseWebSocket.IgnoreServerCertificateErrors;
-                set => _baseWebSocket.IgnoreServerCertificateErrors = value;
+                get => IgnoreServerCertificateErrors;
+                set => IgnoreServerCertificateErrors = value;
             }
 
             public void AddSubProtocol(string subProtocol)
             {
-                _baseWebSocket.Subprotocols = _baseWebSocket.Subprotocols.Concat(new string[] { subProtocol });
+                Subprotocols.Add(subProtocol);
             }
 
             public void SetRequestHeader(string headerName, string headerValue)
             {
-                _baseWebSocket.Headers.Add(headerName, headerValue);
+                Headers[headerName] = headerValue;
             }
         }
 
-        readonly MessageWebSocketRx _baseWebSocket;
-        readonly IClientWebSocketOptions _options;
+        readonly ClientWebSocketOptionsLitePcl _options;
+        ClientWebSocketRx _baseWebSocket;
         Channel<string> _channel;
         IDisposable _receiverDisposable;
 
         public ClientWebSocketLitePcl()
         {
-            _baseWebSocket = new MessageWebSocketRx
-            {
-                Headers = new Dictionary<string, string> { { "Pragma", "no-cache" }, { "Cache-Control", "no-cache" } },
-                TlsProtocolType = SslProtocols.Tls12,
-                Subprotocols = new string[] { "protoo", "Sec-WebSocket-Protocol" }
-            };
-            _options = new ClientWebSocketOptionsLitePcl(_baseWebSocket);
+            _options = new ClientWebSocketOptionsLitePcl();
         }
 
         public IClientWebSocketOptions Options => _options;
@@ -63,82 +59,74 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, 
             CancellationToken cancellationToken)
         {
-            _receiverDisposable.Dispose();
+            _receiverDisposable?.Dispose();
             _channel.Writer.Complete();
-            return _baseWebSocket.DisconnectAsync();
+            return Task.CompletedTask;
         }
 
         public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
         {
-            _channel = Channel.CreateBounded<string>(5); 
+            _channel = Channel.CreateBounded<string>(5);
             TaskCompletionSource<Unit> tcs = new();
+
+            _baseWebSocket = new ClientWebSocketRx
+            {
+                Headers = new Dictionary<string, string>(_options.Headers),
+                TlsProtocolType = SslProtocols.Tls12,
+                Subprotocols = _options.Subprotocols.ToArray(),
+                IgnoreServerCertificateErrors = _options.IgnoreServerCertificateErrors,
+            };
 
             using (cancellationToken.Register(() =>
             {
                 tcs.TrySetCanceled();
             }))
             {
-                var connectionDisposable = _baseWebSocket.ConnectionStatusObservable.Subscribe(
-                    status =>
-                    {
-                        Console.WriteLine($"======> Connect: {status}");
-                        if (status == IWebsocketClientLite.PCL.ConnectionStatus.WebsocketConnected)
+                _receiverDisposable = _baseWebSocket.WebsocketConnectWithStatusObservable(uri)
+                    .Subscribe(
+                        tuple =>
+                        {
+                            Console.WriteLine($"======> Connect: {tuple.state}");
+                            if (tuple.state == ConnectionStatus.WebsocketConnected)
+                            {
+                                tcs.TrySetResult(Unit.Default);
+                            }
+                            else if (tuple.state == ConnectionStatus.Aborted ||
+                                tuple.state == ConnectionStatus.ConnectionFailed)
+                            {
+                                tcs.TrySetException(new WebSocketException("Connection failed"));
+                            }
+                            else if (tuple.state == ConnectionStatus.DataframeReceived
+                                && tuple.dataframe is not null)
+                            {
+                                var ok = _channel.Writer.TryWrite(tuple.dataframe.Message);
+                                Debug.Assert(ok);
+                                if (!ok)
+                                {
+                                    Console.WriteLine($"ERROR: Channel is full");
+                                }
+                            }
+                        },
+                        ex =>
+                        {
+                            tcs.TrySetException(ex);
+                            _channel.Writer.Complete(ex);
+                        },
+                        () =>
                         {
                             tcs.TrySetResult(Unit.Default);
-                        }
-                        else if (status == IWebsocketClientLite.PCL.ConnectionStatus.Disconnected ||
-                            status == IWebsocketClientLite.PCL.ConnectionStatus.Aborted ||
-                            status == IWebsocketClientLite.PCL.ConnectionStatus.ConnectionFailed)
-                        {
-                            tcs.TrySetException(new WebSocketException("Connection failed"));
-                        }
-                    },
-                    ex =>
-                    {
-                        tcs.TrySetException(ex);
-                    },
-                    () =>
-                    {
-                        tcs.TrySetResult(Unit.Default);
-                    });
+                            _channel.Writer.TryComplete();
+                        });
 
-                _receiverDisposable = _baseWebSocket.MessageReceiverObservable.Subscribe(
-                    message =>
-                    {
-                        var ok = _channel.Writer.TryWrite(message);
-                        Debug.Assert(ok);
-                        if (!ok)
-                        {
-                            // TODO: Error logging.
-                            Console.WriteLine($"ERROR: Channel is full");
-                        }
-                    },
-                    ex =>
-                    {
-                        // TODO: Error logging.
-                    },
-                    () =>
-                    {
-                    });
-
-
-                await _baseWebSocket.ConnectAsync(uri);
                 try
                 {
                     _ = await tcs.Task;
                 }
-                catch (WebSocketException)
-                {
-                    _receiverDisposable.Dispose();
-                    connectionDisposable.Dispose();
-                    throw;
-                }
-                catch 
+                catch
                 {
                     _receiverDisposable.Dispose();
                     throw;
                 }
-                connectionDisposable.Dispose();
             }
         }
 
@@ -154,7 +142,7 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, 
             CancellationToken cancellationToken)
         {
-            return _baseWebSocket.SendTextAsync(Encoding.UTF8.GetString(buffer.ToArray()));
+            return _baseWebSocket.Sender.SendText(Encoding.UTF8.GetString(buffer.ToArray()));
         }
     }
 }

@@ -63,9 +63,10 @@
 	  <EmbeddedResource Include="appsettings.json" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.6" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.51" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Xamarinme.Configuration" Version="1.0.2" />
 	</ItemGroup>
     
@@ -74,16 +75,16 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
-		<PackageReference Include="CommunityToolkit.Maui" Version="14.1.0" />
-		<PackageReference Include="Xamarin.AndroidX.Fragment" Version="1.8.9.2" />
-		<PackageReference Include="Xamarin.AndroidX.Camera.Lifecycle" Version="1.5.3.1" />
-		<PackageReference Include="Xamarin.AndroidX.Camera.Camera2" Version="1.5.3.1" />
-		<PackageReference Include="Xamarin.AndroidX.Camera.View" Version="1.5.3.1" />
-		<PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.8.9.2" />		
-		<PackageReference Include="Xamarin.Google.Guava.ListenableFuture" Version="1.0.0.31" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
+		<PackageReference Include="Xamarin.AndroidX.Fragment" Version="1.8.9.3" />
+		<PackageReference Include="Xamarin.AndroidX.Camera.Lifecycle" Version="1.6.1.1" />
+		<PackageReference Include="Xamarin.AndroidX.Camera.Camera2" Version="1.6.1.1" />
+		<PackageReference Include="Xamarin.AndroidX.Camera.View" Version="1.6.1.1" />
+		<PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.8.9.4" />		
+		<PackageReference Include="Xamarin.Google.Guava.ListenableFuture" Version="9999.0.0" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
-		<PackageReference Include="CommunityToolkit.Maui" Version="14.1.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 	</ItemGroup>
 
 </Project>
