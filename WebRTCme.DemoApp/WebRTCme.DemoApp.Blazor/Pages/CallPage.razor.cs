@@ -31,8 +31,7 @@ namespace WebRTCme.DemoApp.Blazor.Pages
 
         void ReRender()
         {
-            //// TODO: Add InvokeAsync(StateHasChanged)
-            StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
 
         public void Dispose()
