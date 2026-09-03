@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,6 @@ namespace WebRTCme.Shared.SipSorcery
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public IMediaRecorder MediaRecorder(IMediaStream stream, MediaRecorderOptions options = null)
@@ -20,12 +19,20 @@ namespace WebRTCme.Shared.SipSorcery
 
         public IMediaStream MediaStream()
         {
+#if WINDOWS
+            return new WebRTCme.Windows.MediaStream();
+#else
             throw new NotImplementedException();
+#endif
         }
 
         public INavigator Navigator()
         {
+#if WINDOWS
+            return WebRTCme.Windows.Navigator.Create();
+#else
             throw new NotImplementedException();
+#endif
         }
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>

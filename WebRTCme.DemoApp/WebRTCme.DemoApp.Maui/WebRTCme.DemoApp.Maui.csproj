@@ -87,4 +87,21 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 	</ItemGroup>
 
+	<!--
+	  Windows video needs the FFmpeg 8.x *shared* native libraries at runtime; the
+	  SIPSorceryMedia.FFmpeg package provides bindings only. They are not committed here
+	  (~100MB, and LGPL binaries are better tracked outside the repo), so point
+	  FFMPEG_SHARED_PATH at the folder holding avcodec-*.dll etc. and they are copied to the
+	  output on build. Alternatively put that folder on PATH, or set
+	  WindowsSupport.FFmpegLibraryPath at startup.
+	-->
+	<PropertyGroup Condition="'$(FFmpegSharedPath)' == ''">
+		<FFmpegSharedPath>$(FFMPEG_SHARED_PATH)</FFmpegSharedPath>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'
+	                      And '$(FFmpegSharedPath)' != '' And Exists('$(FFmpegSharedPath)')">
+		<None Include="$(FFmpegSharedPath)\*.dll" CopyToOutputDirectory="PreserveNewest"
+		      Visible="false" />
+	</ItemGroup>
+
 </Project>
