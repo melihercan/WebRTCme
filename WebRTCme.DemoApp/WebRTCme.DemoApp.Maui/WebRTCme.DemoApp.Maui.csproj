@@ -98,6 +98,15 @@
 	<PropertyGroup Condition="'$(FFmpegSharedPath)' == ''">
 		<FFmpegSharedPath>$(FFMPEG_SHARED_PATH)</FFmpegSharedPath>
 	</PropertyGroup>
+	<!--
+	  Conventional install location, used when neither the FFmpegSharedPath property nor the
+	  FFMPEG_SHARED_PATH environment variable is set. Guarded by Exists() so it is simply
+	  ignored on machines that do not have it.
+	-->
+	<PropertyGroup Condition="'$(FFmpegSharedPath)' == ''
+	                          And Exists('C:\apps\ffmpeg-8.1-shared\bin')">
+		<FFmpegSharedPath>C:\apps\ffmpeg-8.1-shared\bin</FFmpegSharedPath>
+	</PropertyGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'
 	                      And '$(FFmpegSharedPath)' != '' And Exists('$(FFmpegSharedPath)')">
 		<None Include="$(FFmpegSharedPath)\*.dll" CopyToOutputDirectory="PreserveNewest"
