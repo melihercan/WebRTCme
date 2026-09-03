@@ -88,29 +88,60 @@
 	</ItemGroup>
 
 	<!--
-	  Windows video needs the FFmpeg 8.x *shared* native libraries at runtime; the
-	  SIPSorceryMedia.FFmpeg package provides bindings only. They are not committed here
-	  (~100MB, and LGPL binaries are better tracked outside the repo), so point
-	  FFMPEG_SHARED_PATH at the folder holding avcodec-*.dll etc. and they are copied to the
-	  output on build. Alternatively put that folder on PATH, or set
-	  WindowsSupport.FFmpegLibraryPath at startup.
+	  Windows video needs the FFmpeg 8.x *shared* native libraries at runtime;
+	  SIPSorceryMedia.FFmpeg provides bindings only. They are not committed (137MB, and all
+	  seven libraries are required - FFmpeg.AutoGen loads the whole set on init), so the build
+	  resolves them in this order:
+
+	    1. FFmpegSharedPath property        (-p:FFmpegSharedPath=...)
+	    2. FFMPEG_SHARED_PATH environment variable
+	    3. C:\apps\ffmpeg-8.1-shared\bin      (conventional local install)
+	    4. a per-user cache, downloaded once from the FFmpeg build below
+
+	  Whatever resolves first is copied next to the app on build. Set
+	  FFmpegAllowDownload=false to disable step 4 and fail loudly instead, or set
+	  WindowsSupport.FFmpegLibraryPath at startup to bypass all of this.
+
+	  The build is the LGPL shared variant so that redistributing it alongside this
+	  MIT-licensed library stays straightforward; its LICENSE.txt travels in the archive.
 	-->
-	<PropertyGroup Condition="'$(FFmpegSharedPath)' == ''">
-		<FFmpegSharedPath>$(FFMPEG_SHARED_PATH)</FFmpegSharedPath>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
+		<FFmpegBuildName>ffmpeg-n8.1-latest-win64-lgpl-shared-8.1</FFmpegBuildName>
+		<FFmpegDownloadUrl>https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$(FFmpegBuildName).zip</FFmpegDownloadUrl>
+		<FFmpegCacheRoot>$(LOCALAPPDATA)\WebRTCme\ffmpeg</FFmpegCacheRoot>
+		<FFmpegAllowDownload Condition="'$(FFmpegAllowDownload)' == ''">true</FFmpegAllowDownload>
+
+		<FFmpegSharedPath Condition="'$(FFmpegSharedPath)' == ''">$(FFMPEG_SHARED_PATH)</FFmpegSharedPath>
+		<FFmpegSharedPath Condition="'$(FFmpegSharedPath)' == '' And Exists('C:\apps\ffmpeg-8.1-shared\bin')">C:\apps\ffmpeg-8.1-shared\bin</FFmpegSharedPath>
+		<FFmpegSharedPath Condition="'$(FFmpegSharedPath)' == '' And Exists('$(FFmpegCacheRoot)\$(FFmpegBuildName)\bin')">$(FFmpegCacheRoot)\$(FFmpegBuildName)\bin</FFmpegSharedPath>
 	</PropertyGroup>
-	<!--
-	  Conventional install location, used when neither the FFmpegSharedPath property nor the
-	  FFMPEG_SHARED_PATH environment variable is set. Guarded by Exists() so it is simply
-	  ignored on machines that do not have it.
-	-->
-	<PropertyGroup Condition="'$(FFmpegSharedPath)' == ''
-	                          And Exists('C:\apps\ffmpeg-8.1-shared\bin')">
-		<FFmpegSharedPath>C:\apps\ffmpeg-8.1-shared\bin</FFmpegSharedPath>
-	</PropertyGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'
-	                      And '$(FFmpegSharedPath)' != '' And Exists('$(FFmpegSharedPath)')">
-		<None Include="$(FFmpegSharedPath)\*.dll" CopyToOutputDirectory="PreserveNewest"
-		      Visible="false" />
-	</ItemGroup>
+
+	<Target Name="ResolveFFmpegNatives" BeforeTargets="Build;Publish"
+	        Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
+
+		<!-- Nothing found locally: fetch once into the per-user cache. -->
+		<PropertyGroup Condition="'$(FFmpegSharedPath)' == '' And '$(FFmpegAllowDownload)' == 'true'">
+			<FFmpegSharedPath>$(FFmpegCacheRoot)\$(FFmpegBuildName)\bin</FFmpegSharedPath>
+		</PropertyGroup>
+
+		<Message Importance="high" Condition="'$(FFmpegSharedPath)' != '' And !Exists('$(FFmpegSharedPath)')"
+		         Text="Downloading FFmpeg shared libraries (~68MB) to $(FFmpegCacheRoot) - one time only." />
+		<DownloadFile Condition="'$(FFmpegSharedPath)' != '' And !Exists('$(FFmpegSharedPath)')"
+		              SourceUrl="$(FFmpegDownloadUrl)" DestinationFolder="$(FFmpegCacheRoot)"
+		              SkipUnchangedFiles="true" Retries="2">
+			<Output TaskParameter="DownloadedFile" PropertyName="FFmpegDownloadedArchive" />
+		</DownloadFile>
+		<Unzip Condition="'$(FFmpegDownloadedArchive)' != ''"
+		       SourceFiles="$(FFmpegDownloadedArchive)" DestinationFolder="$(FFmpegCacheRoot)"
+		       OverwriteReadOnlyFiles="true" />
+
+		<Error Condition="'$(FFmpegSharedPath)' == ''"
+		       Text="FFmpeg shared libraries not found and downloading is disabled. Set FFmpegSharedPath or FFMPEG_SHARED_PATH to a folder containing avcodec-*.dll." />
+
+		<ItemGroup>
+			<FFmpegNative Include="$(FFmpegSharedPath)\*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(FFmpegNative)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>
