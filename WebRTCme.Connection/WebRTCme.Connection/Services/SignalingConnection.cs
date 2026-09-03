@@ -203,6 +203,10 @@ namespace WebRTCme.Connection.Services
                     await CreateOrDeletePeerConnectionAsync(peerId, peerName, isInitiator: false);
                     peerContext = _connectionContext.PeerContexts.Single(context => context.Id.Equals(peerId));
                 }
+                if (peerContext is null)
+                    throw new InvalidOperationException(
+                        $"Received {description.Type} SDP from peer '{peerName}' ({peerId}) with no known peer context.");
+
                 var peerConnection = peerContext.PeerConnection;
 
                 System.Diagnostics.Debug.WriteLine(
