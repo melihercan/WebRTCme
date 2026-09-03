@@ -116,7 +116,13 @@
 		<FFmpegSharedPath Condition="'$(FFmpegSharedPath)' == '' And Exists('$(FFmpegCacheRoot)\$(FFmpegBuildName)\bin')">$(FFmpegCacheRoot)\$(FFmpegBuildName)\bin</FFmpegSharedPath>
 	</PropertyGroup>
 
-	<Target Name="ResolveFFmpegNatives" BeforeTargets="Build;Publish"
+	<!--
+	  Runs before AssignTargetPaths so the libraries are added as Content items and therefore
+	  land in the MSIX payload as well as the output folder. A plain Copy to $(OutDir) is not
+	  enough: VS runs the packaged app from the AppX staging folder, which only receives files
+	  that participate in packaging.
+	-->
+	<Target Name="ResolveFFmpegNatives" BeforeTargets="AssignTargetPaths"
 	        Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
 
 		<!-- Nothing found locally: fetch once into the per-user cache. -->
@@ -139,9 +145,9 @@
 		       Text="FFmpeg shared libraries not found and downloading is disabled. Set FFmpegSharedPath or FFMPEG_SHARED_PATH to a folder containing avcodec-*.dll." />
 
 		<ItemGroup>
-			<FFmpegNative Include="$(FFmpegSharedPath)\*.dll" />
+			<Content Include="$(FFmpegSharedPath)\*.dll" Link="%(Filename)%(Extension)"
+			         CopyToOutputDirectory="PreserveNewest" Visible="false" />
 		</ItemGroup>
-		<Copy SourceFiles="@(FFmpegNative)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
 	</Target>
 
 </Project>

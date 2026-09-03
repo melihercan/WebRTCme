@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Linq;
 using SIPSorceryMedia.FFmpeg;
 
 namespace WebRTCme.Windows
@@ -35,8 +37,7 @@ namespace WebRTCme.Windows
 
                 try
                 {
-                    FFmpegInit.Initialise(FfmpegLogLevelEnum.AV_LOG_FATAL,
-                        WindowsSupport.FFmpegLibraryPath);
+                    FFmpegInit.Initialise(FfmpegLogLevelEnum.AV_LOG_FATAL, ResolveLibraryPath());
                 }
                 catch (Exception ex)
                 {
@@ -51,6 +52,32 @@ namespace WebRTCme.Windows
 
                 _initialised = true;
             }
+        }
+
+        /// <summary>
+        /// Explicit path if one was configured, otherwise the application folder when the
+        /// libraries sit next to the app. Probing the app folder explicitly matters for packaged
+        /// (MSIX) apps, whose working directory is not the install location.
+        /// </summary>
+        private static string ResolveLibraryPath()
+        {
+            if (!string.IsNullOrEmpty(WindowsSupport.FFmpegLibraryPath))
+                return WindowsSupport.FFmpegLibraryPath;
+
+            try
+            {
+                var appDirectory = AppContext.BaseDirectory;
+                if (Directory.EnumerateFiles(appDirectory, "avcodec-*.dll").Any())
+                    return appDirectory;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## Probing for FFmpeg next to the app failed: {ex.Message}");
+            }
+
+            // Fall back to FFmpeg.AutoGen's own probing (PATH, working directory).
+            return null;
         }
     }
 }

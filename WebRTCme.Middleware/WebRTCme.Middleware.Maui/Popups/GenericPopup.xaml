@@ -2,10 +2,12 @@
 <views:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
            xmlns:views="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-           Size="300,300"
            x:Class="WebRTCme.Middleware.Maui.Popups.GenericPopup">
 
-    <StackLayout>
+    <!-- CommunityToolkit.Maui dropped Popup.Size; the content is sized instead. Leaving Size
+         here made InitializeComponent throw, which killed the app whenever an error popup
+         was shown. -->
+    <StackLayout WidthRequest="300" MinimumHeightRequest="300">
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
             <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
                 <Image x:Name="Image" Aspect="AspectFit" HeightRequest="30" IsVisible="False"/>

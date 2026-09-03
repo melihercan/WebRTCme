@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -14,7 +15,19 @@ namespace WebRTCme.Shared.SipSorcery
         {
         }
 
-        public string Candidate => NativeObject.candidate;
+        /// <summary>
+        /// SIPSorcery yields the candidate without the "candidate:" prefix, but the WebRTC API
+        /// (and Google's parser on the receiving end) expects the full attribute value. Sending
+        /// the bare form aborts libwebrtc inside addIceCandidate, taking the remote peer's
+        /// process down with it.
+        /// </summary>
+        public string Candidate => NativeObject.candidate is null
+            ? null
+            : NativeObject.candidate.StartsWith(CandidatePrefix, StringComparison.OrdinalIgnoreCase)
+                ? NativeObject.candidate
+                : CandidatePrefix + NativeObject.candidate;
+
+        private const string CandidatePrefix = "candidate:";
 
         public RTCIceComponent Component => Candidate
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
@@ -77,7 +90,13 @@ namespace WebRTCme.Shared.SipSorcery
             }
         }
 
-        public string SdpMid => NativeObject.sdpMid;
+        /// <summary>
+        /// SIPSorcery leaves sdpMid unset on some candidates. Peers that key off sdpMid rather
+        /// than the m-line index would then discard them, so fall back to the index - SIPSorcery
+        /// numbers its own media sections "0", "1", ... so the two agree.
+        /// </summary>
+        public string SdpMid => NativeObject.sdpMid
+            ?? NativeObject.sdpMLineIndex.ToString(CultureInfo.InvariantCulture);
 
         public ushort? SdpMLineIndex => NativeObject.sdpMLineIndex;
 

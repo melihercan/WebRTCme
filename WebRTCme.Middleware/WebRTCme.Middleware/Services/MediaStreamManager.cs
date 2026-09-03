@@ -19,7 +19,15 @@ namespace WebRTCme.Middleware.Services
 
         public void Remove(string label)
         {
-            MediaStreamParametersList.Remove(MediaStreamParametersList.Single(mp => mp.Label == label));
+            // Tolerate a label that is not present: teardown can run more than once (peer left,
+            // hangup, connection error), and throwing here happened on the UI thread and killed
+            // the app.
+            var mediaStreamParameters = MediaStreamParametersList
+                .FirstOrDefault(mp => mp.Label == label);
+            if (mediaStreamParameters is null)
+                return;
+
+            MediaStreamParametersList.Remove(mediaStreamParameters);
         }
 
         public void Clear()
