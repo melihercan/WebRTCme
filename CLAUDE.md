@@ -3,7 +3,10 @@
 Cross-platform WebRTC framework for .NET. It maps each platform's native WebRTC SDK (browser
 JS API via Blazor JSInterop, Android Java SDK, iOS ObjC SDK, desktop via SIPSorcery) to a single
 common .NET API, so MAUI/Blazor apps can use one WebRTC surface across Windows, macOS (Mac
-Catalyst), Android, iOS, and web.
+Catalyst), Android, iOS, and web. `WebRTCme.Api`'s interfaces/models/enums deliberately mirror the
+[W3C WebRTC 1.0 API](https://w3c.github.io/webrtc-pc/) (the same spec browsers implement), so the
+C# surface should feel familiar to anyone who's used the browser WebRTC JS API (see the
+[project wiki](https://github.com/melihercan/WebRTCme/wiki)).
 
 Currently on `feature/dotnet10_support`, migrating the whole solution from .NET 8 to **.NET 10**
 (net10.0 / net10.0-android / net10.0-ios / net10.0-maccatalyst / net10.0-windows10.0.22621.0).
