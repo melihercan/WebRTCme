@@ -30,7 +30,7 @@
 		    <dependency id="Microsoft.Maui.Controls.Compatibility" version="8.0.6"  exclude="Build,Analyzers"/>
 		    <dependency id="CommunityToolkit.Maui" version="7.0.1"  exclude="Build,Analyzers"/>
     	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
-        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="8.0.5" exclude="Build,Analyzers" />
         <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
 	      <dependency id="System.Threading.Channels" version="8.0.0" exclude="Build,Analyzers"/>
@@ -54,7 +54,7 @@
 		    <dependency id="Microsoft.Maui.Controls.Compatibility" version="8.0.6"  exclude="Build,Analyzers"/>
 		    <dependency id="CommunityToolkit.Maui" version="7.0.1"  exclude="Build,Analyzers"/>
     	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
-        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="8.0.5" exclude="Build,Analyzers" />
         <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
 	      <dependency id="System.Threading.Channels" version="8.0.0" exclude="Build,Analyzers"/>
@@ -77,7 +77,7 @@
 		    <dependency id="Microsoft.AspNetCore.Components" version="8.0.1" exclude="Build,Analyzers" />
 		    <dependency id="Microsoft.AspNetCore.Components.Web" version="8.0.1" exclude="Build,Analyzers" />
     	  <dependency id="System.Net.WebSockets.Client" version="4.3.2"  exclude="Build,Analyzers"/>
-        <dependency id="System.Text.Json" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="8.0.5" exclude="Build,Analyzers" />
         <dependency id="Refractored.MvvmHelpers" version="1.6.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Extensions.Configuration.Binder" version="8.0.1" exclude="Build,Analyzers" />
         <dependency id="BlazorDialog" version="2.3.0"  exclude="Build,Analyzers"/>
