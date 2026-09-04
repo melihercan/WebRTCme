@@ -32,6 +32,11 @@
 	<string>Allow video camera access</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow microphone access</string>
+	<!-- Required since iOS 14 to reach a signalling server on the LAN. Without this key iOS
+	     blocks the connection outright - it reports "The Internet connection appears to be
+	     offline" with NWPath "Local network prohibited" - and never prompts the user. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Local network access is required to reach the signalling server and connect calls.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
