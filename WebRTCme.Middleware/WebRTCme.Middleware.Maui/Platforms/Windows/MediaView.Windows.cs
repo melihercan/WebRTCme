@@ -33,7 +33,7 @@ namespace WebRTCme.Middleware
             if (videoTrack is null)
                 return;
 
-            _frameSubscription = WindowsSupport.SubscribeToVideoFrames(videoTrack, OnBgraFrame);
+            _frameSubscription = SipSorcerySupport.SubscribeToVideoFrames(videoTrack, OnBgraFrame);
         }
 
         private void OnBgraFrame(byte[] bgra, int width, int height)

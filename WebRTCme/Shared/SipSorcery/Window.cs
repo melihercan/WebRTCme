@@ -17,23 +17,9 @@ namespace WebRTCme.Shared.SipSorcery
             throw new NotImplementedException();
         }
 
-        public IMediaStream MediaStream()
-        {
-#if WINDOWS
-            return new WebRTCme.Windows.MediaStream();
-#else
-            throw new NotImplementedException();
-#endif
-        }
+        public IMediaStream MediaStream() => new Media.MediaStream();
 
-        public INavigator Navigator()
-        {
-#if WINDOWS
-            return WebRTCme.Windows.Navigator.Create();
-#else
-            throw new NotImplementedException();
-#endif
-        }
+        public INavigator Navigator() => MediaPlatform.CreateNavigator();
 
         public IRTCPeerConnection RTCPeerConnection(RTCConfiguration configuration) =>
             new RTCPeerConnection(configuration);

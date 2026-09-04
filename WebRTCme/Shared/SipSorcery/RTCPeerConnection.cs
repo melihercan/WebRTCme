@@ -26,11 +26,9 @@ internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>,
         NativeObject.onnegotiationneeded += NativeOnNegotiationNeeded;
         NativeObject.onsignalingstatechange += NativeOnSignalingStateChange;
 
-#if WINDOWS
         // SIPSorcery has no ontrack event, so remote media is detected during negotiation.
-        WebRTCme.Windows.WindowsMediaBridge.AttachRemoteMedia(NativeObject,
+        Media.MediaBridge.AttachRemoteMedia(NativeObject,
             track => OnTrack?.Invoke(this, new RTCTrackEvent(track)));
-#endif
     }
 
 
@@ -77,15 +75,11 @@ internal class RTCPeerConnection : NativeBase<SIPSorcery.Net.RTCPeerConnection>,
 
     public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream)
     {
-#if WINDOWS
-        WebRTCme.Windows.WindowsMediaBridge.AttachLocalTrack(NativeObject, track);
+        Media.MediaBridge.AttachLocalTrack(NativeObject, track);
 
         var sender = new RTCRtpSender(track);
         _senders.Add(sender);
         return sender;
-#else
-        throw new NotImplementedException();
-#endif
     }
 
     public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init = null)

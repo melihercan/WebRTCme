@@ -71,11 +71,16 @@
 		<PackageReference Include="SIPSorceryMedia.FFmpeg" Version="10.0.16" />
 	</ItemGroup>
 
+	<!--
+	  Mac Catalyst uses the native Google WebRTC framework, like iOS, rather than the SipSorcery
+	  binding. FFmpeg.AutoGen misidentifies Catalyst as Linux (it looks for libdl.so.2), so the
+	  SipSorcery route cannot encode or decode video there at all; the native framework also
+	  brings camera, microphone and audio playback for free.
+	-->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
 		<Compile Include="**\MacCatalyst\**\*.cs" />
 		<Compile Include="*.cs" />
-		<Compile Include="**\Shared\SipSorcery\**\*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.SipSorcery\WebRTCme.Bindings.SipSorcery.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />

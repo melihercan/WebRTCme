@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SIPSorcery.Media;
 using SIPSorceryMedia.FFmpeg;
 using SIPSorceryMedia.Windows;
+using WebRTCme.Shared.SipSorcery.Media;
 
 namespace WebRTCme.Windows
 {
@@ -66,7 +67,7 @@ namespace WebRTCme.Windows
             if (wantsVideo)
                 tracks.Add(await CreateVideoTrackAsync(constraints?.Video?.Object));
 
-            return new MediaStream(tracks);
+            return new WebRTCme.Shared.SipSorcery.Media.MediaStream(tracks);
         }
 
         public void Dispose() { }
@@ -79,8 +80,8 @@ namespace WebRTCme.Windows
             var audioEndPoint = new WindowsAudioEndPoint(new AudioEncoder());
             await audioEndPoint.StartAudio();
 
-            return new MediaStreamTrack(audioEndPoint, deviceId: string.Empty,
-                label: "Default audio input");
+            return new WebRTCme.Shared.SipSorcery.Media.MediaStreamTrack(audioEndPoint,
+                deviceId: string.Empty, label: "Default audio input");
         }
 
         private static async Task<IMediaStreamTrack> CreateVideoTrackAsync(
@@ -116,8 +117,8 @@ namespace WebRTCme.Windows
 
             await videoEndPoint.StartVideo();
 
-            return new MediaStreamTrack(videoEndPoint, resolvedDeviceId, label,
-                width, height, fps);
+            return new WebRTCme.Shared.SipSorcery.Media.MediaStreamTrack(videoEndPoint,
+                resolvedDeviceId, label, width, height, fps);
         }
 
         /// <summary>

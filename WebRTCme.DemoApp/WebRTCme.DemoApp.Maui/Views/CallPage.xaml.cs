@@ -24,10 +24,32 @@ namespace WebRTCme.DemoApp.Maui.Views
             }
         }
 
+        private bool _started;
+
+        /// <summary>
+        /// Both OnHandlerChanged and OnAppearing can complete the prerequisites, and their order
+        /// is not guaranteed, so whichever finishes last starts the call - exactly once, and only
+        /// after camera/microphone permission has been granted. Starting from OnHandlerChanged
+        /// directly used to reach GetUserMedia before the permission prompt had even appeared.
+        /// </summary>
         private async Task CallOnViewModelAppearing()
         {
-            if (_callViewModel != null)
+            if (_started || _callViewModel is null || _connectionParameters is null)
+                return;
+            _started = true;
+
+            try
+            {
+                await MauiSupport.SetCameraAndMicPermissionsAsync();
                 await _callViewModel.OnPageAppearingAsync(_connectionParameters);
+            }
+            catch (Exception ex)
+            {
+                // Callers are async void, so an escaping exception would vanish silently and
+                // leave the page blank with no clue as to why.
+                Console.WriteLine($"######## CallPage failed to start: {ex}");
+                throw;
+            }
         }
 
         protected override async void OnHandlerChanged()
@@ -41,7 +63,6 @@ namespace WebRTCme.DemoApp.Maui.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await MauiSupport.SetCameraAndMicPermissionsAsync();
             DeviceDisplay.KeepScreenOn = true;
 
             await CallOnViewModelAppearing();

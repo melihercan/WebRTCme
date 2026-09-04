@@ -1,4 +1,4 @@
-using Microsoft.Maui.Handlers;
+﻿using Microsoft.Maui.Handlers;
 
 namespace WebRTCme.Middleware
 {
@@ -39,12 +39,12 @@ namespace WebRTCme.Middleware
 
         public static void MapVideoMuted(MediaHandler handler, Media media)
         {
-
+            
         }
 
         public static void MapAudioMuted(MediaHandler handler, Media media)
         {
-
+            
         }
 
         public static void MapCameraType(MediaHandler handler, Media media)
@@ -56,7 +56,7 @@ namespace WebRTCme.Middleware
         {
             handler._showControls = media.ShowControls;
         }
-
+        
         protected override MediaView CreatePlatformView()
         {
             _stream = VirtualView.Stream;
@@ -73,8 +73,10 @@ namespace WebRTCme.Middleware
                 _audioTrack = _stream.GetAudioTracks().FirstOrDefault();
             }
 
+            // Instantiate the native control and assign it to the Control property with
+            // the SetNativeControl method.
             _mediaView = new MediaView();
-
+            
             if (_videoTrack is not null)
                 _mediaView.SetTrack(_videoTrack);
 

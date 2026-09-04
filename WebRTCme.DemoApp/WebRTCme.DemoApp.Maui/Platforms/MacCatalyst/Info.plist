@@ -26,5 +26,16 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<!-- Required on macOS: touching the camera or microphone without a usage description
+	     terminates the app rather than merely being denied. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to send video in a call.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is required to send audio in a call.</string>
+	<!-- Deliberately NOT setting NSCameraUseExternalDeviceType: it opts the app into receiving
+	     external cameras only as AVCaptureDeviceTypeExternal, and WebRTC's capture discovery
+	     asks for builtInWideAngleCamera. With the key set, a USB webcam disappears from
+	     RTCCameraVideoCapturer.CaptureDevices entirely; without it, macOS still reports the
+	     camera under the legacy type (with a deprecation warning) and WebRTC can find it. -->
 </dict>
 </plist>
