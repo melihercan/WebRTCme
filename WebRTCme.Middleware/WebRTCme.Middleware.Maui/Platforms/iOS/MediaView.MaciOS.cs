@@ -25,7 +25,7 @@ namespace WebRTCme.Middleware
         public void SetTrack(IMediaStreamTrack videoTrack)
         {
             var cameraDevices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
-            _isCamera = cameraDevices.Any(device => device.ModelID == videoTrack.Id);
+            _isCamera = cameraDevices.Any(device => device.UniqueID == videoTrack.Id);
 
             if (_isCamera)
             {

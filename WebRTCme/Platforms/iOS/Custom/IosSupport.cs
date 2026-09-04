@@ -23,9 +23,9 @@ namespace WebRTCme
 
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
-                // Get the selected device by matching RTCMediaStreamTrack.TrackId with AVCaptureDevice.ModelID from
-                // RTCCameraVideoCapturer.CaptureDevices list.
-                .Single(device => device.ModelID == videoTrack.Id);
+                // The track id is the device's UniqueID (see MediaStream.Create), so match on
+                // that - ModelID is not unique and does not identify the chosen device.
+                .Single(device => device.UniqueID == videoTrack.Id);
 
             var formats = Webrtc.RTCCameraVideoCapturer.SupportedFormatsForDevice(cameraDevice);
             System.Diagnostics.Debug.WriteLine($"============= Capture Formats =============== ");

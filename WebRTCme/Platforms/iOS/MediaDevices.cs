@@ -27,11 +27,11 @@ namespace WebRTCme.iOS
                     Kind = MediaDeviceInfoKind.VideoInput,
                     Label = device.LocalizedName
                 });
-#if XAMARINIOS
-            var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Audio)
-#else
-            var audioCaptureDevices = AVCaptureDevice.DevicesWithMediaType("TODO: FIXME")
-#endif
+            // XAMARINIOS is not defined on .NET for iOS, so the placeholder media type below was
+            // the live code path and could never match a device. AVMediaTypes.Audio is the modern
+            // equivalent of the old AVMediaType.Audio constant.
+            var audioCaptureDevices = AVCaptureDevice
+                .DevicesWithMediaType(AVMediaTypes.Audio.GetConstant())
                 .Select(device => new MediaDeviceInfo
                 {
                     DeviceId = device.UniqueID,

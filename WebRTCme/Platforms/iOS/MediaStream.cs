@@ -38,15 +38,22 @@ namespace WebRTCme.iOS
                 constraints.Video.Object != null;
             if (isAudio)
             {
-                var defaultAudioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio);
+                var defaultAudioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio)
+                    ?? throw new InvalidOperationException("No audio capture device was found.");
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Audio, defaultAudioDevice.UniqueID));
             }
             if (isVideo)
             {
                 var devices = Webrtc.RTCCameraVideoCapturer.CaptureDevices;
-                //// TODO: CURENTLY HARD CODED TO BACK. SELECT THE CAMERA BASED ON constraints
-                var defaultVideoDevice = devices.FirstOrDefault(d => d.Position == AVCaptureDevicePosition.Front/*.Back*/);
-                //var defaultVideoDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Video);
+
+                //// TODO: CURENTLY HARD CODED TO FRONT. SELECT THE CAMERA BASED ON constraints
+                // Fall back to any available camera rather than dereferencing null when no
+                // front-facing one exists.
+                var defaultVideoDevice =
+                    devices.FirstOrDefault(d => d.Position == AVCaptureDevicePosition.Front/*.Back*/)
+                    ?? devices.FirstOrDefault()
+                    ?? throw new InvalidOperationException("No video capture device was found.");
+
                 mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, defaultVideoDevice.UniqueID));
             }
 
