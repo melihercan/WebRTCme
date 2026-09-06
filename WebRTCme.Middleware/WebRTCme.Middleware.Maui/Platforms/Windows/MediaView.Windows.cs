@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 // Aliased because MAUI and WinUI both define Image/Stretch and both are in scope here.
 using WinUiImage = Microsoft.UI.Xaml.Controls.Image;
@@ -9,7 +9,8 @@ namespace WebRTCme.Middleware
 {
     /// <summary>
     /// Renders a WebRTC video track into a WinUI image. Frames arrive from the binding as BGRA8
-    /// on a media thread and are blitted into a WriteableBitmap on the UI thread.
+    /// on a WebRTC capture or decode thread and are blitted into a WriteableBitmap on the UI
+    /// thread.
     /// </summary>
     public class MediaView : Microsoft.UI.Xaml.Controls.Grid
     {
@@ -33,7 +34,7 @@ namespace WebRTCme.Middleware
             if (videoTrack is null)
                 return;
 
-            _frameSubscription = SipSorcerySupport.SubscribeToVideoFrames(videoTrack, OnBgraFrame);
+            _frameSubscription = WindowsSupport.SubscribeToVideoFrames(videoTrack, OnBgraFrame);
         }
 
         private void OnBgraFrame(byte[] bgra, int width, int height)

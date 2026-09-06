@@ -1,23 +1,16 @@
-﻿using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.JSInterop;
 
-namespace WebRTCme
+namespace WebRTCme;
+
+internal sealed class WebRtc : IWebRtc
 {
-    internal class WebRtc : IWebRtc
-    {
-        public static IWebRtc Create() => new WebRtc();
+    public static IWebRtc Create() => new WebRtc();
 
-        public void Dispose()
-        {
-        }
+    /// <summary>
+    /// The JS runtime is meaningless here -- it exists for the Blazor binding, which is the only
+    /// one that reaches WebRTC through the browser -- and is ignored.
+    /// </summary>
+    public IWindow Window(IJSRuntime jsRuntime = null) => new WebRTCme.Windows.Window();
 
-#if NETSTANDARD
-        public IWindow Window(IJSRuntime jsRuntime) => throw new NotImplementedException();
-#else
-        public IWindow Window(IJSRuntime jsRuntime) => new WebRTCme.Shared.SipSorcery.Window();
-#endif
-
-    }
+    public void Dispose() { }
 }

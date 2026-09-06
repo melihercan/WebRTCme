@@ -23,20 +23,14 @@
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-windows10.0.22621">
-        <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
-        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-maccatalyst13.1">
-        <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
-        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
       <group targetFramework="net8.0-macos10.14">
-        <dependency id="SIPSorcery" version="6.2.0" exclude="Build,Analyzers" />
-        <dependency id="SIPSorceryMedia" version="3.0.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.JSInterop" version="8.0.1" exclude="Build,Analyzers" />
  		    <dependency id="Macross.Json.Extensions" version="3.0.0" exclude="Build,Analyzers" />
 	    </group>
