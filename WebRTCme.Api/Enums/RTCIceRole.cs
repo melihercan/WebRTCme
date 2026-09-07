@@ -6,6 +6,7 @@ namespace WebRTCme
     public enum RTCIceRole
     {
         Controlling,
-        Controlled
+        Controlled,
+        Unknown
     }
 }

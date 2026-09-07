@@ -19,7 +19,7 @@ namespace WebRTCme.Blazor
             AddNativeEventListener("bufferedamountlow", (s, e) => OnBufferedAmountLow?.Invoke(s, e));
             AddNativeEventListener("close", (s, e) => OnClose?.Invoke(s, e));
             AddNativeEventListener("closing", (s, e) => OnClosing?.Invoke(s, e));
-            AddNativeEventListenerForObjectRef("error", (s, e) => OnError?.Invoke(s, e), ErrorEvent.Create);
+            AddNativeEventListenerForObjectRef("error", (s, e) => OnError?.Invoke(s, e), RTCErrorEvent.Create);
             AddNativeEventListenerForObjectRef("message", (s, e) => OnMessage?.Invoke(s, e), MessageEvent.Create);
             AddNativeEventListener("open", (s, e) => OnOpen?.Invoke(s, e));
         }
@@ -57,7 +57,7 @@ namespace WebRTCme.Blazor
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
         public event EventHandler OnClosing;
-        public event EventHandler<IErrorEvent> OnError;
+        public event EventHandler<IRTCErrorEvent> OnError;
         public event EventHandler<IMessageEvent> OnMessage;
         public event EventHandler OnOpen;
 

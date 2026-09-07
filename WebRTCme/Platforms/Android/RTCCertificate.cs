@@ -1,6 +1,7 @@
 ﻿using Webrtc = Org.Webrtc;
 using System;
 using WebRTCme;
+using System.Linq;
 using WebRTCme.Platforms.Android.Custom;
 
 namespace WebRTCme.Android
@@ -16,6 +17,15 @@ namespace WebRTCme.Android
         { }
 
         public ulong Expires => throw new NotImplementedException();
+
+        public RTCDtlsFingerprint[] GetFingerprints() =>
+            NativeObject.Fingerprints
+                .Select(nativeFingerprint => new RTCDtlsFingerprint
+                {
+                    Algorithm = nativeFingerprint.Algorithm,
+                    Value = nativeFingerprint.Value
+                })
+                .ToArray();
 
     }
 }

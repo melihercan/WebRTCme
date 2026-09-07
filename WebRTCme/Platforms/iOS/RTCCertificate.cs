@@ -19,5 +19,9 @@ namespace WebRTCme.iOS
 
         public ulong Expires => throw new NotImplementedException();
 
+        // RTCCertificate in the ObjC SDK exposes only the PEM key pair, not its fingerprints.
+        public RTCDtlsFingerprint[] GetFingerprints() => throw new NotSupportedException(
+            "Certificate fingerprints are not reported by the iOS SDK.");
+
     }
 }

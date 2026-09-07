@@ -9,6 +9,8 @@ namespace WebRTCme.iOS
         public RTCDTMFSender(Webrtc.IRTCDtmfSender nativeDtmfSender) : base(nativeDtmfSender)
         { }
 
+        public bool CanInsertDTMF => NativeObject.CanInsertDtmf;
+
         public string ToneBuffer => throw new NotImplementedException();
 
         public event EventHandler OnToneChange;

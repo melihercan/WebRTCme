@@ -9,6 +9,8 @@ namespace WebRTCme
 
         IRTCDtlsTransport Transport { get; }
 
+        double? JitterBufferTarget { get; set; }
+
         RTCRtpContributingSource[] GetContributingSources();
 
         RTCRtpReceiveParameters GetParameters();

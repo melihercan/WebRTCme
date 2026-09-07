@@ -44,6 +44,11 @@ namespace WebRTCme.Blazor
         
         public string UsernameFragment => GetNativeProperty<string>("usernameFragment");
 
+        public RTCIceServerTransportProtocol? RelayProtocol =>
+            GetNativeProperty<RTCIceServerTransportProtocol?>("relayProtocol");
+
+        public string Url => GetNativeProperty<string>("url");
+
         public string ToJson() => JsonSerializer.Serialize(this);
     }
 }

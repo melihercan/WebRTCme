@@ -905,9 +905,9 @@ IMediaStream remMedia;
 
                     }
 
-                    void DataConsumer_OnError(object sender, IErrorEvent e)
+                    void DataConsumer_OnError(object sender, IRTCErrorEvent e)
                     {
-                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnError {e.Message}");
+                        _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnError {e.Error.Message}");
                     }
 
                     void DataConsumer_OnMessage(object sender, IMessageEvent e)

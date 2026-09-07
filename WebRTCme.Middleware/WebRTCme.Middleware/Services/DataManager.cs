@@ -287,7 +287,7 @@ namespace WebRTCme.Middleware.Services
                 }
             }
 
-            void DataChannel_OnError(object sender, IErrorEvent e)
+            void DataChannel_OnError(object sender, IRTCErrorEvent e)
             {
                 Console.WriteLine($"************* DataChannel_OnError");
             }
@@ -391,7 +391,7 @@ namespace WebRTCme.Middleware.Services
                 }
             }
 
-            void ConsumerDataChannel_OnError(object sender, IErrorEvent e)
+            void ConsumerDataChannel_OnError(object sender, IRTCErrorEvent e)
             {
                 Console.WriteLine($"************* DataChannel_OnError");
             }

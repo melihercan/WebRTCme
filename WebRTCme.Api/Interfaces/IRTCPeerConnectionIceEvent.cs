@@ -8,7 +8,7 @@ namespace WebRTCme
     public interface IRTCPeerConnectionIceEvent : IDisposable // INativeObject
     {
         IRTCIceCandidate Candidate { get; }
-        
-        ////string Url { get; }
+
+        string Url { get; }
     }
 }

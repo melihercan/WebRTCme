@@ -39,7 +39,7 @@ namespace WebRTCme.iOS
         public event EventHandler OnBufferedAmountLow;
         public event EventHandler OnClose;
         public event EventHandler OnClosing;
-        public event EventHandler<IErrorEvent> OnError;
+        public event EventHandler<IRTCErrorEvent> OnError;
         public event EventHandler<IMessageEvent> OnMessage;
         public event EventHandler OnOpen;
 

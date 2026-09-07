@@ -7,5 +7,8 @@ namespace WebRTCme
         IRTCIceTransport IceTransport { get; }
 
         RTCDtlsTransportState State { get; }
+
+        event EventHandler OnStateChange;
+        event EventHandler<IRTCErrorEvent> OnError;
     }
 }

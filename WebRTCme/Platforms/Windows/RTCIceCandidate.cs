@@ -39,6 +39,11 @@ internal sealed class RTCIceCandidate : IRTCIceCandidate
 
     public string UsernameFragment { get; }
 
+    // The shim delivers the bare SDP attribute, with no record of the server it came from.
+    public RTCIceServerTransportProtocol? RelayProtocol => null;
+
+    public string Url => null;
+
     public string Foundation => Field(0);
 
     public RTCIceComponent Component =>

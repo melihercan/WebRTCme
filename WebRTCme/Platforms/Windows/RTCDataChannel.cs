@@ -122,7 +122,7 @@ internal sealed class RTCDataChannel : IRTCDataChannel
     // crossing, and a send failure is asynchronous and only logged natively.
 #pragma warning disable CS0067
     public event EventHandler OnBufferedAmountLow;
-    public event EventHandler<IErrorEvent> OnError;
+    public event EventHandler<IRTCErrorEvent> OnError;
 #pragma warning restore CS0067
 
     /// <summary>

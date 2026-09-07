@@ -77,6 +77,7 @@ namespace WebRTCme.Android
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+        public event EventHandler<IRTCPeerConnectionIceErrorEvent> OnIceCandidateError;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
@@ -229,6 +230,13 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
+        public Task SetLocalDescription()
+        {
+            var tcs = new TaskCompletionSource<object>();
+            NativeObject.SetLocalDescription(new SdpObserverProxy(tcs));
+            return tcs.Task;
+        }
+
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
             var tcs = new TaskCompletionSource<object>();
@@ -359,6 +367,10 @@ namespace WebRTCme.Android
         public void OnIceConnectionReceivingChange(bool p0)
         {
         }
+
+        // Implemented explicitly: the observer callback and the API event share a name.
+        void Webrtc.PeerConnection.IObserver.OnIceCandidateError(Webrtc.IceCandidateErrorEvent p0) =>
+            OnIceCandidateError?.Invoke(this, new RTCPeerConnectionIceErrorEvent(p0));
 
         public void OnIceGatheringChange(Webrtc.PeerConnection.IceGatheringState p0) =>
             OnIceGatheringStateChange?.Invoke(this, EventArgs.Empty);

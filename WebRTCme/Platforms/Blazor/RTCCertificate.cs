@@ -18,5 +18,8 @@ namespace WebRTCme.Blazor
 
         public ulong Expires => GetNativeProperty<ulong>("expires");
 
+        public RTCDtlsFingerprint[] GetFingerprints() =>
+            JsRuntime.CallJsMethod<RTCDtlsFingerprint[]>(NativeObject, "getFingerprints");
+
     }
 }

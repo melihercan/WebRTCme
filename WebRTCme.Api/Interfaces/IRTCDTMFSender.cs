@@ -6,6 +6,8 @@ namespace WebRTCme
 {
     public interface IRTCDTMFSender : IDisposable // INativeObject
     {
+        bool CanInsertDTMF { get; }
+
         string ToneBuffer { get; }
 
         event EventHandler OnToneChange;

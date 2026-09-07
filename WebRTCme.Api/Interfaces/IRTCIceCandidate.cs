@@ -39,6 +39,10 @@ namespace WebRTCme
 
         string UsernameFragment { get; }
 
+        RTCIceServerTransportProtocol? RelayProtocol { get; }
+
+        string Url { get; }
+
         string ToJson();
     }
 }

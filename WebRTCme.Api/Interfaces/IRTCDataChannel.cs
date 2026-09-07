@@ -32,7 +32,7 @@ namespace WebRTCme
         event EventHandler OnBufferedAmountLow;
         event EventHandler OnClose;
         event EventHandler OnClosing;
-        event EventHandler<IErrorEvent> OnError;
+        event EventHandler<IRTCErrorEvent> OnError;
         event EventHandler<IMessageEvent> OnMessage;
         event EventHandler OnOpen;
 

@@ -23,6 +23,12 @@ namespace WebRTCme.Blazor
         public IRTCDtlsTransport Transport =>
             new RTCDtlsTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
+        public double? JitterBufferTarget
+        {
+            get => GetNativeProperty<double?>("jitterBufferTarget");
+            set => SetNativeProperty("jitterBufferTarget", value);
+        }
+
         public RTCRtpContributingSource[] GetContributingSources()
         {
             var rtpContributingSources = new List<RTCRtpContributingSource>();

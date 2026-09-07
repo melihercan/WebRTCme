@@ -102,6 +102,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
     public event EventHandler OnConnectionStateChanged;
     public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+    public event EventHandler<IRTCPeerConnectionIceErrorEvent> OnIceCandidateError;
     public event EventHandler OnIceConnectionStateChange;
     public event EventHandler OnIceGatheringStateChange;
     public event EventHandler OnNegotiationNeeded;
@@ -137,6 +138,20 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
         }
 
         return completion.Task;
+    }
+
+    /// <summary>
+    /// The shim has no argument-less form, so this follows the algorithm the spec gives for it:
+    /// answer when a remote offer is outstanding, otherwise offer.
+    /// </summary>
+    public async Task SetLocalDescription()
+    {
+        var description = _signalingState is RTCSignalingState.HaveRemoteOffer
+                                          or RTCSignalingState.HaveLocalPranswer
+            ? await CreateAnswer().ConfigureAwait(false)
+            : await CreateOffer().ConfigureAwait(false);
+
+        await SetLocalDescription(description).ConfigureAwait(false);
     }
 
     public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)

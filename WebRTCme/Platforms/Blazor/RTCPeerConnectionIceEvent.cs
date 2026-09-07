@@ -27,5 +27,7 @@ namespace WebRTCme.Blazor
                 return jsPropertyObjectRef == null ? null : new RTCIceCandidate(JsRuntime, jsPropertyObjectRef);
             }
         }
+
+        public string Url => GetNativeProperty<string>("url");
     }
 }

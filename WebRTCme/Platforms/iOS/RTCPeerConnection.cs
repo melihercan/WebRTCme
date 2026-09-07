@@ -110,6 +110,7 @@ namespace WebRTCme.iOS
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+        public event EventHandler<IRTCPeerConnectionIceErrorEvent> OnIceCandidateError;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
@@ -254,6 +255,21 @@ namespace WebRTCme.iOS
             throw new NotImplementedException();
         }
 
+        public Task SetLocalDescription()
+        {
+            var tcs = new TaskCompletionSource<object>();
+            NativeObject.SetLocalDescriptionWithCompletionHandler(
+                (nsError) =>
+                {
+                    if (nsError != null)
+                    {
+                        tcs.SetException(new Exception($"{nsError.LocalizedDescription}"));
+                    }
+                    tcs.SetResult(null);
+                });
+            return tcs.Task;
+        }
+
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) 
         {
             var tcs = new TaskCompletionSource<object>();
@@ -288,6 +304,12 @@ namespace WebRTCme.iOS
         
         
 #region NativeEvents
+        public void DidFailToGatherIceCandidate(Webrtc.RTCPeerConnection peerConnection,
+            Webrtc.RTCIceCandidateErrorEvent @event)
+        {
+            OnIceCandidateError?.Invoke(this, new RTCPeerConnectionIceErrorEvent(@event));
+        }
+
         public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCSignalingState stateChanged)
         {

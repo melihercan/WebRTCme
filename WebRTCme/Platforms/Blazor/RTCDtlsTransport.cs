@@ -14,11 +14,18 @@ namespace WebRTCme.Blazor
 {
     internal class RTCDtlsTransport : NativeBase, IRTCDtlsTransport
     {
-        public RTCDtlsTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef) { }
+        public RTCDtlsTransport(IJSRuntime jsRuntime, JsObjectRef jsObjectRef) : base(jsRuntime, jsObjectRef)
+        {
+            AddNativeEventListener("statechange", (s, e) => OnStateChange?.Invoke(s, e));
+            AddNativeEventListenerForObjectRef("error", (s, e) => OnError?.Invoke(s, e), RTCErrorEvent.Create);
+        }
 
         public IRTCIceTransport IceTransport => 
             new RTCIceTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "iceTransport"));
 
         public RTCDtlsTransportState State => GetNativeProperty<RTCDtlsTransportState>("state");
+
+        public event EventHandler OnStateChange;
+        public event EventHandler<IRTCErrorEvent> OnError;
     }
 }

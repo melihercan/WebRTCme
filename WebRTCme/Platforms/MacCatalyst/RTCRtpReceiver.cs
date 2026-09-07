@@ -15,6 +15,12 @@ namespace WebRTCme.MacCatalyst
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 
+        public double? JitterBufferTarget
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
 
         public RTCRtpContributingSource[] GetContributingSources()
         {

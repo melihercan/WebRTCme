@@ -19,6 +19,8 @@ namespace WebRTCme
         RecvOnly,
 
         [EnumMember(Value = "inactive")]
-        Inactive
+        Inactive,
+        [EnumMember(Value = "stopped")]
+        Stopped
     }
 }

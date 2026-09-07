@@ -5,5 +5,7 @@ internal sealed class RTCPeerConnectionIceEvent(RTCIceCandidateInit candidate)
 {
     public IRTCIceCandidate Candidate { get; } = new RTCIceCandidate(candidate);
 
+    public string Url => null;
+
     public void Dispose() { }
 }

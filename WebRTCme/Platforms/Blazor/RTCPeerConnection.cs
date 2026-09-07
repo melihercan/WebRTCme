@@ -25,6 +25,8 @@ namespace WebRTCme.Blazor
                 RTCDataChannelEvent.Create);
             AddNativeEventListenerForObjectRef("icecandidate", (s, e) => OnIceCandidate?.Invoke(s, e),
                 RTCPeerConnectionIceEvent.Create);
+            AddNativeEventListenerForObjectRef("icecandidateerror",
+                (s, e) => OnIceCandidateError?.Invoke(s, e), RTCPeerConnectionIceErrorEvent.Create);
             AddNativeEventListener("iceconnectionstatechange", (s, e) => OnIceConnectionStateChange?.Invoke(s, e));
             AddNativeEventListener("icegatheringstatechange", (s, e) => OnIceGatheringStateChange?.Invoke(s, e));
             AddNativeEventListener("negotiationneeded", (s, e) => OnNegotiationNeeded?.Invoke(s, e));
@@ -73,6 +75,7 @@ namespace WebRTCme.Blazor
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         public event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+        public event EventHandler<IRTCPeerConnectionIceErrorEvent> OnIceCandidateError;
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
@@ -244,6 +247,10 @@ namespace WebRTCme.Blazor
                     protocol,
                     userName
                 });
+
+        public Task SetLocalDescription() =>
+            JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription")
+            .AsTask();
 
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription", sessionDescription)

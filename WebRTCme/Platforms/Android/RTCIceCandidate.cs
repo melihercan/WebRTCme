@@ -112,6 +112,11 @@ namespace WebRTCme.Android
 
         public string UsernameFragment => null;
 
+        // The Android SDK does not report which protocol was used to reach the TURN server.
+        public RTCIceServerTransportProtocol? RelayProtocol => null;
+
+        public string Url => NativeObject.ServerUrl;
+
         public string ToJson() => JsonSerializer.Serialize(this);
     }
 }

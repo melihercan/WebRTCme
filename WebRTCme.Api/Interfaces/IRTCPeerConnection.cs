@@ -37,6 +37,7 @@ namespace WebRTCme
         event EventHandler OnConnectionStateChanged;
         event EventHandler<IRTCDataChannelEvent> OnDataChannel;
         event EventHandler<IRTCPeerConnectionIceEvent> OnIceCandidate;
+        event EventHandler<IRTCPeerConnectionIceErrorEvent> OnIceCandidateError;
         event EventHandler OnIceConnectionStateChange;
         event EventHandler OnIceGatheringStateChange;
         event EventHandler OnNegotiationNeeded;
@@ -82,6 +83,8 @@ namespace WebRTCme
         void SetConfiguration(RTCConfiguration configuration);
 
         void SetIdentityProvider(string domainName, string protocol = null, string userName = null);
+
+        Task SetLocalDescription();
 
         Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription);
 

@@ -52,6 +52,10 @@ namespace WebRTCme
 
         public string UsernameFragment { get; set; }
 
+        public RTCIceServerTransportProtocol? RelayProtocol { get; set; }
+
+        public string Url { get; set; }
+
         public object NativeObject { get; set; }
 
         public void Dispose()

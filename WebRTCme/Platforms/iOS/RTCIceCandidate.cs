@@ -107,6 +107,11 @@ namespace WebRTCme.iOS
 
         public string UsernameFragment => null;
 
+        // The iOS SDK does not report which protocol was used to reach the TURN server.
+        public RTCIceServerTransportProtocol? RelayProtocol => null;
+
+        public string Url => NativeObject.ServerUrl;
+
 
         public string ToJson()
         {

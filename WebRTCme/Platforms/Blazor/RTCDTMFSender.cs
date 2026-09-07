@@ -17,6 +17,8 @@ namespace WebRTCme.Blazor
             AddNativeEventListener("tonechange", (s, e) => OnToneChange?.Invoke(s, e));
         }
 
+        public bool CanInsertDTMF => GetNativeProperty<bool>("canInsertDTMF");
+
         public string ToneBuffer => GetNativeProperty<string>("toneBuffer");
 
         public event EventHandler OnToneChange;

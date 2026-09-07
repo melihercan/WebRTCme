@@ -24,7 +24,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
         public event EventHandler OnOpen;
         public event EventHandler OnClose;
-        public event EventHandler<IErrorEvent> OnError;
+        public event EventHandler<IRTCErrorEvent> OnError;
         public event EventHandler OnTransportClosed;
         public event EventHandler<IMessageEvent> OnMessage;
 
@@ -98,7 +98,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             OnOpen?.Invoke(this, e);
         }
 
-        void DataChannel_OnError(object sender, IErrorEvent e)
+        void DataChannel_OnError(object sender, IRTCErrorEvent e)
         {
             if (Closed)
                 return;
