@@ -290,6 +290,20 @@ public static partial class Interop
         delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onFailure,
         IntPtr userData);
 
+    // ----------------------------------------------------------- statistics
+    //
+    // Asynchronous like negotiation: the return value reports only that
+    // collection started. The report arrives on the callback as JSON, borrowed
+    // for the duration of the call like every other callback string.
+
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_get_stats")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int PeerConnectionGetStats(
+        IntPtr pc,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onSuccess,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onFailure,
+        IntPtr userData);
+
     [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_add_ice_candidate",
                    StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]

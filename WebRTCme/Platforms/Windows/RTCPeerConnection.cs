@@ -456,6 +456,37 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void StatsSucceeded(IntPtr userData, IntPtr json)
+    {
+        var handle = GCHandle.FromIntPtr(userData);
+        var completion = (TaskCompletionSource<IRTCStatsReport>)handle.Target;
+        handle.Free();
+
+        // Parsing on the signalling thread is against the spirit of the contract, but the JSON is
+        // borrowed and dies when this returns, so it has to be read here. Copying the string only
+        // to parse it elsewhere would cost the same walk twice.
+        try
+        {
+            completion.TrySetResult(StatsJson.ToStatsReport(Marshal.PtrToStringUTF8(json)));
+        }
+        catch (Exception exception)
+        {
+            completion.TrySetException(exception);
+        }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void StatsFailed(IntPtr userData, IntPtr error)
+    {
+        var handle = GCHandle.FromIntPtr(userData);
+        var completion = (TaskCompletionSource<IRTCStatsReport>)handle.Target;
+        handle.Free();
+
+        completion.TrySetException(new InvalidOperationException(
+            Marshal.PtrToStringUTF8(error) ?? "Collecting statistics failed."));
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void SetSucceeded(IntPtr userData)
     {
         var handle = GCHandle.FromIntPtr(userData);
@@ -574,14 +605,25 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public IRTCRtpReceiver[] GetReceivers() =>
         throw new NotSupportedException("Receivers are not exposed by the Windows binding.");
 
-    // The shim has no stats entry point: none of its rtc_* exports touch stats, and libwebrtc's
-    // own GetStats takes a C++ collector callback, which P/Invoke cannot supply. Reaching stats
-    // here means adding an export to WebRtcInterop.dll, whose source lives in the WebRTCnative
-    // repository rather than this one.
-    public Task<IRTCStatsReport> GetStats() =>
-        throw new NotSupportedException(
-            "Stats are not exposed by the Windows binding: WebRtcInterop.dll has no stats "
-            + "entry point. Adding one requires a change to the native shim.");
+    public unsafe Task<IRTCStatsReport> GetStats()
+    {
+        ThrowIfClosed();
+
+        var completion = new TaskCompletionSource<IRTCStatsReport>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var context = GCHandle.Alloc(completion);
+
+        var status = PeerConnectionGetStats(_handle, &StatsSucceeded, &StatsFailed,
+                                            GCHandle.ToIntPtr(context));
+
+        if (status != Ok)
+        {
+            context.Free();
+            WebRtcRuntime.Check(status, "collect statistics");
+        }
+
+        return completion.Task;
+    }
 
     public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
         throw new NotSupportedException("Certificate generation is not exposed by the Windows binding.");

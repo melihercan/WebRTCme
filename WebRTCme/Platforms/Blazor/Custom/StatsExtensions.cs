@@ -53,7 +53,7 @@ namespace WebRTCme.Platforms.Blazor.Custom
             value.ValueKind switch
             {
                 JsonValueKind.String => value.GetString(),
-                JsonValueKind.Number => value.TryGetInt64(out var number) ? number : value.GetDouble(),
+                JsonValueKind.Number => value.TryGetInt64(out var number) ? number : (object)value.GetDouble(),
                 JsonValueKind.True => true,
                 JsonValueKind.False => false,
                 JsonValueKind.Null or JsonValueKind.Undefined => null,
