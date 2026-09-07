@@ -13,7 +13,7 @@ namespace WebRTCme
 
         RTCSctpTransportState State { get; }
 
-        IRTCSctpTransport Transport { get; }
+        IRTCDtlsTransport Transport { get; }
 
         event EventHandler<RTCSctpTransportState> OnStateChange;
     }

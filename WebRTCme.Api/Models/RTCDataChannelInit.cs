@@ -16,6 +16,6 @@ namespace WebRTCme
 
         public bool? Negotiated { get; set; }
 
-        public short? Id { get; set; } 
+        public ushort? Id { get; set; } 
     }
 }

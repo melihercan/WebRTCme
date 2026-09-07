@@ -105,7 +105,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public event EventHandler OnIceConnectionStateChange;
     public event EventHandler OnIceGatheringStateChange;
     public event EventHandler OnNegotiationNeeded;
-    public event EventHandler OnSignallingStateChange;
+    public event EventHandler OnSignalingStateChange;
     public event EventHandler<IRTCTrackEvent> OnTrack;
 
     public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
@@ -486,7 +486,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
             return;
 
         _signalingState = state;
-        Post(() => OnSignallingStateChange?.Invoke(this, EventArgs.Empty));
+        Post(() => OnSignalingStateChange?.Invoke(this, EventArgs.Empty));
     }
 
     private void UpdateIceGatheringState(RTCIceGatheringState state)

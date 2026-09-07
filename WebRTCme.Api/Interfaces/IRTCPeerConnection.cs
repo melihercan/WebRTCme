@@ -40,7 +40,7 @@ namespace WebRTCme
         event EventHandler OnIceConnectionStateChange;
         event EventHandler OnIceGatheringStateChange;
         event EventHandler OnNegotiationNeeded;
-        event EventHandler OnSignallingStateChange;
+        event EventHandler OnSignalingStateChange;
         event EventHandler<IRTCTrackEvent> OnTrack;
 
         RTCIceServer[] GetDefaultIceServers();

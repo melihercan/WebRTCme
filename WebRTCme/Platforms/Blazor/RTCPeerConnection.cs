@@ -28,7 +28,7 @@ namespace WebRTCme.Blazor
             AddNativeEventListener("iceconnectionstatechange", (s, e) => OnIceConnectionStateChange?.Invoke(s, e));
             AddNativeEventListener("icegatheringstatechange", (s, e) => OnIceGatheringStateChange?.Invoke(s, e));
             AddNativeEventListener("negotiationneeded", (s, e) => OnNegotiationNeeded?.Invoke(s, e));
-            AddNativeEventListener("signallingstatechange", (s, e) => OnSignallingStateChange?.Invoke(s, e));
+            AddNativeEventListener("signalingstatechange", (s, e) => OnSignalingStateChange?.Invoke(s, e));
             AddNativeEventListenerForObjectRef("track", (s, e) => OnTrack?.Invoke(s, e),
                 RTCTrackEvent.Create);
         }
@@ -76,7 +76,7 @@ namespace WebRTCme.Blazor
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
-        public event EventHandler OnSignallingStateChange;
+        public event EventHandler OnSignalingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
 

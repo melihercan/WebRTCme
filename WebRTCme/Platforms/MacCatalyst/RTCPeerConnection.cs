@@ -113,7 +113,7 @@ namespace WebRTCme.MacCatalyst
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
-        public event EventHandler OnSignallingStateChange;
+        public event EventHandler OnSignalingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
         public RTCIceServer[] GetDefaultIceServers() =>
@@ -291,7 +291,7 @@ namespace WebRTCme.MacCatalyst
         public void DidChangeSignalingState(Webrtc.RTCPeerConnection peerConnection, 
             Webrtc.RTCSignalingState stateChanged)
         {
-            OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
+            OnSignalingStateChange?.Invoke(this, EventArgs.Empty);
         }
 
         public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)

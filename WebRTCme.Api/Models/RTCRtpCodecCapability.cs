@@ -8,7 +8,7 @@ namespace WebRTCme
     {
         public ushort? Channels { get; set; }
 
-        public ulong ClockRate { get; }
+        public ulong ClockRate { get; set; }
 
         public string MimeType { get; set; }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCRtpHeaderExtensionCabability
+    public class RTCRtpHeaderExtensionCapability
     {
         public string Uri { get; set; }
     }

@@ -310,7 +310,7 @@ namespace WebRTCme.Connection.Services
                     peerConnection.OnIceConnectionStateChange -= OnIceConnectionStateChange;
                     peerConnection.OnIceGatheringStateChange -= OnIceGatheringStateChange;
                     peerConnection.OnNegotiationNeeded -= OnNegotiationNeeded;
-                    peerConnection.OnSignallingStateChange -= OnSignallingStateChange;
+                    peerConnection.OnSignalingStateChange -= OnSignalingStateChange;
                     peerConnection.OnTrack -= OnTrack;
 
                     // Remove local tracks and close.
@@ -362,7 +362,7 @@ namespace WebRTCme.Connection.Services
                     peerConnection.OnIceConnectionStateChange += OnIceConnectionStateChange;
                     peerConnection.OnIceGatheringStateChange += OnIceGatheringStateChange;
                     peerConnection.OnNegotiationNeeded += OnNegotiationNeeded;
-                    peerConnection.OnSignallingStateChange += OnSignallingStateChange;
+                    peerConnection.OnSignalingStateChange += OnSignalingStateChange;
                     peerConnection.OnTrack += OnTrack;
 
 
@@ -483,11 +483,11 @@ namespace WebRTCme.Connection.Services
                         $"peerUser:{peerName}");
                     // TODO: WHAT IF Not initiator adds track (which trigggers this event)???
                 }
-                void OnSignallingStateChange(object s, EventArgs e)
+                void OnSignalingStateChange(object s, EventArgs e)
                 {
                     System.Diagnostics.Debug.WriteLine(
 ////                _logger.LogInformation(
-                        $"######## OnSignallingStateChange - room:{_connectionContext.UserContext.Room} " +
+                        $"######## OnSignalingStateChange - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName}, " +
                         $"signallingState:{ peerConnection.SignalingState }");

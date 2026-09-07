@@ -25,8 +25,8 @@ namespace WebRTCme.Blazor
 
         public RTCSctpTransportState State => GetNativeProperty<RTCSctpTransportState>("state");
 
-        public IRTCSctpTransport Transport =>
-            new RTCSctpTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
+        public IRTCDtlsTransport Transport =>
+            new RTCDtlsTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
         public event EventHandler<RTCSctpTransportState> OnStateChange;
     }

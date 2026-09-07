@@ -80,7 +80,7 @@ namespace WebRTCme.Android
         public event EventHandler OnIceConnectionStateChange;
         public event EventHandler OnIceGatheringStateChange;
         public event EventHandler OnNegotiationNeeded;
-        public event EventHandler OnSignallingStateChange;
+        public event EventHandler OnSignalingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
         public RTCIceServer[] GetDefaultIceServers() =>
@@ -371,7 +371,7 @@ namespace WebRTCme.Android
         public void OnRenegotiationNeeded() => OnNegotiationNeeded?.Invoke(this, EventArgs.Empty);
 
         public void OnSignalingChange(Webrtc.PeerConnection.SignalingState p0) =>
-            OnSignallingStateChange?.Invoke(this, EventArgs.Empty);
+            OnSignalingStateChange?.Invoke(this, EventArgs.Empty);
 
 
 

@@ -387,7 +387,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     MaxRetransmits = (ushort?)options_.MaxRetransmits,
                     Protocol = options_.Protocol,
                     Negotiated = true,
-                    Id = (short?)_nextSendSctpStreamId
+                    Id = (ushort?)_nextSendSctpStreamId
                 };
 
                 var dataChannel = _pc.CreateDataChannel(options_.Label, options);
@@ -651,7 +651,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     MaxRetransmits = (ushort?)options_.SctpStreamParameters.MaxRetransmits,
                     Protocol = options_.Protocol,
                     Negotiated = true,
-                    Id = (short?)options_.SctpStreamParameters.StreamId
+                    Id = (ushort?)options_.SctpStreamParameters.StreamId
                 };
 
                 var dataChannel = _pc.CreateDataChannel(options_.Label, options);

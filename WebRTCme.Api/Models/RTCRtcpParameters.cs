@@ -6,8 +6,8 @@ namespace WebRTCme
 {
     public class RTCRtcpParameters
     {
-        public string Cname { get; }
+        public string Cname { get; init; }
 
-        public bool ReducedSize { get; }
+        public bool ReducedSize { get; init; }
     }
 }

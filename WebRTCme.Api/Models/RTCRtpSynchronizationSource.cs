@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebRTCme
 {
-    public class RTCRtpSynchronizationSource
+    public class RTCRtpSynchronizationSource : RTCRtpContributingSource
     {
         public bool? VoiceActivityFlag { get; } 
     }
