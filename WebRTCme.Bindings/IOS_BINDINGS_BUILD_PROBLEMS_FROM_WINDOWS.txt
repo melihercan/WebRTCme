@@ -85,3 +85,50 @@ Three ways out, in order of least disruption:
 On an Apple Silicon Mac use iossimulator-arm64 and PlatformTarget arm64 instead; the simulator
 slice of the xcframework is fat (arm64 and x86_64), so either resolves.
 
+- A stale binding assembly that survives Clean, Rebuild All and deleting the app's bin/obj.
+
+Symptom, when deploying the app to a device:
+
+  clang++ exited with code 1:
+  Undefined symbols for architecture arm64:
+    "_kRTCIlbcCodecName", referenced from:
+        <initial-undefines>
+
+"<initial-undefines>" means the symbol reaches the linker as a -u flag generated from a [Field]
+binding, not from compiled code. So the app is linking binding metadata that no longer matches
+ApiDefinitions.cs.
+
+The cause is a file lock, not staleness in the ordinary sense. Visual Studio keeps MSBuild node
+processes alive between builds, and one of them holds
+
+  WebRTCme.Bindings.Maui.iOS/bin/Debug/net10.0-ios/WebRTCme.Bindings.Maui.iOS.resources.zip
+
+open. Every rebuild then regenerates the binding sources correctly and fails to replace the
+assembly. Building the binding from the command line while Visual Studio is open says so plainly:
+
+  System.IO.IOException: The process cannot access the file '...resources.zip' because it is
+  being used by another process.
+  The "CreateBindingResourcePackage" task failed unexpectedly.
+
+Inside Visual Studio it is quieter: the project is reported as skipped, the build is declared
+successful, and only the app's link step fails.
+
+What makes this hard to spot is that every intermediate output looks right. Check them in order
+and the break is obvious:
+
+  ApiDefinitions.cs                              the edit is there
+  obj/.../compiled-api-definitions.dll           fresh
+  obj/.../iOS/Webrtc/Constants.g.cs              fresh, and the field is gone
+  bin/.../WebRTCme.Bindings.Maui.iOS.dll         days old, and still contains the symbol
+
+Fix: close Visual Studio, delete the binding project's bin and obj, and rebuild. "dotnet
+build-server shutdown" may release the nodes without closing the IDE, but a long-lived session
+with dozens of nodes is quicker to restart.
+
+Verify the result rather than assuming, since the failure is silent:
+
+  grep -c kRTCIlbcCodecName WebRTCme.Bindings.Maui.iOS/bin/Debug/net10.0-ios/WebRTCme.Bindings.Maui.iOS.dll
+
+Zero means the fix is in the assembly. Grepping a managed DLL for the string works because [Field]
+records the symbol name verbatim in metadata.
+
