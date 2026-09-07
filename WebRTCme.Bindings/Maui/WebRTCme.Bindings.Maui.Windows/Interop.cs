@@ -73,6 +73,9 @@ public static partial class Interop
     public const int AudioDeviceRecording = 0;
     public const int AudioDevicePlayout = 1;
 
+    public const int DesktopSourceScreen = 0;
+    public const int DesktopSourceWindow = 1;
+
     // -------------------------------------------------------------- structs
     //
     // Verified blittable on x64 against the same clang-cl that builds the DLL,
@@ -292,10 +295,50 @@ public static partial class Interop
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int PeerConnectionAddIceCandidate(IntPtr pc, string mid, int mlineIndex, string sdp);
 
+    /// <param name="sender">Receives a handle to release. Pass <see cref="IntPtr.Zero"/> by
+    /// using the overload-free form only when the track will never be replaced or removed.</param>
     [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_add_track",
                    StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int PeerConnectionAddTrack(IntPtr pc, IntPtr track, string streamId);
+    public static partial int PeerConnectionAddTrack(IntPtr pc, IntPtr track, string streamId,
+                                                     out IntPtr sender);
+
+    // -------------------------------------------------------- desktop capture
+    //
+    // getDisplayMedia taken apart the same way getUserMedia was. Enumeration
+    // takes no factory because a capturer needs none, and the id rather than
+    // the index identifies a source -- indices are not stable across calls.
+
+    [LibraryImport(Lib, EntryPoint = "rtc_desktop_source_count")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DesktopSourceCount(int kind, out int count);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_desktop_source_info")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DesktopSourceInfo(int kind, int index, out IntPtr title, out long id);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_desktop_track_create",
+                   StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DesktopTrackCreate(IntPtr factory, int kind, long sourceId,
+                                                  string label, int maxFps, out IntPtr track);
+
+    // --------------------------------------------------------------- senders
+
+    /// <summary>W3C replaceTrack. A zero track stops the sender without
+    /// renegotiating; the new track must be the same kind as the old.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_replace_track")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpSenderReplaceTrack(IntPtr sender, IntPtr track);
+
+    /// <summary>The sender handle stays valid and must still be released.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_remove_track")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int PeerConnectionRemoveTrack(IntPtr pc, IntPtr sender);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_release")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void RtpSenderRelease(IntPtr sender);
 
     // -------------------------------------------------------- data channels
     //

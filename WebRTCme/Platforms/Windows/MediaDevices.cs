@@ -81,10 +81,41 @@ internal sealed class MediaDevices : IMediaDevices
         FrameRate = true
     };
 
-    public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints) =>
-        throw new NotSupportedException(
-            "Screen capture is not exposed by the Windows binding; the interop ABI has no " +
-            "desktop capture source.");
+    /// <summary>
+    /// Captures the primary screen. The W3C call shows a picker and returns what the user
+    /// chose; there is no picker here, so it takes the first screen. An app that wants a
+    /// choice enumerates with <see cref="WindowsSupport.GetDesktopSources"/> and calls
+    /// <see cref="WindowsSupport.GetDisplayMedia"/> with the one it wants.
+    /// </summary>
+    public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
+    {
+        var screens = WindowsSupport.GetDesktopSources(DesktopSourceKind.Screen);
+        if (screens.Count == 0)
+            throw new InvalidOperationException("No screen is available to capture.");
+
+        var frameRate = (int?)constraints?.Video?.Object?.FrameRate?.Value ?? DefaultShareFrameRate;
+        return Task.FromResult(WindowsSupport.GetDisplayMedia(screens[0], frameRate));
+    }
+
+    /// <summary>
+    /// Shared screens are read, not watched: a lower rate leaves bandwidth for resolution, which
+    /// is what keeps text legible.
+    /// </summary>
+    internal const int DefaultShareFrameRate = 15;
+
+    internal static IMediaStreamTrack CreateDesktopTrack(int kind, long sourceId, string title,
+                                                         int maxFrameRate)
+    {
+        var id = NewTrackId("screen");
+        WebRtcRuntime.Check(
+            DesktopTrackCreate(WebRtcRuntime.Factory, kind, sourceId, id, maxFrameRate,
+                               out var handle),
+            $"capture '{title}'");
+
+        return new MediaStreamTrack(handle, MediaStreamTrackKind.Video, id, title,
+                                    isRemote: false, deviceId: null,
+                                    width: 0, height: 0, frameRate: maxFrameRate);
+    }
 
     public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints)
     {

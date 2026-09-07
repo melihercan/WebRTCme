@@ -214,27 +214,36 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
                 nameof(track));
 
         WebRtcRuntime.Check(
-            PeerConnectionAddTrack(_handle, windowsTrack.Handle, stream?.Id ?? string.Empty),
+            PeerConnectionAddTrack(_handle, windowsTrack.Handle, stream?.Id ?? string.Empty,
+                                   out var handle),
             $"add track '{track.Id}' to the peer connection");
 
-        var sender = new RTCRtpSender(track);
+        var sender = new RTCRtpSender(handle, track);
         lock (_senders)
             _senders.Add(sender);
         return sender;
     }
 
-    /// <summary>
-    /// Forgets the sender. The shim has no remove-track function, so the track keeps being sent
-    /// until the connection closes; the mesh teardown path calls this immediately before
-    /// <see cref="Close"/>, where the difference does not show.
-    /// </summary>
     public void RemoveTrack(IRTCRtpSender sender)
     {
         if (sender is null)
             return;
 
+        if (sender is not RTCRtpSender windowsSender)
+            throw new ArgumentException(
+                $"Sender must come from the Windows binding, got {sender.GetType().FullName}.",
+                nameof(sender));
+
         lock (_senders)
             _senders.Remove(sender);
+
+        if (_handle == IntPtr.Zero || windowsSender.Handle == IntPtr.Zero)
+            return;
+
+        // Idempotent, per W3C: removing a sender whose track is already gone is a quiet no-op.
+        WebRtcRuntime.Check(PeerConnectionRemoveTrack(_handle, windowsSender.Handle),
+                            "remove the track from the peer connection");
+        windowsSender.Detach();
     }
 
     public IRTCRtpSender[] GetSenders()
@@ -306,6 +315,13 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
         PeerConnectionClose(handle);
         _events.Dispose();
+
+        lock (_senders)
+        {
+            foreach (var sender in _senders)
+                sender.Dispose();
+            _senders.Clear();
+        }
 
         // Releasing revokes the observer, so no callback can arrive after this point and the
         // GCHandle behind user_data is safe to free.

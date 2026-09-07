@@ -1,14 +1,64 @@
+using static WebRTCme.Bindings.Maui.Windows.Interop;
+
 namespace WebRTCme.Windows;
 
 /// <summary>
-/// Stands for a track that has been added to a peer connection. The shim's
-/// <c>rtc_peer_connection_add_track</c> returns a status rather than a sender, so this carries
-/// only what the caller put in -- enough for <c>GetSenders()</c> to find a track by kind, which
-/// is what the signalling layer uses it for.
+/// What <c>add_track</c> hands back: the handle through which a track can be swapped or removed
+/// after the fact.
 /// </summary>
-internal sealed class RTCRtpSender(IMediaStreamTrack track) : IRTCRtpSender
+/// <remarks>
+/// <see cref="Track"/> is what this sender is currently sending, updated by
+/// <see cref="ReplaceTrack"/> — so <c>GetSenders().First(s =&gt; s.Track.Kind == ...)</c> keeps
+/// finding the right sender after a swap, which is how the signalling layer uses it.
+/// </remarks>
+internal sealed class RTCRtpSender : IRTCRtpSender
 {
-    public IMediaStreamTrack Track { get; } = track;
+    private IntPtr _handle;
+
+    internal RTCRtpSender(IntPtr handle, IMediaStreamTrack track)
+    {
+        _handle = handle;
+        Track = track;
+    }
+
+    internal IntPtr Handle => _handle;
+
+    public IMediaStreamTrack Track { get; private set; }
+
+    /// <summary>
+    /// Swaps the track without renegotiating — the whole point of replaceTrack over
+    /// remove-then-add. A null track stops the sender while leaving the transport in place, which
+    /// is how muting is done at the sender rather than the source.
+    /// </summary>
+    public Task ReplaceTrack(IMediaStreamTrack newTrack = null)
+    {
+        ObjectDisposedException.ThrowIf(_handle == IntPtr.Zero, this);
+
+        var handle = IntPtr.Zero;
+        if (newTrack is not null)
+        {
+            if (newTrack is not MediaStreamTrack windowsTrack)
+                throw new ArgumentException(
+                    $"Track must come from the Windows binding, got {newTrack.GetType().FullName}.",
+                    nameof(newTrack));
+
+            if (newTrack.Kind != Track?.Kind)
+                throw new ArgumentException(
+                    $"A {Track?.Kind} sender cannot take a {newTrack.Kind} track.",
+                    nameof(newTrack));
+
+            handle = windowsTrack.Handle;
+        }
+
+        WebRtcRuntime.Check(RtpSenderReplaceTrack(_handle, handle),
+                            "replace the track on the sender");
+
+        Track = newTrack;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Called after the peer connection has removed this sender.</summary>
+    internal void Detach() => Track = null;
 
     public IRTCDTMFSender Dtmf =>
         throw new NotSupportedException("DTMF is not supported by the Windows binding.");
@@ -25,14 +75,6 @@ internal sealed class RTCRtpSender(IMediaStreamTrack track) : IRTCRtpSender
     public Task<IRTCStatsReport> GetStats() =>
         throw new NotSupportedException("Stats are not exposed by the Windows binding.");
 
-    /// <summary>
-    /// Not supported: replacing a live sender's track needs an ABI function the shim does not
-    /// have yet. Renegotiating with a new track is the way to switch camera for now.
-    /// </summary>
-    public Task ReplaceTrack(IMediaStreamTrack newTrack = null) =>
-        throw new NotSupportedException(
-            "Replacing a track on a live sender is not supported by the Windows binding.");
-
     public Task SetParameters(RTCRtpSendParameters parameters) =>
         throw new NotSupportedException(
             "Send parameters are not configurable through the Windows binding.");
@@ -41,5 +83,10 @@ internal sealed class RTCRtpSender(IMediaStreamTrack track) : IRTCRtpSender
         throw new NotSupportedException(
             "Reassigning a sender's streams is not supported by the Windows binding.");
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        var handle = Interlocked.Exchange(ref _handle, IntPtr.Zero);
+        if (handle != IntPtr.Zero)
+            RtpSenderRelease(handle);
+    }
 }
