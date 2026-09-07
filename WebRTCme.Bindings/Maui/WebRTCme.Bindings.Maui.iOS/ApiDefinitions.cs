@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AVFoundation;
 using AudioToolbox;
 using AudioUnit;
@@ -2834,9 +2834,11 @@ namespace Webrtc
 		[Field ("kRTCG722CodecName", "__Internal")]
 		NSString kRTCG722CodecName { get; }
 
+		// iLBC was removed from WebRTC upstream and the symbol no longer exists in M152,
+		// so binding it fails at link time.
 		// extern const NSString *const _Nonnull kRTCIlbcCodecName;
-		[Field ("kRTCIlbcCodecName", "__Internal")]
-		NSString kRTCIlbcCodecName { get; }
+		//[Field ("kRTCIlbcCodecName", "__Internal")]
+		//NSString kRTCIlbcCodecName { get; }
 
 		// extern const NSString *const _Nonnull kRTCPcmuCodecName;
 		[Field ("kRTCPcmuCodecName", "__Internal")]

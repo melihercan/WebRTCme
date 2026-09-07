@@ -10,17 +10,22 @@
 
 #import <Foundation/Foundation.h>
 
-#import "RTCMacros.h"
-#import "RTCRtcpParameters.h"
-#import "RTCRtpCodecParameters.h"
-#import "RTCRtpEncodingParameters.h"
-#import "RTCRtpHeaderExtension.h"
+#import <WebRTC/RTCRtcpParameters.h>
+#import <WebRTC/RTCRtpCodecParameters.h>
+#import <WebRTC/RTCRtpEncodingParameters.h>
+#import <WebRTC/RTCRtpHeaderExtension.h>
+#import <WebRTC/RTCMacros.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /** Corresponds to webrtc::DegradationPreference. */
 typedef NS_ENUM(NSInteger, RTCDegradationPreference) {
-  RTCDegradationPreferenceDisabled,
+  RTCDegradationPreferenceMaintainFramerateAndResolution,
+  // TODO(webrtc:450044904): Switch downstream projects to
+  // RTCDegradationPreferenceMaintainFramerateAndResolution and remove
+  // RTCDegradationPreferenceDisabled.
+  RTCDegradationPreferenceDisabled =
+      RTCDegradationPreferenceMaintainFramerateAndResolution,
   RTCDegradationPreferenceMaintainFramerate,
   RTCDegradationPreferenceMaintainResolution,
   RTCDegradationPreferenceBalanced
@@ -33,17 +38,19 @@ RTC_OBJC_EXPORT
 @property(nonatomic, copy) NSString *transactionId;
 
 /** Parameters used for RTCP. */
-@property(nonatomic, readonly, copy) RTC_OBJC_TYPE(RTCRtcpParameters) * rtcp;
+@property(nonatomic, readonly) RTC_OBJC_TYPE(RTCRtcpParameters) * rtcp;
 
 /** An array containing parameters for RTP header extensions. */
-@property(nonatomic, readonly, copy)
+@property(nonatomic, readonly)
     NSArray<RTC_OBJC_TYPE(RTCRtpHeaderExtension) *> *headerExtensions;
 
 /** The currently active encodings in the order of preference. */
-@property(nonatomic, copy) NSArray<RTC_OBJC_TYPE(RTCRtpEncodingParameters) *> *encodings;
+@property(nonatomic, copy)
+    NSArray<RTC_OBJC_TYPE(RTCRtpEncodingParameters) *> *encodings;
 
 /** The negotiated set of send codecs in order of preference. */
-@property(nonatomic, copy) NSArray<RTC_OBJC_TYPE(RTCRtpCodecParameters) *> *codecs;
+@property(nonatomic, copy)
+    NSArray<RTC_OBJC_TYPE(RTCRtpCodecParameters) *> *codecs;
 
 /**
  * Degradation preference in case of CPU adaptation or constrained bandwidth.

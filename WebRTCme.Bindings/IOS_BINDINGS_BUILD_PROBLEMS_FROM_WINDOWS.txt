@@ -1,4 +1,4 @@
-This has been almost always problematic.
+﻿This has been almost always problematic.
 
 - Earlier, Xamarin.iOS binding (VS v16.9) build was not possible, and the workaround was:
 
@@ -19,4 +19,38 @@ For now I will build it on macOS and copy/use DLL instead of the project.
 - For VS2022 v17.7.5, MAUI.iOS binding build also fails, and the workaround is to remove SessionId field:
 https://github.com/xamarin/xamarin-macios/issues/18308#issuecomment-1563052193
 
+- Updating the Mac Catalyst framework from Windows will silently break it.
+
+git tracks five entries in WebRTCme.Bindings.Maui.MacCatalyst/WebRTC.framework as symlinks
+(mode 120000): Headers, Modules, Resources, WebRTC, and Versions/Current. With
+core.symlinks=false, which is what Windows checks out with, those arrive as small text files
+containing the target path. Copying a freshly extracted framework over the folder replaces them
+with real files, git records them as regular files, and the framework stops working on macOS --
+the linker looks for WebRTC.framework/WebRTC and finds a 23-byte text file.
+
+Update only the real files under Versions/A/ and leave the five symlink entries alone. The
+top-level names resolve through Versions/Current, so replacing Versions/A/WebRTC is enough.
+
+Windows also cannot extract the artifact zip correctly for the same reason ("symlink error"
+during unzip). Unzip it on macOS if a full framework is needed.
+
+The iOS framework has no symlinks -- it is flat -- so it can be replaced from Windows safely.
+
+- Verifying a binding without building an app.
+
+Binding projects only compile C#; a [Field (..., "__Internal")] that names a symbol the framework
+no longer exports fails when an app links, not when the binding builds. That is how iLBC slipped
+through: kRTCIlbcCodecName was dropped upstream and the binding still declared it.
+
+The cheap check, run against the framework binary on a Mac:
+
+  nm -gU WebRTC.framework/WebRTC | awk '{print $3}' | sed 's/^_//' | sort -u > symbols.txt
+
+  grep -E '^[[:space:]]*\[Field \("[A-Za-z0-9_]+", "__Internal"\)\]' ApiDefinitions.cs |
+    sed -E 's/.*\("([A-Za-z0-9_]+)".*/\1/' | sort -u > fields.txt
+
+  comm -23 fields.txt symbols.txt      # anything listed would be a link error
+
+Note the leading [[:space:]]* in that grep: without it the pattern also matches commented-out bindings and
+reports false positives for symbols that were already dealt with.
 

@@ -10,7 +10,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import "RTCMacros.h"
+#import <WebRTC/RTCMacros.h>
+
+@class RTC_OBJC_TYPE(RTCDtlsFingerprint);
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,18 +20,28 @@ RTC_OBJC_EXPORT
 @interface RTC_OBJC_TYPE (RTCCertificate) : NSObject <NSCopying>
 
 /** Private key in PEM. */
-@property(nonatomic, readonly, copy) NSString *private_key;
+@property(nonatomic, readonly) NSString *private_key;
 
 /** Public key in an x509 cert encoded in PEM. */
-@property(nonatomic, readonly, copy) NSString *certificate;
+@property(nonatomic, readonly) NSString *certificate;
 
 /**
- * Initialize an RTCCertificate with PEM strings for private_key and certificate.
+ * Initialize an RTCCertificate with PEM strings for private_key and
+ * certificate.
  */
 - (instancetype)initWithPrivateKey:(NSString *)private_key
-                       certificate:(NSString *)certificate NS_DESIGNATED_INITIALIZER;
+                       certificate:(NSString *)certificate
+    NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init NS_UNAVAILABLE;
+
+/**
+ * The fingerprints of the certificate, one per digest algorithm, derived from
+ * its PEM representation. Mirrors the WebIDL RTCCertificate.getFingerprints().
+ * Returns an empty array if the fingerprints cannot be computed. See
+ * https://w3c.github.io/webrtc-pc/#dom-rtccertificate-getfingerprints
+ */
+- (NSArray<RTC_OBJC_TYPE(RTCDtlsFingerprint) *> *)getFingerprints;
 
 /** Generate a new certificate for 're' use.
  *
@@ -37,7 +49,8 @@ RTC_OBJC_EXPORT
  *  provided.
  *  - name: "ECDSA" or "RSASSA-PKCS1-v1_5"
  */
-+ (nullable RTC_OBJC_TYPE(RTCCertificate) *)generateCertificateWithParams:(NSDictionary *)params;
++ (nullable RTC_OBJC_TYPE(RTCCertificate) *)generateCertificateWithParams:
+    (NSDictionary *)params;
 
 @end
 
