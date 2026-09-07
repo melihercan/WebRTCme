@@ -72,8 +72,14 @@ internal sealed class RTCRtpSender : IRTCRtpSender
     public RTCRtpSendParameters GetParameters() =>
         throw new NotSupportedException("Send parameters are not exposed by the Windows binding.");
 
+    // The shim has no stats entry point: none of its rtc_* exports touch stats, and libwebrtc's
+    // own GetStats takes a C++ collector callback, which P/Invoke cannot supply. Reaching stats
+    // here means adding an export to WebRtcInterop.dll, whose source lives in the WebRTCnative
+    // repository rather than this one.
     public Task<IRTCStatsReport> GetStats() =>
-        throw new NotSupportedException("Stats are not exposed by the Windows binding.");
+        throw new NotSupportedException(
+            "Stats are not exposed by the Windows binding: WebRtcInterop.dll has no stats "
+            + "entry point. Adding one requires a change to the native shim.");
 
     public Task SetParameters(RTCRtpSendParameters parameters) =>
         throw new NotSupportedException(
