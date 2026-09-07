@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Channels;
 using static WebRTCme.Bindings.Maui.Windows.Interop;
 
 namespace WebRTCme.Windows;
@@ -26,9 +25,7 @@ namespace WebRTCme.Windows;
 /// </remarks>
 internal sealed class RTCPeerConnection : IRTCPeerConnection
 {
-    private readonly Channel<Action> _events =
-        Channel.CreateUnbounded<Action>(new UnboundedChannelOptions { SingleReader = true });
-
+    private readonly EventDispatcher _events = new();
     private readonly List<IRTCRtpSender> _senders = [];
     private readonly RTCConfiguration _configuration;
     private readonly GCHandle _self;
@@ -43,9 +40,6 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
         _configuration = configuration ?? new RTCConfiguration();
         _self = GCHandle.Alloc(this);
 
-        // Raise events in arrival order, one at a time, off the signalling thread.
-        _ = Task.Run(DispatchEventsAsync);
-
         unsafe
         {
             var observer = new PeerConnectionObserver
@@ -54,7 +48,8 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
                 OnConnectionState = &RaiseConnectionState,
                 OnSignalingState = &RaiseSignalingState,
                 OnTrack = &RaiseTrack,
-                OnRenegotiationNeeded = &RaiseRenegotiationNeeded
+                OnRenegotiationNeeded = &RaiseRenegotiationNeeded,
+                OnDataChannel = &RaiseDataChannel
             };
 
             using var servers = new NativeIceServers(_configuration.IceServers);
@@ -113,10 +108,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public event EventHandler OnSignallingStateChange;
     public event EventHandler<IRTCTrackEvent> OnTrack;
 
-    /// <summary>Never raised: the shim has no data channel support.</summary>
-#pragma warning disable CS0067
     public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
-#pragma warning restore CS0067
 
     // ---- negotiation --------------------------------------------------------
 
@@ -251,6 +243,49 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
             return [.. _senders];
     }
 
+    // ---- data channels ------------------------------------------------------
+
+    /// <summary>
+    /// Opens a data channel. Called before the offer it appears as an m=application section;
+    /// called afterwards it raises <see cref="OnNegotiationNeeded"/>, as in the W3C API.
+    /// </summary>
+    public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+        ThrowIfClosed();
+
+        // The ABI takes UTF-8 and -1 for the unset optionals.
+        var protocol = options?.Protocol is null
+            ? IntPtr.Zero
+            : Marshal.StringToCoTaskMemUTF8(options.Protocol);
+
+        try
+        {
+            var init = new DataChannelInit
+            {
+                Protocol = protocol,
+                Ordered = (options?.Ordered ?? true) ? 1 : 0,
+                MaxPacketLifeTime = options?.MaxPacketLifeTime ?? -1,
+                MaxRetransmits = options?.MaxRetransmits ?? -1,
+                Negotiated = (options?.Negotiated ?? false) ? 1 : 0,
+                Id = options?.Id ?? -1
+            };
+
+            WebRtcRuntime.Check(
+                PeerConnectionCreateDataChannel(_handle, label, init, out var channel),
+                $"create the data channel '{label}'");
+
+            return new RTCDataChannel(channel, options);
+        }
+        finally
+        {
+            // Safe to free straight away: the shim copies the configuration into WebRTC's own
+            // during the call and keeps none of these pointers.
+            if (protocol != IntPtr.Zero)
+                Marshal.FreeCoTaskMem(protocol);
+        }
+    }
+
     // ---- lifetime -----------------------------------------------------------
 
     public void Close()
@@ -270,7 +305,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
             return;
 
         PeerConnectionClose(handle);
-        _events.Writer.TryComplete();
+        _events.Dispose();
 
         // Releasing revokes the observer, so no callback can arrive after this point and the
         // GCHandle behind user_data is safe to free.
@@ -339,6 +374,25 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void RaiseDataChannel(IntPtr userData, IntPtr channel)
+    {
+        var self = FromUserData(userData);
+        if (self is null)
+        {
+            // Rule 1: the handle is ours even if we have nowhere to put it.
+            DataChannelRelease(channel);
+            return;
+        }
+
+        // Wrapped here rather than on the dispatcher: the wrapper registers the observer, and
+        // the channel can open before a queued action would run -- which would lose OnOpen.
+        // The constructor only reads the label and registers, so it does not block signalling.
+        var wrapper = new RTCDataChannel(channel);
+
+        self.Post(() => self.OnDataChannel?.Invoke(self, new RTCDataChannelEvent(wrapper)));
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void RaiseRenegotiationNeeded(IntPtr userData)
     {
         var self = FromUserData(userData);
@@ -395,22 +449,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
     // ---- event dispatch -----------------------------------------------------
 
-    private void Post(Action action) => _events.Writer.TryWrite(action);
-
-    private async Task DispatchEventsAsync()
-    {
-        await foreach (var action in _events.Reader.ReadAllAsync())
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"######## Peer connection event handler failed: {ex}");
-            }
-        }
-    }
+    private void Post(Action action) => _events.Post(action);
 
     private void UpdateConnectionState(RTCPeerConnectionState state)
     {
@@ -495,11 +534,6 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public IRTCSctpTransport Sctp => null;
 
     public Task<IRTCIdentityAssertion> PeerIdentity => Task.FromResult<IRTCIdentityAssertion>(null);
-
-    public IRTCDataChannel CreateDataChannel(string label, RTCDataChannelInit options = null) =>
-        throw new NotSupportedException(
-            "Data channels are not supported by the Windows binding: the interop ABI has no " +
-            "data channel functions yet.");
 
     public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init = null) =>
         throw new NotSupportedException("Transceivers are not exposed by the Windows binding.");

@@ -65,6 +65,11 @@ public static partial class Interop
     public const int MediaKindAudio = 0;
     public const int MediaKindVideo = 1;
 
+    public const int DataChannelStateConnecting = 0;
+    public const int DataChannelStateOpen = 1;
+    public const int DataChannelStateClosing = 2;
+    public const int DataChannelStateClosed = 3;
+
     public const int AudioDeviceRecording = 0;
     public const int AudioDevicePlayout = 1;
 
@@ -87,6 +92,22 @@ public static partial class Interop
     {
         public IntPtr IceServers;      // IceServer*
         public int IceServerCount;
+    }
+
+    /// <summary>
+    /// W3C RTCDataChannelInit. The optional members are plain ints with -1 for
+    /// unset rather than nullables, matching the ABI: it keeps the struct
+    /// blittable, and -1 is not a value any of these fields can take.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct DataChannelInit
+    {
+        public IntPtr Protocol;        // UTF-8, nullable
+        public int Ordered;            // 0 or 1; 1 is the W3C default
+        public int MaxPacketLifeTime;  // milliseconds, or -1
+        public int MaxRetransmits;     // or -1
+        public int Negotiated;         // 0 or 1; 0 is the W3C default
+        public int Id;                 // only meaningful when negotiated, else -1
     }
 
     /// <summary>An I420 frame. The planes are valid only for the duration of
@@ -120,6 +141,21 @@ public static partial class Interop
         public delegate* unmanaged[Cdecl]<IntPtr, int, void> OnSignalingState;
         public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int, IntPtr, void> OnTrack;
         public delegate* unmanaged[Cdecl]<IntPtr, void> OnRenegotiationNeeded;
+        // Appended in the ABI rather than inserted, so the fields above keep
+        // their offsets. Measured at 40; the struct is 48 bytes.
+        public delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> OnDataChannel;
+    }
+
+    /// <summary>
+    /// Registered separately from the channel, because a channel arriving
+    /// through <c>OnDataChannel</c> does not exist until the callback runs.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct DataChannelObserver
+    {
+        public delegate* unmanaged[Cdecl]<IntPtr, int, void> OnState;
+        public delegate* unmanaged[Cdecl]<IntPtr, byte*, int, int, void> OnMessage;
+        public delegate* unmanaged[Cdecl]<IntPtr, ulong, void> OnBufferedAmountChange;
     }
 
     // -------------------------------------------------------------- library
@@ -260,6 +296,57 @@ public static partial class Interop
                    StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int PeerConnectionAddTrack(IntPtr pc, IntPtr track, string streamId);
+
+    // -------------------------------------------------------- data channels
+    //
+    // Creating a channel before the offer puts an m=application section in the
+    // SDP; creating one afterwards raises OnRenegotiationNeeded, as in the W3C
+    // API.
+
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_create_data_channel",
+                   StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int PeerConnectionCreateDataChannel(
+        IntPtr pc, string label, in DataChannelInit init, out IntPtr channel);
+
+    /// <summary>Register before the channel opens, or the open transition is
+    /// missed -- for an incoming channel that means inside the callback that
+    /// delivered it.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_set_observer")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelSetObserver(
+        IntPtr channel, in DataChannelObserver observer, IntPtr userData);
+
+    /// <summary>Asynchronous: the status says the payload was accepted on an
+    /// open channel, not that it was delivered.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_send")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int DataChannelSend(
+        IntPtr channel, byte* data, int size, int isBinary);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_get_label")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelGetLabel(IntPtr channel, out IntPtr label);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_get_id")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelGetId(IntPtr channel, out int id);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_get_state")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelGetState(IntPtr channel, out int state);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_get_buffered_amount")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelGetBufferedAmount(IntPtr channel, out ulong amount);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_close")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int DataChannelClose(IntPtr channel);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_data_channel_release")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void DataChannelRelease(IntPtr channel);
 
     // --------------------------------------------------------- video frames
     //

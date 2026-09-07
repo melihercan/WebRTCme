@@ -42,12 +42,18 @@ namespace WebRTCme.Middleware
             _connection = _connectionFactory.SelectConnection(ConnectionType.MediaSoup);
             ConnectionTypeNames = Enum.GetNames(typeof(ConnectionType));
 
-            // Default values for debugging.
+            // Default values for debugging. The name identifies the peer in the signalling
+            // server's log, so every platform needs its own -- Windows reporting itself as
+            // "Blazor" made a native peer indistinguishable from a browser one.
             var platformName = string.Empty;
             if (DeviceInfo.Platform == DevicePlatform.Android)
                 platformName = "Android";
             else if (DeviceInfo.Platform == DevicePlatform.iOS)
                 platformName = "iOS";
+            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                platformName = "Windows";
+            else if (DeviceInfo.Platform == DevicePlatform.MacCatalyst)
+                platformName = "MacCatalyst";
             else
                 platformName = "Blazor";
             ConnectionParameters.Room = "hello";
