@@ -16,7 +16,7 @@ namespace WebRTCme
 
         IRTCRtpSender Sender { get; }
 
-        void SetCodecPreferences(RTCRtpCodecCapability[] codecs);
+        void SetCodecPreferences(RTCRtpCodec[] codecs);
 
         void Stop();
     }

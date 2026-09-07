@@ -6,7 +6,7 @@ namespace WebRTCme
 {
     public class RTCRtpCapabilities
     {
-        public RTCRtpCodecCapability[] Codecs { get; set; }
+        public RTCRtpCodec[] Codecs { get; set; }
 
         public RTCRtpHeaderExtensionCapability[] HeaderExtensions { get; set; }
     }

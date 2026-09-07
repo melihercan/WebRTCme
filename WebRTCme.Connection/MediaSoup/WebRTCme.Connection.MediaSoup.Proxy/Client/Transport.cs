@@ -117,7 +117,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             Handler.Close();
         }
 
-        public Task</*****IRTCStatsReport****/string> GetStatsAsync()
+        public Task<IRTCStatsReport> GetStatsAsync()
         {
             if (Closed)
                 throw new Exception("Closed");

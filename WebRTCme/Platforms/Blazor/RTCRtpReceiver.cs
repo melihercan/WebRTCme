@@ -49,8 +49,7 @@ namespace WebRTCme.Blazor
             NativeObject, "getParameters");
 
         public async Task<IRTCStatsReport> GetStats() =>
-            await Task.FromResult(new RTCStatsReport(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                NativeObject, "getStats")));
+            (await JsRuntime.GetJsStatsAsync(NativeObject)).ToStatsReport();
 
         public RTCRtpSynchronizationSource[] GetSynchronizationSources()
         {

@@ -28,8 +28,7 @@ namespace WebRTCme.Blazor
             JsRuntime.CallJsMethod<RTCRtpSendParameters>(NativeObject, "getParameters");
 
         public async Task<IRTCStatsReport> GetStats() =>
-            await Task.FromResult(new RTCStatsReport(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                NativeObject, "getStats")));
+            (await JsRuntime.GetJsStatsAsync(NativeObject)).ToStatsReport();
 
         public Task SetParameters(RTCRtpSendParameters parameters) =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "setParameters", parameters).AsTask();

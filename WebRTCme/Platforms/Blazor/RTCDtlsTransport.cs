@@ -25,6 +25,9 @@ namespace WebRTCme.Blazor
 
         public RTCDtlsTransportState State => GetNativeProperty<RTCDtlsTransportState>("state");
 
+        public byte[][] GetRemoteCertificates() =>
+            Array.ConvertAll(JsRuntime.GetJsRemoteCertificates(NativeObject), Convert.FromBase64String);
+
         public event EventHandler OnStateChange;
         public event EventHandler<IRTCErrorEvent> OnError;
     }

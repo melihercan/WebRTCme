@@ -13,16 +13,6 @@ namespace WebRTCme.iOS
 {
     internal class RTCPeerConnection : NativeBase<Webrtc.RTCPeerConnection>, IRTCPeerConnection, Webrtc.IRTCPeerConnectionDelegate
     {
-        /// <summary>
-        /// //////////////REMOVE THIS ONCE BLAZOR CALLBACKS IMPLEMENTED
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public Task<string> GetStatsHack()
-        {
-            throw new NotImplementedException();
-        }
-
         private static Webrtc.RTCMediaConstraints NativeDefaultRTCMediaConstraints
         {
             get

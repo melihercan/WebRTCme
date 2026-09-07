@@ -1,4 +1,4 @@
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,6 +169,23 @@ namespace WebRTCme.Bindings.Blazor.Extensions
                 .ConfigureAwait(false);
             return ret;
         }
+
+        public static async ValueTask<Dictionary<string, Dictionary<string, JsonElement>>>
+            GetJsStatsAsync(this IJSRuntime jsRuntime, object parent, params object[] args)
+        {
+            var invokeParams = new object[] { parent };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            return await jsRuntime
+                .InvokeAsync<Dictionary<string, Dictionary<string, JsonElement>>>(
+                    "JsInterop.getStats", invokeParams)
+                .ConfigureAwait(false);
+        }
+
+        public static string[] GetJsRemoteCertificates(this IJSRuntime jsRuntime, object parent) =>
+            jsRuntime.Invoke<string[]>("JsInterop.getRemoteCertificates", parent);
 
         public static IDisposable AddJsEventListener(this IJSRuntime jsRuntime,
             JsObjectRef jsObjectRef, string property, string event_, JsEventHandler callBack)

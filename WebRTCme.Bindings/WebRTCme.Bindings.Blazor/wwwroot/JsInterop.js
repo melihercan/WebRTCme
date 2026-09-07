@@ -320,33 +320,7 @@
     public.callMethodAsync = async function (parent, method, ...args) {
         let parentObject = getParentObject(parent);
         let methodObject = getPropertyObject(parentObject, method);
-
-    /////// VERY UGLY HACK FOR RTCPeerConnection.getStats till I sort callback functions from JS.
-    let ret = undefined;
-
-    if (method === 'getStats') {
-            let cameraStats = await methodObject.apply(parentObject, args);
-            let statsString = '';
-            cameraStats?.forEach(res => {
-                statsString += '<h3>Report type=';
-                statsString += res.type;
-                statsString += '</h3>\n';
-                statsString += 'id ' + res.id + '<br>\n';
-                statsString += 'time ' + res.timestamp + '<br>\n';
-                Object.keys(res).forEach(k => {
-                    if (k !== 'timestamp' && k !== 'type' && k !== 'id') {
-                        statsString += k + ': ' + res[k] + '<br>\n';
-                    }
-                });
-            });
-            ret = statsString;
-    }
-    else
-
-
-
-
-        /****let****/ ret = await methodObject.apply(parentObject, args);
+        let ret = await methodObject.apply(parentObject, args);
         if (ret !== undefined) {
             if (ret !== null && typeof(ret) === 'object') {
                 let objectRef = addObjectRef(ret);
@@ -362,6 +336,57 @@
             }
         }
     }
+
+    /**
+     * Awaits getStats on the parent object and flattens the RTCStatsReport into a plain object,
+     * keyed by stats id. The report is a maplike, which does not survive JSON serialization, and
+     * its entries are snapshots, so there is nothing to keep an object reference to.
+     *
+     * @param {any} parent: Parent object. It can be JS object reference or a string.
+     * @param {...any} args: Argument list of getStats, i.e. an optional track selector.
+     */
+    public.getStats = async function (parent, ...args) {
+        let parentObject = getParentObject(parent);
+        let report = await parentObject.getStats.apply(parentObject, args);
+        let result = {};
+        report?.forEach(function (stats, id) {
+            let entry = {};
+            for (let key in stats) {
+                let value = stats[key];
+                if (typeof value === 'function') {
+                    continue;
+                }
+                if (value === Infinity) {
+                    value = "Infinity";
+                }
+                entry[key] = value;
+            }
+            result[id] = entry;
+        });
+        return result;
+    }
+
+    /**
+     * Calls getRemoteCertificates on the parent object and base64-encodes each ArrayBuffer, since
+     * binary values do not survive the JSON bridge.
+     *
+     * @param {any} parent: Parent object. It can be JS object reference or a string.
+     */
+    public.getRemoteCertificates = function (parent) {
+        let parentObject = getParentObject(parent);
+        let certificates = parentObject.getRemoteCertificates();
+        let result = [];
+        for (let i = 0; i < certificates.length; i++) {
+            let bytes = new Uint8Array(certificates[i]);
+            let binary = '';
+            for (let j = 0; j < bytes.length; j++) {
+                binary += String.fromCharCode(bytes[j]);
+            }
+            result.push(btoa(binary));
+        }
+        return result;
+    }
+
 
     /**
      * Adds a new event listener. .NET callback will be invoken on JS event. It returns an id as event reference. 

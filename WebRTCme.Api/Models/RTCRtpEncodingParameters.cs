@@ -8,6 +8,8 @@ namespace WebRTCme
     {
         public bool Active { get; set; } = true;
 
+        public RTCRtpCodec Codec { get; set; }
+
         public ulong? MaxBitrate { get; set; }
 
         public double? MaxFramerate { get; set; }

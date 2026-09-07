@@ -376,7 +376,10 @@ IMediaStream remMedia;
                                 await Task.Delay(2000);
 
                                 var txStats = await _sendTransport.GetStatsAsync();
-                                Console.WriteLine(txStats);
+                                foreach (var entry in txStats)
+                                    Console.WriteLine($"{entry.Value.Type} {entry.Key}: " +
+                                        string.Join(", ", entry.Value.Members
+                                            .Select(member => $"{member.Key}={member.Value}")));
 
                                 //var rxStats = await _recvTransport.GetStatsAsync();
 

@@ -194,8 +194,7 @@ namespace WebRTCme.Blazor
         }
 
         public async Task<IRTCStatsReport> GetStats() =>
-            await Task.FromResult(new RTCStatsReport(JsRuntime, await JsRuntime.CallJsMethodAsync<JsObjectRef>(
-                NativeObject, "getStats")));
+            (await JsRuntime.GetJsStatsAsync(NativeObject)).ToStatsReport();
 
         public IRTCRtpTransceiver[] GetTransceivers()
         {
@@ -229,16 +228,6 @@ namespace WebRTCme.Blazor
             .AsTask();
 
 
-
-        /// <summary>
-     /// ///////////////////////////////// THIS IS A HACK, REMOVE THIS ONCE JS callbacks are implemented.
-        /// Currenlty the call is implemented in JsInterop.js file, remove that too
-      /// </summary>
-        /// <returns></returns>
-     public async Task<string> GetStatsHack()
-    {
-         return await JsRuntime.CallJsMethodAsync<string>(NativeObject, "getStats");
-    }
 
     }
 }

@@ -577,9 +577,6 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public Task<IRTCStatsReport> GetStats() =>
         throw new NotSupportedException("Stats are not exposed by the Windows binding.");
 
-    public Task<string> GetStatsHack() =>
-        throw new NotSupportedException("Stats are not exposed by the Windows binding.");
-
     public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
         throw new NotSupportedException("Certificate generation is not exposed by the Windows binding.");
 
