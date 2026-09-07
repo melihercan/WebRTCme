@@ -54,3 +54,34 @@ The cheap check, run against the framework binary on a Mac:
 Note the leading [[:space:]]* in that grep: without it the pattern also matches commented-out bindings and
 reports false positives for symbols that were already dealt with.
 
+- NETSDK1032 when building for the iOS simulator from the command line.
+
+  error NETSDK1032: The RuntimeIdentifier platform 'iossimulator-x64' and the
+  PlatformTarget 'arm64' must be compatible.
+
+Nothing in the repository causes this. It comes from WebRTCme.DemoApp.Maui.csproj.user, which
+Visual Studio writes when a physical iPhone is selected as the iOS target, and which contains:
+
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)'=='iOS'">
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+    <PlatformTarget>arm64</PlatformTarget>
+  </PropertyGroup>
+
+-r on the command line is a global property and wins for RuntimeIdentifier, but PlatformTarget is
+not passed, so the .user value survives and the two disagree. The file is gitignored and untracked,
+so this only affects the machine it was written on. Confirmed by evaluating the property with and
+without the file present: arm64 with, x64 without.
+
+Three ways out, in order of least disruption:
+
+  1. dotnet build ... -f net10.0-ios -r iossimulator-x64 -p:PlatformTarget=x64
+     Leaves the file, and so leaves Visual Studio's device selection, alone.
+
+  2. Select a simulator rather than a device in Visual Studio, which rewrites the file.
+
+  3. Delete the .csproj.user. Visual Studio recreates it, but the selected iOS device, the default
+     Android device and the active debug profile are lost with it.
+
+On an Apple Silicon Mac use iossimulator-arm64 and PlatformTarget arm64 instead; the simulator
+slice of the xcframework is fat (arm64 and x86_64), so either resolves.
+
