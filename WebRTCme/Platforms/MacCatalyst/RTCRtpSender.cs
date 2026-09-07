@@ -28,7 +28,13 @@ namespace WebRTCme.MacCatalyst
 
         public Task<IRTCStatsReport> GetStats()
         {
-            throw new NotImplementedException();
+            // The Objective-C category binds statisticsForSender:/statisticsForReceiver: to the
+            // generated RTCRtpSender/RTCRtpReceiver classes, but senders and receivers reach us as
+            // protocol wrappers, so there is nothing valid to pass. Reaching them needs the binding
+            // definition changed to take the protocol interface.
+            throw new NotSupportedException(
+                "Per-sender stats are not reachable through the current iOS binding; "
+                + "use RTCPeerConnection.GetStats() and select the sender entries from the report.");
         }
 
         public Task ReplaceTrack(IMediaStreamTrack newTrack = null)

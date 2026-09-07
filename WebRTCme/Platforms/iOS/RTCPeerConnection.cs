@@ -208,9 +208,12 @@ namespace WebRTCme.iOS
             NativeObject.Senders
                 .Select(nativeSender => new RTCRtpSender(nativeSender)).ToArray();
 
-        public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
+        public Task<IRTCStatsReport> GetStats()
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            Webrtc.RTCPeerConnection_Stats.StatisticsWithCompletionHandler(NativeObject,
+                nativeReport => tcs.Complete(nativeReport));
+            return tcs.Task;
         }
 
         public IRTCRtpTransceiver[] GetTransceivers() =>
