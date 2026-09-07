@@ -9,8 +9,12 @@ namespace WebRTCme.Android
     internal class RTCRtpSender : NativeBase<Webrtc.RtpSender>, IRTCRtpSender
     {
         public void Dispose() { }
-        public RTCRtpSender(Webrtc.RtpSender nativeRtpSender) : base(nativeRtpSender)
+        private readonly Webrtc.PeerConnection _nativePeerConnection;
+
+        public RTCRtpSender(Webrtc.RtpSender nativeRtpSender,
+            Webrtc.PeerConnection nativePeerConnection = null) : base(nativeRtpSender)
         {
+            _nativePeerConnection = nativePeerConnection;
         }
 
         public IRTCDTMFSender Dtmf => new RTCDTMFSender(NativeObject.Dtmf());
@@ -24,7 +28,13 @@ namespace WebRTCme.Android
 
         public Task<IRTCStatsReport> GetStats()
         {
-            throw new NotImplementedException();
+            if (_nativePeerConnection is null)
+                throw new InvalidOperationException(
+                    "This sender was not created from a peer connection, so it cannot report stats.");
+
+            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            _nativePeerConnection.GetStats(NativeObject, new StatsExtensions.StatsCollectorProxy(tcs));
+            return tcs.Task;
         }
 
         public Task SetParameters(RTCRtpSendParameters parameters)

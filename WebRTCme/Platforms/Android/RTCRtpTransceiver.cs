@@ -9,8 +9,12 @@ namespace WebRTCme.Android
     internal class RTCRtpTransceiver : NativeBase<Webrtc.RtpTransceiver>, IRTCRtpTransceiver
     {
         public void Dispose() { }
-        public RTCRtpTransceiver(Webrtc.RtpTransceiver nativeTransceiver) : base(nativeTransceiver)
+        private readonly Webrtc.PeerConnection _nativePeerConnection;
+
+        public RTCRtpTransceiver(Webrtc.RtpTransceiver nativeTransceiver,
+            Webrtc.PeerConnection nativePeerConnection = null) : base(nativeTransceiver)
         {
+            _nativePeerConnection = nativePeerConnection;
         }
 
         public RTCRtpTransceiverDirection CurrentDirection =>
@@ -24,9 +28,9 @@ namespace WebRTCme.Android
 
         public string Mid => NativeObject.Mid;
 
-        public IRTCRtpReceiver Receiver => new RTCRtpReceiver(NativeObject.Receiver);
+        public IRTCRtpReceiver Receiver => new RTCRtpReceiver(NativeObject.Receiver, _nativePeerConnection);
 
-        public IRTCRtpSender Sender => new RTCRtpSender(NativeObject.Sender);
+        public IRTCRtpSender Sender => new RTCRtpSender(NativeObject.Sender, _nativePeerConnection);
 
 
         public void SetCodecPreferences(RTCRtpCodec[] codecs)

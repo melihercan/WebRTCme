@@ -95,7 +95,7 @@ namespace WebRTCme.Android
             RTCRtpSender sender = null;
 
             sender = new RTCRtpSender(NativeObject.AddTrack(((MediaStreamTrack)track).NativeObject,
-                new List<string> { stream.Id }));
+                new List<string> { stream.Id }), NativeObject);
 
             return sender;
         }
@@ -105,9 +105,10 @@ namespace WebRTCme.Android
             RTCRtpTransceiver transceiver;
 
             if (init is null)
-                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative()));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative()), NativeObject);
             else
-                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()));
+                transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()),
+                    NativeObject);
 
             //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
 
@@ -120,10 +121,10 @@ namespace WebRTCme.Android
 
             if (init is null)
                 transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(
-                    ((MediaStreamTrack)track).NativeObject));
+                    ((MediaStreamTrack)track).NativeObject), NativeObject);
             else
                 transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(
-                    ((MediaStreamTrack)track).NativeObject, init.ToNative()));
+                    ((MediaStreamTrack)track).NativeObject, init.ToNative()), NativeObject);
 
             //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
 
@@ -166,7 +167,8 @@ namespace WebRTCme.Android
         }
 
         public IRTCRtpReceiver[] GetReceivers() =>
-            NativeObject.Receivers.Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver)).ToArray();
+            NativeObject.Receivers
+                .Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver, NativeObject)).ToArray();
 
         //public IRTCRtpReceiver[] GetReceivers()
         //{
@@ -175,7 +177,8 @@ namespace WebRTCme.Android
         //}
 
         public IRTCRtpSender[] GetSenders() =>
-            NativeObject.Senders.Select(nativeSender => new RTCRtpSender(nativeSender)).ToArray();
+            NativeObject.Senders
+                .Select(nativeSender => new RTCRtpSender(nativeSender, NativeObject)).ToArray();
 
 
         //public IRTCRtpSender[] GetSenders()
@@ -184,14 +187,16 @@ namespace WebRTCme.Android
         //    return _sendersDictionary.Values.ToArray();
         //}
 
-        public Task<IRTCStatsReport> GetStats() //// TODO: REWORK STATS
+        public Task<IRTCStatsReport> GetStats()
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            NativeObject.GetStats(new StatsExtensions.StatsCollectorProxy(tcs));
+            return tcs.Task;
         }
 
         public IRTCRtpTransceiver[] GetTransceivers() =>
             NativeObject.Transceivers
-                .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();
+                .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver, NativeObject)).ToArray();
 
         //public IRTCRtpTransceiver[] GetTransceivers()
         //{

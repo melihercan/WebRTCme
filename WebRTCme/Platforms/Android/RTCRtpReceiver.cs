@@ -10,8 +10,12 @@ namespace WebRTCme.Android
     internal class RTCRtpReceiver : NativeBase<Webrtc.RtpReceiver>, IRTCRtpReceiver
     {
         public void Dispose() { }
-        public RTCRtpReceiver(RtpReceiver nativeReceiver) : base(nativeReceiver)
+        private readonly Webrtc.PeerConnection _nativePeerConnection;
+
+        public RTCRtpReceiver(RtpReceiver nativeReceiver,
+            Webrtc.PeerConnection nativePeerConnection = null) : base(nativeReceiver)
         {
+            _nativePeerConnection = nativePeerConnection;
         }
 
         public IMediaStreamTrack Track => new MediaStreamTrack(NativeObject.Track());
@@ -34,7 +38,13 @@ namespace WebRTCme.Android
 
         public Task<IRTCStatsReport> GetStats()
         {
-            throw new NotImplementedException();
+            if (_nativePeerConnection is null)
+                throw new InvalidOperationException(
+                    "This receiver was not created from a peer connection, so it cannot report stats.");
+
+            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            _nativePeerConnection.GetStats(NativeObject, new StatsExtensions.StatsCollectorProxy(tcs));
+            return tcs.Task;
         }
 
         public RTCRtpSynchronizationSource[] GetSynchronizationSources()
