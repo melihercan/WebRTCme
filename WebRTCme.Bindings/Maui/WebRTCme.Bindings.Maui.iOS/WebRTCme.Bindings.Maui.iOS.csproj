@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
@@ -13,8 +13,18 @@
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
 
+  <!--
+    An xcframework rather than a bare framework, so the binding carries the simulator slice
+    (arm64 + x86_64) alongside the device one and the demo app can run on the iOS simulator.
+    The dSYMs the artifact ships are not committed: they are 559MB against 37MB for the
+    frameworks themselves, and the manifest's DebugSymbolsPath entries were removed with them
+    so nothing points at a directory that is not there.
+
+    Mac Catalyst deliberately stays on a plain framework; it has only one slice, and its
+    Versions/A layout uses symlinks that a Windows checkout cannot represent.
+  -->
   <ItemGroup>
-    <NativeReference Include="WebRTC.framework">
+    <NativeReference Include="WebRTC.xcframework">
       <Kind>Framework</Kind>
       <Frameworks></Frameworks>
       <LinkerFlags></LinkerFlags>
