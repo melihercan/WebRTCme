@@ -73,7 +73,10 @@ namespace WebRTCme.DemoApp.Maui.Views
             base.OnDisappearing();
             DeviceDisplay.KeepScreenOn = false;
 
-            await _callViewModel.OnPageDisappearingAsync();
+            // Cleared so returning to a reused page instance starts the call again.
+            _started = false;
+            if (_callViewModel is not null)
+                await _callViewModel.OnPageDisappearingAsync();
         }
     }
 }

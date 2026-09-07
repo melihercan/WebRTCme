@@ -16,10 +16,31 @@ namespace WebRTCme.DemoApp.Maui.Views
             BindingContext = _chatViewModel;
         }
 
+        private bool _started;
+
+        /// <summary>
+        /// Both OnHandlerChanged and OnAppearing can complete the prerequisites, and their order
+        /// is not guaranteed, so whichever finishes last starts the chat - exactly once. Without
+        /// the guard both ran, and each joined the room over the same connection.
+        /// </summary>
         private async Task CallOnViewModelAppearing()
         {
-            if (_chatViewModel != null)
+            if (_started || _chatViewModel is null || _connectionParameters is null)
+                return;
+            _started = true;
+
+            try
+            {
+                await MauiSupport.SetCameraAndMicPermissionsAsync();
                 await _chatViewModel.OnPageAppearingAsync(_connectionParameters);
+            }
+            catch (Exception ex)
+            {
+                // Callers are async void, so an escaping exception would vanish silently and
+                // leave the page blank with no clue as to why.
+                Console.WriteLine($"######## ChatPage failed to start: {ex}");
+                throw;
+            }
         }
 
         protected override async void OnHandlerChanged()
@@ -42,7 +63,6 @@ namespace WebRTCme.DemoApp.Maui.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await MauiSupport.SetCameraAndMicPermissionsAsync();
             DeviceDisplay.KeepScreenOn = true;
             await CallOnViewModelAppearing();
         }
@@ -50,8 +70,12 @@ namespace WebRTCme.DemoApp.Maui.Views
         protected override async void OnDisappearing()
         {
             base.OnDisappearing();
-            //Xamarin.Essentials.DeviceDisplay.KeepScreenOn = false;
-            await _chatViewModel.OnPageDisappearingAsync();
+            DeviceDisplay.KeepScreenOn = false;
+
+            // Cleared so returning to a reused page instance starts the chat again.
+            _started = false;
+            if (_chatViewModel is not null)
+                await _chatViewModel.OnPageDisappearingAsync();
         }
     }
 }

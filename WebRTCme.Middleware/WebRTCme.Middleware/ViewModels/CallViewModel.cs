@@ -105,6 +105,10 @@ namespace WebRTCme.Middleware
 
         void Connect()
         {
+            // ConnectionRequest is a cold observable: every subscription joins the room. Dropping
+            // any live one first keeps a second Connect from leaving two joins outstanding.
+            _connectionDisposer?.Dispose();
+
             _connectionDisposer = _connection.ConnectionRequest(_userContext).Subscribe(
                 // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
                 onNext: async peerResponse =>
@@ -227,7 +231,8 @@ namespace WebRTCme.Middleware
         {
             _mediaRecorderManager.ResetAllAsync();
             _mediaStreamManager.Clear();
-            _connectionDisposer.Dispose();
+            _connectionDisposer?.Dispose();
+            _connectionDisposer = null;
         }
 
         private bool _isSharingScreen;
