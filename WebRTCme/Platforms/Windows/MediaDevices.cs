@@ -180,9 +180,19 @@ internal sealed class MediaDevices : IMediaDevices
         // The id travels into the SDP as the msid, so it must not be the device path.
         var id = NewTrackId("video");
 
-        WebRtcRuntime.Check(
-            VideoTrackCreate(factory, deviceId, id, width, height, frameRate, out var handle),
-            $"open camera '{label}' at {width}x{height}@{frameRate}");
+        var status = VideoTrackCreate(factory, deviceId, id, width, height, frameRate,
+                                      out var handle);
+
+        // The shim separates a device that is absent from one that is present but will not
+        // start. Only the second is actionable, and "not found" for a camera the user can see
+        // listed sends them looking for the wrong problem.
+        if (status == ErrInvalidState)
+            throw new InvalidOperationException(
+                $"The camera '{label}' was found but could not be started at " +
+                $"{width}x{height}@{frameRate}. It is usually held by another application; " +
+                "close anything else using the camera and try again.");
+
+        WebRtcRuntime.Check(status, $"open camera '{label}' at {width}x{height}@{frameRate}");
 
         return new MediaStreamTrack(handle, MediaStreamTrackKind.Video, id, label,
                                     isRemote: false, deviceId, width, height, frameRate);
