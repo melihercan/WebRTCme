@@ -9,8 +9,6 @@ namespace WebRTCme
     {
         public string Credential { get; set; }
 
-        public RTCIceCredentialType? CredentialType { get; set; }
-        
         public string[] Urls { get; set; }
         
         public string Username { get; set; }

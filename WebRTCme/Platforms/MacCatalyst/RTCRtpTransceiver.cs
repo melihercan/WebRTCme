@@ -27,8 +27,6 @@ namespace WebRTCme.MacCatalyst
 
         public IRTCRtpSender Sender => new RTCRtpSender(NativeObject.Sender);
 
-        public bool Stopped => NativeObject.IsStopped;
-
 
         public void SetCodecPreferences(RTCRtpCodecCapability[] codecs)
         {

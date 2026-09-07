@@ -25,8 +25,6 @@ namespace WebRTCme.MacCatalyst
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Split(" ", StringSplitOptions.RemoveEmptyEntries)[0];
 
-        public string Ip => Address;
-
         public ushort Port => Convert.ToUInt16(Candidate
             .Replace("candidate:", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Split(" ", StringSplitOptions.RemoveEmptyEntries)[5]);

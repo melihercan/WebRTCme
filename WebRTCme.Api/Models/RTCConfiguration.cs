@@ -16,10 +16,6 @@ namespace WebRTCme
 
         public RTCIceTransportPolicy? IceTransportPolicy { get; set; }
 
-        public string PeerIdentity { get; set; }
-
         public RTCRtcpMuxPolicy? RtcpMuxPolicy { get; set; }
-
-        public SdpSemantics? SdpSemantics { get; set; }
     }
 }

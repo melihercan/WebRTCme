@@ -8,15 +8,9 @@ namespace WebRTCme
     {
         public bool Active { get; set; } = true;
 
-        public byte? CodecPayloadType { get; set; }
-
-        public RTCDtxStatus? Dtx { get; set; }
-
         public ulong? MaxBitrate { get; set; }
 
         public double? MaxFramerate { get; set; }
-
-        public ulong? Ptime { get; set; }
 
         public string Rid { get; set; }
 

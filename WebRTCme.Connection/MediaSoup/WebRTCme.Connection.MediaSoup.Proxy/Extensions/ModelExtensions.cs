@@ -11,15 +11,10 @@ namespace WebRTCme.Connection.MediaSoup.Proxy
         {
             RTCRtpEncodingParameters params_ = new()
             {
-                //Ptime = parameters.
                 Rid = parameters.Rid,
             };
 
 
-            if (parameters.CodecPayloadType.HasValue)
-                params_.CodecPayloadType = (byte)parameters.CodecPayloadType;
-            if (parameters.Dtx.HasValue)
-                params_.Dtx = (bool)parameters.Dtx ? RTCDtxStatus.Enabled : RTCDtxStatus.Disabled;
             if (parameters.MaxBitrate.HasValue)
                 params_.MaxBitrate = (ulong)parameters.MaxBitrate;
             if (parameters.MaxFramerate.HasValue)

@@ -17,14 +17,6 @@ namespace WebRTCme.MacCatalyst
                 _ => throw new NotImplementedException()
             };
 
-        public static Webrtc.RTCTlsCertPolicy ToNative(this RTCIceCredentialType iceCredentialType) =>
-            iceCredentialType switch
-            {
-                RTCIceCredentialType.Password => Webrtc.RTCTlsCertPolicy.Secure,
-                RTCIceCredentialType.Oauth => Webrtc.RTCTlsCertPolicy.Secure,
-                _ => throw new NotImplementedException()
-            };
-
         public static Webrtc.RTCIceTransportPolicy ToNative(this RTCIceTransportPolicy iceTransportPolicy) =>
             iceTransportPolicy switch
             {
@@ -36,7 +28,6 @@ namespace WebRTCme.MacCatalyst
         public static Webrtc.RTCRtcpMuxPolicy ToNative(this RTCRtcpMuxPolicy rtcpMuxPolicy) =>
             rtcpMuxPolicy switch
             {
-                RTCRtcpMuxPolicy.Negotiate => Webrtc.RTCRtcpMuxPolicy.Negotiate,
                 RTCRtcpMuxPolicy.Require => Webrtc.RTCRtcpMuxPolicy.Require,
                 _ => throw new NotImplementedException()
             };
@@ -66,14 +57,6 @@ namespace WebRTCme.MacCatalyst
             {
                 MediaStreamTrackKind.Audio => Webrtc.RTCRtpMediaType.Audio,
                 MediaStreamTrackKind.Video => Webrtc.RTCRtpMediaType.Video,
-                _ => throw new NotImplementedException()
-            };
-
-        public static Webrtc.RTCSdpSemantics ToNative(this SdpSemantics sdpSemantics) =>
-            sdpSemantics switch
-            {
-                SdpSemantics.PlanB => Webrtc.RTCSdpSemantics.PlanB,
-                SdpSemantics.UnifiedPlan => Webrtc.RTCSdpSemantics.UnifiedPlan,
                 _ => throw new NotImplementedException()
             };
 
@@ -142,18 +125,9 @@ namespace WebRTCme.MacCatalyst
                 _ => throw new NotImplementedException()
             };
 
-        public static RTCIceCredentialType FromNative(this Webrtc.RTCTlsCertPolicy nativeTlsCertPolicy) =>
-            nativeTlsCertPolicy switch
-            {
-                Webrtc.RTCTlsCertPolicy.InsecureNoCheck => throw new NotImplementedException(),
-                Webrtc.RTCTlsCertPolicy.Secure => RTCIceCredentialType.Password,
-                _ => throw new NotImplementedException()
-            };
-
         public static RTCRtcpMuxPolicy FromNative(this Webrtc.RTCRtcpMuxPolicy nativeRtcpMuxPolicy) =>
             nativeRtcpMuxPolicy switch
             {
-                Webrtc.RTCRtcpMuxPolicy.Negotiate => RTCRtcpMuxPolicy.Negotiate,
                 Webrtc.RTCRtcpMuxPolicy.Require => RTCRtcpMuxPolicy.Require,
                 _ => throw new NotImplementedException()
             };
@@ -175,7 +149,7 @@ namespace WebRTCme.MacCatalyst
                 Webrtc.RTCRtpTransceiverDirection.SendOnly => RTCRtpTransceiverDirection.SendOnly,
                 Webrtc.RTCRtpTransceiverDirection.RecvOnly => RTCRtpTransceiverDirection.RecvOnly,
                 Webrtc.RTCRtpTransceiverDirection.Inactive => RTCRtpTransceiverDirection.Inactive,
-                Webrtc.RTCRtpTransceiverDirection.Stopped => throw new NotImplementedException(),
+                Webrtc.RTCRtpTransceiverDirection.Stopped => RTCRtpTransceiverDirection.Stopped,
                 _ => throw new NotImplementedException()
             };
 

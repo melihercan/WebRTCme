@@ -51,7 +51,6 @@ namespace WebRTCme.Connection.Signaling.Server.TurnServerProxies
                 .Select(xirsysIceServer => new RTCIceServer 
                 { 
                     Credential = xirsysIceServer.Credential,
-                    CredentialType = RTCIceCredentialType.Password,
                     Urls = new string[] { xirsysIceServer.Url },
                     Username = xirsysIceServer.Username
                 }).ToArray();

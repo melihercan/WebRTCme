@@ -58,8 +58,6 @@ internal sealed class RTCIceCandidate : IRTCIceCandidate
 
     public string Address => Field(4);
 
-    public string Ip => Address;
-
     public ushort Port => ushort.TryParse(Field(5), out var port) ? port : (ushort)0;
 
     public RTCIceCandidateType Type =>

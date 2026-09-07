@@ -25,8 +25,7 @@ namespace WebRTCme.MacCatalyst
                 nativeConfiguration.IceTransportPolicy = ((RTCIceTransportPolicy)configuration.IceTransportPolicy).ToNative();
             if (configuration.RtcpMuxPolicy.HasValue)
                 nativeConfiguration.RtcpMuxPolicy = ((RTCRtcpMuxPolicy)configuration.RtcpMuxPolicy).ToNative();
-            if (configuration.SdpSemantics.HasValue)
-                nativeConfiguration.SdpSemantics = ((SdpSemantics)configuration.SdpSemantics).ToNative();
+            nativeConfiguration.SdpSemantics = Webrtc.RTCSdpSemantics.UnifiedPlan;
             return nativeConfiguration;
         }
 
@@ -36,7 +35,7 @@ namespace WebRTCme.MacCatalyst
                 urlStrings: iceServer.Urls,
                 username: iceServer.Username,
                 credential: iceServer.Credential,
-                tlsCertPolicy: iceServer.CredentialType?.ToNative() ?? Webrtc.RTCTlsCertPolicy.Secure
+                tlsCertPolicy: Webrtc.RTCTlsCertPolicy.Secure
             );
 
 
@@ -101,7 +100,6 @@ namespace WebRTCme.MacCatalyst
             new RTCIceServer
             {
                 Credential = nativeIceServer.Credential,
-                CredentialType = nativeIceServer.TlsCertPolicy.FromNative(),
                 Urls = nativeIceServer.UrlStrings,
                 Username = nativeIceServer.Username
             };
@@ -150,11 +148,8 @@ namespace WebRTCme.MacCatalyst
             new RTCRtpEncodingParameters
             {
                 Active = nativeEncoding.IsActive,
-                ////CodecPayloadType = 0, //// TODO: CHECK THIS
-                ////Dtx = RTCDtxStatus.Enabled, //// TODO: CHECK THIS
                 MaxBitrate = nativeEncoding.MaxBitrateBps.UInt64Value,
                 MaxFramerate = nativeEncoding.MaxFramerate.DoubleValue,
-                ////Ptime = 0, //// TODO: CHECK THIS
                 Rid = nativeEncoding.Rid,
                 ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy.DoubleValue
             };

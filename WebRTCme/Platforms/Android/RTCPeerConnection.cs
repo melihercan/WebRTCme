@@ -60,8 +60,6 @@ namespace WebRTCme.Android
 
         public RTCSessionDescriptionInit LocalDescription => NativeObject.LocalDescription.FromNative();
 
-        public Task<IRTCIdentityAssertion> PeerIdentity => throw new NotImplementedException();
-
         public RTCSessionDescriptionInit PendingLocalDescription => NativeObject.LocalDescription.FromNative();
 
         public RTCSessionDescriptionInit PendingRemoteDescription => NativeObject.RemoteDescription.FromNative();
@@ -83,9 +81,6 @@ namespace WebRTCme.Android
         public event EventHandler OnNegotiationNeeded;
         public event EventHandler OnSignalingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
-
-        public RTCIceServer[] GetDefaultIceServers() =>
-            throw new NotImplementedException();
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate)
         {
@@ -170,12 +165,6 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public void GetIdentityAssertion()
-        {
-            throw new NotImplementedException();
-        }
-
-
         public IRTCRtpReceiver[] GetReceivers() =>
             NativeObject.Receivers.Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver)).ToArray();
 
@@ -224,11 +213,6 @@ namespace WebRTCme.Android
 
         public void SetConfiguration(RTCConfiguration configuration) =>
             NativeObject.SetConfiguration(configuration.ToNative());
-
-        public void SetIdentityProvider(string domainName, string protocol = null, string userName = null)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task SetLocalDescription()
         {

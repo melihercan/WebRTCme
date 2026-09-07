@@ -8,7 +8,6 @@ namespace WebRTCme
     [JsonConverter(typeof(JsonCamelCaseStringEnumConverter))]
     public enum RTCRtcpMuxPolicy
     {
-        Negotiate,
         Require
     }
 }

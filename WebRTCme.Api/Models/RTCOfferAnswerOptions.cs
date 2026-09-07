@@ -6,6 +6,5 @@ namespace WebRTCme
 {
     public class RTCOfferAnswerOptions
     {
-        public bool? VoiceActivityDetection { get; set; }
     }
 }

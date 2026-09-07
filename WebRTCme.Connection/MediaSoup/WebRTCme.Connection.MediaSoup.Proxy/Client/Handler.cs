@@ -75,8 +75,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
             { 
                 IceTransportPolicy = RTCIceTransportPolicy.All,
                 BundlePolicy = RTCBundlePolicy.MaxBundle,
-                RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
-                SdpSemantics = SdpSemantics.UnifiedPlan
+                RtcpMuxPolicy = RTCRtcpMuxPolicy.Require
             });
             pc.AddTransceiver(MediaStreamTrackKind.Audio);
             pc.AddTransceiver(MediaStreamTrackKind.Video);
@@ -133,8 +132,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                 IceServers = options.IceServers,
                 IceTransportPolicy = options.IceTransportPolicy.HasValue ? options.IceTransportPolicy : RTCIceTransportPolicy.All,
                 BundlePolicy = RTCBundlePolicy.MaxBundle,
-                RtcpMuxPolicy = RTCRtcpMuxPolicy.Require,
-                SdpSemantics = SdpSemantics.UnifiedPlan
+                RtcpMuxPolicy = RTCRtcpMuxPolicy.Require
             });
 
             _pc.OnIceConnectionStateChange += async (s, e) => 

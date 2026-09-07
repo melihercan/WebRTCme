@@ -560,11 +560,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
     public RTCConfiguration GetConfiguration() => _configuration;
 
-    public RTCIceServer[] GetDefaultIceServers() => [];
-
     public IRTCSctpTransport Sctp => null;
-
-    public Task<IRTCIdentityAssertion> PeerIdentity => Task.FromResult<IRTCIdentityAssertion>(null);
 
     public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init = null) =>
         throw new NotSupportedException("Transceivers are not exposed by the Windows binding.");
@@ -586,12 +582,6 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
     public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
         throw new NotSupportedException("Certificate generation is not exposed by the Windows binding.");
-
-    public void GetIdentityAssertion() =>
-        throw new NotSupportedException("Identity assertions are not supported by the Windows binding.");
-
-    public void SetIdentityProvider(string domainName, string protocol = null, string userName = null) =>
-        throw new NotSupportedException("Identity providers are not supported by the Windows binding.");
 
     public void RestartIce() =>
         throw new NotSupportedException("ICE restart is not supported by the Windows binding.");

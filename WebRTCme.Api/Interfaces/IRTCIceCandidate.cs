@@ -15,8 +15,6 @@ namespace WebRTCme
 
         string Foundation { get; }
 
-        string Ip { get; }
-
         ushort Port { get; }
 
         uint Priority { get; }

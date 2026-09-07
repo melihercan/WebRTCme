@@ -53,11 +53,6 @@ namespace WebRTCme.Blazor
         public RTCSessionDescriptionInit LocalDescription =>
             GetNativeProperty<RTCSessionDescriptionInit>("localDescription");
 
-        public Task<IRTCIdentityAssertion> PeerIdentity => GetPeerIdentity();
-        private async Task<IRTCIdentityAssertion> GetPeerIdentity() =>
-            await Task.FromResult(new RTCIdentityAssertion(JsRuntime, await JsRuntime.GetJsPropertyObjectRefAsync(
-                NativeObject, "peerIdentity")));
-
         public RTCSessionDescriptionInit PendingLocalDescription =>
             GetNativeProperty<RTCSessionDescriptionInit>("pendingLocalDescription");
 
@@ -82,21 +77,6 @@ namespace WebRTCme.Blazor
         public event EventHandler OnSignalingStateChange;
         public event EventHandler<IRTCTrackEvent> OnTrack;
 
-
-        public RTCIceServer[] GetDefaultIceServers()
-        {
-            var iceServers = new List<RTCIceServer>();
-            var jsObjectRefGetDefaultIceServers =
-                JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getDefaultIceServers");
-            var jsObjectRefIceServerArray = JsRuntime.GetJsPropertyArray(jsObjectRefGetDefaultIceServers);
-            foreach (var jsObjectRefIceServer in jsObjectRefIceServerArray)
-            {
-                iceServers.Add(JsRuntime.GetJsPropertyValue<RTCIceServer>(jsObjectRefIceServer, null));
-                JsRuntime.DeleteJsObjectRef(jsObjectRefIceServer.JsObjectRefId);
-            }
-            JsRuntime.DeleteJsObjectRef(jsObjectRefGetDefaultIceServers.JsObjectRefId);
-            return iceServers.ToArray();
-        }
 
         public Task AddIceCandidate(RTCIceCandidateInit candidate) =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "addIceCandidate", candidate/*.NativeObject*/).AsTask();
@@ -191,9 +171,6 @@ namespace WebRTCme.Blazor
         public RTCConfiguration GetConfiguration() =>
             JsRuntime.CallJsMethod<RTCConfiguration>(NativeObject, "getConfiguration");
 
-        public void GetIdentityAssertion() =>
-            JsRuntime.CallJsMethodVoid(NativeObject, "getIdentityAssertion");
-
         public IRTCRtpReceiver[] GetReceivers()
         {
             var jsObjectRefGetReceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getReceivers");
@@ -238,15 +215,6 @@ namespace WebRTCme.Blazor
 
         public void SetConfiguration(RTCConfiguration configuration) => JsRuntime.CallJsMethodVoid(NativeObject,
             "setConfiguration", configuration);
-
-        public void SetIdentityProvider(string domainName, string protocol = null, string userName = null) =>
-            JsRuntime.CallJsMethodVoid(NativeObject, "setIdentifierProvider",
-                new object[]
-                {
-                    domainName,
-                    protocol,
-                    userName
-                });
 
         public Task SetLocalDescription() =>
             JsRuntime.CallJsMethodVoidAsync(NativeObject, "setLocalDescription")

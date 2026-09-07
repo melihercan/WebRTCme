@@ -20,8 +20,6 @@ namespace WebRTCme.Blazor
 
         public string Foundation => GetNativeProperty<string>("foundation");
 
-        public string Ip => GetNativeProperty<string>("ip");
-
         public ushort Port => GetNativeProperty<ushort>("port");
 
         public uint Priority => GetNativeProperty<uint>("priority");

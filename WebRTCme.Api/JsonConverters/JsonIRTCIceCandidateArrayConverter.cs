@@ -28,8 +28,6 @@ namespace WebRTCme
 
         public string Foundation { get; set; }
 
-        public string Ip { get; set; }
-
         public ushort Port { get; set; }
 
         public uint Priority { get; set; }

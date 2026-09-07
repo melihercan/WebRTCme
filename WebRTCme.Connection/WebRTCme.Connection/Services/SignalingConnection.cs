@@ -335,9 +335,7 @@ namespace WebRTCme.Connection.Services
                     }
                     var configuration = new RTCConfiguration
                     {
-                        IceServers = iceServers,
-                        SdpSemantics = SdpSemantics.UnifiedPlan
-                        //PeerIdentity = peerName
+                        IceServers = iceServers
                     };
 
                     _logger.LogInformation($"################ LIST OF ICE SERVERS ################");

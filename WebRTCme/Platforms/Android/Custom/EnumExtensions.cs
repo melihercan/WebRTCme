@@ -18,14 +18,6 @@ namespace WebRTCme.Android
             };
 
 
-        public static Webrtc.PeerConnection.TlsCertPolicy ToNative(this RTCIceCredentialType iceCredentialType) =>
-            iceCredentialType switch
-            {
-                RTCIceCredentialType.Password => Webrtc.PeerConnection.TlsCertPolicy.TlsCertPolicySecure,
-                RTCIceCredentialType.Oauth => Webrtc.PeerConnection.TlsCertPolicy.TlsCertPolicySecure,
-                _ => throw new NotImplementedException()
-            };
-
         public static Webrtc.PeerConnection.IceTransportsType ToNative(this RTCIceTransportPolicy iceTransportPolicy) =>
             iceTransportPolicy switch
             {
@@ -37,7 +29,6 @@ namespace WebRTCme.Android
         public static Webrtc.PeerConnection.RtcpMuxPolicy ToNative(this RTCRtcpMuxPolicy rtcpMuxPolicy) =>
             rtcpMuxPolicy switch
             {
-                RTCRtcpMuxPolicy.Negotiate => Webrtc.PeerConnection.RtcpMuxPolicy.Negotiate,
                 RTCRtcpMuxPolicy.Require => Webrtc.PeerConnection.RtcpMuxPolicy.Require,
                 _ => throw new NotImplementedException()
             };
@@ -68,14 +59,6 @@ namespace WebRTCme.Android
             {
                 MediaStreamTrackKind.Audio => Webrtc.MediaStreamTrack.MediaType.MediaTypeAudio,
                 MediaStreamTrackKind.Video => Webrtc.MediaStreamTrack.MediaType.MediaTypeVideo,
-                _ => throw new NotImplementedException()
-            };
-
-        public static Webrtc.PeerConnection.SdpSemantics ToNative(this SdpSemantics sdpSemantics) =>
-            sdpSemantics switch
-            {
-                SdpSemantics.PlanB => Webrtc.PeerConnection.SdpSemantics.PlanB,
-                SdpSemantics.UnifiedPlan => Webrtc.PeerConnection.SdpSemantics.UnifiedPlan,
                 _ => throw new NotImplementedException()
             };
 

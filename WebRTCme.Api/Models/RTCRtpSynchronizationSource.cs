@@ -6,6 +6,5 @@ namespace WebRTCme
 {
     public class RTCRtpSynchronizationSource : RTCRtpContributingSource
     {
-        public bool? VoiceActivityFlag { get; } 
     }
 }

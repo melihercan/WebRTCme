@@ -31,8 +31,6 @@ namespace WebRTCme.Blazor
         public IRTCRtpSender Sender =>
             new RTCRtpSender(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sender"));
 
-        public bool Stopped => GetNativeProperty<bool>("stopped");
-
 
         public void SetCodecPreferences(RTCRtpCodecCapability[] codecs) =>
             JsRuntime.CallJsMethodVoid(NativeObject, "setCodecPreferences", codecs);

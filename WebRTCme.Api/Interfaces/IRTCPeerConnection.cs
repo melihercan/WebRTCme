@@ -22,8 +22,6 @@ namespace WebRTCme
 
         RTCSessionDescriptionInit LocalDescription { get; }
 
-        Task<IRTCIdentityAssertion> PeerIdentity { get; }
-
         RTCSessionDescriptionInit PendingLocalDescription { get; }
 
         RTCSessionDescriptionInit PendingRemoteDescription { get; }
@@ -44,8 +42,6 @@ namespace WebRTCme
         event EventHandler OnSignalingStateChange;
         event EventHandler<IRTCTrackEvent> OnTrack;
 
-        RTCIceServer[] GetDefaultIceServers();
-        
         Task AddIceCandidate(RTCIceCandidateInit candidate);
 
         IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream);
@@ -66,8 +62,6 @@ namespace WebRTCme
 
         RTCConfiguration GetConfiguration();
 
-        void GetIdentityAssertion();
-
         IRTCRtpReceiver[] GetReceivers();
 
         IRTCRtpSender[] GetSenders();
@@ -81,8 +75,6 @@ namespace WebRTCme
         void RestartIce();
 
         void SetConfiguration(RTCConfiguration configuration);
-
-        void SetIdentityProvider(string domainName, string protocol = null, string userName = null);
 
         Task SetLocalDescription();
 
