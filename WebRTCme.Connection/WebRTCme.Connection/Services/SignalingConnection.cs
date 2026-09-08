@@ -114,7 +114,12 @@ namespace WebRTCme.Connection.Services
 
         public Task<IRTCStatsReport> GetStats(Guid id)
         {
-            throw new NotImplementedException();
+            var peerContext = _connectionContext?.PeerContexts
+                .SingleOrDefault(context => context.Id.Equals(id));
+            if (peerContext is null)
+                throw new ArgumentException($"No peer with id {id} is in this connection.", nameof(id));
+
+            return peerContext.PeerConnection.GetStats();
         }
 
 

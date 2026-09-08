@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WebRTCme.Connection;
@@ -46,6 +47,86 @@ namespace WebRTCme.Middleware
         ConnectionParameters _connectionParameters;
 
         string _recordingFileName = "WebRTCme.webm";
+
+        /// <summary>
+        /// Polls GetStats for one peer and writes a summary where it can be read afterwards.
+        /// </summary>
+        /// <remarks>
+        /// The file matters as much as the logging: on Mac Catalyst the app is sandboxed and its
+        /// Debug output does not reach the unified log, so a file inside the container is the only
+        /// way to see what a released build actually reported.
+        /// </remarks>
+        void StartStatsPolling(Guid peerId, string peerName)
+        {
+            StopStatsPolling(peerId);
+
+            var cts = new CancellationTokenSource();
+            _statsPollers[peerId] = cts;
+
+            _ = Task.Run(async () =>
+            {
+                var path = Path.Combine(Path.GetTempPath(), "webrtcme-stats.log");
+
+                while (!cts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), cts.Token).ConfigureAwait(false);
+
+                        var report = await _connection.GetStats(peerId).ConfigureAwait(false);
+
+                        // Counters first, then the pair that is actually carrying the call: enough
+                        // to tell a connected call from a negotiated one that never flowed.
+                        var outbound = report.Values.Where(s => s.Type == "outbound-rtp").ToArray();
+                        var inbound = report.Values.Where(s => s.Type == "inbound-rtp").ToArray();
+                        var selected = report.Values.FirstOrDefault(s =>
+                            s.Type == "candidate-pair" &&
+                            s.Members.TryGetValue("state", out var state) && (string)state == "succeeded");
+
+                        var line =
+                            $"{DateTime.Now:HH:mm:ss} {peerName} entries:{report.Count} " +
+                            $"out:[{string.Join(" ", outbound.Select(Describe))}] " +
+                            $"in:[{string.Join(" ", inbound.Select(Describe))}] " +
+                            $"pair:{(selected is null ? "none" : Member(selected, "bytesSent") + "/" + Member(selected, "bytesReceived"))}";
+
+                        _logger.LogInformation($"************* STATS {line}");
+                        System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
+                        System.IO.File.AppendAllText(path, line + Environment.NewLine);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                    catch (Exception exception)
+                    {
+                        var line = $"{DateTime.Now:HH:mm:ss} {peerName} FAILED: {exception.GetType().Name}: {exception.Message}";
+                        _logger.LogInformation($"************* STATS {line}");
+                        System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
+                        try { System.IO.File.AppendAllText(path, line + Environment.NewLine); } catch { }
+                        return;
+                    }
+                }
+            });
+        }
+
+        static string Describe(RTCStats stats) =>
+            $"{Member(stats, "kind")}:{Member(stats, "bytesSent")}{Member(stats, "bytesReceived")}";
+
+        static string Member(RTCStats stats, string name) =>
+            stats.Members.TryGetValue(name, out var value) ? value?.ToString() ?? string.Empty : string.Empty;
+
+        void StopStatsPolling(Guid peerId)
+        {
+            if (_statsPollers.Remove(peerId, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+        }
+
+
+        // One poller per connected peer, so a peer leaving stops only its own.
+        readonly Dictionary<Guid, CancellationTokenSource> _statsPollers = new();
 
         public CallViewModel(INavigation navigation, ILocalMediaStream localMediaStream, 
             IMediaStreamManager mediaStreamManager,
@@ -140,9 +221,11 @@ namespace WebRTCme.Middleware
 
                                 _reRender?.Invoke();
                             }
+                            StartStatsPolling(peerResponse.Id, peerResponse.Name);
                             break;
 
                         case PeerResponseType.PeerLeft:
+                            StopStatsPolling(peerResponse.Id);
                             _runOnUiThread.Invoke(() =>
                             {
                                 _mediaStreamManager.Remove(peerResponse.Name);
@@ -152,6 +235,7 @@ namespace WebRTCme.Middleware
                             break;
 
                         case PeerResponseType.PeerError:
+                            StopStatsPolling(peerResponse.Id);
                             _runOnUiThread.Invoke(() =>
                             {
                                 _mediaStreamManager.Remove(peerResponse.Name);
@@ -231,6 +315,9 @@ namespace WebRTCme.Middleware
         {
             _mediaRecorderManager.ResetAllAsync();
             _mediaStreamManager.Clear();
+            foreach (var id in _statsPollers.Keys.ToArray())
+                StopStatsPolling(id);
+
             _connectionDisposer?.Dispose();
             _connectionDisposer = null;
         }
