@@ -1,27 +1,32 @@
-# This workflow will build a .NET project
+# Builds WebRTCme.Api and publishes it to this repository's GitHub Packages feed.
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
 name: WebRTCme.Api
 
 on: [workflow_dispatch]
-  
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 10.0.x
+    - name: Restore
+      run: dotnet restore WebRTCme.Api/WebRTCme.Api.csproj
     - name: Build
-      run: dotnet build -c Release WebRTCme.Api/WebRTCme.Api.csproj
+      run: dotnet build -c Release --no-restore WebRTCme.Api/WebRTCme.Api.csproj
     - name: Pack NuGet package
-      run: dotnet pack -c Release WebRTCme.Api/WebRTCme.Api.csproj  
+      run: dotnet pack -c Release --no-build -o packages WebRTCme.Api/WebRTCme.Api.csproj
     - name: Add source
       run: dotnet nuget add source --username melihercan --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/melihercan/index.json"
     - name: Publish NuGet package to GitHub packages
-      run: dotnet nuget push "WebRTCme.Api/bin/Release/WebRTCme.Api.1.0.1.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-      
+      run: dotnet nuget push "packages/*.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
