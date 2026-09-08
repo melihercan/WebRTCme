@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebRTCme.Connection.Signaling.Server.Data;
 using WebRTCme.Connection.Signaling.Server.Hubs;
 using WebRTCme.Connection.Signaling.Server.TurnServerProxies;
 
@@ -30,7 +29,6 @@ namespace WebRTCme.Connection.Signaling.Server
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
 
             services.AddCors(policy =>
             {

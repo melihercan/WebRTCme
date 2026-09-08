@@ -20,12 +20,14 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
         // Must be static as SignalR Hub crates a new context for each call.
         static Models.Server _server = new();
 
-        // Currently these events are not used. Hence appended empty { add { } remove { } }.
-        public event ISignalingServerNotify.PeerJoinedDelegateAsync PeerJoinedEventAsync;// { add { } remove { } }
-        public event ISignalingServerNotify.PeerLeftDelegateAsync PeerLeftEventAsync;// { add { } remove { } }
-        public event ISignalingServerNotify.PeerSdpAsyncDelegateAsync PeerSdpEventAsync;// { add { } remove { } }
-        public event ISignalingServerNotify.PeerIceAsyncDelegateAsync PeerIceEventAsync;// { add { } remove { } }
-        public event ISignalingServerNotify.PeerMediaAsyncDelegateAsync PeerMediaEventAsync;// { add { } remove { } }
+        // ISignalingServerApi requires these events, but the hub notifies its clients through
+        // Hub<ISignalingServerNotify>.Clients instead, so it never raises them. Empty accessors
+        // satisfy the interface without declaring backing fields nothing ever assigns.
+        public event ISignalingServerNotify.PeerJoinedDelegateAsync PeerJoinedEventAsync { add { } remove { } }
+        public event ISignalingServerNotify.PeerLeftDelegateAsync PeerLeftEventAsync { add { } remove { } }
+        public event ISignalingServerNotify.PeerSdpAsyncDelegateAsync PeerSdpEventAsync { add { } remove { } }
+        public event ISignalingServerNotify.PeerIceAsyncDelegateAsync PeerIceEventAsync { add { } remove { } }
+        public event ISignalingServerNotify.PeerMediaAsyncDelegateAsync PeerMediaEventAsync { add { } remove { } }
 
         public RoomHub(TurnServerProxyFactory turnServerProxyFactory, ILogger<RoomHub> logger)
         {
