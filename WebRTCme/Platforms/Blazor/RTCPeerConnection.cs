@@ -196,6 +196,10 @@ namespace WebRTCme.Blazor
         public async Task<IRTCStatsReport> GetStats() =>
             (await JsRuntime.GetJsStatsAsync(NativeObject)).ToStatsReport();
 
+        public async Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector) =>
+            (await JsRuntime.GetJsStatsAsync(NativeObject,
+                ((MediaStreamTrack)selector)?.NativeObject)).ToStatsReport();
+
         public IRTCRtpTransceiver[] GetTransceivers()
         {
             var jsObjectRefGetTransceivers = JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "getTransceivers");

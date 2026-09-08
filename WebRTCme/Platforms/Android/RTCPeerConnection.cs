@@ -194,6 +194,41 @@ namespace WebRTCme.Android
             return tcs.Task;
         }
 
+        /// <summary>
+        /// The SDK has no selector form, so this resolves the selector the way the spec
+        /// defines it -- to the sender or receiver carrying the track -- and collects from
+        /// that one.
+        /// </summary>
+        public Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector)
+        {
+            if (selector is null)
+                return GetStats();
+
+            var id = selector.Id;
+            var senders = NativeObject.Senders
+                .Where(nativeSender => nativeSender.Track()?.Id() == id).ToArray();
+            var receivers = NativeObject.Receivers
+                .Where(nativeReceiver => nativeReceiver.Track()?.Id() == id).ToArray();
+
+            if (senders.Length + receivers.Length > 1)
+                throw new InvalidOperationException(
+                    "More than one sender or receiver is using this track, so the statistics "
+                    + "to report are ambiguous.");
+
+            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            var collector = new StatsExtensions.StatsCollectorProxy(tcs);
+
+            if (senders.Length == 1)
+                NativeObject.GetStats(senders[0], collector);
+            else if (receivers.Length == 1)
+                NativeObject.GetStats(receivers[0], collector);
+            else
+                // Nothing is carrying the track, which the spec makes an empty report.
+                tcs.SetResult(new RTCStatsReport(new Dictionary<string, RTCStats>()));
+
+            return tcs.Task;
+        }
+
         public IRTCRtpTransceiver[] GetTransceivers() =>
             NativeObject.Transceivers
                 .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver, NativeObject)).ToArray();

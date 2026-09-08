@@ -68,6 +68,16 @@ namespace WebRTCme
 
         Task<IRTCStatsReport> GetStats();
 
+        /// <summary>
+        /// Statistics for the sender or receiver carrying <paramref name="selector"/>.
+        /// </summary>
+        /// <remarks>
+        /// An empty report when nothing is sending or receiving the track. Throws when more
+        /// than one sender or receiver is using it, which the spec makes an error rather than
+        /// a choice between them.
+        /// </remarks>
+        Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector);
+
         IRTCRtpTransceiver[] GetTransceivers();
 
         void RemoveTrack(IRTCRtpSender sender);

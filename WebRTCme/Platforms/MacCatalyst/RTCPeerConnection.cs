@@ -216,6 +216,18 @@ namespace WebRTCme.MacCatalyst
             return tcs.Task;
         }
 
+        public Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector)
+        {
+            if (selector is null)
+                return GetStats();
+
+            // Resolving a selector means collecting from one sender or receiver, and those
+            // two calls are the ones the binding cannot reach -- see RTCRtpSender.GetStats.
+            throw new NotSupportedException(
+                "Selecting statistics by track is not reachable through the current iOS "
+                + "binding; use GetStats() and select the entries from the report.");
+        }
+
         public IRTCRtpTransceiver[] GetTransceivers() =>
             NativeObject.Transceivers
                  .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver)).ToArray();

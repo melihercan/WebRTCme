@@ -605,6 +605,17 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public IRTCRtpReceiver[] GetReceivers() =>
         throw new NotSupportedException("Receivers are not exposed by the Windows binding.");
 
+    /// <summary>
+    /// The shim collects for the whole connection; rtc_peer_connection_get_stats takes no
+    /// selector, and neither does anything else it exports.
+    /// </summary>
+    public Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector) =>
+        selector is null
+            ? GetStats()
+            : throw new NotSupportedException(
+                "Selecting statistics by track is not supported by the Windows binding; "
+                + "use GetStats() and select the entries from the report.");
+
     public unsafe Task<IRTCStatsReport> GetStats()
     {
         ThrowIfClosed();
