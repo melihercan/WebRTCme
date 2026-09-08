@@ -44,7 +44,7 @@ namespace WebRTCme.Blazor
 
         public ushort? MaxPacketLifeTime => GetNativeProperty<ushort>("maxPacketLifeTime");
 
-        public ushort? MaxRetransmits => GetNativeProperty<ushort>("maxretransmits");
+        public ushort? MaxRetransmits => GetNativeProperty<ushort>("maxRetransmits");
 
         public bool Negotiated => GetNativeProperty<bool>("negotiated");
 

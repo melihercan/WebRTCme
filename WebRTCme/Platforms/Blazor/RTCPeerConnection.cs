@@ -65,7 +65,7 @@ namespace WebRTCme.Blazor
         public IRTCSctpTransport Sctp =>
             new RTCSctpTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "sctp"));
 
-        public RTCSignalingState SignalingState => GetNativeProperty<RTCSignalingState>("signallingState");
+        public RTCSignalingState SignalingState => GetNativeProperty<RTCSignalingState>("signalingState");
 
         public event EventHandler OnConnectionStateChanged;
         public event EventHandler<IRTCDataChannelEvent> OnDataChannel;
