@@ -41,8 +41,6 @@ namespace WebRTCme.Blazor
 
         public bool Muted => GetNativeProperty<bool>("muted");
 
-        public bool Readonly => GetNativeProperty<bool>("readonly");
-
         public MediaStreamTrackState ReadyState => GetNativeProperty<MediaStreamTrackState>("readyState");
 
         public event EventHandler OnEnded;

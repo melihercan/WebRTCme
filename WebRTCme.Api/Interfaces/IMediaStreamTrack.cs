@@ -23,8 +23,6 @@ namespace WebRTCme
         
         public bool Muted { get; }
         
-        public bool Readonly { get; }
-
         public MediaStreamTrackState ReadyState { get; }
         
         public event EventHandler OnEnded;

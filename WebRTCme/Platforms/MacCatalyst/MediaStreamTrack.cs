@@ -59,8 +59,6 @@ namespace WebRTCme.MacCatalyst
 
         public bool Muted => throw new NotImplementedException();
 
-        public bool Readonly => throw new NotImplementedException();
-
         public MediaStreamTrackState ReadyState => NativeObject.ReadyState.FromNative();
 
         public event EventHandler OnMute;

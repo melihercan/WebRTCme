@@ -70,8 +70,6 @@ namespace WebRTCme.Android
 
         public bool Muted => throw new NotImplementedException();
 
-        public bool Readonly => throw new NotImplementedException();
-
         public MediaStreamTrackState ReadyState => NativeObject.InvokeState().FromNative();
 
 

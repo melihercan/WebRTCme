@@ -82,8 +82,6 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
 
     public bool Isolated => false;
 
-    public bool Readonly => IsRemote;
-
     public event EventHandler OnEnded;
 
     // The ABI raises no mute signal; a track's own Enabled is the only thing that changes here,
