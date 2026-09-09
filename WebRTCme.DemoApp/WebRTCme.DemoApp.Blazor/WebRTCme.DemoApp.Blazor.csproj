@@ -16,7 +16,7 @@
 
 
 	<ItemGroup>
-    <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.Blazor\WebRTCme.Middleware.Blazor.csproj" />
+    <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
   </ItemGroup>
 
 </Project>

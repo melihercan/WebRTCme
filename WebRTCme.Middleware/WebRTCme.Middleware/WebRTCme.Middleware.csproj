@@ -1,37 +1,120 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-	  <TargetFrameworks>net10.0</TargetFrameworks>
-	  <RootNamespace>WebRTCme.Middleware</RootNamespace>
-	  <Authors>melihercan</Authors>
-	  <Version>2.0.0</Version>
-	  <Description>Common services layer between Blazor/Xamarin applications and WebRTCme library.</Description>
-	  <Copyright>melihercan 2023</Copyright>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
-	  <PackageIcon>me.png</PackageIcon>
-	  <PackageIconUrl />
-	  <RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
-	  <PackageTags>WebRTC .NET Blazor Xamarin</PackageTags>
-	  <PackageReleaseNotes>New major release.</PackageReleaseNotes>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+	<!--
+	  One project, one assembly, one package, two implementations.
+
+	  The middleware used to be three projects: a generic core, a Blazor UI layer and a MAUI UI
+	  layer. They are now slices of a single multi-targeted assembly - net10.0 builds Core+Blazor,
+	  each platform TFM builds Core+Maui - so a consumer references WebRTCme.Middleware and gets
+	  whichever implementation matches what they are building. Same bait-and-switch WebRTCme.csproj
+	  uses one layer down.
+	-->
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+		<RootNamespace>WebRTCme.Middleware</RootNamespace>
+		<AssemblyName>WebRTCme.Middleware</AssemblyName>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<SingleProject>true</SingleProject>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">28.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Authors>melihercan</Authors>
+		<Version>2.0.0</Version>
+		<Description>Services layer between Blazor or .NET MAUI applications and the WebRTCme library.</Description>
+		<Copyright>melihercan 2024</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC .NET Blazor MAUI Android iOS</PackageTags>
+		<PackageReleaseNotes>New major release.</PackageReleaseNotes>
+		<!-- Packages come from CI, never from a local build. -->
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<!-- MAUI only on the platform TFMs; net10.0 is the plain Blazor slice. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<UseMaui>true</UseMaui>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<!--
+		  Razor SDK + UseMaui reads as Blazor Hybrid, so MAUI asks for an explicit reference to
+		  Microsoft.AspNetCore.Components.WebView.Maui (MA002). This project hosts no WebView, and
+		  the packed nuspec confirms the dependency does not reach consumers.
+		-->
+		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+	</PropertyGroup>
+
+	<!--
+	  Each slice's markup has to stay out of the other slice's build, and <Remove> cannot do it:
+	  the MAUI Blazor Hybrid targets glob **\*.razor into RazorComponent from a .targets imported
+	  after this file, and honour nothing but DefaultItemExcludes.
+	-->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<DefaultItemExcludes>$(DefaultItemExcludes);Blazor\**</DefaultItemExcludes>
+	</PropertyGroup>
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<DefaultItemExcludes>$(DefaultItemExcludes);Maui\**;Platforms\**</DefaultItemExcludes>
+	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="..\..\me.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+		<Compile Include="Core\**\*.cs" />
+		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<Compile Include="Blazor\**\*.cs" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+		<PackageReference Include="BlazorDialog" Version="4.1.0" />
+		<PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<Compile Include="Maui\**\*.cs" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.9" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<Compile Include="Platforms\Android\**\*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
+		<Compile Include="Platforms\iOS\**\*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
+		<Compile Include="Platforms\MacCatalyst\**\*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
+		<Compile Include="Platforms\Windows\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\me.png" Link="me.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!--
+	  Show the slice that is not being built in Solution Explorer anyway, so the whole middleware
+	  stays browsable whichever TFM is active.
+	-->
+	<ItemGroup>
+		<None Include="Blazor\**\*.cs;Maui\**\*.cs;Platforms\**\*.cs" Exclude="@(Compile);bin\**;obj\**" />
 	</ItemGroup>
 
 </Project>
