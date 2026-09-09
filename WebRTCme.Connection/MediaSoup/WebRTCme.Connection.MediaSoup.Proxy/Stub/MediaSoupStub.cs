@@ -71,6 +71,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
                 $"?roomId={room}" +
                 $"&peerId={name}");
             _webSocket.Options.AddSubProtocol("protoo");
+            SetOriginHeader(uri);
 
             try
             {
@@ -92,6 +93,33 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
             _dispatchLoop = Task.Run(() => DispatchLoopAsync(_cts.Token));
 
             return Result<Unit>.Ok(Unit.Default);
+        }
+
+
+        /// <summary>
+        /// Presents an Origin the server will accept.
+        /// </summary>
+        /// <remarks>
+        /// The server rejects a WebSocket whose Origin does not match its own, and treats a
+        /// missing one as a mismatch. A browser sets this itself and will not let anyone else
+        /// set it, so this is only for the platforms where we drive the socket ourselves; the
+        /// server compares scheme and host only, so deriving it from the server address is
+        /// enough.
+        /// </remarks>
+        void SetOriginHeader(Uri serverUri)
+        {
+            var scheme = serverUri.Scheme == Uri.UriSchemeWss ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
+
+            try
+            {
+                _webSocket.Options.SetRequestHeader("Origin", $"{scheme}://{serverUri.Host}");
+            }
+            catch (Exception ex)
+            {
+                // Blazor: the browser owns this header and forbids setting it, which is fine
+                // because the browser is already sending the right one.
+                Registry.Logger.LogInformation($"Origin header not set: {ex.Message}");
+            }
         }
 
         IClientWebSocket CreateWebSocket()

@@ -115,14 +115,12 @@ namespace WebRTCme.Connection.Services
                             new WebRtcTransportCreateRequest
                             {
                                 ForceTcp = forceTcp,
-                                Producing = true,
-                                Consuming = false,
-                                SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
+                                AppData = new WebRtcTransportAppData { Direction = "producer" }
                             }));
 
                     _sendTransport = _mediaSoupDevice.CreateSendTransport(new TransportOptions
                     {
-                        Id = transportInfo.Id,
+                        Id = transportInfo.TransportId,
                         IceParameters = transportInfo.IceParameters,
                         IceCandidates = transportInfo.IceCandidates,
                         DtlsParameters = transportInfo.DtlsParameters,
@@ -147,14 +145,12 @@ namespace WebRTCme.Connection.Services
                             new WebRtcTransportCreateRequest
                             {
                                 ForceTcp = forceTcp,
-                                Producing = false,
-                                Consuming = true,
-                                SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
+                                AppData = new WebRtcTransportAppData { Direction = "consumer" }
                             }));
 
                     _recvTransport = _mediaSoupDevice.CreateRecvTransport(new TransportOptions
                     {
-                        Id = transportInfo.Id,
+                        Id = transportInfo.TransportId,
                         IceParameters = transportInfo.IceParameters,
                         IceCandidates = transportInfo.IceCandidates,
                         DtlsParameters = transportInfo.DtlsParameters,
@@ -176,8 +172,7 @@ namespace WebRTCme.Connection.Services
                         {
                             DisplayName = _displayName,
                             Device = _device,
-                            RtpCapabilities = _consume ? _mediaSoupDevice.RtpCapabilities : null,
-                            SctpCapabilities = _useDataChannel ? _mediaSoupDevice.SctpCapabilities : null
+                            RtpCapabilities = _consume ? _mediaSoupDevice.RtpCapabilities : null
                         }));
 
                 foreach (var peer in peers)
@@ -640,6 +635,8 @@ namespace WebRTCme.Connection.Services
                 case MethodName.ProducerScore:
                 case MethodName.ActiveSpeaker:
                 case MethodName.DownlinkBwe:
+                case MethodName.SpeakingPeers:
+                case MethodName.MediasoupVersion:
                     break;
 
                 default:
@@ -728,7 +725,7 @@ namespace WebRTCme.Connection.Services
 
                     consumer = await _recvTransport.ConsumeAsync(new ConsumerOptions
                     {
-                        Id = consumerRequestData.Id,
+                        Id = consumerRequestData.ConsumerId,
                         ProducerId = consumerRequestData.ProducerId,
                         Kind = consumerRequestData.Kind,
                         RtpParameters = consumerRequestData.RtpParameters,
@@ -937,7 +934,7 @@ namespace WebRTCme.Connection.Services
 
                     dataConsumer = await _recvTransport.ConsumeDataAsync(new DataConsumerOptions
                     {
-                        Id = dataConsumerRequestData.Id,
+                        Id = dataConsumerRequestData.DataConsumerId,
                         DataProducerId = dataConsumerRequestData.DataProducerId,
                         SctpStreamParameters = dataConsumerRequestData.SctpStreamParameters,
                         Label = dataConsumerRequestData.Label,
@@ -1087,16 +1084,17 @@ namespace WebRTCme.Connection.Services
             switch (method)
             {
                 case MethodName.GetRouterRtpCapabilities:
-                    var routerRtpCapabilities = JsonSerializer.Deserialize<RtpCapabilities>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
-                    
+                    // Wrapped in its own member rather than being the response body.
+                    var routerRtpCapabilities = JsonSerializer.Deserialize<RouterRtpCapabilitiesResponse>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions).RouterRtpCapabilities;
+
                     // Need to convert object (Parameters.Value) to either string or int.
                     foreach (var codec in routerRtpCapabilities.Codecs)
                     {
                         codec.Parameters.ToStringOrNumber();
                     }
 
-                     return routerRtpCapabilities;
+                    return routerRtpCapabilities;
 
                 case MethodName.CreateWebRtcTransport:
                     var transportInfo = JsonSerializer.Deserialize<TransportInfo>(
@@ -1115,7 +1113,7 @@ namespace WebRTCme.Connection.Services
                 case MethodName.Produce:
                     var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return produceResponse.Id;
+                    return produceResponse.ProducerId;
 
                 case MethodName.PauseProducer:
                     var pauseProducerResponse = JsonSerializer.Deserialize<PauseProducerResponse>(
@@ -1130,7 +1128,7 @@ namespace WebRTCme.Connection.Services
                 case MethodName.ProduceData:
                     var produceDataResponse = JsonSerializer.Deserialize<ProduceDataResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return produceDataResponse.Id;
+                    return produceDataResponse.DataProducerId;
 
                 case MethodName.PauseConsumer:
                     var pauseConsumerResponse = JsonSerializer.Deserialize<PauseConsumerResponse>(
@@ -1143,18 +1141,21 @@ namespace WebRTCme.Connection.Services
                     return resumeConsumerResponse;
 
                 case MethodName.GetTransportStats:
-                    var getTransportStatsResponse = JsonSerializer.Deserialize<GetTransportStatsResponse[]>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    // Stats arrive wrapped in a 'stats' member rather than as a bare array.
+                    var getTransportStatsResponse = JsonSerializer.Deserialize<StatsResponse<GetTransportStatsResponse>>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions).Stats;
                     return getTransportStatsResponse;
 
                 case MethodName.GetProducerStats:
-                    var getProducerStatsResponse = JsonSerializer.Deserialize<GetProducerStatsResponse[]>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    // Stats arrive wrapped in a 'stats' member rather than as a bare array.
+                    var getProducerStatsResponse = JsonSerializer.Deserialize<StatsResponse<GetProducerStatsResponse>>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions).Stats;
                     return getProducerStatsResponse;
 
                 case MethodName.GetConsumerStats:
-                    var getConsumerStatsResponse = JsonSerializer.Deserialize<GetConsumerStatsResponse[]>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
+                    // Stats arrive wrapped in a 'stats' member rather than as a bare array.
+                    var getConsumerStatsResponse = JsonSerializer.Deserialize<StatsResponse<GetConsumerStatsResponse>>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions).Stats;
                     return getConsumerStatsResponse;
 
             }

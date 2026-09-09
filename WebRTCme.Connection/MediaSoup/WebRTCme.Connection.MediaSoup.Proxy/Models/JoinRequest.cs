@@ -9,6 +9,5 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Models
         public string DisplayName { get; init; }
         public Device Device { get; init; }
         public RtpCapabilities RtpCapabilities { get; init; }
-        public SctpCapabilities SctpCapabilities { get; init; }
     }
 }

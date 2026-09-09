@@ -6,6 +6,6 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class ProduceResponse
     {
-        public string Id { get; init; }
+        public string ProducerId { get; init; }
     }
 }

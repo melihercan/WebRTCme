@@ -8,7 +8,7 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public string PeerId { get; init; } // null if bot
         public string DataProducerId { get; init; }
-        public string Id { get; init; }
+        public string DataConsumerId { get; init; }
         public SctpStreamParameters SctpStreamParameters { get; init; }
         public string Label { get; init; }
         public string Protocol { get; init; }

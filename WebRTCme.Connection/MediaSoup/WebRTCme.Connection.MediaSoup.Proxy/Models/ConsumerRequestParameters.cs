@@ -8,7 +8,7 @@ namespace WebRTCme.Connection.MediaSoup
     {
         public string PeerId { get; init; }
         public string ProducerId { get; init; }
-        public string Id { get; init; }
+        public string ConsumerId { get; init; }
         public MediaKind? Kind { get; init; }
         public RtpParameters RtpParameters { get; init; }
         public ConsumerType? Type { get; init; }

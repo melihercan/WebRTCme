@@ -6,7 +6,7 @@ namespace WebRTCme.Connection.MediaSoup
 {
     public class TransportInfo
     {
-        public string Id { get; init; }
+        public string TransportId { get; init; }
         public IceParameters IceParameters { get; init; }
 
         public IceCandidate[] IceCandidates { get; init; }

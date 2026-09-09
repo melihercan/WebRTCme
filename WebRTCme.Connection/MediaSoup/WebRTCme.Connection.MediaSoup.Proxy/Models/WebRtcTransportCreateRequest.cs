@@ -7,10 +7,11 @@ namespace WebRTCme.Connection.MediaSoup
     public class WebRtcTransportCreateRequest
     {
         public bool ForceTcp { get; init; }
-        public bool Producing { get; init; }
-        public bool Consuming { get; init; }
 
-        public SctpCapabilities SctpCapabilities { get; init; }
+
+        // The server takes the transport's direction in appData now, and enables SCTP
+        // itself rather than negotiating it from the client's capabilities.
+        public WebRtcTransportAppData AppData { get; init; }
 
     }
 }

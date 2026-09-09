@@ -32,6 +32,8 @@ namespace WebRTCme.Connection.MediaSoup
         public const string DataConsumerClosed = "dataConsumerClosed";
         public const string ActiveSpeaker = "activeSpeaker";
         public const string DownlinkBwe = "downlinkBwe";
+        public const string MediasoupVersion = "mediasoupVersion";
+        public const string SpeakingPeers = "speakingPeers";
         public const string ProducerScore = "producerScore";
         public const string GetTransportStats = "getTransportStats";
         public const string GetProducerStats = "getProducerStats";
