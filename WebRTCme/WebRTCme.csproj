@@ -3,11 +3,12 @@
 	<!--
 	  The whole client stack ships as this one package.
 
-	  WebRTCme.Api, the four MAUI bindings and the Blazor binding are separate projects but not
-	  separate packages: their assemblies are folded into lib/ below, and each of them sets
-	  IsPackable=false so pack does not record it as a dependency a consumer would have to
-	  resolve. PrivateAssets="all" would do that too, but it also stops the types flowing to
-	  everything downstream in this repo, and WebRTCme.Api is the public API surface.
+	  The API is compiled straight into this assembly from Api/. The five bindings stay separate
+	  projects - they have to, each binds a different native SDK - but not separate packages:
+	  their assemblies are folded into lib/ below and they are referenced with PrivateAssets="all"
+	  so pack does not record them as dependencies a consumer would have to resolve. That is safe
+	  for a binding because nothing downstream needs its types, and it is exactly why the API
+	  could not stay a project reference: everything downstream needs those.
 
 	  The Razor SDK is here for one reason - wwwroot/JsInterop.js, which the Blazor binding calls
 	  and which only a Razor SDK project can ship as a static web asset.
@@ -130,10 +131,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" PrivateAssets="all" />
 		<!--
-		  WebRTCme.Api and WebRTCme.Bindings.Blazor are packed into this package rather than
-		  depended on, so the packages they in turn need have to be declared here.
+		  The API lives here rather than in its own assembly. It used to be WebRTCme.Api, and
+		  keeping it separate meant either a second package or a private reference that stopped
+		  its types reaching anything downstream - every consumer of WebRTCme wants them.
+		-->
+		<Compile Include="Api\**\*.cs" />
+		<!--
+		  WebRTCme.Bindings.Blazor is packed into this package rather than depended on, so the
+		  packages it in turn needs have to be declared here.
 		-->
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />

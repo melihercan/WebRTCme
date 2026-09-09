@@ -1,0 +1,65 @@
+# Builds everything and packs both NuGet packages, without publishing them.
+#
+# Runs on Windows because that is the only host that can build all five target frameworks in one
+# job: Android, Windows and Blazor need no Mac, and the iOS and Mac Catalyst *libraries* compile
+# here too - only linking and deploying an app needs one. That is enough to produce the packages,
+# but it does mean nothing here proves the Apple native side links.
+name: CI
+
+on:
+  push:
+    branches: [ master, 'feature/**' ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The native halves of the bindings are committed, not downloaded: libwebrtc.aar,
+      # WebRTC.xcframework, WebRTC.framework and the Windows interop DLLs. They are plain git
+      # objects, so a normal checkout is enough, but it is a large one.
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install workloads
+        run: dotnet workload restore WebRTCme.sln
+
+      - name: Restore
+        run: dotnet restore WebRTCme.sln
+
+      - name: Build
+        run: dotnet build WebRTCme.sln -c Release --no-restore
+
+      # Pack on every run, not only on release: packing is where things go wrong silently, and a
+      # broken package should fail the branch that broke it rather than the release weeks later.
+      # No --no-build: this project's packing targets resolve its ProjectReferences, which counts
+      # as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085). Pack builds,
+      # and after the step above it is incremental.
+      - name: Pack
+        run: |
+          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o packages
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o packages
+
+      - name: Verify packages
+        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory packages
+        shell: pwsh
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: packages/*.nupkg

@@ -1,0 +1,99 @@
+# Packs both packages at one version and pushes them to nuget.org.
+#
+# The two packages are released together and never separately: WebRTCme.Middleware depends on
+# WebRTCme at exactly the version it was built against, so publishing one without the other leaves
+# a dependency nobody can resolve.
+#
+# Needs a NUGET_API_KEY secret. The key must be scoped to both WebRTCme and WebRTCme.Middleware -
+# a glob of WebRTCme* also covers the retired WebRTCme.Api, WebRTCme.Bindings* and
+# WebRTCme.Middleware.Xamarin, which should be unlisted rather than kept pushable.
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version, e.g. 2.0.0 or 2.1.0-preview.1'
+        required: true
+        type: string
+      publish:
+        description: 'Push to nuget.org (off = build and verify only)'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'push') {
+            $v = '${{ github.ref_name }}' -replace '^v', ''
+          } else {
+            $v = '${{ inputs.version }}'
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+            throw "Version '$v' is not a valid NuGet version."
+          }
+          "value=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Releasing $v"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install workloads
+        run: dotnet workload restore WebRTCme.sln
+
+      - name: Build
+        run: dotnet build WebRTCme.sln -c Release -p:Version=${{ steps.version.outputs.value }}
+
+      # No --no-build: this project's packing targets resolve its ProjectReferences, which counts
+      # as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085). Pack builds,
+      # and after the step above it is incremental.
+      - name: Pack
+        run: |
+          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o packages -p:Version=${{ steps.version.outputs.value }}
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o packages -p:Version=${{ steps.version.outputs.value }}
+
+      - name: Verify packages
+        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory packages -Version ${{ steps.version.outputs.value }}
+        shell: pwsh
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ steps.version.outputs.value }}
+          path: packages/*.nupkg
+
+      # WebRTCme goes first so the dependency exists by the time the middleware is indexed.
+      - name: Push to nuget.org
+        if: github.event_name == 'push' || inputs.publish
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if (-not $env:NUGET_API_KEY) { throw 'NUGET_API_KEY secret is not set.' }
+          $v = '${{ steps.version.outputs.value }}'
+          foreach ($id in 'WebRTCme', 'WebRTCme.Middleware') {
+            dotnet nuget push "packages/$id.$v.nupkg" `
+              --source https://api.nuget.org/v3/index.json `
+              --api-key $env:NUGET_API_KEY `
+              --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { throw "Pushing $id failed." }
+          }

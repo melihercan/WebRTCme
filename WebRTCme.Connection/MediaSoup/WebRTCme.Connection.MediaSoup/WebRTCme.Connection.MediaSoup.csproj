@@ -19,8 +19,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
-		<!-- WebRTCme keeps its Api reference private so the package does not depend on it, so the API types have to be referenced here directly. -->
-		<ProjectReference Include="..\..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
 	</ItemGroup>
 
 </Project>
