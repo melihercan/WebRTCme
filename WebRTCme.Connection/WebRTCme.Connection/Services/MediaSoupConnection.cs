@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
+using WebRTCme.Connection.Models;
 using WebRTCme.Connection.MediaSoup.Proxy;
 using WebRTCme.Connection.MediaSoup.Proxy.Client;
 using WebRTCme.Connection.MediaSoup.Proxy.Enums;
@@ -746,7 +747,6 @@ namespace WebRTCme.Connection.Services
                     consumer.OnClose += Consumer_OnClose;
                     consumer.OnTransportClosed += Consumer_OnTransportClosed;
                     consumer.OnTrackEnded += Consumer_OnTrackEnded;
-                    consumer.OnGetStatsAsync += Consumer_OnGetStatsAsync;
 
                     Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: before accept {consumerRequestData.Kind} {consumer.Kind}");
                     accept();
@@ -906,12 +906,6 @@ namespace WebRTCme.Connection.Services
                         _logger.LogInformation($"-------> Consumer_OnTrackEnded");
                     }
 
-                    Task<IRTCStatsReport> Consumer_OnGetStatsAsync(object sender, EventArgs e)
-                    {
-                        _logger.LogInformation($"-------> Consumer_GetStatsAsync");
-                        return default;
-                    }
-
 
                 case MethodName.NewDataConsumer:
                     DataConsumer dataConsumer = null;
@@ -1024,14 +1018,58 @@ namespace WebRTCme.Connection.Services
         }
 
 
-        public Task<IRTCStatsReport> GetStats(Guid id)
+        /// <summary>
+        /// Statistics for what is being received from one peer.
+        /// </summary>
+        /// <remarks>
+        /// A peer arrives over as many consumers as it produces tracks, so their reports are
+        /// merged into one. This covers the receive side only: with an SFU there is no
+        /// per-peer send side to report, because one set of producers serves every peer.
+        /// </remarks>
+        public async Task<IRTCStatsReport> GetStats(Guid id)
         {
-            throw new NotImplementedException();
+            var peer = _peers.Values.FirstOrDefault(peer => peer.Id == id);
+            if (peer is null)
+                throw new ArgumentException($"No peer with id {id} is in this connection.", nameof(id));
+
+            Dictionary<string, RTCStats> stats = new();
+
+            foreach (var consumerId in peer.ConsumerIds.ToArray())
+            {
+                if (!_consumers.TryGetValue(consumerId, out var consumer))
+                    continue;
+
+                var report = await consumer.GetStats();
+                if (report is null)
+                    continue;
+
+                foreach (var entry in report)
+                    stats[entry.Key] = entry.Value;
+            }
+
+            return new AggregateStatsReport(stats);
         }
 
-        public Task ReplaceOutgoingTrackAsync(IMediaStreamTrack track, IMediaStreamTrack newTrack)
+        /// <summary>
+        /// Swaps a track this connection is producing, keeping the producer and its negotiation.
+        /// </summary>
+        public async Task ReplaceOutgoingTrackAsync(IMediaStreamTrack track, IMediaStreamTrack newTrack)
         {
-            throw new NotImplementedException();
+            if (track is null)
+                throw new ArgumentNullException(nameof(track));
+
+            var producer = track.Kind switch
+            {
+                MediaStreamTrackKind.Audio => _micProducer,
+                MediaStreamTrackKind.Video => _webcamProducer,
+                _ => null
+            };
+
+            if (producer is null)
+                throw new InvalidOperationException(
+                    $"This connection is not producing a {track.Kind} track to replace.");
+
+            await producer.ReplaceTrackAsync(newTrack);
         }
 
         object ParseResponse(string method, Result<object> result)
