@@ -19,6 +19,20 @@ namespace WebRTCme.Connection.MediaSoup
         public const string PauseConsumer = "pauseConsumer";
         public const string ResumeConsumer = "resumeConsumer";
         public const string NewPeer = "newPeer";
+
+        // Server notifications. Everything the room can send is listed so an unrecognised
+        // method really means unrecognised, rather than merely unhandled.
+        public const string PeerClosed = "peerClosed";
+        public const string PeerDisplayNameChanged = "peerDisplayNameChanged";
+        public const string ConsumerClosed = "consumerClosed";
+        public const string ConsumerPaused = "consumerPaused";
+        public const string ConsumerResumed = "consumerResumed";
+        public const string ConsumerScore = "consumerScore";
+        public const string ConsumerLayersChanged = "consumerLayersChanged";
+        public const string DataConsumerClosed = "dataConsumerClosed";
+        public const string ActiveSpeaker = "activeSpeaker";
+        public const string DownlinkBwe = "downlinkBwe";
+        public const string ProducerScore = "producerScore";
         public const string GetTransportStats = "getTransportStats";
         public const string GetProducerStats = "getProducerStats";
         public const string GetConsumerStats = "getConsumerStats";

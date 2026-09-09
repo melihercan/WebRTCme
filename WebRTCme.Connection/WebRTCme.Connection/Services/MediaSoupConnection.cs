@@ -562,24 +562,121 @@ namespace WebRTCme.Connection.Services
             _logger.LogInformation($"=======> OnNotifyAsync: {method}");
             Console.WriteLine($"=======> OnNotifyAsync: {method}");
 
+            var element = (JsonElement)data;
+
             switch (method)
             {
                 case MethodName.NewPeer:
+                    OnNewPeer(JsonSerializer.Deserialize<Peer>(
+                        element.GetRawText(), JsonHelper.WebRtcJsonSerializerOptions));
+                    break;
+
+                case MethodName.PeerClosed:
+                    OnPeerClosed(GetString(element, "peerId"));
+                    break;
+
+                case MethodName.PeerDisplayNameChanged:
                     {
-                        var json = ((JsonElement)data).GetRawText();
-                        var peer = JsonSerializer.Deserialize<Peer>(
-                            json, JsonHelper.WebRtcJsonSerializerOptions);
-                        OnNewPeer(peer);
+                        var peerId = GetString(element, "peerId");
+                        if (peerId is not null && _peers.TryGetValue(peerId, out var peer) &&
+                            peer.Peer is not null)
+                        {
+                            peer.Peer.DisplayName = GetString(element, "displayName");
+                        }
                     }
+                    break;
+
+                case MethodName.ConsumerClosed:
+                    {
+                        // Closing raises the consumer's own close handler, which is what takes
+                        // it out of the peer's list and stops receiving it.
+                        var consumerId = GetString(element, "consumerId");
+                        if (consumerId is not null && _consumers.TryGetValue(consumerId, out var consumer))
+                            consumer.Close();
+                    }
+                    break;
+
+                case MethodName.ConsumerPaused:
+                    {
+                        var consumerId = GetString(element, "consumerId");
+                        if (consumerId is not null && _consumers.TryGetValue(consumerId, out var consumer))
+                            consumer.Pause();
+                    }
+                    break;
+
+                case MethodName.ConsumerResumed:
+                    {
+                        var consumerId = GetString(element, "consumerId");
+                        if (consumerId is not null && _consumers.TryGetValue(consumerId, out var consumer))
+                            consumer.Resume();
+                    }
+                    break;
+
+                case MethodName.DataConsumerClosed:
+                    {
+                        var dataConsumerId = GetString(element, "dataConsumerId");
+                        if (dataConsumerId is not null &&
+                            _dataConsumers.TryGetValue(dataConsumerId, out var dataConsumer))
+                        {
+                            dataConsumer.Close();
+                        }
+                    }
+                    break;
+
+                // Reported continuously by the server and nothing consumes them yet. Recognised
+                // rather than handled, so that a genuinely unknown method still stands out.
+                case MethodName.ConsumerScore:
+                case MethodName.ConsumerLayersChanged:
+                case MethodName.ProducerScore:
+                case MethodName.ActiveSpeaker:
+                case MethodName.DownlinkBwe:
                     break;
 
                 default:
                     _logger.LogError($"-------> UNKNOWN Notification: {method}");
                     break;
-
             }
 
             return Task.CompletedTask;
+
+            static string GetString(JsonElement element, string name) =>
+                element.TryGetProperty(name, out var value) &&
+                value.ValueKind == JsonValueKind.String
+                    ? value.GetString()
+                    : null;
+        }
+
+        /// <summary>
+        /// Drops a peer that has left and tells the caller it is gone.
+        /// </summary>
+        /// <remarks>
+        /// The server closes the peer's consumers separately, but a peer whose transport died
+        /// may never produce those notifications, so anything still attributed to it is closed
+        /// here too. Closing twice is a no-op.
+        /// </remarks>
+        void OnPeerClosed(string peerId)
+        {
+            if (peerId is null || !_peers.TryRemove(peerId, out var peer))
+                return;
+
+            foreach (var consumerId in peer.ConsumerIds.ToArray())
+            {
+                if (_consumers.TryRemove(consumerId, out var consumer))
+                    consumer.Close();
+            }
+
+            foreach (var dataConsumerId in peer.DataConsumerIds.ToArray())
+            {
+                if (_dataConsumers.TryRemove(dataConsumerId, out var dataConsumer))
+                    dataConsumer.Close();
+            }
+
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerLeft,
+                Id = peer.Id,
+                Name = peerId
+            });
         }
 
         public async Task OnRequestAsync(string method, object data,
@@ -770,8 +867,8 @@ namespace WebRTCme.Connection.Services
                             _connectionContext.Observer.OnNext(new PeerResponse
                             {
                                 Type = PeerResponseType.PeerJoined,
-                                Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
-                                Name = consumerRequestData.PeerId,//peer.Peer.DisplayName,
+                                Id = consumerPeer.Id,
+                                Name = consumerRequestData.PeerId,
                                 MediaStream = mediaStream,
                                 DataChannel = /*isInitiator ? dataChannel :*/ null
                             });
