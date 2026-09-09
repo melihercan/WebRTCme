@@ -96,9 +96,20 @@ namespace WebRTCme.iOS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Ends this track as far as a native track can be ended.
+        /// </summary>
+        /// <remarks>
+        /// libwebrtc has no stop() on a track: a track ends when its source does. Here the
+        /// camera capturer belongs to the view that started it, so there is nothing to release
+        /// from this side; disabling stops the track delivering. ReadyState keeps reporting what
+        /// the native track says, because the track itself is still alive and owned by its
+        /// sender or receiver.
+        /// </remarks>
         public void Stop()
         {
-            throw new NotImplementedException();
+            Enabled = false;
+            OnEnded?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -106,9 +106,22 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Ends this track as far as a native track can be ended.
+        /// </summary>
+        /// <remarks>
+        /// libwebrtc has no stop() on a track: a track ends when its source does, and the source
+        /// belongs to whoever created it. So stop the capture started for this track, which is
+        /// what actually releases the camera, and disable the track either way so it stops
+        /// delivering. ReadyState keeps reporting what the native track says, because that is
+        /// the truth -- the track object itself is still alive and owned by its sender or
+        /// receiver.
+        /// </remarks>
         public void Stop()
         {
-            throw new NotImplementedException();
+            AndroidSupport.StopCapture(Id);
+            Enabled = false;
+            OnEnded?.Invoke(this, EventArgs.Empty);
         }
 
     }

@@ -27,6 +27,31 @@ namespace WebRTCme
         // same track to another renderer reuses it instead of opening the camera again.
         static readonly ConcurrentDictionary<string, Webrtc.ICameraVideoCapturer> _capturersByTrackId = new();
 
+        /// <summary>
+        /// Releases the camera captured for a track, if this is a track we started capture for.
+        /// </summary>
+        /// <remarks>
+        /// Stopping the capturer is what actually turns the camera off; disabling the track only
+        /// stops it being delivered. Remote tracks never had a capturer here, so this does
+        /// nothing for them.
+        /// </remarks>
+        public static void StopCapture(string trackId)
+        {
+            if (trackId is null || !_capturersByTrackId.TryRemove(trackId, out var videoCapturer))
+                return;
+
+            try
+            {
+                videoCapturer.StopCapture();
+            }
+            catch (Exception exception)
+            {
+                // Nothing useful to do about a camera that will not stop, and throwing out of
+                // a teardown path helps nobody.
+                Console.WriteLine($"Stopping the camera capture failed: {exception.Message}");
+            }
+        }
+
         public static void SetTrack(IMediaStreamTrack videoTrack, Webrtc.SurfaceViewRenderer rendererView, 
             global::Android.Content.Context context/*, Webrtc.IEglBaseContext eglBaseContext*/)
         {
