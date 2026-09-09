@@ -13,6 +13,14 @@
     Same Objective-C API surface as the iOS binding, over a WebRTC build that carries Mac
     Catalyst slices (x86_64 and arm64). The iOS binding keeps its own iOS-only framework so
     that platform is unaffected.
+
+    The framework is stored shallow - Headers, Modules, Resources and the binary at its root,
+    no Versions/A and no symlinks - which is the same shape as the iOS xcframework. It used to
+    be a versioned bundle, and that could not survive this repository being checked out on
+    Windows: git writes each symlink as a small text file holding its target, so the framework
+    arrived with a 23-byte WebRTC where the 26MB binary should be. The Apple SDK refuses such a
+    framework outright when git *does* create real symlinks, and packs the broken one when it
+    does not - which is how a corrupt Mac Catalyst slice shipped without any build complaining.
   -->
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />

@@ -1,0 +1,186 @@
+name: Publish
+
+# Publishes WebRTCme and WebRTCme.Middleware to nuget.org.
+#
+# The two are always published together and never separately: WebRTCme.Middleware depends on
+# WebRTCme at exactly the version it was built against, so shipping one alone leaves a dependency
+# nobody can resolve. There is therefore no per-package tag here, unlike Me.Toolkit.Maui.
+#
+# Ways in:
+#   * tag v<version>  — publishes both packages
+#   * run manually    — defaults to a dry run that packs and uploads the .nupkg files as build
+#                       artifacts without publishing anything
+#
+# Authentication is NuGet Trusted Publishing, so no API key is stored in this repository. It needs
+# a policy on nuget.org naming this repository and this workflow file. The glob must cover both
+# ids: "WebRTCme.*" alone does not match "WebRTCme" itself, so list "WebRTCme" as a package
+# alongside the pattern, or the first push of the main package is rejected.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Pack only, do not push to NuGet'
+        type: boolean
+        default: true
+      skip-duplicate:
+        description: 'Treat "already exists" as success (only for re-running a release already out)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Pack and publish
+    # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else,
+    # and the iOS and Mac Catalyst library slices do compile here - only linking an app needs a
+    # Mac. Nothing in this job proves the Apple native side links.
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+      # Lets the job request a GitHub OIDC token, which nuget.org exchanges for a
+      # short-lived API key. Nothing long-lived is stored in the repository.
+      id-token: write
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # The native halves of the bindings are committed rather than downloaded - libwebrtc.aar,
+      # WebRTC.xcframework, WebRTC.framework and the Windows interop DLLs - so a normal checkout
+      # is enough, but it is a large one.
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # Reads the solution and installs exactly the workloads its target frameworks need, rather
+      # than a hardcoded list that would drift.
+      - name: Install MAUI workloads
+        run: dotnet workload restore WebRTCme.sln
+
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+          declared=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme/WebRTCme.csproj | head -1)
+          middleware=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj | head -1)
+
+          # The two versions are not independent: the middleware package records a dependency on
+          # WebRTCme at whatever version this build produces, so a mismatch would ship a package
+          # pointing at one that was never published.
+          if [ "$declared" != "$middleware" ]; then
+            echo "::error::WebRTCme declares $declared but WebRTCme.Middleware declares $middleware; they must match."
+            exit 1
+          fi
+
+          # Catches the classic release bug: tagging one version while the csproj still says another.
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            tag="${GITHUB_REF_NAME#v}"
+            if [ "$tag" != "$declared" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match <Version>$declared</Version>"
+              exit 1
+            fi
+          fi
+
+          echo "value=$declared" >> "$GITHUB_OUTPUT"
+          echo "Version: $declared"
+
+      - name: Build
+        run: dotnet build WebRTCme.sln -c Release
+
+      # No --no-build: these projects' packing targets resolve their ProjectReferences, which
+      # counts as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085). Pack
+      # builds, and after the step above it is incremental.
+      - name: Pack
+        run: |
+          set -euo pipefail
+          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
+
+      # Asserts every slice and native payload is present and that no folded project leaked into
+      # the dependency groups. Both are things pack gets wrong in silence, and neither shows up in
+      # a consumer's build - a missing framework surfaces on a device, and a leaked dependency
+      # points at a package that was never published.
+      - name: Verify packages
+        shell: pwsh
+        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory artifacts -Version ${{ steps.version.outputs.value }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nupkg-${{ steps.version.outputs.value }}
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+      # Trusted Publishing: swap a GitHub OIDC token for an API key that nuget.org issues for one
+      # hour. Requested immediately before the push, because the key expires and each token buys
+      # exactly one key.
+      - name: NuGet login
+        if: github.event_name == 'push' || inputs.dry-run == false
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: melihercan
+
+      # WebRTCme goes first, so its dependency exists by the time the middleware is indexed.
+      # Pushed one at a time, with the glob expanded here rather than handed to dotnet as a quoted
+      # string - dotnet nuget push does not expand globs, and a failed push after a successful
+      # login burns the token.
+      - name: Push to NuGet
+        if: github.event_name == 'push' || inputs.dry-run == false
+        env:
+          # A tag push never skips duplicates. --skip-duplicate cannot tell a genuine re-release
+          # from a hard refusal - nuget.org answers 409 for both - so it turns a rejection into a
+          # green tick. Only a manual run can ask for it, and then it is a deliberate choice.
+          SKIP_DUPLICATE: ${{ (github.event_name == 'workflow_dispatch' && inputs.skip-duplicate) && 'yes' || 'no' }}
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          set -euo pipefail
+          version='${{ steps.version.outputs.value }}'
+
+          skip=()
+          if [ "$SKIP_DUPLICATE" = "yes" ]; then
+            skip=(--skip-duplicate)
+          fi
+          echo "skip-duplicate: $SKIP_DUPLICATE"
+
+          for id in WebRTCme WebRTCme.Middleware; do
+            package="artifacts/$id.$version.nupkg"
+            echo "Pushing $package"
+
+            if dotnet nuget push "$package" \
+                 --api-key "$NUGET_API_KEY" \
+                 --source https://api.nuget.org/v3/index.json \
+                 "${skip[@]}"; then
+              continue
+            fi
+
+            # dotnet nuget push reports the status line and throws the response body away, which
+            # is where nuget.org puts the reason. Ask again with curl purely to read that body,
+            # then fail. X-NuGet-Client-Version is required or nuget.org answers 400 before it
+            # ever looks at the package.
+            echo "::group::Raw nuget.org response for $package"
+            curl -sS -X PUT \
+              -H "X-NuGet-ApiKey: $NUGET_API_KEY" \
+              -H "X-NuGet-Client-Version: 6.0.0" \
+              -F "package=@$package" \
+              -D - \
+              -w '\nHTTP %{http_code}\n' \
+              https://www.nuget.org/api/v2/package || true
+            echo "::endgroup::"
+
+            echo "::error::Pushing $package failed; see the raw response above."
+            exit 1
+          done
+
+      - name: Dry run summary
+        if: github.event_name == 'workflow_dispatch' && inputs.dry-run
+        run: echo "::notice::Dry run - packages built and uploaded as artifacts, nothing published."

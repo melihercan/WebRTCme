@@ -1,65 +1,68 @@
-# Builds everything and packs both NuGet packages, without publishing them.
-#
-# Runs on Windows because that is the only host that can build all five target frameworks in one
-# job: Android, Windows and Blazor need no Mac, and the iOS and Mac Catalyst *libraries* compile
-# here too - only linking and deploying an app needs one. That is enough to produce the packages,
-# but it does mean nothing here proves the Apple native side links.
 name: CI
 
 on:
   push:
-    branches: [ master, 'feature/**' ]
+    branches: [master, 'feature/**']
   pull_request:
-    branches: [ master ]
+    branches: [master]
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
+    name: Build and pack
+    # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else,
+    # and the iOS and Mac Catalyst library slices do compile here - only linking an app needs a
+    # Mac. So nothing in this job proves the Apple native side links.
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - uses: actions/checkout@v4
+      # The native halves of the bindings are committed rather than downloaded - libwebrtc.aar,
+      # WebRTC.xcframework, WebRTC.framework and the Windows interop DLLs - so a normal checkout
+      # is enough, but it is a large one.
+      - uses: actions/checkout@v7
 
-      # The native halves of the bindings are committed, not downloaded: libwebrtc.aar,
-      # WebRTC.xcframework, WebRTC.framework and the Windows interop DLLs. They are plain git
-      # objects, so a normal checkout is enough, but it is a large one.
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-dotnet@v6
         with:
-          distribution: temurin
-          java-version: '17'
+          dotnet-version: '10.0.x'
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Install workloads
+      # Reads the solution and installs exactly the workloads its target frameworks need, rather
+      # than a hardcoded list that would drift.
+      - name: Install MAUI workloads
         run: dotnet workload restore WebRTCme.sln
 
-      - name: Restore
-        run: dotnet restore WebRTCme.sln
-
+      # No separate restore step, and no --no-restore. The MAUI Windows app resolves runtime packs
+      # per RuntimeIdentifier, and a plain solution-level restore does not fetch them: build then
+      # fails with NETSDK1112 telling you to restore with a RuntimeIdentifier. Letting build do its
+      # own restore gets it right.
       - name: Build
-        run: dotnet build WebRTCme.sln -c Release --no-restore
+        run: dotnet build WebRTCme.sln -c Release
 
-      # Pack on every run, not only on release: packing is where things go wrong silently, and a
-      # broken package should fail the branch that broke it rather than the release weeks later.
-      # No --no-build: this project's packing targets resolve its ProjectReferences, which counts
-      # as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085). Pack builds,
-      # and after the step above it is incremental.
+      # Packing runs on every push and PR, not only on release. Packing is where this repository
+      # goes wrong quietly - pack discards build output it does not recognise without a word - so
+      # a commit that breaks a package should fail that commit rather than the release weeks later.
+      #
+      # No --no-build: these projects' packing targets resolve their ProjectReferences, which counts
+      # as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085).
       - name: Pack
         run: |
-          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o packages
-          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o packages
+          set -euo pipefail
+          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts
 
       - name: Verify packages
-        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory packages
         shell: pwsh
+        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory artifacts
 
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: packages
-          path: packages/*.nupkg
+          name: nupkg
+          path: artifacts/*.nupkg
+          if-no-files-found: error

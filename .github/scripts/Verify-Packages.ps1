@@ -23,7 +23,20 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-$suffix = if ($Version) { ".$Version" } else { "" }
+# With a version, the exact file is named. Without one, the id is matched against whatever
+# version happens to be there - but not loosely: "WebRTCme.*.nupkg" would also match
+# WebRTCme.Middleware, so the part after the id has to start with a digit.
+function Resolve-Package {
+    param([string] $Directory, [string] $Id, [string] $Version)
+
+    if ($Version) { return Join-Path $Directory "$Id.$Version.nupkg" }
+
+    $match = Get-ChildItem -Path $Directory -Filter "$Id.*.nupkg" -ErrorAction SilentlyContinue |
+             Where-Object { $_.Name -match "^$([regex]::Escape($Id))\.\d" } |
+             Select-Object -First 1
+    if ($match) { return $match.FullName }
+    return Join-Path $Directory "$Id.nupkg"   # reported as missing below
+}
 
 # Folder names under lib/ carry a platform version the projects never state (net10.0-android
 # becomes net10.0-android36.0), so these are matched as patterns rather than literals.
@@ -69,7 +82,7 @@ $expected = @{
 $failures = New-Object System.Collections.Generic.List[string]
 
 foreach ($id in $expected.Keys | Sort-Object) {
-    $path = Join-Path $PackageDirectory "$id$suffix.nupkg"
+    $path = Resolve-Package -Directory $PackageDirectory -Id $id -Version $Version
     if (-not (Test-Path $path)) {
         $failures.Add("$id : package not found at $path")
         continue
