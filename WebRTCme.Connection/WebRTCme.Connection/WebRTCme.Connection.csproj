@@ -13,7 +13,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\MediaSoup\WebRTCme.Connection.MediaSoup.Proxy\WebRTCme.Connection.MediaSoup.Proxy.csproj" />
+    <ProjectReference Include="..\MediaSoup\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
     <ProjectReference Include="..\Signaling\WebRTCme.Connection.Signaling.Proxy\WebRTCme.Connection.Signaling.Proxy.csproj" />
   </ItemGroup>
 

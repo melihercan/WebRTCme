@@ -1,21 +1,22 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<TargetFrameworks>net10.0</TargetFrameworks>
-  </PropertyGroup>
-
-
-	<ItemGroup>
-    <ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
-  </ItemGroup>
-
-
+	<PropertyGroup>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+	</PropertyGroup>
 
 	<ItemGroup>
-	    <PackageReference Include="System.Reactive" Version="6.1.0" />
+		<PackageReference Include="WebsocketClientLite.PCL" Version="9.0.2" />
+		<PackageReference Include="System.Reactive" Version="6.1.0" />
 		<PackageReference Include="Utilme.Result" Version="1.0.1" />
 		<PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.80" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>
 
 </Project>
