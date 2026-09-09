@@ -1208,7 +1208,15 @@ namespace WebRTCme.Connection.Services
 
         void OnNewPeer(Peer peer)
         {
-            GetOrAddPeer(peer.Id).Peer = peer;
+            if (peer?.PeerId is null)
+            {
+                // Better a complaint than a peer recorded under a null key, which takes the
+                // whole connection down and says nothing about why.
+                _logger.LogError("-------> Ignoring a peer announced without an id");
+                return;
+            }
+
+            GetOrAddPeer(peer.PeerId).Peer = peer;
         }
 
         /// <summary>

@@ -6,7 +6,8 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Models
 {
     public class Peer
     {
-        public string Id { get; init; }
+        // 'peerId' on the wire, not 'id'.
+        public string PeerId { get; init; }
         public string DisplayName { get; set; }
         public Device Device { get; init; }
     }
