@@ -67,6 +67,10 @@ jobs:
       - name: Install MAUI workloads
         run: dotnet workload restore WebRTCme.sln
 
+      # Versions are the build date: 26.9.9 is the 9th of September 2026. Write it normalised,
+      # without leading zeros - NuGet strips them anyway, so a csproj saying 26.09.09 produces
+      # WebRTCme.26.9.9.nupkg and every place that builds a file name from <Version> stops
+      # matching. Declaring the normalised form keeps csproj, tag and file name identical.
       - name: Resolve version
         id: version
         run: |
@@ -153,7 +157,15 @@ jobs:
           echo "skip-duplicate: $SKIP_DUPLICATE"
 
           for id in WebRTCme WebRTCme.Middleware; do
-            package="artifacts/$id.$version.nupkg"
+            # Found rather than constructed. If <Version> is ever written with leading zeros the
+            # file is named after the normalised form instead, and a constructed path would miss
+            # it - after a successful login, which burns the token. The digit after the id is what
+            # stops "WebRTCme." also matching WebRTCme.Middleware.
+            package=$(ls artifacts/$id.[0-9]*.nupkg 2>/dev/null | head -1)
+            if [ -z "$package" ]; then
+              echo "::error::No package found for $id in artifacts/ (expected version $version)."
+              exit 1
+            fi
             echo "Pushing $package"
 
             if dotnet nuget push "$package" \

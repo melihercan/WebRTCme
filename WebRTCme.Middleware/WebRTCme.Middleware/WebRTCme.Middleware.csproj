@@ -27,7 +27,7 @@
 
 	<PropertyGroup>
 		<Authors>melihercan</Authors>
-		<Version>2.0.0</Version>
+		<Version>26.9.9</Version>
 		<Description>Services layer between Blazor or .NET MAUI applications and the WebRTCme library.</Description>
 		<Copyright>melihercan 2024</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>

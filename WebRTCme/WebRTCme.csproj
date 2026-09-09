@@ -30,7 +30,7 @@
 
 	<PropertyGroup>
 		<Authors>melihercan</Authors>
-		<Version>2.0.0</Version>
+		<Version>26.9.9</Version>
 		<Description>WebRTC library with a single, unified API for .NET MAUI and Blazor middlewares/applications.</Description>
 		<Copyright>melihercan 2024</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
