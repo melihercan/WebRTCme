@@ -72,6 +72,12 @@ library slices - only linking and deploying an *app* for those needs a Mac. CI d
 on `windows-latest`, which is the only runner that can build all five target frameworks in one
 job, since `net10.0-windows10.0.22621.0` builds nowhere else.
 
+## Known gaps
+
+`doc/KnownGaps.md` lists what is unimplemented, half-wired or fragile, and what has and has
+not been verified. Worth reading before promising a feature works - several things are
+implemented but unreachable, and screen sharing works on two platforms out of five.
+
 ## Notes specific to this repo
 
 - No `global.json`; `dotnet --version` on this machine is 10.0.400.
