@@ -186,29 +186,30 @@ IMediaStream remMedia;
 
                 if (_produce)
                 {
-                    ////await Task.Delay(1000);
+                    // Produce the stream the caller already opened. Opening the camera a second
+                    // time here used to fail on Android with "Failed to start capture request /
+                    // onCameraError from another session": the local preview kept the first
+                    // capture session, and the tracks produced from this second one carried no
+                    // frames, so remote peers saw a black tile.
+                    var mediaStream = userContext.LocalStream;
+                    if (mediaStream is null)
+                        throw new Exception(
+                            "UserContext.LocalStream is required when producing is enabled");
 
-                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
-                        var mediaStream = await mediaDevices.GetUserMedia(new MediaStreamConstraints
-                        {
-                            Audio = new MediaStreamContraintsUnion { Value = true },
-                            Video = new MediaStreamContraintsUnion { Value = true }
-
-                        });
-
-
-                        // Enable mic.
-                        var micTrack = mediaStream.GetAudioTracks()[0];
-                        _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
-                        {
-                            Track = micTrack, //// userContext.LocalStream.GetAudioTracks().First(),
-                            Encodings = new RtpEncodingParameters[] { },
-                            CodecOptions = new ProducerCodecOptions
+                        // Enable mic. An audio-only or video-only local stream is legitimate,
+                        // so each track is produced only if the caller actually supplied one.
+                        var micTrack = mediaStream.GetAudioTracks().FirstOrDefault();
+                        if (micTrack is not null)
+                            _micProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                             {
-                                OpusStereo = true,
-                                OpusDtx = true
-                            }
-                        });
+                                Track = micTrack,
+                                Encodings = new RtpEncodingParameters[] { },
+                                CodecOptions = new ProducerCodecOptions
+                                {
+                                    OpusStereo = true,
+                                    OpusDtx = true
+                                }
+                            });
 
                         // Enable webcam.
 ////                        var mediaDevices = _webRtc.Window(_jsRuntime).Navigator().MediaDevices;
@@ -250,7 +251,7 @@ IMediaStream remMedia;
                         //});
 
 ////                        var tracks = webcamStream.GetVideoTracks();
-                        var webcamTrack =  mediaStream.GetVideoTracks()[0]; ////webcamStream.GetVideoTracks()[0];
+                        var webcamTrack = mediaStream.GetVideoTracks().FirstOrDefault();
 
                         //var caps = webcamTrack.GetCapabilities();
                         //var constraints = webcamTrack.GetConstraints();
@@ -320,22 +321,14 @@ IMediaStream remMedia;
                             }
                         }
 
-                        try
-                        {
+                        if (webcamTrack is not null)
                             _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                             {
-                                Track = webcamTrack,//// userContext.LocalStream.GetVideoTracks().First(),
+                                Track = webcamTrack,
                                 Encodings = encodings ?? new RtpEncodingParameters[] { },
                                 CodecOptions = codecOptions,
                                 Codec = codec
-
                             });
-                        }
-                        catch(Exception ex)
-                        {
-                            var m = ex.Message;
-                            throw;
-                        }
 
                   _logger.LogInformation("Connection completed");
 

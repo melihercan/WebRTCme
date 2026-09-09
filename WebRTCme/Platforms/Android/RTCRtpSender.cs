@@ -17,9 +17,15 @@ namespace WebRTCme.Android
             _nativePeerConnection = nativePeerConnection;
         }
 
+        public RTCRtpSender(Func<Webrtc.RtpSender> nativeRtpSenderProvider,
+            Webrtc.PeerConnection nativePeerConnection = null) : base(nativeRtpSenderProvider)
+        {
+            _nativePeerConnection = nativePeerConnection;
+        }
+
         public IRTCDTMFSender Dtmf => new RTCDTMFSender(NativeObject.Dtmf());
 
-        public IMediaStreamTrack Track => new MediaStreamTrack(NativeObject.Track());
+        public IMediaStreamTrack Track => new MediaStreamTrack(() => NativeObject.Track());
 
         public IRTCDtlsTransport Transport => throw new NotImplementedException();
 

@@ -46,6 +46,10 @@ namespace WebRTCme.Android
         public MediaStreamTrack(Webrtc.MediaStreamTrack nativeMediaStreamTrack) : base(nativeMediaStreamTrack)
         { }
 
+        public MediaStreamTrack(Func<Webrtc.MediaStreamTrack> nativeMediaStreamTrackProvider)
+            : base(nativeMediaStreamTrackProvider)
+        { }
+
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Enabled 
         { 

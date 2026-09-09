@@ -164,7 +164,12 @@ Console.WriteLine($"########################## REQUEST: {request.Method}");
                     }
                     catch (Exception ex)
                     {
-                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
+                        // Console as well as the logger: on Android the ILogger output does not
+                        // reach logcat, so a handler that threw here left no trace at all -- a
+                        // newConsumer that failed simply never got accepted and the server timed
+                        // out 30s later with no hint of why.
+                        Console.WriteLine($"E X C E P T I O N: {ex}");
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex}");
                     }
                     finally
                     {
@@ -187,7 +192,12 @@ Console.WriteLine($"########################## REQUEST: {request.Method}");
                     }
                     catch (Exception ex)
                     {
-                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
+                        // Console as well as the logger: on Android the ILogger output does not
+                        // reach logcat, so a handler that threw here left no trace at all -- a
+                        // newConsumer that failed simply never got accepted and the server timed
+                        // out 30s later with no hint of why.
+                        Console.WriteLine($"E X C E P T I O N: {ex}");
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex}");
                     }
                     finally
                     {
@@ -210,7 +220,12 @@ Console.WriteLine($"########################## REQUEST: {request.Method}");
                     }
                     catch (Exception ex)
                     {
-                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
+                        // Console as well as the logger: on Android the ILogger output does not
+                        // reach logcat, so a handler that threw here left no trace at all -- a
+                        // newConsumer that failed simply never got accepted and the server timed
+                        // out 30s later with no hint of why.
+                        Console.WriteLine($"E X C E P T I O N: {ex}");
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex}");
                     }
                     finally
                     {
@@ -280,7 +295,12 @@ Console.WriteLine($"########################## REQUEST: {request.Method}");
                     catch (OperationCanceledException) { }
                     catch (Exception ex)
                     {
-                        Registry.Logger.LogError($"E X C E P T I O N: {ex.Message}");
+                        // Console as well as the logger: on Android the ILogger output does not
+                        // reach logcat, so a handler that threw here left no trace at all -- a
+                        // newConsumer that failed simply never got accepted and the server timed
+                        // out 30s later with no hint of why.
+                        Console.WriteLine($"E X C E P T I O N: {ex}");
+                        Registry.Logger.LogError($"E X C E P T I O N: {ex}");
                         //// TODO: HOW TO REPORT THIS ERROR??? ERROR EVENT???
                     }
                 }

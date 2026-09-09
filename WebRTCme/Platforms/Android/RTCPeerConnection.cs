@@ -10,16 +10,15 @@ namespace WebRTCme.Android
         Webrtc.PeerConnection.IObserver
     {
         public Webrtc.PeerConnection NativeObject { get; init; }
-        // TODO: THERE IS A PROBLEM TO BE SORTED!!!
-        // If you create a RTCRtp Sender, Receiver or Transceiver and then access the list
-        // of Senders, Receivers or Transceivers via RTCPeerConnection NativeObject,  
-        // native objects of Sender, Receiver and Transceivers are all disposed!!!
 
-        // Caches to prevent new instance creation of already existed platform independent objects that have
-        // same native base.
-        //private Dictionary<Webrtc.RtpSender, IRTCRtpSender> _sendersDictionary = new();
-        //private Dictionary<Webrtc.RtpReceiver, IRTCRtpReceiver> _receiversDictionary = new();
-        //private Dictionary<Webrtc.RtpTransceiver, IRTCRtpTransceiver> _transceiversDictionary = new();
+        // libwebrtc's PeerConnection.getTransceivers() disposes every transceiver it handed out
+        // previously, and disposing a transceiver disposes its sender, its receiver and that
+        // receiver's track. So enumerating to find a newly negotiated consumer used to kill the
+        // tracks and senders handed out for the ones before it. Keeping one wrapper per m-line
+        // and pointing it at the fresh native on every enumeration is what lets a reference
+        // taken earlier stay usable afterwards.
+        readonly Dictionary<string, RTCRtpTransceiver> _transceiverByMid = new();
+        readonly List<RTCRtpTransceiver> _unnegotiatedTransceivers = new();
 
          private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
         {
@@ -110,7 +109,7 @@ namespace WebRTCme.Android
                 transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(kind.ToNative(), init.ToNative()),
                     NativeObject);
 
-            //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
+            _unnegotiatedTransceivers.Add(transceiver);
 
             return transceiver;
         }
@@ -126,7 +125,7 @@ namespace WebRTCme.Android
                 transceiver = new RTCRtpTransceiver(NativeObject.AddTransceiver(
                     ((MediaStreamTrack)track).NativeObject, init.ToNative()), NativeObject);
 
-            //_transceiversDictionary.Add(transceiver.NativeObject, transceiver);
+            _unnegotiatedTransceivers.Add(transceiver);
 
             return transceiver;
         }
@@ -229,15 +228,63 @@ namespace WebRTCme.Android
             return tcs.Task;
         }
 
-        public IRTCRtpTransceiver[] GetTransceivers() =>
-            NativeObject.Transceivers
-                .Select(nativeTransceiver => new RTCRtpTransceiver(nativeTransceiver, NativeObject)).ToArray();
+        public IRTCRtpTransceiver[] GetTransceivers()
+        {
+            var nativeTransceivers = NativeObject.Transceivers;
+            var transceivers = new IRTCRtpTransceiver[nativeTransceivers.Count];
 
-        //public IRTCRtpTransceiver[] GetTransceivers()
-        //{
-        //    RefreshTransceiversDictionary();
-        //    return _transceiversDictionary.Values.ToArray();
-        //}
+            for (var i = 0; i < nativeTransceivers.Count; i++)
+            {
+                var nativeTransceiver = nativeTransceivers[i];
+                var mid = nativeTransceiver.Mid;
+
+                if (mid is not null && _transceiverByMid.TryGetValue(mid, out var transceiver))
+                {
+                    transceiver.Rebind(nativeTransceiver);
+                }
+                else
+                {
+                    transceiver = AdoptUnnegotiatedTransceiver(mid);
+                    if (transceiver is null)
+                        transceiver = new RTCRtpTransceiver(nativeTransceiver, NativeObject);
+                    else
+                        transceiver.Rebind(nativeTransceiver);
+
+                    if (mid is not null)
+                        _transceiverByMid[mid] = transceiver;
+                }
+
+                transceivers[i] = transceiver;
+            }
+
+            return transceivers;
+        }
+
+        /// <summary>
+        /// Reclaims the wrapper for a locally added transceiver now that it has a mid.
+        /// </summary>
+        /// <remarks>
+        /// AddTransceiver hands back a wrapper before there is a local description, so it has no
+        /// mid to be keyed on yet. It is matched up here by the mid it reported once negotiation
+        /// gave it one, which keeps a producer's sender pointing at a live native.
+        /// </remarks>
+        RTCRtpTransceiver AdoptUnnegotiatedTransceiver(string mid)
+        {
+            if (mid is null)
+                return null;
+
+            for (var i = 0; i < _unnegotiatedTransceivers.Count; i++)
+            {
+                var candidate = _unnegotiatedTransceivers[i];
+                if (candidate.LastKnownMid != mid)
+                    continue;
+
+                _unnegotiatedTransceivers.RemoveAt(i);
+                return candidate;
+            }
+
+            return null;
+        }
 
         public void RemoveTrack(IRTCRtpSender sender)
         {
