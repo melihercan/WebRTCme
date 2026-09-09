@@ -42,7 +42,13 @@ namespace WebRTCme.iOS
         { }
 
         public string ContentHint { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        // Not optional: mediasoup's Consumer constructor reads this to seed its paused state,
+        // so leaving it unimplemented threw before any consumer could be registered.
+        public bool Enabled
+        {
+            get => NativeObject.IsEnabled;
+            set => NativeObject.IsEnabled = value;
+        }
         public string Id => NativeObject.TrackId;
 
         public bool Isolated => throw new NotImplementedException();
