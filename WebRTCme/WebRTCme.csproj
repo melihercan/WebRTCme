@@ -1,4 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<!--
+	  The whole client stack ships as this one package.
+
+	  WebRTCme.Api, the four MAUI bindings and the Blazor binding are separate projects but not
+	  separate packages: their assemblies are folded into lib/ below, and each of them sets
+	  IsPackable=false so pack does not record it as a dependency a consumer would have to
+	  resolve. PrivateAssets="all" would do that too, but it also stops the types flowing to
+	  everything downstream in this repo, and WebRTCme.Api is the public API surface.
+
+	  The Razor SDK is here for one reason - wwwroot/JsInterop.js, which the Blazor binding calls
+	  and which only a Razor SDK project can ship as a static web asset.
+	-->
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
@@ -11,7 +25,22 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Authors>melihercan</Authors>
+		<Version>2.0.0</Version>
+		<Description>WebRTC library with a single, unified API for .NET MAUI and Blazor middlewares/applications.</Description>
+		<Copyright>melihercan 2024</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
+		<PackageIcon>me.png</PackageIcon>
+		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>WebRTC .NET MAUI Android iOS Windows macOS Blazor</PackageTags>
+		<PackageReleaseNotes>New major release.</PackageReleaseNotes>
+		<!-- Packages come from CI, never from a local build. -->
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-android'">
@@ -29,23 +58,42 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
-
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
 		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<!-- wwwroot belongs to the Blazor slice alone; a MAUI app has no browser to serve it. -->
+		<DefaultItemExcludes>$(DefaultItemExcludes);wwwroot\**</DefaultItemExcludes>
+		<!--
+		  Keep Blazor Hybrid out of the graph entirely. The Razor SDK plus UseMaui makes MAUI add
+		  Microsoft.AspNetCore.Components.WebView.Maui implicitly, and that one package causes
+		  both of this layout's problems: its targets glob **\*.razor into every MAUI slice, and
+		  its blazor.modules.json is claimed at the same target path by every Razor-SDK project in
+		  the graph, which is a hard error once there is more than one. Neither project hosts a
+		  WebView, and the MAUI packages they do need are referenced explicitly below.
+		-->
+		<DisableMauiImplicitPackageReferences>true</DisableMauiImplicitPackageReferences>
+		<!--
+		  And no static web asset manifests either. The Razor SDK emits them per TFM even with no
+		  wwwroot, and an app that ends up with both the net10.0 and the platform build of this
+		  assembly gets two files claiming one destination name, which fails MSIX packaging.
+		-->
+		<StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
 		<Compile Include="**\Blazor\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.9" />
-		<!--<PackageReference Include="Xamarin.Essentials" Version="1.8.1" />-->
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
 		<Compile Include="**\Android\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
@@ -54,7 +102,7 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
 		<Compile Include="**\iOS\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
@@ -63,7 +111,7 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
 		<Compile Include="**\Windows\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
@@ -75,22 +123,29 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
 		<Compile Include="**\MacCatalyst\**\*.cs" />
 		<Compile Include="*.cs" />
-		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
+		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" />
-	</ItemGroup> 	
+		<ProjectReference Include="..\WebRTCme.Api\WebRTCme.Api.csproj" PrivateAssets="all" />
+		<!--
+		  WebRTCme.Api and WebRTCme.Bindings.Blazor are packed into this package rather than
+		  depended on, so the packages they in turn need have to be declared here.
+		-->
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
+		<PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <None Include="..\me.png" Link="me.png">
 		<PackagePath></PackagePath>
 		<Pack>True</Pack>
 	  </None>
-	</ItemGroup> 	
+	</ItemGroup>
 
 	<!--
 	  Make every platform's source files visible in Solution Explorer
@@ -101,5 +156,59 @@
 	<ItemGroup>
 		<None Include="Platforms\**\*.cs" Exclude="@(Compile)" />
 	</ItemGroup>
+
+	<!--
+	  Packaging. Everything below exists because this package carries five projects and four
+	  native payloads that dotnet pack would otherwise turn into dependencies or drop.
+	-->
+	<PropertyGroup>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeReferencedProjectAssemblies</TargetsForTfmSpecificBuildOutput>
+		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludeNativePayload</TargetsForTfmSpecificContentInPackage>
+		<!--
+		  Without these two, pack drops the native payloads from the build output folder without
+		  saying so: the allow-list defaults to assemblies and a handful of metadata files, and
+		  anything else is discarded silently. libwebrtc.aar is the Android binding's Java side,
+		  and the .resources.zip files carry WebRTC.xcframework and WebRTC.framework.
+		-->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.aar;.zip</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+
+	<!--
+	  The referenced projects' assemblies, plus the native halves of the Android and Apple
+	  bindings, all of which belong beside WebRTCme.dll in lib/<tfm>/.
+
+	  These go through BuildOutputInPackage rather than TfmSpecificPackageFile because only the
+	  former knows the lib folder's name. That name is the framework's *short* form, which carries
+	  a platform version the project never states (net10.0-android becomes net10.0-android36.0),
+	  and NuGet does not pass it to the content targets - a hand-built PackagePath lands the file
+	  in a folder of its own and earns NU5103.
+	-->
+	<Target Name="IncludeReferencedProjectAssemblies" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('Extension', '.dll'))" />
+			<BuildOutputInPackage Condition="'$(TargetFramework)' == 'net10.0-android'" Include="$(OutputPath)libwebrtc.aar" />
+			<BuildOutputInPackage Condition="'$(TargetFramework)' == 'net10.0-ios'" Include="$(OutputPath)WebRTCme.Bindings.Maui.iOS.resources.zip" />
+			<BuildOutputInPackage Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'" Include="$(OutputPath)WebRTCme.Bindings.Maui.MacCatalyst.resources.zip" />
+		</ItemGroup>
+	</Target>
+
+	<!-- Windows P/Invokes plain DLLs, which belong in runtimes/<rid>/native instead. -->
+	<Target Name="IncludeNativePayload">
+		<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
+			<TfmSpecificPackageFile Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\native\win-x64\*.dll" PackagePath="runtimes\win-x64\native\" />
+		</ItemGroup>
+	</Target>
+	<!--
+	  Drop the .aar the Android SDK builds for this project. It re-emits the four
+	  libjingle_peerconnection_so.so that arrive with libwebrtc.aar and nothing else, so it is
+	  23MB of duplication - and two .aar carrying the same .so in one lib/ folder is a conflict
+	  waiting to happen. The SDK adds it from _IncludeAarInNuGetPackage with no property to say
+	  no, so it is removed immediately afterwards.
+	-->
+	<Target Name="DropRedundantGeneratedAar" AfterTargets="_IncludeAarInNuGetPackage">
+		<ItemGroup>
+			<TfmSpecificPackageFile Remove="$(OutputPath)$(TargetName).aar" />
+		</ItemGroup>
+	</Target>
 
 </Project>

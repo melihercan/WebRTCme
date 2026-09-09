@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+		<!-- Packed into WebRTCme or WebRTCme.Middleware, never shipped as a package of its own. -->
+		<IsPackable>false</IsPackable>
 	<TargetFrameworks>net10.0</TargetFrameworks>
 	<AssemblyName>WebRTCme.Bindings.Blazor</AssemblyName>
     <RootNamespace>WebRTCme.Bindings.Blazor</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>melihercan</Authors>
     <Description>Blazor bindings using JSInterop.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+		<!-- Packed into WebRTCme or WebRTCme.Middleware, never shipped as a package of its own. -->
+		<IsPackable>false</IsPackable>
 	<TargetFrameworks>net10.0</TargetFrameworks>
 	  <RootNamespace>WebRTCme</RootNamespace>
 	  <UserSecretsId>a419948c-ce76-4240-bd44-60047b666b15</UserSecretsId>
-	  <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	  <Authors>melihercan</Authors>
 	  <Description>WebRTCme API library.</Description>
 	  <Copyright>melihercan 2024</Copyright>

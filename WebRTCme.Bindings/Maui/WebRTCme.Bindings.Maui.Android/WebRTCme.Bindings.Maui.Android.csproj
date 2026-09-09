@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+		<!-- Packed into WebRTCme or WebRTCme.Middleware, never shipped as a package of its own. -->
+		<IsPackable>false</IsPackable>
     <TargetFrameworks>net10.0-android</TargetFrameworks>
     <SupportedOSPlatformVersion>28</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 </Project>

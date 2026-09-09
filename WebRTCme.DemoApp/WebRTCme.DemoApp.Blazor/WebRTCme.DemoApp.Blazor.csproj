@@ -17,6 +17,9 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+    <!-- WebRTCme keeps this private so its package carries no dependency on it; a project
+         reference has to name it, where a package reference would not. -->
+    <ProjectReference Include="..\..\WebRTCme.Api\WebRTCme.Api.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<!--
 	  One project, one assembly, one package, two implementations.
@@ -46,11 +46,20 @@
 		<UseMaui>true</UseMaui>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<!--
-		  Razor SDK + UseMaui reads as Blazor Hybrid, so MAUI asks for an explicit reference to
-		  Microsoft.AspNetCore.Components.WebView.Maui (MA002). This project hosts no WebView, and
-		  the packed nuspec confirms the dependency does not reach consumers.
+		  Keep Blazor Hybrid out of the graph entirely. The Razor SDK plus UseMaui makes MAUI add
+		  Microsoft.AspNetCore.Components.WebView.Maui implicitly, and that one package causes
+		  both of this layout's problems: its targets glob **\*.razor into every MAUI slice, and
+		  its blazor.modules.json is claimed at the same target path by every Razor-SDK project in
+		  the graph, which is a hard error once there is more than one. Neither project hosts a
+		  WebView, and the MAUI packages they do need are referenced explicitly below.
 		-->
-		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+		<DisableMauiImplicitPackageReferences>true</DisableMauiImplicitPackageReferences>
+		<!--
+		  And no static web asset manifests either. The Razor SDK emits them per TFM even with no
+		  wwwroot, and an app that ends up with both the net10.0 and the platform build of this
+		  assembly gets two files claiming one destination name, which fails MSIX packaging.
+		-->
+		<StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
 	</PropertyGroup>
 
 	<!--
@@ -67,16 +76,51 @@
 
 	<ItemGroup>
 		<Compile Include="Core\**\*.cs" />
-		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+		<!--
+		  The connection layer is packed into this package rather than depended on - its projects
+		  set IsPackable=false - so the packages it needs are declared here instead. WebRTCme is
+		  the one real dependency, and it is now referenced directly so pack records it as such;
+		  it used to reach consumers only through the connection layer, which is invisible to them.
+		-->
+		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" PrivateAssets="all" />
+		<ProjectReference Include="..\..\WebRTCme\WebRTCme.csproj" />
 		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.80" />
+		<PackageReference Include="System.Reactive" Version="6.1.0" />
+		<PackageReference Include="Utilme.Result" Version="1.0.1" />
+		<PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
+		<PackageReference Include="WebsocketClientLite.PCL" Version="9.0.2" />
 	</ItemGroup>
+
+	<!--
+	  Pack the connection layer's assemblies into lib/ beside the middleware. The filter is by
+	  name because ReferenceCopyLocalPaths also carries WebRTCme and its bindings, which arrive
+	  transitively and belong to the WebRTCme package, not this one.
+	-->
+	<PropertyGroup>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeConnectionAssemblies</TargetsForTfmSpecificBuildOutput>
+	</PropertyGroup>
+
+	<Target Name="IncludeConnectionAssemblies" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)"
+				Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(Extension)' == '.dll' and $([System.String]::Copy('%(Filename)').StartsWith('WebRTCme.Connection'))" />
+		</ItemGroup>
+	</Target>
 
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
 		<Compile Include="Blazor\**\*.cs" />
+		<!-- Private: the binding assemblies ship inside the WebRTCme package, not this one. -->
+		<ProjectReference Include="..\..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
 		<PackageReference Include="BlazorDialog" Version="4.1.0" />
 		<PackageReference Include="Blazorme.StreamSaver" Version="1.0.1" />
 	</ItemGroup>
@@ -91,15 +135,23 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
 		<Compile Include="Platforms\Android\**\*.cs" />
+		<!-- Private: the binding assemblies ship inside the WebRTCme package, not this one. -->
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
 		<Compile Include="Platforms\iOS\**\*.cs" />
+		<!-- Private: the binding assemblies ship inside the WebRTCme package, not this one. -->
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
 		<Compile Include="Platforms\MacCatalyst\**\*.cs" />
+		<!-- Private: the binding assemblies ship inside the WebRTCme package, not this one. -->
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
 		<Compile Include="Platforms\Windows\**\*.cs" />
+		<!-- Private: the binding assemblies ship inside the WebRTCme package, not this one. -->
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -116,5 +168,17 @@
 	<ItemGroup>
 		<None Include="Blazor\**\*.cs;Maui\**\*.cs;Platforms\**\*.cs" Exclude="@(Compile);bin\**;obj\**" />
 	</ItemGroup>
+	<!--
+	  Drop the .aar the Android SDK builds for this project. It re-emits the four
+	  libjingle_peerconnection_so.so that arrive with libwebrtc.aar and nothing else, so it is
+	  23MB of duplication - and two .aar carrying the same .so in one lib/ folder is a conflict
+	  waiting to happen. The SDK adds it from _IncludeAarInNuGetPackage with no property to say
+	  no, so it is removed immediately afterwards.
+	-->
+	<Target Name="DropRedundantGeneratedAar" AfterTargets="_IncludeAarInNuGetPackage">
+		<ItemGroup>
+			<TfmSpecificPackageFile Remove="$(OutputPath)$(TargetName).aar" />
+		</ItemGroup>
+	</Target>
 
 </Project>
