@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           declared=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme/WebRTCme.csproj | head -1)
-          middleware=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj | head -1)
+          middleware=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme.Middleware/WebRTCme.Middleware.csproj | head -1)
 
           # The two versions are not independent: the middleware package records a dependency on
           # WebRTCme at whatever version this build produces, so a mismatch would ship a package
@@ -108,7 +108,7 @@ jobs:
         run: |
           set -euo pipefail
           dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
-          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
 
       # Asserts every slice and native payload is present and that no folded project leaked into
       # the dependency groups. Both are things pack gets wrong in silence, and neither shows up in

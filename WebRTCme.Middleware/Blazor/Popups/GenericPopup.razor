@@ -1,0 +1,44 @@
+﻿@namespace WebRTCme.Middleware
+
+<Dialog Id="GenericPopup" Size="DialogSize.Normal" Centered="true" Animation="DialogAnimation.FadeIn">
+    <DialogInputProvider TInput="GenericPopupIn">
+        <DialogHeader ShowClose="true">
+            <h4>
+                @context.Input.Title
+                <!-- TODO: ADD IMAGE HERE
+                <span class="mdi mdi-chat mdi-48px"></span>
+                -->
+            </h4>
+        </DialogHeader>
+        <DialogBody>
+            <p>@context.Input.Text</p>
+            @if(!string.IsNullOrEmpty(context.Input.EntryPlaceholder))
+            {
+                <EditForm Context="editFormContext" Model="@_out">
+                    <div class="text-center">
+                        <InputText placeholder=@context.Input.EntryPlaceholder @bind-Value="_out.Entry" />
+                    </div>
+                </EditForm>    
+            }
+        </DialogBody>
+        <DialogFooter>
+            @if(!string.IsNullOrEmpty(context.Input.Ok))
+            {
+                <button type="button" class="btn btn-primary" @onclick="@(async () => OnOkAsync(context.Dialog))">
+                    @context.Input.Ok
+                </button>
+            }
+            @if(!string.IsNullOrEmpty(context.Input.Cancel))
+            {
+                <button type="button" class="btn btn-secondary" @onclick="@(async () => OnCancelAsync(context.Dialog))">
+                    @context.Input.Cancel
+                </button>
+            }
+        </DialogFooter>
+    </DialogInputProvider>
+</Dialog>
+
+
+
+
+

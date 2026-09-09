@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts
-          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts
+          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts
 
       - name: Verify packages
         shell: pwsh

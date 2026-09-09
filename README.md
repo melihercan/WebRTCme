@@ -9,7 +9,7 @@ Dropped:
 - Xamarin 
 - .NET 5, 6, and 7 
 
-The Xamarin code has been left in the repo but excluded from the solution file. 
+The Xamarin code has since been removed from the repo; the previous README above is the record of it. 
 
 Special thanks and credits to [Gøran Yri](https://github.com/EagleDelux) for his major contributions to .NET MAUI porting. 
 

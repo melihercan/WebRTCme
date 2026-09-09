@@ -71,7 +71,7 @@
 	</ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+      <ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
     </ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">

@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Bindings", "WebRTC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebRTCme.Middleware", "WebRTCme.Middleware", "{1B143511-677C-4946-A201-C8D429A563A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware", "WebRTCme.Middleware\WebRTCme.Middleware\WebRTCme.Middleware.csproj", "{83F339B2-8815-4479-ABA0-866962D44B10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Middleware", "WebRTCme.Middleware\WebRTCme.Middleware.csproj", "{83F339B2-8815-4479-ABA0-866962D44B10}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRTCme.Bindings.Blazor", "WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj", "{36BF2F92-C0EF-4744-A345-C72C4215FAD4}"
 EndProject
