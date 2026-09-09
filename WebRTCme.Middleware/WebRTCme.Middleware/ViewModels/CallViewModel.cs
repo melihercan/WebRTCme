@@ -180,7 +180,42 @@ namespace WebRTCme.Middleware
         public Task OnPageDisappearingAsync()
         {
             Disconnect();
+            ReleaseLocalMedia();
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Stops the capture this page started.
+        /// </summary>
+        /// <remarks>
+        /// The connection produces these streams but does not own them, so nothing downstream
+        /// stops them and the camera stayed on after leaving a call. Deliberately not part of
+        /// Disconnect(): the error path disconnects and then reconnects using these same
+        /// streams, and only this page's disappearance means they are finished with.
+        /// </remarks>
+        void ReleaseLocalMedia()
+        {
+            foreach (var stream in new[] { _cameraStream, _displayStream })
+            {
+                if (stream is null)
+                    continue;
+
+                foreach (var track in stream.GetTracks())
+                {
+                    try
+                    {
+                        track.Stop();
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogInformation(
+                            $"Stopping a local track failed: {exception.Message}");
+                    }
+                }
+            }
+
+            _cameraStream = null;
+            _displayStream = null;
         }
 
 
