@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebRTCme.Connection.Services;
 using WebRTCme.Connection.Signaling.Proxy;
-using WebRTCme.Connection.MediaSoup.Proxy;
+using WebRTCme.Connection.MediaSoup;
 
 namespace WebRTCme.Connection
 {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Utilme.SdpTransform;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
+namespace WebRTCme.Connection.MediaSoup.Client.Sdp
 {
     public class MediaObject
     {

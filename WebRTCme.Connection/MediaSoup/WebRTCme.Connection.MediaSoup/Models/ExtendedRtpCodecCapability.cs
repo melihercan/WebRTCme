@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup;
 
 namespace WebRTCme.Connection.MediaSoup
 {

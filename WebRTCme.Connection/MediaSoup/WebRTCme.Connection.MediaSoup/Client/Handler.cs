@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilme.SdpTransform;
-using WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup.Client.Sdp;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Client
 {
     public class Handler : IDisposable
     {

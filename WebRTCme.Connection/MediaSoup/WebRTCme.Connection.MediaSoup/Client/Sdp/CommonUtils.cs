@@ -5,9 +5,8 @@ using System.Text;
 using WebRTCme.Connection.MediaSoup;
 using Utilme.SdpTransform;
 using System.Linq;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
+namespace WebRTCme.Connection.MediaSoup.Client.Sdp
 {
     static class CommonUtils
     {

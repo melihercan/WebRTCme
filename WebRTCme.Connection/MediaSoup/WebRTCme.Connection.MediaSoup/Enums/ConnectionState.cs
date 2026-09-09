@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace WebRTCme.Connection
+namespace WebRTCme.Connection.MediaSoup
 {
     [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum ConnectionState

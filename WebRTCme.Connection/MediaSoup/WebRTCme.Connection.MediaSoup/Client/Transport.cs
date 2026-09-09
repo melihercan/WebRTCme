@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Client
 {
     public class Transport
     {

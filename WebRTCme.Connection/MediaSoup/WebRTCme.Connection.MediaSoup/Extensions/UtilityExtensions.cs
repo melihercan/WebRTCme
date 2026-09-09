@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy
+namespace WebRTCme.Connection.MediaSoup
 {
     internal static class UtilityExtensions
     {

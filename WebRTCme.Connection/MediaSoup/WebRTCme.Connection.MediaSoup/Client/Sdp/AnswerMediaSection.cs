@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
+namespace WebRTCme.Connection.MediaSoup.Client.Sdp
 {
     class AnswerMediaSection : MediaSection
     {

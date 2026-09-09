@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Enums
+namespace WebRTCme.Connection.MediaSoup
 {
     public static class KeyName
     {

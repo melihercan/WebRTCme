@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebRTCme.Connection.MediaSoup.ClientWebSockets;
-using WebRTCme.Connection.MediaSoup.Proxy.Stub;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy
+namespace WebRTCme.Connection.MediaSoup
 {
     public static class ServiceExtensions
     {

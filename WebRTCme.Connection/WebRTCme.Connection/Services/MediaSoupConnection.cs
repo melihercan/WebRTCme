@@ -14,10 +14,7 @@ using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.Models;
-using WebRTCme.Connection.MediaSoup.Proxy;
-using WebRTCme.Connection.MediaSoup.Proxy.Client;
-using WebRTCme.Connection.MediaSoup.Proxy.Enums;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup.Client;
 ////using Xamarin.Essentials;
 
 namespace WebRTCme.Connection.Services
@@ -29,11 +26,11 @@ namespace WebRTCme.Connection.Services
         readonly ILogger<MediaSoupConnection> _logger;
         readonly IWebRtc _webRtc;
         readonly IJSRuntime _jsRuntime;
-        readonly MediaSoup.Proxy.Models.Device _device;
+        readonly MediaSoup.Device _device;
 
         ConnectionContext _connectionContext;
 
-        MediaSoup.Proxy.Client.Device _mediaSoupDevice;
+        MediaSoup.Client.Device _mediaSoupDevice;
         Transport _sendTransport;
         Transport _recvTransport;
         string _displayName;
@@ -100,7 +97,7 @@ namespace WebRTCme.Connection.Services
 
                 await _mediaSoupServerApi.ConnectAsync(guid, userContext.Name, userContext.Room);
 
-                _mediaSoupDevice = new MediaSoup.Proxy.Client.Device();
+                _mediaSoupDevice = new MediaSoup.Client.Device();
 
                 var routerRtpCapabilities = (RtpCapabilities)ParseResponse(MethodName.GetRouterRtpCapabilities,
                     await _mediaSoupServerApi.ApiAsync(MethodName.GetRouterRtpCapabilities));
@@ -1249,24 +1246,24 @@ namespace WebRTCme.Connection.Services
             return TryGetPeerId(appData, out var peerId) && _peers.TryGetValue(peerId, out peer);
         }
 
-        //        MediaSoup.Proxy.Models.Device GetDevice()
+        //        MediaSoup.Device GetDevice()
         //        {
         //#if ANDROID
-        //            return new MediaSoup.Proxy.Models.Device
+        //            return new MediaSoup.Device
         //                {
         //                    Flag = "Android",
         //                    Name = DeviceInfoExt.Name,
         //                    Version = DeviceInfoExt.Version.ToString()
         //                };
         //#elif IOS
-        //            return new MediaSoup.Proxy.Models.Device
+        //            return new MediaSoup.Device
         //                {
         //                    Flag = "iOS",
         //                    Name = DeviceInfoExt.Name,
         //                    Version = DeviceInfoExt.Version.ToString()
         //                };
         //#else
-        //            return new MediaSoup.Proxy.Models.Device
+        //            return new MediaSoup.Device
         //            {
         //                Flag = "Blazor",
         //                Name = "Browser",
@@ -1275,24 +1272,24 @@ namespace WebRTCme.Connection.Services
         //#endif
         //        }
 
-        MediaSoup.Proxy.Models.Device GetDevice()
+        MediaSoup.Device GetDevice()
         {
             if (DeviceInfo.Platform == DevicePlatform.Android)
-                return new MediaSoup.Proxy.Models.Device
+                return new MediaSoup.Device
                 {
                     Flag = "Android",
                     Name = DeviceInfo.Name,
                     Version = DeviceInfo.Version.ToString()
                 };
             else if (DeviceInfo.Platform == DevicePlatform.iOS)
-                return new MediaSoup.Proxy.Models.Device
+                return new MediaSoup.Device
                 {
                     Flag = "iOS",
                     Name = DeviceInfo.Name,
                     Version = DeviceInfo.Version.ToString()
                 };
             else
-                return new MediaSoup.Proxy.Models.Device
+                return new MediaSoup.Device
                 {
                     Flag = "Blazor",
                     Name = "Browser",

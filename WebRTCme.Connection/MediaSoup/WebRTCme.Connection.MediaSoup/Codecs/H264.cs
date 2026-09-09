@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Codecs
+namespace WebRTCme.Connection.MediaSoup.Codecs
 {
 
     class H264

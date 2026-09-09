@@ -15,7 +15,7 @@ using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.ClientWebSockets;
 using Microsoft.Maui.Devices;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
+namespace WebRTCme.Connection.MediaSoup
 {
     /// <summary>
     /// protoo client: one socket, one reader, one handler queue.

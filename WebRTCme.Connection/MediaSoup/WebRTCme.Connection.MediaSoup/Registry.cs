@@ -3,9 +3,9 @@ using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRTCme.Connection.MediaSoup.Proxy.Stub;
+using WebRTCme.Connection.MediaSoup;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy
+namespace WebRTCme.Connection.MediaSoup
 {
     static class Registry
     {

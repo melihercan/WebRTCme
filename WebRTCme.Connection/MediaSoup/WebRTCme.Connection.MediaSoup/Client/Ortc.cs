@@ -6,10 +6,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Utilme.SdpTransform;
 using WebRTCme.Connection.MediaSoup;
-using WebRTCme.Connection.MediaSoup.Proxy.Codecs;
-using WebRTCme.Connection.MediaSoup.Proxy.Models;
+using WebRTCme.Connection.MediaSoup.Codecs;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client
+namespace WebRTCme.Connection.MediaSoup.Client
 {
     public class Ortc
     {

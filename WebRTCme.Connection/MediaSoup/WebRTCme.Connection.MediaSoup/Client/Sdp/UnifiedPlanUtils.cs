@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Utilme.SdpTransform;
 
-namespace WebRTCme.Connection.MediaSoup.Proxy.Client.Sdp
+namespace WebRTCme.Connection.MediaSoup.Client.Sdp
 {
     public static class UnifiedPlanUtils
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using WebRTCme.Connection.MediaSoup.Proxy.Enums;
+using WebRTCme.Connection.MediaSoup;
 
 namespace WebRTCme.Connection.MediaSoup
 {
