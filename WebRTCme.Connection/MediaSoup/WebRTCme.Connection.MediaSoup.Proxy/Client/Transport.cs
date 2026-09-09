@@ -224,17 +224,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
 
                     return producer;
                 }
-                catch (Exception ex)
+                catch
                 {
                     try
                     {
                         await Handler.StopSendingAsync(handlerSendResult.LocalId);
                     }
                     catch { }
-                    throw ex;
+                    // Rethrow rather than 'throw ex', which would discard where it came from.
+                    throw;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 if (options.StopTracks.HasValue && (bool)options.StopTracks)
                 {
@@ -244,7 +245,7 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Client
                     }
                     catch { }
                 }
-                throw ex;
+                throw;
             }
         }
 

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Utilme;
 using WebRTCme.Connection.MediaSoup;
@@ -66,6 +67,10 @@ namespace WebRTCme.Connection.Services
         {
             return Observable.Create<PeerResponse>(async observer =>
             {
+            // This service is a singleton, so a previous call's transports and producers are
+            // still here unless something clears them.
+            CloseConnection();
+
             var guid = Guid.NewGuid();
             var forceTcp = _configuration.GetValue<bool>("MediaSoupServer:ForceTcp");
             _produce = _configuration.GetValue<bool>("MediaSoupServer:Produce");
@@ -428,9 +433,13 @@ namespace WebRTCme.Connection.Services
                         _mediaSoupServerApi.NotifyEventAsync -= OnNotifyAsync;
                         _mediaSoupServerApi.RequestEventAsync -= OnRequestAsync;
                         await _mediaSoupServerApi.DisconnectAsync(guid);
-                        //await mediaServerProxy.StopAsync();
                     }
-                    catch { };
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Disconnecting from the mediasoup server failed: {ex.Message}");
+                    }
+
+                    CloseConnection();
                 };
 
                 async Task SendTransport_OnConnectAsync(object sender, DtlsParameters dtlsParameters)
@@ -1116,6 +1125,47 @@ namespace WebRTCme.Connection.Services
 
         }
 
+
+        /// <summary>
+        /// Returns this connection to its pre-call state.
+        /// </summary>
+        /// <remarks>
+        /// Closing the transports is what releases the peer connections, and with them the
+        /// producers, consumers and the tracks they hold. Without it a hung-up call left its
+        /// camera, microphone and ICE agents running, and the next call started on top of the
+        /// previous one's state.
+        /// </remarks>
+        void CloseConnection()
+        {
+            var sendTransport = Interlocked.Exchange(ref _sendTransport, null);
+            var recvTransport = Interlocked.Exchange(ref _recvTransport, null);
+
+            foreach (var transport in new[] { sendTransport, recvTransport })
+            {
+                if (transport is null)
+                    continue;
+
+                try
+                {
+                    transport.Close();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Closing a mediasoup transport failed: {ex.Message}");
+                }
+            }
+
+            _consumers.Clear();
+            _dataConsumers.Clear();
+            _peers.Clear();
+
+            _micProducer = null;
+            _webcamProducer = null;
+            _chatDataProducer = null;
+            _botDataProducer = null;
+            _mediaSoupDevice = null;
+            _connectionContext = null;
+        }
 
         void OnNewPeer(Peer peer)
         {
