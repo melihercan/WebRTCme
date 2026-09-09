@@ -66,7 +66,12 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
 
         public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
         {
-            _channel = Channel.CreateBounded<string>(5);
+            // Unbounded: this is the socket's receive buffer, and the writer below runs inside
+            // an Rx OnNext, so it cannot wait for space. Bounded at 5 it dropped messages --
+            // the server bursts a newConsumer/newDataConsumer pair per existing peer right
+            // after join, faster than the handlers drain them, and a discarded response left
+            // its ApiAsync waiting forever.
+            _channel = Channel.CreateUnbounded<string>();
             TaskCompletionSource<Unit> tcs = new();
 
             _baseWebSocket = new ClientWebSocketRx
@@ -99,11 +104,12 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
                             else if (tuple.state == ConnectionStatus.DataframeReceived
                                 && tuple.dataframe is not null)
                             {
-                                var ok = _channel.Writer.TryWrite(tuple.dataframe.Message);
-                                Debug.Assert(ok);
-                                if (!ok)
+                                if (!_channel.Writer.TryWrite(tuple.dataframe.Message))
                                 {
-                                    Console.WriteLine($"ERROR: Channel is full");
+                                    // Unbounded, so this only happens once the channel is
+                                    // completed -- worth reporting rather than asserting.
+                                    Console.WriteLine(
+                                        "ERROR: dropped an incoming websocket message");
                                 }
                             }
                         },

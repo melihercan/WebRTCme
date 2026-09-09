@@ -53,8 +53,18 @@ namespace WebRTCme.Connection.MediaSoup.Proxy.Stub
             Registry.Logger = logger;
             Registry.JsRuntime = jsRuntime;
 
-            //// TODO: Bypass only for debugging with self signed certs (local IPs).
-            var bypassSslCertificateError = DeviceInfo.Platform == DevicePlatform.Android;
+            // The demo signaling servers are reachable over a local IP with a self-signed
+            // certificate, which the system websocket refuses. Debug builds fall back to the
+            // pure-managed socket, which can be told to accept it; release builds always
+            // validate. iOS needs this as much as Android does -- without it the handshake
+            // fails before any mediasoup code runs.
+#if DEBUG
+            var bypassSslCertificateError =
+                DeviceInfo.Platform == DevicePlatform.Android ||
+                DeviceInfo.Platform == DevicePlatform.iOS;
+#else
+            var bypassSslCertificateError = false;
+#endif
             if (bypassSslCertificateError)
             {
                 _webSocket = clientWebSocketFactory.Create(ClientWebSocketSelect.LitePcl);

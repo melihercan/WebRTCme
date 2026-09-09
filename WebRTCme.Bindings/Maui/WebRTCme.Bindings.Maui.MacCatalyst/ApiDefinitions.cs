@@ -3018,17 +3018,14 @@ namespace Webrtc
 	interface RTCRtpReceiver
     {
 		// @required @property (readonly, nonatomic) NSString * _Nonnull receiverId;
-		[Abstract]
 		[Export ("receiverId")]
 		string ReceiverId { get; }
 
 		// @required @property (readonly, nonatomic) RTCRtpParameters * _Nonnull parameters;
-		[Abstract]
 		[Export ("parameters")]
 		RTCRtpParameters Parameters { get; }
 
 		// @required @property (readonly, nonatomic) RTCMediaStreamTrack * _Nullable track;
-		[Abstract]
 		[NullAllowed, Export ("track")]
 		RTCMediaStreamTrack Track { get; }
 
@@ -3037,7 +3034,6 @@ namespace Webrtc
 		IRTCRtpReceiverDelegate Delegate { get; set; }
 
 		// @required @property (nonatomic, weak) id<RTCRtpReceiverDelegate> _Nullable delegate;
-		[Abstract]
 		[NullAllowed, Export ("delegate", ArgumentSemantic.Weak)]
 		NSObject WeakDelegate { get; set; }
     }
@@ -3106,27 +3102,22 @@ namespace Webrtc
 	interface RTCRtpSender
     {
 		// @required @property (readonly, nonatomic) NSString * _Nonnull senderId;
-		[Abstract]
 		[Export ("senderId")]
 		string SenderId { get; }
 
 		// @required @property (copy, nonatomic) RTCRtpParameters * _Nonnull parameters;
-		[Abstract]
 		[Export ("parameters", ArgumentSemantic.Copy)]
 		RTCRtpParameters Parameters { get; set; }
 
 		// @required @property (copy, nonatomic) RTCMediaStreamTrack * _Nullable track;
-		[Abstract]
 		[NullAllowed, Export ("track", ArgumentSemantic.Copy)]
 		RTCMediaStreamTrack Track { get; set; }
 
 		// @required @property (copy, nonatomic) NSArray<NSString *> * _Nonnull streamIds;
-		[Abstract]
 		[Export ("streamIds", ArgumentSemantic.Copy)]
 		string[] StreamIds { get; set; }
 
 		// @required @property (readonly, nonatomic) id<RTCDtmfSender> _Nullable dtmfSender;
-		[Abstract]
 		[NullAllowed, Export ("dtmfSender")]
 		RTCDtmfSender DtmfSender { get; }
 	}
@@ -3179,47 +3170,38 @@ namespace Webrtc
 	interface RTCRtpTransceiver
     {
 		// @required @property (readonly, nonatomic) RTCRtpMediaType mediaType;
-		[Abstract]
 		[Export ("mediaType")]
 		RTCRtpMediaType MediaType { get; }
 
 		// @required @property (readonly, nonatomic) NSString * _Nonnull mid;
-		[Abstract]
 		[Export ("mid")]
 		string Mid { get; }
 
 		// @required @property (readonly, nonatomic) RTCRtpSender * _Nonnull sender;
-		[Abstract]
 		[Export ("sender")]
 		RTCRtpSender Sender { get; }
 
 		// @required @property (readonly, nonatomic) RTCRtpReceiver * _Nonnull receiver;
-		[Abstract]
 		[Export ("receiver")]
 		RTCRtpReceiver Receiver { get; }
 
 		// @required @property (readonly, nonatomic) BOOL isStopped;
-		[Abstract]
 		[Export ("isStopped")]
 		bool IsStopped { get; }
 
 		// @required @property (readonly, nonatomic) RTCRtpTransceiverDirection direction;
-		[Abstract]
 		[Export ("direction")]
 		RTCRtpTransceiverDirection Direction { get; }
 
 		// @required -(BOOL)currentDirection:(RTCRtpTransceiverDirection * _Nonnull)currentDirectionOut;
-		[Abstract]
 		[Export ("currentDirection:")]
 		/****unsafe****/ bool CurrentDirection (/****RTCRtpTransceiverDirection* currentDirectionOut****/ref RTCRtpTransceiverDirection currentDirectionOut);
 
 		// @required -(void)stopInternal;
-		[Abstract]
 		[Export ("stopInternal")]
 		void StopInternal ();
 
 		// @required -(void)setDirection:(RTCRtpTransceiverDirection)direction error:(NSError * _Nullable * _Nullable)error;
-		[Abstract]
 		[Export ("setDirection:error:")]
 		void SetDirection (RTCRtpTransceiverDirection direction, [NullAllowed] out NSError error);
 	}
