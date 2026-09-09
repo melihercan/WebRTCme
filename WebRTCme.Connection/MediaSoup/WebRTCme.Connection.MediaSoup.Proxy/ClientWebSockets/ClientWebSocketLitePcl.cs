@@ -60,7 +60,9 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
             CancellationToken cancellationToken)
         {
             _receiverDisposable?.Dispose();
-            _channel.Writer.Complete();
+            // Null when the socket was never connected, and already completed when the server
+            // hung up first; closing twice must not throw.
+            _channel?.Writer.TryComplete();
             return Task.CompletedTask;
         }
 
@@ -136,19 +138,12 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
             }
         }
 
-        public async Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, 
-            CancellationToken cancellationToken)
-        {
-            var message = await _channel.Reader.ReadAsync(cancellationToken);
-            var bytes = Encoding.UTF8.GetBytes(message);
-            bytes.CopyTo(buffer.Array, 0);
-            return new WebSocketReceiveResult(bytes.Length, WebSocketMessageType.Text, true);
-        }
+        // The underlying library reassembles frames, so a message arrives whole and is handed
+        // over as-is -- no caller-supplied buffer to overflow.
+        public Task<string> ReceiveMessageAsync(CancellationToken cancellationToken) =>
+            _channel.Reader.ReadAsync(cancellationToken).AsTask();
 
-        public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, 
-            CancellationToken cancellationToken)
-        {
-            return _baseWebSocket.Sender.SendText(Encoding.UTF8.GetString(buffer.ToArray()));
-        }
+        public Task SendMessageAsync(string message, CancellationToken cancellationToken) =>
+            _baseWebSocket.Sender.SendText(message);
     }
 }

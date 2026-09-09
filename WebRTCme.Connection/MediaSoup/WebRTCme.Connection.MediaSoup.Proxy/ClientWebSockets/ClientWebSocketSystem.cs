@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -44,6 +46,10 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
             }
         }
 
+        // Frames arrive in chunks of at most this size; a message is reassembled across as many
+        // as it takes, so this bounds a read rather than a message.
+        const int ReceiveChunkSize = 16 * 1024;
+
         readonly ClientWebSocket _baseWebSocket;
         readonly IClientWebSocketOptions _options;
 
@@ -56,18 +62,52 @@ namespace WebRTCme.Connection.MediaSoup.ClientWebSockets
         public IClientWebSocketOptions Options => _options;
 
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription,
-            CancellationToken cancellationToken) => 
-                _baseWebSocket.CloseAsync(closeStatus, statusDescription, cancellationToken);
+            CancellationToken cancellationToken)
+        {
+            if (_baseWebSocket.State != WebSocketState.Open)
+                return Task.CompletedTask;
+
+            return _baseWebSocket.CloseAsync(closeStatus, statusDescription, cancellationToken);
+        }
 
         public Task ConnectAsync(Uri uri, CancellationToken cancellationToken) =>
             _baseWebSocket.ConnectAsync(uri, cancellationToken);
 
-        public Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer,
-            CancellationToken cancellationToken) =>
-                _baseWebSocket.ReceiveAsync(buffer, cancellationToken);
+        public async Task<string> ReceiveMessageAsync(CancellationToken cancellationToken)
+        {
+            var buffer = ArrayPool<byte>.Shared.Rent(ReceiveChunkSize);
+            try
+            {
+                using var message = new MemoryStream();
+                WebSocketReceiveResult result;
 
-        public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage,
-            CancellationToken cancellationToken) =>
-                _baseWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
+                do
+                {
+                    result = await _baseWebSocket.ReceiveAsync(
+                        new ArraySegment<byte>(buffer), cancellationToken);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                        throw new WebSocketException(
+                            WebSocketError.ConnectionClosedPrematurely,
+                            $"Server closed the connection: {result.CloseStatusDescription}");
+
+                    message.Write(buffer, 0, result.Count);
+                }
+                while (!result.EndOfMessage);
+
+                return Encoding.UTF8.GetString(message.GetBuffer(), 0, (int)message.Length);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+        public Task SendMessageAsync(string message, CancellationToken cancellationToken) =>
+            _baseWebSocket.SendAsync(
+                new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
+                WebSocketMessageType.Text,
+                true,
+                cancellationToken);
     }
 }

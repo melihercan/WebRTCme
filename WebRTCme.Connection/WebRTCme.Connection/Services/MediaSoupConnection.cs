@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Microsoft.Maui.Devices;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -21,11 +22,6 @@ namespace WebRTCme.Connection.Services
 {
     class MediaSoupConnection : IConnection, IMediaSoupServerNotify
     {
-
-int cnt;
-IMediaStream remMedia; 
-
-
         readonly IConfiguration _configuration;
         readonly IMediaSoupServerApi _mediaSoupServerApi;
         readonly ILogger<MediaSoupConnection> _logger;
@@ -44,14 +40,13 @@ IMediaStream remMedia;
         bool _consume;
         bool _useDataChannel;
 
-        Dictionary<string, Consumer> _consumers = new();
-        Dictionary<string, DataConsumer> _dataConsumers = new();
+        ConcurrentDictionary<string, Consumer> _consumers = new();
+        ConcurrentDictionary<string, DataConsumer> _dataConsumers = new();
         Producer _micProducer;
         Producer _webcamProducer;
         DataProducer _chatDataProducer;
         DataProducer _botDataProducer;
-        Producer _shareProducer;
-        Dictionary<string, PeerParameters> _peers = new();
+        ConcurrentDictionary<string, PeerParameters> _peers = new();
 
         public MediaSoupConnection(IConfiguration configuration, 
             IMediaSoupServerApi mediaSoupServerApi,
@@ -635,10 +630,10 @@ IMediaStream remMedia;
                     Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: after ConsumeAsync {consumerRequestData.Kind} {consumer.Kind}");
 
 
-                    _consumers.Add(consumer.Id, consumer);
+                    _consumers[consumer.Id] = consumer;
                     ////if (requestData.PeerId is not null)
                     {
-                        var peer = _peers[consumerRequestData.PeerId];
+                        var peer = GetOrAddPeer(consumerRequestData.PeerId);
                         peer.ConsumerIds.Add(consumer.Id);
                     }
 
@@ -660,7 +655,7 @@ IMediaStream remMedia;
                     // TODO: WE can have audio only calls!!!
                     ////if (requestData.PeerId is not null)
                     {
-                        var consumerPeer = _peers[consumerRequestData.PeerId];
+                        var consumerPeer = GetOrAddPeer(consumerRequestData.PeerId);
                         var consumers = consumerPeer.ConsumerIds
                             .Select(key => _consumers[key])
                             .ToList();
@@ -787,17 +782,17 @@ IMediaStream remMedia;
                     void Consumer_OnClose(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"-------> Consumer_OnClose");
-                        var peer = _peers[(string)consumer.AppData[KeyName.PeerId]];
-                        peer.ConsumerIds.Remove(consumer.Id);
-                        _consumers.Remove(consumer.Id);
+                        if (TryGetPeer(consumer.AppData, out var peer))
+                            peer.ConsumerIds.Remove(consumer.Id);
+                        _consumers.TryRemove(consumer.Id, out _);
                     }
 
                     void Consumer_OnTransportClosed(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"-------> Consumer_OnTransportClose");
-                        var peer = _peers[(string)consumer.AppData[KeyName.PeerId]];
-                        peer.ConsumerIds.Remove(consumer.Id);
-                        _consumers.Remove(consumer.Id);
+                        if (TryGetPeer(consumer.AppData, out var peer))
+                            peer.ConsumerIds.Remove(consumer.Id);
+                        _consumers.TryRemove(consumer.Id, out _);
                     }
 
                     void Consumer_OnTrackEnded(object sender, EventArgs e)
@@ -850,10 +845,10 @@ IMediaStream remMedia;
                         AppData = appData
                     });
 
-                    _dataConsumers.Add(dataConsumer.Id, dataConsumer);
+                    _dataConsumers[dataConsumer.Id] = dataConsumer;
                     if (dataConsumerRequestData.PeerId is not null)
                     {
-                        var dataConsumerPeer = _peers[dataConsumerRequestData.PeerId];
+                        var dataConsumerPeer = GetOrAddPeer(dataConsumerRequestData.PeerId);
                         dataConsumerPeer.DataConsumerIds.Add(dataConsumer.Id);
                     }
 
@@ -887,17 +882,17 @@ IMediaStream remMedia;
                     void DataConsumer_OnClose(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnClose");
-                        var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
-                        peer.DataConsumerIds.Remove(dataConsumer.Id);
-                        _dataConsumers.Remove(dataConsumer.Id);
+                        if (TryGetPeer(dataConsumer.AppData, out var peer))
+                            peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        _dataConsumers.TryRemove(dataConsumer.Id, out _);
                     }
 
                     void DataConsumer_OnTransportClosed(object sender, EventArgs e)
                     {
                         _logger.LogInformation($"####=======> {dataConsumer.Label} DataConsumer_OnTransportClosed");
-                        var peer = _peers[(string)dataConsumer.AppData[KeyName.PeerId]];
-                        peer.DataConsumerIds.Remove(dataConsumer.Id);
-                        _dataConsumers.Remove(dataConsumer.Id);
+                        if (TryGetPeer(dataConsumer.AppData, out var peer))
+                            peer.DataConsumerIds.Remove(dataConsumer.Id);
+                        _dataConsumers.TryRemove(dataConsumer.Id, out _);
 
                     }
 
@@ -1027,12 +1022,37 @@ IMediaStream remMedia;
 
         void OnNewPeer(Peer peer)
         {
-            _peers.Add(peer.Id, new PeerParameters 
-            { 
-                Peer = peer,
+            GetOrAddPeer(peer.Id).Peer = peer;
+        }
+
+        /// <summary>
+        /// The record for a peer, created on demand.
+        /// </summary>
+        /// <remarks>
+        /// The server starts sending consumers for a peer the moment we join, and those are
+        /// handled on the dispatcher while the join response is still being processed here, so
+        /// a consumer can legitimately arrive before its peer has been recorded.
+        /// </remarks>
+        PeerParameters GetOrAddPeer(string peerId) =>
+            _peers.GetOrAdd(peerId, _ => new PeerParameters
+            {
                 ConsumerIds = new(),
-                DataConsumerIds =new(),
+                DataConsumerIds = new(),
             });
+
+        static bool TryGetPeerId(Dictionary<string, object> appData, out string peerId)
+        {
+            peerId = appData is not null && appData.TryGetValue(KeyName.PeerId, out var value)
+                ? value as string
+                : null;
+            return peerId is not null;
+        }
+
+        bool TryGetPeer(Dictionary<string, object> appData, out PeerParameters peer)
+        {
+            peer = null;
+            // The server's bot data producer has no peer id at all.
+            return TryGetPeerId(appData, out var peerId) && _peers.TryGetValue(peerId, out peer);
         }
 
         //        MediaSoup.Proxy.Models.Device GetDevice()

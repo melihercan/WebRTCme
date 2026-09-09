@@ -16,14 +16,12 @@ namespace WebRTCme.Connection.MediaSoup.Proxy
             services.AddSingleton<IMediaSoupServerApi, MediaSoupStub>();
 
             services.AddSingleton<ClientWebSocketFactory>();
-            services
-                .AddSingleton<ClientWebSocketSystem>()
-                .AddSingleton<IClientWebSocket, ClientWebSocketSystem>(service =>
-                    service.GetService<ClientWebSocketSystem>());
-            services
-                .AddSingleton<ClientWebSocketLitePcl>()
-                .AddSingleton<IClientWebSocket, ClientWebSocketLitePcl>(service =>
-                    service.GetService<ClientWebSocketLitePcl>());
+
+            // Transient: a websocket cannot be reopened once closed, so every connect needs its
+            // own. Registered as singletons, a second call reused a dead socket and the join
+            // never went anywhere.
+            services.AddTransient<ClientWebSocketSystem>();
+            services.AddTransient<ClientWebSocketLitePcl>();
 
             return services;
         }
