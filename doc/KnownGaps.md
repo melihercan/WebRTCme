@@ -228,9 +228,24 @@ Two traps in that script's own history, both now guarded:
 - The script refuses to run when source and destination resolve to the same directory. That check
   exists because the above actually happened.
 
-**Still open: packaging.** The binding's `.resources.zip` is built from whatever `NativeReference`
-points at, so a package built on Windows contains the flat framework and its Mac Catalyst slice is
-unusable. No single machine can produce all five slices correctly - macOS cannot build
-`net10.0-windows`, and Windows cannot produce the symlinks Mac Catalyst needs. The options are a
-second macOS CI job that builds that slice, shipping a fixup target inside the package, or leaving
-Mac Catalyst out of the package and building it from source. Undecided.
+**Packaging: solved by building the Apple slices on macOS.** The binding's `.resources.zip` is
+built from whatever `NativeReference` points at, so a package built entirely on Windows contains
+the flat framework and its Mac Catalyst slice is unusable - and no single machine can produce all
+five slices, because macOS cannot build `net10.0-windows` either.
+
+`publish.yml` therefore runs two jobs. `apple` builds `net10.0-ios` and `net10.0-maccatalyst` on
+`macos-latest` and uploads the assemblies and their `.resources.zip`; `publish` packs everything on
+Windows and `Merge-AppleSlices.ps1` swaps those two slices in. iOS is built there too, not because
+it needs to be - its xcframework is flat and packs correctly on Windows - but because keeping both
+Apple slices on one machine removes a way to be subtly wrong.
+
+The rule that makes it work: **the `.resources.zip` files are copied byte for byte and never
+unpacked.** The symlinks live inside them, and rewriting one on Windows would flatten the framework
+again. Verified end to end - symlink entries (`Versions/Current` at 1 byte, `Headers` at 24) are
+still present after the merge rezips the outer package on Windows.
+
+Two guards, because a merge that quietly does nothing looks exactly like one that worked:
+`Merge-AppleSlices.ps1` fails if any artifact matches no entry in the package, and
+`Verify-Packages.ps1 -RequireAppleNativeLayout` opens the Mac Catalyst `.resources.zip` and insists
+on `Versions/A/WebRTC`. Both were tested against a Windows-only package, which they correctly
+reject.

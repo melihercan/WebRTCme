@@ -16,7 +16,13 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string] $PackageDirectory,
-    [string] $Version
+    [string] $Version,
+
+    # Release-only. Asserts the Mac Catalyst framework inside the package is a versioned bundle,
+    # which it can only be if that slice was built on macOS. A Windows build produces a flat one
+    # that macOS refuses to codesign - and nothing else in the package looks any different, which
+    # is why this has to be checked rather than assumed.
+    [switch] $RequireAppleNativeLayout
 )
 
 Set-StrictMode -Version Latest
@@ -119,6 +125,40 @@ foreach ($id in $expected.Keys | Sort-Object) {
     finally {
         $zip.Dispose()
     }
+}
+
+if ($RequireAppleNativeLayout) {
+    $webrtcme = Resolve-Package -Directory $PackageDirectory -Id 'WebRTCme' -Version $Version
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($webrtcme)
+    try {
+        $entry = $zip.Entries |
+                 Where-Object { $_.FullName -like 'lib/net10.0-maccatalyst*/*.resources.zip' } |
+                 Select-Object -First 1
+        if (-not $entry) {
+            $failures.Add("WebRTCme : no Mac Catalyst .resources.zip to inspect")
+        }
+        else {
+            # Read the inner zip's central directory without extracting it - extracting on Windows
+            # would lose the symlinks, which are the whole point.
+            $ms = New-Object System.IO.MemoryStream
+            $stream = $entry.Open()
+            try { $stream.CopyTo($ms) } finally { $stream.Dispose() }
+            $ms.Position = 0
+            $inner = New-Object System.IO.Compression.ZipArchive($ms, [System.IO.Compression.ZipArchiveMode]::Read)
+            try {
+                $names = $inner.Entries | ForEach-Object { $_.FullName }
+                $versioned = $names | Where-Object { $_ -like '*WebRTC.framework/Versions/A/WebRTC' }
+                if ($versioned) {
+                    Write-Host "WebRTCme : Mac Catalyst framework is versioned (built on macOS)"
+                }
+                else {
+                    $failures.Add("WebRTCme : Mac Catalyst framework is not versioned - that slice was built on Windows and macOS will refuse to codesign it")
+                }
+            }
+            finally { $inner.Dispose(); $ms.Dispose() }
+        }
+    }
+    finally { $zip.Dispose() }
 }
 
 if ($failures.Count -gt 0) {
