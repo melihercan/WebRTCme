@@ -86,5 +86,29 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 	</ItemGroup>
+	<!--
+	  The app references each platform's binding directly, and this is load-bearing rather than
+	  tidy-up. WebRTCme and WebRTCme.Middleware reference the bindings with PrivateAssets="all",
+	  which keeps them out of the published packages' dependency lists - but it also stops the
+	  binding's .resources.zip flowing to consumers. That zip is what the Apple SDK extracts
+	  WebRTC.xcframework from, so without it the app compiles, the registrar emits references to
+	  RTCAudioSession and friends, and then clang++ fails with "Undefined symbols for architecture
+	  arm64". Nothing on Windows shows it; it only appears when the Mac links.
+
+	  Package consumers do not need this: there the binding assembly and its zip sit side by side
+	  in lib/<tfm>/, which is the layout the SDK already understands.
+	-->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-maccatalyst'">
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
+		<ProjectReference Include="..\..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" />
+	</ItemGroup>
 
 </Project>

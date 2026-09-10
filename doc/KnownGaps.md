@@ -80,15 +80,51 @@ above are "implemented but unreachable".
 ## Verified against, and not
 
 Working and tested on this branch: three-peer calls (Blazor + Android + iOS) over both the
-peer-to-peer and mediasoup paths, join/leave/rejoin, and camera release on leaving the call page.
+peer-to-peer and mediasoup paths, join/leave/rejoin, camera release on leaving the call page, and
+Windows in a call with Android over the peer-to-peer path (2026-09-10).
+
+**iOS links on a Mac again as of 2026-09-10**, which is worth its own note because the break was
+invisible everywhere else. See "A failure only the Mac can see" below.
 
 Not verified, in rough order of risk:
 
-- **Apple native linking.** The Mac Catalyst framework was corrupt in every package built on
-  Windows until it was flattened; it is now structurally correct but nothing has linked it on a
-  Mac. iOS links from Visual Studio on a Mac and has been run.
+- **Mac Catalyst native linking.** Its framework was corrupt in every package built on Windows
+  until it was flattened; it is structurally correct now, but nothing has linked it on a Mac. iOS
+  is the reassuring precedent, not proof - they are separate frameworks.
 - **Mac Catalyst has never been run at all** - compile-verified only, on any release.
 - **`ReplaceOutgoingTrackAsync`** - implemented, but the demo app has no path that calls it.
 - **Camera actually released on Android** after `MediaStreamTrack.Stop()`. The capturer is stopped
   through the by-track-id registry, but this was written after the phone was unplugged.
 - **Blazor Debug builds** fail to boot on a `.pdb` fetch; Release is unaffected. Cause unknown.
+
+## A failure only the Mac can see
+
+The bindings are referenced with `PrivateAssets="all"` so they stay out of the published packages'
+dependency lists. That also stops the binding's `<name>.resources.zip` flowing to consumers - and
+that zip is what the Apple SDK extracts `WebRTC.xcframework` from. The result:
+
+- the app compiles;
+- the registrar emits references to `_OBJC_CLASS_$_RTCAudioSession` and every other bound class;
+- `clang++` then fails with *Undefined symbols for architecture arm64*, because no
+  `-framework WebRTC` was ever passed.
+
+**Nothing outside the Mac shows it.** A green CI, a clean `dotnet build WebRTCme.sln`, a package
+that passes `Verify-Packages.ps1`, and a demo app built from those packages on Windows are all
+consistent with a link that cannot succeed. The artefacts are all present and correct on Windows;
+only the *reference set handed to the linker* is wrong.
+
+The fix is in `WebRTCme.DemoApp.Maui.csproj`: the app references each platform binding directly, so
+the zip travels with the assembly. Package consumers do not need it - there the assembly and its
+zip sit side by side in `lib/<tfm>/`.
+
+**How to check it without a Mac**, which is the only cheap signal available:
+
+```powershell
+dotnet msbuild WebRTCme.DemoApp/WebRTCme.DemoApp.Maui/WebRTCme.DemoApp.Maui.csproj `
+  -p:TargetFramework=net10.0-ios -t:ResolveReferences -getItem:ReferenceCopyLocalPaths |
+  Select-String "Bindings.Maui.iOS.resources.zip"
+```
+
+No match means the link will fail. On the Mac itself, the proof is that
+`find ~/Library/Caches/maui/PairToMac/Builds -type f -name WebRTC` finds an extracted binary -
+note the path is `maui/PairToMac`, not the older `Xamarin/mtbs`.
