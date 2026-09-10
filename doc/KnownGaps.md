@@ -137,12 +137,17 @@ if it ever shows up at *startup* rather than at teardown.
 **iOS links on a Mac again as of 2026-09-10**, which is worth its own note because the break was
 invisible everywhere else. See "A failure only the Mac can see" below.
 
+**Mac Catalyst runs** (2026-09-10), for the first time in this project's history. On the Mac mini
+it links, codesigns, launches, joins and leaves cleanly, and captures from a USB webcam at a steady
+30fps through `AVCaptureVideoDataOutput` into WebRTC - so the native framework is live, not merely
+linked. It needed the framework fix below.
+
 Not verified, in rough order of risk:
 
-- **Mac Catalyst native linking.** Its framework was corrupt in every package built on Windows
-  until it was flattened; it is structurally correct now, but nothing has linked it on a Mac. iOS
-  is the reassuring precedent, not proof - they are separate frameworks.
-- **Mac Catalyst has never been run at all** - compile-verified only, on any release.
+- **The Mac Catalyst slice of a package built on Windows is still wrong.** See "The framework that
+  fits neither platform" below: the repository is now correct for building from source on either
+  OS, but a `.resources.zip` produced on Windows carries the flat framework, which macOS refuses.
+  Nobody has consumed that slice from a package.
 - **`ReplaceOutgoingTrackAsync`** - implemented, but the demo app has no path that calls it.
 - **Blazor Debug builds** fail to boot on a `.pdb` fetch when served by `dotnet run`'s
   WebAssembly dev server; Release is unaffected. **Did not reproduce when launched from Visual
@@ -180,3 +185,33 @@ dotnet msbuild WebRTCme.DemoApp/WebRTCme.DemoApp.Maui/WebRTCme.DemoApp.Maui.cspr
 No match means the link will fail. On the Mac itself, the proof is that
 `find ~/Library/Caches/maui/PairToMac/Builds -type f -name WebRTC` finds an extracted binary -
 note the path is `maui/PairToMac`, not the older `Xamarin/mtbs`.
+
+## The framework that fits neither platform
+
+`WebRTC.framework` for Mac Catalyst cannot be stored in a form that works on both operating
+systems, which took three attempts to establish:
+
+| Layout | Windows checkout | macOS codesign |
+| --- | --- | --- |
+| Versioned - `Versions/A` plus symlinks | corrupt: git writes symlinks as small text files unless `core.symlinks` is on, so the 26MB binary arrives as 23 bytes | **required** |
+| Flat, `Info.plist` under `Resources/` | intact | refused - *bundle format is ambiguous (could be app or framework)* |
+| Flat, `Info.plist` at the root | intact | refused - same error; tested, not assumed |
+
+So the repository stores it **flat**, and `build-versioned-framework.sh` rebuilds the versioned
+bundle into `obj/versioned-framework/` at build time, on macOS only. Verified from a genuinely flat
+tree - the state a Windows clone produces - and the committed framework is left untouched.
+
+Two traps in that script's own history, both now guarded:
+
+- `$(IntermediateOutputPath)` is **not defined** in the project body; the common targets that set
+  it are imported afterwards. Using it collapsed the destination onto the source, and the script's
+  `rm -rf` deleted the committed framework. Hence the fixed `objersioned-framework\` path.
+- The script refuses to run when source and destination resolve to the same directory. That check
+  exists because the above actually happened.
+
+**Still open: packaging.** The binding's `.resources.zip` is built from whatever `NativeReference`
+points at, so a package built on Windows contains the flat framework and its Mac Catalyst slice is
+unusable. No single machine can produce all five slices correctly - macOS cannot build
+`net10.0-windows`, and Windows cannot produce the symlinks Mac Catalyst needs. The options are a
+second macOS CI job that builds that slice, shipping a fixup target inside the package, or leaving
+Mac Catalyst out of the package and building it from source. Undecided.

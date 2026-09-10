@@ -14,21 +14,49 @@
     Catalyst slices (x86_64 and arm64). The iOS binding keeps its own iOS-only framework so
     that platform is unaffected.
 
-    The framework is stored shallow - Headers, Modules, Resources and the binary at its root,
-    no Versions/A and no symlinks - which is the same shape as the iOS xcframework. It used to
-    be a versioned bundle, and that could not survive this repository being checked out on
-    Windows: git writes each symlink as a small text file holding its target, so the framework
-    arrived with a 23-byte WebRTC where the 26MB binary should be. The Apple SDK refuses such a
-    framework outright when git *does* create real symlinks, and packs the broken one when it
-    does not - which is how a corrupt Mac Catalyst slice shipped without any build complaining.
+    The framework is stored flat in the repository - Headers, Modules, Resources and the binary
+    at its root - and rebuilt into the versioned bundle macOS wants at build time, on macOS.
+    Neither shape works everywhere:
+
+      * versioned (Versions/A plus symlinks) is what codesign requires for a framework inside an
+        app's Contents/Frameworks, and anything else is refused as "bundle format is ambiguous";
+      * but git on Windows writes symlinks as small text files unless core.symlinks is on, so a
+        versioned bundle checks out with a 23-byte WebRTC in place of the 26MB binary - which is
+        what shipped in every Windows-built package until it was caught.
+
+    Flat survives any checkout, so that is what is committed, and build-versioned-framework.sh
+    reassembles the rest. A flat framework is not an acceptable substitute on macOS, with
+    Info.plist at the root or under Resources; both were tried and both are refused.
   -->
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <WebRtcFlatFramework>WebRTC.framework</WebRtcFlatFramework>
+    <!--
+      A fixed path under obj, deliberately not $(IntermediateOutputPath): that is defined by the
+      common targets, which are imported after this file, so here it expands to nothing - which
+      collapses the destination onto the source and deletes the committed framework.
+    -->
+    <WebRtcVersionedFramework>obj\versioned-framework\WebRTC.framework</WebRtcVersionedFramework>
+    <!-- Off macOS nothing can codesign anyway, so the flat copy is used as-is. -->
+    <WebRtcFramework>$(WebRtcFlatFramework)</WebRtcFramework>
+    <WebRtcFramework Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(WebRtcVersionedFramework)</WebRtcFramework>
+  </PropertyGroup>
+
+  <Target Name="BuildVersionedWebRtcFramework"
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+          BeforeTargets="BeforeBuild"
+          Inputs="$(WebRtcFlatFramework)/WebRTC"
+          Outputs="$(WebRtcVersionedFramework)/Versions/A/WebRTC">
+    <Exec Command="sh build-versioned-framework.sh &quot;$(WebRtcFlatFramework)&quot; &quot;$(WebRtcVersionedFramework)&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
   <ItemGroup>
-    <NativeReference Include="WebRTC.framework">
+    <NativeReference Include="$(WebRtcFramework)">
       <Kind>Framework</Kind>
       <Frameworks></Frameworks>
       <LinkerFlags></LinkerFlags>
