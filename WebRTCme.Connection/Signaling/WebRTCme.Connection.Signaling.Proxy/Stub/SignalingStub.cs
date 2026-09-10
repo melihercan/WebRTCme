@@ -17,6 +17,14 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
 {
     class SignalingStub : ISignalingServerApi
     {
+        // Long enough for a WebSocket closing handshake on a slow link, short enough that a server
+        // that has already gone away cannot hang the app's teardown.
+        static readonly TimeSpan CloseTimeout = TimeSpan.FromSeconds(5);
+
+        // Serialises connect against disconnect: the stub is a singleton reused across calls, so a
+        // join arriving while the previous call is still closing must not race it.
+        readonly SemaphoreSlim _connectGate = new SemaphoreSlim(1, 1);
+
         CancellationTokenSource _cts = new CancellationTokenSource();
         HubConnection _hubConnection;
         string _signallingServerBaseUrl;
@@ -87,20 +95,72 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
 
             _hubConnection.Closed += HubConnection_Closed;
 
-            // Start connection without waiting.
-            _ = ConnectWithRetryAsync();
+            // Start connecting without waiting; a join will await EnsureConnectedAsync anyway.
+            _ = EnsureConnectedAsync();
+        }
+
+        public async Task EnsureConnectedAsync()
+        {
+            if (_hubConnection.State == HubConnectionState.Connected)
+                return;
+
+            await _connectGate.WaitAsync(_cts.Token);
+            try
+            {
+                if (_hubConnection.State == HubConnectionState.Disconnected)
+                    await ConnectWithRetryAsync();
+            }
+            finally
+            {
+                _connectGate.Release();
+            }
+        }
+
+        public async Task DisconnectAsync()
+        {
+            if (_hubConnection.State == HubConnectionState.Disconnected)
+                return;
+
+            await _connectGate.WaitAsync();
+            try
+            {
+                await StopGracefullyAsync();
+            }
+            finally
+            {
+                _connectGate.Release();
+            }
         }
 
         public async ValueTask DisposeAsync()
         {
+            // Cancel first, so ConnectWithRetryAsync stops retrying and cannot reconnect underneath
+            // the shutdown below. DisconnectAsync deliberately does not do this - it has to leave
+            // the stub reusable, since it is a singleton and a later call will join again.
             _cts.Cancel();
-            if (_hubConnection.State != HubConnectionState.Disconnected)
+
+            await StopGracefullyAsync();
+            await _hubConnection.DisposeAsync();
+        }
+
+        async Task StopGracefullyAsync()
+        {
+            if (_hubConnection.State == HubConnectionState.Disconnected)
+                return;
+
+            try
             {
-                try
-                {
-                    await _hubConnection.StopAsync(_cts.Token);
-                }
-                catch { }
+                // Deliberately NOT _cts.Token. In DisposeAsync it has just been cancelled, and
+                // StopAsync given an already-cancelled token aborts immediately rather than
+                // performing the WebSocket closing handshake - so the close never happened and the
+                // catch below hid it.
+                using var closeCts = new CancellationTokenSource(CloseTimeout);
+                await _hubConnection.StopAsync(closeCts.Token);
+            }
+            catch
+            {
+                // A close that fails or times out is not worth failing teardown over: LeaveAsync
+                // has already removed the peer, so the server has nothing stale to hold on to.
             }
         }
 

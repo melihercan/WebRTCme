@@ -68,13 +68,10 @@ and rewrite its values to coerce what `System.Text.Json` produced into what medi
 It is called on codec parameters and consumer `appData`. Fragile in both directions: a shape it
 does not anticipate passes through unchanged, and the mutation is invisible to the caller.
 
-### Teardown is fire-and-forget in places
-Some close paths start async work without awaiting it, so a leave can return before the server has
-been told. The server's own keepalive covers it eventually, which is why this rarely shows.
+### Teardown left the transport open - fixed 2026-09-10
+Kept here because the diagnosis was wrong twice, and the wrong versions are the tempting ones.
 
-**Observed 2026-09-10 on three platforms out of four.** iOS, Android and Windows each produced
-the same sequence against the signalling server: `LeaveAsync` arrives and succeeds, then the
-socket dies without a closing handshake and the server logs
+The symptom: iOS, Android and Windows each made the server log
 
 ```
 Socket connection closed prematurely.
@@ -82,27 +79,28 @@ WebSocketException: The remote party closed the WebSocket connection without com
 close handshake.
 ```
 
-**Blazor is the control case, and it is clean:**
+right after a successful `LeaveAsync`. Blazor did not - it closed cleanly.
 
-```
-######## LeaveAsync - id:...
-Socket closed.
-OnConnectedAsync ending.
-Removing connection ... from the list of connections.
-```
+The cause was not that teardown went un-awaited, and not that `SignalingStub.DisposeAsync`
+cancelled its own token before calling `StopAsync` (it does, and that would abort the handshake -
+but that path never ran). **Nothing disposed anything.** `SignalingStub` and `SignalingConnection`
+are both DI singletons, `SignalingConnection.DisposeAsync` only unsubscribes event handlers, and no
+code anywhere called `DisposeAsync` on either. The socket was therefore only ever closed by the app
+process going away. Blazor looked clean because the browser closes its own WebSocket regardless of
+what managed code does - the most-tested platform was the one hiding it.
 
-That split is what identifies the bug. All four run the same `WebRTCme.Connection` code, so the
-shared layer is not behaving differently per platform - what differs is the WebSocket underneath.
-Blazor WASM goes through the browser's own WebSocket, which completes the closing handshake when
-the connection is torn down. iOS, Android and Windows use `System.Net.WebSockets.ClientWebSocket`,
-which does not unless something calls `CloseAsync` and awaits it.
+The fix closes the transport when a call ends instead of leaving it to the process:
+`ISignalingServerApi` gained `EnsureConnectedAsync` / `DisconnectAsync` (default no-op, so the
+server-side `RoomHub` implementation is unaffected), `SignalingConnection` connects before joining
+and disconnects after closing the peers, and `SignalingStub` serialises the two behind a semaphore
+so a join cannot race a close. Verified on Android over two consecutive calls: both produce
+`Socket closed` and `Removing connection`, and the second reconnects through
+`EnsureConnectedAsync`.
 
-So this is one fix in the shared layer, but the mechanism is narrower than "teardown is not
-awaited": the hub connection is disposed without being closed first, and only the browser
-transport hides it. It also explains why it never caused visible trouble - the browser was the
-most-tested platform.
-
-Harmless as it stands: `LeaveAsync` has already removed the peer, so no ghost is left behind.
+**The lesson worth keeping:** three platforms agreeing did *not* mean they shared a bug in the code
+they share - it meant three of them lacked a workaround that the fourth had. When one platform out
+of four behaves differently, the odd one out is as likely to be the one masking the problem as the
+one causing it.
 
 ### `IConnection` is narrow
 Three members, all call-scoped. Anything a real app wants - mute, screen share, ICE restart, layer
@@ -117,7 +115,8 @@ peer-to-peer path (2026-09-10).
 
 **All four clients start, connect, join and leave** against the signalling server - iOS, Android,
 Windows and Blazor, each run on its own from Visual Studio on 2026-09-10, with no application-level
-errors on any of them.
+errors on any of them. Android additionally ran two consecutive calls after the teardown fix, so
+closing the transport between calls and reconnecting for the next one is covered.
 
 **Android really does release the camera** on `MediaStreamTrack.Stop()` (verified 2026-09-10).
 This was an open question because the code was written with the phone unplugged. Android reports

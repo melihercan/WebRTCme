@@ -44,6 +44,9 @@ namespace WebRTCme.Connection.Services
 
                 try
                 {
+                    // The transport is closed when a call ends, so bring it back up before joining.
+                    await _signalingServerApi.EnsureConnectedAsync();
+
                     // Do checks before creating connection context.
                     var result = await _signalingServerApi.JoinAsync(
                         userContext.Id,
@@ -80,6 +83,13 @@ namespace WebRTCme.Connection.Services
                             }
                             _connectionContext = null;
                         }
+
+                        // Close the transport too, rather than leaving it open until the process
+                        // dies. Nothing disposes this connection - it and the stub are both DI
+                        // singletons - so without this the socket is only ever torn down by the app
+                        // going away, which the server sees as a client that vanished mid-session.
+                        // The next call reconnects through EnsureConnectedAsync above.
+                        await _signalingServerApi.DisconnectAsync();
                     }
                     catch { };
                 };
