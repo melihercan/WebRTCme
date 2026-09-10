@@ -72,6 +72,21 @@ does not anticipate passes through unchanged, and the mutation is invisible to t
 Some close paths start async work without awaiting it, so a leave can return before the server has
 been told. The server's own keepalive covers it eventually, which is why this rarely shows.
 
+**Observed 2026-09-10, and it is in the shared layer.** iOS and Android each produced the same
+sequence against the signalling server: `LeaveAsync` arrives and succeeds, then the socket dies
+without a close handshake and the server logs
+
+```
+Socket connection closed prematurely.
+WebSocketException: The remote party closed the WebSocket connection without completing the
+close handshake.
+```
+
+Two platforms, two different bindings, identical behaviour - so this is `WebRTCme.Connection`,
+not a platform binding. It is harmless as it stands, because `LeaveAsync` has already removed the
+peer and no ghost is left, but the client is dropping the transport rather than closing it. The
+fix is to await the hub connection's disposal after the leave instead of letting it race.
+
 ### `IConnection` is narrow
 Three members, all call-scoped. Anything a real app wants - mute, screen share, ICE restart, layer
 control, device switching - has no route through the interface, which is why several of the items
@@ -80,8 +95,24 @@ above are "implemented but unreachable".
 ## Verified against, and not
 
 Working and tested on this branch: three-peer calls (Blazor + Android + iOS) over both the
-peer-to-peer and mediasoup paths, join/leave/rejoin, camera release on leaving the call page, and
-Windows in a call with Android over the peer-to-peer path (2026-09-10).
+peer-to-peer and mediasoup paths, join/leave/rejoin, and Windows in a call with Android over the
+peer-to-peer path (2026-09-10).
+
+**Android really does release the camera** on `MediaStreamTrack.Stop()` (verified 2026-09-10).
+This was an open question because the code was written with the phone unplugged. Android reports
+the device closed, not merely the track disabled:
+
+```
+Camera2Session: Stop camera2 session on camera 1
+CameraManagerGlobal: Camera 1 ... state now CAMERA_STATE_IDLE
+CameraManagerGlobal: Camera 1 ... state now CAMERA_STATE_CLOSED
+Camera2Session: Camera device closed.
+```
+
+A `W/CameraCapturer: onFrameCaptured from another session` appears alongside it. During shutdown
+that is a late frame from the session being torn down and is benign - but it is the same message
+that masked the double-capture crash fixed in `8be81e88` for months, so treat it as a real signal
+if it ever shows up at *startup* rather than at teardown.
 
 **iOS links on a Mac again as of 2026-09-10**, which is worth its own note because the break was
 invisible everywhere else. See "A failure only the Mac can see" below.
@@ -93,8 +124,6 @@ Not verified, in rough order of risk:
   is the reassuring precedent, not proof - they are separate frameworks.
 - **Mac Catalyst has never been run at all** - compile-verified only, on any release.
 - **`ReplaceOutgoingTrackAsync`** - implemented, but the demo app has no path that calls it.
-- **Camera actually released on Android** after `MediaStreamTrack.Stop()`. The capturer is stopped
-  through the by-track-id registry, but this was written after the phone was unplugged.
 - **Blazor Debug builds** fail to boot on a `.pdb` fetch; Release is unaffected. Cause unknown.
 
 ## A failure only the Mac can see
