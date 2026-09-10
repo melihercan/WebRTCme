@@ -72,9 +72,9 @@ does not anticipate passes through unchanged, and the mutation is invisible to t
 Some close paths start async work without awaiting it, so a leave can return before the server has
 been told. The server's own keepalive covers it eventually, which is why this rarely shows.
 
-**Observed 2026-09-10, and it is in the shared layer.** iOS and Android each produced the same
-sequence against the signalling server: `LeaveAsync` arrives and succeeds, then the socket dies
-without a close handshake and the server logs
+**Observed 2026-09-10 on three platforms out of four.** iOS, Android and Windows each produced
+the same sequence against the signalling server: `LeaveAsync` arrives and succeeds, then the
+socket dies without a closing handshake and the server logs
 
 ```
 Socket connection closed prematurely.
@@ -82,10 +82,27 @@ WebSocketException: The remote party closed the WebSocket connection without com
 close handshake.
 ```
 
-Two platforms, two different bindings, identical behaviour - so this is `WebRTCme.Connection`,
-not a platform binding. It is harmless as it stands, because `LeaveAsync` has already removed the
-peer and no ghost is left, but the client is dropping the transport rather than closing it. The
-fix is to await the hub connection's disposal after the leave instead of letting it race.
+**Blazor is the control case, and it is clean:**
+
+```
+######## LeaveAsync - id:...
+Socket closed.
+OnConnectedAsync ending.
+Removing connection ... from the list of connections.
+```
+
+That split is what identifies the bug. All four run the same `WebRTCme.Connection` code, so the
+shared layer is not behaving differently per platform - what differs is the WebSocket underneath.
+Blazor WASM goes through the browser's own WebSocket, which completes the closing handshake when
+the connection is torn down. iOS, Android and Windows use `System.Net.WebSockets.ClientWebSocket`,
+which does not unless something calls `CloseAsync` and awaits it.
+
+So this is one fix in the shared layer, but the mechanism is narrower than "teardown is not
+awaited": the hub connection is disposed without being closed first, and only the browser
+transport hides it. It also explains why it never caused visible trouble - the browser was the
+most-tested platform.
+
+Harmless as it stands: `LeaveAsync` has already removed the peer, so no ghost is left behind.
 
 ### `IConnection` is narrow
 Three members, all call-scoped. Anything a real app wants - mute, screen share, ICE restart, layer
@@ -97,6 +114,10 @@ above are "implemented but unreachable".
 Working and tested on this branch: three-peer calls (Blazor + Android + iOS) over both the
 peer-to-peer and mediasoup paths, join/leave/rejoin, and Windows in a call with Android over the
 peer-to-peer path (2026-09-10).
+
+**All four clients start, connect, join and leave** against the signalling server - iOS, Android,
+Windows and Blazor, each run on its own from Visual Studio on 2026-09-10, with no application-level
+errors on any of them.
 
 **Android really does release the camera** on `MediaStreamTrack.Stop()` (verified 2026-09-10).
 This was an open question because the code was written with the phone unplugged. Android reports
@@ -124,7 +145,10 @@ Not verified, in rough order of risk:
   is the reassuring precedent, not proof - they are separate frameworks.
 - **Mac Catalyst has never been run at all** - compile-verified only, on any release.
 - **`ReplaceOutgoingTrackAsync`** - implemented, but the demo app has no path that calls it.
-- **Blazor Debug builds** fail to boot on a `.pdb` fetch; Release is unaffected. Cause unknown.
+- **Blazor Debug builds** fail to boot on a `.pdb` fetch when served by `dotnet run`'s
+  WebAssembly dev server; Release is unaffected. **Did not reproduce when launched from Visual
+  Studio on 2026-09-10**, which points at the dev server rather than the app. Narrow it before
+  spending time on it: reproduce with `dotnet run --launch-profile https` first.
 
 ## A failure only the Mac can see
 
