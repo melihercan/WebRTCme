@@ -102,6 +102,23 @@ they share - it meant three of them lacked a workaround that the fourth had. Whe
 of four behaves differently, the odd one out is as likely to be the one masking the problem as the
 one causing it.
 
+### CoreAudio object-not-found spam on Mac Catalyst
+Every few seconds during a call, Mac Catalyst logs
+
+```
+(CoreAudio) AudioObjectHasProperty: no object with given ID 136
+AVAudioSessionHALUtils.mm:277 GetSampleRateOfDevice: Error getting sampleRate of device 136
+    err: 2003332927
+```
+
+`2003332927` is `kAudioHardwareBadObjectError`: WebRTC's audio layer is polling an audio device id
+that no longer exists. Audio works regardless - the Telephony chain runs and the call is audible -
+so this is noise rather than a fault, but it is worth knowing three things about it. It comes from
+inside WebRTC's `AVAudioSessionHALUtils`, not from this project; it is Mac Catalyst specific,
+because `AVAudioSession` there is emulated over the macOS HAL and device ids come and go in a way
+iOS never sees; and it will bury anything else in the log at default verbosity. If a genuine audio
+fault is ever chased on Catalyst, filter this out first rather than reading it as the cause.
+
 ### `IConnection` is narrow
 Three members, all call-scoped. Anything a real app wants - mute, screen share, ICE restart, layer
 control, device switching - has no route through the interface, which is why several of the items
@@ -138,9 +155,11 @@ if it ever shows up at *startup* rather than at teardown.
 invisible everywhere else. See "A failure only the Mac can see" below.
 
 **Mac Catalyst runs** (2026-09-10), for the first time in this project's history. On the Mac mini
-it links, codesigns, launches, joins and leaves cleanly, and captures from a USB webcam at a steady
-30fps through `AVCaptureVideoDataOutput` into WebRTC - so the native framework is live, not merely
-linked. It needed the framework fix below.
+it links, codesigns, launches, joins and leaves cleanly, captures from a USB webcam at a steady
+30fps, and **holds a two-way call with Android** - remote video rendered on screen, and CoreAudio
+running its `use_case=Telephony` chain with both uplink and downlink nodes, which only happens once
+a peer is actually connected. That exercises `Platforms/MacCatalyst/MediaView.MaciOS.cs`, which had
+never run. It needed the framework fix below.
 
 Not verified, in rough order of risk:
 
