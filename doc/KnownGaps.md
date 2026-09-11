@@ -55,10 +55,24 @@ for, and the peer-to-peer path needs an offer with `iceRestart` set plus a rule 
 starts it. Both are untested territory, so this stayed out of the mute change rather than being
 added blind.
 
-### Simulcast layer control - absent
+### Simulcast layer control - absent, and it shows
 The client produces simulcast encodings, but there is no `setPreferredLayers` or
-`setMaxSpatialLayer` anywhere, so a consumer cannot ask for a lower layer and nothing adapts to a
-slow receiver.
+`setMaxSpatialLayer` anywhere, so a consumer cannot ask for a layer and nothing adapts to a slow
+receiver. The server is left to choose unaided.
+
+Observed on the Android/Windows SFU call of 2026-09-11: the server moved the consumer between
+spatial layers every twenty to thirty seconds, climbing one layer and falling back within a few
+seconds, and **never selected the top layer at all**. Inbound video settled around 150 kbit/s,
+against 1.8 Mbit/s for the same pair over the peer-to-peer path, on the same LAN - so this is not
+the network.
+
+On Windows the missing half is in the binding: `RTCRtpSender.GetParameters` / `SetParameters` are
+still `NotSupportedException`, because encodings would have to be round-tripped back across the C
+ABI with owned strings, and nothing called them. They are what `Handler.SetMaxSpatialLayerAsync`
+needs.
+
+See "The jumping tile" below for what the layer changes do to the UI, which is a separate fault
+with a much cheaper fix.
 
 ### Send-side statistics - absent
 `MediaSoupConnection.GetStats` walks the peer's *consumers* only and merges their reports. That is
@@ -147,6 +161,25 @@ because `AVAudioSession` there is emulated over the macOS HAL and device ids com
 iOS never sees; and it will bury anything else in the log at default verbosity. If a genuine audio
 fault is ever chased on Catalyst, filter this out first rather than reading it as the cause.
 
+### The jumping tile - the MAUI `Media` view has no stable size
+A remote tile on Android resizes whenever the incoming video's resolution changes, and the whole
+layout shifts with it. Seen on the SFU call of 2026-09-11, where the tile alternated between
+289x240 and 144x120 every twenty to thirty seconds:
+
+```
+09-11 17:12:54  BLASTBufferQueue update, w= 289 h= 240  ... caller= MediaView.n_onLayout
+09-11 17:12:56  BLASTBufferQueue update, w= 144 h= 120  ... caller= MediaView.n_onLayout
+```
+
+Those numbers come through `MediaView.n_onLayout`, so it is the view's own measured size following
+the video, not merely the decode buffer being resized underneath a stable view.
+
+**Only the SFU path shows it**, which is why it went unnoticed for so long: peer-to-peer resolution
+is settled at negotiation and does not change mid-call, whereas an SFU switches spatial layers
+whenever its estimate moves. The cause is upstream - see "Simulcast layer control" above - but the
+two are worth fixing separately, because a tile that keeps its size would stop the jumping whatever
+the server decides, and that is a self-contained change in `WebRTCme.Middleware`.
+
 ### `IConnection` is narrow - mute added 2026-09-10, the rest still missing
 It had three members, all call-scoped, so anything a real app wants - mute, screen share, ICE
 restart, layer control, device switching - had no route through the interface. That is why several
@@ -199,6 +232,37 @@ running its `use_case=Telephony` chain with both uplink and downlink nodes, whic
 a peer is actually connected. That exercises `Platforms/MacCatalyst/MediaView.MaciOS.cs`, which had
 never run. It needed the framework fix below.
 
+**MediaSoup runs on Windows** (2026-09-11), for the first time in this project's history. Android
+and Windows held a two-way SFU call: both transports created, `join`, both peers consuming each
+other's audio and video, SCTP connected on both transports, and live media in both directions.
+
+It needed a change to the native shim rather than to this repository. The Windows binding threw
+`NotSupportedException` from `AddTransceiver`, `GetTransceivers` and `GetReceivers`, and that was
+honest: `WebRtcInterop.dll` exported 41 functions whose peer-connection surface was
+`add_track`/`remove_track`, the Plan B shape, with no transceiver entry point at all. mediasoup-
+client is unified plan throughout - it probes capabilities by adding a transceiver of each kind,
+creates each send stream with its simulcast encodings, and finds a receive m-section by `mid` - so
+it failed on its very first call, right after `getRouterRtpCapabilities`.
+
+The shim now exports transceivers, receivers, per-sender and per-receiver statistics, and
+`media_track_get_kind` (a track reached through a receiver arrived by negotiation and carries no
+kind the caller already knows). See `WebRTCnative` `feature/transceivers`. **The DLL in
+`WebRTCme.Bindings/Maui/WebRTCme.Bindings.Maui.Windows/native/win-x64/` is now built from that
+branch** - a Windows build against an older shim will fail with `EntryPointNotFoundException`
+rather than the old `NotSupportedException`.
+
+Two things worth keeping from doing it:
+
+- **Check the API against the branch being built, not against memory.** `cricket::MediaType` no
+  longer exists in M152 and is `webrtc::MediaType::AUDIO`; the selector `GetStats` overloads take a
+  `scoped_refptr` callback where the connection-wide one takes a raw pointer. Both were verified by
+  fetching the headers first, and the compile confirmed it: the only errors were four instances of
+  `-Wunsafe-buffer-usage`, which is a lint no header could have warned about.
+- **Pass `webrtc_branch` explicitly when dispatching the build.** Left empty it resolves the latest
+  stable Chromium milestone, which rolled to M153 on 2026-09-11; that branch fails `gn gen` on the
+  runner image and wastes forty minutes before reaching a compiler. It would also have been the
+  wrong WebRTC version to build against.
+
 **Mute works peer-to-peer, both directions, both kinds** (Android + Windows, 2026-09-11). Camera
 off collapsed outbound video from ~1.14 MB per 5s to 71 kB and it recovered on unmute; a remote mic
 mute took the receiving peer's `inbound-rtp` audio level to exactly 0 and back. The receiving half
@@ -208,8 +272,8 @@ other client.
 
 Not verified, in rough order of risk:
 
-- **Mute on the mediasoup path.** Different implementation - producer pause plus a server request -
-  and the SFU has not been exercised for 18 commits.
+- **Mute on the mediasoup path.** Different implementation - producer pause plus a server request.
+  The SFU itself now runs again, on Android and Windows, but nothing has muted across it.
 - **The Mac Catalyst slice of a package built on Windows is still wrong.** See "The framework that
   fits neither platform" below: the repository is now correct for building from source on either
   OS, but a `.resources.zip` produced on Windows carries the flat framework, which macOS refuses.
