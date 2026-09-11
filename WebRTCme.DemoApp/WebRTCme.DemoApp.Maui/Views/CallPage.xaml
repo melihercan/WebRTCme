@@ -12,12 +12,20 @@
         -->
         <Grid RowDefinitions="Auto,Auto,*">
 
-            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Padding="8" Spacing="8">
-                <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
-                <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
-                <Button Text="Restart ICE" Command="{Binding RestartIceCommand}" />
-                <Button Text="{Binding SpatialLayerButtonText}" Command="{Binding ToggleSpatialLayerCommand}" />
-            </HorizontalStackLayout>
+            <!--
+                Scrollable, because the row is wider than a phone: on a 1080px screen the third
+                button is already clipped and the fourth is off the edge entirely, which made them
+                unreachable rather than merely ugly.
+            -->
+            <ScrollView Grid.Row="0" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout HorizontalOptions="Center" Padding="8" Spacing="8">
+                    <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
+                    <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
+                    <Button Text="Restart ICE" Command="{Binding RestartIceCommand}" />
+                    <Button Text="{Binding SpatialLayerButtonText}" Command="{Binding ToggleSpatialLayerCommand}" />
+                    <Button Text="{Binding ShareScreenButtonText}" Command="{Binding ShareScreenCommand}" />
+                </HorizontalStackLayout>
+            </ScrollView>
 
             <Label Grid.Row="1"
                    Text="{Binding PeerMediaStatus}"

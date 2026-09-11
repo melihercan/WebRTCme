@@ -511,6 +511,30 @@ capture request with the nearest supported format and says nothing:
   outright on a camera publishing fewer than seven formats. It now picks the closest supported
   format to the request and clamps the frame rate to what that format allows.
 
+### Two Android sender stubs were on live paths - filled in 2026-09-11
+Auditing the stubs by whether anything actually calls them, rather than by counting them, turned up
+two on `RTCRtpSender` that features added the same day walked straight into:
+
+- **`SetParameters`** backs `SetMaxOutgoingSpatialLayerAsync`, so simulcast layer control threw
+  `NotImplementedException` on Android. Implemented by fetching the native parameters, mutating
+  them and handing them back - Java's `RtpParameters` has no public constructor, the only
+  legitimate instance comes from `getParameters()`, and it carries state the native side checks.
+  Encodings are matched by rid where there is one and by position otherwise. The native call
+  reports refusal by returning false rather than throwing, so that is turned into an exception:
+  a silently ignored parameter change is the failure this path exists to prevent.
+- **`ReplaceTrack`** backs `ReplaceOutgoingTrackAsync` and therefore screen sharing and device
+  switching. Implemented with `SetTrack(track, takeOwnership: false)` - ownership deliberately not
+  taken, because the track belongs to the caller's stream, which the local preview is still
+  rendering, and letting the sender dispose it would stop a track that is still in use.
+
+Verified on device: the layer button now reports `max outgoing spatial layer set to 0` where it
+previously raised an error popup. `ReplaceTrack` is **not** verified - reaching it on Android needs
+`GetDisplayMedia`, which that platform does not have.
+
+The audit is worth repeating rather than the counting. 41 distinct members throw on Android and
+only 16 are referenced anywhere in the connection or middleware layers; those 16 are where the
+next real failure will come from, and the rest can wait indefinitely.
+
 ### Binding surface is incomplete
 `NotImplementedException` counts under `WebRTCme/Platforms/`: ~47 Android, ~40 iOS, ~40 Mac
 Catalyst, plus ~17 each in the Apple `Custom/` helpers. The paths the demo apps exercise work; the
