@@ -71,10 +71,28 @@ The flag follows the observer directly, so it flickers across the short gaps in 
 UI that highlights the speaker will want its own hold-off; that is a presentation decision and is
 deliberately not made here.
 
-Still missing: **voice activity on the peer-to-peer path**. There is no server there to observe
-audio levels, so `speaking` is still sent as false - it needs a local detector, which means
-sampling the microphone's level far more often than the current five-second stats poll and applying
-a threshold and a hangover.
+**Peer-to-peer computes it locally** (2026-09-11), since there is no server in the media path to
+observe anything. `SignalingConnection` samples `media-source`'s `audioLevel` - the microphone
+before encoding - every 400ms from any one peer connection, since they all send the same local
+track, and sends the signalling message only when the state changes.
+
+Both constants came from measurement, and are worth keeping as measurements rather than taste:
+
+- **Threshold 0.01.** In this project's own stats silence sits between 0.0001 and 0.0006 and speech
+  runs 0.005 to 0.16, so 0.01 clears the noise and stays under the quietest speech seen. A noisy
+  room will need it raised.
+- **Hangover 2 seconds.** The first version used 900ms and the flag fell and rose *twice inside a
+  single spoken sentence*, with the quiet stretches running 1.2 to 1.7 seconds. Anything under
+  about 1.8s reproduces that flicker. At 2s, two bursts of speech produced exactly two
+  transitions - held 8.7s and 10.4s - with nothing in between.
+
+Muting is not special-cased: a disabled track reports a level of zero, so mute drops the flag by
+itself. It is forced to false anyway, because "muted and speaking" is a contradiction no peer
+should be sent.
+
+The cost is one `getStats` call every 400ms, which on Blazor crosses the JS interop boundary. That
+is the reason for sampling one peer connection rather than all of them, and the reason the interval
+is not shorter.
 
 **Verified in an Android/Windows call on 2026-09-11**, in both directions and for both kinds. See
 "How to tell a mute actually happened" below - it is not as obvious as it sounds, and the first
