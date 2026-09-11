@@ -201,8 +201,32 @@ So the earlier framing in this entry - "the server chooses badly when it has som
 from" - was wrong. It chooses correctly for what it believes the path can carry, and what it
 believes is wrong by more than a factor of ten.
 
-**The prime suspect is now the test rig, not the library.** The same stats show the selected ICE
-tuple as:
+**The Docker bridge was the prime suspect, and it has been ruled out.** The same measurement taken
+with the *browser* as the consumer, over the same container and the same bridge:
+
+```
+                    availableOutgoingBitrate           remoteIp
+toward Blazor       469692 -> 504807 -> 565778 -> 568755    172.17.0.1
+toward Android      142948 -> 108394 ->  47041 ->  62504    172.17.0.1
+```
+
+Same bridge, same NATed remote address, opposite behaviour - one climbing to half a megabit, the
+other collapsing to a twentieth of that. Whatever sets the estimate apart, it is not the container's
+networking. The paragraph that used to stand here blamed it, on the strength of the address alone.
+
+One thing the browser run does show is that the estimate is **pessimistic in both directions**: the
+transport toward Blazor reported 568 kbit/s available while successfully sending 900 kbit/s to that
+same consumer. So `availableOutgoingBitrate` is not simply "low for Android" - it is unreliable
+here generally, and only *matters* when simulcast gives the allocator something to choose with.
+
+What is left is the path to the device itself, which is the one thing that differs: the phone is on
+WiFi, the browser is on the same host as the container. That has to be squared with the fact that
+the same phone on the same WiFi receives 1.8 Mbit/s happily as soon as simulcast is off - so "the
+WiFi is bad" is not the answer either, and the next measurement should be RTT and jitter on that
+transport over time rather than another guess.
+
+The remaining rig detail, kept because it is still true and still worth knowing when reading these
+stats - it simply is not the cause: the selected ICE tuple is
 
 ```
 "iceSelectedTuple": { "localIp": "0.0.0.0", "localPort": 44444,
@@ -210,20 +234,46 @@ tuple as:
 ```
 
 `172.17.0.1` is the Docker bridge gateway. The container runs with `--network bridge`, so every
-peer reaches the SFU through Docker's NAT and appears at the gateway address. `MEDIASOUP_ANNOUNCED_ADDRESS`
-is set correctly, which is why media flows at all - but send-side bandwidth estimation depends on
-transport-cc feedback timing, and a bridged and NATed path is exactly the kind of thing that
-perturbs it.
+peer reaches the SFU through Docker's NAT and appears at the gateway address regardless of where it
+actually is. `MEDIASOUP_ANNOUNCED_ADDRESS` is set correctly, which is why media flows at all. It is
+worth knowing when reading any of these stats - the remote address tells you nothing about which
+peer you are looking at - but it is not what is holding the estimate down.
 
-This is a strong lead, **not** a proven cause. What would settle it, in order:
+Where to look next, in order:
 
-1. Re-measure with the container on host networking, or mediasoup on the host directly. Note that
-   Docker Desktop on Windows runs a Linux VM, so `--network host` does not mean there what it means
-   on Linux - this may need a Linux host to test at all.
-2. If the estimate behaves there, this entry is an artefact of the development rig and not a defect
-   in this library, and `UseSimulcast: false` in the demo apps can go.
-3. If it does not, look at mediasoup's probation: `probationBytesSent` was 17792 with
-   `probationSendBitrate` at 0, so probing is happening but not lifting the estimate.
+1. **RTT and jitter on the receive transport, sampled over time**, for the phone and the browser
+   side by side. The estimate is what differs; these are what feed it. `LogServerStats` already
+   prints both.
+2. **mediasoup's probation.** `probationBytesSent` sat at 17792 with `probationSendBitrate` at 0 in
+   every sample, on both transports - so probing runs but never lifts the estimate. That is the
+   mechanism that is supposed to discover headroom, and it appears not to be discovering any.
+3. Only then the rig. Re-measuring on host networking is still worth doing, but it is no longer the
+   first thing to try, and Docker Desktop on Windows runs a Linux VM - `--network host` does not
+   mean there what it means on Linux, so this may need a Linux host to test at all.
+
+### Android funds only one simulcast layer
+Found on 2026-09-11 while measuring the above, and separate from it. With `UseSimulcast: true` on
+the phone, its own send-side statistics read:
+
+```
+out:[ audio bytes=514407 | video/r1 x bytes=0 frames=0 | video/r0 640x480 bytes=13377552 frames=1594 ]
+```
+
+`r1` is negotiated and reported, and encodes **nothing at all** - no frames, no bytes, not even a
+frame size. `r0` carries the whole picture at full 640x480. That is the unfunded-layer signature
+described under "A simulcast ladder has to suit the camera": an encoding that is active and simply
+never funded, which looks nothing like throttling.
+
+Two things make it its own entry rather than a repeat of that one. The ladder there was wrong for
+the camera and was fixed by matching it to the track height, and on Blazor that fix works - the same
+code yields `r0 320x240` and `r1 640x480`, both encoding, both climbing. On Android the *order* is
+inverted as well: `r0` is the full-size layer rather than the reduced one. So the encodings are not
+reaching the encoder as written, and the consumer sees it - the server reports `bitrateByLayer: {}`
+for that producer, because only one stream ever carries anything.
+
+Not investigated further. It matters because the SFU cannot choose a layer that was never produced,
+so any conclusion about the server's layer selection drawn from an Android publisher is worthless
+until this is fixed.
 
 **Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
 library change; anything consuming the package can still turn it on. It gives up per-consumer
