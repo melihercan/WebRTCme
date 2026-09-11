@@ -194,6 +194,61 @@ namespace WebRTCme.Connection.Services
                 throw new Exception($"{result.ErrorMessage}");
         }
 
+        /// <summary>
+        /// Offers again with the ICE-restart flag set, for every peer this client offers to.
+        /// </summary>
+        /// <remarks>
+        /// Only for the peers where this client is the initiator. Both ends restarting at once
+        /// would be glare - two offers crossing - and this design already settles who offers: the
+        /// peer that was here when the other arrived. For the remaining peers the restart has to
+        /// come from their side, which is a real limitation rather than an oversight, and the
+        /// reason a caller cannot treat this as "fix the whole call".
+        ///
+        /// Every peer is attempted even if one fails, and failures are collected: with several
+        /// peers, the first to fail is not necessarily the interesting one.
+        /// </remarks>
+        public async Task RestartIceAsync()
+        {
+            var connectionContext = _connectionContext
+                ?? throw new InvalidOperationException("There is no call whose ICE could be restarted.");
+
+            var initiated = connectionContext.PeerContexts.Where(context => context.IsInitiator).ToArray();
+            if (initiated.Length == 0)
+                throw new InvalidOperationException(
+                    "This client does not offer to any peer in this call, so it cannot restart ICE. " +
+                    "The peer that initiated has to do it.");
+
+            var failures = new List<string>();
+
+            foreach (var peerContext in initiated)
+            {
+                try
+                {
+                    var offer = await peerContext.PeerConnection.CreateOffer(
+                        new RTCOfferOptions { IceRestart = true });
+
+                    // Local description first: it is what starts the new gathering, and the peer
+                    // cannot answer an offer this side has not applied.
+                    await peerContext.PeerConnection.SetLocalDescription(offer);
+
+                    var sdp = JsonSerializer.Serialize(offer, JsonHelper.WebRtcJsonSerializerOptions);
+                    var result = await _signalingServerApi.SdpAsync(peerContext.Id, sdp);
+                    if (!result.IsOk)
+                        throw new Exception(result.ErrorMessage);
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"######## ICE restart offered to peer:{peerContext.Name}");
+                }
+                catch (Exception exception)
+                {
+                    failures.Add($"{peerContext.Name}: {exception.Message}");
+                }
+            }
+
+            if (failures.Count > 0)
+                throw new Exception($"ICE restart failed for {string.Join("; ", failures)}");
+        }
+
         public Task<IRTCStatsReport> GetStats(Guid id)
         {
             var peerContext = _connectionContext?.PeerContexts

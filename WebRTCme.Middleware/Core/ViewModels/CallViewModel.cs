@@ -477,6 +477,40 @@ namespace WebRTCme.Middleware
         });
 
         /// <summary>
+        /// Re-gathers ICE for a call whose media has stopped while the signalling is still up.
+        /// </summary>
+        /// <remarks>
+        /// Manual here because nothing detects the condition yet. A real app would watch the
+        /// connection state and restart on its own; exposing it as a button at least makes the
+        /// capability reachable and testable, which it has never been.
+        /// </remarks>
+        public async Task OnRestartIceAsync()
+        {
+            try
+            {
+                await _connection.RestartIceAsync();
+                System.Diagnostics.Debug.WriteLine("######## APP ICE restart requested");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogInformation($"************* APP ICE restart failed: {exception.Message}");
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## APP ICE restart failed: {exception.Message}");
+                _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                {
+                    Title = "Error",
+                    Text = "Could not restart the connection:" + Environment.NewLine + exception.Message,
+                    Ok = "Ok",
+                });
+            }
+        }
+
+        public ICommand RestartIceCommand => new AsyncCommand(async () =>
+        {
+            await OnRestartIceAsync();
+        });
+
+        /// <summary>
         /// Flips the mute state for one kind and reports the state to settle on.
         /// </summary>
         /// <remarks>

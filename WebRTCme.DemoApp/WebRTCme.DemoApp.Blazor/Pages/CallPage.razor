@@ -19,6 +19,10 @@
     @CallViewModel.CameraButtonText
 </button>
 
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnRestartIceAsync">
+    Restart ICE
+</button>
+
 @if (!string.IsNullOrEmpty(CallViewModel.PeerMediaStatus))
 {
     <p class="mx-4 text-muted">@CallViewModel.PeerMediaStatus</p>

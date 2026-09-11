@@ -1271,6 +1271,49 @@ namespace WebRTCme.Connection.Services
                 producer.Pause();
         }
 
+        /// <summary>
+        /// Re-gathers ICE on both transports, recovering a connection whose path has died.
+        /// </summary>
+        /// <remarks>
+        /// Each transport is restarted independently and both are attempted even if the first
+        /// fails: they are separate ICE sessions, and a send path that has died does not imply the
+        /// receive path has. Reporting only the first failure would also hide the more useful one.
+        ///
+        /// The server gathers new candidates and answers with its side's ICE parameters, which the
+        /// handler needs before it can restart its own - hence a request rather than a
+        /// notification.
+        /// </remarks>
+        public async Task RestartIceAsync()
+        {
+            var transports = new[] { _sendTransport, _recvTransport }.Where(t => t is not null).ToArray();
+            if (transports.Length == 0)
+                throw new InvalidOperationException("There is no call whose ICE could be restarted.");
+
+            var failures = new List<string>();
+
+            foreach (var transport in transports)
+            {
+                try
+                {
+                    var iceParameters = (IceParameters)ParseResponse(MethodName.RestartIce,
+                        await _mediaSoupServerApi.ApiAsync(MethodName.RestartIce,
+                            new RestartIceRequest { TransportId = transport.Id }));
+
+                    await transport.RestartIceAsync(iceParameters);
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"######## ICE restarted on transport {transport.Id}");
+                }
+                catch (Exception exception)
+                {
+                    failures.Add($"{transport.Id}: {exception.Message}");
+                }
+            }
+
+            if (failures.Count > 0)
+                throw new Exception($"ICE restart failed on {string.Join("; ", failures)}");
+        }
+
         Producer ProducerFor(MediaStreamTrackKind kind) => kind switch
         {
             MediaStreamTrackKind.Audio => _micProducer,
@@ -1318,6 +1361,11 @@ namespace WebRTCme.Connection.Services
 
                 case MethodName.ConnectWebRtcTransport:
                     return null;
+
+                case MethodName.RestartIce:
+                    // Nested under its own member, like the router capabilities above.
+                    return JsonSerializer.Deserialize<RestartIceResponse>(
+                        json, JsonHelper.WebRtcJsonSerializerOptions).IceParameters;
 
                 case MethodName.Produce:
                     var produceResponse = JsonSerializer.Deserialize<ProduceResponse>(

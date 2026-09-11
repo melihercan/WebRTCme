@@ -15,6 +15,7 @@
             <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Padding="8" Spacing="8">
                 <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
                 <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
+                <Button Text="Restart ICE" Command="{Binding RestartIceCommand}" />
             </HorizontalStackLayout>
 
             <Label Grid.Row="1"

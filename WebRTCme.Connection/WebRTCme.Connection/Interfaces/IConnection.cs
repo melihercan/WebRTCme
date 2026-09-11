@@ -44,5 +44,21 @@ namespace WebRTCme.Connection
         /// track of that kind was offered when it started.
         /// </exception>
         Task SetOutgoingMediaEnabledAsync(MediaStreamTrackKind kind, bool enabled);
+
+        /// <summary>
+        /// Re-gathers ICE, recovering a call whose network path has died under it.
+        /// </summary>
+        /// <remarks>
+        /// For when the media stops but the signalling is still alive - a device changing network,
+        /// a NAT binding expiring, a route disappearing. Without it such a call stays dead until
+        /// somebody hangs up and redials, which is what happened here until now: both paths could
+        /// restart ICE and neither had any way to be asked.
+        ///
+        /// The two paths do different work. Peer-to-peer renegotiates with each peer, offering
+        /// afresh with the ICE-restart flag set; mediasoup asks the server to re-gather on both
+        /// transports and applies the parameters it sends back.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">There is no call to restart.</exception>
+        Task RestartIceAsync();
     }
 }
