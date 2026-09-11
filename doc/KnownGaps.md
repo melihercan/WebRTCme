@@ -17,7 +17,7 @@ and none of them is a small change:
 | | where the work is |
 | --- | --- |
 | **`getDisplayMedia` on iOS and Mac Catalyst** | A platform project - ReplayKit and a broadcast extension. **Android is done** (2026-09-11). |
-| **A peer's tiles going blank when the app is backgrounded** | Unreproduced. Seen once with the demo app behind WhatsApp while sharing; the obvious suspect is Android suspending a backgrounded app, and the obvious suspect has been wrong all day. |
+| **Backgrounding the Android app kills the call, permanently** | Reproduced and root-caused. Needs a foreground service for the call itself, the way screen capture already has one. |
 | **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
 | **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
@@ -69,6 +69,43 @@ one worth remembering:
   of type FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION"* - which reads as a missing manifest entry and
   is nothing of the kind. The manifest was correct throughout; the service simply had not got there
   yet. The service now signals when it is genuinely foregrounded and `GetDisplayMedia` waits.
+
+### Backgrounding the Android app kills the call, and it does not come back
+Reported as "both tiles went blank", reproduced deliberately on 2026-09-11, and considerably worse
+than a pause. Pressing Home on a live mediasoup call:
+
+```
+sending    video x bytes=2591410 frames=727   frozen, no frame size
+           audio bytes=479631 -> 521490       still climbing
+receiving  video:3202799 audio:43758 pair:none lvl:0   frozen, no candidate pair
+camera     CAMERA_STATE_CLOSED / Camera device closed / finishCameraStreamingOps
+transport  connected => disconnected,  disconnected => failed
+```
+
+**Returning to the foreground recovers nothing.** The camera is never reopened - zero opens in the
+log after resuming - the receive side stays frozen on the same byte counts, and the peer's tile for
+this device disappears entirely. **`RestartIceAsync` does not recover it either**, which is worth
+knowing because this looks exactly like the fault that feature was added for.
+
+What is still alive is signalling: the speaking indicator keeps updating and audio keeps being
+sent. So the app looks connected while carrying no media in either direction, which is the worst
+shape a failure can take - nothing on screen says the call is dead.
+
+The chain is Android policy, not a WebRTC fault. A backgrounded app may not hold the camera, and a
+cached process gets frozen; ICE then stops answering, the transports go `connected` ->
+`disconnected` -> `failed`, and a failed transport is not something the client recovers from on its
+own. The camera closing is expected. **Nothing reopening it, and nothing noticing the transports
+failed, is ours.**
+
+**The fix is a foreground service for the call**, with `camera` and `microphone` types, started
+when a call begins and stopped when it ends - exactly the shape
+`ScreenCaptureService` already has for projection. Without one, Android will keep doing this, and
+any amount of recovery logic is papering over a process that is not allowed to run. Recovery on
+resume is worth having as well, but second: a call that survives being backgrounded is the goal,
+not a call that repairs itself afterwards.
+
+Until then, **the Android app only works in the foreground**, and that is a fair summary to give
+anyone testing it.
 
 ### Stopping a share did not stop the capture - fixed 2026-09-11
 Worse than an ordinary bug and worth its own entry. Pressing "stop sharing" closed the producer,
