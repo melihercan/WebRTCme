@@ -143,7 +143,15 @@ namespace WebRTCme.Android
         /// </remarks>
         public void Stop()
         {
+            // Both kinds of capture, because a track does not know which it is until asked and
+            // stopping the wrong one is a no-op. The screen matters more than the camera here: a
+            // projection that outlives its track keeps recording the device, and the only thing
+            // the user would see is a notification they did not expect.
             AndroidSupport.StopCapture(Id);
+
+            if (AndroidSupport.IsScreenTrack(Id))
+                AndroidSupport.StopScreenCapture();
+
             Enabled = false;
             OnEnded?.Invoke(this, EventArgs.Empty);
         }

@@ -85,9 +85,83 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
+        /// <summary>
+        /// Captures the screen, after asking the user for permission.
+        /// </summary>
+        /// <remarks>
+        /// The order below is fixed by Android and getting it wrong throws: the foreground service
+        /// has to be running <b>before</b> the projection is used, because since Android 10 a
+        /// <c>MediaProjection</c> can only be obtained while a service of type
+        /// <c>mediaProjection</c> is already up.
+        ///
+        /// Audio is not captured. Android can mix system audio into a projection from API 29, but
+        /// it is a separate source with its own consent implications, and a screen share that
+        /// silently carried everything the device was playing is not what a caller asking for
+        /// <c>getDisplayMedia</c> expects.
+        ///
+        /// The size comes from the display rather than from the constraints: capturing a screen at
+        /// something other than its own aspect ratio bakes letterboxing into the frames, which is
+        /// worse than sending the real shape and letting the far side fit it.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">The user refused, or dismissed the dialog.</exception>
+        public async Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
-            throw new NotImplementedException();
+            var context = (global::Android.Content.Context)Platform.CurrentActivity
+                ?? global::Android.App.Application.Context;
+
+            // Asked for before the service is started, because a foreground service has to post a
+            // notification and Android 13 made that a runtime permission. Refusal is not fatal -
+            // the service still runs - so this does not check the answer, it only makes sure the
+            // user was asked before the notification would otherwise have been dropped.
+            if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.Tiramisu)
+            {
+                try { await Permissions.RequestAsync<Permissions.PostNotifications>(); }
+                catch { /* Older MAUI targets do not know this permission; the service copes. */ }
+            }
+
+            var permission = await ScreenCapturePermissionActivity.RequestAsync(context)
+                ?? throw new InvalidOperationException(
+                    "Screen capture was not allowed. Android asks each time, and an answer " +
+                    "authorises a single capture session.");
+
+            // Started, and then *waited for*. startForegroundService returns immediately and the
+            // service reaches the foreground later on the main looper; taking the projection in
+            // between fails with a SecurityException that names the missing service and reads like
+            // a manifest problem. Ten seconds is far longer than this takes and still bounded -
+            // Android itself kills a service that has not started in about five.
+            ScreenCaptureService.Start(context);
+
+            var ready = await Task.WhenAny(
+                ScreenCaptureService.ReadyAsync,
+                Task.Delay(TimeSpan.FromSeconds(10)));
+
+            if (ready != ScreenCaptureService.ReadyAsync || !ScreenCaptureService.ReadyAsync.Result)
+            {
+                ScreenCaptureService.Stop(context);
+                throw new InvalidOperationException(
+                    "The screen capture service did not reach the foreground, so the projection " +
+                    "cannot be used. Its own log line says why.");
+            }
+
+            var metrics = context.Resources?.DisplayMetrics;
+            var width = metrics?.WidthPixels ?? 1080;
+            var height = metrics?.HeightPixels ?? 1920;
+            var frameRate = VideoConstraints.From(constraints).FrameRate ?? 30;
+
+            var track = MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"screen:{WebRtc.Id}");
+
+            try
+            {
+                AndroidSupport.StartScreenCapture(track, permission, width, height, frameRate);
+            }
+            catch
+            {
+                // The service is only justified by a capture that is actually running.
+                ScreenCaptureService.Stop(context);
+                throw;
+            }
+
+            return MediaStream.Create(new[] { track });
         }
 
         public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>

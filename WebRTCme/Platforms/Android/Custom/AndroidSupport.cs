@@ -53,6 +53,114 @@ namespace WebRTCme
                 _formatsByTrackId[trackId] = constraints;
         }
 
+        // The screen capturer, when one is running. At most one: Android grants a projection for a
+        // single capture session, so a second share means a second permission dialog and the first
+        // session ending anyway.
+        static Webrtc.ScreenCapturerAndroid _screenCapturer;
+        static string _screenTrackId;
+
+        /// <summary>
+        /// Starts capturing the screen into a video source, once permission has been granted.
+        /// </summary>
+        /// <remarks>
+        /// Unlike the camera, this starts at track creation rather than when a renderer binds the
+        /// track. There is no device to look up later - the capturer is built around the one-shot
+        /// Intent the permission dialog returned - and a screen share that only began once somebody
+        /// displayed it locally would be a surprising thing to ship.
+        ///
+        /// Size comes from the display rather than from constraints. Capturing a screen at
+        /// something other than its own aspect ratio produces letterboxing baked into the frames,
+        /// which is worse than sending the real thing and letting the far side fit it.
+        /// </remarks>
+        public static void StartScreenCapture(
+            IMediaStreamTrack videoTrack,
+            global::Android.Content.Intent permission,
+            int width,
+            int height,
+            int frameRate)
+        {
+            StopScreenCapture();
+
+            var nativeVideoSource = GetNativeVideoSource(videoTrack);
+
+            var capturer = new Webrtc.ScreenCapturerAndroid(
+                permission, new ProjectionStoppedCallback(videoTrack));
+            capturer.Initialize(
+                Webrtc.SurfaceTextureHelper.Create("ScreenCapturerThread", GetNativeEglBase().EglBaseContext),
+                global::Android.App.Application.Context,
+                nativeVideoSource.CapturerObserver);
+            capturer.StartCapture(width, height, frameRate);
+
+            _screenCapturer = capturer;
+            _screenTrackId = videoTrack.Id;
+        }
+
+        /// <summary>
+        /// Stops capturing the screen and takes the foreground notification down with it.
+        /// </summary>
+        public static void StopScreenCapture()
+        {
+            var capturer = _screenCapturer;
+            _screenCapturer = null;
+            _screenTrackId = null;
+
+            if (capturer is null)
+                return;
+
+            try
+            {
+                capturer.StopCapture();
+                capturer.Dispose();
+            }
+            catch (Exception exception)
+            {
+                // Same reasoning as the camera: nothing useful to do about a capturer that will
+                // not stop, and throwing out of a teardown path helps nobody.
+                Console.WriteLine($"Stopping the screen capture failed: {exception.Message}");
+            }
+            finally
+            {
+                ScreenCaptureService.Stop(global::Android.App.Application.Context);
+            }
+        }
+
+        /// <summary>Whether this track is the screen rather than a camera.</summary>
+        public static bool IsScreenTrack(string trackId) =>
+            trackId is not null && trackId == _screenTrackId;
+
+        /// <summary>
+        /// Notices when the user stops sharing from the system UI rather than from the app.
+        /// </summary>
+        /// <remarks>
+        /// Android puts its own "stop sharing" control in the status bar, so the projection can end
+        /// without this app being asked. Without this the capturer would keep running against a
+        /// dead projection and the notification would stay up.
+        /// </remarks>
+        class ProjectionStoppedCallback : global::Android.Media.Projection.MediaProjection.Callback
+        {
+            readonly IMediaStreamTrack _track;
+
+            public ProjectionStoppedCallback(IMediaStreamTrack track) => _track = track;
+
+            public override void OnStop()
+            {
+                base.OnStop();
+                Console.WriteLine("######## The user stopped screen sharing from the system UI.");
+
+                // Capture first, then the track. StopScreenCapture clears the ids it keys on, so
+                // the Stop below does not come back round - and ending the track is what lets
+                // anything above here notice. Without it the far side keeps a tile showing the
+                // last frame, indefinitely, with nothing to say the share is over.
+                StopScreenCapture();
+
+                try { _track?.Stop(); }
+                catch (Exception exception)
+                {
+                    Console.WriteLine($"Ending the screen track failed: {exception.Message}");
+                }
+            }
+        }
+
         /// <summary>
         /// Releases the camera captured for a track, if this is a track we started capture for.
         /// </summary>

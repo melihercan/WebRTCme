@@ -815,6 +815,22 @@ namespace WebRTCme.Middleware
                 if (_isSharingScreen)
                 {
                     await _connection.StopScreenShareAsync();
+
+                    // Stopping the connection's use of the stream is not the same as releasing the
+                    // capture, and forgetting the difference leaves the device still recording:
+                    // on Android the MediaProjection stays live and keeps its notification up, and
+                    // in a browser the "sharing your screen" bar stays put. The tracks have to be
+                    // stopped, and this is the only place holding them.
+                    foreach (var track in _displayStream?.GetTracks() ?? Array.Empty<IMediaStreamTrack>())
+                    {
+                        try { track.Stop(); }
+                        catch (Exception exception)
+                        {
+                            System.Diagnostics.Debug.WriteLine(
+                                $"######## APP display track would not stop: {exception.Message}");
+                        }
+                    }
+
                     _displayStream = null;
                     _isSharingScreen = false;
                 }
