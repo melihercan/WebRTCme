@@ -368,20 +368,36 @@ namespace WebRTCme.Middleware
                 });
         }
 
+        /// <summary>
+        /// Ends the call and resets everything a new one would otherwise inherit.
+        /// </summary>
+        /// <remarks>
+        /// Called from page teardown, which is on the UI thread, and from the subscription's
+        /// error handler, which is not - Rx delivers that on whatever thread the failure arrived
+        /// on. So everything a binding watches goes through the dispatcher: WinUI throws
+        /// <see cref="InvalidOperationException"/> when a bound property changes or a bound
+        /// collection is mutated off it, and that surfaces as a stowed exception in
+        /// Microsoft.UI.Xaml rather than as anything pointing back here.
+        /// </remarks>
         void Disconnect()
         {
             _mediaRecorderManager.ResetAllAsync();
-            _mediaStreamManager.Clear();
             foreach (var id in _statsPollers.Keys.ToArray())
                 StopStatsPolling(id);
 
             _connectionDisposer?.Dispose();
             _connectionDisposer = null;
 
+            // Not bound to anything, so it needs no dispatcher.
             _peerMedia.Clear();
-            PeerMediaStatus = string.Empty;
-            IsMicrophoneMuted = false;
-            IsCameraMuted = false;
+
+            _runOnUiThread.Invoke(() =>
+            {
+                _mediaStreamManager.Clear();
+                PeerMediaStatus = string.Empty;
+                IsMicrophoneMuted = false;
+                IsCameraMuted = false;
+            });
         }
 
         #region Muting

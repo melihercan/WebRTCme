@@ -661,7 +661,13 @@ namespace WebRTCme.Connection.Services
             // Snapshotted before it is read twice: the list itself is not concurrent, and the
             // server can be adding a consumer to it while this runs. OnPeerClosed takes the same
             // precaution for the same reason.
-            var peer = _peers.Values.FirstOrDefault(p => p.ConsumerIds.ToArray().Contains(consumerId));
+            //
+            // Taken as a pair rather than by value, because the key is needed: it is the peer id,
+            // and it stands in for a display name that is routinely absent - see below.
+            var entry = _peers.FirstOrDefault(
+                p => p.Value.ConsumerIds.ToArray().Contains(consumerId));
+            var peerId = entry.Key;
+            var peer = entry.Value;
             if (peer is null)
                 return;
 
@@ -683,18 +689,27 @@ namespace WebRTCme.Connection.Services
                 Speaking = false
             };
 
+            // DisplayName is routinely null here, and not because anything went wrong: the peer
+            // record is created on demand when its consumers arrive, and a client joining a room
+            // that is already occupied never receives 'newPeer' for the peers already in it - they
+            // come in the join response instead. Falling back to the peer id keeps the response
+            // usable, and costs nothing in this application because the two are the same string:
+            // the client joins with DisplayName = userContext.Name and the server keys peers by
+            // it. OnPeerClosed already reports a departing peer this way.
+            var name = peer.Peer?.DisplayName ?? peerId;
+
             System.Diagnostics.Debug.WriteLine(
-                $"<------- PeerMedia - peer:{peer.Peer?.DisplayName ?? peer.Id.ToString()} " +
+                $"<------- PeerMedia - peer:{name} " +
                 $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
             _logger.LogInformation(
-                $"<------- PeerMedia - peer:{peer.Peer?.DisplayName ?? peer.Id.ToString()} " +
+                $"<------- PeerMedia - peer:{name} " +
                 $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
 
             _connectionContext.Observer.OnNext(new PeerResponse
             {
                 Type = PeerResponseType.PeerMedia,
                 Id = peer.Id,
-                Name = peer.Peer?.DisplayName,
+                Name = name,
                 MediaContext = mediaContext
             });
         }
