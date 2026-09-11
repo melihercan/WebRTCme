@@ -290,12 +290,17 @@ other client.
 
 Not verified, in rough order of risk:
 
-- **A peer consumed before it is announced has no display name.** `ReportPeerMedia` reports
-  `peer.Peer?.DisplayName`, and on the mediasoup path that is routinely null: the peer record is
-  created on demand when its consumers arrive, and a client that joined an occupied room never
-  receives `newPeer` for the peers already in it. The 2026-09-11 call showed `APP PeerMedia` with
-  an empty name where the peer-to-peer path showed `Windows`. Cosmetic today, because nothing keys
-  off it, but a UI labelling a tile from that name would show a blank.
+- **What crashes the Windows app under Visual Studio's launch.** It is reproducible - twice under
+  Ctrl+F5, against a deployment that activates and runs perfectly - but the cause is unknown. The
+  managed exception behind the stowed one was `0x80131509`, an `InvalidOperationException`, raised
+  before any of this project's code runs. See "Running and debugging the Windows app" above.
+- **A peer consumed before it is announced still has no `DisplayName`** - `ReportPeerMedia` now
+  falls back to the peer id, so the symptom is gone, but the underlying hole is not. The peer
+  record is created on demand when its consumers arrive, and a client joining an occupied room
+  never receives `newPeer` for the peers already in it; they arrive in the join response, which
+  nothing reads into `PeerParameters.Peer`. The fallback works only because peer id and display
+  name are the same string in this application - see "Peer id is the display name" above - so it
+  breaks the moment that design gap is fixed.
 - **The Mac Catalyst slice of a package built on Windows is still wrong.** See "The framework that
   fits neither platform" below: the repository is now correct for building from source on either
   OS, but a `.resources.zip` produced on Windows carries the flat framework, which macOS refuses.
@@ -305,6 +310,48 @@ Not verified, in rough order of risk:
   WebAssembly dev server; Release is unaffected. **Did not reproduce when launched from Visual
   Studio on 2026-09-10**, which points at the dev server rather than the app. Narrow it before
   spending time on it: reproduce with `dotnet run --launch-profile https` first.
+
+## Running and debugging the Windows app
+
+Three things about the Windows app cost time on 2026-09-11, and none of them is about WebRTC.
+
+**A plain build does not refresh what gets deployed.** The MSIX layout under
+`bin/Debug/<tfm>/win-x64/AppX/` is produced only by Visual Studio's deploy step. `dotnet build`,
+`dotnet build -t:Rebuild` and `-p:GenerateAppxPackageOnBuild=true` all leave it alone - the last
+one additionally fails, because the property flows to the referenced library projects, which are
+not packaged - and there is no `Deploy` target on the project to invoke. So after any rebuild the
+deployed copy is stale until VS deploys again, and an app launched from it runs old code while
+looking entirely normal. **Check by hashing, not by timestamps**: compare the assemblies in `AppX/`
+against the ones beside it in `win-x64/`. That is how a "the fix does not work" hour turned out to
+be a build from thirty minutes earlier.
+
+Do not delete the `AppX` folder to force a refresh. It does not come back from the command line,
+and the app cannot be launched until VS regenerates it.
+
+**Visual Studio's own launch crashes; the package runs fine.** Started with Ctrl+F5, the app dies
+at startup with `0xc000027b` - a stowed exception - faulting in `Microsoft.UI.Xaml.dll`, having
+produced no output of its own at all. The same deployed package, launched by activating it
+directly, runs normally:
+
+```powershell
+Start-Process "shell:AppsFolder\3D60F9C0-02BD-427F-9DED-82EDCEE7EF30_9zz4h110yvjzm!App"
+```
+
+Observed twice each way within minutes, on an unchanged deployment, so the fault is in how VS
+launches rather than in the app. **The correction that matters**: commit `23b23573` claims its
+dispatcher fix is "consistent with" this crash. It is not. That fix concerns `Disconnect()`, which
+runs only when a call ends or the subscription errors, and this crash happens before any of this
+project's code executes. The fix is right on its own merits - bound state must not be touched off
+the dispatcher - but it does not explain this crash, and the commit message overstates it.
+
+So the procedure that works: **deploy from Visual Studio** (Ctrl+F5 - it regenerates the layout
+even if its own launch then fails), then **activate the package** with the command above.
+
+**Reading Windows debug output.** `Debug.WriteLine` reaches the debugger when one is attached, and
+otherwise goes to the Win32 `OutputDebugString` channel, which a capture tool can read - only one
+consumer gets it, so a capture works only when the app runs without a debugger. `Console.WriteLine`
+reaches neither: a packaged WinUI app has no console, which is why `MediaSoupStub`'s protoo frames
+were invisible on Windows until they were echoed to both.
 
 ## How to tell a mute actually happened
 
