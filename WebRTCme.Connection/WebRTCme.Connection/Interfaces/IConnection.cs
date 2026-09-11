@@ -120,5 +120,32 @@ namespace WebRTCme.Connection
         /// This connection carries no simulcast, so there are no layers to cap.
         /// </exception>
         Task SetMaxOutgoingSpatialLayerAsync(int spatialLayer);
+
+        /// <summary>
+        /// Starts sending a captured screen or window to the other peers.
+        /// </summary>
+        /// <remarks>
+        /// The two paths differ in what the peers end up seeing, and the difference is not hidden
+        /// because it is visible to the user. On mediasoup the screen becomes a producer of its
+        /// own, so it arrives as a second tile and the camera keeps its own; peer-to-peer swaps the
+        /// camera track on the existing sender, so the screen replaces the camera until it stops.
+        /// Peer-to-peer could carry both, but only by negotiating a second transceiver with every
+        /// peer, and that is a larger change than this member.
+        ///
+        /// Obtaining the stream is the caller's job - the platforms that cannot capture a screen
+        /// fail there, at <c>GetDisplayMedia</c>, rather than here.
+        /// </remarks>
+        /// <exception cref="ArgumentException"><paramref name="displayStream"/> has no video track.</exception>
+        /// <exception cref="InvalidOperationException">There is no call to share into.</exception>
+        Task StartScreenShareAsync(IMediaStream displayStream);
+
+        /// <summary>
+        /// Stops sharing, putting the camera back where it was displaced.
+        /// </summary>
+        /// <remarks>
+        /// Doing nothing when nothing is being shared, because both paths can reach this from
+        /// teardown as well as from a button, and a second stop is not a caller error.
+        /// </remarks>
+        Task StopScreenShareAsync();
     }
 }

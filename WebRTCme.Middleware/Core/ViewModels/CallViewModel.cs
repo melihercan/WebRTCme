@@ -796,27 +796,55 @@ namespace WebRTCme.Middleware
             }
         }
 
+        /// <summary>
+        /// Starts or stops sharing a screen.
+        /// </summary>
+        /// <remarks>
+        /// The connection decides what the peers see: a second tile on the mediasoup path, and the
+        /// screen in place of the camera peer-to-peer. This used to swap tracks here, which forced
+        /// the peer-to-peer behaviour on both paths and left the caller holding the camera track it
+        /// had to swap back.
+        ///
+        /// Capture comes first and can fail - the picker is a permission prompt, and cancelling it
+        /// throws - so nothing is marked as shared until it has returned a stream.
+        /// </remarks>
         public async Task OnShareScreenAsync()
         {
-            if (_isSharingScreen)
+            try
             {
-                // Stop sharing.
-                ShareScreenButtonText = "Start sharing screen";
-                await _connection.ReplaceOutgoingTrackAsync(_displayStream.GetVideoTracks()[0],
-                    _cameraStream.GetVideoTracks()[0]);
+                if (_isSharingScreen)
+                {
+                    await _connection.StopScreenShareAsync();
+                    _displayStream = null;
+                    _isSharingScreen = false;
+                }
+                else
+                {
+                    _displayStream ??= await _localMediaStream.GetDisplayMediaStreamAync();
+                    await _connection.StartScreenShareAsync(_displayStream);
+                    _isSharingScreen = true;
+                }
+
+                _runOnUiThread.Invoke(() => ShareScreenButtonText = _isSharingScreen
+                    ? "Stop sharing screen"
+                    : "Start sharing screen");
+            }
+            catch (Exception exception)
+            {
+                // A cancelled picker lands here too, which is why this does not report a failure
+                // to start as an error unless there is a message worth showing.
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## APP screen share failed: {exception.GetType().Name}: {exception.Message}");
                 _displayStream = null;
-            }
-            else
-            {
-                _displayStream ??= await _localMediaStream.GetDisplayMediaStreamAync();
 
-                // Start sharing.
-                ShareScreenButtonText = "Stop sharing screen";
-                await _connection.ReplaceOutgoingTrackAsync(_cameraStream.GetVideoTracks()[0],
-                    _displayStream.GetVideoTracks()[0]);
+                _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                {
+                    Title = "Error",
+                    Text = "Could not change the screen share:" + Environment.NewLine +
+                           exception.Message,
+                    Ok = "Ok",
+                });
             }
-            _isSharingScreen = !_isSharingScreen;
-
         }
 
         public ICommand ShareScreenCommand => new AsyncCommand(async () =>

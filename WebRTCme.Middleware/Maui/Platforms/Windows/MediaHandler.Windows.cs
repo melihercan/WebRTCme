@@ -1,4 +1,4 @@
-using Microsoft.Maui.Handlers;
+﻿using Microsoft.Maui.Handlers;
 
 namespace WebRTCme.Middleware
 {
@@ -23,7 +23,14 @@ namespace WebRTCme.Middleware
             {
                 handler._videoTrack = media.Stream.GetVideoTracks().FirstOrDefault();
                 handler._audioTrack = handler._stream.GetAudioTracks().FirstOrDefault();
-                handler._mediaView.SetTrack(handler._videoTrack);
+
+                // Only when there is one. A stream can legitimately carry audio and no video - a
+                // peer with no camera, or one whose video consumer has not arrived yet - and the
+                // renderers all dereference the track they are handed. Passing null here crashed
+                // the Android app outright. A tile with no video stays blank; its audio is played
+                // by the peer connection, not by this view, so nothing is lost by not rendering.
+                if (handler._videoTrack is not null)
+                    handler._mediaView.SetTrack(handler._videoTrack);
             }
         }
 

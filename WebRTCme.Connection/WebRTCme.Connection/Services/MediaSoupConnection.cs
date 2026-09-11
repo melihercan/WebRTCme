@@ -43,6 +43,10 @@ namespace WebRTCme.Connection.Services
         ConcurrentDictionary<string, DataConsumer> _dataConsumers = new();
         Producer _micProducer;
         Producer _webcamProducer;
+
+        // The screen, when one is being shared. Its own producer rather than a swapped track, so
+        // peers receive it beside the camera instead of in place of it.
+        Producer _shareProducer;
         DataProducer _chatDataProducer;
         DataProducer _botDataProducer;
         ConcurrentDictionary<string, PeerParameters> _peers = new();
@@ -206,7 +210,8 @@ namespace WebRTCme.Connection.Services
                                 {
                                     OpusStereo = true,
                                     OpusDtx = true
-                                }
+                                },
+                                AppData = SourceAppData(MicSource)
                             });
 
                         // Enable webcam.
@@ -309,7 +314,8 @@ namespace WebRTCme.Connection.Services
                                 Track = webcamTrack,
                                 Encodings = encodings ?? new RtpEncodingParameters[] { },
                                 CodecOptions = codecOptions,
-                                Codec = codec
+                                Codec = codec,
+                                AppData = SourceAppData(WebcamSource)
                             });
 
                             LogNegotiatedEncodings(_webcamProducer, encodings);
@@ -879,6 +885,135 @@ namespace WebRTCme.Connection.Services
         /// not changed, but the caller is being handed a complete picture and it has to be right.
         /// A kind with no consumer at all counts as muted: nothing is arriving for it either way.
         /// </remarks>
+        #region Sources
+
+        // What a producer is a picture of, carried in its appData. The server copies 'source'
+        // from the producer's appData onto every consumer it creates for it, so tagging here is
+        // what lets the receiving end tell a camera apart from a shared screen - there is nothing
+        // else in a consumer that distinguishes two video streams from the same peer.
+        const string SourceKey = "source";
+        const string MicSource = "mic";
+        const string WebcamSource = "webcam";
+        const string ScreenSource = "screen";
+
+        // Microphone and camera are one tile; a shared screen is its own. Anything unrecognised,
+        // including a peer running a client old enough not to tag its producers at all, falls in
+        // with the camera - which is what this did before sources existed.
+        const string CameraGroup = "camera";
+
+        static Dictionary<string, object> SourceAppData(string source) =>
+            new() { [SourceKey] = source };
+
+        static string SourceGroupOf(Dictionary<string, object> appData) =>
+            appData is not null &&
+            appData.TryGetValue(SourceKey, out var value) &&
+            value as string == ScreenSource
+                ? ScreenSource
+                : CameraGroup;
+
+        /// <summary>
+        /// The tile label for one of a peer's sources.
+        /// </summary>
+        /// <remarks>
+        /// The label is the tile's identity all the way up: the view keys on it, and a peer with a
+        /// camera and a screen needs two that do not collide. Suffixed rather than prefixed so the
+        /// two sit together when anything sorts by name.
+        /// </remarks>
+        string LabelFor(string peerId, string sourceGroup) =>
+            sourceGroup == ScreenSource
+                ? $"{DisplayNameFor(peerId)} (screen)"
+                : DisplayNameFor(peerId);
+
+        Consumer[] ConsumersOf(PeerParameters peer, string sourceGroup) =>
+            peer.ConsumerIds.ToArray()
+                .Select(id => _consumers.TryGetValue(id, out var consumer) ? consumer : null)
+                .Where(consumer => consumer is not null && SourceGroupOf(consumer.AppData) == sourceGroup)
+                .ToArray();
+
+        /// <summary>
+        /// Reports one of a peer's sources as a stream of its own.
+        /// </summary>
+        /// <remarks>
+        /// Called for every consumer as it arrives rather than once the set looks complete, and it
+        /// re-reports the whole group each time. There is no message saying how many producers a
+        /// peer has, so waiting for a particular shape means guessing: the old code waited for one
+        /// audio and one video consumer and therefore never announced a peer that published only
+        /// audio, and could never have announced a second video source at all.
+        ///
+        /// Re-announcing is safe because the label identifies the tile and the view replaces
+        /// rather than appends. A peer with a camera and a microphone is announced twice, a
+        /// fraction of a second apart, and the second announcement carries both tracks.
+        /// </remarks>
+        void AnnounceSourceGroup(string peerId, PeerParameters peer, string sourceGroup)
+        {
+            if (_connectionContext is null)
+                return;
+
+            var consumers = ConsumersOf(peer, sourceGroup);
+            if (consumers.Length == 0)
+                return;
+
+            var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
+            foreach (var consumer in consumers)
+                mediaStream.AddTrack(consumer.Track);
+
+            var label = LabelFor(peerId, sourceGroup);
+
+            System.Diagnostics.Debug.WriteLine(
+                $"<------- PeerJoined - tile:{label} tracks:{consumers.Length}");
+
+            _connectionContext.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerJoined,
+                Id = peer.Id,
+                Name = label,
+                MediaStream = mediaStream
+            });
+        }
+
+        /// <summary>
+        /// Re-reports a source after one of its consumers went away, or withdraws it if that was
+        /// the last one.
+        /// </summary>
+        /// <remarks>
+        /// This is what makes a shared screen disappear when the sharer stops: the screen producer
+        /// closes, its consumer closes with it, the group empties, and the tile goes. A peer that
+        /// merely turns its camera off keeps its consumer - that is a pause, not a close - so it
+        /// keeps its tile and reports the mute instead.
+        /// </remarks>
+        void SourceGroupChanged(Consumer consumer)
+        {
+            if (consumer is null || !TryGetPeerId(consumer.AppData, out var peerId))
+                return;
+
+            if (!_peers.TryGetValue(peerId, out var peer))
+                return;
+
+            var sourceGroup = SourceGroupOf(consumer.AppData);
+
+            if (ConsumersOf(peer, sourceGroup).Length == 0)
+                RetireSourceGroup(peer.Id, LabelFor(peerId, sourceGroup));
+            else
+                AnnounceSourceGroup(peerId, peer, sourceGroup);
+        }
+
+        /// <summary>
+        /// Withdraws a source's tile, for a screen that stopped or a peer that left.
+        /// </summary>
+        void RetireSourceGroup(Guid peerRecordId, string label)
+        {
+            System.Diagnostics.Debug.WriteLine($"<------- PeerLeft - tile:{label}");
+
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerLeft,
+                Id = peerRecordId,
+                Name = label
+            });
+        }
+
+        #endregion
+
         // The peers the server last reported as audible. Held rather than asked for: the
         // notification is a snapshot of who is speaking now, and knowing who *stopped* needs the
         // previous snapshot to compare against.
@@ -991,6 +1126,21 @@ namespace WebRTCme.Connection.Services
             if (peerId is null || !_peers.TryRemove(peerId, out var peer))
                 return;
 
+            // Which tiles this peer put on screen, read before its consumers are closed - closing
+            // them is what makes the answer unavailable. A peer sharing a screen has two, and
+            // withdrawing only one leaves the other behind for the rest of the call.
+            //
+            // The name comes from the record just removed rather than from DisplayNameFor, which
+            // looks in _peers and would no longer find it.
+            var name = peer.Peer?.DisplayName ?? peerId;
+            var labels = peer.ConsumerIds.ToArray()
+                .Select(id => _consumers.TryGetValue(id, out var consumer) ? consumer : null)
+                .Where(consumer => consumer is not null)
+                .Select(consumer => SourceGroupOf(consumer.AppData))
+                .Distinct()
+                .Select(sourceGroup => sourceGroup == ScreenSource ? $"{name} (screen)" : name)
+                .ToArray();
+
             foreach (var consumerId in peer.ConsumerIds.ToArray())
             {
                 if (_consumers.TryRemove(consumerId, out var consumer))
@@ -1003,13 +1153,10 @@ namespace WebRTCme.Connection.Services
                     dataConsumer.Close();
             }
 
-            _connectionContext?.Observer.OnNext(new PeerResponse
-            {
-                Type = PeerResponseType.PeerLeft,
-                Id = peer.Id,
-                // From the record we just removed, not a lookup: it is already out of _peers.
-                Name = peer.Peer?.DisplayName ?? peerId
-            });
+            // A peer that never got as far as producing anything has no tiles and no labels, and
+            // still has to be reported gone - it was announced by name when it joined.
+            foreach (var label in labels.DefaultIfEmpty(name))
+                RetireSourceGroup(peer.Id, label);
         }
 
         public async Task OnRequestAsync(string method, object data,
@@ -1098,131 +1245,15 @@ namespace WebRTCme.Connection.Services
                     ////consumer.Pause();
 
 
-                    // Consumer is ready. Check if stream is ready (both audio and video).
-                    // TODO: WE can have audio only calls!!!
-                    ////if (requestData.PeerId is not null)
+                    // Announce the source this consumer belongs to. Every consumer triggers this
+                    // and the whole group is rebuilt each time, because nothing tells us how many
+                    // producers a peer has - see AnnounceSourceGroup.
                     {
                         var consumerPeer = GetOrAddPeer(consumerRequestData.PeerId);
-                        var consumers = consumerPeer.ConsumerIds
-                            .Select(key => _consumers[key])
-                            .ToList();
-                        foreach (var c in consumers)
-                        {
-                            Console.WriteLine($"--------------------------- CONSUMER: {c.Kind}");
-                        }
-
-                        var audioConsumer =
-                            consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Audio);
-                        var videoConsumer =
-                            consumers.FirstOrDefault(consumer => consumer.Kind == MediaKind.Video);
-
-                        Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: {consumerRequestData.Kind} {consumer.Kind}");
-                        if (consumer.Kind == MediaKind.Video)
-                        {
-
-                            //// TODO: THERE IS A TIMING ISSUE. WITHOUT THE ABOVE DELAY, _webcamProducer is nul!!! CHECK THIS
-                            Console.WriteLine($"--------------------------- NEW VIDEO TRACK");
-                            _logger.LogInformation($"--------------------------- NEW VIDEO TRACK");
-
-                            ////await Task.Delay(2000);
-                            ////_logger.LogInformation($"--------------------------- WEBCAM - muted: {_webcamProducer.Track.Muted} ");
-
-                        }
-                        else if (consumer.Kind == MediaKind.Audio)
-                        {
-                            Console.WriteLine($"--------------------------- NEW AUDIO TRACK");
-                            _logger.LogInformation($"--------------------------- NEW AUDIO TRACK");
-                        }
-
-                        // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
-                        if (audioConsumer is not null && videoConsumer is not null)
-                        {
-
-
-#if false
-                            //// TESTING
-         _ = Task.Run(async () => 
-         {
-             while (true)
-             {
-                 try
-                 {
-                     await Task.Delay(2000);
-
-                     //var txStats = await _sendTransport.GetStatsAsync();
-                     //var rxStats = await _recvTransport.GetStatsAsync();
-
-
-                     //var sendTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
-                     //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats, 
-                     //new GetTransportStatsRequest { TransportId = _sendTransport.Id }));
-
-                     //var recvTransportStats = (object)ParseResponse(MethodName.GetTransportStats,
-                     //await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats,
-                     //new GetTransportStatsRequest { TransportId = _recvTransport.Id }));
-
-                     var micProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
-                         await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
-                         new GetProducerStatsRequest { ProducerId = _micProducer.Id }));
-
-
-                     ////var webcamProducerStats = (GetProducerStatsResponse[])ParseResponse(MethodName.GetProducerStats,
-                     ////await _mediaSoupServerApi.ApiAsync(MethodName.GetProducerStats,
-                     ////new GetProducerStatsRequest { ProducerId = _webcamProducer.Id }));
-
-                     _consumers.Values.ToList().ForEach(async consumer => 
-                     {
-                         var consumerStats = (GetConsumerStatsResponse[])ParseResponse(MethodName.GetConsumerStats,
-                             await _mediaSoupServerApi.ApiAsync(MethodName.GetConsumerStats,
-                             new GetConsumerStatsRequest { ConsumerId = consumer.Id }));
-                     });
-
-
-                 }
-                 catch (Exception ex)
-                 {
-                     Console.WriteLine($"@@@@@@@@@@@@@@@@@@@@@ EXCEPTION: {ex.Message}");
-                     var m = ex.Message;
-                 }
-             }
-
-         });
-#endif
-
-
-
-
-
-
-                            //_ = ParseResponse(MethodName.PauseConsumer,
-                            //    await _mediaSoupServerApi.ApiAsync(MethodName.PauseConsumer,
-                            //        new PauseConsumerRequest
-                            //        {
-                            //            ConsumerId = videoConsumer.Id
-                            //        })); ;
-
-
-                            //_ = ParseResponse(MethodName.ResumeConsumer,
-                            //    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeConsumer,
-                            //        new ResumeConsumerRequest
-                            //        {
-                            //            ConsumerId = videoConsumer.Id
-                            //        })); ;
-
-
-                            var mediaStream = _webRtc.Window(_jsRuntime).MediaStream();
-                            mediaStream.AddTrack(audioConsumer.Track);
-                            mediaStream.AddTrack(videoConsumer.Track);
-             ////mediaStream.AddTrack(_webcamProducer.Track);
-                            _connectionContext.Observer.OnNext(new PeerResponse
-                            {
-                                Type = PeerResponseType.PeerJoined,
-                                Id = consumerPeer.Id,
-                                Name = DisplayNameFor(consumerRequestData.PeerId),
-                                MediaStream = mediaStream,
-                                DataChannel = /*isInitiator ? dataChannel :*/ null
-                            });
-                        }
+                        AnnounceSourceGroup(
+                            consumerRequestData.PeerId,
+                            consumerPeer,
+                            SourceGroupOf(consumer.AppData));
                     }
                     break;
 
@@ -1232,6 +1263,7 @@ namespace WebRTCme.Connection.Services
                         if (TryGetPeer(consumer.AppData, out var peer))
                             peer.ConsumerIds.Remove(consumer.Id);
                         _consumers.TryRemove(consumer.Id, out _);
+                        SourceGroupChanged(consumer);
                     }
 
                     void Consumer_OnTransportClosed(object sender, EventArgs e)
@@ -1240,6 +1272,7 @@ namespace WebRTCme.Connection.Services
                         if (TryGetPeer(consumer.AppData, out var peer))
                             peer.ConsumerIds.Remove(consumer.Id);
                         _consumers.TryRemove(consumer.Id, out _);
+                        SourceGroupChanged(consumer);
                     }
 
                     void Consumer_OnTrackEnded(object sender, EventArgs e)
@@ -1545,6 +1578,60 @@ namespace WebRTCme.Connection.Services
                 ?? throw new InvalidOperationException("This connection is not sending video.");
 
             await producer.SetMaxSpatialLayerAsync(spatialLayer);
+        }
+
+        /// <summary>
+        /// Produces the screen as a source of its own, beside the camera.
+        /// </summary>
+        /// <remarks>
+        /// A separate producer rather than a track swap, which is what lets a peer see the camera
+        /// and the screen at once: the server copies this producer's <c>source</c> onto the
+        /// consumers it creates, and the receiving end groups by it.
+        ///
+        /// No simulcast. A shared screen is mostly still, and the ladder here is built from a
+        /// camera's frame height - neither the resolution nor the bitrates suit a desktop, and the
+        /// bottom rung of a camera ladder makes text unreadable.
+        /// </remarks>
+        public async Task StartScreenShareAsync(IMediaStream displayStream)
+        {
+            var track = displayStream?.GetVideoTracks().FirstOrDefault()
+                ?? throw new ArgumentException(
+                    "The stream to share has no video track.", nameof(displayStream));
+
+            var sendTransport = _sendTransport
+                ?? throw new InvalidOperationException("There is no call to share into.");
+
+            // Idempotent: a second start replaces what is being shared rather than producing
+            // twice, which would put two screen tiles on every peer.
+            await StopScreenShareAsync();
+
+            _shareProducer = await sendTransport.ProduceAsync(new ProducerOptions
+            {
+                Track = track,
+                Encodings = new RtpEncodingParameters[] { },
+                CodecOptions = new ProducerCodecOptions { VideoGoogleStartBitrate = 1000 },
+                AppData = SourceAppData(ScreenSource)
+            });
+        }
+
+        public async Task StopScreenShareAsync()
+        {
+            var producer = _shareProducer;
+            if (producer is null)
+                return;
+
+            _shareProducer = null;
+
+            // Told to close, not just closed locally: the server is what stops forwarding it and
+            // what makes the other peers' screen tiles go away.
+            var result = await _mediaSoupServerApi.NotifyAsync(MethodName.CloseProducer,
+                new CloseProducerRequest { ProducerId = producer.Id });
+
+            if (!result.IsOk)
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## Screen share not closed on the server: {result.ErrorMessage}");
+
+            producer.Close();
         }
 
         /// <summary>

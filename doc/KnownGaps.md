@@ -8,7 +8,7 @@ Bugs found and fixed during the migration are in the git history, not here.
 
 ## Unimplemented features
 
-### Screen sharing - limited by the capture platforms, not by the connection
+### Screen sharing - its own source on the SFU path 2026-09-11
 `ILocalMediaStream.GetDisplayMediaStreamAync` and `CallViewModel` both wire it up, and
 `MediaDevices.GetDisplayMedia` is implemented for Blazor and Windows. On **Android, iOS and Mac
 Catalyst it throws `NotImplementedException`** - Android needs a MediaProjection foreground
@@ -21,45 +21,51 @@ This entry used to claim screen sharing did not reach the SFU path at all. **Tha
 producer is needed for it to work. Verified Blazor -> Android over mediasoup on 2026-09-11: the
 shared tab appeared on the phone at about 2.25 Mbit/s, and stopping the share put the camera back.
 
-What is genuinely missing is a **second** producer for the share, the way mediasoup-demo carries
-one with `appData { share: true }`. Track replacement means the screen arrives *instead of* the
-camera, so a peer cannot see both at once. That is a feature, not a repair.
+**The screen is now its own producer** (2026-09-11), so on the mediasoup path a peer sees the
+camera and the screen at once. `IConnection.StartScreenShareAsync` / `StopScreenShareAsync` carry
+it, and the two paths deliberately differ in what peers end up seeing, because the difference is
+visible to the user and not worth pretending away:
 
-**What actually stands in the way**, established 2026-09-11, because it is not the producer side:
+- **mediasoup** produces the screen separately with `appData { source: "screen" }`. The server
+  copies `source` onto every consumer it creates, so the receiving end can tell two video streams
+  from one peer apart - there is nothing else in a consumer that distinguishes them.
+- **peer-to-peer** still swaps the camera track on the existing sender, so the screen arrives
+  *instead of* the camera. Carrying both would mean negotiating a second transceiver with every
+  peer.
 
-`MediaSoupConnection`'s `newConsumer` handler pairs a peer's consumers into one stream with
+Verified both ways on 2026-09-11, Blazor sharing to Android: over mediasoup the phone showed
+`Alice` and `Alice (screen)` together and stopping retired only the screen tile; peer-to-peer
+showed the screen in place of Alice's camera and put the camera back on stop.
+
+**The real work was on the receiving side, not the producing side.** The `newConsumer` handler
+used to pair a peer's consumers with `FirstOrDefault` for audio and `FirstOrDefault` for video and
+emit one `PeerJoined` when it had both:
 
 ```csharp
-var audioConsumer = consumers.FirstOrDefault(c => c.Kind == MediaKind.Audio);
-var videoConsumer = consumers.FirstOrDefault(c => c.Kind == MediaKind.Video);
 // TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
 if (audioConsumer is not null && videoConsumer is not null)
 ```
 
-and emits one `PeerJoined` carrying that stream. A second video producer from the same peer would
-arrive as a second video consumer, `FirstOrDefault` would keep returning the first, and the share
-would never reach the UI no matter how correctly it was produced. So the feature is really "one
-tile per peer becomes one tile per peer *per source*", which runs through the response type, the
-labels, and `MediaStreamManager` - it keys tiles by label and removes by peer name, so two tiles
-from one peer need distinct labels and a matching teardown.
+A second video consumer would never have been looked at. Consumers are now grouped by source,
+each group is announced as its own tile with its own label, and `MediaStreamManager.Add` replaces
+by label instead of appending - because a group is announced as soon as it has any track and again
+as the rest arrive, audio and video being two separate notifications.
 
-**That rework is the same rework the UI refactor wants**, which is why it is worth doing together
-rather than twice.
+**That fixed the audio-only bug with it.** A peer publishing audio and no video used to produce no
+`PeerJoined` at all - no tile, no name, while its audio played - reachable from a device with no
+camera, from `MediaSoupServer:AudioOnly`, or from joining with the camera already off. The author
+knew: the line above the guard read `// TODO: WE can have audio only calls!!!`.
 
-### An audio-only peer never appears - found 2026-09-11
-Same block, and a live bug rather than a missing feature. The guard is `audioConsumer is not null
-&& videoConsumer is not null`, so a peer that publishes audio and no video produces no
-`PeerJoined` at all: no tile, no name, nothing. It is not in the room as far as every other client
-is concerned, while its audio plays.
+And announcing earlier exposed a crash that had been waiting for it. All four platform handlers
+did `mediaView.SetTrack(stream.GetVideoTracks().FirstOrDefault())` and every renderer dereferences
+what it is handed, so the first audio-only announcement took the Android app down with a
+`NullReferenceException` raised inside a MAUI property mapper. Guarded in all four, and again
+inside `AndroidSupport.SetTrack`. A tile with no video now stays blank, and its audio plays
+regardless - the peer connection plays it, not the view.
 
-Reachable three ways: a device with no camera, `MediaSoupServer:AudioOnly`, and a peer that joins
-with the camera already off. The author knew - the line above the guard reads
-`// TODO: WE can have audio only calls!!!`.
-
-Not fixed here, deliberately. The obvious patch - announce on the first consumer instead of the
-pair - changes when the stream is handed to the UI and what it contains at that moment, and the
-platform views bind a stream once. Getting that wrong turns a peer that is invisible into a peer
-that is visible and silent, which is worse. It belongs with the per-source rework above.
+`OnPeerClosed` reads a peer's tile labels *before* closing its consumers, since closing them is
+what makes the answer unavailable, and retires every one - a sharing peer that left used to leave
+its screen tile on screen for the rest of the call.
 
 ### Mute / pause / resume - wired and verified peer-to-peer 2026-09-11
 Was: the send side did not exist. `IConnection` had no mute, and the `PauseProducer` /

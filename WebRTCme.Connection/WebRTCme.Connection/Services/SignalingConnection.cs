@@ -277,6 +277,59 @@ namespace WebRTCme.Connection.Services
             return peerContext.PeerConnection.GetStats();
         }
 
+        // The camera track displaced by a screen share, so stopping can put it back. Held here
+        // rather than asked of the sender, because by then the sender is carrying the screen.
+        IMediaStreamTrack _displacedCameraTrack;
+
+        /// <summary>
+        /// Swaps the camera for the screen on every peer connection.
+        /// </summary>
+        /// <remarks>
+        /// A swap, not an addition, and so the screen arrives *instead of* the camera. Carrying
+        /// both would mean negotiating a second transceiver with every peer - real work, and a
+        /// different shape from the mediasoup path, which gets a second tile for free because the
+        /// server already routes producers separately.
+        ///
+        /// No renegotiation is needed for the swap itself: replacing a sender's track keeps the
+        /// m-line it was negotiated with.
+        /// </remarks>
+        public async Task StartScreenShareAsync(IMediaStream displayStream)
+        {
+            var screenTrack = displayStream?.GetVideoTracks().FirstOrDefault()
+                ?? throw new ArgumentException(
+                    "The stream to share has no video track.", nameof(displayStream));
+
+            var connectionContext = _connectionContext
+                ?? throw new InvalidOperationException("There is no call to share into.");
+
+            var cameraTrack = connectionContext.UserContext.LocalStream?.GetVideoTracks().FirstOrDefault()
+                ?? throw new InvalidOperationException(
+                    "This call was started without a camera, so there is nothing to share in place of.");
+
+            // Remembered before the swap, and only the first time: sharing twice without stopping
+            // would otherwise record the screen as the thing to go back to.
+            _displacedCameraTrack ??= cameraTrack;
+
+            await ReplaceOutgoingTrackAsync(_displacedCameraTrack, screenTrack);
+        }
+
+        public async Task StopScreenShareAsync()
+        {
+            var cameraTrack = _displacedCameraTrack;
+            if (cameraTrack is null)
+                return;
+
+            _displacedCameraTrack = null;
+
+            // Whatever is on the sender now is the screen; put the camera back in its place.
+            var current = _connectionContext?.PeerContexts.FirstOrDefault()?.PeerConnection
+                .GetSenders()
+                .FirstOrDefault(sender => sender.Track?.Kind == MediaStreamTrackKind.Video)?.Track;
+
+            if (current is not null)
+                await ReplaceOutgoingTrackAsync(current, cameraTrack);
+        }
+
         #region Voice activity
 
         // Above this, the microphone counts as carrying speech. Measured rather than picked: in

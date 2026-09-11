@@ -23,6 +23,7 @@ namespace WebRTCme.Connection.MediaSoup
         // notification sent as a request is rejected with "unknown request method", and a request
         // sent as a notification is silently dropped. The first of those is what pauseProducer did
         // on its first run against a real server, and it reads like a version mismatch.
+        public const string CloseProducer = "closeProducer";
         public const string PauseProducer = "pauseProducer";
         public const string ResumeProducer = "resumeProducer";
         public const string PauseConsumer = "pauseConsumer";

@@ -83,9 +83,16 @@ namespace WebRTCme
             }
         }
 
-        public static void SetTrack(IMediaStreamTrack videoTrack, Webrtc.SurfaceViewRenderer rendererView, 
+        public static void SetTrack(IMediaStreamTrack videoTrack, Webrtc.SurfaceViewRenderer rendererView,
             global::Android.Content.Context context/*, Webrtc.IEglBaseContext eglBaseContext*/)
         {
+            // Nothing to render is not an error: a stream can carry audio and no video. Callers
+            // are expected to check, and this is the second line of defence - the cast below
+            // threw NullReferenceException from inside a MAUI property mapper, which surfaces as
+            // an unhandled exception on the UI thread and takes the app down.
+            if (videoTrack is null)
+                return;
+
             var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.VideoTrack;
 
             var cameraEnum = new Webrtc.Camera2Enumerator(context);
