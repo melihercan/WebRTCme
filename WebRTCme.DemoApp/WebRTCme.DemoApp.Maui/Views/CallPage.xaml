@@ -7,10 +7,17 @@
 
         <!--
             The call controls are their own row rather than an overlay, so the video below keeps
-            all the space it had. The status line collapses when no peer has muted anything -
-            IsVisible on an empty string keeps the row from reserving height for nothing.
+            all the space it had.
+
+            The status row has a FIXED height, and that matters more than it looks. It used to be
+            Auto with the label collapsing when there was nothing to say, which was fine while the
+            only thing it reported was a mute - rare, and a one-off shift when it happened. Voice
+            activity made it toggle with every phrase, and each toggle resized the video below it:
+            measured at 1080x860 while a peer was speaking and 1080x897 a second later, back and
+            forth for the whole call. Reserving the row costs one line of blank space and stops the
+            picture moving.
         -->
-        <Grid RowDefinitions="Auto,Auto,*">
+        <Grid RowDefinitions="Auto,28,*">
 
             <!--
                 Scrollable, because the row is wider than a phone: on a 1080px screen the third

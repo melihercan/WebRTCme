@@ -666,7 +666,34 @@ because `AVAudioSession` there is emulated over the macOS HAL and device ids com
 iOS never sees; and it will bury anything else in the log at default verbosity. If a genuine audio
 fault is ever chased on Catalyst, filter this out first rather than reading it as the cause.
 
-### The jumping tile - the MAUI `Media` view has no stable size
+### The jumping tile - one cause fixed, the original not reproducing
+**Re-measured 2026-09-11, and what was found was not what this entry described.** With simulcast
+on and the tile watched for 75 seconds, it moved between `1080x860` and `1080x896` - full width
+throughout, a 36-pixel wobble in height - while `consumerLayersChanged` stayed pinned at
+`spatialLayer 0` the whole time. No resolution change, so the size was not following the video.
+
+Correlating the two logs found the real cause immediately, and it was **a regression introduced
+the same day**:
+
+```
+22:58:43  speaking:True    -> OnLayout 1080x860
+22:58:45  speaking:False   -> OnLayout 1080x897
+22:58:56  speaking:True    -> OnLayout 1080x860
+22:58:58  speaking:False   -> OnLayout 1080x897
+```
+
+The status row was `Auto` height with the label collapsing when it had nothing to say. That was
+harmless while the only thing it reported was a mute - rare, and one shift when it happened. Voice
+activity made it toggle with every phrase, so the video resized continuously throughout a
+conversation. The row now has a fixed height on MAUI and a `min-height` on Blazor: one line of
+blank space, and the picture stops moving. Verified - 70 seconds and two speaking toggles produced
+**zero** layout events where every toggle used to produce two.
+
+**The original fault did not reproduce**, and is left recorded below rather than deleted, because
+nothing has been done to fix it and the conditions that produced it may simply not have recurred -
+the layer never left 0 during this measurement, so a spatial change was never available to
+observe. What it said:
+
 A remote tile on Android resizes whenever the incoming video's resolution changes, and the whole
 layout shifts with it. Seen on the SFU call of 2026-09-11, where the tile alternated between
 289x240 and 144x120 every twenty to thirty seconds:

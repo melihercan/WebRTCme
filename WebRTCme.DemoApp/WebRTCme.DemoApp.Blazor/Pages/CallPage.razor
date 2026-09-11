@@ -27,10 +27,10 @@
     @CallViewModel.SpatialLayerButtonText
 </button>
 
-@if (!string.IsNullOrEmpty(CallViewModel.PeerMediaStatus))
-{
-    <p class="mx-4 text-muted">@CallViewModel.PeerMediaStatus</p>
-}
+@* Always rendered, never conditional. Removing the element when there is nothing to say moved
+   everything below it, and voice activity made that happen with every phrase rather than only
+   on a mute. A reserved line costs nothing and keeps the video still. *@
+<p class="mx-4 text-muted" style="min-height: 1.5rem;">@CallViewModel.PeerMediaStatus</p>
 
 <div class="mx-4 d-flex flex-wrap">
     @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)
