@@ -128,11 +128,55 @@ Two things this settles that were previously only inferred from the encoder's ow
   The server is not merely choosing the bottom spatial layer, it is throttling below it as well.
   "Parks on spatial layer 0" understates it.
 
-What is left, and where to look next: mediasoup's per-consumer layer selection and its probing -
-why the estimate for these consumers never climbs, when the same transport carries 1.8 Mbit/s
-happily as soon as there is only one layer to send. The next measurement worth taking is on the
-server, not the client: the consumer's own `score` and the transport's bitrate estimate, over the
-same window as the figures above.
+**The server's own view, read for the first time on 2026-09-11** through
+`MediaSoupServer:LogServerStats`. This is the measurement everything above was missing, and it
+changes the diagnosis.
+
+```
+recvTransport: availableOutgoingBitrate over six samples
+  142948 -> 142242 -> 108394 -> 156480 -> 47041 -> 62504
+
+consumer outbound bitrate over the same window
+  250429 -> 136394 -> 90064 -> 111619 -> 107168 -> 0
+
+consumer score 10,  producer score 10,  packetsLost 1,  inbound rid: "r0" in all 12 samples
+```
+
+**The SFU is not choosing badly. Its own bandwidth estimate has collapsed.**
+`availableOutgoingBitrate` sits between 47 and 156 kbit/s and never climbs, on the same LAN path
+that carries 1.8 Mbit/s the moment there is one layer instead of two. Everything downstream follows
+from that number: layer 0 is the only layer that fits in it, and the temporal throttling below layer
+0 is the same estimate being enforced further. The scores being a flat 10 at both ends says the
+media that *is* being sent arrives perfectly - this was never a quality problem, it is an estimate
+problem.
+
+So the earlier framing in this entry - "the server chooses badly when it has something to choose
+from" - was wrong. It chooses correctly for what it believes the path can carry, and what it
+believes is wrong by more than a factor of ten.
+
+**The prime suspect is now the test rig, not the library.** The same stats show the selected ICE
+tuple as:
+
+```
+"iceSelectedTuple": { "localIp": "0.0.0.0", "localPort": 44444,
+                      "remoteIp": "172.17.0.1", "remotePort": 40343, "protocol": "udp" }
+```
+
+`172.17.0.1` is the Docker bridge gateway. The container runs with `--network bridge`, so every
+peer reaches the SFU through Docker's NAT and appears at the gateway address. `MEDIASOUP_ANNOUNCED_ADDRESS`
+is set correctly, which is why media flows at all - but send-side bandwidth estimation depends on
+transport-cc feedback timing, and a bridged and NATed path is exactly the kind of thing that
+perturbs it.
+
+This is a strong lead, **not** a proven cause. What would settle it, in order:
+
+1. Re-measure with the container on host networking, or mediasoup on the host directly. Note that
+   Docker Desktop on Windows runs a Linux VM, so `--network host` does not mean there what it means
+   on Linux - this may need a Linux host to test at all.
+2. If the estimate behaves there, this entry is an artefact of the development rig and not a defect
+   in this library, and `UseSimulcast: false` in the demo apps can go.
+3. If it does not, look at mediasoup's probation: `probationBytesSent` was 17792 with
+   `probationSendBitrate` at 0, so probing is happening but not lifting the estimate.
 
 **Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
 library change; anything consuming the package can still turn it on. It gives up per-consumer

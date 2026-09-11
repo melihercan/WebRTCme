@@ -47,6 +47,10 @@ namespace WebRTCme.Connection.Services
         DataProducer _botDataProducer;
         ConcurrentDictionary<string, PeerParameters> _peers = new();
 
+        // Whether to ask the server for its own view of consumers and transports - see
+        // LogServerStatsAsync. Off unless MediaSoupServer:LogServerStats says otherwise.
+        bool _logServerStats;
+
         public MediaSoupConnection(IConfiguration configuration, 
             IMediaSoupServerApi mediaSoupServerApi,
             ILogger<MediaSoupConnection> logger, IWebRtc webRtc, IJSRuntime jsRuntime = null)
@@ -80,6 +84,7 @@ namespace WebRTCme.Connection.Services
             var useSharingSimulcast = _configuration.GetValue<bool>("MediaSoupServer:UseSharingSimulcast");
             var audioOnly = _configuration.GetValue<bool>("MediaSoupServer:AudioOnly");
             var e2eKey = _configuration.GetValue<string>("MediaSoupServer:E2eKey");
+            _logServerStats = _configuration.GetValue<bool>("MediaSoupServer:LogServerStats");
 
             _displayName = userContext.Name;
 
@@ -696,6 +701,59 @@ namespace WebRTCme.Connection.Services
         const int PreferredTemporalLayer = 2;
 
         /// <summary>
+        /// Logs the server's own view of a consumer and of the receive transport, raw.
+        /// </summary>
+        /// <remarks>
+        /// Off unless <c>MediaSoupServer:LogServerStats</c> is set, because it is two extra
+        /// requests per sample and only useful while chasing something.
+        ///
+        /// It exists because every other measurement is taken on the client, which can only show
+        /// what it sent and what it got. The numbers that actually explain the SFU's layer choice -
+        /// the consumer's score, the layer being forwarded, and above all the transport's own
+        /// outgoing bitrate estimate - live on the server. Reading them is what turned "the SFU
+        /// chooses badly" into "the SFU's estimate has collapsed"; see the gaps document.
+        ///
+        /// Raw JSON deliberately. <c>GetConsumerStatsResponse</c> is an empty class, so there is
+        /// nothing to deserialize into, and these shapes are worth reading rather than assumed -
+        /// guessing at a response shape has already cost this project two separate bugs.
+        /// </remarks>
+        async Task LogServerStatsAsync(string consumerId)
+        {
+            if (!_logServerStats)
+                return;
+
+            try
+            {
+                var consumerStats = await _mediaSoupServerApi.ApiAsync(MethodName.GetConsumerStats,
+                    new GetConsumerStatsRequest { ConsumerId = consumerId });
+                if (consumerStats.IsOk)
+                    Echo($"SERVER consumer {consumerId}: " +
+                        $"{((JsonElement)consumerStats.Value).GetRawText()}");
+
+                if (_recvTransport is not null)
+                {
+                    var transportStats = await _mediaSoupServerApi.ApiAsync(MethodName.GetTransportStats,
+                        new GetTransportStatsRequest { TransportId = _recvTransport.Id });
+                    if (transportStats.IsOk)
+                        Echo($"SERVER recvTransport: " +
+                            $"{((JsonElement)transportStats.Value).GetRawText()}");
+                }
+            }
+            catch (Exception exception)
+            {
+                Echo($"SERVER stats failed: {exception.GetType().Name}: {exception.Message}");
+            }
+        }
+
+        // Both, because neither reaches everywhere on its own: the MAUI apps register no logging
+        // provider so ILogger goes nowhere, and a packaged WinUI app has no console.
+        static void Echo(string line)
+        {
+            Console.WriteLine($"######## {line}");
+            System.Diagnostics.Debug.WriteLine($"######## {line}");
+        }
+
+        /// <summary>
         /// Lifts a new consumer's ceiling to the top, so nothing here is what holds it down.
         /// </summary>
         /// <remarks>
@@ -901,6 +959,22 @@ namespace WebRTCme.Connection.Services
                     consumer.OnTrackEnded += Consumer_OnTrackEnded;
 
                     await RequestBestLayersAsync(consumer);
+
+                    // For the layer investigation - see LogServerStatsAsync, which does nothing
+                    // unless it is switched on. Video only, and fire-and-forget: this runs inside
+                    // the newConsumer request handler, and waiting here would delay the accept().
+                    if (_logServerStats && consumer.Kind == MediaKind.Video)
+                    {
+                        var consumerId = consumer.Id;
+                        _ = Task.Run(async () =>
+                        {
+                            for (var sample = 0; sample < 6; sample++)
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(5));
+                                await LogServerStatsAsync(consumerId);
+                            }
+                        });
+                    }
 
                     Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: before accept {consumerRequestData.Kind} {consumer.Kind}");
                     accept();
