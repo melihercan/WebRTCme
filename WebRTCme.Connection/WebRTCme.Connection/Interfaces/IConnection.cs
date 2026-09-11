@@ -16,6 +16,26 @@ namespace WebRTCme.Connection
         Task<IRTCStatsReport> GetStats(Guid id);
 
         /// <summary>
+        /// Statistics for what this client is sending.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="GetStats(Guid)"/> answers a question about one peer, which on the mediasoup
+        /// path can only ever be a receive-side answer: the peers arrive as consumers, and the
+        /// producers that carry this client's own media belong to no peer in particular. So the
+        /// outbound bitrate, the encoder's quality limitation and the loss the far side reports
+        /// back were all unreachable. This asks the senders directly instead.
+        ///
+        /// Peer-to-peer has a send side per peer, since each peer connection encodes separately,
+        /// and all of them are reported here at once. Their keys are qualified with the peer's id
+        /// to keep two peers' streams apart, so read the entries by <see cref="RTCStats.Type"/>
+        /// rather than by key.
+        ///
+        /// Empty rather than throwing when nothing is being sent yet - producing starts
+        /// asynchronously, so a poller would otherwise have to race it.
+        /// </remarks>
+        Task<IRTCStatsReport> GetOutgoingStatsAsync();
+
+        /// <summary>
         /// Whether this client is currently sending <paramref name="kind"/>.
         /// </summary>
         /// <remarks>

@@ -49,12 +49,11 @@ namespace WebRTCme.Middleware
         string _recordingFileName = "WebRTCme.webm";
 
         /// <summary>
-        /// Polls GetStats for one peer and writes a summary where it can be read afterwards.
+        /// Polls GetStats for one peer and writes a summary through <see cref="LogStats"/>.
         /// </summary>
         /// <remarks>
-        /// The file matters as much as the logging: on Mac Catalyst the app is sandboxed and its
-        /// Debug output does not reach the unified log, so a file inside the container is the only
-        /// way to see what a released build actually reported.
+        /// The receive side only. What this client sends has its own poller, because it belongs to
+        /// no peer in particular - see <see cref="StartOutgoingStatsPolling"/>.
         /// </remarks>
         void StartStatsPolling(Guid peerId, string peerName)
         {
@@ -65,8 +64,6 @@ namespace WebRTCme.Middleware
 
             _ = Task.Run(async () =>
             {
-                var path = Path.Combine(Path.GetTempPath(), "webrtcme-stats.log");
-
                 while (!cts.IsCancellationRequested)
                 {
                     try
@@ -100,9 +97,7 @@ namespace WebRTCme.Middleware
                             $"pair:{(selected is null ? "none" : Member(selected, "bytesSent") + "/" + Member(selected, "bytesReceived"))} " +
                             $"lvl:[{string.Join(" ", levels)}]";
 
-                        _logger.LogInformation($"************* STATS {line}");
-                        System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
-                        System.IO.File.AppendAllText(path, line + Environment.NewLine);
+                        LogStats(line);
                     }
                     catch (OperationCanceledException)
                     {
@@ -110,14 +105,145 @@ namespace WebRTCme.Middleware
                     }
                     catch (Exception exception)
                     {
-                        var line = $"{DateTime.Now:HH:mm:ss} {peerName} FAILED: {exception.GetType().Name}: {exception.Message}";
-                        _logger.LogInformation($"************* STATS {line}");
-                        System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
-                        try { System.IO.File.AppendAllText(path, line + Environment.NewLine); } catch { }
+                        LogStats($"{DateTime.Now:HH:mm:ss} {peerName} FAILED: " +
+                            $"{exception.GetType().Name}: {exception.Message}");
                         return;
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Polls the send side and writes a summary beside the per-peer ones.
+        /// </summary>
+        /// <remarks>
+        /// Separate from <see cref="StartStatsPolling"/> because what this client sends is not a
+        /// property of any one peer - on the mediasoup path one set of producers serves the whole
+        /// room, and folding it into the per-peer loop would repeat the same numbers once per peer.
+        ///
+        /// It starts with the connection rather than with the first peer: producing begins as soon
+        /// as the transports are up, and the interesting part - whether every simulcast layer
+        /// actually gets encoded - happens in those first seconds, before anyone else has joined.
+        /// A failure here does not stop the loop the way a peer poller's does, because there is
+        /// nothing to leave: an empty report early on is the normal state, not the end of it.
+        /// </remarks>
+        void StartOutgoingStatsPolling()
+        {
+            StopOutgoingStatsPolling();
+
+            var cts = new CancellationTokenSource();
+            _outgoingStatsPoller = cts;
+
+            _ = Task.Run(async () =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5), cts.Token).ConfigureAwait(false);
+
+                        var report = await _connection.GetOutgoingStatsAsync().ConfigureAwait(false);
+
+                        // One entry per simulcast layer, so they are printed one per layer too:
+                        // a layer that is active but unfunded shows the same size and rid as its
+                        // neighbours while its frame count stays at zero.
+                        var outbound = report.Values
+                            .Where(stats => stats.Type == "outbound-rtp")
+                            .Select(DescribeOutbound)
+                            .ToArray();
+
+                        // What the far side says it got. The only place loss and round-trip time
+                        // appear on the sending end - the encoder itself cannot know either.
+                        var remote = report.Values
+                            .Where(stats => stats.Type == "remote-inbound-rtp")
+                            .Select(stats =>
+                                $"{Member(stats, "kind")}:lost={Member(stats, "packetsLost")} " +
+                                $"rtt={Member(stats, "roundTripTime")} " +
+                                $"jitter={Member(stats, "jitter")}")
+                            .ToArray();
+
+                        LogStats(
+                            $"{DateTime.Now:HH:mm:ss} SEND entries:{report.Count} " +
+                            $"out:[{string.Join(" | ", outbound)}] " +
+                            $"remote:[{string.Join(" | ", remote)}]");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                    catch (Exception exception)
+                    {
+                        LogStats($"{DateTime.Now:HH:mm:ss} SEND FAILED: " +
+                            $"{exception.GetType().Name}: {exception.Message}");
+                    }
+                }
+            });
+        }
+
+        void StopOutgoingStatsPolling()
+        {
+            var cts = _outgoingStatsPoller;
+            _outgoingStatsPoller = null;
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
+        CancellationTokenSource _outgoingStatsPoller;
+
+        /// <summary>
+        /// Writes one stats line everywhere it might be read from.
+        /// </summary>
+        /// <remarks>
+        /// The file matters as much as the logging: on Mac Catalyst the app is sandboxed and its
+        /// Debug output does not reach the unified log, so a file inside the container is the only
+        /// way to see what a released build actually reported. The file write is the one allowed
+        /// to fail quietly - losing a line is better than killing the poller that produced it.
+        /// </remarks>
+        void LogStats(string line)
+        {
+            _logger.LogInformation($"************* STATS {line}");
+            System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
+
+            try
+            {
+                // Qualified: an unadorned 'File' resolves to the JSInterop one in this file.
+                System.IO.File.AppendAllText(
+                    Path.Combine(Path.GetTempPath(), "webrtcme-stats.log"),
+                    line + Environment.NewLine);
+            }
+            catch
+            {
+                // Nowhere to write it is not worth ending the call over.
+            }
+        }
+
+        /// <summary>
+        /// One outgoing RTP stream, described by whatever its kind actually reports.
+        /// </summary>
+        /// <remarks>
+        /// Frame size, frame count and the encoder's quality limitation are video's alone; printing
+        /// their empty slots for an audio stream produced a stray "x" and two empty fields, which
+        /// read like missing data rather than like fields that never applied.
+        /// </remarks>
+        static string DescribeOutbound(RTCStats stats)
+        {
+            var kind = Member(stats, "kind");
+
+            // Simulcast layers are told apart by rid; there is no rid at all when simulcast is off.
+            var rid = stats.Members.TryGetValue("rid", out var value) && value is not null
+                ? $"/{value}" : string.Empty;
+
+            if (kind != "video")
+                return $"{kind}{rid} bytes={Member(stats, "bytesSent")}";
+
+            // Only worth printing when it is limiting something; "none" on every line is noise.
+            var reason = Member(stats, "qualityLimitationReason");
+            var limitation = string.IsNullOrEmpty(reason) || reason == "none"
+                ? string.Empty : $" limited={reason}";
+
+            return $"{kind}{rid} {Member(stats, "frameWidth")}x{Member(stats, "frameHeight")} " +
+                $"bytes={Member(stats, "bytesSent")} " +
+                $"frames={Member(stats, "framesEncoded")}{limitation}";
         }
 
         static string Describe(RTCStats stats) =>
@@ -235,6 +361,8 @@ namespace WebRTCme.Middleware
             // ConnectionRequest is a cold observable: every subscription joins the room. Dropping
             // any live one first keeps a second Connect from leaving two joins outstanding.
             _connectionDisposer?.Dispose();
+
+            StartOutgoingStatsPolling();
 
             _connectionDisposer = _connection.ConnectionRequest(_userContext).Subscribe(
                 // 'async' here is fire-and-forget!!! It is OK for exceptions and error messages only.
@@ -384,6 +512,7 @@ namespace WebRTCme.Middleware
             _mediaRecorderManager.ResetAllAsync();
             foreach (var id in _statsPollers.Keys.ToArray())
                 StopStatsPolling(id);
+            StopOutgoingStatsPolling();
 
             _connectionDisposer?.Dispose();
             _connectionDisposer = null;

@@ -1197,6 +1197,40 @@ namespace WebRTCme.Connection.Services
         }
 
         /// <summary>
+        /// Statistics for what this client is sending, gathered from the producers themselves.
+        /// </summary>
+        /// <remarks>
+        /// One report per producer, merged: the ids identify RTP streams within the send
+        /// transport's peer connection, so they are distinct and nothing is overwritten. With
+        /// simulcast each producer contributes one <c>outbound-rtp</c> entry per layer, which is
+        /// what makes an unfunded layer visible - it reports <c>framesEncoded: 0</c> while its
+        /// neighbours climb.
+        ///
+        /// A paused producer is still asked. Its counters standing still is the point: that is
+        /// the evidence a mute reached the wire, which no receive-side report can show.
+        /// </remarks>
+        public async Task<IRTCStatsReport> GetOutgoingStatsAsync()
+        {
+            Dictionary<string, RTCStats> stats = new();
+
+            foreach (var producer in new[] { _micProducer, _webcamProducer })
+            {
+                // A closed producer has no transceiver left to ask, and would throw.
+                if (producer is null || producer.Closed)
+                    continue;
+
+                var report = await producer.GetStatsAsync();
+                if (report is null)
+                    continue;
+
+                foreach (var entry in report)
+                    stats[entry.Key] = entry.Value;
+            }
+
+            return new AggregateStatsReport(stats);
+        }
+
+        /// <summary>
         /// Swaps a track this connection is producing, keeping the producer and its negotiation.
         /// </summary>
         public async Task ReplaceOutgoingTrackAsync(IMediaStreamTrack track, IMediaStreamTrack newTrack)

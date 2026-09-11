@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using WebRTCme.Connection.Models;
 using WebRTCme.Connection.Signaling;
 
 namespace WebRTCme.Connection.Services
@@ -257,6 +258,45 @@ namespace WebRTCme.Connection.Services
                 throw new ArgumentException($"No peer with id {id} is in this connection.", nameof(id));
 
             return peerContext.PeerConnection.GetStats();
+        }
+
+        /// <summary>
+        /// Statistics for what this client is sending, across every peer it is sending to.
+        /// </summary>
+        /// <remarks>
+        /// Peer-to-peer encodes the same camera once per peer, so there is no single send side to
+        /// report - three peers mean three encoders, three bitrates and three sets of loss. All of
+        /// them come back together, keyed by peer so that they stay apart, because stats ids are
+        /// only unique within one peer connection and merging them raw would silently drop one
+        /// peer's streams on top of another's.
+        ///
+        /// Only the sending half is kept. The rest of each peer's report is what
+        /// <see cref="GetStats(Guid)"/> is for, and repeating it here would make the outbound
+        /// entries hard to find in a report several times the size.
+        /// </remarks>
+        public async Task<IRTCStatsReport> GetOutgoingStatsAsync()
+        {
+            Dictionary<string, RTCStats> stats = new();
+
+            var peerContexts = _connectionContext?.PeerContexts.ToArray()
+                ?? Array.Empty<PeerContext>();
+
+            foreach (var peerContext in peerContexts)
+            {
+                var report = await peerContext.PeerConnection.GetStats();
+                if (report is null)
+                    continue;
+
+                foreach (var entry in report)
+                {
+                    if (entry.Value.Type is not ("outbound-rtp" or "remote-inbound-rtp" or "media-source"))
+                        continue;
+
+                    stats[$"{peerContext.Id}/{entry.Key}"] = entry.Value;
+                }
+            }
+
+            return new AggregateStatsReport(stats);
         }
 
 
