@@ -167,15 +167,20 @@ internal sealed class MediaDevices : IMediaDevices
 
     private IMediaStreamTrack CreateVideoTrack(IntPtr factory, MediaTrackConstraints constraints)
     {
-        var requestedDeviceId = constraints?.DeviceId?.Value
-            ?? constraints?.DeviceId?.Exact?.Value
-            ?? constraints?.DeviceId?.Ideal?.Value;
+        // Read through VideoConstraints rather than off the bare .Value fields: a caller writing
+        // { width: { ideal: 1280 } } means it, and reading only the simplest of the forms answered
+        // that with the default instead, silently.
+        //
+        // facingMode is not read here and cannot be. A desktop camera has no facing and the shim
+        // reports none, so CameraType.Front and CameraType.Back both open the default camera -
+        // which is what they did before, and is the only honest answer on this platform.
+        var videoConstraints = VideoConstraints.From(constraints);
 
-        var (deviceId, label) = ResolveCamera(factory, requestedDeviceId);
+        var (deviceId, label) = ResolveCamera(factory, videoConstraints.DeviceId);
 
-        var width = (int?)constraints?.Width?.Value ?? DefaultWidth;
-        var height = (int?)constraints?.Height?.Value ?? DefaultHeight;
-        var frameRate = (int?)constraints?.FrameRate?.Value ?? DefaultFrameRate;
+        var width = videoConstraints.Width ?? DefaultWidth;
+        var height = videoConstraints.Height ?? DefaultHeight;
+        var frameRate = videoConstraints.FrameRate ?? DefaultFrameRate;
 
         // The id travels into the SDP as the msid, so it must not be the device path.
         var id = NewTrackId("video");

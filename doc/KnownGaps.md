@@ -174,10 +174,41 @@ stop the camera track when a producer closes, and that is the same track the loc
 peer - consumer paused, inbound bitrate down 16x - proves the SFU stopped forwarding. It cannot
 prove the sender stopped, and it was read as though it had.
 
-### Camera selection ignores constraints
-Android takes `GetCameraIdList()[1]` and iOS/Mac Catalyst take the front camera or simply the
-first device, all with a TODO saying so. `MediaStreamConstraints` asking for a specific camera or
-resolution is not honoured.
+### Camera selection ignores constraints - honoured 2026-09-11
+Was: Android took `GetCameraIdList()[1]`, iOS and Mac Catalyst took the front camera or simply the
+first device, and every platform captured at a fixed size. `CameraType` was worse than ignored -
+`GetCameraMediaStreamAsync` accepted it and then asked for `video: true` regardless, so naming a
+camera did exactly nothing.
+
+`VideoConstraints` (in `Api/Helpers`) reads the four answers a camera needs out of the constraint
+unions once, for everyone: which device, which way it faces, what size, how fast. `deviceId`,
+`facingMode`, `width`, `height` and `frameRate` are now honoured on Android, iOS, Mac Catalyst and
+Windows, in all their forms - a bare value, an array, `exact`, `ideal`, a min/max range. An `exact`
+that cannot be met throws; an `ideal` is dropped quietly. `CameraType` becomes an ideal
+`facingMode`.
+
+Selection is by lens facing rather than by list index. Index 1 is the front camera on many devices
+and not on others, and asking each camera which way it faces is what `facingMode` needs anyway.
+Defaults are unchanged in intent and in fact: front camera, 640x480, 30fps.
+
+Verified on Android: `CameraType.Back` opened the back camera where before the parameter did
+nothing, and explicit constraints of 1280x720@24 produced `video 1280x720` in the send-side stats
+where the default gives `640x480`. iOS, Mac Catalyst and Windows are compile-verified only.
+
+**Two hidden defects fell out of this**, both of the same kind - libwebrtc answers an unsupported
+capture request with the nearest supported format and says nothing:
+
+- Android asked for `StartCapture(480, 640, 30)`. No camera here publishes 480x640;
+  `Camera2Enumerator` reports landscape formats. 640x480 is simply what is nearest to the
+  transposed pair, so the portrait request had been "working" by accident for as long as it existed.
+  The first version of this fix preserved the transposition and asked a camera that publishes
+  1280x720 for 720x1280 - which opened at **1088x1088**, nearer to the transposed pair than the
+  format actually meant. The capture format the camera chose is now logged beside the list it
+  supports, because that is the only way this class of mistake is visible.
+- iOS used `SupportedFormatsForDevice(device)[6]`. The index is meaningless: the list differs per
+  device and per iOS version, so index 6 is a different resolution on every phone, and it throws
+  outright on a camera publishing fewer than seven formats. It now picks the closest supported
+  format to the request and clamps the frame rate to what that format allows.
 
 ### Binding surface is incomplete
 `NotImplementedException` counts under `WebRTCme/Platforms/`: ~47 Android, ~40 iOS, ~40 Mac
