@@ -1,4 +1,4 @@
-# Known gaps
+﻿# Known gaps
 
 What is missing, half-wired or fragile, as of the .NET 10 branch (2026-09-09). Everything here was
 checked against the code rather than remembered, and each entry says where it actually stands -
@@ -73,21 +73,59 @@ server's dispatcher, alongside `join` and `produce`, and `MethodName.RestartIce`
 is missing on the mediasoup side is the request and response types and a caller. The peer-to-peer
 path still needs an offer with `iceRestart` set plus a rule for which side starts it.
 
-### Simulcast layer control - absent, and it shows
-The client produces simulcast encodings, but there is no `setPreferredLayers` or
-`setMaxSpatialLayer` anywhere, so a consumer cannot ask for a layer and nothing adapts to a slow
-receiver. The server is left to choose unaided.
+### The SFU will not climb past the bottom layer
+**The biggest open quality problem on the mediasoup path.** Given a choice of simulcast layers, the
+server parks a native consumer on spatial layer 0 and shuffles, and the picture is visibly blurry
+and freezes. Measured Blazor -> Android on 2026-09-11, same LAN, same pair of peers, minutes apart:
 
-Observed on the Android/Windows SFU call of 2026-09-11: the server moved the consumer between
-spatial layers every twenty to thirty seconds, climbing one layer and falling back within a few
-seconds, and **never selected the top layer at all**. Inbound video settled around 150 kbit/s,
-against 1.8 Mbit/s for the same pair over the peer-to-peer path, on the same LAN - so this is not
-the network.
+| | inbound video | resolution | layer changes |
+| --- | --- | --- | --- |
+| simulcast on | 64-159 kbit/s | 289x240 | 21, parked on spatialLayer 0 |
+| simulcast off | 1781-1828 kbit/s | 578x480 | none |
 
-On Windows the missing half is in the binding: `RTCRtpSender.GetParameters` / `SetParameters` are
-still `NotSupportedException`, because encodings would have to be round-tripped back across the C
-ABI with owned strings, and nothing called them. They are what `Handler.SetMaxSpatialLayerAsync`
-needs.
+The single-layer figure is the important one: **the path demonstrably carries 1.8 Mbit/s**, so
+capacity is not the constraint. The server chooses badly when it has something to choose from.
+
+What has been ruled out, each by measurement rather than argument:
+
+- **Packet loss.** 2 lost of 7074 on the receiving side, and `consumerScore` reports a flat 10.
+- **The client's encodings.** All layers `active`, correct `scaleResolutionDownBy`.
+- **The SDP.** All RIDs negotiated both ways, `a=simulcast` correct in both directions, no `b=`
+  bandwidth line anywhere, transport-cc and the wide-CC header extension present.
+- **The publisher's uplink estimate.** 2349 kbit/s available against 1290 used.
+- **`initialAvailableOutgoingBitrate`.** Raised from 1 Mbit/s to 10 Mbit/s on the server and
+  reverted again: no measurable effect. Do not reach for it again without new evidence.
+- **`setConsumerPreferredLayers`.** Now implemented and accepted by the server, and it does not
+  help: preferred layers are a **ceiling, not a floor**, so asking for the top layer changes
+  nothing when the server has already decided to send the bottom one.
+
+What is left, and where to look next: mediasoup's per-consumer layer selection and its probing -
+why the estimate for these consumers never climbs, when the same transport carries 1.8 Mbit/s
+happily as soon as there is only one layer to send.
+
+**Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
+library change; anything consuming the package can still turn it on. It gives up per-consumer
+adaptation, which is most of the point of an SFU, so it is a stopgap and not an answer.
+
+### A simulcast ladder has to suit the camera - fixed 2026-09-11
+Related but genuinely fixed, and worth separating from the above because it was a real defect with
+a real cause.
+
+The encodings were copied from mediasoup-demo: three layers at 1/4, 1/2 and full size with a
+5 Mbit/s top, which assumes a 720p or 1080p camera. Against a 640x480 webcam the rate allocator has
+to fund the lower layers' maxima - 500 kbit/s and 1 Mbit/s - before it reaches the top rung, and
+**never got there**. Chrome reported the top encoding `active` with `framesEncoded: 0` and
+`qualityLimitationReason: "none"` for 121 seconds: not throttled, simply never funded. So the best
+layer did not exist, and no consumer could do better than 320x240 however it asked.
+
+`SimulcastEncodingsFor` now picks the ladder from the track's height - three layers at 720p and
+above, two below, with a top bitrate matched to the resolution. Verified: both layers encode, the
+top one at 640x480 and 1093 kbit/s, where before it produced nothing.
+
+The lesson is the diagnostic one. `qualityLimitationReason: "none"` on an encoding that has encoded
+nothing is the signature of an unfunded layer, and it looks nothing like the bandwidth problem it
+gets mistaken for - which is exactly what happened here, twice, before the stats were read
+properly.
 
 See "The jumping tile" below for what the layer changes do to the UI, which is a separate fault
 with a much cheaper fix.

@@ -293,24 +293,7 @@ namespace WebRTCme.Connection.Services
                             }
                             else
                             {
-                                encodings = new RtpEncodingParameters[]
-                                {
-                                    new()
-                                    {
-                                        ScaleResolutionDownBy = 4,
-                                        MaxBitrate = 500000
-                                    },
-                                    new()
-                                    {
-                                        ScaleResolutionDownBy = 2,
-                                        MaxBitrate = 1000000
-                                    },
-                                    new()
-                                    {
-                                        ScaleResolutionDownBy = 1,
-                                        MaxBitrate = 5000000
-                                    }
-                                };
+                                encodings = SimulcastEncodingsFor(webcamTrack);
                             }
                         }
 
@@ -615,13 +598,27 @@ namespace WebRTCme.Connection.Services
                     }
                     break;
 
+                // The server's own estimate of how much it can send us, which is what decides
+                // which simulcast layer each consumer gets. Logged rather than acted on: when a
+                // remote picture is worse than the network should allow, this says whether the
+                // server believes the path is narrow or whether something else is capping it.
+                case MethodName.DownlinkBwe:
+                    System.Diagnostics.Debug.WriteLine(
+                        $"######## DownlinkBwe: {element.GetRawText()}");
+                    break;
+
+                // The layer actually in use, and the server's opinion of how well it is arriving.
+                // Same reason: these are the two numbers that explain a blurry remote tile.
+                case MethodName.ConsumerLayersChanged:
+                case MethodName.ConsumerScore:
+                    System.Diagnostics.Debug.WriteLine(
+                        $"######## {method}: {element.GetRawText()}");
+                    break;
+
                 // Reported continuously by the server and nothing consumes them yet. Recognised
                 // rather than handled, so that a genuinely unknown method still stands out.
-                case MethodName.ConsumerScore:
-                case MethodName.ConsumerLayersChanged:
                 case MethodName.ProducerScore:
                 case MethodName.ActiveSpeaker:
-                case MethodName.DownlinkBwe:
                 case MethodName.SpeakingPeers:
                 case MethodName.MediasoupVersion:
                     break;
@@ -638,6 +635,97 @@ namespace WebRTCme.Connection.Services
                 value.ValueKind == JsonValueKind.String
                     ? value.GetString()
                     : null;
+        }
+
+        /// <summary>
+        /// Builds a simulcast ladder that suits the camera, rather than a fixed one.
+        /// </summary>
+        /// <remarks>
+        /// The old ladder was three layers at 1/4, 1/2 and full size with a 5 Mbit/s top - the
+        /// values mediasoup-demo uses, which assume a 720p or 1080p camera. Against a 640x480
+        /// webcam they produce a 160x120 bottom rung nobody wants and a top rung that never runs:
+        /// measured on Chrome, `r2` sat `active` with `framesEncoded: 0` for two minutes, with
+        /// `qualityLimitationReason: "none"` and a megabit of spare estimated bandwidth. The
+        /// allocator has to fund the lower layers' maxima before it reaches the top one, and
+        /// 500k + 1M of those against a VGA source leaves the best layer permanently unfunded.
+        ///
+        /// Consumers then cannot do better than 320x240 however they ask, which is what made the
+        /// remote picture blurry, and the server's shuffling between the two layers that do exist
+        /// is what made the tile jump and freeze.
+        ///
+        /// So: three layers only when the source is big enough to have three worth sending, two
+        /// otherwise, and a top bitrate matched to the resolution instead of a 1080p number.
+        /// Unknown dimensions - a platform that does not fill in the track settings - fall back to
+        /// the conservative pair rather than to the ladder that misbehaves.
+        /// </remarks>
+        static RtpEncodingParameters[] SimulcastEncodingsFor(IMediaStreamTrack track)
+        {
+            long height = 0;
+            try
+            {
+                height = track?.GetSettings()?.Height ?? 0;
+            }
+            catch
+            {
+                // Not every platform reports settings, and none of this is worth failing a call
+                // over: an unknown size just takes the two-layer ladder below.
+            }
+
+            if (height >= 720)
+                return new RtpEncodingParameters[]
+                {
+                    new() { ScaleResolutionDownBy = 4, MaxBitrate = 500000 },
+                    new() { ScaleResolutionDownBy = 2, MaxBitrate = 1200000 },
+                    new() { ScaleResolutionDownBy = 1, MaxBitrate = 3000000 }
+                };
+
+            return new RtpEncodingParameters[]
+            {
+                new() { ScaleResolutionDownBy = 2, MaxBitrate = 400000 },
+                new() { ScaleResolutionDownBy = 1, MaxBitrate = 1500000 }
+            };
+        }
+
+        // A ceiling rather than a fixed choice: the server clamps this to the top layer the
+        // producer actually publishes, and still drops below it when it has to.
+        const int PreferredSpatialLayer = 2;
+        const int PreferredTemporalLayer = 2;
+
+        /// <summary>
+        /// Asks the server to forward the best simulcast layers it can for a video consumer.
+        /// </summary>
+        /// <remarks>
+        /// Left to itself the server chose badly. Measured on an Android/Blazor call: it moved the
+        /// consumer up a layer and back down every twenty to thirty seconds, never selected the top
+        /// layer at all, and settled around 53-90 kbit/s at 144x120 - against 1.8 Mbit/s for the
+        /// same pair over the peer-to-peer path on the same LAN. The picture was visibly blurry,
+        /// and the resolution changes are what made the tile jump.
+        ///
+        /// This does not disable adaptation. Preferred layers are an upper bound, so the server
+        /// still drops down under real congestion; it simply stops treating the bottom layer as a
+        /// reasonable resting place on a network with room to spare.
+        ///
+        /// Audio has no spatial layers, so it is left alone.
+        /// </remarks>
+        async Task RequestBestLayersAsync(Consumer consumer)
+        {
+            if (consumer is null || consumer.Kind != MediaKind.Video)
+                return;
+
+            var result = await _mediaSoupServerApi.NotifyAsync(
+                MethodName.SetConsumerPreferredLayers,
+                new SetConsumerPreferredLayersRequest
+                {
+                    ConsumerId = consumer.Id,
+                    SpatialLayer = PreferredSpatialLayer,
+                    TemporalLayer = PreferredTemporalLayer
+                });
+
+            // Not fatal: the call still works at whatever layer the server picks on its own, which
+            // is exactly what happened before this existed.
+            if (!result.IsOk)
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## Preferred layers not set for consumer {consumer.Id}: {result.ErrorMessage}");
         }
 
         /// <summary>
@@ -805,6 +893,8 @@ namespace WebRTCme.Connection.Services
                     consumer.OnClose += Consumer_OnClose;
                     consumer.OnTransportClosed += Consumer_OnTransportClosed;
                     consumer.OnTrackEnded += Consumer_OnTrackEnded;
+
+                    await RequestBestLayersAsync(consumer);
 
                     Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW CONSUMER: before accept {consumerRequestData.Kind} {consumer.Kind}");
                     accept();

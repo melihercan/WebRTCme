@@ -27,6 +27,7 @@ namespace WebRTCme.Connection.MediaSoup
         public const string ResumeProducer = "resumeProducer";
         public const string PauseConsumer = "pauseConsumer";
         public const string ResumeConsumer = "resumeConsumer";
+        public const string SetConsumerPreferredLayers = "setConsumerPreferredLayers";
 
         // Server to client, as requests.
         public const string NewConsumer = "newConsumer";
