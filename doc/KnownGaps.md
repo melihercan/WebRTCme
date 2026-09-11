@@ -131,10 +131,15 @@ Verified on a two-peer mediasoup call: two `restartIce` requests, both answered,
 elements' `currentTime` advanced 4.5s across 4s of wall clock at 640x480 - media flowed straight
 through the restart rather than recovering after it.
 
-### The SFU will not climb past the bottom layer
-**The biggest open quality problem on the mediasoup path.** Given a choice of simulcast layers, the
-server parks a native consumer on spatial layer 0 and shuffles, and the picture is visibly blurry
-and freezes. Measured Blazor -> Android on 2026-09-11, same LAN, same pair of peers, minutes apart:
+### The SFU's bandwidth estimate collapses under simulcast
+**The biggest open quality problem on the mediasoup path**, and the entry that has been rewritten
+most - each time because a measurement contradicted the explanation standing here. Read it from the
+bottom if you want the current answer; the top is kept because knowing what was ruled out, and how,
+is most of its value.
+
+The symptom: given a choice of simulcast layers, the server parks a native consumer on spatial
+layer 0 and shuffles, and the picture is visibly blurry and freezes. Measured Blazor -> Android on
+2026-09-11, same LAN, same pair of peers, minutes apart:
 
 | | inbound video | resolution | layer changes |
 | --- | --- | --- | --- |
@@ -219,11 +224,29 @@ transport toward Blazor reported 568 kbit/s available while successfully sending
 same consumer. So `availableOutgoingBitrate` is not simply "low for Android" - it is unreliable
 here generally, and only *matters* when simulcast gives the allocator something to choose with.
 
-What is left is the path to the device itself, which is the one thing that differs: the phone is on
-WiFi, the browser is on the same host as the container. That has to be squared with the fact that
-the same phone on the same WiFi receives 1.8 Mbit/s happily as soon as simulcast is off - so "the
-WiFi is bad" is not the answer either, and the next measurement should be RTT and jitter on that
-transport over time rather than another guess.
+**And then the same transport, measured with simulcast off.** Same phone, same WiFi, same
+container, same bridge, same room - the only thing changed is whether the publisher sends a ladder:
+
+| | availableOutgoingBitrate | delivered to the consumer | probationBytesSent |
+| --- | --- | --- | --- |
+| simulcast **on** | 142948 -> 47041 -> 62504, falling | 250429 -> ... -> 0 | 17792 in every sample |
+| simulcast **off** | 797244 -> 844077 -> 873838 -> 881760, rising | 1095354 -> ... -> 1298294 | 21824 -> 27328 -> 33472 |
+
+**The estimate only collapses when simulcast is in play.** The path is not the constraint, the
+phone's WiFi is not the constraint, and the container is not the constraint - all three are
+identical across those two rows, and the estimate differs by a factor of fourteen. Every network
+explanation this entry has carried is now ruled out by measurement rather than by argument.
+
+The second column is the mechanism, or the start of it. `probationBytesSent` **grows** in the
+healthy case and is **frozen** in the broken one. Probation is precisely what is supposed to break
+the deadlock this entry describes - a low estimate picks a low layer, a low layer sends little
+traffic, and little traffic gives the estimator nothing to raise its estimate with. With simulcast
+off there is no layer decision to make: mediasoup forwards everything the producer sends, the
+estimator has 1.3 Mbit/s of real traffic to measure, and it climbs.
+
+So the question is no longer "why is the estimate low" but **"why does probation stop when the
+consumer is a simulcast consumer"**. That is inside mediasoup's transport congestion control, not
+in this client, and it is where anyone picking this up should start.
 
 The remaining rig detail, kept because it is still true and still worth knowing when reading these
 stats - it simply is not the cause: the selected ICE tuple is
@@ -241,15 +264,16 @@ peer you are looking at - but it is not what is holding the estimate down.
 
 Where to look next, in order:
 
-1. **RTT and jitter on the receive transport, sampled over time**, for the phone and the browser
-   side by side. The estimate is what differs; these are what feed it. `LogServerStats` already
-   prints both.
-2. **mediasoup's probation.** `probationBytesSent` sat at 17792 with `probationSendBitrate` at 0 in
-   every sample, on both transports - so probing runs but never lifts the estimate. That is the
-   mechanism that is supposed to discover headroom, and it appears not to be discovering any.
-3. Only then the rig. Re-measuring on host networking is still worth doing, but it is no longer the
-   first thing to try, and Docker Desktop on Windows runs a Linux VM - `--network host` does not
-   mean there what it means on Linux, so this may need a Linux host to test at all.
+1. **Why probation stops for a simulcast consumer.** That is the one measured difference between a
+   transport whose estimate climbs and one whose estimate collapses, and it sits in mediasoup's
+   `TransportCongestionControlClient` and the simulcast consumer's layer allocation - server side,
+   not here. Everything above is groundwork for this question.
+2. **The initial layer.** If the allocator starts a simulcast consumer at layer 0 and probation is
+   not running, nothing can ever lift it: little traffic gives the estimator nothing to measure, and
+   a low estimate keeps the layer low. Worth checking whether starting higher breaks the loop, since
+   that is testable from the server's configuration.
+3. The rig is no longer a suspect at all, and re-measuring on host networking is no longer worth
+   doing for this. It is kept here only because the notes below explain what the stats look like.
 
 ### Android cannot encode simulcast with this libwebrtc build
 Found on 2026-09-11 while measuring the above, and separate from it. With `UseSimulcast: true` on
@@ -295,7 +319,7 @@ right for the phone for that reason as well as the SFU one.
 which is what separated step 2 from step 3 here. Reach for it first next time simulcast misbehaves:
 it tells you immediately whether to look at this code or below it.
 
-**What this does *not* invalidate:** the "SFU will not climb" measurements were taken with Blazor
+**What this does *not* invalidate:** the "SFU's bandwidth estimate" measurements were taken with Blazor
 publishing and Android consuming, and Blazor's ladder is genuinely two layers. Only the later run
 with Android as publisher was measuring a producer that could publish one.
 
