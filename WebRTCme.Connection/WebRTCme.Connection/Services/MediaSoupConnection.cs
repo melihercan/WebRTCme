@@ -856,11 +856,11 @@ namespace WebRTCme.Connection.Services
                         consumerJson, JsonHelper.WebRtcJsonSerializerOptions);
                     
                     // Convert elements with Dictionary<string, object> to string or number or bool.
-                    consumerRequestData.AppData.ToStringOrNumberOrBool();
+                    consumerRequestData.AppData = consumerRequestData.AppData.ToStringOrNumberOrBool();
                     foreach (var codec in consumerRequestData.RtpParameters.Codecs)
-                        codec.Parameters.ToStringOrNumberOrBool();
+                        codec.Parameters = codec.Parameters.ToStringOrNumberOrBool();
                     foreach (var headerExtension in consumerRequestData.RtpParameters.HeaderExtensions)
-                        headerExtension.Parameters.ToStringOrNumberOrBool();
+                        headerExtension.Parameters = headerExtension.Parameters.ToStringOrNumberOrBool();
 
 
                     var consumerAppData = consumerRequestData.AppData;
@@ -1074,7 +1074,7 @@ namespace WebRTCme.Connection.Services
                         dataConsumerJson, JsonHelper.WebRtcJsonSerializerOptions);
 
                     // Convert elements with Dictionary<string, object> to string or number or bool.
-                    dataConsumerRequestData.AppData.ToStringOrNumberOrBool();
+                    dataConsumerRequestData.AppData = dataConsumerRequestData.AppData.ToStringOrNumberOrBool();
 
                     var appData = dataConsumerRequestData.AppData;
                     appData.Add(KeyName.PeerId, dataConsumerRequestData.PeerId);  // trick
@@ -1302,7 +1302,7 @@ namespace WebRTCme.Connection.Services
                     // Need to convert object (Parameters.Value) to either string or int.
                     foreach (var codec in routerRtpCapabilities.Codecs)
                     {
-                        codec.Parameters.ToStringOrNumber();
+                        codec.Parameters = codec.Parameters.ToStringOrNumber();
                     }
 
                     return routerRtpCapabilities;

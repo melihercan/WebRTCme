@@ -12,6 +12,9 @@ namespace WebRTCme.Connection.MediaSoup
         public SctpStreamParameters SctpStreamParameters { get; init; }
         public string Label { get; init; }
         public string Protocol { get; init; }
-        public Dictionary<string, object> AppData { get; init; }
+        // Settable because it is normalised after deserialisation: System.Text.Json leaves
+        // JsonElements here that ToStringOrNumberOrBool has to replace, and doing that to an
+        // init-only property meant editing the dictionary behind its owner's back.
+        public Dictionary<string, object> AppData { get; set; }
     }
 }

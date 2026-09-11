@@ -12,7 +12,10 @@ namespace WebRTCme.Connection.MediaSoup
         public MediaKind? Kind { get; init; }
         public RtpParameters RtpParameters { get; init; }
         public ConsumerType? Type { get; init; }
-        public Dictionary<string, object> AppData { get; init; }
+        // Settable because it is normalised after deserialisation: System.Text.Json leaves
+        // JsonElements here that ToStringOrNumberOrBool has to replace, and doing that to an
+        // init-only property meant editing the dictionary behind its owner's back.
+        public Dictionary<string, object> AppData { get; set; }
         public bool ProducerPaused { get; init; }
 
     }

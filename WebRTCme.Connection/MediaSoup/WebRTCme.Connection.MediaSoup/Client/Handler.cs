@@ -30,7 +30,13 @@ namespace WebRTCme.Connection.MediaSoup.Client
         // before the list is updated, if there comes another write to the list, things will be corrupted.
         // Use this semaphore to avoid race condition.
         // Also any send or receive operation should be atomic.
-        static SemaphoreSlim _sem = new(1);
+        //
+        // Per instance, not static. Everything it protects - _pc, _remoteSdp, _mapMidTransceiver - belongs
+        // to this handler, and a handler owns exactly one peer connection, so there is nothing to
+        // coordinate between handlers. Sharing one semaphore across the process made a send transport wait
+        // on an unrelated receive transport: invisible with a single connection, and a plain serialisation
+        // of unrelated SDP work with more than one.
+        readonly SemaphoreSlim _sem = new(1);
 
         static int _instanceNo; 
 
@@ -219,7 +225,7 @@ namespace WebRTCme.Connection.MediaSoup.Client
                 var sendingRtpParameters =
                     Utils.Clone<RtpParameters>(_sendingRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
                 foreach (var codec in sendingRtpParameters.Codecs)
-                    codec.Parameters.ToStringOrNumber();
+                    codec.Parameters = codec.Parameters.ToStringOrNumber();
 
                 // This may throw.
                 sendingRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRtpParameters.Codecs, options.Codec);
@@ -228,7 +234,7 @@ namespace WebRTCme.Connection.MediaSoup.Client
                     Utils.Clone<RtpParameters>(
                         _sendingRemoteRtpParametersByKind[options.Track.Kind.ToMediaSoup()], default);
                 foreach (var codec in sendingRemoteRtpParameters.Codecs)
-                    codec.Parameters.ToStringOrNumber();
+                    codec.Parameters = codec.Parameters.ToStringOrNumber();
 
                 // This may throw.
                 sendingRemoteRtpParameters.Codecs = _ortc.ReduceCodecs(sendingRemoteRtpParameters.Codecs, options.Codec);
