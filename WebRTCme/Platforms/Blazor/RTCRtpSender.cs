@@ -24,8 +24,18 @@ namespace WebRTCme.Blazor
         public IRTCDtlsTransport Transport =>
             new RTCDtlsTransport(JsRuntime, JsRuntime.GetJsPropertyObjectRef(NativeObject, "transport"));
 
+        /// <summary>
+        /// The sender's current parameters, contents and all.
+        /// </summary>
+        /// <remarks>
+        /// Content, not an object reference. This used to call <c>CallJsMethod</c>, which returns a
+        /// reference for any object result, so every property of what came back was null - and
+        /// nothing said so. Any caller reading <c>Encodings</c> got a null array: layer control
+        /// threw <see cref="ArgumentNullException"/> from deep inside a LINQ call, and setting
+        /// encoding parameters silently did nothing.
+        /// </remarks>
         public RTCRtpSendParameters GetParameters() =>
-            JsRuntime.CallJsMethod<RTCRtpSendParameters>(NativeObject, "getParameters");
+            JsRuntime.CallJsMethodWithContent<RTCRtpSendParameters>(NativeObject, "getParameters");
 
         public async Task<IRTCStatsReport> GetStats() =>
             (await JsRuntime.GetJsStatsAsync(NativeObject)).ToStatsReport();
@@ -42,6 +52,6 @@ namespace WebRTCme.Blazor
 
         /*static*/
         public RTCRtpCapabilities GetCapabilities(string kind) =>
-            JsRuntime.CallJsMethod<RTCRtpCapabilities>("RTCRtpSender", "getCapabilities", kind);
+            JsRuntime.CallJsMethodWithContent<RTCRtpCapabilities>("RTCRtpSender", "getCapabilities", null, kind);
     }
 }

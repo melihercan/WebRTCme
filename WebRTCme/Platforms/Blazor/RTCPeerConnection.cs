@@ -169,7 +169,7 @@ namespace WebRTCme.Blazor
                 "RTCPeerConnection", "generateCertificate", keygenAlgorithm)));
 
         public RTCConfiguration GetConfiguration() =>
-            JsRuntime.CallJsMethod<RTCConfiguration>(NativeObject, "getConfiguration");
+            JsRuntime.CallJsMethodWithContent<RTCConfiguration>(NativeObject, "getConfiguration");
 
         public IRTCRtpReceiver[] GetReceivers()
         {

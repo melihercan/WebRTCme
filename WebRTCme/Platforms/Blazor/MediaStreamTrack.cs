@@ -54,13 +54,13 @@ namespace WebRTCme.Blazor
             new MediaStreamTrack(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, "clone"));
 
         public MediaTrackCapabilities GetCapabilities() =>
-            JsRuntime.CallJsMethod<MediaTrackCapabilities>(NativeObject, "getCapabilities");
+            JsRuntime.CallJsMethodWithContent<MediaTrackCapabilities>(NativeObject, "getCapabilities");
 
         public MediaTrackConstraints GetConstraints() =>
-            JsRuntime.CallJsMethod<MediaTrackConstraints>(NativeObject, "getConstraints");
+            JsRuntime.CallJsMethodWithContent<MediaTrackConstraints>(NativeObject, "getConstraints");
 
         public MediaTrackSettings GetSettings() =>
-            JsRuntime.CallJsMethod<MediaTrackSettings>(NativeObject, "getSettings");
+            JsRuntime.CallJsMethodWithContent<MediaTrackSettings>(NativeObject, "getSettings");
 
         public void Stop() =>
             JsRuntime.CallJsMethodVoid(NativeObject, "stop");

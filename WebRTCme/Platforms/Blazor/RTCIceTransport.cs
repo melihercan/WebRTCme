@@ -46,7 +46,7 @@ namespace WebRTCme.Blazor
         }
 
         public RTCIceParameters GetLocalParameters() =>
-            JsRuntime.CallJsMethod<RTCIceParameters>(NativeObject, "getLocalParameters");
+            JsRuntime.CallJsMethodWithContent<RTCIceParameters>(NativeObject, "getLocalParameters");
 
         public IRTCIceCandidate[] GetRemoteCandidates()
         {
@@ -60,7 +60,7 @@ namespace WebRTCme.Blazor
         }
 
         public RTCIceParameters GetRemoteParameters() =>
-            JsRuntime.CallJsMethod<RTCIceParameters>(NativeObject, "getRemoteParameters");
+            JsRuntime.CallJsMethodWithContent<RTCIceParameters>(NativeObject, "getRemoteParameters");
 
         public IRTCIceCandidatePair GetSelectedCandidatePair() =>
             new RTCIceCandidatePair(JsRuntime, JsRuntime.CallJsMethod<JsObjectRef>(NativeObject, 

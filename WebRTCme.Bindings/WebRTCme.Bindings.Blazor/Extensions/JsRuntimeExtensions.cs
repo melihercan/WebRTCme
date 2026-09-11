@@ -79,6 +79,35 @@ namespace WebRTCme.Bindings.Blazor.Extensions
             return content;
         }
 
+        /// <summary>
+        /// Calls a JS method and deserializes the result's <b>content</b>, not a reference to it.
+        /// </summary>
+        /// <remarks>
+        /// Use this, not <see cref="CallJsMethod{T}"/>, whenever the result is a value object to be
+        /// read rather than a thing to call further methods on. <c>callMethod</c> hands back an
+        /// object reference for anything object-typed, and deserializing a reference into a model
+        /// leaves every property null - which is silent, and looks exactly like an API that
+        /// returned nothing.
+        ///
+        /// <paramref name="contentSpec"/> selects which members to copy, as for
+        /// <see cref="GetJsPropertyValue{T}"/>; null takes everything.
+        /// </remarks>
+        public static T CallJsMethodWithContent<T>(this IJSRuntime jsRuntime, object parent,
+            string method, object contentSpec = null, params object[] args)
+        {
+            var invokeParams = new object[]
+            {
+                parent,
+                method,
+                contentSpec
+            };
+            if (args != null)
+            {
+                invokeParams = invokeParams.Concat(args).ToArray();
+            }
+            return jsRuntime.Invoke<T>("JsInterop.callMethodWithContent", invokeParams);
+        }
+
         public static IEnumerable<JsObjectRef> GetJsPropertyArray(this IJSRuntime jsRuntime,
             object parent, string property = null)
         {

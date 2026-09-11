@@ -308,7 +308,34 @@
     }
 
     /**
-     * Calls a method asynchronously. it waits for the promise to be completed. If return value is object type, 
+     * Calls a method synchronously and returns the RESULT'S CONTENT rather than a reference to it.
+     *
+     * 'callMethod' hands back an object reference for anything object-typed, which is right for a
+     * thing you then call methods on - a track, a sender - and wrong for a plain value object you
+     * want to read. Deserializing a reference into a C# model yields a model with every property
+     * null, which is silent and looks exactly like an API that returned nothing. That is what
+     * 'RTCRtpSender.getParameters' did on this path: it never once returned usable encodings.
+     *
+     * @param {any} parent: Parent object, a JS object reference or a string.
+     * @param {string} method: String specifying the method to be called.
+     * @param {any} contentSpec: Which members to copy, as for 'getPropertyValue'. '*' takes all.
+     * @param {...any} args: Argument list of the method.
+     */
+    public.callMethodWithContent = function (parent, method, contentSpec, ...args) {
+        let parentObject = getParentObject(parent);
+        let methodObject = getPropertyObject(parentObject, method);
+        let ret = methodObject.apply(parentObject, args);
+        if (ret === undefined) {
+            return undefined;
+        }
+        if (ret !== null && typeof (ret) === 'object') {
+            return getObjectContent(ret, [], contentSpec);
+        }
+        return ret;
+    }
+
+    /**
+     * Calls a method asynchronously. it waits for the promise to be completed. If return value is object type,
      * it adds the object to 'objectRefs' and returna JS object reference. Otherwise the primitive type is returned.
      *
      * @param {any} parent: Parent object. It can be JS object reference or a string. JS object reference will be

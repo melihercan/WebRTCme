@@ -45,7 +45,7 @@ namespace WebRTCme.Blazor
             return rtpContributingSources.ToArray();
         }
 
-        public RTCRtpReceiveParameters GetParameters() => JsRuntime.CallJsMethod<RTCRtpReceiveParameters>(
+        public RTCRtpReceiveParameters GetParameters() => JsRuntime.CallJsMethodWithContent<RTCRtpReceiveParameters>(
             NativeObject, "getParameters");
 
         public async Task<IRTCStatsReport> GetStats() =>
@@ -70,6 +70,6 @@ namespace WebRTCme.Blazor
 
         /*static*/
         public RTCRtpCapabilities GetCapabilities(string kind) =>
-            JsRuntime.CallJsMethod<RTCRtpCapabilities>("RTCRtpReceiver", "getCapabilities", kind);
+            JsRuntime.CallJsMethodWithContent<RTCRtpCapabilities>("RTCRtpReceiver", "getCapabilities", null, kind);
     }
 }
