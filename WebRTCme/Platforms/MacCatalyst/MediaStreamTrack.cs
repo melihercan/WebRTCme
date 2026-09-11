@@ -91,9 +91,32 @@ namespace WebRTCme.MacCatalyst
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// What this track is delivering, as far as this can say.
+        /// </summary>
+        /// <remarks>
+        /// Only a local camera track has an answer, and it is the format the camera was asked for.
+        /// The format actually selected is not settled until capture starts, which is later than
+        /// anything asking this - see <see cref="MacCatalystSupport.RequestedFormatFor"/>.
+        ///
+        /// Empty settings for anything else rather than an exception. The simulcast ladder is
+        /// chosen from the track's height inside a <c>try</c>, so throwing here meant every video
+        /// produce silently took the fallback ladder, which is indistinguishable from choosing it.
+        /// </remarks>
         public MediaTrackSettings GetSettings()
         {
-            throw new NotImplementedException();
+            var settings = new MediaTrackSettings { DeviceId = Id };
+
+            var format = MacCatalystSupport.RequestedFormatFor(Id);
+            if (format is null)
+                return settings;
+
+            var (width, height, frameRate) = format.Value;
+            settings.Width = width;
+            settings.Height = height;
+            settings.FrameRate = frameRate;
+            settings.AspectRatio = height == 0 ? 0d : (double)width / height;
+            return settings;
         }
 
         /// <summary>

@@ -522,7 +522,7 @@ capture request with the nearest supported format and says nothing:
   outright on a camera publishing fewer than seven formats. It now picks the closest supported
   format to the request and clamps the frame rate to what that format allows.
 
-### Three Android stubs were on live paths - filled in 2026-09-11
+### Three native stubs were on live paths - filled in 2026-09-11
 Auditing the stubs by whether anything actually calls them, rather than by counting them, turned up
 two on `RTCRtpSender` that features added the same day walked straight into:
 
@@ -554,10 +554,27 @@ way, so a guess no longer looks like a decision. Verified on device: `ladder cho
 `GetConfiguration` is referenced but not on a live path - only `Handler.UpdateIceServersAsync`
 calls it and nothing calls that - so it is left alone.
 
-The audit is worth repeating; the counting is not. 41 distinct members throw on Android and only
-16 are referenced anywhere in the connection or middleware layers. Of those 16, three were on
-paths that actually run, and all three are now implemented. The rest can wait indefinitely - and
-the useful question for the next one is not "how many are left" but "does anything call it".
+**iOS and Mac Catalyst had the same three**, found by running the audit against them once Android
+proved it worth doing. Apple's versions are simpler - `parameters` and `track` are both settable
+properties, where Android needs `SetParameters` and `SetTrack` and a decision about ownership - but
+the shape of `SetParameters` is the same and for the same reason: the object handed back has to be
+the one the sender produced, because it carries the codecs and header extensions the far side
+negotiated, and a fresh one would send those back empty.
+
+Compile-verified only on Apple; neither platform runs here.
+
+The audit is worth repeating; the counting is not. 41 distinct members threw on Android and only
+16 were referenced anywhere in the connection or middleware layers - after this, 38 and 13. Of
+those 16, three were on paths that actually run, and all three are now implemented on all three
+native platforms. The rest can wait indefinitely, and the useful question for the next one is not
+"how many are left" but "does anything call it".
+
+The remaining referenced ones, for whoever asks that question next: `GetDisplayMedia` (a platform
+project of its own, above), `MediaRecorder`, `MediaStream.Create`, `GetCapabilities`,
+`GetConstraints`, and the data-channel properties `BinaryType`, `Protocol` and
+`BufferedAmountLowThreshold`. The data-channel three are referenced by `DataConsumer` and
+`DataProducer` as pass-through properties rather than invoked by anything, so they are referenced
+without being reached - which the audit cannot tell apart, and a reader has to check by hand.
 
 ### Binding surface is incomplete
 `NotImplementedException` counts under `WebRTCme/Platforms/`: ~47 Android, ~40 iOS, ~40 Mac

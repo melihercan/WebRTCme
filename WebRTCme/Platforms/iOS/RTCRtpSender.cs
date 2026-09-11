@@ -37,14 +37,64 @@ namespace WebRTCme.iOS
                 + "use RTCPeerConnection.GetStats() and select the sender entries from the report.");
         }
 
+        /// <summary>
+        /// Swaps what this sender is sending, keeping the negotiation it already has.
+        /// </summary>
+        /// <remarks>
+        /// A plain property assignment, where Android needs <c>SetTrack</c> and a decision about
+        /// ownership. A null track is meaningful: it stops the sender without renegotiating.
+        /// </remarks>
         public Task ReplaceTrack(IMediaStreamTrack newTrack = null)
         {
-            throw new NotImplementedException();
+            NativeObject.Track = newTrack is null
+                ? null
+                : ((MediaStreamTrack)newTrack).NativeObject as Webrtc.RTCMediaStreamTrack;
+
+            return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Applies changed encodings to the sender.
+        /// </summary>
+        /// <remarks>
+        /// The native parameters are fetched, mutated and assigned back. <c>parameters</c> is
+        /// declared <c>copy</c>, so what comes out is already safe to change - but it has to be
+        /// the object the sender produced, because it carries the codecs and header extensions the
+        /// far side negotiated, and a fresh one would send those back empty.
+        ///
+        /// Matched by rid where there is one, since a ladder's order is not guaranteed to survive
+        /// the round trip, and by position otherwise: a single encoding has no rid.
+        /// </remarks>
         public Task SetParameters(RTCRtpSendParameters parameters)
         {
-            throw new NotImplementedException();
+            if (parameters?.Encodings is null)
+                throw new ArgumentException("There are no encodings to apply.", nameof(parameters));
+
+            var native = NativeObject.Parameters
+                ?? throw new InvalidOperationException(
+                    "This sender reported no parameters, so there is nothing to change.");
+
+            var nativeEncodings = native.Encodings ?? Array.Empty<Webrtc.RTCRtpEncodingParameters>();
+
+            for (var index = 0; index < parameters.Encodings.Length; index++)
+            {
+                var encoding = parameters.Encodings[index];
+
+                var target = encoding.Rid is not null
+                    ? nativeEncodings.FirstOrDefault(candidate => candidate.Rid == encoding.Rid)
+                    : index < nativeEncodings.Length ? nativeEncodings[index] : null;
+
+                if (target is null)
+                    continue;
+
+                target.IsActive = encoding.Active;
+                target.MaxBitrateBps = encoding.MaxBitrate;
+                target.MaxFramerate = encoding.MaxFramerate;
+                target.ScaleResolutionDownBy = encoding.ScaleResolutionDownBy;
+            }
+
+            NativeObject.Parameters = native;
+            return Task.CompletedTask;
         }
 
         public void SetStreams(IMediaStream[] mediaStreams)

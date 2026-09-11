@@ -54,6 +54,28 @@ namespace WebRTCme
         }
 
         /// <summary>
+        /// What a camera track was opened with, for a caller asking a track about itself.
+        /// </summary>
+        /// <remarks>
+        /// The requested format, not a measured one, and not the format
+        /// <see cref="SelectFormat"/> settles on either - that choice is not made until a view
+        /// binds the track and capture starts, which can be long after anything asks this.
+        ///
+        /// Null for a track that is not a camera this opened, which the caller reports as "no
+        /// settings" rather than as zeroes.
+        /// </remarks>
+        public static (int Width, int Height, int FrameRate)? RequestedFormatFor(string trackId)
+        {
+            if (trackId is null || !_formatsByTrackId.TryGetValue(trackId, out var constraints))
+                return null;
+
+            return (
+                constraints.HasSize ? constraints.Width.Value : DefaultCaptureWidth,
+                constraints.HasSize ? constraints.Height.Value : DefaultCaptureHeight,
+                constraints.FrameRate ?? DefaultCaptureFrameRate);
+        }
+
+        /// <summary>
         /// The supported capture format closest to what was asked for, and a frame rate it allows.
         /// </summary>
         /// <remarks>
