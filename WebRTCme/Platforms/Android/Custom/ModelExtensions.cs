@@ -87,12 +87,18 @@ namespace WebRTCme.Android
                 ////ServerUrl = ???
             };
 
+        // Null means "no preference" on the way out as much as on the way in, and Java takes null
+        // for each of these. Unwrapping an unset one threw, so a caller who set only a bitrate
+        // could not produce at all.
         public static Webrtc.RtpParameters.Encoding ToNative(this RTCRtpEncodingParameters parameters) =>
-            new Webrtc.RtpParameters.Encoding(parameters.Rid, parameters.Active, 
-                (Java.Lang.Double)parameters.ScaleResolutionDownBy)
+            new Webrtc.RtpParameters.Encoding(parameters.Rid, parameters.Active,
+                parameters.ScaleResolutionDownBy is null
+                    ? null : (Java.Lang.Double)parameters.ScaleResolutionDownBy.Value)
             {
-                MaxBitrateBps = (Java.Lang.Integer)(int)parameters.MaxBitrate,
-                MaxFramerate = parameters.MaxFramerate == null ? null : (Java.Lang.Integer)(int)parameters.MaxFramerate,
+                MaxBitrateBps = parameters.MaxBitrate is null
+                    ? null : (Java.Lang.Integer)(int)parameters.MaxBitrate.Value,
+                MaxFramerate = parameters.MaxFramerate is null
+                    ? null : (Java.Lang.Integer)(int)parameters.MaxFramerate.Value,
             };
 
         //{
@@ -117,13 +123,19 @@ namespace WebRTCme.Android
             return new Webrtc.RtpTransceiver.RtpTransceiverInit(direction, streamIds, sendEncodings);
         }
 
+        // numChannels is null for every video codec, and clockRate can be unset too - both are
+        // boxed Java Integers, so unwrapping one without checking threw NullReferenceException.
+        // That happened on the first video codec in the list, which is why reading a sender's
+        // parameters failed on any peer connection actually carrying video.
         public static RTCRtpCodecParameters FromNative(this Webrtc.RtpParameters.Codec nativeCodecParameters) =>
             new RTCRtpCodecParameters
             {
                 PayloadType = (byte)nativeCodecParameters.PayloadType,
                 ////MimeType = "TODO: FIX ME",
-                ClockRate = (ulong)(int)nativeCodecParameters.ClockRate,
-                Channels = (ushort)(int)nativeCodecParameters.NumChannels,
+                ClockRate = nativeCodecParameters.ClockRate is null
+                    ? null : (ulong?)(int)nativeCodecParameters.ClockRate,
+                Channels = nativeCodecParameters.NumChannels is null
+                    ? null : (ushort?)(int)nativeCodecParameters.NumChannels,
                 ////SdpFmtpLine = "TODO: FIX ME"
             };
 
@@ -136,12 +148,26 @@ namespace WebRTCme.Android
                 Encrypted = nativeHeaderExtension.Encrypted
             };
 
+        // RtpParameters.Codecs and .Encodings are bound as the NON-generic
+        // System.Collections.IList, so "as List<T>" on one could never have succeeded - it yielded
+        // null rather than failing, and every call site below then threw ArgumentNullException
+        // from inside LINQ, naming the parameter "source" and pointing nowhere near the cast.
+        // That is what made RTCRtpSender.GetParameters unusable on Android, and with it simulcast
+        // layer control and any attempt to read back a negotiated ladder.
+        //
+        // HeaderExtensions is bound generically, hence the second overload.
+        static IEnumerable<T> NativeItems<T>(System.Collections.IList nativeList) =>
+            nativeList is null ? Enumerable.Empty<T>() : nativeList.Cast<T>();
+
+        static IEnumerable<T> NativeItems<T>(IList<T> nativeList) =>
+            nativeList ?? Enumerable.Empty<T>();
+
         public static RTCRtpReceiveParameters FromNativeToReceive(this Webrtc.RtpParameters nativeRtpParameters) =>
             new RTCRtpReceiveParameters
             {
-                Codecs = (nativeRtpParameters.Codecs as List<Webrtc.RtpParameters.Codec>)
+                Codecs = NativeItems<Webrtc.RtpParameters.Codec>(nativeRtpParameters.Codecs)
                     .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
-                HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
+                HeaderExtensions = NativeItems(nativeRtpParameters.HeaderExtensions)
                     .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
                 Rtcp = null//// TODO: CHECK THIS
             };
@@ -149,24 +175,30 @@ namespace WebRTCme.Android
         public static RTCRtpSendParameters FromNativeToSend(this Webrtc.RtpParameters nativeRtpParameters) =>
             new RTCRtpSendParameters
             {
-                Codecs = (nativeRtpParameters.Codecs as List<Webrtc.RtpParameters.Codec>)
+                Codecs = NativeItems<Webrtc.RtpParameters.Codec>(nativeRtpParameters.Codecs)
                     .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
-                HeaderExtensions = (nativeRtpParameters.HeaderExtensions as List<Webrtc.RtpParameters.HeaderExtension>)
+                HeaderExtensions = NativeItems(nativeRtpParameters.HeaderExtensions)
                     .Select(headerExtension => headerExtension.FromNative()).ToArray(),
                 Rtcp = null,//// TODO: CHECK THIS
-                Encodings = (nativeRtpParameters.Encodings as List<Webrtc.RtpParameters.Encoding>)
+                Encodings = NativeItems<Webrtc.RtpParameters.Encoding>(nativeRtpParameters.Encodings)
                     .Select(nativeEncoding => nativeEncoding.FromNative()).ToArray(),
                 TransactionId = nativeRtpParameters.TransactionId
             };
 
+        // Each of these is optional in Java and arrives as a boxed Integer or Double, so an unset
+        // one is null. Unwrapping without checking threw on any encoding that left a field to the
+        // encoder's discretion, which is most of them.
         public static RTCRtpEncodingParameters FromNative(this Webrtc.RtpParameters.Encoding nativeEncoding) =>
             new RTCRtpEncodingParameters
             {
                 Active = nativeEncoding.Active,
-                MaxBitrate = (ulong)(int)nativeEncoding.MaxBitrateBps,
-                MaxFramerate = (double)(int)nativeEncoding.MaxFramerate,
+                MaxBitrate = nativeEncoding.MaxBitrateBps is null
+                    ? null : (ulong?)(int)nativeEncoding.MaxBitrateBps,
+                MaxFramerate = nativeEncoding.MaxFramerate is null
+                    ? null : (double?)(int)nativeEncoding.MaxFramerate,
                 Rid = nativeEncoding.Rid,
-                ScaleResolutionDownBy = (double)nativeEncoding.ScaleResolutionDownBy
+                ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy is null
+                    ? null : (double?)(double)nativeEncoding.ScaleResolutionDownBy
             };
 
         public static RTCSessionDescriptionInit FromNative(this Webrtc.SessionDescription nativeDescription) =>

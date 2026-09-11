@@ -303,6 +303,7 @@ namespace WebRTCme.Connection.Services
                         }
 
                         if (webcamTrack is not null)
+                        {
                             _webcamProducer = await _sendTransport.ProduceAsync(new ProducerOptions
                             {
                                 Track = webcamTrack,
@@ -310,6 +311,9 @@ namespace WebRTCme.Connection.Services
                                 CodecOptions = codecOptions,
                                 Codec = codec
                             });
+
+                            LogNegotiatedEncodings(_webcamProducer, encodings);
+                        }
 
                   _logger.LogInformation("Connection completed");
 
@@ -717,6 +721,46 @@ namespace WebRTCme.Connection.Services
                 new() { ScaleResolutionDownBy = 2, MaxBitrate = 400000 },
                 new() { ScaleResolutionDownBy = 1, MaxBitrate = 1500000 }
             };
+        }
+
+        /// <summary>
+        /// Prints the ladder that was asked for beside the one the encoder actually has.
+        /// </summary>
+        /// <remarks>
+        /// Simulcast has produced two separate defects here already, and both were invisible until
+        /// somebody compared the request against the result. The encoder is free to ignore, clamp
+        /// or reorder what it is given, and it does so silently: the second bug showed up as a
+        /// negotiated layer that reported no frames at all.
+        ///
+        /// Only for a real ladder, and only once per producer, so a single-encoding call stays
+        /// quiet.
+        /// </remarks>
+        static void LogNegotiatedEncodings(Producer producer, RtpEncodingParameters[] requested)
+        {
+            if (producer is null || requested is null || requested.Length < 2)
+                return;
+
+            try
+            {
+                Echo("Simulcast asked for: " + string.Join(", ", requested.Select(encoding =>
+                    $"scale={encoding.ScaleResolutionDownBy} max={encoding.MaxBitrate}")));
+
+                var negotiated = producer.RtpSender?.GetParameters()?.Encodings;
+                if (negotiated is null)
+                {
+                    Echo("Simulcast negotiated: the sender reported no encodings at all.");
+                    return;
+                }
+
+                Echo("Simulcast negotiated: " + string.Join(", ", negotiated.Select(encoding =>
+                    $"rid={encoding.Rid} active={encoding.Active} " +
+                    $"scale={encoding.ScaleResolutionDownBy} max={encoding.MaxBitrate}")));
+            }
+            catch (Exception exception)
+            {
+                Echo($"Simulcast encodings could not be read: " +
+                    $"{exception.GetType().Name}: {exception.Message}");
+            }
         }
 
         // A ceiling rather than a fixed choice: the server clamps this to the top layer the

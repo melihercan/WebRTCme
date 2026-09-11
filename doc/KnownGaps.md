@@ -251,7 +251,7 @@ Where to look next, in order:
    first thing to try, and Docker Desktop on Windows runs a Linux VM - `--network host` does not
    mean there what it means on Linux, so this may need a Linux host to test at all.
 
-### Android funds only one simulcast layer
+### Android cannot encode simulcast with this libwebrtc build
 Found on 2026-09-11 while measuring the above, and separate from it. With `UseSimulcast: true` on
 the phone, its own send-side statistics read:
 
@@ -264,16 +264,61 @@ frame size. `r0` carries the whole picture at full 640x480. That is the unfunded
 described under "A simulcast ladder has to suit the camera": an encoding that is active and simply
 never funded, which looks nothing like throttling.
 
-Two things make it its own entry rather than a repeat of that one. The ladder there was wrong for
-the camera and was fixed by matching it to the track height, and on Blazor that fix works - the same
-code yields `r0 320x240` and `r1 640x480`, both encoding, both climbing. On Android the *order* is
-inverted as well: `r0` is the full-size layer rather than the reduced one. So the encodings are not
-reaching the encoder as written, and the consumer sees it - the server reports `bitrateByLayer: {}`
-for that producer, because only one stream ever carries anything.
+**Traced to the root on the same day, and it is not this project's code.** The chain, each step
+measured rather than reasoned:
 
-Not investigated further. It matters because the SFU cannot choose a layer that was never produced,
-so any conclusion about the server's layer selection drawn from an Android publisher is worthless
-until this is fixed.
+1. The ladder asked for is correct: `scale=2 max=400000, scale=1 max=1500000`, the same array that
+   works on Blazor.
+2. The ladder **negotiated** is correct too - the sender reports back
+   `rid=r0 active=True scale=2 max=400000, rid=r1 active=True scale=1 max=1500000`. So the
+   encodings reach the peer connection intact, and the earlier guess that they were being reordered
+   or dropped in the binding was wrong.
+3. The encoder ignores it anyway. `r0` encodes at the full 640x480 - its `scale=2` unapplied - and
+   `r1` never encodes a frame.
+4. `WebRtc.cs` builds the factory with `DefaultVideoEncoderFactory`, and **the AAR contains no
+   simulcast-capable factory at all**. The only encoder factories in
+   `Jars/libwebrtc.aar` are `DefaultVideoEncoderFactory`, `HardwareVideoEncoderFactory` and
+   `SoftwareVideoEncoderFactory`. `SimulcastVideoEncoderFactory` - the class that wraps encoders in
+   a `SimulcastEncoderAdapter` - is not there. Google's stock Android build does not ship it; the
+   forks that support simulcast add it.
+
+So Android can negotiate a ladder and can only ever encode one stream of it. **The fix is a
+libwebrtc AAR that includes `SimulcastVideoEncoderFactory`**, or a simulcast-capable
+`VideoEncoderFactory` written against the binding - either of which is a change to the native
+dependency, not to this code.
+
+Until then, asking for simulcast on Android is actively worse than not asking: the SFU is told the
+producer has two spatial layers, and one of them never carries anything. `UseSimulcast: false` is
+right for the phone for that reason as well as the SFU one.
+
+`LogNegotiatedEncodings` prints the requested ladder beside the negotiated one at produce time,
+which is what separated step 2 from step 3 here. Reach for it first next time simulcast misbehaves:
+it tells you immediately whether to look at this code or below it.
+
+**What this does *not* invalidate:** the "SFU will not climb" measurements were taken with Blazor
+publishing and Android consuming, and Blazor's ladder is genuinely two layers. Only the later run
+with Android as publisher was measuring a producer that could publish one.
+
+### Three Android binding conversions could never have worked - fixed 2026-09-11
+Found while chasing the above, and the reason it took as long as it did.
+
+`RTCRtpSender.GetParameters()` threw on Android every single time, so nothing could read back a
+negotiated ladder - and `SetMaxOutgoingSpatialLayerAsync`, added earlier the same day, was broken
+on Android for exactly the same reason it had been on Blazor.
+
+- `RtpParameters.Codecs` and `.Encodings` are bound as the **non-generic**
+  `System.Collections.IList`. `as List<T>` on one of those yields null rather than failing, so
+  `FromNativeToSend` and `FromNativeToReceive` threw `ArgumentNullException` from inside LINQ,
+  naming the parameter `source` and pointing nowhere near the cast. Now read with `Cast<T>()`.
+- `Codec.FromNative` unwrapped `NumChannels` and `ClockRate` without checking. Both are boxed Java
+  `Integer`s and `numChannels` is **null for every video codec**, so this threw
+  `NullReferenceException` on the first video codec in the list - which is to say on any peer
+  connection actually carrying video.
+- The encoding conversions unwrapped `MaxBitrate`, `MaxFramerate` and `ScaleResolutionDownBy` the
+  same way, in both directions. Null means "no preference" on the way out as much as on the way in.
+
+The shape of the first one is worth remembering: an `as` cast that cannot succeed does not fail,
+it produces null, and the exception then surfaces several frames away wearing someone else's name.
 
 **Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
 library change; anything consuming the package can still turn it on. It gives up per-consumer
