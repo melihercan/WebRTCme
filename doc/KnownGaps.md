@@ -25,6 +25,42 @@ What is genuinely missing is a **second** producer for the share, the way medias
 one with `appData { share: true }`. Track replacement means the screen arrives *instead of* the
 camera, so a peer cannot see both at once. That is a feature, not a repair.
 
+**What actually stands in the way**, established 2026-09-11, because it is not the producer side:
+
+`MediaSoupConnection`'s `newConsumer` handler pairs a peer's consumers into one stream with
+
+```csharp
+var audioConsumer = consumers.FirstOrDefault(c => c.Kind == MediaKind.Audio);
+var videoConsumer = consumers.FirstOrDefault(c => c.Kind == MediaKind.Video);
+// TODO: ASSUMED ONLY 1 video and 1 audio trak per peer.
+if (audioConsumer is not null && videoConsumer is not null)
+```
+
+and emits one `PeerJoined` carrying that stream. A second video producer from the same peer would
+arrive as a second video consumer, `FirstOrDefault` would keep returning the first, and the share
+would never reach the UI no matter how correctly it was produced. So the feature is really "one
+tile per peer becomes one tile per peer *per source*", which runs through the response type, the
+labels, and `MediaStreamManager` - it keys tiles by label and removes by peer name, so two tiles
+from one peer need distinct labels and a matching teardown.
+
+**That rework is the same rework the UI refactor wants**, which is why it is worth doing together
+rather than twice.
+
+### An audio-only peer never appears - found 2026-09-11
+Same block, and a live bug rather than a missing feature. The guard is `audioConsumer is not null
+&& videoConsumer is not null`, so a peer that publishes audio and no video produces no
+`PeerJoined` at all: no tile, no name, nothing. It is not in the room as far as every other client
+is concerned, while its audio plays.
+
+Reachable three ways: a device with no camera, `MediaSoupServer:AudioOnly`, and a peer that joins
+with the camera already off. The author knew - the line above the guard reads
+`// TODO: WE can have audio only calls!!!`.
+
+Not fixed here, deliberately. The obvious patch - announce on the first consumer instead of the
+pair - changes when the stream is handed to the UI and what it contains at that moment, and the
+platform views bind a stream once. Getting that wrong turns a peer that is invisible into a peer
+that is visible and silent, which is worse. It belongs with the per-source rework above.
+
 ### Mute / pause / resume - wired and verified peer-to-peer 2026-09-11
 Was: the send side did not exist. `IConnection` had no mute, and the `PauseProducer` /
 `ResumeProducer` calls in `MediaSoupConnection` were commented out, so muting locally never
