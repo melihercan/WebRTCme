@@ -377,6 +377,33 @@ namespace WebRTCme.Connection.MediaSoup
             }
         }
 
+        public async Task<Result<Unit>> NotifyAsync(string method, object data)
+        {
+            Registry.Logger.LogInformation($"######## NotifyAsync: {method}");
+
+            var cts = _cts;
+            if (_webSocket is null || cts is null || cts.IsCancellationRequested)
+                return Result<Unit>.Error("Not connected to the mediasoup server");
+
+            try
+            {
+                // No id and no completion source: a protoo notification is never answered, so
+                // there is nothing to correlate a response against and nothing to wait for.
+                await SendAsync(new ProtooNotification
+                {
+                    Notification = true,
+                    Method = method,
+                    Data = data
+                }, cts.Token);
+
+                return Result<Unit>.Ok(Unit.Default);
+            }
+            catch (Exception ex)
+            {
+                return Result<Unit>.Error(ex.Message);
+            }
+        }
+
         Task SendAsync(object message, CancellationToken cancellationToken)
         {
             var json = JsonSerializer.Serialize(message, JsonHelper.WebRtcJsonSerializerOptions);

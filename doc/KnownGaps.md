@@ -42,18 +42,36 @@ relays it; nothing computes it, so it is always sent as false.
 "How to tell a mute actually happened" below - it is not as obvious as it sounds, and the first
 attempt at verifying it proved nothing.
 
-The mediasoup half is still unexercised: same interface, different implementation.
+**The mediasoup half is verified too** (Android/Windows, 2026-09-11), and it needed a protocol fix
+first. `pauseProducer` was being sent as a protoo *request* and the server answered `invalid protoo
+request method`. It is a **notification**: the demo server keeps two separate dispatchers, and
+which side a method falls on has nothing to do with how important it is - pausing a producer is a
+notification, while asking for transport statistics is a request.
+
+```
+14:17:55  <== request      pauseProducer      -> error: invalid protoo request method
+14:40:21  <·· notification pauseProducer      -> consumerPaused to the other peer
+```
+
+The notifications are `closeProducer`, `pauseProducer`, `resumeProducer`, `pauseConsumer`,
+`resumeConsumer`, `setConsumerPreferredLayers`, `setConsumerPriority`, `requestConsumerKeyFrame`
+and `changeDisplayName`; everything else this client sends is a request. `MethodName` now groups
+its constants that way. Sending one the wrong way fails in both directions and neither failure is
+obvious: as a request it is rejected, and as a notification it is silently ignored.
+
+`IMediaSoupServerApi` had no way to send a notification at all - only `ApiAsync`, which waits for a
+response - so `NotifyAsync` was added alongside it.
 
 ### ICE restart - implemented but unreachable
 `Handler.RestartIceAsync` and `Transport.RestartIceAsync` exist and are ported. Nothing calls
 them: `IConnection` still has no route to a restart, and `MediaSoupConnection` never invokes one.
 A connection that loses its ICE path stays lost.
 
-Unlike mute, this is not simply a matter of widening the interface. The mediasoup path needs a
-`restartIce` request that `MethodName` does not list and neither request nor response type exists
-for, and the peer-to-peer path needs an offer with `iceRestart` set plus a rule for which side
-starts it. Both are untested territory, so this stayed out of the mute change rather than being
-added blind.
+Unlike mute, this is not simply a matter of widening the interface - but it is less work than it
+first looked. **The server already supports it**: `restartIce` is a protoo *request* in the demo
+server's dispatcher, alongside `join` and `produce`, and `MethodName.RestartIce` now names it. What
+is missing on the mediasoup side is the request and response types and a caller. The peer-to-peer
+path still needs an offer with `iceRestart` set plus a rule for which side starts it.
 
 ### Simulcast layer control - absent, and it shows
 The client produces simulcast encodings, but there is no `setPreferredLayers` or
@@ -272,8 +290,12 @@ other client.
 
 Not verified, in rough order of risk:
 
-- **Mute on the mediasoup path.** Different implementation - producer pause plus a server request.
-  The SFU itself now runs again, on Android and Windows, but nothing has muted across it.
+- **A peer consumed before it is announced has no display name.** `ReportPeerMedia` reports
+  `peer.Peer?.DisplayName`, and on the mediasoup path that is routinely null: the peer record is
+  created on demand when its consumers arrive, and a client that joined an occupied room never
+  receives `newPeer` for the peers already in it. The 2026-09-11 call showed `APP PeerMedia` with
+  an empty name where the peer-to-peer path showed `Windows`. Cosmetic today, because nothing keys
+  off it, but a UI labelling a tile from that name would show a blank.
 - **The Mac Catalyst slice of a package built on Windows is still wrong.** See "The framework that
   fits neither platform" below: the repository is now correct for building from source on either
   OS, but a `.resources.zip` produced on Windows carries the flat framework, which macOS refuses.

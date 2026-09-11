@@ -1125,9 +1125,10 @@ namespace WebRTCme.Connection.Services
         /// consumer; the server request is what actually stops the forwarding and makes the other
         /// peers see the pause, through their own <c>consumerPaused</c> notification.
         ///
-        /// Local first when pausing and local first when resuming, matching mediasoup-demo: on the
-        /// way down that stops the media before the server stops accepting it, and on the way up
-        /// the track is live before the server is told to forward it again.
+        /// The server is told first and the local producer changed afterwards. A notification is
+        /// not acknowledged, so the only failure that can be reported is a failure to send, and
+        /// pausing locally before that would leave this client believing it had muted while the
+        /// SFU carried on forwarding.
         /// </remarks>
         public async Task SetOutgoingMediaEnabledAsync(MediaStreamTrackKind kind, bool enabled)
         {
@@ -1145,20 +1146,26 @@ namespace WebRTCme.Connection.Services
             _logger.LogInformation(
                 $"######## Outgoing {kind} {(enabled ? "unmuted" : "muted")} - producer:{producer.Id}");
 
+            // Notifications, not requests. The server dispatches these two through
+            // handleProtooNotification, so sending them as requests is answered with "unknown
+            // request method 'pauseProducer'" - which is what happened the first time this ran
+            // against a real server, and reads like a version mismatch rather than a shape error.
+            var result = enabled
+                ? await _mediaSoupServerApi.NotifyAsync(MethodName.ResumeProducer,
+                      new ResumeProducerRequest { ProducerId = producer.Id })
+                : await _mediaSoupServerApi.NotifyAsync(MethodName.PauseProducer,
+                      new PauseProducerRequest { ProducerId = producer.Id });
+
+            if (!result.IsOk)
+                throw new Exception(result.ErrorMessage);
+
+            // Local state last: the server has no acknowledgement to give, so the only failure
+            // that can be reported is a failure to send, and pausing locally before that would
+            // leave this client muted while the SFU kept forwarding.
             if (enabled)
-            {
                 producer.Resume();
-                _ = ParseResponse(MethodName.ResumeProducer,
-                    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
-                        new ResumeProducerRequest { ProducerId = producer.Id }));
-            }
             else
-            {
                 producer.Pause();
-                _ = ParseResponse(MethodName.PauseProducer,
-                    await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
-                        new PauseProducerRequest { ProducerId = producer.Id }));
-            }
         }
 
         Producer ProducerFor(MediaStreamTrackKind kind) => kind switch
@@ -1214,30 +1221,14 @@ namespace WebRTCme.Connection.Services
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceResponse.ProducerId;
 
-                case MethodName.PauseProducer:
-                    var pauseProducerResponse = JsonSerializer.Deserialize<PauseProducerResponse>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return pauseProducerResponse;
-
-                case MethodName.ResumeProducer:
-                    var resumeProducerResponse = JsonSerializer.Deserialize<ResumeProducerResponse>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return resumeProducerResponse;
+                // PauseProducer, ResumeProducer, PauseConsumer and ResumeConsumer used to be
+                // handled here. They are notifications, not requests, so they have no response to
+                // parse and cannot reach this switch.
 
                 case MethodName.ProduceData:
                     var produceDataResponse = JsonSerializer.Deserialize<ProduceDataResponse>(
                         json, JsonHelper.WebRtcJsonSerializerOptions);
                     return produceDataResponse.DataProducerId;
-
-                case MethodName.PauseConsumer:
-                    var pauseConsumerResponse = JsonSerializer.Deserialize<PauseConsumerResponse>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return pauseConsumerResponse;
-
-                case MethodName.ResumeConsumer:
-                    var resumeConsumerResponse = JsonSerializer.Deserialize<ResumeConsumerResponse>(
-                        json, JsonHelper.WebRtcJsonSerializerOptions);
-                    return resumeConsumerResponse;
 
                 case MethodName.GetTransportStats:
                     // Stats arrive wrapped in a 'stats' member rather than as a bare array.
