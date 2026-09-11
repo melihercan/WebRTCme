@@ -65,6 +65,14 @@ public static partial class Interop
     public const int MediaKindAudio = 0;
     public const int MediaKindVideo = 1;
 
+    // W3C RTCRtpTransceiverDirection. Stopped is reported but never accepted: a transceiver is
+    // stopped by stopping it, not by being described as stopped.
+    public const int TransceiverDirectionSendRecv = 0;
+    public const int TransceiverDirectionSendOnly = 1;
+    public const int TransceiverDirectionRecvOnly = 2;
+    public const int TransceiverDirectionInactive = 3;
+    public const int TransceiverDirectionStopped = 4;
+
     public const int DataChannelStateConnecting = 0;
     public const int DataChannelStateOpen = 1;
     public const int DataChannelStateClosing = 2;
@@ -353,6 +361,132 @@ public static partial class Interop
     [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_release")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void RtpSenderRelease(IntPtr sender);
+
+    /// <summary>
+    /// Audio or video. Needed for a track reached through a receiver, which arrived through
+    /// negotiation and so carries no kind the caller already knows.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_media_track_get_kind")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int MediaTrackGetKind(IntPtr track, out int kind);
+
+    /// <summary>
+    /// getStats() narrowed to one sender, which the connection-wide call cannot do.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_get_stats")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int RtpSenderGetStats(
+        IntPtr pc,
+        IntPtr sender,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onSuccess,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onFailure,
+        IntPtr userData);
+
+    // --------------------------------------------------------- transceivers
+    //
+    // The unified-plan view: one transceiver per m-section, pairing a sender
+    // with a receiver. Anything that negotiates per m-section needs these --
+    // reading a mid, asking for specific simulcast encodings, or matching an
+    // incoming stream to the section carrying it. Without them addTrack is the
+    // only way to send, which is why mediasoup could not run on Windows.
+
+    /// <summary>
+    /// One simulcast layer. Optional members use a sentinel rather than a nullable, to keep the
+    /// struct blittable: -1 for the integers, 0 for the scale factor, null for the strings.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RtpEncoding
+    {
+        public IntPtr Rid;                    // UTF-8, or Zero
+        public int Active;                    // 0 or 1
+        public int MaxBitrate;                // bits per second, or -1
+        public int MaxFramerate;              // or -1
+        public double ScaleResolutionDownBy;  // 0 means unset
+        public IntPtr ScalabilityMode;        // UTF-8, or Zero
+    }
+
+    /// <param name="kind">Ignored when <paramref name="track"/> is non-zero.</param>
+    /// <param name="track">Zero adds a transceiver of <paramref name="kind"/> with no track,
+    /// which is how the platform's encoding capabilities are discovered.</param>
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_add_transceiver")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int PeerConnectionAddTransceiver(
+        IntPtr pc,
+        int kind,
+        IntPtr track,
+        int direction,
+        IntPtr* streamIds,
+        int streamIdCount,
+        RtpEncoding* encodings,
+        int encodingCount,
+        out IntPtr transceiver);
+
+    /// <summary>
+    /// Two-call: a null buffer counts, then a buffer of at least that size fills. A buffer that is
+    /// too small is rejected having written nothing, so a caller that raced a renegotiation can
+    /// simply ask again.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_get_transceivers")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int PeerConnectionGetTransceivers(
+        IntPtr pc, IntPtr* buffer, int capacity, out int count);
+
+    /// <summary>
+    /// Null until the local description naming it has been applied, reported as
+    /// <c>RTC_ERR_NOT_FOUND</c> rather than as an empty string. Free with <c>StringFree</c>.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_get_mid")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverGetMid(IntPtr transceiver, out IntPtr mid);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_get_direction")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverGetDirection(IntPtr transceiver, out int direction);
+
+    /// <summary>What negotiation settled on; <c>RTC_ERR_NOT_FOUND</c> until an answer arrives.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_get_current_direction")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverGetCurrentDirection(IntPtr transceiver,
+                                                                out int direction);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_set_direction")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverSetDirection(IntPtr transceiver, int direction);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_get_sender")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverGetSender(IntPtr transceiver, out IntPtr sender);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_get_receiver")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverGetReceiver(IntPtr transceiver, out IntPtr receiver);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_stop")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpTransceiverStop(IntPtr transceiver);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_transceiver_release")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void RtpTransceiverRelease(IntPtr transceiver);
+
+    // ------------------------------------------------------------ receivers
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_receiver_get_track")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int RtpReceiverGetTrack(IntPtr receiver, out IntPtr track);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_receiver_release")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void RtpReceiverRelease(IntPtr receiver);
+
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_receiver_get_stats")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int RtpReceiverGetStats(
+        IntPtr pc,
+        IntPtr receiver,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onSuccess,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onFailure,
+        IntPtr userData);
 
     // -------------------------------------------------------- data channels
     //

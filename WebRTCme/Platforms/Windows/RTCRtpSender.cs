@@ -13,10 +13,16 @@ namespace WebRTCme.Windows;
 /// </remarks>
 internal sealed class RTCRtpSender : IRTCRtpSender
 {
+    private readonly RTCPeerConnection _peerConnection;
     private IntPtr _handle;
 
-    internal RTCRtpSender(IntPtr handle, IMediaStreamTrack track)
+    /// <summary>
+    /// The peer connection is held because it, not the sender, owns stats collection: WebRTC's
+    /// per-sender getStats is a method on the connection taking the sender as a selector.
+    /// </summary>
+    internal RTCRtpSender(RTCPeerConnection peerConnection, IntPtr handle, IMediaStreamTrack track)
     {
+        _peerConnection = peerConnection;
         _handle = handle;
         Track = track;
     }
@@ -72,14 +78,14 @@ internal sealed class RTCRtpSender : IRTCRtpSender
     public RTCRtpSendParameters GetParameters() =>
         throw new NotSupportedException("Send parameters are not exposed by the Windows binding.");
 
-    // The shim has no stats entry point: none of its rtc_* exports touch stats, and libwebrtc's
-    // own GetStats takes a C++ collector callback, which P/Invoke cannot supply. Reaching stats
-    // here means adding an export to WebRtcInterop.dll, whose source lives in the WebRTCnative
-    // repository rather than this one.
-    public Task<IRTCStatsReport> GetStats() =>
-        throw new NotSupportedException(
-            "Stats are not exposed by the Windows binding: WebRtcInterop.dll has no stats "
-            + "entry point. Adding one requires a change to the native shim.");
+    /// <summary>
+    /// getStats() for this sender alone, rather than the whole connection.
+    /// </summary>
+    public Task<IRTCStatsReport> GetStats()
+    {
+        ObjectDisposedException.ThrowIf(_handle == IntPtr.Zero, this);
+        return _peerConnection.GetSenderStats(_handle);
+    }
 
     public Task SetParameters(RTCRtpSendParameters parameters) =>
         throw new NotSupportedException(

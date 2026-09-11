@@ -233,7 +233,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
                                    out var handle),
             $"add track '{track.Id}' to the peer connection");
 
-        var sender = new RTCRtpSender(handle, track);
+        var sender = new RTCRtpSender(this, handle, track);
         lock (_senders)
             _senders.Add(sender);
         return sender;
@@ -593,30 +593,190 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
     public IRTCSctpTransport Sctp => null;
 
-    public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init = null) =>
-        throw new NotSupportedException("Transceivers are not exposed by the Windows binding.");
+    // ---- transceivers -------------------------------------------------------
+    //
+    // The unified-plan view of the connection. These used to throw, which made this binding
+    // unusable by anything negotiating per m-section -- mediasoup reads a mid, asks for simulcast
+    // encodings, and matches an incoming stream to the section carrying it, and none of that is
+    // reachable through addTrack alone.
 
-    public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track, RTCRtpTransceiverInit init = null) =>
-        throw new NotSupportedException("Transceivers are not exposed by the Windows binding.");
+    public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind,
+                                             RTCRtpTransceiverInit init = null) =>
+        AddTransceiver(kind, track: null, init);
 
-    public IRTCRtpTransceiver[] GetTransceivers() =>
-        throw new NotSupportedException("Transceivers are not exposed by the Windows binding.");
+    public IRTCRtpTransceiver AddTransceiver(IMediaStreamTrack track,
+                                             RTCRtpTransceiverInit init = null)
+    {
+        ArgumentNullException.ThrowIfNull(track);
 
-    public IRTCRtpReceiver[] GetReceivers() =>
-        throw new NotSupportedException("Receivers are not exposed by the Windows binding.");
+        if (track is not MediaStreamTrack windowsTrack)
+            throw new ArgumentException(
+                $"Track must come from the Windows binding, got {track.GetType().FullName}.",
+                nameof(track));
+
+        return AddTransceiver(track.Kind, windowsTrack, init);
+    }
+
+    private unsafe IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind,
+                                                     MediaStreamTrack track,
+                                                     RTCRtpTransceiverInit init)
+    {
+        ThrowIfClosed();
+
+        // SendRecv is the W3C default for addTransceiver, and it is what a caller that passes no
+        // init gets everywhere else.
+        var direction = RTCRtpTransceiver.FromDirection(
+            init?.Direction ?? RTCRtpTransceiverDirection.SendRecv);
+
+        var streams = init?.Streams ?? [];
+        var encodings = init?.SendEncodings ?? [];
+
+        // Every string is pinned for the duration of the call and freed afterwards: the native
+        // side copies what it needs into WebRTC's own structures before returning, so nothing
+        // here has to outlive the call.
+        var allocations = new List<IntPtr>();
+        try
+        {
+            var streamIds = stackalloc IntPtr[Math.Max(streams.Length, 1)];
+            for (var i = 0; i < streams.Length; i++)
+            {
+                var id = Marshal.StringToCoTaskMemUTF8(streams[i].Id ?? string.Empty);
+                allocations.Add(id);
+                streamIds[i] = id;
+            }
+
+            var native = stackalloc RtpEncoding[Math.Max(encodings.Length, 1)];
+            for (var i = 0; i < encodings.Length; i++)
+                native[i] = ToNative(encodings[i], allocations);
+
+            WebRtcRuntime.Check(
+                PeerConnectionAddTransceiver(
+                    _handle,
+                    kind == MediaStreamTrackKind.Video ? MediaKindVideo : MediaKindAudio,
+                    track?.Handle ?? IntPtr.Zero,
+                    direction,
+                    streams.Length == 0 ? null : streamIds,
+                    streams.Length,
+                    encodings.Length == 0 ? null : native,
+                    encodings.Length,
+                    out var handle),
+                $"add a {kind} transceiver");
+
+            return new RTCRtpTransceiver(this, handle);
+        }
+        finally
+        {
+            foreach (var allocation in allocations)
+                Marshal.FreeCoTaskMem(allocation);
+        }
+    }
 
     /// <summary>
-    /// The shim collects for the whole connection; rtc_peer_connection_get_stats takes no
-    /// selector, and neither does anything else it exports.
+    /// Maps one encoding to the ABI, recording any string it allocates so the caller can free it.
     /// </summary>
-    public Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector) =>
-        selector is null
-            ? GetStats()
-            : throw new NotSupportedException(
-                "Selecting statistics by track is not supported by the Windows binding; "
-                + "use GetStats() and select the entries from the report.");
+    /// <remarks>
+    /// The optional members cross as sentinels rather than as nullables, to keep the struct
+    /// blittable: -1 for the integers, 0 for the scale factor. A legitimate scale factor cannot be
+    /// 0 because it is used as a divisor, and a bitrate cannot be negative, so neither sentinel
+    /// collides with a real value.
+    /// </remarks>
+    private static RtpEncoding ToNative(RTCRtpEncodingParameters encoding, List<IntPtr> allocations)
+    {
+        IntPtr Utf8(string value)
+        {
+            if (value is null)
+                return IntPtr.Zero;
+            var pointer = Marshal.StringToCoTaskMemUTF8(value);
+            allocations.Add(pointer);
+            return pointer;
+        }
 
-    public unsafe Task<IRTCStatsReport> GetStats()
+        return new RtpEncoding
+        {
+            Rid = Utf8(encoding.Rid),
+            Active = encoding.Active ? 1 : 0,
+            // Clamped rather than wrapped: a bitrate past int.MaxValue is 2 Gbit/s, which no
+            // encoder will honour anyway, and silently negating it would disable the layer.
+            MaxBitrate = encoding.MaxBitrate is null
+                ? -1
+                : (int)Math.Min(encoding.MaxBitrate.Value, int.MaxValue),
+            MaxFramerate = encoding.MaxFramerate is null
+                ? -1
+                : (int)Math.Round(encoding.MaxFramerate.Value),
+            ScaleResolutionDownBy = encoding.ScaleResolutionDownBy ?? 0.0,
+            ScalabilityMode = IntPtr.Zero
+        };
+    }
+
+    /// <summary>
+    /// Every transceiver on the connection, including those the remote end created.
+    /// </summary>
+    /// <remarks>
+    /// Counted first, then fetched, and the count is re-checked: a renegotiation landing between
+    /// the two calls would otherwise overflow the buffer. The native side refuses a buffer that is
+    /// too small having written nothing, so retrying is safe rather than merely likely to work.
+    /// </remarks>
+    public unsafe IRTCRtpTransceiver[] GetTransceivers()
+    {
+        ThrowIfClosed();
+
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            WebRtcRuntime.Check(PeerConnectionGetTransceivers(_handle, null, 0, out var count),
+                                "count the transceivers");
+            if (count == 0)
+                return [];
+
+            var handles = new IntPtr[count];
+            int status;
+            fixed (IntPtr* buffer = handles)
+                status = PeerConnectionGetTransceivers(_handle, buffer, count, out _);
+
+            // The one case worth retrying: the set grew between the two calls.
+            if (status == ErrInvalidArg)
+                continue;
+
+            WebRtcRuntime.Check(status, "get the transceivers");
+
+            var transceivers = new IRTCRtpTransceiver[count];
+            for (var i = 0; i < count; i++)
+                transceivers[i] = new RTCRtpTransceiver(this, handles[i]);
+            return transceivers;
+        }
+
+        throw new InvalidOperationException(
+            "The transceiver set kept changing while it was being read.");
+    }
+
+    /// <summary>
+    /// The receiving half of every transceiver, which is what the W3C getReceivers() is.
+    /// </summary>
+    public IRTCRtpReceiver[] GetReceivers() =>
+        [.. GetTransceivers().Select(transceiver => transceiver.Receiver)];
+
+    /// <summary>getStats() narrowed to one sender. Called by <see cref="RTCRtpSender"/>.</summary>
+    internal unsafe Task<IRTCStatsReport> GetSenderStats(IntPtr sender) =>
+        CollectStats((pc, success, failure, userData) =>
+                         RtpSenderGetStats(pc, sender, success, failure, userData),
+                     "collect sender statistics");
+
+    /// <summary>getStats() narrowed to one receiver. Called by <see cref="RTCRtpReceiver"/>.</summary>
+    internal unsafe Task<IRTCStatsReport> GetReceiverStats(IntPtr receiver) =>
+        CollectStats((pc, success, failure, userData) =>
+                         RtpReceiverGetStats(pc, receiver, success, failure, userData),
+                     "collect receiver statistics");
+
+    private unsafe delegate int StatsRequest(
+        IntPtr pc,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onSuccess,
+        delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> onFailure,
+        IntPtr userData);
+
+    /// <summary>
+    /// The bookkeeping shared by all three getStats entry points: allocate the completion, hand
+    /// its handle across, and free it again if the call never started.
+    /// </summary>
+    private unsafe Task<IRTCStatsReport> CollectStats(StatsRequest request, string what)
     {
         ThrowIfClosed();
 
@@ -624,17 +784,34 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
             TaskCreationOptions.RunContinuationsAsynchronously);
         var context = GCHandle.Alloc(completion);
 
-        var status = PeerConnectionGetStats(_handle, &StatsSucceeded, &StatsFailed,
-                                            GCHandle.ToIntPtr(context));
+        var status = request(_handle, &StatsSucceeded, &StatsFailed, GCHandle.ToIntPtr(context));
 
+        // The callbacks free the handle; nothing will call them if the request was refused.
         if (status != Ok)
         {
             context.Free();
-            WebRtcRuntime.Check(status, "collect statistics");
+            WebRtcRuntime.Check(status, what);
         }
 
         return completion.Task;
     }
+
+    /// <summary>
+    /// Selecting by track is still not supported, although senders and receivers now can be:
+    /// the ABI's selectors are a sender or a receiver, and a track maps to neither on its own —
+    /// one track can be sent by several senders.
+    /// </summary>
+    public Task<IRTCStatsReport> GetStats(IMediaStreamTrack selector) =>
+        selector is null
+            ? GetStats()
+            : throw new NotSupportedException(
+                "Selecting statistics by track is not supported by the Windows binding; "
+                + "select on the sender or receiver, or use GetStats() and filter the report.");
+
+    public unsafe Task<IRTCStatsReport> GetStats() =>
+        CollectStats((pc, success, failure, userData) =>
+                         PeerConnectionGetStats(pc, success, failure, userData),
+                     "collect statistics");
 
     public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
         throw new NotSupportedException("Certificate generation is not exposed by the Windows binding.");
