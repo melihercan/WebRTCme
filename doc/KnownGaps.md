@@ -16,7 +16,8 @@ and none of them is a small change:
 
 | | where the work is |
 | --- | --- |
-| **`getDisplayMedia` on Android, iOS, Mac Catalyst** | Platform projects - a MediaProjection foreground service, a ReplayKit broadcast extension. Sharing works everywhere it can *start*. |
+| **`getDisplayMedia` on iOS and Mac Catalyst** | A platform project - ReplayKit and a broadcast extension. **Android is done** (2026-09-11). |
+| **A peer's tiles going blank when the app is backgrounded** | Unreproduced. Seen once with the demo app behind WhatsApp while sharing; the obvious suspect is Android suspending a backgrounded app, and the obvious suspect has been wrong all day. |
 | **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
 | **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
@@ -39,12 +40,54 @@ rather than its contents.
 Most of these are now fixed. They are kept because the interesting part is rarely the fix - it is
 what the fault looked like beforehand, which in almost every case here was "nothing at all".
 
-### Screen sharing - its own source on the SFU path 2026-09-11
+### Screen sharing - its own source on the SFU path, and working on Android 2026-09-11
 `ILocalMediaStream.GetDisplayMediaStreamAync` and `CallViewModel` both wire it up, and
-`MediaDevices.GetDisplayMedia` is implemented for Blazor and Windows. On **Android, iOS and Mac
-Catalyst it throws `NotImplementedException`** - Android needs a MediaProjection foreground
-service, Apple needs ReplayKit and a broadcast extension, so neither is a small addition. That is
-the whole of the limitation: sharing can only *start* where `getDisplayMedia` exists.
+`MediaDevices.GetDisplayMedia` is implemented for Blazor, Windows and **Android**. On **iOS and Mac
+Catalyst it still throws `NotImplementedException`** - Apple needs ReplayKit and a broadcast
+extension, which is not a small addition. Sharing can only *start* where `getDisplayMedia` exists.
+
+**Android, added 2026-09-11.** `ScreenCapturerAndroid` is in this AAR and already bound, so the
+missing pieces were the consent flow, the foreground service and the wiring - not the capture.
+
+The consent flow is a translucent activity belonging to the library rather than a call into the
+host app's activity. Screen capture permission can only be requested with
+`startActivityForResult`, and the result only reaches the activity that asked; the alternative is
+every consuming app overriding `OnActivityResult` and forwarding it, which would make this
+something an app has to wire up rather than something it can call.
+
+Three things went wrong on the device before it worked, each independently, and the third is the
+one worth remembering:
+
+- **The service never completed `startForeground`**, so Android killed the process with
+  `ForegroundServiceDidNotStartInTimeException`. The type has to be passed explicitly from Android
+  10 - the two-argument overload leaves the service typeless, and a typeless service is not one a
+  projection will accept.
+- **`POST_NOTIFICATIONS` was never requested.** A foreground service must post a notification, and
+  Android 13 made that a runtime permission.
+- **The projection was taken immediately after `startForegroundService`**, which returns before the
+  service reaches the foreground. That fails with *"Media projections require a foreground service
+  of type FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION"* - which reads as a missing manifest entry and
+  is nothing of the kind. The manifest was correct throughout; the service simply had not got there
+  yet. The service now signals when it is genuinely foregrounded and `GetDisplayMedia` waits.
+
+### Stopping a share did not stop the capture - fixed 2026-09-11
+Worse than an ordinary bug and worth its own entry. Pressing "stop sharing" closed the producer,
+withdrew the peer's tile and flipped the button back - and left the `MediaProjection` live. The
+phone carried on recording, with only a notification to show for it. Confirmed from
+`dumpsys media_projection`, which still reported a session against WhatsApp's task after the app
+believed sharing had ended.
+
+The mistake was treating "stop sending the screen" and "stop capturing the screen" as one action.
+They are not, and nothing in the type system says so. Stopping a share now stops the tracks, and
+stopping a screen track tears down the capturer and the foreground service with it - which is also
+what makes a browser's "sharing your screen" bar go away on Blazor and Windows, where the same
+omission was quietly leaving capture running.
+
+The other direction needed wiring too: ending a share from Android's own control now ends the
+track, so the far side does not sit on a frozen last frame with nothing to say the share is over.
+
+**Anything that starts a capture owns releasing it.** If a stop path does not end with the device
+no longer recording, it is not a stop path.
 
 This entry used to claim screen sharing did not reach the SFU path at all. **That was wrong.**
 `CallViewModel` shares by swapping tracks through `ReplaceOutgoingTrackAsync`, which
@@ -97,6 +140,25 @@ regardless - the peer connection plays it, not the view.
 `OnPeerClosed` reads a peer's tile labels *before* closing its consumers, since closing them is
 what makes the answer unavailable, and retires every one - a sharing peer that left used to leave
 its screen tile on screen for the rest of the call.
+
+**A `Replace` on an `ObservableCollection` does not rebind a `BindableLayout` item.** This cost a
+round trip and is the kind of thing that will cost another one: `MediaStreamManager.Add` originally
+replaced a tile by assigning to the collection indexer, which raises
+`NotifyCollectionChangedAction.Replace`, and MAUI keeps the existing item view untouched. The tile
+held the stream it was first given and every later announcement was dropped on the floor.
+
+Because a group is announced as soon as it has *any* track, a peer whose audio consumer arrived
+before its video one rendered a permanently black tile - while its video arrived and decoded
+perfectly, several megabytes of it, which is what made the fault look like a transport problem.
+Consumer order varies, so it worked in every test until it did not.
+
+`Add` and `Update` now remove and re-insert at the same index, which raises `Remove` and `Add` -
+events `BindableLayout` does handle - and keeps the tile in its place in the row.
+
+The diagnostic that settled it in one run is worth keeping: the Android handler logs what
+`MapStream` actually receives. `MapStream label:Alice video:none audio:yes`, appearing exactly once
+against two announcements, named the fault immediately and separated "the media never arrived" from
+"the view was never told".
 
 ### Mute / pause / resume - wired and verified peer-to-peer 2026-09-11
 Was: the send side did not exist. `IConnection` had no mute, and the `PauseProducer` /
