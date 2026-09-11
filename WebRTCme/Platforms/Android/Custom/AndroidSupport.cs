@@ -135,6 +135,28 @@ namespace WebRTCme
         }
 
         /// <summary>
+        /// What a camera track was opened with, for a caller asking a track about itself.
+        /// </summary>
+        /// <remarks>
+        /// The requested format rather than a measured one. Android's <c>VideoTrack</c> does not
+        /// report the size it is delivering, and libwebrtc picks the nearest supported format to
+        /// what it was asked for without saying which - so this can differ from reality by
+        /// whatever that substitution did. It is still a far better answer than throwing, which is
+        /// what <c>GetSettings</c> did before: the simulcast ladder is chosen from the track's
+        /// height, so on Android it always fell to the catch and took the fallback ladder.
+        ///
+        /// Returns null for a track that is not a camera - a remote track, or an audio one - which
+        /// the caller reports as "no settings" rather than as zeroes.
+        /// </remarks>
+        public static (int Width, int Height, int FrameRate)? RequestedFormatFor(string trackId)
+        {
+            if (trackId is null || !_formatsByTrackId.ContainsKey(trackId))
+                return null;
+
+            return FormatFor(trackId);
+        }
+
+        /// <summary>
         /// The capture format for a track: what was asked for, or what this always used.
         /// </summary>
         /// <remarks>

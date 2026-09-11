@@ -353,6 +353,17 @@ libwebrtc AAR that includes `SimulcastVideoEncoderFactory`**, or a simulcast-cap
 `VideoEncoderFactory` written against the binding - either of which is a change to the native
 dependency, not to this code.
 
+Corroborated from the encoder's own side on 2026-09-11. libwebrtc logs what it was asked to build:
+
+```
+[VESFW] InitEncode(codec=VideoCodec {type: VP8, mode: RealtimeVideo,
+        Simulcast: {[320x240 L1T3, active][640x480 L1T3, active]}}, ...)
+```
+
+Both layers arrive at the encoder, correctly configured, both active. `VESFW` is
+`video_encoder_software_fallback_wrapper` - a **single** encoder. Nothing between the ladder and the
+encoder is losing anything; there is simply no adapter to run two of them.
+
 Until then, asking for simulcast on Android is actively worse than not asking: the SFU is told the
 producer has two spatial layers, and one of them never carries anything. `UseSimulcast: false` is
 right for the phone for that reason as well as the SFU one.
@@ -511,7 +522,7 @@ capture request with the nearest supported format and says nothing:
   outright on a camera publishing fewer than seven formats. It now picks the closest supported
   format to the request and clamps the frame rate to what that format allows.
 
-### Two Android sender stubs were on live paths - filled in 2026-09-11
+### Three Android stubs were on live paths - filled in 2026-09-11
 Auditing the stubs by whether anything actually calls them, rather than by counting them, turned up
 two on `RTCRtpSender` that features added the same day walked straight into:
 
@@ -531,9 +542,22 @@ Verified on device: the layer button now reports `max outgoing spatial layer set
 previously raised an error popup. `ReplaceTrack` is **not** verified - reaching it on Android needs
 `GetDisplayMedia`, which that platform does not have.
 
-The audit is worth repeating rather than the counting. 41 distinct members throw on Android and
-only 16 are referenced anywhere in the connection or middleware layers; those 16 are where the
-next real failure will come from, and the rest can wait indefinitely.
+**`MediaStreamTrack.GetSettings` was the third**, and the one that had been failing quietly for
+longest. `SimulcastEncodingsFor` picks the ladder from the track's height inside a `try`, so on
+Android every video produce threw here, was swallowed, and took the fallback ladder. Nothing
+downstream could tell: the ladder for an unknown camera and the ladder for a 480p camera are the
+same ladder. It now returns the format the camera was opened with - Android reports nothing about
+a track's live size, so that is the honest best answer - and the chosen height is logged either
+way, so a guess no longer looks like a decision. Verified on device: `ladder chosen from height
+480` where it used to be 0.
+
+`GetConfiguration` is referenced but not on a live path - only `Handler.UpdateIceServersAsync`
+calls it and nothing calls that - so it is left alone.
+
+The audit is worth repeating; the counting is not. 41 distinct members throw on Android and only
+16 are referenced anywhere in the connection or middleware layers. Of those 16, three were on
+paths that actually run, and all three are now implemented. The rest can wait indefinitely - and
+the useful question for the next one is not "how many are left" but "does anything call it".
 
 ### Binding surface is incomplete
 `NotImplementedException` counts under `WebRTCme/Platforms/`: ~47 Android, ~40 iOS, ~40 Mac

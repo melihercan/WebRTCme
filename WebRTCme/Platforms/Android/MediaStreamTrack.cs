@@ -101,9 +101,33 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// What this track is delivering, as far as Android will say.
+        /// </summary>
+        /// <remarks>
+        /// Only a local camera track has an answer. Android reports nothing about a track's current
+        /// size, so this gives the format the camera was opened with, recorded when the track was
+        /// created - see <see cref="AndroidSupport.RequestedFormatFor"/>.
+        ///
+        /// Empty settings for anything else - a remote track, an audio one - rather than an
+        /// exception. The previous <see cref="NotImplementedException"/> was not harmless: the
+        /// simulcast ladder is chosen from the track's height, so every video produce on Android
+        /// threw here, was swallowed by the catch around it, and silently took the fallback ladder.
+        /// </remarks>
         public MediaTrackSettings GetSettings()
         {
-            throw new NotImplementedException();
+            var settings = new MediaTrackSettings { DeviceId = Id };
+
+            var format = AndroidSupport.RequestedFormatFor(Id);
+            if (format is null)
+                return settings;
+
+            var (width, height, frameRate) = format.Value;
+            settings.Width = width;
+            settings.Height = height;
+            settings.FrameRate = frameRate;
+            settings.AspectRatio = height == 0 ? 0d : (double)width / height;
+            return settings;
         }
 
         /// <summary>

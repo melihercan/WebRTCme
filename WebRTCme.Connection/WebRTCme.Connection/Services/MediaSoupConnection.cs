@@ -708,11 +708,18 @@ namespace WebRTCme.Connection.Services
             {
                 height = track?.GetSettings()?.Height ?? 0;
             }
-            catch
+            catch (Exception exception)
             {
                 // Not every platform reports settings, and none of this is worth failing a call
-                // over: an unknown size just takes the two-layer ladder below.
+                // over: an unknown size takes the two-layer ladder below. Said out loud, though,
+                // because falling through here silently looks exactly like a deliberate choice -
+                // an unknown camera and a 480p one get the same ladder, so nothing downstream can
+                // tell the two apart. Android did this on every produce for months.
+                Echo($"Simulcast: the track would not report its size " +
+                    $"({exception.GetType().Name}), so the ladder is a guess.");
             }
+
+            Echo($"Simulcast: ladder chosen from height {height}.");
 
             if (height >= 720)
                 return new RtpEncodingParameters[]
