@@ -323,7 +323,7 @@ it tells you immediately whether to look at this code or below it.
 publishing and Android consuming, and Blazor's ladder is genuinely two layers. Only the later run
 with Android as publisher was measuring a producer that could publish one.
 
-### Three Android binding conversions could never have worked - fixed 2026-09-11
+### Reading RTP parameters back was broken on every native platform - fixed 2026-09-11
 Found while chasing the above, and the reason it took as long as it did.
 
 `RTCRtpSender.GetParameters()` threw on Android every single time, so nothing could read back a
@@ -341,8 +341,26 @@ on Android for exactly the same reason it had been on Blazor.
 - The encoding conversions unwrapped `MaxBitrate`, `MaxFramerate` and `ScaleResolutionDownBy` the
   same way, in both directions. Null means "no preference" on the way out as much as on the way in.
 
-The shape of the first one is worth remembering: an `as` cast that cannot succeed does not fail,
-it produces null, and the exception then surfaces several frames away wearing someone else's name.
+**iOS and Mac Catalyst had the same fault**, found by sweeping for the pattern once Android proved
+it real. There the boxes are `NSNumber` rather than Java `Integer`, and the binding is explicit
+about it - `clockRate`, `numChannels`, `maxBitrateBps`, `maxFramerate` and `scaleResolutionDownBy`
+are all declared `_Nullable` in `ApiDefinitions.cs`. Every one was read with `.UInt64Value` or
+`.DoubleValue` straight off a possibly-nil reference, so `GetParameters()` threw there too, on any
+peer connection carrying video. Now read with `?.`, and the bridged arrays guarded the same way.
+
+The outbound direction needed nothing on Apple: `NSNumber` converts from a nullable implicitly and
+a null stays null. Android's did need it, because unwrapping a null `Integer` throws.
+
+So the same defect existed on three platforms and, between them, `RTCRtpSender.GetParameters()`
+worked on none of them - which is why nothing had ever noticed: no caller could get far enough to
+find out. Blazor's version was broken too, differently, and was fixed hours earlier the same day
+(see "A JS return value is a reference, not its contents"). **Four platforms, four bugs, one API.**
+An API that no platform implements correctly is indistinguishable from one that is not there, and
+this one had been sitting behind a feature nobody had asked for until simulcast layer control did.
+
+The shape of the Android one is worth remembering on its own: an `as` cast that cannot succeed does
+not fail, it produces null, and the exception then surfaces several frames away wearing someone
+else's name.
 
 **Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
 library change; anything consuming the package can still turn it on. It gives up per-consumer

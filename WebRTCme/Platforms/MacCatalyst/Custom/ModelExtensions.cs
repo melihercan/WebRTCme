@@ -107,8 +107,9 @@ namespace WebRTCme.MacCatalyst
         public static RTCRtpReceiveParameters FromNativeToReceive(this Webrtc.RTCRtpParameters nativeRtpParameters) =>
             new RTCRtpReceiveParameters
             {
-                Codecs = nativeRtpParameters.Codecs.Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
-                HeaderExtensions = nativeRtpParameters.HeaderExtensions
+                Codecs = NativeItems(nativeRtpParameters.Codecs)
+                    .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = NativeItems(nativeRtpParameters.HeaderExtensions)
                     .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
                 Rtcp = null//// TODO: CHECK THIS
             };
@@ -116,22 +117,33 @@ namespace WebRTCme.MacCatalyst
         public static RTCRtpSendParameters FromNativeToSend(this Webrtc.RTCRtpParameters nativeRtpParameters) =>
             new RTCRtpSendParameters
             {
-                Codecs = nativeRtpParameters.Codecs.Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
-                HeaderExtensions = nativeRtpParameters.HeaderExtensions
+                Codecs = NativeItems(nativeRtpParameters.Codecs)
+                    .Select(nativeCodec => nativeCodec.FromNative()).ToArray(),
+                HeaderExtensions = NativeItems(nativeRtpParameters.HeaderExtensions)
                     .Select(nativeHeaderExtension => nativeHeaderExtension.FromNative()).ToArray(),
                 Rtcp = null,//// TODO: CHECK THIS
-                Encodings = nativeRtpParameters.Encodings.Select(nativeEncoding => nativeEncoding.FromNative())
-                    .ToArray(),
+                Encodings = NativeItems(nativeRtpParameters.Encodings)
+                    .Select(nativeEncoding => nativeEncoding.FromNative()).ToArray(),
                 TransactionId = nativeRtpParameters.TransactionId
             };
 
+        // An array bridged from Objective-C is null when the other side returned nil, and LINQ on
+        // a null array throws ArgumentNullException naming "source" - an exception that points at
+        // the query rather than at the property that was empty. Cheap insurance, and the Android
+        // side needed the same for the same reason.
+        static IEnumerable<T> NativeItems<T>(T[] nativeArray) => nativeArray ?? Array.Empty<T>();
+
+        // clockRate and numChannels are both _Nullable NSNumber, and numChannels is null for every
+        // video codec - so reading .UInt16Value off one threw on the first video codec in the list,
+        // which is to say on any peer connection actually carrying video. The identical fault sat
+        // on Android with boxed Java Integers; see ModelExtensions there.
         public static RTCRtpCodecParameters FromNative(this Webrtc.RTCRtpCodecParameters nativeRtpCodecParameters) =>
             new RTCRtpCodecParameters
             {
                 PayloadType = (byte)nativeRtpCodecParameters.PayloadType,
                 MimeType = string.Empty, //// TODO: FIX THIS
-                ClockRate = nativeRtpCodecParameters.ClockRate.UInt64Value,
-                Channels = nativeRtpCodecParameters.NumChannels.UInt16Value,
+                ClockRate = nativeRtpCodecParameters.ClockRate?.UInt64Value,
+                Channels = nativeRtpCodecParameters.NumChannels?.UInt16Value,
                 SdpFmtpLine = string.Empty //// TODO: FIX THIS
             };
 
@@ -144,14 +156,18 @@ namespace WebRTCme.MacCatalyst
                 Encrypted = nativeRtpHeaderExtension.Encrypted
             };
 
+        // Every one of these is _Nullable, and an encoding that leaves a field to the encoder's
+        // discretion - which is most of them - carries null. Null means "no preference" here, not
+        // zero. The outbound direction needs no such care: NSNumber converts from a nullable
+        // implicitly and a null stays null.
         public static RTCRtpEncodingParameters FromNative(this Webrtc.RTCRtpEncodingParameters nativeEncoding) =>
             new RTCRtpEncodingParameters
             {
                 Active = nativeEncoding.IsActive,
-                MaxBitrate = nativeEncoding.MaxBitrateBps.UInt64Value,
-                MaxFramerate = nativeEncoding.MaxFramerate.DoubleValue,
+                MaxBitrate = nativeEncoding.MaxBitrateBps?.UInt64Value,
+                MaxFramerate = nativeEncoding.MaxFramerate?.DoubleValue,
                 Rid = nativeEncoding.Rid,
-                ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy.DoubleValue
+                ScaleResolutionDownBy = nativeEncoding.ScaleResolutionDownBy?.DoubleValue
             };
 
         public static RTCSessionDescriptionInit FromNative(this Webrtc.RTCSessionDescription nativeDescription) =>
