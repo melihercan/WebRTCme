@@ -154,7 +154,7 @@ namespace WebRTCme.Connection.MediaSoup
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var json = await _webSocket.ReceiveMessageAsync(cancellationToken);
-                    Console.WriteLine($">>>>>>>>>>>>> INCOMING MSG: {json}");
+                    Echo($">>>>>>>>>>>>> INCOMING MSG: {json}");
 
                     using var jsonDocument = JsonDocument.Parse(json);
                     var root = jsonDocument.RootElement;
@@ -248,7 +248,7 @@ namespace WebRTCme.Connection.MediaSoup
                         switch (message)
                         {
                             case ProtooRequest request:
-                                Console.WriteLine($"########################## REQUEST: {request.Method}");
+                                Echo($"########################## REQUEST: {request.Method}");
                                 await OnRequestAsync(request, cancellationToken);
                                 break;
 
@@ -407,7 +407,7 @@ namespace WebRTCme.Connection.MediaSoup
         Task SendAsync(object message, CancellationToken cancellationToken)
         {
             var json = JsonSerializer.Serialize(message, JsonHelper.WebRtcJsonSerializerOptions);
-            Console.WriteLine($"<<<<<<<<<<<<< OUTGOING MSG: {json}");
+            Echo($"<<<<<<<<<<<<< OUTGOING MSG: {json}");
             return _webSocket.SendMessageAsync(json, cancellationToken);
         }
 
@@ -477,8 +477,27 @@ namespace WebRTCme.Connection.MediaSoup
 
         static void Log(string message)
         {
-            Console.WriteLine(message);
+            Echo(message);
             Registry.Logger?.LogError(message);
+        }
+
+        /// <summary>
+        /// Writes a line everywhere it might be read from.
+        /// </summary>
+        /// <remarks>
+        /// Console and Debug are not alternatives, because neither reaches every host. A packaged
+        /// WinUI app has no console at all, so the protoo traffic logged here was invisible on
+        /// Windows; Debug.WriteLine reaches the debugger, or - with no debugger attached - the
+        /// Win32 OutputDebugString channel that DebugView and friends can capture. On Android both
+        /// arrive in logcat.
+        ///
+        /// Registry.Logger is a third destination again, and is the one that reaches nothing in
+        /// the MAUI apps: they register no logging provider.
+        /// </remarks>
+        static void Echo(string message)
+        {
+            Console.WriteLine(message);
+            System.Diagnostics.Debug.WriteLine(message);
         }
 
         public async ValueTask DisposeAsync() => await TearDownAsync();
