@@ -44,8 +44,37 @@ every other client - the server relays that message whether or not anyone handle
 mediasoup path `consumerPaused` / `consumerResumed` now raise the same `PeerMedia` response,
 derived from all of that peer's consumers rather than the one that changed.
 
-Still missing: **voice activity detection**. The wire carries a `speaking` flag and the server
-relays it; nothing computes it, so it is always sent as false.
+**Voice activity now works on the mediasoup path** (2026-09-11). It cost nothing to compute: the
+server runs an audio level observer and had been telling this client who was audible several times
+a second, and the notification was being discarded. `MediaContext.Speaking` was on the response all
+along, hardcoded false.
+
+The notification to use is **`speakingPeers`**, not `activeSpeaker`, and that is worth knowing
+because the names suggest the opposite:
+
+- `speakingPeers` carries `{ peerVolumes: [ { peerId, volume } ] }`, continuously, per peer, with
+  volume in dBov. Membership of the list is itself the signal - the observer only reports producers
+  above its own threshold.
+- `activeSpeaker` carries a peer id only from the `ActiveSpeakerObserver`'s `dominantspeaker` event,
+  which **never fired once in testing**: not for tones, not for continuous synthesised speech, not
+  even with a single audio producer left in the room. What did arrive was the audio level
+  observer's *silence* case, which the server sends as `{ peerId: undefined }` - so it serialises
+  to `{}` and is indistinguishable from a dominant speaker whose `appData` is missing. Half an hour
+  went into that ambiguity before reading `Room.js` settled it.
+
+Only the difference between snapshots is reported, since these arrive several times a second and
+re-reporting every peer each time would push a stream of identical updates at the UI. Verified
+Blazor -> Android: `speaking` toggled true and false in step with two bursts of speech separated by
+a pause, one report per transition.
+
+The flag follows the observer directly, so it flickers across the short gaps in natural speech. A
+UI that highlights the speaker will want its own hold-off; that is a presentation decision and is
+deliberately not made here.
+
+Still missing: **voice activity on the peer-to-peer path**. There is no server there to observe
+audio levels, so `speaking` is still sent as false - it needs a local detector, which means
+sampling the microphone's level far more often than the current five-second stats poll and applying
+a threshold and a hangover.
 
 **Verified in an Android/Windows call on 2026-09-11**, in both directions and for both kinds. See
 "How to tell a mute actually happened" below - it is not as obvious as it sounds, and the first

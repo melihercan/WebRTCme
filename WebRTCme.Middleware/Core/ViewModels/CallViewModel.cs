@@ -752,16 +752,29 @@ namespace WebRTCme.Middleware
                 UpdatePeerMediaStatus();
         }
 
+        /// <summary>
+        /// Rebuilds the one-line summary of what the other peers are doing.
+        /// </summary>
+        /// <remarks>
+        /// Speaking is listed beside the mutes rather than in a line of its own: it is the same
+        /// question - what is this peer doing right now - and a peer that is talking while its
+        /// microphone is muted is worth seeing as one statement, since that is the case somebody
+        /// needs telling about.
+        ///
+        /// Only peers with something to report appear, so the line collapses to nothing in a call
+        /// where everyone is unmuted and quiet.
+        /// </remarks>
         void UpdatePeerMediaStatus()
         {
             var reports = _peerMedia.Values
-                .Where(entry => entry.Media.VideoMuted || entry.Media.AudioMuted)
+                .Where(entry => entry.Media.VideoMuted || entry.Media.AudioMuted || entry.Media.Speaking)
                 .Select(entry =>
                 {
-                    var muted = new List<string>();
-                    if (entry.Media.AudioMuted) muted.Add("mic muted");
-                    if (entry.Media.VideoMuted) muted.Add("camera off");
-                    return $"{entry.Name}: {string.Join(", ", muted)}";
+                    var states = new List<string>();
+                    if (entry.Media.Speaking) states.Add("speaking");
+                    if (entry.Media.AudioMuted) states.Add("mic muted");
+                    if (entry.Media.VideoMuted) states.Add("camera off");
+                    return $"{entry.Name}: {string.Join(", ", states)}";
                 })
                 .ToArray();
 

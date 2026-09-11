@@ -624,11 +624,35 @@ namespace WebRTCme.Connection.Services
                         $"######## {method}: {element.GetRawText()}");
                     break;
 
-                // Reported continuously by the server and nothing consumes them yet. Recognised
-                // rather than handled, so that a genuinely unknown method still stands out.
-                case MethodName.ProducerScore:
-                case MethodName.ActiveSpeaker:
+                // Who the server's audio level observer currently hears, with each one's volume.
+                // Appearing in the list at all is the signal: the observer only reports producers
+                // above its own threshold, so membership already means "audible".
                 case MethodName.SpeakingPeers:
+                    {
+                        var speaking = new HashSet<string>();
+                        if (element.TryGetProperty("peerVolumes", out var volumes) &&
+                            volumes.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var entry in volumes.EnumerateArray())
+                            {
+                                var id = GetString(entry, "peerId");
+                                if (id is not null)
+                                    speaking.Add(id);
+                            }
+                        }
+                        ReportSpeakingPeers(speaking);
+                    }
+                    break;
+
+                // Not used, despite being the obvious candidate. In this server 'activeSpeaker'
+                // carries a peer id only from the ActiveSpeakerObserver's 'dominantspeaker' event,
+                // which never fired in testing - not for tones, not for continuous speech, not
+                // even with a single audio producer in the room. What did arrive was the silence
+                // case, which the server sends as { peerId: undefined } and which therefore looks
+                // exactly like a dominant speaker whose appData is missing. 'speakingPeers' says
+                // the same thing continuously, per peer, and with a volume attached.
+                case MethodName.ActiveSpeaker:
+                case MethodName.ProducerScore:
                 case MethodName.MediasoupVersion:
                     break;
 
@@ -811,6 +835,49 @@ namespace WebRTCme.Connection.Services
         /// not changed, but the caller is being handed a complete picture and it has to be right.
         /// A kind with no consumer at all counts as muted: nothing is arriving for it either way.
         /// </remarks>
+        // The peers the server last reported as audible. Held rather than asked for: the
+        // notification is a snapshot of who is speaking now, and knowing who *stopped* needs the
+        // previous snapshot to compare against.
+        HashSet<string> _speakingPeerIds = new();
+
+        /// <summary>
+        /// Reports the peers whose speaking state just changed.
+        /// </summary>
+        /// <remarks>
+        /// Voice activity costs nothing to compute on this path: mediasoup runs an audio level
+        /// observer and says who is audible, and this client had been discarding the notification
+        /// outright. <see cref="MediaContext.Speaking"/> has been on the response all along,
+        /// hardcoded false.
+        ///
+        /// Only the difference is reported. These arrive several times a second, and re-reporting
+        /// every peer each time would push a stream of identical updates through to the UI for no
+        /// change in what it shows.
+        ///
+        /// The local peer can be in the list too, and is ignored here: this reports on peers, and
+        /// this client consumes no audio of its own.
+        /// </remarks>
+        void ReportSpeakingPeers(HashSet<string> speaking)
+        {
+            if (speaking.SetEquals(_speakingPeerIds))
+                return;
+
+            var changed = new HashSet<string>(_speakingPeerIds);
+            changed.SymmetricExceptWith(speaking);
+            _speakingPeerIds = speaking;
+
+            foreach (var peerId in changed)
+            {
+                if (!_peers.TryGetValue(peerId, out var peer))
+                    continue;
+
+                // Any of the peer's consumers will do: ReportPeerMedia works back from a consumer
+                // to its peer, and they all give the same answer.
+                var consumerId = peer.ConsumerIds.ToArray().FirstOrDefault();
+                if (consumerId is not null)
+                    ReportPeerMedia(consumerId);
+            }
+        }
+
         void ReportPeerMedia(string consumerId)
         {
             if (_connectionContext is null)
@@ -844,17 +911,19 @@ namespace WebRTCme.Connection.Services
             {
                 VideoMuted = IsMuted(MediaKind.Video),
                 AudioMuted = IsMuted(MediaKind.Audio),
-                Speaking = false
+                Speaking = _speakingPeerIds.Contains(peerId)
             };
 
             var name = DisplayNameFor(peerId);
 
             System.Diagnostics.Debug.WriteLine(
                 $"<------- PeerMedia - peer:{name} " +
-                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
+                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted} " +
+                $"speaking:{mediaContext.Speaking}");
             _logger.LogInformation(
                 $"<------- PeerMedia - peer:{name} " +
-                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
+                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted} " +
+                $"speaking:{mediaContext.Speaking}");
 
             _connectionContext.Observer.OnNext(new PeerResponse
             {
