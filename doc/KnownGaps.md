@@ -8,13 +8,22 @@ Bugs found and fixed during the migration are in the git history, not here.
 
 ## Unimplemented features
 
-### Screen sharing - works peer-to-peer on Blazor and Windows only
+### Screen sharing - limited by the capture platforms, not by the connection
 `ILocalMediaStream.GetDisplayMediaStreamAync` and `CallViewModel` both wire it up, and
 `MediaDevices.GetDisplayMedia` is implemented for Blazor and Windows. On **Android, iOS and Mac
 Catalyst it throws `NotImplementedException`** - Android needs a MediaProjection foreground
-service, Apple needs ReplayKit and a broadcast extension, so neither is a small addition.
-Separately, `MediaSoupConnection` never produces a display stream, so screen sharing does not
-reach the SFU path on any platform.
+service, Apple needs ReplayKit and a broadcast extension, so neither is a small addition. That is
+the whole of the limitation: sharing can only *start* where `getDisplayMedia` exists.
+
+This entry used to claim screen sharing did not reach the SFU path at all. **That was wrong.**
+`CallViewModel` shares by swapping tracks through `ReplaceOutgoingTrackAsync`, which
+`MediaSoupConnection` implements by replacing the webcam producer's track - no separate display
+producer is needed for it to work. Verified Blazor -> Android over mediasoup on 2026-09-11: the
+shared tab appeared on the phone at about 2.25 Mbit/s, and stopping the share put the camera back.
+
+What is genuinely missing is a **second** producer for the share, the way mediasoup-demo carries
+one with `appData { share: true }`. Track replacement means the screen arrives *instead of* the
+camera, so a peer cannot see both at once. That is a feature, not a repair.
 
 ### Mute / pause / resume - wired and verified peer-to-peer 2026-09-11
 Was: the send side did not exist. `IConnection` had no mute, and the `PauseProducer` /
@@ -62,16 +71,18 @@ obvious: as a request it is rejected, and as a notification it is silently ignor
 `IMediaSoupServerApi` had no way to send a notification at all - only `ApiAsync`, which waits for a
 response - so `NotifyAsync` was added alongside it.
 
-### ICE restart - implemented but unreachable
-`Handler.RestartIceAsync` and `Transport.RestartIceAsync` exist and are ported. Nothing calls
-them: `IConnection` still has no route to a restart, and `MediaSoupConnection` never invokes one.
-A connection that loses its ICE path stays lost.
+### ICE restart - reachable and verified 2026-09-11
+Was: `Handler.RestartIceAsync` and `Transport.RestartIceAsync` existed, were ported, and nothing
+called them. A connection that lost its ICE path stayed lost.
 
-Unlike mute, this is not simply a matter of widening the interface - but it is less work than it
-first looked. **The server already supports it**: `restartIce` is a protoo *request* in the demo
-server's dispatcher, alongside `join` and `produce`, and `MethodName.RestartIce` now names it. What
-is missing on the mediasoup side is the request and response types and a caller. The peer-to-peer
-path still needs an offer with `iceRestart` set plus a rule for which side starts it.
+`IConnection.RestartIceAsync()` is the route. MediaSoup restarts both transports independently and
+collects failures rather than stopping at the first - they are separate ICE sessions, and a dead
+send path does not imply a dead receive path. Peer-to-peer offers afresh with `IceRestart` set, and
+only to peers where this side is the initiator, so the two ends do not both offer into a glare.
+
+Verified on a two-peer mediasoup call: two `restartIce` requests, both answered, and both video
+elements' `currentTime` advanced 4.5s across 4s of wall clock at 640x480 - media flowed straight
+through the restart rather than recovering after it.
 
 ### The SFU will not climb past the bottom layer
 **The biggest open quality problem on the mediasoup path.** Given a choice of simulcast layers, the
@@ -99,9 +110,29 @@ What has been ruled out, each by measurement rather than argument:
   help: preferred layers are a **ceiling, not a floor**, so asking for the top layer changes
   nothing when the server has already decided to send the bottom one.
 
+**Re-measured 2026-09-11 with send-side statistics**, which the original investigation did not
+have. Blazor -> Android, simulcast on, both layers published:
+
+```
+Alice sends:      video/r0 320x240  ~294 kbit/s   frames=1500
+                  video/r1 640x480  ~1.5 Mbit/s   frames=1500
+Android receives:                   38-87 kbit/s
+```
+
+Two things this settles that were previously only inferred from the encoder's own report:
+
+- **The sender is ruled out by direct measurement.** Both layers encode, at identical frame counts,
+  at healthy rates, continuously. Nothing on this side is failing to produce the top layer - which
+  is what the ladder fix below was about, and is now confirmed rather than assumed.
+- **It is not only spatial.** The receiver gets *less than a third of what layer 0 alone produces*.
+  The server is not merely choosing the bottom spatial layer, it is throttling below it as well.
+  "Parks on spatial layer 0" understates it.
+
 What is left, and where to look next: mediasoup's per-consumer layer selection and its probing -
 why the estimate for these consumers never climbs, when the same transport carries 1.8 Mbit/s
-happily as soon as there is only one layer to send.
+happily as soon as there is only one layer to send. The next measurement worth taking is on the
+server, not the client: the consumer's own `score` and the transport's bitrate estimate, over the
+same window as the figures above.
 
 **Until then the demo apps set `UseSimulcast: false`.** That is a demo-app configuration, not a
 library change; anything consuming the package can still turn it on. It gives up per-consumer
@@ -219,22 +250,35 @@ on `System.Runtime.InteropServices.JavaScript` instead of JSInterop.
 
 ## Design gaps
 
-### Peer id is the display name
-`MediaSoupConnection` joins with `DisplayName = userContext.Name` and keys every peer dictionary
-by the server's `peerId`. Two clients joining one room under the same name collide, and the second
-displaces the first. Documented as a caveat in the MediaSoup README, but it is a design choice
-worth revisiting rather than a documented feature.
+### Peer id is the display name - fixed 2026-09-11
+Was: `MediaSoupConnection` joined with the peer id set to the user's name, so two clients in one
+room under the same name collided and the second displaced the first. The peer now joins under its
+own GUID with the display name carried separately, and `newPeer` is deserialized correctly -
+the payload nests the peer under `"peer"`, and reading the body as a `Peer` had produced nulls,
+which were then discarded as peers with no id. That had been broken since the 3.26 upgrade.
 
-### `Handler._sem` is static
-`static SemaphoreSlim _sem = new(1)` in the mediasoup `Handler` serialises SDP work across *every*
-handler in the process, not per transport. With one connection it is invisible; with two it means
-a send transport waits on an unrelated receive transport.
+Verified with two peers both named "Melih" in one room: both present, four `consume()` calls, no
+displacement.
 
-### `ToStringOrNumber` mutates dictionaries in place
-`ModelExtensions.ToStringOrNumber` / `ToStringOrNumberOrBool` walk a `Dictionary<string, object>`
-and rewrite its values to coerce what `System.Text.Json` produced into what mediasoup expects.
-It is called on codec parameters and consumer `appData`. Fragile in both directions: a shape it
-does not anticipate passes through unchanged, and the mutation is invisible to the caller.
+### `Handler._sem` is static - fixed 2026-09-11
+Was: `static SemaphoreSlim _sem = new(1)` serialised SDP work across *every* handler in the
+process rather than per transport, so a send transport waited on an unrelated receive transport.
+Now an instance field.
+
+### `ToStringOrNumber` mutates dictionaries in place - fixed 2026-09-11
+Was: `ModelExtensions.ToStringOrNumber` / `ToStringOrNumberOrBool` rewrote the caller's dictionary
+in place to coerce what `System.Text.Json` produced into what mediasoup expects. They return a new
+dictionary now.
+
+One trap worth keeping, because the first version of the fix fell into it:
+
+```csharp
+JsonValueKind.Number => element.TryGetInt32(out var i) ? (object)i : element.GetDouble(),
+```
+
+Without that `(object)` cast the ternary unifies to `double`, so every integer is boxed as a
+double and the `(int)` unboxing downstream throws on something as ordinary as `"apt": 101`. It
+killed the connection at `getRouterRtpCapabilities`, which looks nothing like a boxing fault.
 
 ### Teardown left the transport open - fixed 2026-09-10
 Kept here because the diagnosis was wrong twice, and the wrong versions are the tempting ones.
@@ -306,20 +350,32 @@ whenever its estimate moves. The cause is upstream - see "Simulcast layer contro
 two are worth fixing separately, because a tile that keeps its size would stop the jumping whatever
 the server decides, and that is a self-contained change in `WebRTCme.Middleware`.
 
-### `IConnection` is narrow - mute added 2026-09-10, the rest still missing
+### `IConnection` is narrow - four routes added, two still missing
 It had three members, all call-scoped, so anything a real app wants - mute, screen share, ICE
 restart, layer control, device switching - had no route through the interface. That is why several
-of the items above read "implemented but unreachable": the code exists, the interface just does
+items above used to read "implemented but unreachable": the code existed, the interface just did
 not mention it.
 
-`IsOutgoingMediaEnabled` and `SetOutgoingMediaEnabledAsync` are the first of these to be closed.
-The pattern they set is worth keeping for the rest: one member that means the same thing on both
+Closed so far, in order: `IsOutgoingMediaEnabled` and `SetOutgoingMediaEnabledAsync`
+(2026-09-10), then `RestartIceAsync`, `GetOutgoingStatsAsync`,
+`SetPreferredIncomingLayersAsync` and `SetMaxOutgoingSpatialLayerAsync` (2026-09-11).
+
+The pattern they set is worth keeping for the rest: one member meaning the same thing on both
 paths, implemented differently by each, with the state read back from wherever it actually lives
 rather than mirrored in the caller - on the mediasoup path that is the producer's own `Paused`
 flag, which a reconnect resets without anyone asking.
 
-Still with no route: screen share on the SFU path, ICE restart, simulcast layer control, and
-device switching.
+**The interface is no longer the thing holding anything back.** The two entries that remained on
+this list both turned out to need nothing from it: screen share already reaches both paths through
+`ReplaceOutgoingTrackAsync`, and device switching is the same member plus a camera opened with
+different constraints. What is left of either is platform work and features, not routes -
+`getDisplayMedia` on the mobile platforms, and a second producer so a peer can see a camera and a
+screen at once.
+
+Layer control is the last member added, and it is worth knowing what it is not. The receive half
+sets a **ceiling**: it caps what a peer costs, and it cannot raise a floor the server has put
+down - which is why it was no help against the entry below. The send half is a real cap, because
+switching an encoding off means those frames are never produced at all.
 
 ## Verified against, and not
 
@@ -572,3 +628,26 @@ Two guards, because a merge that quietly does nothing looks exactly like one tha
 `Verify-Packages.ps1 -RequireAppleNativeLayout` opens the Mac Catalyst `.resources.zip` and insists
 on `Versions/A/WebRTC`. Both were tested against a Windows-only package, which they correctly
 reject.
+
+## A JS return value is a reference, not its contents
+
+`JsInterop.callMethod` hands back an **object reference** for anything object-typed. That is right
+for a thing you go on to call methods on - a track, a sender, a transport - and wrong for a plain
+value object you want to read: deserializing a reference into a C# model produces a model with
+every property null, and nothing anywhere says so.
+
+Eleven Blazor binding methods were doing exactly that, so every one of them returned an empty
+shell: `RTCRtpSender.GetParameters`, `RTCRtpReceiver.GetParameters`, both `GetCapabilities`
+overloads, `MediaStreamTrack.GetCapabilities` / `GetConstraints` / `GetSettings`,
+`RTCCertificate.GetFingerprints`, `RTCIceTransport.GetLocalParameters` / `GetRemoteParameters`,
+and `RTCPeerConnection.GetConfiguration`.
+
+Found because simulcast layer control threw `ArgumentNullException` with the parameter name
+`source` - a LINQ call inside `Handler.SetMaxSpatialLayerAsync` on a null `Encodings` array. The
+exception points at LINQ, four layers away from the interop that actually produced the null.
+
+`callMethodWithContent` copies the result's content the way `getPropertyValue` already did, and
+`CallJsMethodWithContent<T>` is its C# side. **Use it for any method returning a value object.**
+Two of the eleven take an argument, and those must pass `null` for `contentSpec` explicitly -
+`CallJsMethodWithContent<T>(parent, method, null, kind)` - because the optional `contentSpec`
+parameter sits before `params object[] args` and will otherwise swallow the first argument.

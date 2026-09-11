@@ -16,6 +16,7 @@
                 <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
                 <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
                 <Button Text="Restart ICE" Command="{Binding RestartIceCommand}" />
+                <Button Text="{Binding SpatialLayerButtonText}" Command="{Binding ToggleSpatialLayerCommand}" />
             </HorizontalStackLayout>
 
             <Label Grid.Row="1"

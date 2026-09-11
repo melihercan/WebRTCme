@@ -80,5 +80,45 @@ namespace WebRTCme.Connection
         /// </remarks>
         /// <exception cref="InvalidOperationException">There is no call to restart.</exception>
         Task RestartIceAsync();
+
+        /// <summary>
+        /// Asks for the best simulcast layers to forward from one peer.
+        /// </summary>
+        /// <remarks>
+        /// A <b>ceiling, not a floor</b>. The server clamps the request to the layers the producer
+        /// actually publishes, and still drops below it whenever it decides it has to - so asking
+        /// for the top layer does not make the top layer arrive. This is the reason
+        /// <c>setConsumerPreferredLayers</c> was no help against "The SFU will not climb past the
+        /// bottom layer" in the gaps document: it cannot raise a floor that the server has already
+        /// put down.
+        ///
+        /// What it is genuinely for is the other direction - capping what a peer costs. A tile
+        /// shown as a thumbnail has no use for the top layer, and saying so saves the downlink.
+        ///
+        /// Layers are indices from 0, counting up. Audio consumers have none and are skipped.
+        /// </remarks>
+        /// <exception cref="ArgumentException">No such peer is in this connection.</exception>
+        /// <exception cref="NotSupportedException">
+        /// This connection carries no simulcast, so there are no layers to choose between.
+        /// </exception>
+        Task SetPreferredIncomingLayersAsync(Guid peerId, int spatialLayer, int temporalLayer);
+
+        /// <summary>
+        /// Caps the simulcast layers this client encodes and sends.
+        /// </summary>
+        /// <remarks>
+        /// Every layer up to and including <paramref name="spatialLayer"/> stays active and the
+        /// rest are switched off, so this is a real limit rather than a preference: the frames are
+        /// never encoded, and the CPU and uplink are not spent. Useful on battery, on a metered
+        /// connection, or in a call where nobody is displaying this client large.
+        ///
+        /// Layer 0 alone is not the same as muting - it keeps a picture flowing at the smallest
+        /// size, where <see cref="SetOutgoingMediaEnabledAsync"/> stops it.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">This connection is not sending video.</exception>
+        /// <exception cref="NotSupportedException">
+        /// This connection carries no simulcast, so there are no layers to cap.
+        /// </exception>
+        Task SetMaxOutgoingSpatialLayerAsync(int spatialLayer);
     }
 }

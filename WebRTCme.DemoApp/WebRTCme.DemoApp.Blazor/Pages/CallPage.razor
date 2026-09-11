@@ -23,6 +23,10 @@
     Restart ICE
 </button>
 
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleSpatialLayerAsync">
+    @CallViewModel.SpatialLayerButtonText
+</button>
+
 @if (!string.IsNullOrEmpty(CallViewModel.PeerMediaStatus))
 {
     <p class="mx-4 text-muted">@CallViewModel.PeerMediaStatus</p>

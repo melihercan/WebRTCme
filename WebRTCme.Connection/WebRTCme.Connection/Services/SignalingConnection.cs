@@ -261,6 +261,28 @@ namespace WebRTCme.Connection.Services
         }
 
         /// <summary>
+        /// Not applicable: this path carries no simulcast.
+        /// </summary>
+        /// <remarks>
+        /// There is no server between the peers to choose a layer, and nothing to choose from -
+        /// tracks are added with <c>AddTrack</c>, which negotiates a single encoding. What arrives
+        /// is exactly what the far side sent.
+        ///
+        /// Throwing rather than returning quietly, because a caller adjusting layers is trying to
+        /// control bandwidth and a silent no-op would leave them believing they had.
+        /// </remarks>
+        public Task SetPreferredIncomingLayersAsync(Guid peerId, int spatialLayer, int temporalLayer) =>
+            throw new NotSupportedException(
+                "The peer-to-peer path sends one encoding per track, so there are no layers to " +
+                "choose between. Layer control needs the mediasoup path.");
+
+        /// <inheritdoc cref="SetPreferredIncomingLayersAsync"/>
+        public Task SetMaxOutgoingSpatialLayerAsync(int spatialLayer) =>
+            throw new NotSupportedException(
+                "The peer-to-peer path sends one encoding per track, so there are no layers to " +
+                "cap. To stop sending video entirely, use SetOutgoingMediaEnabledAsync.");
+
+        /// <summary>
         /// Statistics for what this client is sending, across every peer it is sending to.
         /// </summary>
         /// <remarks>

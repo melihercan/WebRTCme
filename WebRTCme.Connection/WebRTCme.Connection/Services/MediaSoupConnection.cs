@@ -696,22 +696,32 @@ namespace WebRTCme.Connection.Services
         const int PreferredTemporalLayer = 2;
 
         /// <summary>
-        /// Asks the server to forward the best simulcast layers it can for a video consumer.
+        /// Lifts a new consumer's ceiling to the top, so nothing here is what holds it down.
         /// </summary>
         /// <remarks>
-        /// Left to itself the server chose badly. Measured on an Android/Blazor call: it moved the
-        /// consumer up a layer and back down every twenty to thirty seconds, never selected the top
-        /// layer at all, and settled around 53-90 kbit/s at 144x120 - against 1.8 Mbit/s for the
-        /// same pair over the peer-to-peer path on the same LAN. The picture was visibly blurry,
-        /// and the resolution changes are what made the tile jump.
+        /// This was added believing it would fix the server parking consumers on spatial layer 0.
+        /// It did not, and the reason is worth keeping: preferred layers are a <b>ceiling, not a
+        /// floor</b>. Raising a ceiling the server was never touching changes nothing, and the
+        /// measurements afterwards were identical - still parked on layer 0, still 64-159 kbit/s at
+        /// 289x240 on a path carrying 1.8 Mbit/s the moment simulcast was switched off.
         ///
-        /// This does not disable adaptation. Preferred layers are an upper bound, so the server
-        /// still drops down under real congestion; it simply stops treating the bottom layer as a
-        /// reasonable resting place on a network with room to spare.
+        /// It stays because it makes the default honest: every consumer starts free to use the
+        /// best layer published, so whatever is capping them is demonstrably not this client.
         ///
         /// Audio has no spatial layers, so it is left alone.
         /// </remarks>
-        async Task RequestBestLayersAsync(Consumer consumer)
+        Task RequestBestLayersAsync(Consumer consumer) =>
+            SetPreferredLayersAsync(consumer, PreferredSpatialLayer, PreferredTemporalLayer);
+
+        /// <summary>
+        /// Tells the server which layers to forward for one consumer.
+        /// </summary>
+        /// <remarks>
+        /// A notification, so there is no acknowledgement and a failure to send is the only failure
+        /// reportable. Not fatal either way: the call carries on at whatever layer the server picks
+        /// for itself, which is exactly what happened before any of this existed.
+        /// </remarks>
+        async Task SetPreferredLayersAsync(Consumer consumer, int spatialLayer, int temporalLayer)
         {
             if (consumer is null || consumer.Kind != MediaKind.Video)
                 return;
@@ -721,12 +731,10 @@ namespace WebRTCme.Connection.Services
                 new SetConsumerPreferredLayersRequest
                 {
                     ConsumerId = consumer.Id,
-                    SpatialLayer = PreferredSpatialLayer,
-                    TemporalLayer = PreferredTemporalLayer
+                    SpatialLayer = spatialLayer,
+                    TemporalLayer = temporalLayer
                 });
 
-            // Not fatal: the call still works at whatever layer the server picks on its own, which
-            // is exactly what happened before this existed.
             if (!result.IsOk)
                 System.Diagnostics.Debug.WriteLine(
                     $"######## Preferred layers not set for consumer {consumer.Id}: {result.ErrorMessage}");
@@ -1303,6 +1311,53 @@ namespace WebRTCme.Connection.Services
                 producer.Resume();
             else
                 producer.Pause();
+        }
+
+        /// <summary>
+        /// Asks the server for the best layers to forward from one peer.
+        /// </summary>
+        /// <remarks>
+        /// Applied to every video consumer that peer has, which today is one, but a peer producing
+        /// both a camera and a screen has two and both are its own.
+        /// </remarks>
+        public async Task SetPreferredIncomingLayersAsync(Guid peerId, int spatialLayer, int temporalLayer)
+        {
+            if (spatialLayer < 0)
+                throw new ArgumentOutOfRangeException(nameof(spatialLayer),
+                    "Layers count from 0; there is nothing below the bottom one.");
+            if (temporalLayer < 0)
+                throw new ArgumentOutOfRangeException(nameof(temporalLayer),
+                    "Layers count from 0; there is nothing below the bottom one.");
+
+            var peer = _peers.Values.FirstOrDefault(peer => peer.Id == peerId)
+                ?? throw new ArgumentException(
+                    $"No peer with id {peerId} is in this connection.", nameof(peerId));
+
+            foreach (var consumerId in peer.ConsumerIds.ToArray())
+            {
+                if (_consumers.TryGetValue(consumerId, out var consumer))
+                    await SetPreferredLayersAsync(consumer, spatialLayer, temporalLayer);
+            }
+        }
+
+        /// <summary>
+        /// Caps which simulcast layers this client encodes, by switching the rest off.
+        /// </summary>
+        /// <remarks>
+        /// Video only. Audio has no spatial layers, and a caller asking to cap them has
+        /// misunderstood something rather than made a request worth honouring quietly.
+        /// </remarks>
+        public async Task SetMaxOutgoingSpatialLayerAsync(int spatialLayer)
+        {
+            if (spatialLayer < 0)
+                throw new ArgumentOutOfRangeException(nameof(spatialLayer),
+                    "Layers count from 0; capping below the bottom one would send nothing at all, " +
+                    "which is what SetOutgoingMediaEnabledAsync is for.");
+
+            var producer = _webcamProducer
+                ?? throw new InvalidOperationException("This connection is not sending video.");
+
+            await producer.SetMaxSpatialLayerAsync(spatialLayer);
         }
 
         /// <summary>

@@ -639,6 +639,67 @@ namespace WebRTCme.Middleware
             await OnRestartIceAsync();
         });
 
+        bool _isSendingBottomLayerOnly;
+        string _spatialLayerButtonText = "Send bottom layer only";
+        public string SpatialLayerButtonText
+        {
+            get => _spatialLayerButtonText;
+            set
+            {
+                _spatialLayerButtonText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Toggles this client between sending only the smallest simulcast layer and sending all.
+        /// </summary>
+        /// <remarks>
+        /// A real cap rather than a preference: the layers above are switched off, so their frames
+        /// are never encoded and neither CPU nor uplink is spent on them. Distinct from muting,
+        /// which stops the picture altogether - this keeps one flowing at the smallest size.
+        ///
+        /// Only meaningful with simulcast enabled. With a single encoding there is nothing above
+        /// layer 0 to switch off, so the button does nothing visible, and the peer-to-peer path
+        /// refuses outright because it negotiates one encoding per track.
+        /// </remarks>
+        public async Task OnToggleSpatialLayerAsync()
+        {
+            // Back to the top of whatever ladder is configured. Anything higher than the ladder is
+            // clamped, so this does not need to know how many layers there are.
+            var spatialLayer = _isSendingBottomLayerOnly ? int.MaxValue : 0;
+
+            try
+            {
+                await _connection.SetMaxOutgoingSpatialLayerAsync(spatialLayer);
+
+                _isSendingBottomLayerOnly = !_isSendingBottomLayerOnly;
+                _runOnUiThread.Invoke(() => SpatialLayerButtonText = _isSendingBottomLayerOnly
+                    ? "Send all layers"
+                    : "Send bottom layer only");
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## APP max outgoing spatial layer set to {spatialLayer}");
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## APP spatial layer cap failed: {exception.Message}");
+                _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                {
+                    Title = "Error",
+                    Text = "Could not change the outgoing layers:" + Environment.NewLine +
+                           exception.Message,
+                    Ok = "Ok",
+                });
+            }
+        }
+
+        public ICommand ToggleSpatialLayerCommand => new AsyncCommand(async () =>
+        {
+            await OnToggleSpatialLayerAsync();
+        });
+
         /// <summary>
         /// Flips the mute state for one kind and reports the state to settle on.
         /// </summary>
