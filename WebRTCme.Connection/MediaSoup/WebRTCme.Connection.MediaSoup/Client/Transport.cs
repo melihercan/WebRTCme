@@ -213,7 +213,17 @@ namespace WebRTCme.Connection.MediaSoup.Client
                         options.Track,
                         handlerSendResult.RtpParameters,
                         options.StopTracks ?? false,
-                        options.DisableTrackOnPause ?? false,
+                        // True by default, as in mediasoup-client. It had defaulted to false, so
+                        // Pause() set a flag and did nothing else: the server stopped forwarding
+                        // and the peers saw the mute, while this client carried on encoding and
+                        // sending a full-rate stream for the SFU to throw away. Send-side stats
+                        // are what made that visible - a muted phone's bytesSent and framesEncoded
+                        // climbed exactly as fast as before the mute.
+                        //
+                        // StopTracks stays false, unlike mediasoup-client: closing a producer
+                        // would otherwise stop the camera track, which is the same track the local
+                        // preview is rendering.
+                        options.DisableTrackOnPause ?? true,
                         options.ZeroRtpOnPause ?? false,
                         options.AppData);
 

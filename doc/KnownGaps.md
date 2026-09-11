@@ -130,10 +130,49 @@ properly.
 See "The jumping tile" below for what the layer changes do to the UI, which is a separate fault
 with a much cheaper fix.
 
-### Send-side statistics - absent
-`MediaSoupConnection.GetStats` walks the peer's *consumers* only and merges their reports. That is
-the right shape for an SFU, where there is no per-peer send side, but it means no producer
-statistics are available at all - no outbound bitrate, no packet loss on what this client sends.
+### Send-side statistics - added and verified 2026-09-11
+Was: `GetStats` takes a peer id, and on an SFU a peer can only ever be a receive-side answer - the
+producers carrying this client's own media belong to no peer in particular. So there was no
+outbound bitrate and no loss figure for anything this client sent, on any platform.
+
+`IConnection.GetOutgoingStatsAsync()` is the second route. MediaSoup merges the mic and webcam
+producers' reports; the plumbing beneath them already ran all the way down to `Sender.GetStats()`
+and nothing had ever called it. Peer-to-peer returns every peer's sending half at once, keyed by
+peer id - the same camera is encoded once per peer, and stats ids are unique only within one peer
+connection, so merging them raw would drop one peer's streams on top of another's. `CallViewModel`
+polls it on its own timer, started with the connection rather than with the first peer, because
+the interesting part happens before anyone else joins.
+
+Read `bytesSent`, not `framesEncoded`, to judge a video mute - see "How to tell a mute actually
+happened". The first thing this found is the entry below.
+
+### Muting did not stop the sender - fixed 2026-09-11
+`Transport.ProduceAsync` passed `options.DisableTrackOnPause ?? false`, and `MediaSoupConnection`
+never sets that option. mediasoup-client defaults it to **true**. So `Producer.Pause()` set
+`Paused = true` and did nothing else - it never touched `Track.Enabled`.
+
+Everything observable pointed the other way: the button flipped, `pauseProducer` went out, the
+server stopped forwarding, and every peer saw the mute and measured the drop. The client simply
+kept encoding and sending a full-rate stream for the SFU to discard. On a phone that is battery and
+mobile data spent on video nobody receives.
+
+Measured on a muted Android producer before the fix: 130 frames and ~150 kB of video every 5s,
+*identical* to the rate before the mute. After it, same device, same test:
+
+| | before mute | after mute | |
+|---|---|---|---|
+| audio bytes / 5s | 38,516 | 775 | 50x |
+| video bytes / 5s | 457,197 | 12,544 | 36x |
+
+Blazor was affected identically - audio 40,250 -> 48 bytes per 5s, video 653,228 -> 7,392. This was
+never platform-specific. It was invisible everywhere, because proving it needs a send-side report.
+
+`StopTracks` stays at `?? false`, deliberately unlike mediasoup-client: `stopTracks: true` would
+stop the camera track when a producer closes, and that is the same track the local preview renders.
+
+**The lesson is about what the earlier mute testing proved.** Verifying a mute from the *receiving*
+peer - consumer paused, inbound bitrate down 16x - proves the SFU stopped forwarding. It cannot
+prove the sender stopped, and it was read as though it had.
 
 ### Camera selection ignores constraints
 Android takes `GetCameraIdList()[1]` and iOS/Mac Catalyst take the front camera or simply the
@@ -413,6 +452,18 @@ than an order of magnitude.
 So the stats line carries `lvl:[…]`, printed from any report exposing `audioLevel` - `inbound-rtp`
 for what a peer is sending you, `media-source` for your own microphone. That goes to exactly 0 on
 mute and back on unmute, and it is the only cheap evidence available. Read it, not the bytes.
+
+**`framesEncoded` cannot show a video mute either, on the sending side.** A disabled video track
+does not stop feeding the encoder - it feeds it black frames, so the frame counter keeps climbing
+at the full frame rate through a mute. Only the bytes fall. Measured on a correctly muted Android
+producer: 128 frames per 5s either way, while video fell from 457 kB per 5s to 12.5 kB. Reading the
+frame counter there would say the mute failed when it worked.
+
+**And a receiving peer cannot show anything about the sender.** A peer's consumer pausing proves
+the *SFU* stopped forwarding, which it will do whether or not the sender stopped - that is the
+whole point of pausing server-side. Only `GetOutgoingStatsAsync` can tell you what left this
+device. Conflating the two hid the `DisableTrackOnPause` bug above for a full day of testing that
+looked, at every step, like it had passed.
 
 ## A failure only the Mac can see
 
