@@ -67,9 +67,16 @@ namespace WebRTCme.Connection.MediaSoup
             _cts = new();
             _webSocket = CreateWebSocket();
 
+            // The peer id is the caller's id, not its display name. Two people called "Melih"
+            // joining one room used to collide on the server, and the second silently displaced
+            // the first. The display name travels separately, in the join request, and comes back
+            // on every peer the server describes.
+            //
+            // `name` is kept in the signature because the peer-to-peer path's signalling server
+            // does key by name, and both implement the same shape.
             var uri = new Uri(new Uri(_mediaSoupServerBaseUrl),
                 $"?roomId={room}" +
-                $"&peerId={name}");
+                $"&peerId={id}");
             _webSocket.Options.AddSubProtocol("protoo");
             SetOriginHeader(uri);
 

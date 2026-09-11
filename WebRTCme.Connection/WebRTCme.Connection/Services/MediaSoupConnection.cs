@@ -536,8 +536,12 @@ namespace WebRTCme.Connection.Services
             switch (method)
             {
                 case MethodName.NewPeer:
-                    OnNewPeer(JsonSerializer.Deserialize<Peer>(
-                        element.GetRawText(), JsonHelper.WebRtcJsonSerializerOptions));
+                    // The peer is nested under "peer", not the body itself. Deserialising the body
+                    // as a Peer gave one with a null id, which OnNewPeer then discarded - so every
+                    // peer that joined after this client did was never recorded, and its display
+                    // name was never learned.
+                    OnNewPeer(JsonSerializer.Deserialize<NewPeerNotification>(
+                        element.GetRawText(), JsonHelper.WebRtcJsonSerializerOptions)?.Peer);
                     break;
 
                 case MethodName.PeerClosed:
@@ -777,14 +781,7 @@ namespace WebRTCme.Connection.Services
                 Speaking = false
             };
 
-            // DisplayName is routinely null here, and not because anything went wrong: the peer
-            // record is created on demand when its consumers arrive, and a client joining a room
-            // that is already occupied never receives 'newPeer' for the peers already in it - they
-            // come in the join response instead. Falling back to the peer id keeps the response
-            // usable, and costs nothing in this application because the two are the same string:
-            // the client joins with DisplayName = userContext.Name and the server keys peers by
-            // it. OnPeerClosed already reports a departing peer this way.
-            var name = peer.Peer?.DisplayName ?? peerId;
+            var name = DisplayNameFor(peerId);
 
             System.Diagnostics.Debug.WriteLine(
                 $"<------- PeerMedia - peer:{name} " +
@@ -831,7 +828,8 @@ namespace WebRTCme.Connection.Services
             {
                 Type = PeerResponseType.PeerLeft,
                 Id = peer.Id,
-                Name = peerId
+                // From the record we just removed, not a lookup: it is already out of _peers.
+                Name = peer.Peer?.DisplayName ?? peerId
             });
         }
 
@@ -1025,7 +1023,7 @@ namespace WebRTCme.Connection.Services
                             {
                                 Type = PeerResponseType.PeerJoined,
                                 Id = consumerPeer.Id,
-                                Name = consumerRequestData.PeerId,
+                                Name = DisplayNameFor(consumerRequestData.PeerId),
                                 MediaStream = mediaStream,
                                 DataChannel = /*isInitiator ? dataChannel :*/ null
                             });
@@ -1119,7 +1117,7 @@ namespace WebRTCme.Connection.Services
                             {
                                 Type = PeerResponseType.ConsumerDataChannel,
                                 Id = Guid.NewGuid(),// TODO: HOW TO GET GUID FOR PEER ID??? requestData.PeerId,
-                                Name = dataConsumerRequestData.PeerId,//peer.Peer.DisplayName,
+                                Name = DisplayNameFor(dataConsumerRequestData.PeerId),
                                 MediaStream = null,
                                 DataChannel = null,
                                 ProducerDataChannel = null,
@@ -1428,6 +1426,30 @@ namespace WebRTCme.Connection.Services
                 ConsumerIds = new(),
                 DataConsumerIds = new(),
             });
+
+        /// <summary>
+        /// The name to show for a peer, falling back to its id when the server has not named it.
+        /// </summary>
+        /// <remarks>
+        /// The two used to be the same string, because this client joined with its display name as
+        /// the peer id - so two people with one name collided on the server and the second
+        /// displaced the first. They are separate now: the id is a GUID and the name travels in the
+        /// join request, coming back on every peer the server describes.
+        ///
+        /// The fallback is therefore a real fallback rather than a synonym, and it is reachable: a
+        /// peer record is created on demand when its consumers arrive, which can happen before the
+        /// peer itself has been announced. Showing a GUID is poor, but it is better than showing
+        /// nothing, and it is recognisably an id rather than a name someone might act on.
+        /// </remarks>
+        string DisplayNameFor(string peerId)
+        {
+            if (peerId is null)
+                return null;
+
+            return _peers.TryGetValue(peerId, out var peer) && peer.Peer?.DisplayName is { } name
+                ? name
+                : peerId;
+        }
 
         static bool TryGetPeerId(Dictionary<string, object> appData, out string peerId)
         {

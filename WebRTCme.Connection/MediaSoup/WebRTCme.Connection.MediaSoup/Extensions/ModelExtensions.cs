@@ -73,7 +73,12 @@ namespace WebRTCme.Connection.MediaSoup
 
                     // Not every JSON number is an int: a codec parameter can legitimately be fractional,
                     // and GetInt32 throws on those rather than rounding.
-                    JsonValueKind.Number => element.TryGetInt32(out var i) ? i : element.GetDouble(),
+                    //
+                    // The (object) cast is load-bearing. Without it both arms of the conditional unify
+                    // to double, so every integer is boxed as a double - and unboxing is exact, so
+                    // consumers doing (int)value throw InvalidCastException on values as ordinary as
+                    // "apt": 101. That took out the whole connection at getRouterRtpCapabilities.
+                    JsonValueKind.Number => element.TryGetInt32(out var i) ? (object)i : element.GetDouble(),
 
                     JsonValueKind.True or JsonValueKind.False when allowBool => element.GetBoolean(),
 
