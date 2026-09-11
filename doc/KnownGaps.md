@@ -1,12 +1,43 @@
 ﻿# Known gaps
 
-What is missing, half-wired or fragile, as of the .NET 10 branch (2026-09-09). Everything here was
-checked against the code rather than remembered, and each entry says where it actually stands -
-"not written" and "written but unreachable" need very different work.
+What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
+2026-09-11**. Everything here was checked against the code rather than remembered, and each entry
+says where it actually stands - "not written" and "written but unreachable" need very different
+work, and most of what was wrong here turned out to be the second kind.
 
-Bugs found and fixed during the migration are in the git history, not here.
+Entries are kept after they are fixed, with what the fault was and how it was found. That is most
+of the value: several of them were wrong for a while in ways that cost real time, and the record of
+*how* the wrong answer looked right is worth more than a tidy list.
 
-## Unimplemented features
+## What is actually open
+
+Everything else below is either fixed or recorded for reference. These are the ones still standing,
+and none of them is a small change:
+
+| | where the work is |
+| --- | --- |
+| **`getDisplayMedia` on Android, iOS, Mac Catalyst** | Platform projects - a MediaProjection foreground service, a ReplayKit broadcast extension. Sharing works everywhere it can *start*. |
+| **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
+| **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
+| **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
+| **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
+
+**What has run, and where.** Blazor, Android and Windows have all executed the 2026-09-11 work and
+are verified in live calls. **iOS and Mac Catalyst compile and have run none of it** - a real
+amount of code changed there on reasoning alone, and the first person to run either should expect
+to find something.
+
+**If you are here to work on this, read these first.** The sections after "Verified against, and
+not" are field notes rather than gaps, and each one exists because something cost hours:
+how to run and debug the Windows app, how to tell a mute actually happened, the link failure only
+a Mac can see, the framework that fits neither platform, and why a JS return value is a reference
+rather than its contents.
+
+## Features, and what became of them
+
+Most of these are now fixed. They are kept because the interesting part is rarely the fix - it is
+what the fault looked like beforehand, which in almost every case here was "nothing at all".
 
 ### Screen sharing - its own source on the SFU path 2026-09-11
 `ILocalMediaStream.GetDisplayMediaStreamAync` and `CallViewModel` both wire it up, and
@@ -576,12 +607,32 @@ project of its own, above), `MediaRecorder`, `MediaStream.Create`, `GetCapabilit
 `DataProducer` as pass-through properties rather than invoked by anything, so they are referenced
 without being reached - which the audit cannot tell apart, and a reader has to check by hand.
 
-### Binding surface is incomplete
-`NotImplementedException` counts under `WebRTCme/Platforms/`: ~47 Android, ~40 iOS, ~40 Mac
-Catalyst, plus ~17 each in the Apple `Custom/` helpers. The paths the demo apps exercise work; the
-rest of the W3C surface is stubs. `Blob` on Blazor cannot produce a `byte[]` from a JS
-ArrayBuffer, and `MediaRecorder`/`Window` carry TODOs proposing the whole Blazor layer be rewritten
-on `System.Runtime.InteropServices.JavaScript` instead of JSInterop.
+### Binding surface is incomplete - but count the right thing
+`NotImplementedException` under `WebRTCme/Platforms/`: **38 distinct members on Android, 33 on
+iOS**, Mac Catalyst mirroring iOS, plus the Apple `Custom/` helpers. The paths the demo apps
+exercise work; the rest of the W3C surface is stubs.
+
+**The count is the wrong measure, and chasing it would waste the effort.** Of the 41 that threw on
+Android before 2026-09-11, only 16 were referenced anywhere in `WebRTCme.Connection` or
+`WebRTCme.Middleware` at all, and only **three** sat on paths that actually run. Those three - see
+"Three native stubs were on live paths" - were where every real failure came from. The other 25
+have never been reached by anything and can wait indefinitely.
+
+So the question for the next one is **"does anything call it"**, not "how many are left". The
+script that answers it walks the platform folder for members that throw, then greps the connection
+and middleware layers for call sites. Two cautions it cannot handle on its own, both of which bit
+during the sweep: a member referenced by a *pass-through property* is not necessarily invoked -
+`DataConsumer.Protocol` forwards to a stub that nothing reads - and a name can collide with an
+unrelated one, which is how `Utils.Clone` showed up as `IMediaStream.Clone`. Check the hits by
+hand before believing them.
+
+Still referenced and still unimplemented, none of them on a live path: `GetDisplayMedia` (its own
+entry above), `MediaRecorder`, `MediaStream.Create`, `GetCapabilities`, `GetConstraints`, and the
+data-channel properties `BinaryType`, `Protocol` and `BufferedAmountLowThreshold`.
+
+Separately, `Blob` on Blazor cannot produce a `byte[]` from a JS ArrayBuffer, and
+`MediaRecorder`/`Window` carry TODOs proposing the whole Blazor layer be rewritten on
+`System.Runtime.InteropServices.JavaScript` instead of JSInterop.
 
 ## Design gaps
 
@@ -712,27 +763,27 @@ whenever its estimate moves. The cause is upstream - see "Simulcast layer contro
 two are worth fixing separately, because a tile that keeps its size would stop the jumping whatever
 the server decides, and that is a self-contained change in `WebRTCme.Middleware`.
 
-### `IConnection` is narrow - four routes added, two still missing
+### `IConnection` was narrow - closed 2026-09-11
 It had three members, all call-scoped, so anything a real app wants - mute, screen share, ICE
 restart, layer control, device switching - had no route through the interface. That is why several
 items above used to read "implemented but unreachable": the code existed, the interface just did
 not mention it.
 
-Closed so far, in order: `IsOutgoingMediaEnabled` and `SetOutgoingMediaEnabledAsync`
-(2026-09-10), then `RestartIceAsync`, `GetOutgoingStatsAsync`,
-`SetPreferredIncomingLayersAsync` and `SetMaxOutgoingSpatialLayerAsync` (2026-09-11).
+Closed, in order: `IsOutgoingMediaEnabled` and `SetOutgoingMediaEnabledAsync` (2026-09-10), then
+`RestartIceAsync`, `GetOutgoingStatsAsync`, `SetPreferredIncomingLayersAsync`,
+`SetMaxOutgoingSpatialLayerAsync`, `StartScreenShareAsync` and `StopScreenShareAsync`
+(2026-09-11). Eight members where there were three.
 
 The pattern they set is worth keeping for the rest: one member meaning the same thing on both
 paths, implemented differently by each, with the state read back from wherever it actually lives
 rather than mirrored in the caller - on the mediasoup path that is the producer's own `Paused`
 flag, which a reconnect resets without anyone asking.
 
-**The interface is no longer the thing holding anything back.** The two entries that remained on
-this list both turned out to need nothing from it: screen share already reaches both paths through
-`ReplaceOutgoingTrackAsync`, and device switching is the same member plus a camera opened with
-different constraints. What is left of either is platform work and features, not routes -
-`getDisplayMedia` on the mobile platforms, and a second producer so a peer can see a camera and a
-screen at once.
+**The interface is no longer the thing holding anything back.** Device switching turned out to need
+nothing from it - `ReplaceOutgoingTrackAsync` plus a camera opened with different constraints - and
+screen share got its own pair of members in the end, because the mediasoup path produces the screen
+separately while peer-to-peer swaps the track, and that difference is visible to a user rather than
+an implementation detail worth hiding. What is left is platform work and features, not routes.
 
 Layer control is the last member added, and it is worth knowing what it is not. The receive half
 sets a **ceiling**: it caps what a peer costs, and it cannot raise a floor the server has put
@@ -741,7 +792,25 @@ switching an encoding off means those frames are never produced at all.
 
 ## Verified against, and not
 
-Working and tested on this branch: three-peer calls (Blazor + Android + iOS) over both the
+**The 2026-09-11 work has run on Blazor, Android and Windows. It has not run on iOS or Mac
+Catalyst.** That gap is worth stating plainly at the top of this section, because a lot of code
+changed on those two platforms on reasoning alone: `RTCRtpSender.SetParameters` and `ReplaceTrack`,
+`MediaStreamTrack.GetSettings`, the RTP parameter conversions, and the null-track guard in the
+media handler. All of it compiles. None of it has been executed.
+
+An end-to-end pass over the mediasoup path on the final build of 2026-09-11 covered, in one call:
+per-source tiles announced and retired, mute and unmute in both kinds propagating to the peer,
+voice activity, ICE restart with media flowing through it, send-side and receive-side statistics,
+and a screen share appearing as its own tile and being withdrawn again - with no unhandled
+exceptions. The same set was then driven from **Windows** against Android, including the layer cap
+and the screen share, with the same result.
+
+One trap that pass nearly walked into, and which has caught this project before: the Windows AppX
+layout was **stale**, its assemblies differing from `bin` by hash. Registering and running it would
+have tested hour-old code while looking entirely successful. Compare hashes, not timestamps, and
+check the granted process path actually points at the folder you refreshed.
+
+Working and tested earlier on this branch: three-peer calls (Blazor + Android + iOS) over both the
 peer-to-peer and mediasoup paths, join/leave/rejoin, and Windows in a call with Android over the
 peer-to-peer path (2026-09-10).
 
