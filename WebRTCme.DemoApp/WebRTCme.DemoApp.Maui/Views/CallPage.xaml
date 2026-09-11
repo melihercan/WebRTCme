@@ -5,21 +5,42 @@
              x:Class="WebRTCme.DemoApp.Maui.Views.CallPage">
     <ContentPage.Content>
 
-        <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
-                    Wrap="Wrap"
-                    Direction="Row"
-                    JustifyContent="Center"
-                    >
-            <BindableLayout.ItemTemplate>
-                <DataTemplate>
-                    <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
-                                      VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
-                                      CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
-                                      VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
-                                      />
-                </DataTemplate>
-            </BindableLayout.ItemTemplate>
-        </FlexLayout>
+        <!--
+            The call controls are their own row rather than an overlay, so the video below keeps
+            all the space it had. The status line collapses when no peer has muted anything -
+            IsVisible on an empty string keeps the row from reserving height for nothing.
+        -->
+        <Grid RowDefinitions="Auto,Auto,*">
+
+            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Padding="8" Spacing="8">
+                <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
+                <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
+            </HorizontalStackLayout>
+
+            <Label Grid.Row="1"
+                   Text="{Binding PeerMediaStatus}"
+                   IsVisible="{Binding HasPeerMediaStatus}"
+                   HorizontalOptions="Center"
+                   Margin="8,0,8,4" />
+
+            <FlexLayout Grid.Row="2"
+                        BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
+                        Wrap="Wrap"
+                        Direction="Row"
+                        JustifyContent="Center"
+                        >
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
+                                          VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
+                                          CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
+                                          VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                                          />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+
+        </Grid>
 
         <!--<StackLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
                      >

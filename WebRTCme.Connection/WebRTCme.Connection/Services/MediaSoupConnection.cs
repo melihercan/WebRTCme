@@ -325,24 +325,8 @@ namespace WebRTCme.Connection.Services
 
                   _logger.LogInformation("Connection completed");
 
-
-                        ///// DIDN't halp to get producer stream to go 
-                        //_ = ParseResponse(MethodName.PauseProducer,
-                        //    await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
-                        //        new PauseProducerRequest
-                        //        {
-                        //            ProducerId = _webcamProducer.Id
-                        //        })); ;
-
-
-                        //_ = ParseResponse(MethodName.ResumeProducer,
-                        //    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
-                        //        new ResumeProducerRequest
-                        //        {
-                        //            ProducerId = _webcamProducer.Id
-                        //        })); ;
-
-
+                        // Pausing and resuming these producers is SetOutgoingMediaEnabledAsync's
+                        // job now; it used to sit here commented out, as a debugging attempt.
                     }
 
                     //_connectionContext = new ConnectionContext
@@ -602,7 +586,10 @@ namespace WebRTCme.Connection.Services
                     {
                         var consumerId = GetString(element, "consumerId");
                         if (consumerId is not null && _consumers.TryGetValue(consumerId, out var consumer))
+                        {
                             consumer.Pause();
+                            ReportPeerMedia(consumerId);
+                        }
                     }
                     break;
 
@@ -610,7 +597,10 @@ namespace WebRTCme.Connection.Services
                     {
                         var consumerId = GetString(element, "consumerId");
                         if (consumerId is not null && _consumers.TryGetValue(consumerId, out var consumer))
+                        {
                             consumer.Resume();
+                            ReportPeerMedia(consumerId);
+                        }
                     }
                     break;
 
@@ -648,6 +638,65 @@ namespace WebRTCme.Connection.Services
                 value.ValueKind == JsonValueKind.String
                     ? value.GetString()
                     : null;
+        }
+
+        /// <summary>
+        /// Reports what a peer is sending, after one of its consumers was paused or resumed.
+        /// </summary>
+        /// <remarks>
+        /// This is the mediasoup equivalent of the peer-to-peer path's media message, and it
+        /// arrives by a different route: there, a peer says it has muted; here, the server pauses
+        /// the consumers carrying that producer and each client works it out from its own side.
+        ///
+        /// The report covers both kinds because the response does, and it is derived from every
+        /// consumer of the peer rather than from the one that changed - the peer's other kind has
+        /// not changed, but the caller is being handed a complete picture and it has to be right.
+        /// A kind with no consumer at all counts as muted: nothing is arriving for it either way.
+        /// </remarks>
+        void ReportPeerMedia(string consumerId)
+        {
+            if (_connectionContext is null)
+                return;
+
+            // Snapshotted before it is read twice: the list itself is not concurrent, and the
+            // server can be adding a consumer to it while this runs. OnPeerClosed takes the same
+            // precaution for the same reason.
+            var peer = _peers.Values.FirstOrDefault(p => p.ConsumerIds.ToArray().Contains(consumerId));
+            if (peer is null)
+                return;
+
+            var consumers = peer.ConsumerIds.ToArray()
+                .Select(id => _consumers.TryGetValue(id, out var consumer) ? consumer : null)
+                .Where(consumer => consumer is not null)
+                .ToArray();
+
+            bool IsMuted(MediaKind kind)
+            {
+                var ofKind = consumers.Where(consumer => consumer.Kind == kind).ToArray();
+                return ofKind.Length == 0 || ofKind.All(consumer => consumer.Paused);
+            }
+
+            var mediaContext = new MediaContext
+            {
+                VideoMuted = IsMuted(MediaKind.Video),
+                AudioMuted = IsMuted(MediaKind.Audio),
+                Speaking = false
+            };
+
+            System.Diagnostics.Debug.WriteLine(
+                $"<------- PeerMedia - peer:{peer.Peer?.DisplayName ?? peer.Id.ToString()} " +
+                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
+            _logger.LogInformation(
+                $"<------- PeerMedia - peer:{peer.Peer?.DisplayName ?? peer.Id.ToString()} " +
+                $"videoMuted:{mediaContext.VideoMuted} audioMuted:{mediaContext.AudioMuted}");
+
+            _connectionContext.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerMedia,
+                Id = peer.Id,
+                Name = peer.Peer?.DisplayName,
+                MediaContext = mediaContext
+            });
         }
 
         /// <summary>
@@ -1052,19 +1101,72 @@ namespace WebRTCme.Connection.Services
             if (track is null)
                 throw new ArgumentNullException(nameof(track));
 
-            var producer = track.Kind switch
-            {
-                MediaStreamTrackKind.Audio => _micProducer,
-                MediaStreamTrackKind.Video => _webcamProducer,
-                _ => null
-            };
-
-            if (producer is null)
-                throw new InvalidOperationException(
+            var producer = ProducerFor(track.Kind)
+                ?? throw new InvalidOperationException(
                     $"This connection is not producing a {track.Kind} track to replace.");
 
             await producer.ReplaceTrackAsync(newTrack);
         }
+
+        public bool IsOutgoingMediaEnabled(MediaStreamTrackKind kind)
+        {
+            // No producer means nothing is being sent, which is what a caller asking this wants to
+            // know - it is not an error, because producing is optional and starts asynchronously.
+            var producer = ProducerFor(kind);
+            return producer is not null && !producer.Paused;
+        }
+
+        /// <summary>
+        /// Pauses or resumes the producer, locally and on the server.
+        /// </summary>
+        /// <remarks>
+        /// Both halves are needed and neither is enough. <see cref="Producer.Pause"/> only
+        /// disables the local track, so the SFU keeps forwarding an RTP stream of silence to every
+        /// consumer; the server request is what actually stops the forwarding and makes the other
+        /// peers see the pause, through their own <c>consumerPaused</c> notification.
+        ///
+        /// Local first when pausing and local first when resuming, matching mediasoup-demo: on the
+        /// way down that stops the media before the server stops accepting it, and on the way up
+        /// the track is live before the server is told to forward it again.
+        /// </remarks>
+        public async Task SetOutgoingMediaEnabledAsync(MediaStreamTrackKind kind, bool enabled)
+        {
+            var producer = ProducerFor(kind)
+                ?? throw new InvalidOperationException($"This connection is not producing {kind}.");
+
+            // Already in the requested state, so there is nothing to say to the server.
+            if (producer.Paused == !enabled)
+                return;
+
+            // Debug.WriteLine as well as the logger: the MAUI apps register no logging provider,
+            // so ILogger output never reaches logcat or the Visual Studio output window.
+            System.Diagnostics.Debug.WriteLine(
+                $"######## Outgoing {kind} {(enabled ? "unmuted" : "muted")} - producer:{producer.Id}");
+            _logger.LogInformation(
+                $"######## Outgoing {kind} {(enabled ? "unmuted" : "muted")} - producer:{producer.Id}");
+
+            if (enabled)
+            {
+                producer.Resume();
+                _ = ParseResponse(MethodName.ResumeProducer,
+                    await _mediaSoupServerApi.ApiAsync(MethodName.ResumeProducer,
+                        new ResumeProducerRequest { ProducerId = producer.Id }));
+            }
+            else
+            {
+                producer.Pause();
+                _ = ParseResponse(MethodName.PauseProducer,
+                    await _mediaSoupServerApi.ApiAsync(MethodName.PauseProducer,
+                        new PauseProducerRequest { ProducerId = producer.Id }));
+            }
+        }
+
+        Producer ProducerFor(MediaStreamTrackKind kind) => kind switch
+        {
+            MediaStreamTrackKind.Audio => _micProducer,
+            MediaStreamTrackKind.Video => _webcamProducer,
+            _ => null
+        };
 
         object ParseResponse(string method, Result<object> result)
         {

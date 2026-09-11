@@ -11,6 +11,18 @@
     @CallViewModel.RecordButtonText
 </button>
 
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleMicrophoneAsync">
+    @CallViewModel.MicrophoneButtonText
+</button>
+
+<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleCameraAsync">
+    @CallViewModel.CameraButtonText
+</button>
+
+@if (!string.IsNullOrEmpty(CallViewModel.PeerMediaStatus))
+{
+    <p class="mx-4 text-muted">@CallViewModel.PeerMediaStatus</p>
+}
 
 <div class="mx-4 d-flex flex-wrap">
     @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)

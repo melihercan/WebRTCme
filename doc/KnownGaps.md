@@ -16,16 +16,44 @@ service, Apple needs ReplayKit and a broadcast extension, so neither is a small 
 Separately, `MediaSoupConnection` never produces a display stream, so screen sharing does not
 reach the SFU path on any platform.
 
-### Mute / pause / resume - not wired for MediaSoup
-The receive side is done: `consumerPaused` / `consumerResumed` notifications are handled and act
-on the consumer. The send side is not - the `PauseProducer` and `ResumeProducer` calls in
-`MediaSoupConnection` are commented out, so muting locally never reaches the server and other
-peers keep receiving. `IConnection` exposes no mute at all.
+### Mute / pause / resume - wired and verified peer-to-peer 2026-09-11
+Was: the send side did not exist. `IConnection` had no mute, and the `PauseProducer` /
+`ResumeProducer` calls in `MediaSoupConnection` were commented out, so muting locally never
+reached the server and other peers kept receiving.
+
+Now `IConnection.SetOutgoingMediaEnabledAsync(kind, enabled)` carries it on both paths:
+
+- **peer-to-peer** disables the local track - one stream feeds every peer connection, so no
+  per-peer work and no renegotiation - and then sends the signalling media message that already
+  existed and that nothing had ever called;
+- **mediasoup** pauses the producer *and* tells the server, which is what stops the SFU forwarding
+  and what makes other peers see it. Pausing only locally leaves the SFU relaying silence.
+
+Both directions now report: `SignalingConnection.OnPeerMediaAsync` used to `throw new
+NotImplementedException`, which means the first peer in a room ever to mute would have taken down
+every other client - the server relays that message whether or not anyone handles it. On the
+mediasoup path `consumerPaused` / `consumerResumed` now raise the same `PeerMedia` response,
+derived from all of that peer's consumers rather than the one that changed.
+
+Still missing: **voice activity detection**. The wire carries a `speaking` flag and the server
+relays it; nothing computes it, so it is always sent as false.
+
+**Verified in an Android/Windows call on 2026-09-11**, in both directions and for both kinds. See
+"How to tell a mute actually happened" below - it is not as obvious as it sounds, and the first
+attempt at verifying it proved nothing.
+
+The mediasoup half is still unexercised: same interface, different implementation.
 
 ### ICE restart - implemented but unreachable
 `Handler.RestartIceAsync` and `Transport.RestartIceAsync` exist and are ported. Nothing calls
-them: `IConnection` has only `ConnectionRequest`, `ReplaceOutgoingTrackAsync` and `GetStats`, and
-`MediaSoupConnection` never invokes a restart. A connection that loses its ICE path stays lost.
+them: `IConnection` still has no route to a restart, and `MediaSoupConnection` never invokes one.
+A connection that loses its ICE path stays lost.
+
+Unlike mute, this is not simply a matter of widening the interface. The mediasoup path needs a
+`restartIce` request that `MethodName` does not list and neither request nor response type exists
+for, and the peer-to-peer path needs an offer with `iceRestart` set plus a rule for which side
+starts it. Both are untested territory, so this stayed out of the mute change rather than being
+added blind.
 
 ### Simulcast layer control - absent
 The client produces simulcast encodings, but there is no `setPreferredLayers` or
@@ -119,10 +147,20 @@ because `AVAudioSession` there is emulated over the macOS HAL and device ids com
 iOS never sees; and it will bury anything else in the log at default verbosity. If a genuine audio
 fault is ever chased on Catalyst, filter this out first rather than reading it as the cause.
 
-### `IConnection` is narrow
-Three members, all call-scoped. Anything a real app wants - mute, screen share, ICE restart, layer
-control, device switching - has no route through the interface, which is why several of the items
-above are "implemented but unreachable".
+### `IConnection` is narrow - mute added 2026-09-10, the rest still missing
+It had three members, all call-scoped, so anything a real app wants - mute, screen share, ICE
+restart, layer control, device switching - had no route through the interface. That is why several
+of the items above read "implemented but unreachable": the code exists, the interface just does
+not mention it.
+
+`IsOutgoingMediaEnabled` and `SetOutgoingMediaEnabledAsync` are the first of these to be closed.
+The pattern they set is worth keeping for the rest: one member that means the same thing on both
+paths, implemented differently by each, with the state read back from wherever it actually lives
+rather than mirrored in the caller - on the mediasoup path that is the producer's own `Paused`
+flag, which a reconnect resets without anyone asking.
+
+Still with no route: screen share on the SFU path, ICE restart, simulcast layer control, and
+device switching.
 
 ## Verified against, and not
 
@@ -161,8 +199,17 @@ running its `use_case=Telephony` chain with both uplink and downlink nodes, whic
 a peer is actually connected. That exercises `Platforms/MacCatalyst/MediaView.MaciOS.cs`, which had
 never run. It needed the framework fix below.
 
+**Mute works peer-to-peer, both directions, both kinds** (Android + Windows, 2026-09-11). Camera
+off collapsed outbound video from ~1.14 MB per 5s to 71 kB and it recovered on unmute; a remote mic
+mute took the receiving peer's `inbound-rtp` audio level to exactly 0 and back. The receiving half
+had never run before - `SignalingConnection.OnPeerMediaAsync` was `throw new
+NotImplementedException()`, so the first peer in a room ever to mute would have thrown on every
+other client.
+
 Not verified, in rough order of risk:
 
+- **Mute on the mediasoup path.** Different implementation - producer pause plus a server request -
+  and the SFU has not been exercised for 18 commits.
 - **The Mac Catalyst slice of a package built on Windows is still wrong.** See "The framework that
   fits neither platform" below: the repository is now correct for building from source on either
   OS, but a `.resources.zip` produced on Windows carries the flat framework, which macOS refuses.
@@ -172,6 +219,29 @@ Not verified, in rough order of risk:
   WebAssembly dev server; Release is unaffected. **Did not reproduce when launched from Visual
   Studio on 2026-09-10**, which points at the dev server rather than the app. Narrow it before
   spending time on it: reproduce with `dotnet run --launch-profile https` first.
+
+## How to tell a mute actually happened
+
+Two traps, both hit on 2026-09-11, and between them the first verification attempt proved nothing
+at all despite the feature working perfectly.
+
+**The apps register no logging provider.** There is no `AddLogging`, `AddDebug` or `AddConsole`
+anywhere in `WebRTCme.DemoApp` or `WebRTCme.Middleware`, so **every `ILogger` call in the MAUI apps
+goes nowhere** - not to logcat, not to the Visual Studio output window. Everything that does show
+up uses `System.Diagnostics.Debug.WriteLine`, which is why `SignalingConnection` is full of
+`Debug.WriteLine` with `////_logger.LogInformation` commented out beside it. The proof is in any
+captured log: `CallViewModel` writes the same stats line twice, once each way, and only the
+`########` one ever appears. New diagnostics must use `Debug.WriteLine` or they are invisible.
+
+**Byte counters cannot show an audio mute.** Disabling an audio track makes it send *silence*, not
+nothing - Opus keeps emitting packets. Measured across a real mute: inbound audio fell from ~24 kB
+per 5s to ~8.7 kB, which is a dip, not a stop, and is easily mistaken for jitter. Video is the
+opposite and is obvious: black frames compress to almost nothing, so outbound video drops by more
+than an order of magnitude.
+
+So the stats line carries `lvl:[…]`, printed from any report exposing `audioLevel` - `inbound-rtp`
+for what a peer is sending you, `media-source` for your own microphone. That goes to exactly 0 on
+mute and back on unmute, and it is the only cheap evidence available. Read it, not the bytes.
 
 ## A failure only the Mac can see
 

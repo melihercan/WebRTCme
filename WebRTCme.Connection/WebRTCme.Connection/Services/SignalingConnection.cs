@@ -20,6 +20,12 @@ namespace WebRTCme.Connection.Services
 
         ConnectionContext _connectionContext;// = new();
 
+        // What this client is sending, as last set. Both are kept because the signalling message
+        // carries the pair rather than a delta, and both are reset when a call starts - a new
+        // call negotiates fresh tracks, which are enabled.
+        bool _outgoingAudioEnabled = true;
+        bool _outgoingVideoEnabled = true;
+
         public SignalingConnection(ISignalingServerApi signalingServerApi, IWebRtc webRtc, 
             ILogger<SignalingConnection> logger, IJSRuntime jsRuntime = null)
         {
@@ -60,6 +66,8 @@ namespace WebRTCme.Connection.Services
                         UserContext = userContext,
                         Observer = observer,
                     };
+                    _outgoingAudioEnabled = true;
+                    _outgoingVideoEnabled = true;
                     isJoined = true;
                 }
                 catch (Exception ex)
@@ -120,6 +128,70 @@ namespace WebRTCme.Connection.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        public bool IsOutgoingMediaEnabled(MediaStreamTrackKind kind) => kind switch
+        {
+            MediaStreamTrackKind.Audio => _outgoingAudioEnabled,
+            MediaStreamTrackKind.Video => _outgoingVideoEnabled,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Not a media kind this connection sends.")
+        };
+
+        /// <summary>
+        /// Disables the local track, so every peer connection sharing it stops carrying media.
+        /// </summary>
+        /// <remarks>
+        /// One local stream feeds all the peer connections, so this needs no per-peer work - and
+        /// deliberately does not touch the senders. A disabled track keeps its m-line and keeps
+        /// sending, as silence or black frames, which is what a browser does for mute and what
+        /// keeps renegotiation out of it.
+        ///
+        /// The peers are then told, so they can show it. That message is advisory: a peer that
+        /// ignores it still receives nothing but silence.
+        /// </remarks>
+        public async Task SetOutgoingMediaEnabledAsync(MediaStreamTrackKind kind, bool enabled)
+        {
+            var connectionContext = _connectionContext
+                ?? throw new InvalidOperationException("There is no call to mute.");
+
+            var localStream = connectionContext.UserContext.LocalStream
+                ?? throw new InvalidOperationException("This call was started without a local stream.");
+
+            var tracks = kind switch
+            {
+                MediaStreamTrackKind.Audio => localStream.GetAudioTracks(),
+                MediaStreamTrackKind.Video => localStream.GetVideoTracks(),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Not a media kind this connection sends.")
+            };
+
+            if (tracks is null || tracks.Length == 0)
+                throw new InvalidOperationException($"This call has no local {kind} track to mute.");
+
+            foreach (var track in tracks)
+                track.Enabled = enabled;
+
+            if (kind == MediaStreamTrackKind.Audio)
+                _outgoingAudioEnabled = enabled;
+            else
+                _outgoingVideoEnabled = enabled;
+
+            // Debug.WriteLine, not the logger: this app registers no logging provider, so every
+            // ILogger call in it goes nowhere. That is the convention throughout this file, and
+            // the reason the first run of this feature produced no client-side evidence at all.
+            System.Diagnostics.Debug.WriteLine(
+                $"######## Outgoing {kind} {(enabled ? "unmuted" : "muted")} - " +
+                $"room:{connectionContext.UserContext.Room} " +
+                $"user:{connectionContext.UserContext.Name}");
+
+            // 'speaking' is always false: nothing here does voice activity detection, and the
+            // server relays whatever it is given rather than deriving it.
+            var result = await _signalingServerApi.MediaAsync(
+                connectionContext.UserContext.Id,
+                videoMuted: !_outgoingVideoEnabled,
+                audioMuted: !_outgoingAudioEnabled,
+                speaking: false);
+            if (!result.IsOk)
+                throw new Exception($"{result.ErrorMessage}");
         }
 
         public Task<IRTCStatsReport> GetStats(Guid id)
@@ -300,9 +372,41 @@ namespace WebRTCme.Connection.Services
 
         }
 
+        /// <summary>
+        /// A peer reporting what it is now sending.
+        /// </summary>
+        /// <remarks>
+        /// This used to throw, which made any peer that muted take down every other client in the
+        /// room - the server relays the message whether or not anyone handles it.
+        ///
+        /// The peer may not have a context here yet: the server relays media messages to the whole
+        /// room, and a peer that mutes before its offer arrives is announcing state for a
+        /// connection that does not exist. Its name is unknown then, and the report is still worth
+        /// passing on, so it goes up with a null name rather than being dropped.
+        /// </remarks>
         public Task OnPeerMediaAsync(Guid peerId, bool videoMuted, bool audioMuted, bool speaking)
         {
-            throw new NotImplementedException();
+            var peerContext = _connectionContext?.PeerContexts
+                .SingleOrDefault(context => context.Id.Equals(peerId));
+
+            System.Diagnostics.Debug.WriteLine(
+                $"<-------- OnPeerMedia - peer:{peerContext?.Name ?? peerId.ToString()} " +
+                $"videoMuted:{videoMuted} audioMuted:{audioMuted} speaking:{speaking}");
+
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerMedia,
+                Id = peerId,
+                Name = peerContext?.Name,
+                MediaContext = new MediaContext
+                {
+                    VideoMuted = videoMuted,
+                    AudioMuted = audioMuted,
+                    Speaking = speaking
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
         async Task CreateOrDeletePeerConnectionAsync(Guid peerId, string peerName, bool isInitiator,  bool isDelete = false)

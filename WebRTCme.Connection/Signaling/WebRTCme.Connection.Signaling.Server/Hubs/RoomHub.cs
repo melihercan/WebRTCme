@@ -178,7 +178,8 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
         {
             try
             {
-                _logger.LogInformation($"######## LeaveAsync - id:{id}");
+                _logger.LogInformation($"######## MediaAsync - id:{id} videoMuted:{videoMuted} " +
+                    $"audioMuted:{audioMuted} speaking:{speaking}");
 
                 var client = _server.Rooms.SelectMany(r => r.Clients).SingleOrDefault(c => c.Id.Equals(id));
                 if (client is null)

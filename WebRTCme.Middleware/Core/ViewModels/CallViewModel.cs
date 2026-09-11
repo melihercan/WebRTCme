@@ -83,11 +83,22 @@ namespace WebRTCme.Middleware
                             s.Type == "candidate-pair" &&
                             s.Members.TryGetValue("state", out var state) && (string)state == "succeeded");
 
+                        // Audio levels, because byte counters cannot show an audio mute: disabling
+                        // a track makes it send silence, not nothing, so the bitrate barely moves.
+                        // The level does move, and it is the only cheap evidence that a mute took
+                        // effect. Printed from whatever reports one rather than from an assumed
+                        // stat type, since the platforms do not agree on where it appears.
+                        var levels = report.Values
+                            .Where(s => s.Members.ContainsKey("audioLevel"))
+                            .Select(s => $"{s.Type}={Member(s, "audioLevel")}")
+                            .ToArray();
+
                         var line =
                             $"{DateTime.Now:HH:mm:ss} {peerName} entries:{report.Count} " +
                             $"out:[{string.Join(" ", outbound.Select(Describe))}] " +
                             $"in:[{string.Join(" ", inbound.Select(Describe))}] " +
-                            $"pair:{(selected is null ? "none" : Member(selected, "bytesSent") + "/" + Member(selected, "bytesReceived"))}";
+                            $"pair:{(selected is null ? "none" : Member(selected, "bytesSent") + "/" + Member(selected, "bytesReceived"))} " +
+                            $"lvl:[{string.Join(" ", levels)}]";
 
                         _logger.LogInformation($"************* STATS {line}");
                         System.Diagnostics.Debug.WriteLine($"######## STATS {line}");
@@ -261,6 +272,7 @@ namespace WebRTCme.Middleware
 
                         case PeerResponseType.PeerLeft:
                             StopStatsPolling(peerResponse.Id);
+                            ForgetPeerMedia(peerResponse.Id);
                             _runOnUiThread.Invoke(() =>
                             {
                                 _mediaStreamManager.Remove(peerResponse.Name);
@@ -288,7 +300,17 @@ namespace WebRTCme.Middleware
                             });
                             break;
                         case PeerResponseType.PeerMedia:
-                            _logger.LogInformation($"TODO: ************* APP PeerMedia");
+                            // Debug.WriteLine as well, because no logging provider is registered
+                            // in these apps and the logger call alone reaches nothing.
+                            System.Diagnostics.Debug.WriteLine(
+                                $"######## APP PeerMedia {peerResponse.Name} " +
+                                $"videoMuted:{peerResponse.MediaContext?.VideoMuted} " +
+                                $"audioMuted:{peerResponse.MediaContext?.AudioMuted}");
+                            _logger.LogInformation(
+                                $"************* APP PeerMedia {peerResponse.Name} " +
+                                $"videoMuted:{peerResponse.MediaContext?.VideoMuted} " +
+                                $"audioMuted:{peerResponse.MediaContext?.AudioMuted}");
+                            OnPeerMedia(peerResponse);
                             break;
                     }
                 },
@@ -355,7 +377,159 @@ namespace WebRTCme.Middleware
 
             _connectionDisposer?.Dispose();
             _connectionDisposer = null;
+
+            _peerMedia.Clear();
+            PeerMediaStatus = string.Empty;
+            IsMicrophoneMuted = false;
+            IsCameraMuted = false;
         }
+
+        #region Muting
+
+        // What each peer says it is sending. Deliberately not folded into MediaStreamParameters:
+        // the VideoMuted/AudioMuted flags there are render-side - whether this client plays the
+        // stream - and a peer muting its microphone is a different fact from this client choosing
+        // not to listen. The local tile, for instance, is permanently AudioMuted to stop echo.
+        readonly Dictionary<Guid, (string Name, MediaContext Media)> _peerMedia = new();
+
+        string _peerMediaStatus = string.Empty;
+
+        /// <summary>
+        /// One line naming the peers that have muted something, empty when nobody has.
+        /// </summary>
+        public string PeerMediaStatus
+        {
+            get => _peerMediaStatus;
+            private set
+            {
+                if (_peerMediaStatus == value)
+                    return;
+                _peerMediaStatus = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasPeerMediaStatus));
+            }
+        }
+
+        /// <summary>
+        /// Whether <see cref="PeerMediaStatus"/> has anything to show, for views that collapse the
+        /// line rather than leaving an empty one.
+        /// </summary>
+        public bool HasPeerMediaStatus => !string.IsNullOrEmpty(PeerMediaStatus);
+
+        bool _isMicrophoneMuted;
+        public bool IsMicrophoneMuted
+        {
+            get => _isMicrophoneMuted;
+            private set
+            {
+                _isMicrophoneMuted = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(MicrophoneButtonText));
+            }
+        }
+
+        bool _isCameraMuted;
+        public bool IsCameraMuted
+        {
+            get => _isCameraMuted;
+            private set
+            {
+                _isCameraMuted = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CameraButtonText));
+            }
+        }
+
+        public string MicrophoneButtonText => IsMicrophoneMuted ? "Unmute microphone" : "Mute microphone";
+
+        public string CameraButtonText => IsCameraMuted ? "Turn camera on" : "Turn camera off";
+
+        public async Task OnToggleMicrophoneAsync() =>
+            IsMicrophoneMuted = await ToggleOutgoingMediaAsync(MediaStreamTrackKind.Audio, IsMicrophoneMuted);
+
+        public async Task OnToggleCameraAsync() =>
+            IsCameraMuted = await ToggleOutgoingMediaAsync(MediaStreamTrackKind.Video, IsCameraMuted);
+
+        public ICommand ToggleMicrophoneCommand => new AsyncCommand(async () =>
+        {
+            await OnToggleMicrophoneAsync();
+        });
+
+        public ICommand ToggleCameraCommand => new AsyncCommand(async () =>
+        {
+            await OnToggleCameraAsync();
+        });
+
+        /// <summary>
+        /// Flips the mute state for one kind and reports the state to settle on.
+        /// </summary>
+        /// <remarks>
+        /// On failure the old state is returned unchanged, so a button that could not do anything
+        /// does not end up claiming it did. The likely failure is asking before there is anything
+        /// to mute - on the mediasoup path the producers appear a moment after the call starts.
+        /// </remarks>
+        async Task<bool> ToggleOutgoingMediaAsync(MediaStreamTrackKind kind, bool muted)
+        {
+            try
+            {
+                await _connection.SetOutgoingMediaEnabledAsync(kind, enabled: muted);
+                return !muted;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogInformation(
+                    $"************* APP Muting {kind} failed: {exception.Message}");
+                _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+                {
+                    Title = "Error",
+                    Text = $"Could not change the outgoing {kind.ToString().ToLowerInvariant()}:" +
+                           Environment.NewLine +
+                           exception.Message,
+                    Ok = "Ok",
+                });
+                return muted;
+            }
+        }
+
+        void OnPeerMedia(PeerResponse peerResponse)
+        {
+            if (peerResponse.MediaContext is null)
+                return;
+
+            // The name can be absent - a peer that mutes before its offer arrives is not known
+            // here yet - so an earlier name is preferred over none, and the id is the last resort.
+            var name = peerResponse.Name
+                ?? (_peerMedia.TryGetValue(peerResponse.Id, out var known) ? known.Name : null)
+                ?? peerResponse.Id.ToString();
+
+            _peerMedia[peerResponse.Id] = (name, peerResponse.MediaContext);
+            UpdatePeerMediaStatus();
+        }
+
+        void ForgetPeerMedia(Guid peerId)
+        {
+            if (_peerMedia.Remove(peerId))
+                UpdatePeerMediaStatus();
+        }
+
+        void UpdatePeerMediaStatus()
+        {
+            var reports = _peerMedia.Values
+                .Where(entry => entry.Media.VideoMuted || entry.Media.AudioMuted)
+                .Select(entry =>
+                {
+                    var muted = new List<string>();
+                    if (entry.Media.AudioMuted) muted.Add("mic muted");
+                    if (entry.Media.VideoMuted) muted.Add("camera off");
+                    return $"{entry.Name}: {string.Join(", ", muted)}";
+                })
+                .ToArray();
+
+            _runOnUiThread.Invoke(() => PeerMediaStatus = string.Join("   ", reports));
+            _reRender?.Invoke();
+        }
+
+        #endregion
 
         private bool _isSharingScreen;
         private string _shareScreenButtonText = "Start sharing screen";
