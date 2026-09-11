@@ -24,6 +24,11 @@ namespace WebRTCme.Middleware
                 handler._videoTrack = media.Stream.GetVideoTracks().FirstOrDefault();
                 handler._audioTrack = handler._stream.GetAudioTracks().FirstOrDefault();
 
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## MapStream label:{media.Label} " +
+                    $"video:{(handler._videoTrack is null ? "none" : "yes")} " +
+                    $"audio:{(handler._audioTrack is null ? "none" : "yes")}");
+
                 // Only when there is one. A stream can legitimately carry audio and no video - a
                 // peer with no camera, or one whose video consumer has not arrived yet - and the
                 // renderers all dereference the track they are handed. Passing null here crashed
