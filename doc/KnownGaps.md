@@ -23,19 +23,48 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Captured frames do not rotate with the device** | nobody - it can be picked up today | Seen on Android 2026-09-12. Upright in portrait, lying on its side in landscape. Worked around by locking the demo to portrait, which is a workaround and not a fix. |
+| **Outgoing frames carry the wrong rotation** | nobody - it can be picked up today | Seen on both Android and Mac Catalyst, 2026-09-12. The picture a *peer* receives is rotated 90 degrees. |
 
-**The rotation one, in more detail**, because the obvious cause is already ruled out. libwebrtc's
-Android capturer reads the display rotation per frame from the `Context` it was handed, and the
-usual way to break that is to hand it the application context; ours comes from the MAUI handler,
-which is the activity. So the cheap explanation does not hold and the next step is to instrument
-the frame rotation actually reaching the renderer, on a device, in both orientations.
+### The rotation one, in detail - 2026-09-12
 
-It matters beyond the demo: the rotation travels with the frame, so a peer sees the same sideways
-picture. The demo apps lock to portrait - see `MainActivity` and `Info.plist` - which makes it
-invisible there and leaves it entirely present for any consumer of the library that allows
-landscape. Once it is fixed, the demo's portrait lock should be revisited: a tablet in landscape
-has width for a row of tiles.
+Two sightings that look like different bugs and are one.
+
+**Android.** The local preview is upright in portrait and lying on its side in landscape. Rotating
+the device does not rotate the picture.
+
+**Mac Catalyst.** The Mac's own window shows the camera correctly, the webcam is physically
+upright - and the same stream arrives at an Android peer rotated 90 degrees.
+
+The Mac case is the one that explains both, and it also explains why the Apple side looked healthy
+for so long: **the Apple self-view never goes through the WebRTC frame path at all.** See
+`MediaView.MaciOS.cs` - for a camera track it builds an `RTCCameraPreviewView` and hands it the
+`AVCaptureSession`, so what you see locally is the capture preview layer, not a decoded WebRTC
+frame. It is upright because the camera is upright. It says nothing about what is being sent.
+
+What is being sent carries a rotation, and that rotation comes from libwebrtc's
+`RTCCameraVideoCapturer`, which derives it from `UIDevice.orientation`. On a Mac that value is
+meaningless, so the frames go out tagged for a rotation the scene never had, and the receiving peer
+dutifully applies it. Android shows the fault locally as well, because its renderer *does* sit on
+the WebRTC frame path - `SurfaceViewRenderer` applies the same metadata.
+
+So: one fault, "the rotation attached to an outgoing frame is derived from a device orientation
+that does not describe the camera", surfacing differently per platform depending on whether the
+local preview happens to share the frame path.
+
+Already ruled out on Android: handing the capturer an application context instead of an activity,
+which is the usual way display rotation goes stale. Ours comes from the MAUI handler, which is the
+activity.
+
+**The demo's portrait lock does not fix this.** It makes Android's *local* preview right and
+leaves what peers receive exactly as wrong; on Mac Catalyst it changes nothing at all. The lock is
+there so the demo does not look broken - see `MainActivity` and `Info.plist` - not because the
+problem is solved.
+
+There is a proven pattern in the tree for the fix on the Apple side:
+`Platforms/MacCatalyst/Custom/ScreenCapture.cs` already takes a `CMSampleBuffer` to an
+`RTCCVPixelBuffer` to an `RTCVideoFrame` with an explicit `RTCVideoRotation_0` and pushes it
+through the capturer delegate. Driving the camera the same way, instead of through
+`RTCCameraVideoCapturer`, would put the rotation under this library's control.
 
 **Passed for now: Android simulcast.** Decided 2026-09-12, after checking rather than assuming.
 `SimulcastVideoEncoderFactory` is **not in WebRTC at all** - a checkout of `main` has 217 Java
