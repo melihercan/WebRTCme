@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
@@ -52,7 +52,9 @@ namespace WebRTCme.Android
                 // The type has to be passed explicitly from Android 10. The two-argument overload
                 // leaves the service typeless, and a typeless service is not one a projection will
                 // accept - which surfaces later and somewhere else.
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+                // OperatingSystem rather than Build.VERSION.SdkInt, which reads the same but is
+                // not a guard the platform-compatibility analyzer understands.
+                if (OperatingSystem.IsAndroidVersionAtLeast(29))
                     StartForeground(NotificationId, notification, ForegroundService.TypeMediaProjection);
                 else
                     StartForeground(NotificationId, notification);

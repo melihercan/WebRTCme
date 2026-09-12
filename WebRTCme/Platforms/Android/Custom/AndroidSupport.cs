@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WebRTCme.Android;
+using WebRTCme.Platforms.Android.Custom;
 using WebRTCme;
 using Webrtc = Org.Webrtc;
 
@@ -58,6 +60,117 @@ namespace WebRTCme
         // session ending anyway.
         static Webrtc.ScreenCapturerAndroid _screenCapturer;
         static string _screenTrackId;
+
+        #region Getting the camera back
+
+        // The tracks a recovery is already running for. A lost camera reports itself more than
+        // once - a disconnect is followed by an error from every failed reopen - and each of those
+        // must feed the loop that is already running rather than start another one beside it.
+        static readonly ConcurrentDictionary<string, byte> _recoveringTrackIds = new();
+
+        // How long to keep trying. Face unlock holds the camera for a couple of seconds, the
+        // system camera app for as long as the user is in it; past a minute of failing there is
+        // something wrong that retrying will not fix, and a loop nobody can see is worse than a
+        // still picture somebody can.
+        const int RecoveryAttempts = 15;
+        const int RecoveryFirstDelayMs = 500;
+        const int RecoveryMaxDelayMs = 5000;
+
+        /// <summary>
+        /// Reopens the camera for a track whose capture the system took away.
+        /// </summary>
+        /// <remarks>
+        /// Only for a track that is still a live local capture: a camera lost because the call
+        /// ended is not one to fight over, and <see cref="LocalCaptureStopped"/> is what says
+        /// which is which.
+        ///
+        /// Each attempt stops the capturer before starting it. The capturer's state after a
+        /// disconnect is a closed session it has not let go of, and starting on top of one of
+        /// those is what takes the process down with "Session has been closed".
+        ///
+        /// Success is a frame, not a returned call: <c>startCapture</c> posts the work to the
+        /// capturer's own thread and comes back immediately, so a start that fails because the
+        /// other client still holds the camera looks exactly like one that worked.
+        /// <see cref="CameraRecovered"/> is what actually ends the loop.
+        /// </remarks>
+        public static void CameraLost(string trackId, string reason)
+        {
+            if (trackId is null)
+                return;
+
+            CameraEcho($"camera {trackId} lost: {reason}");
+
+            if (!_localCaptureTrackIds.ContainsKey(trackId))
+                return;
+
+            if (!_recoveringTrackIds.TryAdd(trackId, 0))
+                return;
+
+            _ = Task.Run(() => RecoverCameraAsync(trackId));
+        }
+
+        /// <summary>
+        /// Ends a recovery, because a frame arrived.
+        /// </summary>
+        public static void CameraRecovered(string trackId)
+        {
+            if (trackId is not null && _recoveringTrackIds.TryRemove(trackId, out _))
+                CameraEcho($"camera {trackId} is capturing again");
+        }
+
+        static async Task RecoverCameraAsync(string trackId)
+        {
+            var delay = RecoveryFirstDelayMs;
+
+            for (var attempt = 1; attempt <= RecoveryAttempts; attempt++)
+            {
+                await Task.Delay(delay).ConfigureAwait(false);
+                delay = Math.Min(delay * 2, RecoveryMaxDelayMs);
+
+                // These say the loop is over from opposite directions: the track has stopped, or
+                // a frame has arrived and CameraRecovered has already cleared us.
+                if (!_localCaptureTrackIds.ContainsKey(trackId) ||
+                    !_recoveringTrackIds.ContainsKey(trackId))
+                    return;
+
+                if (!_capturersByTrackId.TryGetValue(trackId, out var videoCapturer))
+                    return;
+
+                try
+                {
+                    videoCapturer.StopCapture();
+                }
+                catch (Exception exception)
+                {
+                    // Expected: there is usually no session left to stop. It still has to be
+                    // asked, because when there is one, starting over it is fatal.
+                    CameraEcho($"camera {trackId} would not stop before attempt {attempt}: " +
+                        $"{exception.Message}");
+                }
+
+                try
+                {
+                    var (width, height, frameRate) = FormatFor(trackId);
+                    videoCapturer.StartCapture(width, height, frameRate);
+                    CameraEcho($"camera {trackId} reopen attempt {attempt} of {RecoveryAttempts}");
+                }
+                catch (Exception exception)
+                {
+                    CameraEcho($"camera {trackId} reopen attempt {attempt} threw: {exception.Message}");
+                }
+            }
+
+            if (_recoveringTrackIds.TryRemove(trackId, out _))
+                CameraEcho($"camera {trackId} did not come back after {RecoveryAttempts} attempts");
+        }
+
+        internal static void CameraEcho(string line)
+        {
+            Console.WriteLine($"######## {line}");
+            System.Diagnostics.Debug.WriteLine($"######## {line}");
+        }
+
+        #endregion
 
         #region Keeping the call alive
 
@@ -258,7 +371,10 @@ namespace WebRTCme
                 _capturersByTrackId.GetOrAdd(videoTrack.Id, _ =>
                 {
                     var nativeVideoSource = GetNativeVideoSource(videoTrack);
-                    var videoCapturer = cameraEnum.CreateCapturer(videoTrack.Id, null);
+                    // The events handler was null here, which is why a camera the system took
+                    // away never came back - see CameraEvents.
+                    var videoCapturer = cameraEnum.CreateCapturer(
+                        videoTrack.Id, new CameraEvents(videoTrack.Id));
                     videoCapturer.Initialize(
                         Webrtc.SurfaceTextureHelper.Create(
                             "CameraVideoCapturerThread",

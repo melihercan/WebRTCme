@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
@@ -58,9 +58,14 @@ namespace WebRTCme.Android
             {
                 var notification = BuildNotification();
 
-                // The types have to be passed explicitly from Android 10; the two-argument overload
-                // leaves the service typeless, and a typeless service does not keep the camera.
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+                // The types have to be passed explicitly, because the two-argument overload leaves
+                // the service typeless and a typeless service does not keep the camera. These two
+                // types arrived in Android 11 - one version later than the projection type next
+                // door - and below that the untyped call is all there is.
+                //
+                // OperatingSystem rather than Build.VERSION.SdkInt, which reads the same but is
+                // not a guard the platform-compatibility analyzer understands.
+                if (OperatingSystem.IsAndroidVersionAtLeast(30))
                 {
                     StartForeground(NotificationId, notification,
                         ForegroundService.TypeCamera | ForegroundService.TypeMicrophone);
