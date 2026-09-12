@@ -35,11 +35,19 @@ expect to find something - was right twice over. See "What running Mac Catalyst 
 
 A correction while doing it: this file previously said Mac Catalyst had "run none of it", which was
 too broad. It had been run on 2026-09-10, which is where the CoreAudio note below came from; what
-it had not run was anything after that. The narrower claim is the one worth making, and the same
-care applies to **iOS, which still has not run any of this** - it compiles, and it shared every
-line of the two bugs found on Mac Catalyst, both now fixed.
+it had not run was anything after that.
 
-## What running Mac Catalyst found - 2026-09-12
+**iOS has now run it too** - an iPhone XR on 18.7, built and deployed from the Mac - and it is the
+first time any of this branch has executed on a physical Apple device. It went in one attempt, and
+the two bugs found on Mac Catalyst are the reason: iOS shares both files line for line, both fixes
+were already in the tree, and the run was made as a prediction rather than an exploration. Joining
+did not crash (`RTCTrackEvent.Streams`), and no phantom `iOS (screen)` tile appeared (the msid),
+which is each fix confirming itself on a platform it had not been tested on. Two tiles, both
+advancing 4.00s in 4s, voice activity reported.
+
+**Every platform this library targets has now run this branch.**
+
+## What running Mac Catalyst and iOS found - 2026-09-12
 
 Two bugs, in the first ten minutes, neither of which any amount of reading would have produced.
 Both are fixed and both applied to iOS identically.
@@ -70,7 +78,26 @@ answers *wrongly* and has always been believed to work.
 
 **Verified after both fixes**, a three-way peer-to-peer call, Mac Catalyst joining a live
 Android-and-Blazor one: three tiles at the far end, no phantom, the Mac's camera flowing, the Mac's
-voice activity reported, and Android encoding to two peers.
+voice activity reported, and Android encoding to two peers. **Then again on iOS**, an iPhone XR
+joining Blazor, where both fixes held first time - which is the more useful confirmation, because
+nothing about iOS had been exercised when they were written.
+
+**Getting onto the iPhone at all was the hard part, and none of it was the code.** Signing failed
+with `errSecInternalComponent` on a certificate that was valid, in date, unique, and had its
+private key present. It was not the SSH session's lack of keychain access - the obvious answer,
+and true, but not the cause, since it failed in a console session too. The fix was
+`security set-key-partition-list -S apple-tool:,apple:,codesign: -s login.keychain-db`, which
+grants codesign permission to use keys that were imported programmatically rather than created
+through Xcode - and "Created via API" in the certificate's own name was the clue that should have
+been read first.
+
+**What can and cannot be driven remotely**, since this will come up again. Mac Catalyst can be
+driven entirely over SSH: accessibility scripting works, so elements can be read by value and
+pressed by reference. A physical iPhone cannot - there is no UI automation, and
+`idevicescreenshot` needs a Developer disk image that libimobiledevice cannot mount on current
+iOS, so the device screen is not visible either. Deployment and launch do work over SSH
+(`xcrun devicectl device install app` / `process launch --console`), so only the taps need a
+person.
 
 **A testing note that cost twenty minutes.** The app is ad-hoc signed, so every rebuild changes its
 signature and macOS discards the existing TCC grant. The first launch after a rebuild therefore
