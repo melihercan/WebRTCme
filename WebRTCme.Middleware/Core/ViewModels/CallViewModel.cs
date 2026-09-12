@@ -300,6 +300,8 @@ namespace WebRTCme.Middleware
         {
             _connectionParameters = connectionParameters;
             _reRender = reRender;
+            _localMediaStream.OnDeviceChange += OnCaptureDevicesChanged;
+
             _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
             WatchLocalTracks(_cameraStream);
             _mediaStreamManager.Add(new MediaStreamParameters
@@ -350,6 +352,8 @@ namespace WebRTCme.Middleware
 
             try
             {
+                _localMediaStream.OnDeviceChange -= OnCaptureDevicesChanged;
+
                 UnwatchLocalTracks();
 
                 foreach (var stream in new[] { _cameraStream, _displayStream })
@@ -440,6 +444,23 @@ namespace WebRTCme.Middleware
 
             _localTrackWatchers.Clear();
         }
+
+        /// <summary>
+        /// Says that the set of capture devices changed.
+        /// </summary>
+        /// <remarks>
+        /// Reported rather than acted on, deliberately. A camera appearing mid-call is not a
+        /// reason to switch to it - the user chose the one they are using - and a camera
+        /// disappearing is already handled where it matters, by the track ending and
+        /// <see cref="RecoverLocalTrackAsync"/> reopening the device.
+        ///
+        /// What this is for is being able to see it happen. On Android the same notification
+        /// arrives when another application takes the camera, which is the eviction
+        /// <c>AndroidSupport.CameraLost</c> recovers from - seen from the other side, and a moment
+        /// earlier. A log line that says so turns a class of confusing report into an obvious one.
+        /// </remarks>
+        void OnCaptureDevicesChanged(object sender, EventArgs e) =>
+            _logger.LogInformation("-------> the set of capture devices changed");
 
         void OnLocalTrackEnded(IMediaStreamTrack track)
         {

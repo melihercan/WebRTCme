@@ -21,6 +21,40 @@ namespace WebRTCme.Middleware.Services
         }
 
         /// <summary>
+        /// Forwards the platform's device-change notification to whoever asked for it.
+        /// </summary>
+        /// <remarks>
+        /// Subscribed through rather than eagerly, because on the platforms that have no native
+        /// signal this is what starts the work: Windows polls enumeration, Android registers
+        /// system callbacks, and neither should happen in a process that never asks.
+        /// </remarks>
+        public event EventHandler OnDeviceChange
+        {
+            add
+            {
+                if (_onDeviceChange is null)
+                    _mediaDevices.OnDeviceChange += Forward;
+
+                _onDeviceChange += value;
+            }
+            remove
+            {
+                if (_onDeviceChange is null)
+                    return;
+
+                _onDeviceChange -= value;
+
+                if (_onDeviceChange is null)
+                    _mediaDevices.OnDeviceChange -= Forward;
+            }
+        }
+
+        EventHandler _onDeviceChange;
+
+        void Forward(object sender, IMediaStreamTrackEvent e) =>
+            _onDeviceChange?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>
         /// Opens the camera, honouring <paramref name="cameraType"/>.
         /// </summary>
         /// <remarks>

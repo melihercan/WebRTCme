@@ -31,6 +31,50 @@ internal static class CaptureDeviceWatcher
     private static readonly object _gate = new();
     private static Timer _timer;
 
+    // The device set as of the last tick, so a change can be noticed rather than only a loss.
+    // Null until the first tick, which is not the same as "no devices" - the first tick must not
+    // look like everything just appeared.
+    private static HashSet<string> _lastSeen;
+
+    // How many MediaDevices are listening for a change. Kept as a count rather than a flag
+    // because the timer's lifetime is the union of this and the watched tracks: either alone is
+    // reason enough to keep enumerating, and neither may switch it off while the other wants it.
+    private static int _changeListeners;
+
+    /// <summary>
+    /// Raised when a capture device appears or disappears.
+    /// </summary>
+    /// <remarks>
+    /// Static, and <see cref="MediaDevices"/> forwards it to its own instance event. The polling
+    /// is a process-wide cost and there is no sense paying it once per <see cref="MediaDevices"/>.
+    /// </remarks>
+    internal static event Action DevicesChanged;
+
+    /// <summary>
+    /// Starts and stops the polling that <see cref="DevicesChanged"/> needs.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="Watch"/> because the two want it at different times, and the
+    /// device-change case is the one that wants it when nothing is being captured at all: the
+    /// question "what cameras are there" is usually asked by something drawing a device list,
+    /// which is not a thing a call is doing.
+    /// </remarks>
+    internal static void AddChangeListener()
+    {
+        Interlocked.Increment(ref _changeListeners);
+
+        lock (_gate)
+            _timer ??= new Timer(_ => Poll(), null, IntervalMs, IntervalMs);
+    }
+
+    internal static void RemoveChangeListener()
+    {
+        if (Interlocked.Decrement(ref _changeListeners) < 0)
+            Interlocked.Exchange(ref _changeListeners, 0);
+
+        StopTimerIfIdle();
+    }
+
     /// <summary>
     /// Starts watching the device a local track was opened with.
     /// </summary>
@@ -64,16 +108,20 @@ internal static class CaptureDeviceWatcher
 
     private static void StopTimerIfIdle()
     {
-        if (!_watched.IsEmpty)
+        if (!_watched.IsEmpty || Volatile.Read(ref _changeListeners) > 0)
             return;
 
         lock (_gate)
         {
-            if (!_watched.IsEmpty)
+            if (!_watched.IsEmpty || Volatile.Read(ref _changeListeners) > 0)
                 return;
 
             _timer?.Dispose();
             _timer = null;
+
+            // So the next run starts from "unknown" rather than from a list that may be months
+            // stale, which would otherwise report every device as having just appeared.
+            _lastSeen = null;
         }
     }
 
@@ -90,6 +138,25 @@ internal static class CaptureDeviceWatcher
             // Enumeration failing is not evidence that a device has gone, and acting on it would
             // end every track on the call. Skip this tick.
             return;
+        }
+
+        // Before the per-track work, because a device appearing is news too and no track can be
+        // waiting on it. The first tick only records - it has nothing to compare against, and
+        // announcing the devices that were already there is not a change.
+        var previous = _lastSeen;
+        _lastSeen = present;
+
+        if (previous is not null && !previous.SetEquals(present))
+        {
+            try
+            {
+                DevicesChanged?.Invoke();
+            }
+            catch (Exception)
+            {
+                // A listener that throws must not stop the track work below, which is the half
+                // that keeps a call honest.
+            }
         }
 
         foreach (var track in _watched.Keys)

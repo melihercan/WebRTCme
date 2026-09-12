@@ -17,18 +17,49 @@ internal sealed class MediaDevices : IMediaDevices
     private const int DefaultFrameRate = 30;
 
     /// <summary>
-    /// Never raised: the shim reports no device-change notifications. Declared because
-    /// <see cref="IMediaDevices"/> requires it.
+    /// Raised when a capture device appears or disappears.
     /// </summary>
     /// <remarks>
-    /// The absence is real and it costs something - see <see cref="CaptureDeviceWatcher"/>, which
-    /// has to poll <see cref="EnumerateInputDevices"/> to notice a camera being unplugged. Raising
-    /// this properly would need a callback added to the ABI, whose source is not in this
-    /// repository.
+    /// The ABI has no device-change callback, so this is <see cref="CaptureDeviceWatcher"/>
+    /// comparing enumerations - the same polling that notices a camera being unplugged during a
+    /// call, told to report additions as well. Subscribing is what starts it: a process that never
+    /// asks never pays, and the timer stops again when the last subscriber goes.
+    ///
+    /// The argument is null. The spec's <c>devicechange</c> carries no payload - it says the set
+    /// changed, not what changed - and a caller that wants to know calls
+    /// <see cref="EnumerateDevices"/>. The parameter type comes from
+    /// <see cref="IMediaDevices"/> and is not something this can choose.
     /// </remarks>
-#pragma warning disable CS0067 // no device-change signal in the ABI
-    public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
-#pragma warning restore CS0067
+    public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange
+    {
+        add
+        {
+            if (_onDeviceChange is null)
+            {
+                CaptureDeviceWatcher.DevicesChanged += RaiseDeviceChange;
+                CaptureDeviceWatcher.AddChangeListener();
+            }
+
+            _onDeviceChange += value;
+        }
+        remove
+        {
+            if (_onDeviceChange is null)
+                return;
+
+            _onDeviceChange -= value;
+
+            if (_onDeviceChange is null)
+            {
+                CaptureDeviceWatcher.DevicesChanged -= RaiseDeviceChange;
+                CaptureDeviceWatcher.RemoveChangeListener();
+            }
+        }
+    }
+
+    private EventHandler<IMediaStreamTrackEvent> _onDeviceChange;
+
+    private void RaiseDeviceChange() => _onDeviceChange?.Invoke(this, null);
 
     /// <summary>
     /// The ids of the capture devices currently present, cameras and microphones.

@@ -122,6 +122,51 @@ One thing the old text got wrong, and it mattered. "Recovery on resume is worth 
 but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
 behind this one.
 
+### OnDeviceChange was declared everywhere and reachable nowhere - fixed 2026-09-12
+`IMediaDevices.OnDeviceChange` is on the interface and on all five platform classes. Blazor raised
+it, from the browser's own `devicechange`; Android, Windows, iOS and Mac Catalyst declared it and
+never did. And it made no difference which, because **nothing could subscribe from outside the
+library**: the platform `IMediaDevices` is held privately by `LocalMediaStream`, so even the one
+platform that raised the event had no route to a caller. An event can be correct on five platforms
+and still be dead.
+
+Three pieces, then. `ILocalMediaStream.OnDeviceChange` is the route. Windows reuses the polling
+`CaptureDeviceWatcher` already does for device loss, told to report additions too. Android
+registers the callbacks it always had - `CameraManager.AvailabilityCallback` and
+`AudioDeviceCallback` - and only while something is listening, so a process that never asks pays
+nothing.
+
+**Android's "unavailable" is the interesting one**, and broader than "gone": Android reports a
+camera as unavailable when another application opens it. That is the same eviction
+`AndroidSupport.CameraLost` recovers from, seen from the other side and a moment earlier. A phone
+rarely gains or loses a camera; it loses one to the camera app all the time.
+
+**Subscribing announced six changes before anything had changed.** Android delivers the current
+state of everything the moment a callback is registered. A flag saying "ignore what arrives during
+registration" was the first attempt and does not work - with a null handler the callbacks are
+posted to the calling thread's looper, so they arrive *after* registration returns. That was
+visible in the measurement rather than in the reasoning: the camera burst went away because a set
+comparison happened to catch it, and the audio burst did not, because only the flag guarded it.
+
+Comparing is what works, on both platforms, and for audio the known set has to be read from
+`GetDevices` *before* registering so the opening delivery matches it. Startup noise went 6 → 2 → 1,
+and the one that remains is real - this app opening its own camera.
+
+```
+11:44:04  camera 1 unavailable     this app takes the front camera
+11:44:22  camera 1 available       evicted by the camera app
+11:44:22  camera 0 unavailable     the camera app takes the back camera
+11:44:33  camera 0 available       the camera app closes
+11:44:35  camera 1 unavailable     this app reopens the front camera
+```
+
+Reported rather than acted on, deliberately. A camera appearing mid-call is not a reason to switch
+to it, and one disappearing is already handled where it matters. What this buys is being able to
+see it happen.
+
+**iOS and Mac Catalyst still do not raise it** - `AVCaptureDeviceWasConnectedNotification` is the
+signal and nothing observes it - which is the same Mac-shaped gap as everything else on that list.
+
 ### The receiver-side stall signal does not fire - measured 2026-09-12, nothing to do
 Worth recording as a negative result, because it is an obvious idea and the reasoning for it is
 sound right up to the point where it meets a measurement.

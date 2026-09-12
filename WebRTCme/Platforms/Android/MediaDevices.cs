@@ -18,7 +18,49 @@ namespace WebRTCme.Android
     {
         public MediaDevices() { }
 
-        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+        /// <summary>
+        /// Raised when a camera or audio device changes availability.
+        /// </summary>
+        /// <remarks>
+        /// Declared here and never raised until now. Android has the callbacks -
+        /// <c>CameraManager.AvailabilityCallback</c> and <c>AudioDeviceCallback</c> - and nothing
+        /// registered them; see <see cref="CaptureDeviceWatcher"/>, which does so only while
+        /// something is listening.
+        ///
+        /// The argument is null, because the spec's <c>devicechange</c> carries no payload: it
+        /// says the set changed, not what changed, and a caller that wants to know calls
+        /// <see cref="EnumerateDevices"/>. The parameter type comes from <see cref="IMediaDevices"/>.
+        /// </remarks>
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange
+        {
+            add
+            {
+                if (_onDeviceChange is null)
+                {
+                    CaptureDeviceWatcher.DevicesChanged += RaiseDeviceChange;
+                    CaptureDeviceWatcher.AddChangeListener();
+                }
+
+                _onDeviceChange += value;
+            }
+            remove
+            {
+                if (_onDeviceChange is null)
+                    return;
+
+                _onDeviceChange -= value;
+
+                if (_onDeviceChange is null)
+                {
+                    CaptureDeviceWatcher.DevicesChanged -= RaiseDeviceChange;
+                    CaptureDeviceWatcher.RemoveChangeListener();
+                }
+            }
+        }
+
+        EventHandler<IMediaStreamTrackEvent> _onDeviceChange;
+
+        void RaiseDeviceChange() => _onDeviceChange?.Invoke(this, null);
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {
