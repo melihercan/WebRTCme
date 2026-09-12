@@ -73,10 +73,43 @@ namespace WebRTCme.MacCatalyst
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
+        /// <summary>
+        /// Captures the display.
+        /// </summary>
+        /// <remarks>
+        /// ScreenCaptureKit, so this is the whole display rather than this application's own
+        /// window - which is the difference between a Mac and the iOS side of this library, where
+        /// ReplayKit offers only the app's own content. See <see cref="ScreenCapture"/>.
+        ///
+        /// Capture starts here rather than when a view binds the track: a camera has a device to
+        /// open later, a display has nothing to wait for, and a refusal belongs to the caller that
+        /// asked to share.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Screen capture would not start.</exception>
+        public async Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
-            throw new NotImplementedException();
+            var frameRate = (int?)constraints?.Video?.Object?.FrameRate?.Value ?? DefaultShareFrameRate;
+
+            var track = MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"screen:{Guid.NewGuid()}");
+
+            try
+            {
+                await ScreenCapture.StartAsync(track, frameRate);
+            }
+            catch
+            {
+                track.Stop();
+                throw;
+            }
+
+            return MediaStream.Create(new[] { track });
         }
+
+        /// <summary>
+        /// A shared screen is read rather than watched, so a lower rate leaves bandwidth for
+        /// resolution. Matches Windows and iOS.
+        /// </summary>
+        internal const int DefaultShareFrameRate = 15;
 
         public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
             Task.FromResult(MediaStream.Create(constraints));

@@ -129,8 +129,20 @@ namespace WebRTCme.MacCatalyst
         /// the native track says, because the track itself is still alive and owned by its
         /// sender or receiver.
         /// </remarks>
+        /// <summary>
+        /// Ends this track as far as a native track can be ended.
+        /// </summary>
+        /// <remarks>
+        /// Stopping the capture matters more than the rest: a ScreenCaptureKit stream that
+        /// outlives the track it fed keeps reading the display. Android and iOS carry the same
+        /// note against the same hazard - "stop sending the screen" and "stop capturing the
+        /// screen" are two actions, and only one of them is about the call.
+        /// </remarks>
         public void Stop()
         {
+            if (ScreenCapture.IsScreenTrack(Id))
+                ScreenCapture.Stop();
+
             Enabled = false;
             OnEnded?.Invoke(this, EventArgs.Empty);
         }
