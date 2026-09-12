@@ -129,8 +129,24 @@ namespace WebRTCme.iOS
         /// the native track says, because the track itself is still alive and owned by its
         /// sender or receiver.
         /// </remarks>
+        /// <summary>
+        /// Ends this track as far as a native track can be ended.
+        /// </summary>
+        /// <remarks>
+        /// Stopping the screen recorder matters more than the rest of this: a ReplayKit capture
+        /// that outlives the track it fed keeps recording, and the only thing the user would see
+        /// is the red status bar. Android carries the same note against the same hazard, for the
+        /// same reason - the mistake there was treating "stop sending the screen" and "stop
+        /// capturing the screen" as one action, and they are not.
+        ///
+        /// Nothing to do for a camera track here: iOS opens its camera through a capturer owned
+        /// by the view that binds the track, and that view stops it.
+        /// </remarks>
         public void Stop()
         {
+            if (ScreenCapture.IsScreenTrack(Id))
+                ScreenCapture.Stop();
+
             Enabled = false;
             OnEnded?.Invoke(this, EventArgs.Empty);
         }

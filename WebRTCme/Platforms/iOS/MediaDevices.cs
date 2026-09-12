@@ -73,10 +73,47 @@ namespace WebRTCme.iOS
             throw new NotImplementedException();
         }
 
-        public Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
+        /// <summary>
+        /// Captures the screen, as far as iOS lets an application capture it.
+        /// </summary>
+        /// <remarks>
+        /// ReplayKit's in-process recorder, which captures <b>this application's own content
+        /// only</b> - see <see cref="ScreenCapture"/> for why, and for what a system-wide share
+        /// would additionally need. This threw <c>NotImplementedException</c> until 2026-09-12,
+        /// so a caller that could not share at all now can, with a documented limit.
+        ///
+        /// Capture starts here rather than when a view binds the track, which is the opposite of
+        /// the camera path: a camera has a device to open later, and a screen has nothing to wait
+        /// for. Starting eagerly also means a refusal - recording unavailable, or already running
+        /// - is reported to the caller that asked to share, rather than silently much later.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Screen recording would not start.</exception>
+        public async Task<IMediaStream> GetDisplayMedia(MediaStreamConstraints constraints)
         {
-            throw new NotImplementedException();
+            var frameRate = (int?)constraints?.Video?.Object?.FrameRate?.Value ?? DefaultShareFrameRate;
+
+            // Its own track id rather than a device id: there is no capture device behind a
+            // screen, and IosSupport keys camera formats by device UniqueID.
+            var track = MediaStreamTrack.Create(MediaStreamTrackKind.Video, $"screen:{Guid.NewGuid()}");
+
+            try
+            {
+                await ScreenCapture.StartAsync(track, frameRate);
+            }
+            catch
+            {
+                track.Stop();
+                throw;
+            }
+
+            return MediaStream.Create(new[] { track });
         }
+
+        /// <summary>
+        /// A shared screen is read rather than watched, so a lower rate leaves bandwidth for
+        /// resolution - which is what keeps text legible. Matches the Windows default.
+        /// </summary>
+        internal const int DefaultShareFrameRate = 15;
 
         public Task<IMediaStream> GetUserMedia(MediaStreamConstraints constraints) =>
             Task.FromResult(MediaStream.Create(constraints));
