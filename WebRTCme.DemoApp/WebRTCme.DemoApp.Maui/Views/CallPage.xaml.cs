@@ -46,10 +46,29 @@ namespace WebRTCme.DemoApp.Maui.Views
             }
             catch (Exception ex)
             {
-                // Callers are async void, so an escaping exception would vanish silently and
-                // leave the page blank with no clue as to why.
+                // Said, shown, and then out of the call - but never rethrown.
+                //
+                // This used to rethrow, with a comment explaining that the callers are async void
+                // and an escaping exception would otherwise vanish. It does not vanish: an
+                // exception out of async void is unhandled, and on 2026-09-12 that took the whole
+                // Windows app down with 0xc000027b the moment a call could not start. The cause
+                // was mundane - the camera was already open in a browser tab on the same machine -
+                // and a demo that cannot get a camera should say so, not die.
+                //
+                // Cleared so leaving and coming back can try again; a camera that is busy now may
+                // be free in a moment.
+                _started = false;
                 Console.WriteLine($"######## CallPage failed to start: {ex}");
-                throw;
+
+                try
+                {
+                    await DisplayAlert("Could not start the call", ex.Message, "OK");
+                    await Shell.Current.GoToAsync("..");
+                }
+                catch (Exception reporting)
+                {
+                    Console.WriteLine($"######## reporting that failure also failed: {reporting}");
+                }
             }
         }
 
