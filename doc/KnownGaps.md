@@ -22,8 +22,24 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 
 | | blocked on | what it is |
 | --- | --- | --- |
-| **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+
+**Passed for now: Android simulcast.** Decided 2026-09-12, after checking rather than assuming.
+`SimulcastVideoEncoderFactory` is **not in WebRTC at all** - a checkout of `main` has 217 Java
+files under `sdk/android` and no simulcast class anywhere in the tree. Every simulcast
+implementation upstream is C++ (`media/engine/simulcast_encoder_adapter`,
+`modules/video_coding/utility/simulcast_rate_allocator`); the Java factory that exposes it to
+`PeerConnectionFactory` is something the LiveKit and `webrtc-sdk` forks *add*, which is why those
+forks are how people get Android simulcast.
+
+That rules out the cheap route. The native build already patches `sdk/android/BUILD.gn` at build
+time - see `tools/add_generated_jni_to_aar.py` in the native repo - so *including* an existing
+target would have been easy, and the first guess here was that simulcast was one. It is not.
+Enabling it means adding new Java source to the checkout on every build: a patch maintained
+against WebRTC, which is a different commitment from a build-configuration change.
+
+It is also still gated behind the SFU estimate below, so fixing it would buy correctness rather
+than anything visible.
 
 **Nice to have, not needed now: system-wide screen share on iOS.** Decided 2026-09-12. iOS shares
 *this application's own content* only, which is what `RPScreenRecorder` offers and is enough for
