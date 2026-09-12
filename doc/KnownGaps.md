@@ -246,7 +246,7 @@ it behaved as designed - with one thing nobody had asked about falling out of it
 The recovery is right: one camera, unplugged, nothing to reopen, so it says so and leaves the rest
 of the call alone. The `x3` is not.
 
-### Blazor builds a new wrapper on every GetTracks, and each one adds listeners - 2026-09-12
+### Blazor builds a new wrapper on every GetTracks, and each one added listeners - fixed 2026-09-12
 Found by the unplug above, and pre-existing. `MediaStream.GetTracks`, `GetVideoTracks` and
 `GetAudioTracks` each do `.Select(jsObjectRef => new MediaStreamTrack(...))`, and that constructor
 registers `ended`, `mute` and `unmute` on the underlying JS track. So every call to any of them
@@ -259,11 +259,25 @@ seen - which is exactly what produced three "track ended unexpectedly" lines for
 per time the recovery above had been asked to watch the stream. That is fixed there by keying on
 `IMediaStreamTrack.Id`, and it is a trap for the next person to hold a track in a collection.
 
-**The listeners themselves accumulate**, which is inferred from the code rather than counted. How
-much it matters depends entirely on how often `GetTracks` is called on a live call, and that has
-not been measured. Fixing it means caching the wrapper per JS object reference in the Blazor
-`MediaStream` and removing the listeners on dispose - contained, but wider than the bug that
-exposed it, and not done here.
+**The listeners themselves accumulated**, and that half was then measured rather than left
+inferred, by counting `addEventListener` calls on a live call:
+
+```
+idle, 90s                 0 listeners        nothing calls getTracks while a call just runs
+two camera toggles        6 listeners        3 per track, per action that touches tracks
+same two, after the fix   0 listeners
+```
+
+So it leaked per user action rather than per frame, which is why nobody noticed, and why it was
+worth fixing but never urgent. Measuring first was the point: the guess going in was that a
+renderer called `getTracks` constantly, and that was wrong.
+
+The fix is to register each native listener when something first subscribes to the matching event,
+rather than in the constructor. A wrapper nobody subscribes to now costs nothing. That is narrower
+than caching wrappers per JS object reference, and it fixes the leak where the leak is - but it
+does **not** make wrapper objects stable, because building one per call is what the design does.
+Anything holding tracks in a collection still has to key on `Id`, and the two places in this
+repository that learned that both say so where they do it.
 
 **Windows had no signal to give, so it polls.** Its native ABI
 (`WebRTCme.Bindings.Maui.Windows/Interop.cs`) exposes device *enumeration* and no device-lost
