@@ -42,6 +42,7 @@ namespace WebRTCme
         // dropped here rather than asking for a rate ReplayKit does not honour.
         static double _minFrameIntervalNs;
         static long _lastFrameNs;
+        static long _frameCount;
 
         /// <summary>
         /// Whether a track is the one carrying a shared screen.
@@ -77,30 +78,61 @@ namespace WebRTCme
             _screenTrackId = videoTrack.Id;
             _minFrameIntervalNs = maxFrameRate <= 0 ? 0 : 1_000_000_000d / maxFrameRate;
             _lastFrameNs = 0;
+            _frameCount = 0;
 
             // Microphone off: the call already has one, and ReplayKit's would be a second audio
             // source nothing consumes.
             recorder.MicrophoneEnabled = false;
 
+            // Completed by ReplayKit either way: nil on success, an error on failure.
             var started = new TaskCompletionSource<NSError>(
                 TaskCreationOptions.RunContinuationsAsynchronously);
 
-            recorder.StartCapture(OnSample, error => started.TrySetResult(error));
+            Echo("screen capture: asking ReplayKit to start");
 
-            // StartCapture reports failure through the completion handler and success by never
-            // calling it with an error, so a short wait is the only way to tell "refused" from
-            // "running but the screen has not changed yet". A screen that is not changing
-            // delivers no frames at all, which is indistinguishable from a capture that never
-            // began.
-            var outcome = await Task.WhenAny(started.Task, Task.Delay(2000));
+            recorder.StartCapture(OnSample, error =>
+            {
+                Echo($"screen capture: ReplayKit answered - " +
+                    $"{(error is null ? "started" : error.LocalizedDescription)}");
+                started.TrySetResult(error);
+            });
 
-            if (outcome == started.Task && started.Task.Result is NSError failure)
+            // Waiting for that answer rather than assuming it. This used to give up after two
+            // seconds and call the silence success, on the reasoning that a successful start
+            // never calls the handler - which is simply untrue: startCaptureWithHandler's
+            // completion handler runs on success as well, with a nil error.
+            //
+            // The cost of being wrong was a share that the app reported as running and iOS had
+            // never begun: the button read "Stop sharing", the far side got a tile, no frames
+            // arrived, and there was no red recording indicator to contradict any of it.
+            //
+            // The wait is long because the first use shows a consent alert, and how long that
+            // takes is a question about the person holding the phone.
+            var outcome = await Task.WhenAny(started.Task, Task.Delay(ConsentTimeoutMs));
+
+            if (outcome != started.Task)
+            {
+                Reset();
+                throw new InvalidOperationException(
+                    "Screen recording did not start: iOS never answered. If it asked for " +
+                    "permission, the request went unanswered.");
+            }
+
+            if (started.Task.Result is NSError failure)
             {
                 Reset();
                 throw new InvalidOperationException(
                     $"Screen recording would not start: {failure.LocalizedDescription}");
             }
+
+            // Said out loud because the interesting failure is a start that reports success and
+            // records nothing - which is what this method used to do.
+            Echo($"screen capture: running={recorder.Recording} track={_screenTrackId}");
         }
+
+        // How long to wait for ReplayKit's answer, which on first use includes the person
+        // answering a consent alert.
+        const int ConsentTimeoutMs = 60_000;
 
         /// <summary>
         /// Stops recording, if this started it.
@@ -131,6 +163,7 @@ namespace WebRTCme
             _capturer = null;
             _screenTrackId = null;
             _lastFrameNs = 0;
+            _frameCount = 0;
         }
 
         /// <summary>
@@ -162,6 +195,13 @@ namespace WebRTCme
                     return;
 
                 _lastFrameNs = timestampNs;
+
+                // The first frame and then sparingly: silence here is the symptom that matters,
+                // and there is no other way to tell "ReplayKit is not delivering" from
+                // "delivering frames this code is dropping".
+                if (++_frameCount == 1 || _frameCount % 150 == 0)
+                    Echo($"screen capture: frame {_frameCount} " +
+                        $"{pixelBuffer.Width}x{pixelBuffer.Height} ts={timestampNs}");
 
                 // The CVPixelBuffer goes straight in: this constructor wraps it in an
                 // RTCCVPixelBuffer itself, so building one here only to hand it over would be a
