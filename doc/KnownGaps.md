@@ -22,9 +22,20 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 
 | | blocked on | what it is |
 | --- | --- | --- |
-| **System-wide screen share on iOS** | a design decision | iOS shares *this app's own content* only. Sharing other apps needs a Broadcast Upload Extension: a second bundle, an App Group, and WebRTC running inside the extension. An architectural change, not an addition. |
 | **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+
+**Nice to have, not needed now: system-wide screen share on iOS.** Decided 2026-09-12. iOS shares
+*this application's own content* only, which is what `RPScreenRecorder` offers and is enough for
+the moment. Sharing other applications needs a Broadcast Upload Extension, and the cost is not the
+extension itself: it needs its own bundle and explicit App IDs with an App Group capability
+(wildcard profiles cannot carry one), the broadcast can only be *started by the user* through
+`RPSystemBroadcastPickerView` and stopped from Control Centre - which turns `GetDisplayMedia` from
+"start capture and return a stream" into something asynchronous and cancellable, on an interface
+shared by five platforms - and the frames must cross a process boundary, either by running WebRTC
+inside the extension against a ~50 MB memory limit or by shipping full-resolution buffers to the
+app. The frame path written on 2026-09-12 is reusable either way; only the source of the buffers
+changes.
 
 **Two entries that were on this list and are not faults**, kept so nobody re-opens them. The
 remaining binding stubs - 38 on Android, 33 on iOS - are on no path that runs; ask "does anything
