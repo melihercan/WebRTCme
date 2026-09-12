@@ -61,13 +61,29 @@ namespace WebRTCme
                         return;
                     }
 
+                    // Every managed wrapper made here is disposed, and that is the whole
+                    // difference between video and a slideshow.
+                    //
+                    // A wrapper created with owns:false *retains* the native object and releases
+                    // it when it is disposed or finalized. Leave them to the finalizer and each
+                    // frame holds a pixel buffer until the next collection - AVFoundation's output
+                    // pool drains, and with AlwaysDiscardsLateVideoFrames it simply stops
+                    // delivering. Measured on 2026-09-12: ten frames at a clean 33ms, then 49
+                    // frames in the following 43 seconds, with the hand-off into WebRTC timed at
+                    // 0ms throughout - nothing was blocking, the frames had stopped arriving.
+                    //
+                    // The same mistake sank the earlier attempt that drove its own
+                    // AVCaptureSession, where the undisposed wrapper was the one from
+                    // CMSampleBuffer.GetImageBuffer(). Two implementations, one fault.
+                    using var source = frame.Buffer;
+
                     // The frame's buffer is typed as the generated RTCVideoFrameBuffer and the
                     // constructor wants the concrete RTCCVPixelBuffer - the binding cannot express
                     // the protocol conformance between them, which is recorded beside that
-                    // constructor in ApiDefinitions. Same native object either way, re-wrapped as
-                    // the type the constructor accepts. owns: false because the frame owns it.
-                    var buffer = Runtime.GetINativeObject<Webrtc.RTCCVPixelBuffer>(
-                        frame.Buffer.Handle, forced_type: true, owns: false);
+                    // constructor in ApiDefinitions. Same native object, re-wrapped as the type
+                    // the constructor accepts.
+                    using var buffer = Runtime.GetINativeObject<Webrtc.RTCCVPixelBuffer>(
+                        source.Handle, forced_type: true, owns: false);
 
                     if (buffer is null)
                     {
@@ -84,11 +100,14 @@ namespace WebRTCme
                              $"({frame.Width}x{frame.Height})");
                     }
 
-                    using var upright = new Webrtc.RTCVideoFrame(
-                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, frame.TimeStampNs);
+                    using (var upright = new Webrtc.RTCVideoFrame(
+                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, frame.TimeStampNs))
+                    {
+                        _sink.DidCaptureVideoFrame(capturer, upright);
+                    }
 
-                    _sink.DidCaptureVideoFrame(capturer, upright);
-
+                    // Every 300 frames - ten seconds at 30fps. The gap between two of these lines
+                    // is the frame rate, which is the number this had to be judged on.
                     if (++_frameCount % 300 == 0)
                         Echo($"camera frame {_frameCount} upright");
                 }
