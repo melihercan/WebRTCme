@@ -1,7 +1,7 @@
 ﻿# Known gaps
 
 What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
-2026-09-11**. Everything here was checked against the code rather than remembered, and each entry
+2026-09-12**. Everything here was checked against the code rather than remembered, and each entry
 says where it actually stands - "not written" and "written but unreachable" need very different
 work, and most of what was wrong here turned out to be the second kind.
 
@@ -17,17 +17,18 @@ and none of them is a small change:
 | | where the work is |
 | --- | --- |
 | **`getDisplayMedia` on iOS and Mac Catalyst** | A platform project - ReplayKit and a broadcast extension. **Android is done** (2026-09-11). |
-| **Backgrounding the Android app kills the call, permanently** | Reproduced and root-caused. Needs a foreground service for the call itself, the way screen capture already has one. |
 | **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
 | **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
 | **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
 | **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
+| **A lost capture device, anywhere but Android** | Android now notices its camera being taken and reopens it (2026-09-12). Blazor, Windows, iOS and Mac Catalyst are not wired to notice at all. |
 
 **What has run, and where.** Blazor, Android and Windows have all executed the 2026-09-11 work and
-are verified in live calls. **iOS and Mac Catalyst compile and have run none of it** - a real
-amount of code changed there on reasoning alone, and the first person to run either should expect
-to find something.
+are verified in live calls, and the 2026-09-12 Android work - the call foreground service and the
+camera recovery - is verified on the device. **iOS and Mac Catalyst compile and have run none of
+it** - a real amount of code changed there on reasoning alone, and the first person to run either
+should expect to find something.
 
 **If you are here to work on this, read these first.** The sections after "Verified against, and
 not" are field notes rather than gaps, and each one exists because something cost hours:
@@ -70,7 +71,7 @@ one worth remembering:
   is nothing of the kind. The manifest was correct throughout; the service simply had not got there
   yet. The service now signals when it is genuinely foregrounded and `GetDisplayMedia` waits.
 
-### Backgrounding the Android app kills the call, and it does not come back
+### Backgrounding the Android app killed the call - fixed 2026-09-12
 Reported as "both tiles went blank", reproduced deliberately on 2026-09-11, and considerably worse
 than a pause. Pressing Home on a live mediasoup call:
 
@@ -100,12 +101,70 @@ failed, is ours.**
 **The fix is a foreground service for the call**, with `camera` and `microphone` types, started
 when a call begins and stopped when it ends - exactly the shape
 `ScreenCaptureService` already has for projection. Without one, Android will keep doing this, and
-any amount of recovery logic is papering over a process that is not allowed to run. Recovery on
-resume is worth having as well, but second: a call that survives being backgrounded is the goal,
-not a call that repairs itself afterwards.
+any amount of recovery logic is papering over a process that is not allowed to run.
 
-Until then, **the Android app only works in the foreground**, and that is a fair summary to give
-anyone testing it.
+`CallForegroundService` is that, added 2026-09-12. It is started by capture rather than by the
+app - `AndroidSupport.LocalCaptureStarted` on the first local track, `LocalCaptureStopped` on the
+last - because the thing that knows a call is live is the capture: tracks stop from page teardown
+as well as from a hang-up button, and an app-driven version would have to be right about both.
+
+Measured after the change, against the numbers above:
+
+```
+backgrounded    70s with the screen on, then 135s with it off
+sending         video 640x480 frames=486 -> 7444     advancing throughout
+receiving       video 3088882 -> 53825574            advancing throughout
+process         oom adj 50, fg-service-act           not cached, not frozen
+transport       no state change at all
+service         isForeground=true types=0x000000C0   camera|microphone
+```
+
+One thing the old text got wrong, and it mattered. "Recovery on resume is worth having as well,
+but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
+behind this one.
+
+### Nothing reopened a camera the system took away - fixed 2026-09-12
+Found by testing the fix above, which is the only reason it was ever separated from it. With the
+call healthy and backgrounded for two minutes, waking the phone ran face unlock - and face unlock
+wants the front camera:
+
+```
+10:48:00.068  CameraDeviceImpl.onDisconnected      another client took camera 1
+10:48:00.110  CameraCapturer: Stop capture done
+10:48:00.113  Camera2Session: Camera device closed.
+10:48:04      camera 4 CLOSED for client.pid<819>  face unlock lets go
+sending       video x bytes=53440139 frames=7924   frozen from here on
+              audio bytes=2181401 -> 2306659       still climbing
+```
+
+The same shape as the backgrounding failure and a completely different cause, which is what made
+it worth a separate entry: the transports were fine, the process was not frozen, the foreground
+service was doing its job. Only the camera was gone, and audio carried on, so both ends showed a
+live call with a still picture.
+
+`Camera2Enumerator.CreateCapturer(id, null)` was the whole of it. The second argument is the
+`CameraEventsHandler`, and with it null, nothing in this library ever heard `onCameraDisconnected`.
+libwebrtc closes its session and reports it; reopening is deliberately the application's job,
+because only the application knows whether the call is still wanted.
+
+`CameraEvents` is that handler now, and `AndroidSupport.CameraLost` retries with backoff for as
+long as the track is still a live local capture. Two details it turns on:
+
+- **Stop before starting.** What a capturer holds after a disconnect is a closed session it has
+  not released, and `startCapture` over one of those takes the process down with "Session has been
+  closed" - the same trap as binding a track to a second renderer, from a different direction.
+- **Success is a frame, not a returned call.** `startCapture` posts to the capturer's own thread
+  and returns immediately, so a start that failed because the other client still holds the camera
+  looks exactly like one that worked. `onFirstFrameAvailable` is what ends the loop; without that
+  the first attempt would always "succeed" and the camera would stay dark.
+
+Verified on the device, both evictions, with the call live throughout: face unlock took the camera
+and it came back 1.8s later on attempt 3; the system camera app held it for 25s and it came back on
+attempt 7, 1.5s after that app let go.
+
+Worth knowing for the other platforms: this is Android-shaped, but the question it asks is not.
+**Who is told when a capture device disappears, and who reopens it** is a question none of the four
+platforms here had an answer to, and only Android has one now.
 
 ### Stopping a share did not stop the capture - fixed 2026-09-11
 Worse than an ordinary bug and worth its own entry. Pressing "stop sharing" closed the producer,
