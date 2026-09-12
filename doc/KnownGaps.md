@@ -23,6 +23,19 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **Captured frames do not rotate with the device** | nobody - it can be picked up today | Seen on Android 2026-09-12. Upright in portrait, lying on its side in landscape. Worked around by locking the demo to portrait, which is a workaround and not a fix. |
+
+**The rotation one, in more detail**, because the obvious cause is already ruled out. libwebrtc's
+Android capturer reads the display rotation per frame from the `Context` it was handed, and the
+usual way to break that is to hand it the application context; ours comes from the MAUI handler,
+which is the activity. So the cheap explanation does not hold and the next step is to instrument
+the frame rotation actually reaching the renderer, on a device, in both orientations.
+
+It matters beyond the demo: the rotation travels with the frame, so a peer sees the same sideways
+picture. The demo apps lock to portrait - see `MainActivity` and `Info.plist` - which makes it
+invisible there and leaves it entirely present for any consumer of the library that allows
+landscape. Once it is fixed, the demo's portrait lock should be revisited: a tablet in landscape
+has width for a row of tiles.
 
 **Passed for now: Android simulcast.** Decided 2026-09-12, after checking rather than assuming.
 `SimulcastVideoEncoderFactory` is **not in WebRTC at all** - a checkout of `main` has 217 Java
