@@ -69,7 +69,47 @@ namespace WebRTCme.MacCatalyst
 
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
-        public event EventHandler OnEnded;
+        // Track wrappers are not stable: GetTracks builds a new one on every call, so an event
+        // subscribed on one instance can never be raised by another instance of the same
+        // underlying track. That is not theoretical - CallViewModel subscribed to OnEnded on a
+        // wrapper from GetTracks, CaptureDeviceWatcher called Stop on the wrapper it had been
+        // handed at creation, and the two never met. A camera could be unplugged, the track
+        // correctly ended, and nothing upstream would ever hear it.
+        //
+        // So the end is announced once, statically, by track id, and every wrapper that somebody
+        // has subscribed to passes it on. Subscribed lazily for the reason Blazor's track wrappers
+        // are: a wrapper nobody listens to should not be holding a handler, and these are created
+        // constantly and never disposed.
+        static event Action<string> AnyEnded;
+
+        EventHandler _onEnded;
+
+        public event EventHandler OnEnded
+        {
+            add
+            {
+                if (_onEnded is null)
+                    AnyEnded += OnAnyEnded;
+
+                _onEnded += value;
+            }
+            remove
+            {
+                if (_onEnded is null)
+                    return;
+
+                _onEnded -= value;
+
+                if (_onEnded is null)
+                    AnyEnded -= OnAnyEnded;
+            }
+        }
+
+        void OnAnyEnded(string trackId)
+        {
+            if (trackId == Id)
+                _onEnded?.Invoke(this, EventArgs.Empty);
+        }
 
         public Task ApplyConstraints(MediaTrackConstraints contraints)
         {
@@ -148,7 +188,10 @@ namespace WebRTCme.MacCatalyst
             CaptureDeviceWatcher.Forget(Id);
 
             Enabled = false;
-            OnEnded?.Invoke(this, EventArgs.Empty);
+
+            // Announced by id rather than raised on this instance, so that whichever wrapper the
+            // application happens to be holding hears it too.
+            AnyEnded?.Invoke(Id);
         }
     }
 }
