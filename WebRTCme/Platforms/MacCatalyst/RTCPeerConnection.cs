@@ -306,11 +306,12 @@ namespace WebRTCme.MacCatalyst
 
         public void DidAddStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
         {
-            // Depreceted. Convert to OnTrack.
+            // Deprecated. Convert to OnTrack, carrying the stream: it is what tells the far side
+            // a second source from a camera, and dropping it here is what made Streams throw.
             foreach (var track in stream.VideoTracks)
-                OnTrack?.Invoke(this, new RTCTrackEvent(track));
+                OnTrack?.Invoke(this, new RTCTrackEvent(track, stream));
             foreach (var track in stream.AudioTracks)
-                OnTrack?.Invoke(this, new RTCTrackEvent(track));
+                OnTrack?.Invoke(this, new RTCTrackEvent(track, stream));
         }
 
         public void DidRemoveStream(Webrtc.RTCPeerConnection peerConnection, Webrtc.RTCMediaStream stream)
