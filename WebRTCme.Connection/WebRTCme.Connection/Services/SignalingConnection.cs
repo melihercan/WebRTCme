@@ -510,19 +510,6 @@ namespace WebRTCme.Connection.Services
         // 0.005 to 0.16, so 0.01 is clear of the noise and well under the quietest speech seen.
         const double SpeakingLevelThreshold = 0.01;
 
-        // How many samples in a row have to clear the threshold before the flag goes up.
-        //
-        // One is not enough on a noisy microphone, and raising the threshold instead would cost
-        // the quiet speech the threshold was chosen to catch. Measured on the Mac mini's USB
-        // webcam on 2026-09-12: its idle level sits between 0.0005 and 0.006 - an order of
-        // magnitude above the quiet room this was first calibrated in - and spikes past 0.01 every
-        // few seconds. One spike latched the flag, the two-second hold-off carried it to the next
-        // spike, and the peer saw "speaking" permanently.
-        //
-        // Speech sustains and a fan does not, so two in a row separates them. The cost is 400ms of
-        // extra latency at the start of a sentence, against a flag that was previously stuck on.
-        const int SpeakingSamplesToStart = 2;
-
         // How long the flag is held after the level drops below the threshold. Speech is full of
         // gaps, and without a hold-off the flag flickers several times a sentence - which is a
         // worse thing to put in front of a viewer than a flag that lags by a beat.
@@ -567,7 +554,6 @@ namespace WebRTCme.Connection.Services
             _ = Task.Run(async () =>
             {
                 var lastHeard = DateTime.MinValue;
-                var samplesAbove = 0;
 
                 while (!cts.IsCancellationRequested)
                 {
@@ -580,11 +566,6 @@ namespace WebRTCme.Connection.Services
                             continue;
 
                         if (level > SpeakingLevelThreshold)
-                            samplesAbove++;
-                        else
-                            samplesAbove = 0;
-
-                        if (samplesAbove >= SpeakingSamplesToStart)
                             lastHeard = DateTime.UtcNow;
 
                         var speaking = _outgoingAudioEnabled &&
@@ -652,8 +633,32 @@ namespace WebRTCme.Connection.Services
                 if (stats.Type != "media-source")
                     continue;
 
-                if (stats.Members.TryGetValue("audioLevel", out var value) && value is not null &&
-                    double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture,
+                if (!stats.Members.TryGetValue("audioLevel", out var value) || value is null)
+                    continue;
+
+                // Never through the current culture, and never with AllowThousands.
+                //
+                // This read value.ToString() - which formats for the *current* culture - and
+                // parsed the result as invariant. On a machine with a comma decimal separator
+                // an audio level of 0.0021 became the string "0,0021", NumberStyles.Any read the
+                // comma as a group separator, and the level came back as twenty-one thousand.
+                // Every sample was therefore above the threshold and that peer reported itself as
+                // speaking permanently. On a dot-decimal machine the same code worked, so the two
+                // ends of one call disagreed about what a number means.
+                //
+                // Taken as a number when it already is one, and otherwise formatted invariantly.
+                // NumberStyles.Float allows a sign, a decimal point and an exponent - and no group
+                // separator, so a stray comma now fails to parse instead of multiplying by ten
+                // thousand.
+                if (value is double already)
+                    return already;
+
+                if (value is float single)
+                    return single;
+
+                var text = Convert.ToString(value, CultureInfo.InvariantCulture);
+
+                if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture,
                         out var level))
                 {
                     return level;
