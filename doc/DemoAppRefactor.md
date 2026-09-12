@@ -193,12 +193,49 @@ Five controls at 48 plus a menu button, with 8 between them, is 344px. The narro
 1080px phone at roughly 360 device-independent pixels, so the bar fits without scrolling - which is
 the measurement that justifies removing the `ScrollView` in Phase 3 rather than assuming it.
 
-## Phase 2 - Blazor, with MudBlazor
+## Phase 2 - Blazor, with MudBlazor - DONE
 
 `MudThemeProvider` and layout, then the four pages: `ConnectionParametersPage`, `CallPage`,
 `ChatPage`, `AboutPage`. `MudSelect` and `MudTextField` for the join form, `MudIconButton` with
-tooltips for the call controls, `MudGrid` for the tiles. Retire Bootstrap once nothing references
-it - not before, because a half-migrated page inherits from both and looks worse than either.
+tooltips for the call controls, a CSS grid for the tiles. Bootstrap retired once nothing
+referenced it - not before, because a half-migrated page inherits from both and looks worse than
+either.
+
+Verified in Chrome against the running app: all four pages, the debug menu, the leave button, and
+the control bar at phone width - five controls plus the menu on one row with no scrolling, which
+is the measurement Phase 1 used to justify dropping the MAUI `ScrollView` in Phase 3.
+
+### What it turned up
+
+Three faults, none of them introduced here:
+
+- **`SelectedConnectionTypeName` was never initialised.** `JoinCall` matches it against each
+  connection type name, so choosing nothing left `ConnectionParameters.ConnectionType` at its
+  default. The old `<InputSelect>` showed the first option as though it were selected while the
+  bound value was still null - and the default happened to be that same first option, so it
+  always did the right thing for the wrong reason. `MudSelect` showed an empty box, which is the
+  truth. Fixed by preselecting the first name.
+- **The About image has never loaded.** It pointed at `_content/WebRTCme.DemoApp.Blazor/me.png`,
+  which is the path for a file shipped by a *razor class library*; this one is in the app's own
+  `wwwroot`.
+- **`BlazorPro.Spinkit` and `Blazored.Modal` are both dead.** Spinkit has a `@using` and no
+  component; `Blazored.Modal` has not even that. The middleware's popups are `BlazorDialog`.
+  Phase 0 decided to keep them "for now" on the strength of my note that MudBlazor had
+  equivalents for both - which implied they were in use. They are not, so the argument for
+  keeping them (don't replace working code mid-migration) does not apply. Left referenced rather
+  than removed quietly; **removing them is a one-line change whenever you want it.**
+
+### Two things worth knowing before Phase 3
+
+- **The peer-state properties are observable on purpose.** `IMediaStreamManager.Update` removes a
+  tile and re-inserts it - it has to, because `BindableLayout` ignores a `Replace` - and every
+  such round trip rebuilds the platform video renderer. Speaking toggles with every phrase, so
+  the indicator cannot go through the manager. MAUI must follow the same rule.
+- **Debug builds of this app are hard to load.** A Blazor WASM debug build fetches a `.pdb`
+  beside every assembly, and on this machine one of the ~250 parallel requests reliably fails
+  with a status-0 `TypeError: Failed to fetch` - a different asset each time, while `curl` serves
+  every one of them. The Release build has no `.pdb` to fetch and loads first time. If the loading
+  ring sticks at 98%, that is what it is, not the application.
 
 ## Phase 3 - MAUI, with Syncfusion
 
