@@ -15,7 +15,49 @@ namespace WebRTCme.MacCatalyst
     {
         public MediaDevices() { }
 
-        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
+        /// <summary>
+        /// Raised when a capture device is connected or disconnected.
+        /// </summary>
+        /// <remarks>
+        /// Declared here and never raised until 2026-09-12. AVFoundation has always posted
+        /// <c>AVCaptureDeviceWasConnectedNotification</c> and its disconnected twin; nothing
+        /// observed them. See <see cref="CaptureDeviceWatcher"/>, which registers only while
+        /// something is listening.
+        ///
+        /// The argument is null, because the web's <c>devicechange</c> carries no payload: it
+        /// says the set changed, not what changed. Ask <see cref="EnumerateDevices"/> if the
+        /// answer matters. The parameter type comes from <see cref="IMediaDevices"/>.
+        /// </remarks>
+        public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange
+        {
+            add
+            {
+                if (_onDeviceChange is null)
+                {
+                    CaptureDeviceWatcher.DevicesChanged += RaiseDeviceChange;
+                    CaptureDeviceWatcher.AddChangeListener();
+                }
+
+                _onDeviceChange += value;
+            }
+            remove
+            {
+                if (_onDeviceChange is null)
+                    return;
+
+                _onDeviceChange -= value;
+
+                if (_onDeviceChange is null)
+                {
+                    CaptureDeviceWatcher.DevicesChanged -= RaiseDeviceChange;
+                    CaptureDeviceWatcher.RemoveChangeListener();
+                }
+            }
+        }
+
+        EventHandler<IMediaStreamTrackEvent> _onDeviceChange;
+
+        void RaiseDeviceChange() => _onDeviceChange?.Invoke(this, null);
 
         public Task<MediaDeviceInfo[]> EnumerateDevices()
         {

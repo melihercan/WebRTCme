@@ -147,6 +147,10 @@ namespace WebRTCme.iOS
             if (ScreenCapture.IsScreenTrack(Id))
                 ScreenCapture.Stop();
 
+            // Before the event, so a listener that reacts by opening another device cannot be
+            // beaten to it by a watcher still holding this one.
+            CaptureDeviceWatcher.Forget(Id);
+
             Enabled = false;
             OnEnded?.Invoke(this, EventArgs.Empty);
         }

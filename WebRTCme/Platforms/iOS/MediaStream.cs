@@ -59,7 +59,13 @@ namespace WebRTCme.iOS
                 WebRTCme.WebRtc.NativePeerConnectionFactory.MediaStreamWithStreamId($"{WebRTCme.WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in mediaStreamTracks)
+            {
                 self.AddTrack(track);
+
+                // A track's id is its device's UniqueID here, which is how the watcher knows
+                // which track to end when that device is unplugged.
+                CaptureDeviceWatcher.Watch(track as MediaStreamTrack);
+            }
             return self;
         }
 
