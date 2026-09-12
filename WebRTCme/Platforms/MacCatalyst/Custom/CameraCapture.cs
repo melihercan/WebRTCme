@@ -86,6 +86,14 @@ namespace WebRTCme
             var session = new AVCaptureSession();
             session.BeginConfiguration();
 
+            // Input priority, and this is not optional: with any other preset the session owns the
+            // format, and setting device.ActiveFormat underneath it gets overridden when the
+            // session starts. Configured the other way on 2026-09-12 the camera delivered its
+            // first frame and then a trickle - the session and the device disagreeing about the
+            // format for the rest of the call.
+            if (session.CanSetSessionPreset(AVCaptureSession.PresetInputPriority))
+                session.SessionPreset = AVCaptureSession.PresetInputPriority;
+
             var input = AVCaptureDeviceInput.FromDevice(device, out var inputError);
             if (input is null)
                 throw new InvalidOperationException(
@@ -119,10 +127,12 @@ namespace WebRTCme
                     $"Camera '{device.UniqueID}' cannot deliver sample buffers to this session.");
 
             session.AddOutput(output);
-            session.CommitConfiguration();
 
+            // Inside the transaction, so the session sees one consistent configuration rather
+            // than a format that changes under it after it has committed.
             ApplyFormat(device, format, frameRate);
 
+            session.CommitConfiguration();
             session.StartRunning();
 
             var dimensions = ((CMVideoFormatDescription)format.FormatDescription).Dimensions;
@@ -207,7 +217,9 @@ namespace WebRTCme
                     var timestampNs =
                         (long)(sampleBuffer.PresentationTimeStamp.Seconds * 1_000_000_000);
 
-                    if (++_frameCount == 1 || _frameCount % 300 == 0)
+                    // Every 60 frames - two seconds at 30fps. Frequent enough that a stall shows
+                    // up as a gap in the timestamps rather than as silence.
+                    if (++_frameCount == 1 || _frameCount % 60 == 0)
                         Echo($"camera frame {_frameCount} {pixelBuffer.Width}x{pixelBuffer.Height}");
 
                     using var buffer = new Webrtc.RTCCVPixelBuffer(pixelBuffer);
