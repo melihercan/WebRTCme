@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using MvvmHelpers.Commands;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -55,7 +56,14 @@ namespace WebRTCme.Middleware
         // keyed by reference never matches one it has already seen. Measured by unplugging the
         // webcam - three "track ended unexpectedly" lines for one camera, one per time this had
         // been asked to watch the stream.
-        readonly Dictionary<string, (IMediaStreamTrack Track, EventHandler Handler)> _localTrackWatchers = new();
+        // Concurrent, not a plain Dictionary, because the threads that touch these are not the
+        // same one. A device notification arrives on a platform thread - AVFoundation's
+        // notification queue, Android's camera callback, the browser's event loop - while
+        // RecoverLocalTrackAsync runs on a thread-pool continuation and the page's own lifecycle
+        // runs on the UI thread. Iterating one of these while another thread writes to it throws
+        // "Collection was modified", and the watcher catches listener exceptions, so the symptom
+        // would have been a recovery that silently did not happen.
+        readonly ConcurrentDictionary<string, (IMediaStreamTrack Track, EventHandler Handler)> _localTrackWatchers = new();
         bool _localMediaIsBeingReleased;
         readonly SemaphoreSlim _localTrackRecovery = new(1, 1);
 
@@ -65,7 +73,7 @@ namespace WebRTCme.Middleware
         // track is stopped, and Apple reports Live, because it forwards what the native track
         // says and the native track was never ended. Relying on it worked on two platforms and
         // silently did nothing on the other two.
-        readonly Dictionary<MediaStreamTrackKind, IMediaStreamTrack> _awaitingDevice = new();
+        readonly ConcurrentDictionary<MediaStreamTrackKind, IMediaStreamTrack> _awaitingDevice = new();
 
         string _recordingFileName = "WebRTCme.webm";
 
@@ -548,8 +556,8 @@ namespace WebRTCme.Middleware
                 _cameraStream.RemoveTrack(deadTrack);
                 _cameraStream.AddTrack(newTrack);
 
-                _awaitingDevice.Remove(kind);
-                _localTrackWatchers.Remove(deadTrack.Id);
+                _awaitingDevice.TryRemove(kind, out _);
+                _localTrackWatchers.TryRemove(deadTrack.Id, out _);
                 WatchLocalTracks(_cameraStream);
 
                 _mediaStreamManager.Update(new MediaStreamParameters
