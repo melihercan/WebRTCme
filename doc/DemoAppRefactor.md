@@ -237,14 +237,51 @@ Three faults, none of them introduced here:
   every one of them. The Release build has no `.pdb` to fetch and loads first time. If the loading
   ring sticks at 98%, that is what it is, not the application.
 
-## Phase 3 - MAUI, with Syncfusion
+## Phase 3 - MAUI, with Syncfusion - DONE
 
-The same four pages. A `ResourceDictionary` for the theme, so styling stops being inline.
+The same four pages, with `Resources/Styles/Theme.xaml` holding the palette and the styles so
+nothing is inline any more. `SfTextInputLayout` for the join form, `SfPopup` for the debug menu,
+`Border` for the cards and tiles.
 
-Icon buttons replace the horizontally scrolling row of text buttons. Worth being explicit about
-why that row scrolls today: the text buttons do not fit on a 1080px phone - the third was clipped
-and the fourth was off the edge entirely, which made them unreachable rather than merely ugly.
-Icons remove the cause rather than working around it, and the scroll can go.
+Icon buttons replaced the horizontally scrolling row of text buttons, and the scroll went with
+them. That row scrolled because the text buttons did not fit a 1080px phone - the third was
+clipped and the fourth was off the edge entirely, which made them unreachable rather than merely
+ugly. Five 48px controls plus the menu button, 8 apart, is 344 against roughly 360: confirmed on a
+real device rather than calculated.
+
+MAUI also gained the two controls it never had - record, and leave call.
+
+### Icons: Material Icons, not Material Symbols
+
+Phase 1 named Material Symbols. The point of the choice was to share a vocabulary with the Blazor
+demo, and MudBlazor ships **Material Icons** - so that is the set that actually matches, and it is
+a 350KB static font rather than a 3.5MB variable one. The names are the same either way, which is
+why the Phase 1 table needed no changes.
+
+Codepoints came from `MaterialIcons-Regular.codepoints`, the file Google ships beside the font, and
+are written as `\uXXXX` escapes in `Icons.cs`. Pasted literally these glyphs are invisible in an
+editor, identical to each other in a diff, and one encoding accident from being lost.
+
+### Three faults that only showed on a device
+
+- **`SfTextInputLayout` colours its hint from `HintLabelStyle`, not `HintTextColor`.** The three
+  field labels rendered black on the black card while the values beside them were white.
+  `HintTextColor` is not settable at all - it is documented but has no accessor - so it compiles
+  as an attribute on an element and fails only as a `Style` setter. That is why the first attempt
+  looked correct in the markup.
+- **Button text was the dark surface colour on the blue.** It passes a contrast check and still
+  reads as black text on a coloured button. Blazor puts white there, so MAUI was the one out of
+  step.
+- **The Android status bar stayed .NET purple** above a `#121316` page. MAUI styles the system
+  chrome from `Platforms/Android/Resources/values/colors.xml`, which XAML cannot reach.
+
+### One place MAUI still differs from Blazor
+
+Blazor gets `cover` for a peer tile and `contain` for the self-view. MAUI gets whatever each
+platform's renderer does - the Apple `MediaView` already scales to fill, with its aspect-fit branch
+sitting behind an `#if false`, and Android leaves it to `SurfaceViewRenderer`. Matching Blazor
+means a scaling mode plumbed through four platform renderers, which is more than the tile is worth
+today. Recorded rather than done.
 
 ## Phase 4 - sizing and orientation
 
