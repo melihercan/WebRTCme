@@ -122,6 +122,39 @@ One thing the old text got wrong, and it mattered. "Recovery on resume is worth 
 but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
 behind this one.
 
+### The receiver-side stall signal does not fire - measured 2026-09-12, nothing to do
+Worth recording as a negative result, because it is an obvious idea and the reasoning for it is
+sound right up to the point where it meets a measurement.
+
+Every fix on this branch for "a frozen tile on a call that still says connected" is sender-side -
+the process, the camera, the device, the transceiver. The apparent missing half is receiver-side:
+`IMediaStreamTrack.OnMute` and `OnUnmute` are declared on every platform, raised on Blazor, and
+subscribed to by nothing anywhere in the repository. A receiver listening to `mute` on a remote
+track would notice a peer's video stopping whatever the cause, without needing the sender to be
+working well enough to say so.
+
+It does not fire. Tested on a live peer-to-peer call with raw JS listeners on the remote tracks,
+so that nothing in this library could be the reason:
+
+```
+Android turns its camera off      no mute   a disabled track sends black frames, not nothing
+Android loses wifi for 25s        no mute   the peer was removed before any stall was detected
+```
+
+Both cases are already covered, which is the actual finding. A deliberate camera-off arrives as a
+`PeerMedia` signalling message and always did. A peer that genuinely goes away now arrives as
+`PeerLeft`, because the hub reports its disconnect - see the entry below, added hours earlier the
+same day, which is what removed the Android tile during the wifi test and made a stall impossible
+to observe.
+
+So there is no reachable failure mode left for `mute` to report here. **Do not wire it up without
+first producing a case where it actually fires** - the two obvious ones do not, and the reason they
+do not is that something else already handled them.
+
+`OnDeviceChange` is in the same family and also raised by nobody on any platform, which means a
+camera being *plugged in* is never noticed. That one is real but small, and much less interesting
+than the loss case now that loss is handled.
+
 ### A peer that dropped never left the room - fixed 2026-09-12
 `RoomHub` had no `OnDisconnectedAsync`, so the only way out of a room was a client politely calling
 `LeaveAsync` first. Anything that skipped that - a reloaded browser tab, a killed app, a phone
