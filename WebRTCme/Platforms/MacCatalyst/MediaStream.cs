@@ -32,10 +32,13 @@ namespace WebRTCme.MacCatalyst
         public static IMediaStream Create(MediaStreamConstraints constraints)
         {
             var mediaStreamTracks = new List<IMediaStreamTrack>();
-            bool isAudio = (constraints.Audio.Value.HasValue && constraints.Audio.Value == true) ||
-                constraints.Audio.Object != null;
-            bool isVideo = (constraints.Video.Value.HasValue && constraints.Video.Value == true) ||
-                constraints.Video.Object != null;
+            // Null means "not asked for", not a crash. Dereferencing these threw
+            // NullReferenceException for any caller wanting one kind and not the other - which is
+            // exactly what recovering a single dead track does, so the local-device recovery
+            // failed here every time with a message naming nothing. Windows has always had this
+            // as IsRequested; the other platforms never got it.
+            bool isAudio = IsRequested(constraints?.Audio);
+            bool isVideo = IsRequested(constraints?.Video);
             if (isAudio)
             {
                 var defaultAudioDevice = AVCaptureDevice.GetDefaultDevice(AVMediaTypes.Audio)
@@ -188,5 +191,8 @@ namespace WebRTCme.MacCatalyst
             };
         }
 
+
+        static bool IsRequested(MediaStreamContraintsUnion union) =>
+            union is not null && (union.Value == true || union.Object is not null);
     }
 }
