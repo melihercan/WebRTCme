@@ -32,6 +32,10 @@ namespace WebRTCme
         static string _screenTrackId;
         static long _frameCount;
 
+        // How long to wait for the permission gate before giving up. Long enough for somebody to
+        // find the dialog, short enough that a refusal does not look like a hung application.
+        const int PermissionTimeoutMs = 45_000;
+
         /// <summary>
         /// Whether a track is the one carrying a shared screen.
         /// </summary>
@@ -56,10 +60,26 @@ namespace WebRTCme
 
             Echo("screen capture: asking for shareable content");
 
-            // Excluding this application's own windows. Capturing the call while showing the call
-            // is the recursive corridor of mirrors, and on a shared display it is avoidable -
-            // which it is not on iOS, where the app's own content is all ReplayKit offers.
-            var content = await SCShareableContent.GetCurrentProcessShareableContentAsync();
+            // GetShareableContentAsync, not GetCurrentProcessShareableContentAsync. The latter
+            // returns only this process's own windows, which would have reproduced exactly the
+            // iOS limitation that ScreenCaptureKit was chosen to avoid - and it was what this
+            // called first, on 2026-09-12.
+            //
+            // This is also the call that needs Screen Recording permission, and it does not
+            // return until that is settled. With the await on the UI thread the window freezes
+            // meanwhile, which reads as a crash from the outside - so it is raced against a
+            // timeout rather than left to hang.
+            var contentTask = SCShareableContent.GetShareableContentAsync();
+
+            if (await Task.WhenAny(contentTask, Task.Delay(PermissionTimeoutMs)) != contentTask)
+            {
+                Reset();
+                throw new InvalidOperationException(
+                    "Screen recording permission was not granted. Allow it in System Settings " +
+                    "under Privacy & Security > Screen Recording, then try again.");
+            }
+
+            var content = await contentTask;
 
             var display = content?.Displays?.FirstOrDefault()
                 ?? throw new InvalidOperationException("No display is available to capture.");
