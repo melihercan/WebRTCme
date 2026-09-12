@@ -15,13 +15,21 @@ namespace WebRTCme
 {
     public static class MacCatalystSupport
     {
+        /// <summary>
+        /// Opens a camera into a track, and shows it in the preview view.
+        /// </summary>
+        /// <remarks>
+        /// Capture is <see cref="CameraCapture"/>'s rather than <c>RTCCameraVideoCapturer</c>'s,
+        /// and the reason is rotation: that capturer tags every frame from
+        /// <c>UIDevice.orientation</c>, which on a Mac describes nothing, so frames went out
+        /// tagged for a quarter turn the scene never had. See the notes on CameraCapture.
+        ///
+        /// The capturer argument is kept so callers do not have to change; nothing is done with
+        /// it any more.
+        /// </remarks>
         public static void SetCameraTrack(Webrtc.RTCCameraPreviewView _cameraView, IMediaStreamTrack videoTrack, 
             Webrtc.RTCCameraVideoCapturer _videoCapturer)
         {
-            var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.RTCVideoTrack;
-            var nativeVideoSource = nativeVideoTrack.Source;
-            _videoCapturer.Delegate = (Webrtc.IRTCVideoCapturerDelegate)nativeVideoSource;
-
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
                 // The track id is the device's UniqueID (see MediaStream.Create), so match on
@@ -29,10 +37,11 @@ namespace WebRTCme
                 .Single(device => device.UniqueID == videoTrack.Id);
 
             var (format, fps) = SelectFormat(cameraDevice, videoTrack.Id);
-            _videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
 
-            _cameraView.CaptureSession = _videoCapturer.CaptureSession;
-
+            // The preview shows this library's session now. It used to show the one
+            // RTCCameraVideoCapturer owned, which is also why the self-view stayed upright while
+            // what went on the wire did not: a preview layer renders the camera, not a frame.
+            _cameraView.CaptureSession = CameraCapture.Start(videoTrack, cameraDevice, format, fps);
         }
 
         // What getUserMedia asked a camera for, held until something binds the track and capture
