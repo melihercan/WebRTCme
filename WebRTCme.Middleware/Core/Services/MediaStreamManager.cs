@@ -80,8 +80,9 @@ namespace WebRTCme.Middleware.Services
         /// <remarks>
         /// This used to assign the replacement to a local and return, so it did nothing at all -
         /// and it threw rather than doing nothing when the label was absent, which is the same
-        /// trap <see cref="Remove"/> already carries a note about. Nothing calls it; it is kept
-        /// working rather than deleted because it is on the public interface.
+        /// trap <see cref="Remove"/> already carries a note about. It was kept working rather than
+        /// deleted while nothing called it, because it is on the public interface; recovering a
+        /// local track whose device died is what calls it now.
         /// </remarks>
         public void Update(MediaStreamParameters mediaStreamParameters)
         {

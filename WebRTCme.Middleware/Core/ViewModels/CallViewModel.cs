@@ -46,6 +46,13 @@ namespace WebRTCme.Middleware
         IMediaStream _displayStream;
         ConnectionParameters _connectionParameters;
 
+        // The local tracks being watched for an unexpected end, and whether an end is expected.
+        // Teardown ends tracks too, and re-acquiring a camera on the way out of a call would turn
+        // leaving into a permission prompt.
+        readonly Dictionary<IMediaStreamTrack, EventHandler> _localTrackWatchers = new();
+        bool _localMediaIsBeingReleased;
+        readonly SemaphoreSlim _localTrackRecovery = new(1, 1);
+
         string _recordingFileName = "WebRTCme.webm";
 
         /// <summary>
@@ -288,6 +295,7 @@ namespace WebRTCme.Middleware
             _connectionParameters = connectionParameters;
             _reRender = reRender;
             _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
+            WatchLocalTracks(_cameraStream);
             _mediaStreamManager.Add(new MediaStreamParameters
             {
                 Stream = _cameraStream,
@@ -332,28 +340,196 @@ namespace WebRTCme.Middleware
         /// </remarks>
         void ReleaseLocalMedia()
         {
-            foreach (var stream in new[] { _cameraStream, _displayStream })
+            _localMediaIsBeingReleased = true;
+
+            try
             {
-                if (stream is null)
+                UnwatchLocalTracks();
+
+                foreach (var stream in new[] { _cameraStream, _displayStream })
+                {
+                    if (stream is null)
+                        continue;
+
+                    foreach (var track in stream.GetTracks())
+                    {
+                        try
+                        {
+                            track.Stop();
+                        }
+                        catch (Exception exception)
+                        {
+                            _logger.LogInformation(
+                                $"Stopping a local track failed: {exception.Message}");
+                        }
+                    }
+                }
+
+                _cameraStream = null;
+                _displayStream = null;
+            }
+            finally
+            {
+                _localMediaIsBeingReleased = false;
+            }
+        }
+
+        #region Losing a local capture device
+
+        /// <summary>
+        /// Watches a local stream's tracks for a device disappearing under them.
+        /// </summary>
+        /// <remarks>
+        /// A local track ends on its own when the device it is capturing goes away - unplugged,
+        /// disabled, or taken by something with a stronger claim. The signal has been travelling
+        /// all the way up for as long as this has existed: the platform raises
+        /// <see cref="IMediaStreamTrack.OnEnded"/>, mediasoup's <c>Producer</c> forwards it as
+        /// <c>OnTrackEnded</c>, and there it stopped, because nothing subscribed. So the call
+        /// carried on with a dead sender, which at the far end is a frozen tile on a call that
+        /// still says it is connected.
+        ///
+        /// The camera stream only. A display track ending is how a browser reports the user
+        /// pressing its own "Stop sharing", and re-acquiring there would fight the user for the
+        /// screen - <see cref="OnShareScreenAsync"/> owns that path.
+        ///
+        /// Not every platform raises this yet. Blazor does, because the browser does; the other
+        /// three raise <c>OnEnded</c> only from their own <c>Stop()</c>, so they will not notice
+        /// until their capture layer is wired to say so. Android does not need it for the camera,
+        /// which it now reopens underneath the track without the track ever ending - see
+        /// <c>AndroidSupport.CameraLost</c>.
+        /// </remarks>
+        void WatchLocalTracks(IMediaStream stream)
+        {
+            if (stream is null)
+                return;
+
+            foreach (var track in stream.GetTracks())
+            {
+                if (track is null || _localTrackWatchers.ContainsKey(track))
                     continue;
 
-                foreach (var track in stream.GetTracks())
+                var ended = track;
+                EventHandler handler = (_, _) => OnLocalTrackEnded(ended);
+                _localTrackWatchers[ended] = handler;
+                ended.OnEnded += handler;
+            }
+        }
+
+        void UnwatchLocalTracks()
+        {
+            foreach (var (track, handler) in _localTrackWatchers)
+            {
+                try
                 {
-                    try
-                    {
-                        track.Stop();
-                    }
-                    catch (Exception exception)
-                    {
-                        _logger.LogInformation(
-                            $"Stopping a local track failed: {exception.Message}");
-                    }
+                    track.OnEnded -= handler;
+                }
+                catch (Exception exception)
+                {
+                    // A track whose native object has already gone. Nothing to unsubscribe from,
+                    // and this runs on the way out of a call.
+                    _logger.LogInformation(
+                        $"Releasing a local track watcher failed: {exception.Message}");
                 }
             }
 
-            _cameraStream = null;
-            _displayStream = null;
+            _localTrackWatchers.Clear();
         }
+
+        void OnLocalTrackEnded(IMediaStreamTrack track)
+        {
+            if (_localMediaIsBeingReleased || _cameraStream is null)
+                return;
+
+            _logger.LogInformation($"-------> local {track.Kind} track ended unexpectedly");
+            _ = RecoverLocalTrackAsync(track);
+        }
+
+        /// <summary>
+        /// Opens the device again and puts the new track where the dead one was.
+        /// </summary>
+        /// <remarks>
+        /// One kind at a time, and only the kind that died. Re-acquiring the whole stream would
+        /// take the microphone away and give it back for a camera that was unplugged, which is a
+        /// gap in the audio for no reason.
+        ///
+        /// The sender is replaced rather than renegotiated, which is the point of doing this here
+        /// at all: <c>replaceTrack</c> keeps the transceiver, the encodings and the simulcast
+        /// ladder that were negotiated when the call started, so the far side sees the picture
+        /// come back rather than a new stream arriving.
+        ///
+        /// One attempt. A device that is gone is usually gone for a reason the user knows about,
+        /// and the honest thing is to stop and leave the call otherwise intact rather than to sit
+        /// in a loop reopening a camera nobody has plugged back in. This differs from Android's
+        /// camera recovery deliberately - there the device is known to be coming back, because
+        /// something with a temporary claim took it.
+        /// </remarks>
+        async Task RecoverLocalTrackAsync(IMediaStreamTrack deadTrack)
+        {
+            if (!await _localTrackRecovery.WaitAsync(0))
+                return;
+
+            try
+            {
+                var kind = deadTrack.Kind;
+                var replacementStream = await _localMediaStream.GetCameraMediaStreamAsync(
+                    CameraType.Default, ConstraintsFor(kind));
+
+                var newTrack = replacementStream?.GetTracks()
+                    ?.FirstOrDefault(candidate => candidate?.Kind == kind);
+
+                if (newTrack is null)
+                {
+                    _logger.LogInformation(
+                        $"-------> reopening the {kind} device produced no track; " +
+                        $"the call continues without it");
+                    return;
+                }
+
+                await _connection.ReplaceOutgoingTrackAsync(deadTrack, newTrack);
+
+                // The tile renders from the stream, so the new track has to land in it as well -
+                // otherwise the far side recovers and the local preview stays frozen.
+                _cameraStream.RemoveTrack(deadTrack);
+                _cameraStream.AddTrack(newTrack);
+
+                _localTrackWatchers.Remove(deadTrack);
+                WatchLocalTracks(_cameraStream);
+
+                _mediaStreamManager.Update(new MediaStreamParameters
+                {
+                    Stream = _cameraStream,
+                    Label = _connectionParameters.Name,
+                    Hangup = false,
+                    VideoMuted = false,
+                    AudioMuted = true,
+                    CameraType = CameraType.Default,
+                    ShowControls = false
+                });
+
+                _runOnUiThread.Invoke(() => _reRender?.Invoke());
+
+                _logger.LogInformation($"-------> local {kind} track replaced after the device ended");
+            }
+            catch (Exception exception)
+            {
+                // Said and swallowed. This runs from a device event with nobody to throw to, and a
+                // call carrying one fewer track is better than a call that falls over.
+                _logger.LogInformation(
+                    $"Recovering the local {deadTrack.Kind} track failed: {exception.Message}");
+            }
+            finally
+            {
+                _localTrackRecovery.Release();
+            }
+        }
+
+        // Asking for only the kind that died. GetCameraMediaStreamAsync's default asks for both.
+        static MediaStreamConstraints ConstraintsFor(MediaStreamTrackKind kind) =>
+            kind == MediaStreamTrackKind.Audio
+                ? new MediaStreamConstraints { Audio = new MediaStreamContraintsUnion { Value = true } }
+                : new MediaStreamConstraints { Video = new MediaStreamContraintsUnion { Value = true } };
+
+        #endregion
 
 
         void Connect()

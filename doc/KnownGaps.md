@@ -22,7 +22,7 @@ and none of them is a small change:
 | **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
 | **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
 | **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
-| **A lost capture device, anywhere but Android** | Android now notices its camera being taken and reopens it (2026-09-12). Blazor, Windows, iOS and Mac Catalyst are not wired to notice at all. |
+| **A lost capture device on Windows, iOS and Mac Catalyst** | The recovery is written and platform-independent; those three never raise `OnEnded` for a device that disappears, so it never runs there. **Android and Blazor are done** (2026-09-12). |
 
 **What has run, and where.** Blazor, Android and Windows have all executed the 2026-09-11 work and
 are verified in live calls, and the 2026-09-12 Android work - the call foreground service and the
@@ -122,6 +122,59 @@ service         isForeground=true types=0x000000C0   camera|microphone
 One thing the old text got wrong, and it mattered. "Recovery on resume is worth having as well,
 but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
 behind this one.
+
+### A local track whose device died was never noticed - fixed 2026-09-12
+The same question as the entry below, one layer up and on every platform: a capture device can go
+away without the process losing anything. Unplug a USB webcam, disable it, let something with a
+stronger claim take it, and the track ends. The call carries on with a dead sender, and at the far
+end that is a frozen tile on a call that still says it is connected.
+
+The signal had been arriving the whole time and falling on the floor. `MediaStreamTrack.OnEnded`
+is raised by the platform, mediasoup's `Producer` forwards it as `OnTrackEnded` - and nothing
+subscribed to that, anywhere in the repository. Worth remembering as a shape: an event that is
+raised, forwarded once, and never consumed looks exactly like a feature until you go looking for
+the subscriber.
+
+`CallViewModel` now watches the camera stream's tracks and, when one ends by itself, reopens that
+device and calls `ReplaceOutgoingTrackAsync`. Four things it is careful about:
+
+- **The camera stream only.** A display track ending is how a browser reports its own "Stop
+  sharing" bar being pressed, and re-acquiring there would fight the user for the screen.
+- **Only the kind that died.** Re-acquiring the whole stream would take the microphone away and
+  give it back because a camera was unplugged.
+- **Not while tearing down.** Android's `MediaStreamTrack.Stop()` raises `OnEnded` itself, so
+  leaving a call would otherwise reopen the camera on the way out. A flag around
+  `ReleaseLocalMedia` is what stops that, and it is the reason this needs one at all - on Blazor,
+  `stop()` deliberately does not fire `ended`.
+- **One attempt.** A device that is gone is usually gone for a reason the user knows about. This
+  differs from the Android camera recovery below on purpose: there the device is known to be
+  coming back, because something with a temporary claim took it.
+
+`replaceTrack` rather than renegotiation is the whole point of doing it at this layer - the
+transceiver, the encodings and the simulcast ladder negotiated at the start of the call all stay,
+so the far side sees the picture come back rather than a new stream arrive.
+
+Verified Blazor to Android, on a live mediasoup call, twice in a row:
+
+```
+local video   8f3cf39b -> 80944dbe -> 3807b28f    two losses, two recoveries
+local audio   5dd9bcb9 throughout                 untouched, as intended
+far side      video 1747522 -> 13622596           climbing across both swaps, no gap
+consumers     entries:12 unchanged                same consumer, no renegotiation
+mute after    disabled 3807b28f                   Producer.Track followed the replacement
+```
+
+**What this does not prove.** The `ended` event was dispatched at the track rather than caused by
+pulling the camera out, so what is verified is everything from our listener onwards. The browser's
+own dispatch on real device removal is specified behaviour on a listener that was already wired,
+but it has not been watched happening here.
+
+**Where it still does not run.** Windows, iOS and Mac Catalyst raise `OnEnded` only from their own
+`Stop()`, so a device disappearing underneath them is silent and the recovery above never fires.
+Windows is the awkward one: its native ABI (`WebRTCme.Bindings.Maui.Windows/Interop.cs`) exposes
+device *enumeration* and no device-lost callback at all, so noticing there means either polling
+`EnumerateDevices` or adding a callback to the native shim. Apple has the signal already -
+`AVCaptureSessionWasInterrupted` and `AVCaptureSessionInterruptionEnded` - and nothing observes it.
 
 ### Nothing reopened a camera the system took away - fixed 2026-09-12
 Found by testing the fix above, which is the only reason it was ever separated from it. With the
