@@ -18,7 +18,6 @@ picking it up is possible today.
 
 | | blocked on | what it is |
 | --- | --- | --- |
-| **`getDisplayMedia` on Mac Catalyst** | nothing - it is next | Still throws `NotImplementedException`. iOS is done (2026-09-12) and the binding fix it needed applies here too, so the hard part is finished; worth checking whether ScreenCaptureKit beats ReplayKit on macOS before copying. |
 | **System-wide screen share on iOS** | a design decision | iOS shares *this app's own content* only. Sharing other apps needs a Broadcast Upload Extension: a second bundle, an App Group, and WebRTC running inside the extension. An architectural change, not an addition. |
 | **A lost capture device on iOS and Mac Catalyst** | a Mac | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small, once someone can build it. |
 | **`OnDeviceChange` on iOS and Mac Catalyst** | a Mac | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
@@ -112,6 +111,39 @@ does, which is how the two exceptions above were caught, but the middleware logs
 and none of that appears - `log show` returns zero lines for the process. Reach for the app's
 stderr (`open --stderr`), and for `lsof` on the process to see whether it has a socket at all,
 which is how the permission hang above was told apart from a connection failure.
+
+## getDisplayMedia on Mac Catalyst - 2026-09-12
+**ScreenCaptureKit, not ReplayKit**, and the difference is the whole point: ReplayKit's in-process
+recorder gives an application its own content, which is all iOS offers, while ScreenCaptureKit
+gives the display. On a Mac the second is what "share my screen" means. It is bound for Mac
+Catalyst - checked before copying the iOS implementation across, which would have quietly delivered
+the weaker thing.
+
+Verified Mac Catalyst to Blazor: `1920x1080` arriving at the far side and advancing, beside the
+camera tiles, and stopping withdrew the tile while the cameras kept running.
+
+**One mistake worth naming**, because it would have looked like success. The first version called
+`SCShareableContent.GetCurrentProcessShareableContentAsync`, which returns only the calling
+process's own windows - reproducing exactly the iOS limitation ScreenCaptureKit had been chosen to
+avoid. It is also the wrong call for a second and more serious reason: `GetShareableContentAsync`
+is the one that requires Screen Recording permission, so the permission gate was never reached.
+A working-looking share that never asks the user for consent is worse than one that fails.
+
+**Permission cost forty minutes, and none of it was the code.** Two things to know before doing
+this again:
+
+- The call does not return until permission is settled, and the await sits on the UI thread, so
+  the window freezes meanwhile. That reads as a crash from outside, and was reported as one. It is
+  now raced against a timeout that names the setting to change.
+- The app is **ad-hoc signed with no team identifier** (`Signature=adhoc`, `TeamIdentifier=not
+  set`). macOS ties Screen Recording grants to a stable code identity, so a grant can evaporate on
+  relaunch and every rebuild definitely invalidates it. Three grant-relaunch-denied cycles went by
+  before that was the diagnosis. `tccutil reset ScreenCapture <bundle-id>` clears the recorded
+  decision and lets it ask cleanly; the durable fix is signing with the Apple Development identity
+  already on the machine rather than ad-hoc, and that is a project decision rather than a bug.
+
+The same ad-hoc signing explains the camera prompts reappearing earlier the same day. It is one
+cause with two symptoms, and it looked like two unrelated annoyances until this.
 
 ## getDisplayMedia on iOS - 2026-09-12
 
