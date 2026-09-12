@@ -83,7 +83,15 @@ namespace WebRTCme.Android
                 .CreateLocalMediaStream($"{WebRtc.Id}");
             var self = new MediaStream(nativeMediaStream);
             foreach (var track in mediaStreamTracks)
+            {
                 self.AddTrack(track);
+
+                // Android takes the camera and microphone away from a backgrounded app and freezes
+                // the process, which kills a call outright and does not give it back. Holding a
+                // foreground service for as long as these tracks exist is what prevents it.
+                AndroidSupport.LocalCaptureStarted(track.Id);
+            }
+
             return self;
         }
 

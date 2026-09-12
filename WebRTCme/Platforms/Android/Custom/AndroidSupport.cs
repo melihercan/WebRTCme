@@ -59,6 +59,47 @@ namespace WebRTCme
         static Webrtc.ScreenCapturerAndroid _screenCapturer;
         static string _screenTrackId;
 
+        #region Keeping the call alive
+
+        // The local capture tracks that currently exist. While there is at least one, the app
+        // needs to be a foreground service or Android will take the camera away and freeze the
+        // process - see CallForegroundService for what that does to a call.
+        static readonly ConcurrentDictionary<string, byte> _localCaptureTrackIds = new();
+
+        /// <summary>
+        /// Notes that a local camera or microphone track now exists, starting the call service.
+        /// </summary>
+        /// <remarks>
+        /// Driven by capture rather than by the app, because the app does not reliably know: a call
+        /// is over when the tracks stop, and tracks stop from teardown paths as well as from a
+        /// hang-up button.
+        /// </remarks>
+        public static void LocalCaptureStarted(string trackId)
+        {
+            if (trackId is null)
+                return;
+
+            var wasIdle = _localCaptureTrackIds.IsEmpty;
+            _localCaptureTrackIds[trackId] = 0;
+
+            if (wasIdle)
+                CallForegroundService.Start(global::Android.App.Application.Context);
+        }
+
+        /// <summary>
+        /// Notes that a local track has stopped, ending the call service once none are left.
+        /// </summary>
+        public static void LocalCaptureStopped(string trackId)
+        {
+            if (trackId is null || !_localCaptureTrackIds.TryRemove(trackId, out _))
+                return;
+
+            if (_localCaptureTrackIds.IsEmpty)
+                CallForegroundService.Stop(global::Android.App.Application.Context);
+        }
+
+        #endregion
+
         /// <summary>
         /// Starts capturing the screen into a video source, once permission has been granted.
         /// </summary>

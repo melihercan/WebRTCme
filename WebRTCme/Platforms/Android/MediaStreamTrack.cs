@@ -152,6 +152,11 @@ namespace WebRTCme.Android
             if (AndroidSupport.IsScreenTrack(Id))
                 AndroidSupport.StopScreenCapture();
 
+            // Last, and unconditionally: once no local track is left there is nothing for the call
+            // service to keep alive, and a foreground notification outliving the call it describes
+            // is its own bug.
+            AndroidSupport.LocalCaptureStopped(Id);
+
             Enabled = false;
             OnEnded?.Invoke(this, EventArgs.Empty);
         }
