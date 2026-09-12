@@ -72,13 +72,126 @@ exists to tell you.
 
 ## Phase 1 - shared groundwork
 
-One design language both apps follow, written down before either is touched: palette, spacing
-scale, and an agreed icon per action - microphone on/off, camera on/off, share screen, record,
-restart ICE, layer, hang up. Same glyph, same meaning, both platforms.
+One design language both apps follow, written down before either is touched. It exists because the
+two demos have already drifted into looking like different products, and nothing stops that
+happening again except writing the shared vocabulary down. This section is documentation; Phases 2
+and 3 implement it.
 
-This is a page of documentation, not code. It exists because the two demos have already drifted
-into looking like different products, and nothing stops that happening again except writing the
-shared vocabulary down.
+### The control set - DECIDED: required actions on the bar, debugging behind a menu
+
+The call page has six controls today and they are not six of a kind. Four are what anybody in a
+video call expects to find; two exist to exercise this library and mean nothing to someone
+evaluating it. Mixing them is what made the row too wide to fit a phone in the first place.
+
+**On the bar, as icons:**
+
+| action | why it is primary |
+| --- | --- |
+| microphone on / off | the control people reach for most, and the one they need fastest |
+| camera on / off | same |
+| share screen | the feature the demo is mostly there to show |
+| record | it writes a file; a user has to be able to stop it |
+| leave call | see the note below - there is currently no way to leave except the back gesture |
+
+**Behind an overflow menu, labelled Debug:**
+
+| action | why it is not primary |
+| --- | --- |
+| restart ICE | a recovery for a connection fault the library is supposed to handle by itself. Useful when testing that handling; meaningless otherwise. |
+| send bottom layer only | a simulcast switch. Does nothing visible without simulcast, and the peer-to-peer path refuses it outright - see `OnToggleSpatialLayerAsync`. |
+
+The menu is a single `more_vert` button at the end of the bar. Its items keep their text labels:
+they are rare, they need explaining, and an icon for "restart ICE" would be a puzzle rather than a
+shortcut.
+
+Two things the survey turned up that this phase has to settle:
+
+**MAUI has no record button.** Blazor has all six controls; MAUI has five, missing `Record`, though
+`RecordButtonText` and `OnRecordAsync` are on the shared view model and MAUI has a
+`MediaRecorderFileStreamFactory` of its own. The two demos should offer the same controls, so this
+adds the button rather than removing the feature.
+
+**Neither demo has a leave-call control.** `MediaStreamParameters.Hangup` is set to `false` at all
+three construction sites in `CallViewModel` and never set to `true` anywhere, so the per-tile
+hangup it feeds has never fired. Leaving a call means navigating back. A demo of a calling library
+should have a visible way to end a call, so one is added - a red `call_end` button that does what
+the back navigation already does, via `OnPageDisappearingAsync`. Flagged explicitly because it is
+an addition rather than a port: if it is not wanted, it is one row to delete from the bar.
+
+### Icons
+
+MudBlazor ships Material Icons; MAUI gets Material Symbols as a `MauiFont`. The two sets share
+glyph names, which is the whole point of choosing them - one name means one picture on both
+platforms.
+
+| action | state | glyph |
+| --- | --- | --- |
+| microphone | live | `mic` |
+| | muted | `mic_off` |
+| camera | live | `videocam` |
+| | muted | `videocam_off` |
+| share screen | idle | `screen_share` |
+| | sharing | `stop_screen_share` |
+| record | idle | `fiber_manual_record` |
+| | recording | `stop_circle` |
+| leave call | - | `call_end` |
+| debug menu | - | `more_vert` |
+| restart ICE | menu item | `sync_problem` |
+| bottom layer only | menu item | `layers` |
+
+Icon-only buttons need their names said out loud somewhere: a `MudTooltip` on Blazor and
+`SemanticProperties.Description` on MAUI, both taking the existing `*ButtonText` strings from the
+view model. Those strings already read as labels - "Mute microphone", "Start sharing screen" - so
+nothing new has to be written and the states stay in one place.
+
+The MAUI glyph codepoints come from the `.codepoints` file shipped beside the font when it is added
+in Phase 3. They are deliberately not written here: a hex value copied from memory is the kind of
+thing that renders a blank box and takes an hour to explain.
+
+### Palette
+
+Dark, and only dark. Video reads better against a dark surface, every product in this category has
+settled there, and a theme switcher is a feature the demo does not need. The names below are what
+the MudBlazor theme and the MAUI `ResourceDictionary` both call these colours, so a change is made
+once and read in two places.
+
+| name | value | used for |
+| --- | --- | --- |
+| `Surface` | `#121316` | page background |
+| `SurfaceRaised` | `#1C1E22` | control bar, cards, the join form |
+| `SurfaceSunken` | `#2A2D34` | tile background behind letterboxed video, dividers |
+| `Primary` | `#4C8DFF` | join, and the active state of a toggle |
+| `Danger` | `#E5484D` | leave call, and recording while it is running |
+| `Speaking` | `#30A46C` | the speaking indicator on a tile |
+| `Warning` | `#F5A524` | the muted indicator on a tile |
+| `TextPrimary` | `#F2F3F5` | labels, values |
+| `TextSecondary` | `#A0A4AB` | the peer media status line, hints |
+| `TextDisabled` | `#6E7279` | controls that cannot act yet |
+
+An enabled control is `TextPrimary` on `SurfaceRaised`; a toggle that is *off* - muted microphone,
+camera off - is `Danger`, because the state worth noticing is the one where you are not sending
+anything.
+
+### Spacing and size
+
+A 4px base, and nothing between the steps: `4, 8, 12, 16, 24, 32`. Inline padding, ad-hoc margins
+and one-off `HeightRequest`s are what the current pages are made of, and they are why the two look
+unrelated.
+
+| | value | why |
+| --- | --- | --- |
+| icon button | 48x48 | above both minimum touch targets - 44 on iOS, 48 on Android |
+| icon | 24 | Material's own metric |
+| gap between controls | 8 | |
+| control bar padding | 12 | |
+| corner radius, controls | 24 | a pill, at that height |
+| corner radius, tiles | 12 | |
+| tile gap | 8 | |
+| status row | one line, reserved | see "Two behaviours that must survive" |
+
+Five controls at 48 plus a menu button, with 8 between them, is 344px. The narrowest target is a
+1080px phone at roughly 360 device-independent pixels, so the bar fits without scrolling - which is
+the measurement that justifies removing the `ScrollView` in Phase 3 rather than assuming it.
 
 ## Phase 2 - Blazor, with MudBlazor
 
