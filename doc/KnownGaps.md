@@ -29,11 +29,56 @@ remaining binding stubs - 38 on Android, 33 on iOS - are on no path that runs; a
 call it", not "how many are left". The CoreAudio log spam on Mac Catalyst is noise from inside
 WebRTC; filter it before chasing an audio problem there.
 
-**Three of the five need the same thing.** Apple is where this branch is thin, and it is thin in a
-specific way: iOS and Mac Catalyst **compile and have run none of it**. A great deal of code
-changed there on reasoning alone across 2026-09-11 and 2026-09-12, and the first person to run
-either should expect to find something. An hour on a Mac is worth more to this branch than anything
-else on the list.
+**Mac Catalyst has now run it** (2026-09-12, a Mac mini 2018 driven over SSH), and the prediction
+this paragraph used to make - that the first person to run it should expect to find something - was
+right twice over. See "What running Mac Catalyst found" below. **iOS still has not run**: it
+compiles, and it shares every line of the two bugs that were found, both now fixed.
+
+## What running Mac Catalyst found - 2026-09-12
+
+Two bugs, in the first ten minutes, neither of which any amount of reading would have produced.
+Both are fixed and both applied to iOS identically.
+
+**1. A stub with a caller takes the process down.** `RTCTrackEvent.Streams` threw
+`NotImplementedException` on iOS and Mac Catalyst. Carrying the camera and a screen at once
+peer-to-peer - written the same day, on Windows - made `OnTrack` read `e.Streams` for every
+incoming track, so joining a call killed the app: an uncaught `NSException` out of the
+Objective-C trampoline, with the managed stack inside it.
+
+This is exactly what the "remaining binding stubs" row warns about - *ask "does anything call it",
+not "how many are left"* - and the warning did not prevent it, because the stub and its new caller
+were four platforms and a day apart. The fix was already in hand at the call site: `DidAddStream`
+had the stream and threw it away before building the event.
+
+**2. Apple never grouped a peer's tracks into a stream.** `AddTrack(track, stream)` accepted the
+stream and ignored it, passing `track.Id` as the msid. So every track an Apple client sent went out
+on a stream of its own, named after itself. Android has always passed `stream.Id`.
+
+That had presumably been wrong for as long as the file has existed, and it was invisible because
+**nothing read the msid until the same day**. The symptom was a phantom `MacCatalyst (screen)` tile
+on the far side, holding the Mac's microphone: its audio had a different msid from its own video,
+so the second-source rule read it as a shared screen.
+
+Worth sitting with, because it is the more instructive of the two. A feature that asks a question
+nobody had asked before does not just risk meeting unimplemented code - it risks meeting code that
+answers *wrongly* and has always been believed to work.
+
+**Verified after both fixes**, a three-way peer-to-peer call, Mac Catalyst joining a live
+Android-and-Blazor one: three tiles at the far end, no phantom, the Mac's camera flowing, the Mac's
+voice activity reported, and Android encoding to two peers.
+
+**A testing note that cost twenty minutes.** The app is ad-hoc signed, so every rebuild changes its
+signature and macOS discards the existing TCC grant. The first launch after a rebuild therefore
+prompts for camera and microphone - and that run never recovers even once the prompt is answered:
+it sits on the call page having opened no socket and logged nothing. Relaunching after granting
+works immediately. Two things follow: grant the prompt and then restart the app, and do not read
+"call page, no traffic, no log" as a networking fault.
+
+**Diagnostics are the real gap on this platform.** Almost nothing reaches the log. `Console.WriteLine`
+does, which is how the two exceptions above were caught, but the middleware logs through `ILogger`
+and none of that appears - `log show` returns zero lines for the process. Reach for the app's
+stderr (`open --stderr`), and for `lsof` on the process to see whether it has a socket at all,
+which is how the permission hang above was told apart from a connection failure.
 
 ## What 2026-09-12 was, if you are reading this cold
 
