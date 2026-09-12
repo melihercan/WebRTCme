@@ -1,6 +1,5 @@
 using System;
 using Foundation;
-using ObjCRuntime;
 
 namespace WebRTCme
 {
@@ -75,20 +74,11 @@ namespace WebRTCme
                     // The same mistake sank the earlier attempt that drove its own
                     // AVCaptureSession, where the undisposed wrapper was the one from
                     // CMSampleBuffer.GetImageBuffer(). Two implementations, one fault.
-                    using var source = frame.Buffer;
-
-                    // The frame's buffer is typed as the generated RTCVideoFrameBuffer and the
-                    // constructor wants the concrete RTCCVPixelBuffer - the binding cannot express
-                    // the protocol conformance between them, which is recorded beside that
-                    // constructor in ApiDefinitions. Same native object, re-wrapped as the type
-                    // the constructor accepts.
-                    using var buffer = Runtime.GetINativeObject<Webrtc.RTCCVPixelBuffer>(
-                        source.Handle, forced_type: true, owns: false);
+                    using var buffer = frame.Buffer;
 
                     if (buffer is null)
                     {
-                        // Not a pixel buffer, so not something this can rebuild. Sideways video
-                        // beats none.
+                        // No buffer to rebuild from. Sideways video beats none.
                         _sink.DidCaptureVideoFrame(capturer, frame);
                         return;
                     }

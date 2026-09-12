@@ -167,8 +167,18 @@ namespace Webrtc
 		int TimeStamp { get; set; }
 
 		// @property (readonly, nonatomic) id<RTCVideoFrameBuffer> _Nonnull buffer;
+		//
+		// RTCCVPixelBuffer, for exactly the reason recorded on the initWithBuffer: constructor
+		// below: the generator drops the protocol conformance, so nothing is an
+		// RTCVideoFrameBuffer and reading this property threw
+		// "Unable to cast object of type 'Webrtc.RTCCVPixelBuffer' to type
+		// 'Webrtc.RTCVideoFrameBuffer'" on every frame - the runtime had already made the right
+		// wrapper and this declaration refused it.
+		//
+		// Bound to the concrete buffer instead, which is the only one this framework hands out,
+		// and which is what the constructor already takes.
 		[Export ("buffer")]
-		RTCVideoFrameBuffer Buffer { get; }
+		RTCCVPixelBuffer Buffer { get; }
 
 		// -(instancetype _Nonnull)initWithPixelBuffer:(CVPixelBufferRef _Nonnull)pixelBuffer rotation:(RTCVideoRotation)rotation timeStampNs:(int64_t)timeStampNs __attribute__((deprecated("use initWithBuffer instead")));
 		[Export ("initWithPixelBuffer:rotation:timeStampNs:")]
