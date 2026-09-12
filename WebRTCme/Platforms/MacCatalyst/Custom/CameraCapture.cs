@@ -1,288 +1,105 @@
 using System;
-using System.Collections.Concurrent;
-using AVFoundation;
-using CoreFoundation;
-using CoreMedia;
-using CoreVideo;
 using Foundation;
-using WebRTCme.MacCatalyst;
+using ObjCRuntime;
 
 namespace WebRTCme
 {
     /// <summary>
-    /// Camera capture for Mac Catalyst, driven from an <see cref="AVCaptureSession"/> this library
-    /// owns rather than from libwebrtc's <c>RTCCameraVideoCapturer</c>.
+    /// Corrects the rotation libwebrtc attaches to camera frames on Mac Catalyst.
     /// </summary>
     /// <remarks>
-    /// <para>The reason is rotation, and it is worth writing down because the symptom pointed away
-    /// from the cause for most of a day.</para>
-    /// <para><c>RTCCameraVideoCapturer</c> tags every frame it produces with a rotation derived
-    /// from <c>UIDevice.orientation</c>. On an iPhone that is exactly right. On a Mac there is no
-    /// device orientation - the value describes nothing - so frames left this machine tagged for a
-    /// quarter turn the scene never had, and every peer dutifully applied it. Seen on 2026-09-12:
-    /// an upright webcam, an upright picture in the Mac's own window, and the same stream arriving
-    /// sideways on an Android peer.</para>
-    /// <para>The Mac's own window looked right for a reason that hid the bug rather than
+    /// <para><c>RTCCameraVideoCapturer</c> tags every frame with a rotation derived from
+    /// <c>UIDevice.orientation</c>. On an iPhone that is exactly right. On a Mac there is no device
+    /// orientation - the value describes nothing - so frames left this machine tagged for a quarter
+    /// turn the scene never had, and every peer applied it. Seen on 2026-09-12: an upright webcam,
+    /// an upright picture in the Mac's own window, and the same stream arriving sideways on
+    /// Android.</para>
+    /// <para>The Mac's own window looked right for a reason that hid the fault rather than
     /// contradicting it: for a camera track <c>MediaView</c> renders an
     /// <c>RTCCameraPreviewView</c> over the capture session, so the self-view is the AVFoundation
     /// preview layer and never touches a WebRTC frame. It was upright because the camera is
-    /// upright. It said nothing about what was being sent.</para>
-    /// <para>So the frames are built here instead: a <c>CMSampleBuffer</c> becomes an
-    /// <c>RTCCVPixelBuffer</c>, then an <c>RTCVideoFrame</c> with
-    /// <c>RTCVideoRotation_0</c>, pushed through the capturer delegate into the track's video
-    /// source. That is the same path <c>ScreenCapture</c> already uses on this platform, which is
-    /// why it is the shape chosen - it is known to work here.</para>
-    /// <para>Rotation 0 is not a guess and not a workaround: a camera wired to a Mac does not
-    /// move, so upright is the truth about every frame it produces. The platforms that genuinely
-    /// rotate - iOS, Android - are deliberately left alone.</para>
+    /// upright, and said nothing about what was being sent.</para>
+    /// <para><b>This sits between the capturer and the video source and changes one field.</b> The
+    /// first attempt replaced <c>RTCCameraVideoCapturer</c> with an <c>AVCaptureSession</c> this
+    /// library drove itself, building each frame from a <c>CMSampleBuffer</c> the way
+    /// <c>ScreenCapture</c> does. It produced upright video that froze - frames arrived at a
+    /// fraction of the rate the capturer manages, and two rounds of correcting the session
+    /// configuration did not recover it. Reimplementing capture in order to change a rotation was
+    /// the wrong trade: the capturer works, and only the label on its output was wrong.</para>
+    /// <para>Rotation 0 is the truth rather than a workaround: a camera wired to a Mac does not
+    /// move. iOS and Android genuinely rotate, so neither gets this.</para>
     /// </remarks>
     internal static class CameraCapture
     {
-        // One session per track. Binding a track to a view runs the whole setup again - a tile
-        // rebuild is enough - and a second AVCaptureSession on a camera that is already capturing
-        // fails at StartRunning. The same guard exists on Android, for the same reason.
-        static readonly ConcurrentDictionary<string, Capture> _capturesByTrackId = new();
-
         /// <summary>
-        /// Starts capturing <paramref name="device"/> into <paramref name="videoTrack"/>, and
-        /// returns the session so a preview view can show it.
+        /// Wraps a video source so camera frames reach it upright.
         /// </summary>
-        internal static AVCaptureSession Start(IMediaStreamTrack videoTrack, AVCaptureDevice device,
-            AVCaptureDeviceFormat format, int frameRate)
-        {
-            var nativeTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.RTCVideoTrack;
-            var source = nativeTrack?.Source
-                ?? throw new ArgumentException(
-                    "The track to capture into has no video source.", nameof(videoTrack));
+        internal static Webrtc.IRTCVideoCapturerDelegate Upright(
+            Webrtc.IRTCVideoCapturerDelegate sink) => new UprightFrames(sink);
 
-            var capture = _capturesByTrackId.GetOrAdd(videoTrack.Id,
-                _ => Open(device, format, frameRate, (Webrtc.IRTCVideoCapturerDelegate)source));
-
-            return capture.Session;
-        }
-
-        /// <summary>
-        /// Stops capturing for a track, if this started it. Safe to call when nothing is running.
-        /// </summary>
-        internal static void Stop(string trackId)
-        {
-            if (trackId is null || !_capturesByTrackId.TryRemove(trackId, out var capture))
-                return;
-
-            try
-            {
-                capture.Session.StopRunning();
-                Echo($"camera capture stopped for {trackId}");
-            }
-            catch (Exception exception)
-            {
-                Echo($"stopping the camera for {trackId} reported: {exception.Message}");
-            }
-        }
-
-        static Capture Open(AVCaptureDevice device, AVCaptureDeviceFormat format, int frameRate,
-            Webrtc.IRTCVideoCapturerDelegate sink)
-        {
-            var session = new AVCaptureSession();
-            session.BeginConfiguration();
-
-            // Input priority, and this is not optional: with any other preset the session owns the
-            // format, and setting device.ActiveFormat underneath it gets overridden when the
-            // session starts. Configured the other way on 2026-09-12 the camera delivered its
-            // first frame and then a trickle - the session and the device disagreeing about the
-            // format for the rest of the call.
-            if (session.CanSetSessionPreset(AVCaptureSession.PresetInputPriority))
-                session.SessionPreset = AVCaptureSession.PresetInputPriority;
-
-            var input = AVCaptureDeviceInput.FromDevice(device, out var inputError);
-            if (input is null)
-                throw new InvalidOperationException(
-                    $"Could not open camera '{device.UniqueID}': {inputError?.LocalizedDescription}");
-
-            if (!session.CanAddInput(input))
-                throw new InvalidOperationException(
-                    $"Camera '{device.UniqueID}' cannot be added to a capture session.");
-
-            session.AddInput(input);
-
-            var output = new AVCaptureVideoDataOutput
-            {
-                // Bi-planar NV12, which is what RTCCVPixelBuffer expects; anything else would be
-                // converted frame by frame, or rejected.
-                WeakVideoSettings = new AVVideoSettingsUncompressed
-                {
-                    PixelFormatType = CVPixelFormatType.CV420YpCbCr8BiPlanarFullRange,
-                }.Dictionary,
-
-                // A late frame in a live call is worth less than the next one.
-                AlwaysDiscardsLateVideoFrames = true,
-            };
-
-            var delegateObject = new Frames(sink);
-            var queue = new DispatchQueue("WebRTCme.CameraCapture");
-            output.SetSampleBufferDelegate(delegateObject, queue);
-
-            if (!session.CanAddOutput(output))
-                throw new InvalidOperationException(
-                    $"Camera '{device.UniqueID}' cannot deliver sample buffers to this session.");
-
-            session.AddOutput(output);
-
-            // Inside the transaction, so the session sees one consistent configuration rather
-            // than a format that changes under it after it has committed.
-            ApplyFormat(device, format, frameRate);
-
-            session.CommitConfiguration();
-
-            WatchSession(session);
-
-            session.StartRunning();
-
-            var dimensions = ((CMVideoFormatDescription)format.FormatDescription).Dimensions;
-            Echo($"camera capture running {dimensions.Width}x{dimensions.Height}@{frameRate} " +
-                 $"device={device.UniqueID}");
-
-            // Every piece is held: AVFoundation keeps only weak references to the delegate and the
-            // queue, and a collected delegate is a camera that runs and delivers nothing.
-            return new Capture(session, input, output, delegateObject, queue);
-        }
-
-        // Held so the observers are not collected while the session is running.
-        static readonly System.Collections.Generic.List<NSObject> _sessionObservers = new();
-
-        /// <summary>
-        /// Reports the session going quiet.
-        /// </summary>
-        /// <remarks>
-        /// A stopped session, an interrupted one and a runtime error all look the same from the
-        /// sample-buffer delegate: the callbacks simply stop. Without these three lines the only
-        /// evidence is silence, which is the same evidence a blocked delegate queue produces.
-        /// </remarks>
-        static void WatchSession(AVCaptureSession session)
-        {
-            var center = NSNotificationCenter.DefaultCenter;
-
-            _sessionObservers.Add(center.AddObserver(
-                AVCaptureSession.RuntimeErrorNotification,
-                note => Echo($"capture session runtime error: {note?.UserInfo}"), session));
-
-            _sessionObservers.Add(center.AddObserver(
-                AVCaptureSession.WasInterruptedNotification,
-                note => Echo($"capture session interrupted: {note?.UserInfo}"), session));
-
-            _sessionObservers.Add(center.AddObserver(
-                AVCaptureSession.DidStopRunningNotification,
-                _ => Echo("capture session stopped running"), session));
-        }
-
-        /// <summary>
-        /// Puts the chosen format and frame rate on the device.
-        /// </summary>
-        /// <remarks>
-        /// Best effort. A camera that refuses the format still captures at whatever it was already
-        /// set to, and a call with slightly the wrong resolution beats no call at all.
-        /// </remarks>
-        static void ApplyFormat(AVCaptureDevice device, AVCaptureDeviceFormat format, int frameRate)
-        {
-            if (!device.LockForConfiguration(out var lockError))
-            {
-                Echo($"could not lock {device.UniqueID} to set its format: " +
-                     $"{lockError?.LocalizedDescription}");
-                return;
-            }
-
-            try
-            {
-                device.ActiveFormat = format;
-
-                if (frameRate > 0)
-                {
-                    var duration = new CMTime(1, frameRate);
-                    device.ActiveVideoMinFrameDuration = duration;
-                    device.ActiveVideoMaxFrameDuration = duration;
-                }
-            }
-            catch (Exception exception)
-            {
-                Echo($"setting the format on {device.UniqueID} failed: {exception.Message}");
-            }
-            finally
-            {
-                device.UnlockForConfiguration();
-            }
-        }
-
-        /// <summary>
-        /// Everything one running capture needs kept alive.
-        /// </summary>
-        sealed record Capture(
-            AVCaptureSession Session,
-            AVCaptureDeviceInput Input,
-            AVCaptureVideoDataOutput Output,
-            Frames Delegate,
-            DispatchQueue Queue);
-
-        /// <summary>
-        /// Turns AVFoundation sample buffers into WebRTC frames.
-        /// </summary>
-        sealed class Frames : AVCaptureVideoDataOutputSampleBufferDelegate
+        sealed class UprightFrames : NSObject, Webrtc.IRTCVideoCapturerDelegate
         {
             readonly Webrtc.IRTCVideoCapturerDelegate _sink;
-
-            // The capturer argument is only an identity for the delegate call; nothing downstream
-            // reads it, and one instance for the lifetime of the capture is enough.
-            readonly Webrtc.RTCVideoCapturer _capturer = new();
-
             long _frameCount;
-            long _lastFrameAt;
+            bool _saidWhatItIsDoing;
 
-            internal Frames(Webrtc.IRTCVideoCapturerDelegate sink) => _sink = sink;
+            internal UprightFrames(Webrtc.IRTCVideoCapturerDelegate sink) => _sink = sink;
 
-            public override void DidOutputSampleBuffer(AVCaptureOutput captureOutput,
-                CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
+            [Export("capturer:didCaptureVideoFrame:")]
+            public void DidCaptureVideoFrame(Webrtc.RTCVideoCapturer capturer,
+                Webrtc.RTCVideoFrame frame)
             {
                 try
                 {
-                    if (sampleBuffer?.GetImageBuffer() is not CVPixelBuffer pixelBuffer)
+                    if (frame is null)
                         return;
 
-                    var timestampNs =
-                        (long)(sampleBuffer.PresentationTimeStamp.Seconds * 1_000_000_000);
-
-                    var count = ++_frameCount;
-                    var now = Environment.TickCount64;
-                    var sinceLast = _lastFrameAt == 0 ? 0 : now - _lastFrameAt;
-                    _lastFrameAt = now;
-
-                    var handOffMs = 0L;
-
-                    using (var buffer = new Webrtc.RTCCVPixelBuffer(pixelBuffer))
-                    using (var frame = new Webrtc.RTCVideoFrame(
-                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, timestampNs))
+                    if (frame.Rotation == Webrtc.RTCVideoRotation.RTCVideoRotation_0)
                     {
-                        var startedAt = Environment.TickCount64;
-                        _sink.DidCaptureVideoFrame(_capturer, frame);
-                        handOffMs = Environment.TickCount64 - startedAt;
+                        // Nothing to correct, so nothing is rebuilt.
+                        _sink.DidCaptureVideoFrame(capturer, frame);
+                        return;
                     }
 
-                    // The first ten individually, then every 60. The gap and the hand-off cost are
-                    // what separate the three ways this goes wrong: a session that stopped, a
-                    // delegate queue blocked inside WebRTC, and frames that are simply slow.
-                    if (count <= 10 || count % 60 == 0)
-                        Echo($"camera frame {count} {pixelBuffer.Width}x{pixelBuffer.Height} " +
-                             $"gap={sinceLast}ms handoff={handOffMs}ms");
+                    // The frame's buffer is typed as the generated RTCVideoFrameBuffer and the
+                    // constructor wants the concrete RTCCVPixelBuffer - the binding cannot express
+                    // the protocol conformance between them, which is recorded beside that
+                    // constructor in ApiDefinitions. Same native object either way, re-wrapped as
+                    // the type the constructor accepts. owns: false because the frame owns it.
+                    var buffer = Runtime.GetINativeObject<Webrtc.RTCCVPixelBuffer>(
+                        frame.Buffer.Handle, forced_type: true, owns: false);
+
+                    if (buffer is null)
+                    {
+                        // Not a pixel buffer, so not something this can rebuild. Sideways video
+                        // beats none.
+                        _sink.DidCaptureVideoFrame(capturer, frame);
+                        return;
+                    }
+
+                    if (!_saidWhatItIsDoing)
+                    {
+                        _saidWhatItIsDoing = true;
+                        Echo($"correcting camera rotation: {frame.Rotation} -> 0 " +
+                             $"({frame.Width}x{frame.Height})");
+                    }
+
+                    using var upright = new Webrtc.RTCVideoFrame(
+                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, frame.TimeStampNs);
+
+                    _sink.DidCaptureVideoFrame(capturer, upright);
+
+                    if (++_frameCount % 300 == 0)
+                        Echo($"camera frame {_frameCount} upright");
                 }
                 catch (Exception exception)
                 {
-                    // Said and swallowed: this runs on AVFoundation's queue, and an exception
-                    // escaping into Objective-C terminates the process.
-                    Echo($"dropping a camera frame: {exception.GetType().Name}: {exception.Message}");
-                }
-                finally
-                {
-                    // AVCaptureVideoDataOutput reuses its buffers and will stall once its pool is
-                    // exhausted, so each sample is released as soon as it has been copied out.
-                    sampleBuffer?.Dispose();
+                    // Swallowed, and said rarely: this runs on the capturer's queue, an exception
+                    // escaping into Objective-C would end the process, and a fault here would
+                    // otherwise repeat thirty times a second.
+                    if (_frameCount++ % 300 == 0)
+                        Echo("correcting a camera frame failed: " +
+                             $"{exception.GetType().Name}: {exception.Message}");
                 }
             }
         }
@@ -291,9 +108,8 @@ namespace WebRTCme
         {
             Console.WriteLine($"######## {line}");
 
-            // Flushed, because this log is used to decide whether frames are arriving. A buffered
-            // stream makes "no frames" and "no flush yet" look the same, and on 2026-09-12 that
-            // cost a measurement cycle.
+            // Flushed, because this log is read to decide whether frames are arriving and a
+            // buffered stream makes "no frames" and "not flushed yet" look the same.
             try { Console.Out.Flush(); } catch { }
         }
     }
