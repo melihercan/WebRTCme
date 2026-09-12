@@ -41,6 +41,7 @@ namespace WebRTCme
             readonly Webrtc.IRTCVideoCapturerDelegate _sink;
             long _frameCount;
             bool _saidWhatItIsDoing;
+            bool _saidWhyItFailed;
 
             internal UprightFrames(Webrtc.IRTCVideoCapturerDelegate sink) => _sink = sink;
 
@@ -106,9 +107,21 @@ namespace WebRTCme
                     // Swallowed, and said rarely: this runs on the capturer's queue, an exception
                     // escaping into Objective-C would end the process, and a fault here would
                     // otherwise repeat thirty times a second.
-                    if (_frameCount++ % 300 == 0)
+                    //
+                    // The first one in full. A message alone sent this looking in the wrong place
+                    // on 2026-09-12 - "unable to cast RTCCVPixelBuffer to RTCVideoFrameBuffer"
+                    // names the types and not the line, and there turned out to be more than one
+                    // candidate.
+                    if (!_saidWhyItFailed)
+                    {
+                        _saidWhyItFailed = true;
+                        Echo($"correcting a camera frame failed: {exception}");
+                    }
+                    else if (_frameCount++ % 300 == 0)
+                    {
                         Echo("correcting a camera frame failed: " +
                              $"{exception.GetType().Name}: {exception.Message}");
+                    }
                 }
             }
         }
