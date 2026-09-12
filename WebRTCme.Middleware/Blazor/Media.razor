@@ -1,7 +1,37 @@
-﻿@namespace WebRTCme.Middleware
+@namespace WebRTCme.Middleware
 
-<div>
-    <p4>@Label</p4>
+@*
+    One tile: a stream, who it belongs to, and what they are doing with it.
+
+    Deliberately free of any component library or icon font. This is library code - a consumer
+    picks its own UI stack, and a tile that only renders correctly when MudBlazor and a Google
+    font happen to be loaded is a tile that renders wrong in somebody else's application. The
+    states are shown with colour, a ring and words, all of which are always available.
+*@
+
+<div class="tile @(PeerSpeaking && !PeerAudioMuted ? "speaking" : null)">
+
+    <video autoplay playsinline
+           class="video @(IsLocal ? "contain" : "cover")"
+           @ref="VideoElementReference"></video>
+
+    @if (PeerVideoMuted)
+    {
+        @* Covers the last frame rather than sitting beside it. A camera that has been turned
+           off leaves its final picture on screen, which reads as a frozen call. *@
+        <div class="camera-off">Camera off</div>
+    }
+
+    <div class="caption">
+        <h4 class="label">@Label</h4>
+
+        @if (PeerAudioMuted)
+        {
+            <span class="badge muted">Muted</span>
+        }
+        else if (PeerSpeaking)
+        {
+            <span class="badge talking">Speaking</span>
+        }
+    </div>
 </div>
-
-<video autoplay @ref=VideoElementReference></video>

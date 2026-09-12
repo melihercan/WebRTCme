@@ -1,0 +1,7 @@
+.blank-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #121316;
+    color: #F2F3F5;
+}

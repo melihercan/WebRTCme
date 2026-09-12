@@ -1,0 +1,100 @@
+/*
+    Scoped to the tile, so nothing here reaches a consumer's own styles and nothing of theirs
+    reaches in. The palette is the shared one from doc/DemoAppRefactor.md, written as literals
+    rather than variables because a library cannot assume the host defines them.
+*/
+
+.tile {
+    position: relative;
+    /*
+        A fixed shape, which is the whole point: streams arrive at whatever size the camera
+        sends - 640x480 from a webcam, 480x640 from a phone held upright - and a row of tiles
+        sized to their streams is a ragged edge rather than a grid.
+    */
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #2A2D34;
+    /* Transparent rather than absent, so gaining the ring does not resize the tile. */
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    transition: outline-color 120ms ease-in-out;
+}
+
+.tile.speaking {
+    outline-color: #30A46C;
+}
+
+.video {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/*
+    Fill for a peer, fit for yourself. Cropping someone else is cosmetic; cropping your own
+    preview hides what you are actually sending, which is the one thing a self-view is for.
+*/
+.video.cover {
+    object-fit: cover;
+}
+
+.video.contain {
+    object-fit: contain;
+}
+
+.camera-off {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2A2D34;
+    color: #A0A4AB;
+    font-size: 0.875rem;
+}
+
+.caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    /* Readable over both a bright frame and a dark one, without dimming the whole picture. */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0));
+}
+
+.label {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #F2F3F5;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge {
+    margin-left: auto;
+    flex: none;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.badge.muted {
+    background: #F5A524;
+    color: #121316;
+}
+
+.badge.talking {
+    background: #30A46C;
+    color: #F2F3F5;
+}

@@ -1,12 +1,7 @@
-﻿<div>
-    <p>Make sure signalling server is online and try again</p>
-</div>
+<MudText Typo="Typo.body1" Class="mb-4">
+    Make sure the signalling server is online and try again.
+</MudText>
 
-<div class="d-flex flex-grow-1 mt-3 justify-content-center">
-    <button type="button" class="btn btn-secondary" @onclick="@OnOk">
-        OK
-    </button>
-</div>
-
-
-
+<MudStack Row="true" Justify="Justify.Center">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@OnOk">OK</MudButton>
+</MudStack>

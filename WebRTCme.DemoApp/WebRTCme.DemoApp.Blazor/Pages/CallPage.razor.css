@@ -1,0 +1,58 @@
+﻿.call {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #1C1E22;
+}
+
+/*
+    Fixed height and always present. See the note in the markup - this is the row whose collapsing
+    used to resize the video on every phrase a peer spoke.
+*/
+.status {
+    flex: none;
+    height: 28px;
+    line-height: 28px;
+    padding: 0 12px;
+    text-align: center;
+    color: #A0A4AB;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tiles {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    /*
+        One tile per row on a phone, more as there is room - the count follows the actual width
+        rather than a media query, since the same page is a phone in portrait, a phone in
+        landscape and a desktop window being dragged.
+
+        auto-FILL, not auto-fit. auto-fit collapses the tracks nothing is in, so a call with one
+        person in it stretched that single tile across the whole window - a 16:9 box as wide as
+        the browser, with the picture letterboxed inside it and the name badge stranded out at
+        the far edge. auto-fill keeps the empty tracks, so a tile is a tile whether there is one
+        of them or six.
+    */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+    align-content: start;
+    padding: 8px;
+}
+
+.tile-slot {
+    min-width: 0;
+}

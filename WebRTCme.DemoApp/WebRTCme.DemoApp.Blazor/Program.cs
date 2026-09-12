@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using System.Reflection;
 using System.Text.Json;
 using WebRTCme.DemoApp.Blazor.Extensions;
+using MudBlazor.Services;
 using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor
@@ -27,6 +28,7 @@ namespace WebRTCme.DemoApp.Blazor
             builder.Services.AddSingleton(serviceProvider => webRtcMiddleware.WebRtc);
             builder.Services.AddSingleton(serviceProvider => webRtcMiddleware);
 
+            builder.Services.AddMudServices();
             builder.Services.AddApp();
 
             var host = builder.Build();

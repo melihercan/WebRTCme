@@ -1,44 +1,61 @@
 ﻿@page "/"
 
-<h3 class="my-5 text-center">Connection Parameters</h3>
+<PageTitle>WebRTCme - connection</PageTitle>
 
-<EditForm Model="@ConnectionParametersViewModel.ConnectionParameters" 
-          OnValidSubmit="@ConnectionParametersViewModel.Join">
-    
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="0" Class="pa-6" Style="background: #1C1E22;">
 
-    <div>
-        <label class="col-6 text-right">Connection server:</label>
-        <InputSelect @bind-Value="ConnectionParametersViewModel.SelectedConnectionTypeName">
-            @foreach (var connectionType in ConnectionParametersViewModel.ConnectionTypeNames)
-            {
-                <option value="@connectionType">@connectionType</option>
-            }
-        </InputSelect>
-     </div>
+        <MudText Typo="Typo.h5" Class="mb-1">Join a room</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-6">
+            Pick a signalling server, then join the same room name from another device.
+        </MudText>
 
+        <EditForm Model="@ConnectionParametersViewModel.ConnectionParameters"
+                  OnValidSubmit="@ConnectionParametersViewModel.Join">
+            <DataAnnotationsValidator />
 
-    <div>
-        <label class="col-6 text-right">Room name:</label>
-        <InputText id="roomId" placeholder="enter room name" 
-        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Room" />
-    </div>
+            <MudSelect T="string" Label="Connection server" Variant="Variant.Outlined"
+                       Value="@ConnectionParametersViewModel.SelectedConnectionTypeName"
+                       ValueChanged="@(value => ConnectionParametersViewModel.SelectedConnectionTypeName = value)"
+                       Class="mb-4">
+                @foreach (var connectionType in ConnectionParametersViewModel.ConnectionTypeNames)
+                {
+                    <MudSelectItem T="string" Value="@connectionType">@connectionType</MudSelectItem>
+                }
+            </MudSelect>
 
-    <div>
-        <label class="col-6 text-right">User name:</label>
-        <InputText id="userId" placeholder="enter user name" 
-        @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Name" />
-    </div>
+            <MudTextField Label="Room name" Variant="Variant.Outlined"
+                          Placeholder="enter room name"
+                          For="@(() => ConnectionParametersViewModel.ConnectionParameters.Room)"
+                          @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Room"
+                          Class="mb-4" />
 
-    <div class="mt-5 text-center">
-        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = true)"> 
-            Join call
-        </button>
-        <button class="btn btn-primary" type="submit" @onclick="@( () => ConnectionParametersViewModel.IsCall = false)"> 
-            Join chat
-        </button>
-    </div>
-</EditForm>
+            <MudTextField Label="User name" Variant="Variant.Outlined"
+                          Placeholder="enter user name"
+                          For="@(() => ConnectionParametersViewModel.ConnectionParameters.Name)"
+                          @bind-Value="ConnectionParametersViewModel.ConnectionParameters.Name"
+                          Class="mb-6" />
 
+            @*
+                Both are submit buttons and the flag decides which one was pressed, exactly as
+                before. IsCall is set on click rather than in the submit handler because the
+                handler is shared and has no way to tell them apart.
+            *@
+            <MudStack Row="true" Spacing="3" Justify="Justify.Center">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                           Color="Color.Primary" Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.Videocam"
+                           OnClick="@(() => ConnectionParametersViewModel.IsCall = true)">
+                    Join call
+                </MudButton>
 
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined"
+                           Color="Color.Primary" Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.Chat"
+                           OnClick="@(() => ConnectionParametersViewModel.IsCall = false)">
+                    Join chat
+                </MudButton>
+            </MudStack>
+        </EditForm>
+    </MudPaper>
+</MudContainer>

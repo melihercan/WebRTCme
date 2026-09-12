@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.9" PrivateAssets="all" />
+    <PackageReference Include="MudBlazor" Version="9.9.0" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
     <PackageReference Include="Blazored.Modal" Version="7.2.0" />
   </ItemGroup>

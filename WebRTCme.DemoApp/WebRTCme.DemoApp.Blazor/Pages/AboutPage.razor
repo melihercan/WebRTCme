@@ -1,10 +1,19 @@
 ﻿@page "/AboutPage"
 
-<div class="m-5" />
+<PageTitle>WebRTCme - about</PageTitle>
 
-<h1 class="text-center">WebRTCme Demo app</h1>
-<img class="mx-auto d-block img-fluid" src="_content/WebRTCme.DemoApp.Blazor/me.png" />
-<h5 class="mt-2 text-center">© melihercan@@2021</h5>
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="0" Class="pa-8 d-flex flex-column align-center" Style="background: #1C1E22;">
+        <MudText Typo="Typo.h4" Align="Align.Center">WebRTCme</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mud-text-secondary mb-6">
+            Demo application
+        </MudText>
 
+        <MudImage Src="me.png" Fluid="true" Alt="WebRTCme"
+                  Class="rounded-lg" Style="max-width: 240px;" />
 
-
+        <MudText Typo="Typo.caption" Class="mud-text-secondary mt-6">
+            © melihercan
+        </MudText>
+    </MudPaper>
+</MudContainer>

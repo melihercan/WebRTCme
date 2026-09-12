@@ -1,0 +1,49 @@
+/*
+    The popup styled itself with Bootstrap class names - btn, btn-primary, btn-secondary - which
+    it never shipped and never declared. That worked only because the demo application happened
+    to link Bootstrap; any consumer that did not got two unstyled browser buttons, and the demo
+    got them too the moment Bootstrap was retired in favour of MudBlazor.
+
+    So the library dresses its own buttons now. Scoped, so it cannot leak into a consumer's own
+    .btn, and neutral enough to sit inside somebody else's design without fighting it. Colours
+    come from the host where a host says anything - the dialog frame itself belongs to
+    BlazorDialog and is the application's to theme.
+*/
+
+h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+p {
+    margin: 0;
+}
+
+.btn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn + .btn {
+    margin-left: 8px;
+}
+
+.btn-primary {
+    background: #4C8DFF;
+    color: #121316;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: currentColor;
+    box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}

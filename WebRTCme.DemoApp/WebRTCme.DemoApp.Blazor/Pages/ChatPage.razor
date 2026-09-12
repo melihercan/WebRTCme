@@ -3,112 +3,69 @@
 @using WebRTCme.Middleware
 @layout BlankLayout
 
-<style>
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 4rem; 
-  }
+<PageTitle>WebRTCme - chat</PageTitle>
 
-.drag-drop-zone {
-    border: 3px dashed #e68710;
-    padding: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #eee;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
-    color: #aeaeae;
-    font-size: 1.5rem;
-    cursor: pointer;
-    margin: 1.5rem 0 2rem 0;
-    position: relative;
-}
+<div class="chat">
 
-    .drag-drop-zone:hover {
-        background-color: #f5f5f5;
-    }
+    <div class="drop">
+        @*
+            The file input covers the whole zone at zero opacity, so the panel below is what the
+            pointer actually hits. Keeping it a plain InputFile rather than MudFileUpload leaves
+            the existing multi-file handler untouched.
+        *@
+        <InputFile OnChange="@LoadFilesAsync" multiple class="drop-input" />
+        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Color="Color.Default" />
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">@status</MudText>
+    </div>
 
-    .drag-drop-zone input[type=file] {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-</style>
-
-<h1 class="text-center">Chat</h1>
-
-<div class="drag-drop-zone mx-4">
-    <InputFile OnChange="@LoadFilesAsync" multiple/>
-    @status
-</div>
-
-<div class="list-group mx-4">
-    @foreach (var dataParameters in ChatViewModel.DataParametersList)
-    {
-        if (dataParameters.Object.GetType() == typeof(Message))
+    <div class="messages">
+        @foreach (var dataParameters in ChatViewModel.DataParametersList)
         {
-            var message = dataParameters.Object as Message;
-            if (dataParameters.From == DataFromType.System)
+            @if (dataParameters.Object is Message message)
             {
-                <div class="row my-1">
-                    <div class="offset-3 col-6">
-                        <div class="row justify-content-center">
-                            <div class="card text-warning" style="background:#000080">
-                                <div class="card-body px-2 py-0">
-                                    <p class="card-text my-0">@message.Text</p>
-                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (dataParameters.From == DataFromType.Incoming)
-            {
-                <div class="row my-1">
-                    <div class="col-9">
-                        <div class="row justify-content-start">
-                            <div class="card" style=" background:#e6e6f0">
-                                <div class="card-body px-2 py-0">
-                                    <p class="my-0 font-italic small">@dataParameters.PeerUserName</p>
-                                    <p class="card-text my-0">@message.Text</p>
-                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (dataParameters.From == DataFromType.Outgoing)
-            {
-                <div class="row my-1">
-                    <div class="offset-3 col-9">
-                        <div class="row justify-content-end">
-                            <div class="card" style="background:#d3d4bc">
-                                <div class="card-body px-2 py-0">
-                                    <p class="card-text my-0" >@message.Text</p>
-                                    <p class="my-0 text-right font-italic small">@dataParameters.Time</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="row @RowClass(dataParameters.From)">
+                    <MudPaper Elevation="0" Class="@BubbleClass(dataParameters.From)">
+                        @if (dataParameters.From == DataFromType.Incoming)
+                        {
+                            <div class="who">@dataParameters.PeerUserName</div>
+                        }
+                        <div class="text">@message.Text</div>
+                        <div class="when">@dataParameters.Time</div>
+                    </MudPaper>
                 </div>
             }
         }
-    }
+    </div>
+
+    <div class="composer">
+        <EditForm Model="@ChatViewModel" OnValidSubmit="@ChatViewModel.SendMessageAsync">
+            <DataAnnotationsValidator />
+            <div class="composer-row">
+                <MudTextField @bind-Value="ChatViewModel.OutgoingText"
+                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Placeholder="Write a message" Immediate="true"
+                              Class="composer-field" />
+                <MudIconButton ButtonType="ButtonType.Submit"
+                               Icon="@Icons.Material.Filled.Send"
+                               Color="Color.Primary" Variant="Variant.Filled"
+                               aria-label="Send" />
+            </div>
+        </EditForm>
+    </div>
 </div>
 
-<div class="footer bg-primary px-4 pt-3">
-    <EditForm Model="@ChatViewModel" class="d-flex" OnValidSubmit="@ChatViewModel.SendMessageAsync">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <InputText @bind-Value="ChatViewModel.OutgoingText" class="flex-grow-1 w-100 mr-3" />
-        <button type="submit" class="ml-auto">Send</button>
-    </EditForm>
-</div>
+@code {
+    static string RowClass(DataFromType from) => from switch
+    {
+        DataFromType.Outgoing => "row-outgoing",
+        DataFromType.System => "row-system",
+        _ => "row-incoming",
+    };
 
+    static string BubbleClass(DataFromType from) => from switch
+    {
+        DataFromType.Outgoing => "bubble bubble-outgoing",
+        DataFromType.System => "bubble bubble-system",
+        _ => "bubble bubble-incoming",
+    };
+}

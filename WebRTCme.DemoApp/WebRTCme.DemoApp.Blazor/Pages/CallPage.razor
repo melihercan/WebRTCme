@@ -1,45 +1,92 @@
-﻿@page "/CallPage"
+@page "/CallPage"
 @page "/CallPage/{ConnectionParametersJson}"
 @layout BlankLayout
 
-<h1 class="text-center">Call</h1>
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnShareScreenAsync">
-    @CallViewModel.ShareScreenButtonText
-</button>
+<PageTitle>WebRTCme - call</PageTitle>
 
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnRecordAsync">
-    @CallViewModel.RecordButtonText
-</button>
+@*
+    Three rows, and the middle one is load-bearing in a way that is not obvious: it has a fixed
+    height and is always rendered. It used to disappear when there was nothing to report, which
+    was fine while it only reported mutes. Voice activity made it toggle with every phrase, and
+    every toggle resized the video below it. A reserved line costs nothing and keeps the picture
+    still.
+*@
+<div class="call">
 
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleMicrophoneAsync">
-    @CallViewModel.MicrophoneButtonText
-</button>
+    <div class="controls">
+        <MudTooltip Text="@CallViewModel.MicrophoneButtonText">
+            <MudIconButton Icon="@(CallViewModel.IsMicrophoneMuted ? Icons.Material.Filled.MicOff : Icons.Material.Filled.Mic)"
+                           Color="@(CallViewModel.IsMicrophoneMuted ? Color.Error : Color.Default)"
+                           Variant="Variant.Filled"
+                           aria-label="@CallViewModel.MicrophoneButtonText"
+                           OnClick="@CallViewModel.OnToggleMicrophoneAsync" />
+        </MudTooltip>
 
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleCameraAsync">
-    @CallViewModel.CameraButtonText
-</button>
+        <MudTooltip Text="@CallViewModel.CameraButtonText">
+            <MudIconButton Icon="@(CallViewModel.IsCameraMuted ? Icons.Material.Filled.VideocamOff : Icons.Material.Filled.Videocam)"
+                           Color="@(CallViewModel.IsCameraMuted ? Color.Error : Color.Default)"
+                           Variant="Variant.Filled"
+                           aria-label="@CallViewModel.CameraButtonText"
+                           OnClick="@CallViewModel.OnToggleCameraAsync" />
+        </MudTooltip>
 
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnRestartIceAsync">
-    Restart ICE
-</button>
+        <MudTooltip Text="@CallViewModel.ShareScreenButtonText">
+            <MudIconButton Icon="@(CallViewModel.IsSharingScreen ? Icons.Material.Filled.StopScreenShare : Icons.Material.Filled.ScreenShare)"
+                           Color="@(CallViewModel.IsSharingScreen ? Color.Primary : Color.Default)"
+                           Variant="Variant.Filled"
+                           aria-label="@CallViewModel.ShareScreenButtonText"
+                           OnClick="@CallViewModel.OnShareScreenAsync" />
+        </MudTooltip>
 
-<button type="button" class="m-2 btn btn-secondary" @onclick="@CallViewModel.OnToggleSpatialLayerAsync">
-    @CallViewModel.SpatialLayerButtonText
-</button>
+        <MudTooltip Text="@CallViewModel.RecordButtonText">
+            <MudIconButton Icon="@(CallViewModel.IsRecording ? Icons.Material.Filled.StopCircle : Icons.Material.Filled.FiberManualRecord)"
+                           Color="@(CallViewModel.IsRecording ? Color.Error : Color.Default)"
+                           Variant="Variant.Filled"
+                           aria-label="@CallViewModel.RecordButtonText"
+                           OnClick="@CallViewModel.OnRecordAsync" />
+        </MudTooltip>
 
-@* Always rendered, never conditional. Removing the element when there is nothing to say moved
-   everything below it, and voice activity made that happen with every phrase rather than only
-   on a mute. A reserved line costs nothing and keeps the video still. *@
-<p class="mx-4 text-muted" style="min-height: 1.5rem;">@CallViewModel.PeerMediaStatus</p>
+        <MudTooltip Text="Leave call">
+            <MudIconButton Icon="@Icons.Material.Filled.CallEnd"
+                           Color="Color.Error" Variant="Variant.Filled"
+                           aria-label="Leave call"
+                           OnClick="@LeaveCall" />
+        </MudTooltip>
 
-<div class="mx-4 d-flex flex-wrap">
-    @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)
-    {
-        <div class="p-2">
-            <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label" Hangup="@mediaParameters.Hangup"
-                   VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"
-                   CameraType="@mediaParameters.CameraType"  ShowContols="@mediaParameters.ShowControls" />
-        </div>
-    }
+        @*
+            Restart ICE and the layer switch are here rather than on the bar because they exist to
+            exercise this library, not to take part in a call. They keep their words: an icon for
+            "restart ICE" would be a puzzle rather than a shortcut.
+        *@
+        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Variant="Variant.Filled"
+                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight"
+                 aria-label="Debugging actions">
+            <MudMenuItem Icon="@Icons.Material.Filled.SyncProblem"
+                         OnClick="@CallViewModel.OnRestartIceAsync">
+                Restart ICE
+            </MudMenuItem>
+            <MudMenuItem Icon="@Icons.Material.Filled.Layers"
+                         OnClick="@CallViewModel.OnToggleSpatialLayerAsync">
+                @CallViewModel.SpatialLayerButtonText
+            </MudMenuItem>
+        </MudMenu>
+    </div>
+
+    <div class="status">@CallViewModel.PeerMediaStatus</div>
+
+    <div class="tiles">
+        @foreach (var mediaParameters in CallViewModel.MediaStreamParametersList)
+        {
+            <div class="tile-slot">
+                <Media Stream="@mediaParameters.Stream" Label="@mediaParameters.Label"
+                       Hangup="@mediaParameters.Hangup"
+                       VideoMuted="@mediaParameters.VideoMuted" AudioMuted="@mediaParameters.AudioMuted"
+                       CameraType="@mediaParameters.CameraType" ShowContols="@mediaParameters.ShowControls"
+                       IsLocal="@mediaParameters.IsLocal"
+                       PeerAudioMuted="@mediaParameters.PeerAudioMuted"
+                       PeerVideoMuted="@mediaParameters.PeerVideoMuted"
+                       PeerSpeaking="@mediaParameters.PeerSpeaking" />
+            </div>
+        }
+    </div>
 </div>
-

@@ -1,13 +1,9 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<style>
-    body {
-        height: 100vh;
-    }
-
-    #app {
-        height: 100%;
-    }
-</style>
-
-@Body
+@*
+    No chrome: the call and chat pages want the whole viewport. They still need the theme's
+    surface colour, which MudLayout would otherwise be providing.
+*@
+<div class="blank-layout">
+    @Body
+</div>

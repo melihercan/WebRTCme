@@ -328,7 +328,8 @@ namespace WebRTCme.Middleware
                 VideoMuted = false,
                 AudioMuted = true,  // prevents local echo
                 CameraType = CameraType.Default,
-                ShowControls = false
+                ShowControls = false,
+                IsLocal = true
             });
 
             reRender?.Invoke();
@@ -568,7 +569,8 @@ namespace WebRTCme.Middleware
                     VideoMuted = false,
                     AudioMuted = true,
                     CameraType = CameraType.Default,
-                    ShowControls = false
+                    ShowControls = false,
+                    IsLocal = true
                 });
 
                 _runOnUiThread.Invoke(() => _reRender?.Invoke());
@@ -1020,13 +1022,59 @@ namespace WebRTCme.Middleware
                 })
                 .ToArray();
 
-            _runOnUiThread.Invoke(() => PeerMediaStatus = string.Join("   ", reports));
+            _runOnUiThread.Invoke(() =>
+            {
+                PeerMediaStatus = string.Join("   ", reports);
+                ApplyPeerMediaToTiles();
+            });
             _reRender?.Invoke();
+        }
+
+        /// <summary>
+        /// Copies each peer's current state onto its tile.
+        /// </summary>
+        /// <remarks>
+        /// <para>Set on the existing <see cref="MediaStreamParameters"/> rather than handed to
+        /// <see cref="IMediaStreamManager.Update"/>, which would be the obvious call and is the
+        /// wrong one: Update removes the tile and inserts it again, so it rebuilds the platform
+        /// video renderer. Speaking toggles with every phrase, so that would rebuild the video
+        /// several times a sentence. These properties raise <c>PropertyChanged</c> instead and a
+        /// tile follows them in place - see the note on <see cref="MediaStreamParameters"/>.</para>
+        /// <para>Matched by label, because that is the only thing a tile and a peer have in common
+        /// here: tiles are keyed by name throughout this class and the peer id never reaches them.
+        /// A peer whose name is not yet known is listed under its id and matches nothing, which is
+        /// the right outcome - there is no tile for it yet either.</para>
+        /// </remarks>
+        void ApplyPeerMediaToTiles()
+        {
+            foreach (var tile in _mediaStreamManager.MediaStreamParametersList)
+            {
+                if (tile.IsLocal)
+                    continue;
+
+                var known = _peerMedia.Values.FirstOrDefault(entry => entry.Name == tile.Label);
+
+                // A peer with nothing recorded is a peer doing nothing worth reporting, so the
+                // tile is cleared rather than left showing whatever it last said.
+                tile.PeerAudioMuted = known.Media?.AudioMuted ?? false;
+                tile.PeerVideoMuted = known.Media?.VideoMuted ?? false;
+                tile.PeerSpeaking = known.Media?.Speaking ?? false;
+            }
         }
 
         #endregion
 
         private bool _isSharingScreen;
+
+        /// <summary>
+        /// Whether a screen is being shared right now.
+        /// </summary>
+        /// <remarks>
+        /// Public because a view with icon buttons needs the state, not the caption: matching on
+        /// <see cref="ShareScreenButtonText"/> to decide which glyph to draw would make the
+        /// English wording load-bearing.
+        /// </remarks>
+        public bool IsSharingScreen => _isSharingScreen;
         private string _shareScreenButtonText = "Start sharing screen";
         public string ShareScreenButtonText
         {
@@ -1083,6 +1131,7 @@ namespace WebRTCme.Middleware
                     _isSharingScreen = true;
                 }
 
+                _runOnUiThread.Invoke(() => OnPropertyChanged(nameof(IsSharingScreen)));
                 _runOnUiThread.Invoke(() => ShareScreenButtonText = _isSharingScreen
                     ? "Stop sharing screen"
                     : "Start sharing screen");
@@ -1111,6 +1160,12 @@ namespace WebRTCme.Middleware
         });
 
         bool _isRecording;
+
+        /// <summary>
+        /// Whether a recording is running right now. Public for the same reason as
+        /// <see cref="IsSharingScreen"/>.
+        /// </summary>
+        public bool IsRecording => _isRecording;
         string _recordButtonText = "Start recording";
         public string RecordButtonText
         {
@@ -1144,6 +1199,7 @@ namespace WebRTCme.Middleware
                     mediaRecorderOptions);
             }
             _isRecording = !_isRecording;
+            OnPropertyChanged(nameof(IsRecording));
         }
     }
 }

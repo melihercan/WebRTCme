@@ -1,15 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using WebRTCme;
 using WebRTCme.Middleware;
 
 namespace WebRTCme.DemoApp.Blazor.Pages
@@ -18,6 +10,9 @@ namespace WebRTCme.DemoApp.Blazor.Pages
     {
         [Inject]
         CallViewModel CallViewModel { get; set; }
+
+        [Inject]
+        NavigationManager Navigation { get; set; }
 
         [Parameter]
         public string ConnectionParametersJson { get; set; }
@@ -34,15 +29,20 @@ namespace WebRTCme.DemoApp.Blazor.Pages
             InvokeAsync(StateHasChanged);
         }
 
+        /// <summary>
+        /// Leaves the call.
+        /// </summary>
+        /// <remarks>
+        /// Navigating away is the whole of it: the router disposes this page on the way out and
+        /// <see cref="Dispose"/> is what tears the call down. Doing it in that order rather than
+        /// tearing down first means there is exactly one teardown path, the one that already
+        /// worked when people left with the browser's back button.
+        /// </remarks>
+        void LeaveCall() => Navigation.NavigateTo("/");
+
         public void Dispose()
         {
             Task.Run(async () => await CallViewModel.OnPageDisappearingAsync());
-
-
-            //// TODO: How to call async in Dispose??? Currently fire and forget!!!
-            //Task.Run(async () => await SignallingServerService.DisposeAsync());
-            //_webRtcMiddleware.Dispose();
         }
     }
 }
-

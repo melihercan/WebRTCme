@@ -42,6 +42,13 @@ namespace WebRTCme.Middleware
             _connection = _connectionFactory.SelectConnection(ConnectionType.MediaSoup);
             ConnectionTypeNames = Enum.GetNames(typeof(ConnectionType));
 
+            // Start on the first one rather than on nothing. This was null until something was
+            // picked, and JoinCall/JoinChat match it against each name in turn - so choosing
+            // nothing left ConnectionParameters.ConnectionType at its default. It happened to be
+            // the right answer, which is why it was never noticed: the old <InputSelect> showed
+            // the first option as though it were selected while the bound value was still null.
+            SelectedConnectionTypeName = ConnectionTypeNames.FirstOrDefault();
+
             // Default values for debugging. The name identifies the peer in the signalling
             // server's log, so every platform needs its own -- Windows reporting itself as
             // "Blazor" made a native peer indistinguishable from a browser one.

@@ -1,13 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using WebRTCme;
 
 namespace WebRTCme.Middleware
@@ -35,6 +29,30 @@ namespace WebRTCme.Middleware
         [Parameter]
         public bool ShowContols { get; set; } = false;
 
+        /// <summary>
+        /// Whether this tile is the local preview rather than a peer.
+        /// </summary>
+        [Parameter]
+        public bool IsLocal { get; set; } = false;
+
+        /// <summary>
+        /// Whether the peer has muted its microphone.
+        /// </summary>
+        [Parameter]
+        public bool PeerAudioMuted { get; set; } = false;
+
+        /// <summary>
+        /// Whether the peer has turned its camera off.
+        /// </summary>
+        [Parameter]
+        public bool PeerVideoMuted { get; set; } = false;
+
+        /// <summary>
+        /// Whether the peer is talking right now.
+        /// </summary>
+        [Parameter]
+        public bool PeerSpeaking { get; set; } = false;
+
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
 
@@ -43,12 +61,33 @@ namespace WebRTCme.Middleware
 
         private ElementReference VideoElementReference { get; set; }
 
+        // What the video element was last pointed at, so it is only pointed again when that
+        // actually changed.
+        private IMediaStream _attachedStream;
+        private bool _attachedMuted;
+
+        /// <summary>
+        /// Attaches the stream to the video element, once per stream.
+        /// </summary>
+        /// <remarks>
+        /// This used to assign <c>srcObject</c> on every render, which was harmless while the
+        /// page only re-rendered when a peer joined or left. It re-renders far more often now -
+        /// the speaking indicator changes with every phrase - and each of those renders was a
+        /// JS interop call to hand the element the stream it already had.
+        /// </remarks>
         protected override void OnAfterRender(bool firstRender)
         {
             base.OnAfterRender(firstRender);
 
-            if (Stream is not null)// && VideoElementReference.Id is not null)
-                BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, VideoMuted);
+            if (Stream is null)
+                return;
+
+            if (ReferenceEquals(_attachedStream, Stream) && _attachedMuted == VideoMuted)
+                return;
+
+            BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, VideoMuted);
+            _attachedStream = Stream;
+            _attachedMuted = VideoMuted;
         }
 
         public void Dispose()

@@ -1,4 +1,12 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+@using WebRTCme.DemoApp.Blazor.Theme
+
+@* Dark, always. See the note on DemoTheme. *@
+<MudThemeProvider Theme="@DemoTheme.Instance" IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -6,10 +14,12 @@
     <NotFound>
         <PageTitle>Not found</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <MudAlert Severity="Severity.Warning" Class="ma-8">
+                There is nothing at this address.
+            </MudAlert>
         </LayoutView>
     </NotFound>
 </Router>
 
-<!-- This is a central place to keep popup list from Middleware.Blazor-->
-<GenericPopup/>
+@* A central place to keep the popup list from Middleware.Blazor. *@
+<GenericPopup />
