@@ -85,6 +85,7 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.11" />
 		<PackageReference Include="Xamarinme.Configuration" Version="1.0.2" />
 	</ItemGroup>
     

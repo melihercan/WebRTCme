@@ -1,23 +1,50 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:middleware="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware"
-             Title="Connection Parameters"
+             xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+             Title="Connection"
              x:Class="WebRTCme.DemoApp.Maui.Views.ConnectionParametersPage">
-    <StackLayout VerticalOptions="Center" Margin="40,0" Spacing="20">
-        <Picker Title="select connection server" ItemsSource="{Binding ConnectionTypeNames}" 
-                SelectedItem="{Binding SelectedConnectionTypeName}"/>
-        <Entry Placeholder="enter room name" Text="{Binding ConnectionParameters.Room}"/>
-        <Entry Placeholder="enter user name" Text="{Binding ConnectionParameters.Name}"/>
-        <StackLayout Orientation="Horizontal" Margin="40,20">
-            <Button Text="Join call" 
-                    Command="{Binding JoinCallCommand}" HorizontalOptions="CenterAndExpand"/>
-            <Button Text="Join chat" 
-                    Command="{Binding JoinChatCommand}" HorizontalOptions="CenterAndExpand"/>
-        </StackLayout>
 
-        <!--<middleware:Media HorizontalOptions="Fill"
-                          HeightRequest="100"
-                          BackgroundColor="Red" />-->
-    </StackLayout>
+    <ScrollView>
+        <Border Margin="16"
+                Padding="24"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                MaximumWidthRequest="520"
+                BackgroundColor="{StaticResource SurfaceRaised}"
+                StrokeThickness="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="16">
+
+                <Label Text="Join a room" FontSize="22" FontAttributes="Bold" />
+                <Label Style="{StaticResource SecondaryLabel}"
+                       Text="Pick a signalling server, then join the same room name from another device." />
+
+                <!-- The chrome is an implicit style in Theme.xaml, so these carry only a hint. -->
+                <inputLayout:SfTextInputLayout Hint="Connection server">
+                    <Picker ItemsSource="{Binding ConnectionTypeNames}"
+                            SelectedItem="{Binding SelectedConnectionTypeName}"
+                            TextColor="{StaticResource TextPrimary}" />
+                </inputLayout:SfTextInputLayout>
+
+                <inputLayout:SfTextInputLayout Hint="Room name">
+                    <Entry Text="{Binding ConnectionParameters.Room}" />
+                </inputLayout:SfTextInputLayout>
+
+                <inputLayout:SfTextInputLayout Hint="User name">
+                    <Entry Text="{Binding ConnectionParameters.Name}" />
+                </inputLayout:SfTextInputLayout>
+
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" Margin="0,16,0,0">
+                    <Button Text="Join call" Command="{Binding JoinCallCommand}" />
+                    <Button Text="Join chat" Command="{Binding JoinChatCommand}"
+                            Style="{StaticResource OutlineButton}" />
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+    </ScrollView>
 </ContentPage>

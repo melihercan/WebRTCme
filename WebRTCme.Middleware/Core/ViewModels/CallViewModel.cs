@@ -1159,6 +1159,20 @@ namespace WebRTCme.Middleware
             await OnShareScreenAsync();
         });
 
+        /// <summary>
+        /// Starts or stops recording.
+        /// </summary>
+        /// <remarks>
+        /// Added for MAUI, which had no record button at all although this view model, the
+        /// recorder and a platform file-stream factory were all in place. Blazor called
+        /// <see cref="OnRecordAsync"/> directly; every other control on the MAUI page is bound to
+        /// an ICommand, so this is the shape that page needs.
+        /// </remarks>
+        public ICommand RecordCommand => new AsyncCommand(async () =>
+        {
+            await OnRecordAsync();
+        });
+
         bool _isRecording;
 
         /// <summary>

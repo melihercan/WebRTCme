@@ -1,16 +1,25 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<StackLayout xmlns="http://schemas.microsoft.com/dotnet/2021/maui" 
+<?xml version="1.0" encoding="UTF-8"?>
+<StackLayout xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WebRTCme.DemoApp.Maui.Views.SystemChatView">
 
-    <Grid ColumnDefinitions="40,*,40">
-        <Grid Grid.Column="1" HorizontalOptions="Center" Margin="20,5" VerticalOptions="FillAndExpand">
-            <BoxView CornerRadius="10" BackgroundColor="Navy"  HorizontalOptions="FillAndExpand"/>
-            <StackLayout VerticalOptions="FillAndExpand" Padding="10" Spacing="0">
-                <Label Margin="0,5,0,0" Text="{Binding Object.Text}" TextColor="Yellow"/>
-                <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="Micro" FontAttributes="Italic" 
-                       TextColor="Yellow"/>
-            </StackLayout>
-        </Grid>
+    <Grid ColumnDefinitions="32,*,32">
+        <Border Grid.Column="1" HorizontalOptions="Center" Margin="12,4"
+                Padding="12,8"
+                BackgroundColor="Transparent"
+                Stroke="{StaticResource SurfaceSunken}"
+                StrokeThickness="1">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding Object.Text}" FontAttributes="Italic"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Label Text="{Binding Time}" HorizontalOptions="End" FontSize="10"
+                       TextColor="{StaticResource TextSecondary}" />
+            </VerticalStackLayout>
+        </Border>
     </Grid>
 </StackLayout>

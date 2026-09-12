@@ -1,7 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:WebRTCme.DemoApp.Maui.Views"
+             xmlns:local="clr-namespace:WebRTCme.DemoApp.Maui"
+             Title="Chat"
              x:Class="WebRTCme.DemoApp.Maui.Views.ChatPage">
 
     <ContentPage.Resources>
@@ -11,14 +13,28 @@
     </ContentPage.Resources>
 
     <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="*,Auto">
-        <CollectionView x:Name="MessagesCollectionView" 
-			            ItemTemplate="{StaticResource ChatDataTemplateSelector}" 
-			            ItemsSource="{Binding DataParametersList}" />
 
-        <StackLayout Orientation="Horizontal" Grid.Row="1" Padding="10" BackgroundColor="#EFEFEF">
-            <Entry HorizontalOptions="FillAndExpand" HeightRequest="40" Placeholder="Message" 
-				Text="{Binding OutgoingText}" TextColor="Black"/>
-            <Button Text="Send" Command="{Binding SendMessageCommand}"/>
-        </StackLayout>
+        <CollectionView x:Name="MessagesCollectionView"
+                        ItemTemplate="{StaticResource ChatDataTemplateSelector}"
+                        ItemsSource="{Binding DataParametersList}" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="12"
+              BackgroundColor="{StaticResource SurfaceRaised}">
+
+            <Border Grid.Column="0" BackgroundColor="{StaticResource SurfaceSunken}"
+                    StrokeThickness="0" Padding="12,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+                <Entry Placeholder="Write a message" HeightRequest="44"
+                       Text="{Binding OutgoingText}" />
+            </Border>
+
+            <Button Grid.Column="1"
+                    Style="{StaticResource IconButtonActive}"
+                    Text="{x:Static local:Icons.Send}"
+                    Command="{Binding SendMessageCommand}"
+                    SemanticProperties.Description="Send" />
+        </Grid>
     </Grid>
 </ContentPage>

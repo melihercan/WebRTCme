@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    The system chrome, which MAUI styles from here rather than from the app theme. Left at the
+    stock .NET purple, the status bar stayed #512BD4 above a page that is #121316 - the one part
+    of the screen the dark palette could not reach from XAML.
+-->
 <resources>
-    <color name="colorPrimary">#512BD4</color>
-    <color name="colorPrimaryDark">#2B0B98</color>
-    <color name="colorAccent">#2B0B98</color>
+    <color name="colorPrimary">#1C1E22</color>
+    <color name="colorPrimaryDark">#121316</color>
+    <color name="colorAccent">#4C8DFF</color>
 </resources>

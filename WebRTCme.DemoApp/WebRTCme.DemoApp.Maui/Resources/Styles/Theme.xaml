@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    The palette and metrics from doc/DemoAppRefactor.md - the same names and the same values the
+    Blazor demo's MudBlazor theme uses. They are written twice because the two stacks have no way
+    to share a file, which is exactly why the values live in the document rather than only here.
+
+    Dark only, and there is no light palette to switch to. Video reads better against a dark
+    surface, every product in this category has settled there, and a theme switcher is a control
+    the demo would have to explain without teaching anybody anything about WebRTC.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:local="clr-namespace:WebRTCme.DemoApp.Maui"
+                    xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit">
+
+    <Color x:Key="Surface">#121316</Color>
+    <Color x:Key="SurfaceRaised">#1C1E22</Color>
+    <Color x:Key="SurfaceSunken">#2A2D34</Color>
+    <Color x:Key="Primary">#4C8DFF</Color>
+    <Color x:Key="Danger">#E5484D</Color>
+    <Color x:Key="Speaking">#30A46C</Color>
+    <Color x:Key="Warning">#F5A524</Color>
+    <Color x:Key="TextPrimary">#F2F3F5</Color>
+    <Color x:Key="TextSecondary">#A0A4AB</Color>
+    <Color x:Key="TextDisabled">#6E7279</Color>
+
+    <!-- The 4px scale. Nothing between the steps. -->
+    <x:Double x:Key="Space1">4</x:Double>
+    <x:Double x:Key="Space2">8</x:Double>
+    <x:Double x:Key="Space3">12</x:Double>
+    <x:Double x:Key="Space4">16</x:Double>
+    <x:Double x:Key="Space6">24</x:Double>
+    <x:Double x:Key="Space8">32</x:Double>
+
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <Style x:Key="SecondaryLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!--
+        The field chrome, in one place.
+
+        HintLabelStyle is what colours the hint, and setting HintTextColor instead was the bug:
+        against the dark card "Connection server", "Room name" and "User name" were three black
+        labels on a black panel while the values beside them were white. HintTextColor is not
+        even settable - it is documented but has no accessor, so it compiles as an attribute on an
+        element and fails as a Style setter, which is how it went unnoticed the first time.
+    -->
+    <Style TargetType="inputLayout:SfTextInputLayout">
+        <Setter Property="ContainerType" Value="Outlined" />
+        <Setter Property="ContainerBackground" Value="Transparent" />
+        <Setter Property="Stroke" Value="{StaticResource SurfaceSunken}" />
+        <Setter Property="CurrentActiveColor" Value="{StaticResource Primary}" />
+        <Setter Property="HintLabelStyle">
+            <Setter.Value>
+                <inputLayout:LabelStyle TextColor="{StaticResource TextSecondary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextDisabled}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
+    <!--
+        White on the blue, not the dark surface colour. Dark-on-blue passes a contrast check and
+        still reads as black text on a coloured button - muddy at button size and bold weight -
+        and the Blazor demo puts white there, so MAUI was the one out of step.
+    -->
+    <Style TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="Padding" Value="20,0" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+                            <Setter Property="TextColor" Value="{StaticResource TextDisabled}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!--
+        Standalone rather than BasedOn the implicit Button style. MAUI has no
+        BasedOn="{StaticResource {x:Type Button}}" - that is WPF - and an implicit style has no
+        key to reach it by, so the shared setters are repeated here.
+    -->
+    <Style x:Key="OutlineButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="Padding" Value="20,0" />
+    </Style>
+
+    <!--
+        A call control. 48x48 clears both minimum touch targets - 44 on iOS, 48 on Android - and
+        six of them with 8 between fit across the narrowest phone without scrolling, which is the
+        measurement that let the old horizontally scrolling row of text buttons go.
+    -->
+    <Style x:Key="IconButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="MaterialIcons" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceSunken}" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- The state worth noticing is the one where you are not sending anything. -->
+    <Style x:Key="IconButtonOff" TargetType="Button" BasedOn="{StaticResource IconButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <Style x:Key="IconButtonActive" TargetType="Button" BasedOn="{StaticResource IconButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+</ResourceDictionary>

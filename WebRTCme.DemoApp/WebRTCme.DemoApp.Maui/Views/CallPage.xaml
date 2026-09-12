@@ -2,79 +2,216 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:middleware="clr-namespace:WebRTCme.Middleware;assembly=WebRTCme.Middleware"
+             xmlns:local="clr-namespace:WebRTCme.DemoApp.Maui"
+             xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
+             Shell.NavBarIsVisible="False"
              x:Class="WebRTCme.DemoApp.Maui.Views.CallPage">
     <ContentPage.Content>
 
         <!--
-            The call controls are their own row rather than an overlay, so the video below keeps
-            all the space it had.
-
-            The status row has a FIXED height, and that matters more than it looks. It used to be
-            Auto with the label collapsing when there was nothing to say, which was fine while the
-            only thing it reported was a mute - rare, and a one-off shift when it happened. Voice
-            activity made it toggle with every phrase, and each toggle resized the video below it:
-            measured at 1080x860 while a peer was speaking and 1080x897 a second later, back and
-            forth for the whole call. Reserving the row costs one line of blank space and stops the
-            picture moving.
+            Three rows, and the middle one is load-bearing in a way that is not obvious: it has a
+            FIXED height and is always present. It used to be Auto with the label collapsing when
+            there was nothing to say, which was fine while the only thing it reported was a mute -
+            rare, and a one-off shift when it happened. Voice activity made it toggle with every
+            phrase, and each toggle resized the video below it: measured at 1080x860 while a peer
+            was speaking and 1080x897 a second later, back and forth for the whole call. Reserving
+            the row costs one line of blank space and stops the picture moving.
         -->
         <Grid RowDefinitions="Auto,28,*">
 
             <!--
-                Scrollable, because the row is wider than a phone: on a 1080px screen the third
-                button is already clipped and the fourth is off the edge entirely, which made them
-                unreachable rather than merely ugly.
+                No ScrollView any more, and that is a measurement rather than a preference. The row
+                used to scroll because five text buttons did not fit a 1080px phone: the third was
+                clipped and the fourth was off the edge entirely, which made them unreachable
+                rather than merely ugly. Five 48px controls plus the menu button, 8 apart, is 344 -
+                inside the ~360 of the narrowest phone. Icons removed the cause, so the workaround
+                could go with them.
             -->
-            <ScrollView Grid.Row="0" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                <HorizontalStackLayout HorizontalOptions="Center" Padding="8" Spacing="8">
-                    <Button Text="{Binding MicrophoneButtonText}" Command="{Binding ToggleMicrophoneCommand}" />
-                    <Button Text="{Binding CameraButtonText}" Command="{Binding ToggleCameraCommand}" />
-                    <Button Text="Restart ICE" Command="{Binding RestartIceCommand}" />
-                    <Button Text="{Binding SpatialLayerButtonText}" Command="{Binding ToggleSpatialLayerCommand}" />
-                    <Button Text="{Binding ShareScreenButtonText}" Command="{Binding ShareScreenCommand}" />
-                </HorizontalStackLayout>
-            </ScrollView>
+            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center"
+                                   Padding="12" Spacing="8"
+                                   BackgroundColor="{StaticResource SurfaceRaised}">
+
+                <Button Style="{StaticResource IconButton}"
+                        Text="{x:Static local:Icons.Mic}"
+                        Command="{Binding ToggleMicrophoneCommand}"
+                        SemanticProperties.Description="{Binding MicrophoneButtonText}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsMicrophoneMuted}" Value="True">
+                            <Setter Property="Text" Value="{x:Static local:Icons.MicOff}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <Button Style="{StaticResource IconButton}"
+                        Text="{x:Static local:Icons.Videocam}"
+                        Command="{Binding ToggleCameraCommand}"
+                        SemanticProperties.Description="{Binding CameraButtonText}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsCameraMuted}" Value="True">
+                            <Setter Property="Text" Value="{x:Static local:Icons.VideocamOff}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <Button Style="{StaticResource IconButton}"
+                        Text="{x:Static local:Icons.ScreenShare}"
+                        Command="{Binding ShareScreenCommand}"
+                        SemanticProperties.Description="{Binding ShareScreenButtonText}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsSharingScreen}" Value="True">
+                            <Setter Property="Text" Value="{x:Static local:Icons.StopScreenShare}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <!--
+                    New here. The view model, the recorder and a MAUI file-stream factory were all
+                    in place; only the button was missing, so this platform could start a recording
+                    exactly never while Blazor could.
+                -->
+                <Button Style="{StaticResource IconButton}"
+                        Text="{x:Static local:Icons.FiberManualRecord}"
+                        Command="{Binding RecordCommand}"
+                        SemanticProperties.Description="{Binding RecordButtonText}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsRecording}" Value="True">
+                            <Setter Property="Text" Value="{x:Static local:Icons.StopCircle}" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <!--
+                    Also new. Leaving a call meant the back gesture, because MediaStreamParameters.
+                    Hangup is set to false at every construction site and never to true, so the
+                    per-tile hangup it feeds has never fired.
+                -->
+                <Button Style="{StaticResource IconButtonOff}"
+                        Text="{x:Static local:Icons.CallEnd}"
+                        Clicked="OnLeaveCallClicked"
+                        SemanticProperties.Description="Leave call" />
+
+                <!--
+                    Restart ICE and the layer switch live behind this rather than on the bar: they
+                    exist to exercise this library, not to take part in a call. They keep their
+                    words in the menu - an icon for "restart ICE" would be a puzzle rather than a
+                    shortcut.
+                -->
+                <Button x:Name="DebugMenuButton"
+                        Style="{StaticResource IconButton}"
+                        Text="{x:Static local:Icons.MoreVert}"
+                        Clicked="OnDebugMenuClicked"
+                        SemanticProperties.Description="Debugging actions" />
+
+            </HorizontalStackLayout>
 
             <Label Grid.Row="1"
                    Text="{Binding PeerMediaStatus}"
-                   IsVisible="{Binding HasPeerMediaStatus}"
+                   Style="{StaticResource SecondaryLabel}"
                    HorizontalOptions="Center"
-                   Margin="8,0,8,4" />
+                   LineBreakMode="TailTruncation"
+                   Margin="12,0,12,4" />
 
-            <FlexLayout Grid.Row="2"
-                        BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
-                        Wrap="Wrap"
-                        Direction="Row"
-                        JustifyContent="Center"
-                        >
-                <BindableLayout.ItemTemplate>
+            <!--
+                Fixed-size tiles that wrap: one per row on a phone, more as there is room. A fixed
+                size rather than an aspect ratio because MAUI has no aspect-ratio layout - and a
+                fixed one is what makes a row of tiles a grid, since streams arrive at whatever
+                size the camera sends and tiles sized to their streams are a ragged edge.
+            -->
+            <ScrollView Grid.Row="2">
+                <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
+                            Wrap="Wrap"
+                            Direction="Row"
+                            JustifyContent="Center"
+                            AlignContent="Start"
+                            Padding="4">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border WidthRequest="300" HeightRequest="169" Margin="4"
+                                    BackgroundColor="{StaticResource SurfaceSunken}"
+                                    Stroke="Transparent" StrokeThickness="2">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+
+                                <!-- The ring, not a badge: a speaking peer should be findable
+                                     from across a grid without reading anything. -->
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding PeerSpeaking}" Value="True">
+                                        <Setter Property="Stroke" Value="{StaticResource Speaking}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+
+                                <Grid>
+                                    <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}"
+                                                      Hangup="{Binding Hangup}"
+                                                      VideoMuted="{Binding VideoMuted}"
+                                                      AudioMuted="{Binding AudioMuted}"
+                                                      CameraType="{Binding CameraType}"
+                                                      ShowControls="{Binding ShowControls}"
+                                                      VerticalOptions="Fill" HorizontalOptions="Fill" />
+
+                                    <!-- Covers the last frame rather than sitting beside it: a
+                                         camera that has been turned off leaves its final picture
+                                         on screen, which reads as a frozen call. -->
+                                    <Label Text="Camera off"
+                                           IsVisible="{Binding PeerVideoMuted}"
+                                           BackgroundColor="{StaticResource SurfaceSunken}"
+                                           TextColor="{StaticResource TextSecondary}"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center" />
+
+                                    <Grid VerticalOptions="End" Padding="8" ColumnDefinitions="*,Auto"
+                                          BackgroundColor="#99000000">
+                                        <Label Grid.Column="0" Text="{Binding Label}"
+                                               FontAttributes="Bold" FontSize="13"
+                                               LineBreakMode="TailTruncation" />
+
+                                        <Label Grid.Column="1" Text="Muted"
+                                               IsVisible="{Binding PeerAudioMuted}"
+                                               FontSize="11" FontAttributes="Bold"
+                                               TextColor="{StaticResource Warning}" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </ScrollView>
+
+            <popup:SfPopup x:Name="DebugMenuPopup"
+                           ShowHeader="False"
+                           ShowFooter="False"
+                           AutoSizeMode="Both"
+                           OverlayMode="Transparent"
+                           ShowOverlayAlways="True">
+                <popup:SfPopup.ContentTemplate>
                     <DataTemplate>
-                        <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
-                                          VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
-                                          CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
-                                          VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
-                                          />
+                        <!--
+                            Labels rather than Buttons. A MAUI Button always centres its text and
+                            wears the app's button styling, so two of them stacked read as two
+                            buttons in a box rather than as a menu.
+                        -->
+                        <VerticalStackLayout BackgroundColor="{StaticResource SurfaceRaised}">
+                            <Label Text="Restart ICE" Padding="16,14" FontSize="15">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnRestartIceClicked" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Label Text="{Binding SpatialLayerButtonText}" Padding="16,14" FontSize="15">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnToggleSpatialLayerClicked" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
+                </popup:SfPopup.ContentTemplate>
+            </popup:SfPopup>
 
         </Grid>
-
-        <!--<StackLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
-                     >
-            <BindableLayout.ItemTemplate>
-                <DataTemplate>
-                    <middleware:Media Stream="{Binding Stream}" Label="{Binding Label}" Hangup="{Binding Hangup}"
-                                      VideoMuted="{Binding VideoMuted}" AudioMuted="{Binding AudioMuted}"
-                                      CameraType="{Binding CameraType}" ShowControls="{Binding ShowControls}"
-                                      HeightRequest="50"
-                                      />
-                </DataTemplate>
-            </BindableLayout.ItemTemplate>
-        </StackLayout>-->
-
     </ContentPage.Content>
 </ContentPage>
-    
-<!-- 
-                                      VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
--->    

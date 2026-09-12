@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using Syncfusion.Maui.Toolkit.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -14,9 +15,14 @@ public static class MauiProgram
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
+			.ConfigureSyncfusionToolkit()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+
+				// The shared icon vocabulary - see Icons.cs and doc/DemoAppRefactor.md. The alias
+				// is what every FontFamily="MaterialIcons" in XAML resolves through.
+				fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIcons");
 			})
 			.ConfigureMauiHandlers(handlers =>
 			{
