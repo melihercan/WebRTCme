@@ -122,6 +122,34 @@ One thing the old text got wrong, and it mattered. "Recovery on resume is worth 
 but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
 behind this one.
 
+### A peer that dropped never left the room - fixed 2026-09-12
+`RoomHub` had no `OnDisconnectedAsync`, so the only way out of a room was a client politely calling
+`LeaveAsync` first. Anything that skipped that - a reloaded browser tab, a killed app, a phone
+losing wifi, a crash - left the client in the room for the lifetime of the server process, and left
+every other peer holding a peer connection to a peer that no longer existed.
+
+Found by accident while testing the peer-to-peer share: the send-side stats showed Android
+encoding **two** full camera streams when the room had one other person in it.
+
+```
+before   SEND entries:12  out:[audio | video 640x480 frames=5824 | audio | video 640x480 frames=4763]
+after    SEND entries:0                                     ghost torn down within seconds
+rejoin   SEND entries:6   out:[audio | video 640x480 ...]   one peer, as it should be
+```
+
+Double the encode and double the uplink, indefinitely, with nothing on screen to say so - and it
+had been there all along. Worth noting how it stayed hidden: every test that ends by hanging up
+properly cleans up correctly, and reloading a tab is not something a test script usually does.
+
+Two smaller faults came with it. Rooms were never removed, because removal only happens when the
+last client leaves. And `JoinAsync` refuses an id already in a room, so a client reconnecting with
+the same id was turned away by its own ghost - the shape of bug that reads as "it works until you
+refresh". The demo apps happen to generate a new id per page load, which is why that half was
+invisible too.
+
+`LeaveAsync` and the new `OnDisconnectedAsync` now share one `RemoveClientAsync`, so the two paths
+cannot drift.
+
 ### Peer-to-peer carries the camera and the screen at once - 2026-09-12
 It used to replace the camera track on the existing sender, so a shared screen arrived *instead of*
 the camera and the far side had one tile that changed picture. The mediasoup path has carried both
