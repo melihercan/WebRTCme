@@ -52,6 +52,7 @@ namespace WebRTCme
                 return;
 
             _watched[track.Id] = track;
+            Echo($"watching device {track.Id} for a {track.Kind} track");
             EnsureObservers();
         }
 
@@ -128,7 +129,17 @@ namespace WebRTCme
         {
             var uniqueId = UniqueIdOf(notification);
 
-            if (uniqueId is not null && _watched.TryRemove(uniqueId, out var track))
+            MediaStreamTrack track = null;
+            var matched = uniqueId is not null && _watched.TryRemove(uniqueId, out track);
+
+            // Said either way. Whether the disconnected device was one a track was capturing from
+            // is the only interesting thing about this notification, and silence on the match was
+            // what made an earlier failure impossible to place.
+            Echo(matched
+                ? $"ending the track that was capturing from {uniqueId}"
+                : $"no watched track for {uniqueId} - watching [{string.Join(", ", _watched.Keys)}]");
+
+            if (matched)
             {
                 try
                 {
