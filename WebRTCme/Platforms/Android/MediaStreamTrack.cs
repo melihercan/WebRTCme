@@ -77,7 +77,51 @@ namespace WebRTCme.Android
         public MediaStreamTrackState ReadyState => NativeObject.InvokeState().FromNative();
 
 
-        public event EventHandler OnEnded;
+        // Announced by track id rather than raised on this object, because track wrappers are
+        // not stable: MediaStream.GetTracks builds a new MediaStreamTrack on every call, so an
+        // event subscribed on one instance is never raised by another instance of the same
+        // underlying track.
+        //
+        // Nothing exercises that today - Android reopens a lost camera underneath the track
+        // rather than ending it, so Stop() is reached only from teardown - but it is luck rather
+        // than design: Producer.HandleTrack subscribes on the instance it was given, and an
+        // application stopping a track it fetched separately would be stopping a different
+        // object. The same trap has already produced two real bugs on other platforms, in
+        // opposite directions: duplicate handlers on Blazor, and on Apple a subscription that
+        // could never fire.
+        //
+        // Subscribed lazily so a wrapper nobody listens to holds no handler; these are created
+        // constantly and never disposed.
+        static event Action<string> AnyEnded;
+
+        EventHandler _onEnded;
+
+        public event EventHandler OnEnded
+        {
+            add
+            {
+                if (_onEnded is null)
+                    AnyEnded += OnAnyEnded;
+
+                _onEnded += value;
+            }
+            remove
+            {
+                if (_onEnded is null)
+                    return;
+
+                _onEnded -= value;
+
+                if (_onEnded is null)
+                    AnyEnded -= OnAnyEnded;
+            }
+        }
+
+        void OnAnyEnded(string trackId)
+        {
+            if (trackId == Id)
+                _onEnded?.Invoke(this, EventArgs.Empty);
+        }
         public event EventHandler OnMute;
         public event EventHandler OnUnmute;
 
@@ -158,7 +202,9 @@ namespace WebRTCme.Android
             AndroidSupport.LocalCaptureStopped(Id);
 
             Enabled = false;
-            OnEnded?.Invoke(this, EventArgs.Empty);
+
+            // By id, so whichever wrapper the application is holding hears it too.
+            AnyEnded?.Invoke(Id);
         }
 
     }
