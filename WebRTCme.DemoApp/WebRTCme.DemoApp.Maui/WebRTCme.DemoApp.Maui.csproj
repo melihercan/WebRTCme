@@ -39,6 +39,24 @@
       <CodesignProvision>VS: WildCard Development</CodesignProvision>
     </PropertyGroup>
 
+    <!--
+      Signed with a real identity rather than ad-hoc, which is what a Mac Catalyst build defaults
+      to. macOS ties TCC grants - camera, microphone, and Screen Recording above all - to a stable
+      code identity, and an ad-hoc signature with no team gives it nothing to hold on to: a grant
+      can evaporate on relaunch and every rebuild invalidates it outright.
+
+      That cost most of an hour on 2026-09-12 and looked like three unrelated problems: camera
+      permission re-prompting after each build, Screen Recording refusing with SCStreamError -3801
+      after being granted, and the app appearing to hang while a permission call never returned.
+      One cause underneath all three.
+
+      No CodesignProvision: this target declares no entitlements needing a profile, so the identity
+      alone is enough for local development.
+    -->
+    <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-maccatalyst'">
+      <CodesignKey>Apple Development: Created via API (4BFWRL9XBN)</CodesignKey>
+    </PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
