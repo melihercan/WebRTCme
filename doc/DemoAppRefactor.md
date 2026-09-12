@@ -283,11 +283,44 @@ sitting behind an `#if false`, and Android leaves it to `SurfaceViewRenderer`. M
 means a scaling mode plumbed through four platform renderers, which is more than the tile is worth
 today. Recorded rather than done.
 
-## Phase 4 - sizing and orientation
+## Phase 4 - sizing and orientation - DONE
 
-Fixed-aspect tiles, and a responsive count per row: one on a phone, two or three on a tablet or
-desktop. Orientation stays unlocked, because a video call should work whichever way the device is
-held; the layout adapts instead.
+Fixed-aspect tiles, and a count per row that follows the width: one on a phone, up to four on a
+desktop.
+
+**Sizing.** MAUI tiles were a hard 300x169 - too wide for a small phone in portrait, a postage
+stamp in a maximised desktop window. They are now computed from the width of the area holding
+them: as many whole tiles across as fit at 260 minimum, capped at four, always 16:9. In code,
+because MAUI has neither an aspect-ratio layout nor a width-based layout query - there is no XAML
+way to say "16:9, and as many per row as fit". Blazor already sized this way and gained only the
+matching cap, so a wide monitor stops adding columns until the tiles are thumbnails.
+
+**Orientation - the plan was wrong here.** It said orientation stays unlocked and the layout
+adapts. The layout does adapt, and it is still the wrong answer: **the picture does not rotate
+with the device.** The capture pipeline produces frames that are upright in portrait and lying on
+their side in landscape, so allowing landscape means shipping a sideways video feed. Seen on an
+Android device, not deduced.
+
+So: **portrait on every mobile device, phone and tablet alike.** One rule, and the camera is the
+reason rather than the layout - which is why a tablet does not get the phone/tablet split it would
+otherwise deserve.
+
+That is a workaround and not a fix. The frame rotation failing to follow the display is its own
+bug in the Android platform layer, and the usual cause is already excluded: libwebrtc reads the
+display rotation from the `Context` it is handed, and ours comes from the MAUI handler, which is
+the activity. Diagnosing it properly means instrumenting frame rotation on a device - a separate
+change, not something to fold into a layout phase. **Once it is fixed, revisit this lock:** a
+tablet in landscape has width for a row of tiles and is a better layout than a portrait one.
+
+Desktop has no orientation to lock, so the equivalent is to open landscape - 1280x800, which fits
+three tiles across with room for the controls. A starting size only; the grid follows the width
+from there.
+
+The web demo cannot lock orientation at all - a page can only ask, and only in fullscreen - so its
+layout adapts instead, which it already did. Its full-height pages moved from `100vh` to `100dvh`
+while this was being checked: on a phone browser `100vh` is the viewport with the address bar
+hidden, so the control bar ended up underneath the browser chrome, on the one page where every
+control has to be reachable.
 
 ## Phase 5 - verification
 
