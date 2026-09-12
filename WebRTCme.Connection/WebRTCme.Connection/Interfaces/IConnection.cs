@@ -125,12 +125,14 @@ namespace WebRTCme.Connection
         /// Starts sending a captured screen or window to the other peers.
         /// </summary>
         /// <remarks>
-        /// The two paths differ in what the peers end up seeing, and the difference is not hidden
-        /// because it is visible to the user. On mediasoup the screen becomes a producer of its
-        /// own, so it arrives as a second tile and the camera keeps its own; peer-to-peer swaps the
-        /// camera track on the existing sender, so the screen replaces the camera until it stops.
-        /// Peer-to-peer could carry both, but only by negotiating a second transceiver with every
-        /// peer, and that is a larger change than this member.
+        /// Both paths now carry the camera and the screen at once, and arrive as two tiles. They
+        /// get there differently. On mediasoup the screen is a producer of its own and the server
+        /// routes it separately; peer-to-peer adds a second transceiver to every peer connection
+        /// and renegotiates with each of them.
+        ///
+        /// The peer-to-peer version has one limit worth knowing at this level: the far side works
+        /// out which stream is the screen by it being the second one, because peer-to-peer carries
+        /// no application data for the source to travel in. One second source per peer.
         ///
         /// Obtaining the stream is the caller's job - the platforms that cannot capture a screen
         /// fail there, at <c>GetDisplayMedia</c>, rather than here.

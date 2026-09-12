@@ -19,7 +19,6 @@ and none of them is a small change:
 | **`getDisplayMedia` on iOS and Mac Catalyst** | A platform project - ReplayKit and a broadcast extension. **Android is done** (2026-09-11). |
 | **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
 | **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
 | **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
 | **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
 | **A lost capture device on iOS and Mac Catalyst** | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs there. The signal exists (`AVCaptureSessionWasInterrupted`) and nothing observes it. **Android, Blazor and Windows are done** (2026-09-12). |
@@ -122,6 +121,50 @@ service         isForeground=true types=0x000000C0   camera|microphone
 One thing the old text got wrong, and it mattered. "Recovery on resume is worth having as well,
 but second" reads as optional, and it is not: see the next entry, which is the bug that was hiding
 behind this one.
+
+### Peer-to-peer carries the camera and the screen at once - 2026-09-12
+It used to replace the camera track on the existing sender, so a shared screen arrived *instead of*
+the camera and the far side had one tile that changed picture. The mediasoup path has carried both
+for a while, because the server routes producers separately and a second tile comes almost for
+free, and the difference was visible to anyone using both.
+
+Now peer-to-peer adds a second transceiver to every peer connection and renegotiates with each of
+them. Two things made that cheaper than it looked. The SDP handler already answers any offer
+regardless of who initiated the call, so a peer that did not offer originally can still offer now -
+which matters, because the sharer is as likely to be the answerer as the offerer. And a new sender
+raises `negotiationneeded` anyway, so offering explicitly is doing on purpose what the peer
+connection was about to ask for.
+
+**How the far side knows which is which**, and this is the part with a limit in it. Peer-to-peer
+carries no application data: mediasoup hangs `appData.source` on a producer and the server copies
+it onto every consumer, and what arrives at a peer is an msid and nothing else. So the screen goes
+on its own `MediaStream`, and the receiver takes the first stream a peer sends to be its camera and
+anything on a different stream afterwards to be a second source. The mechanism is general - any
+second stream gets its own tile - and only the word "screen" in the label is an assumption. One
+second source per peer.
+
+**Stopping needs the transceiver stopped, not the track removed**, and getting that wrong would
+have added a fourth frozen tile to this document. `removeTrack` leaves the transceiver in place
+and inactive: the sender does stop - measured, frames stuck at 602 - but the remote track is only
+muted, never ended, so the far side kept a tile showing the last frame it had. Stopping the
+transceiver ends the remote track, which is the same signal a dying local device raises and the
+same one the tile already listens for. The cost is that the m-line is finished with, so a later
+share negotiates a new one; the session description grows by one m-line per share, which is how
+WebRTC works and the right trade against a tile that never leaves.
+
+No glare handling. If two peers add a track within a round trip of each other they will offer at
+each other and one `SetRemoteDescription` will fail on state. Perfect negotiation is the fix and it
+is larger than this; sharing a screen is a deliberate act by one person.
+
+Verified Android to Blazor on the signalling path, with Android as the **non-initiator** - the
+harder direction, since it is the side that did not offer originally:
+
+```
+sharing    SEND out:[audio | video 640x480 frames=1848 | video 1072x2096 frames=31]
+far side   three tiles: Alice, Android, Android (screen)
+stopping   SEND out:[audio | video 640x480 ...]        screen sender gone
+far side   two tiles, both cameras still live
+```
 
 ### A local track whose device died was never noticed - fixed 2026-09-12
 The same question as the entry below, one layer up and on every platform: a capture device can go

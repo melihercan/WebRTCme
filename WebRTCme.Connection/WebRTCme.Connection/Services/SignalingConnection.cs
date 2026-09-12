@@ -277,22 +277,34 @@ namespace WebRTCme.Connection.Services
             return peerContext.PeerConnection.GetStats();
         }
 
-        // The camera track displaced by a screen share, so stopping can put it back. Held here
-        // rather than asked of the sender, because by then the sender is carrying the screen.
-        IMediaStreamTrack _displacedCameraTrack;
+        // The stream the screen is being shared on, while one is being shared. Its id is what
+        // tells the far side that this is a second source rather than the camera moving, so it
+        // has to be the same stream for every peer.
+        IMediaStream _screenStream;
 
         /// <summary>
-        /// Swaps the camera for the screen on every peer connection.
+        /// Sends the screen to every peer as a source of its own, beside the camera.
         /// </summary>
         /// <remarks>
-        /// A swap, not an addition, and so the screen arrives *instead of* the camera. Carrying
-        /// both would mean negotiating a second transceiver with every peer - real work, and a
-        /// different shape from the mediasoup path, which gets a second tile for free because the
-        /// server already routes producers separately.
+        /// This used to replace the camera track on the existing sender, so the screen arrived
+        /// *instead of* the camera and the far side had one tile that changed picture. The
+        /// mediasoup path has carried both for a while - the server routes producers separately
+        /// and a second tile comes almost for free - and the difference was visible to anyone
+        /// using both.
         ///
-        /// No renegotiation is needed for the swap itself: replacing a sender's track keeps the
-        /// m-line it was negotiated with.
+        /// Carrying both here means a second transceiver per peer, which means renegotiating with
+        /// each of them. That is the real cost, and it is why this was left alone the first time.
+        /// Two things make it tractable. The SDP handler already answers any offer regardless of
+        /// who initiated the call, so a peer that did not offer originally can still offer now.
+        /// And a new sender is what raises <c>negotiationneeded</c> anyway, so offering explicitly
+        /// here is doing on purpose what the peer connection was about to ask for.
+        ///
+        /// The screen goes on its own <see cref="IMediaStream"/>, and that is the whole of how the
+        /// far side tells the two apart: a peer-to-peer connection carries no application data, so
+        /// the msid is the only thing that travels. See <c>OnTrack</c>.
         /// </remarks>
+        /// <exception cref="ArgumentException"><paramref name="displayStream"/> has no video track.</exception>
+        /// <exception cref="InvalidOperationException">There is no call to share into.</exception>
         public async Task StartScreenShareAsync(IMediaStream displayStream)
         {
             var screenTrack = displayStream?.GetVideoTracks().FirstOrDefault()
@@ -302,33 +314,194 @@ namespace WebRTCme.Connection.Services
             var connectionContext = _connectionContext
                 ?? throw new InvalidOperationException("There is no call to share into.");
 
-            var cameraTrack = connectionContext.UserContext.LocalStream?.GetVideoTracks().FirstOrDefault()
-                ?? throw new InvalidOperationException(
-                    "This call was started without a camera, so there is nothing to share in place of.");
-
-            // Remembered before the swap, and only the first time: sharing twice without stopping
-            // would otherwise record the screen as the thing to go back to.
-            _displacedCameraTrack ??= cameraTrack;
-
-            await ReplaceOutgoingTrackAsync(_displacedCameraTrack, screenTrack);
-        }
-
-        public async Task StopScreenShareAsync()
-        {
-            var cameraTrack = _displacedCameraTrack;
-            if (cameraTrack is null)
+            // Sharing again without stopping is not an error and must not add a second sender -
+            // both paths can reach this from a button and from a reconnect.
+            if (_screenStream is not null)
                 return;
 
-            _displacedCameraTrack = null;
+            // A stream of this library's own rather than the one getDisplayMedia returned. The
+            // display stream is the caller's, and on Blazor its tracks are wrapped afresh on every
+            // access, so holding it here would tie the far side's idea of "the screen" to an
+            // object this class does not own.
+            _screenStream = _webRtc.Window(_jsRuntime).MediaStream();
+            _screenStream.AddTrack(screenTrack);
 
-            // Whatever is on the sender now is the screen; put the camera back in its place.
-            var current = _connectionContext?.PeerContexts.FirstOrDefault()?.PeerConnection
-                .GetSenders()
-                .FirstOrDefault(sender => sender.Track?.Kind == MediaStreamTrackKind.Video)?.Track;
+            var failures = new List<string>();
 
-            if (current is not null)
-                await ReplaceOutgoingTrackAsync(current, cameraTrack);
+            foreach (var peerContext in connectionContext.PeerContexts.ToArray())
+            {
+                try
+                {
+                    peerContext.ScreenSender =
+                        peerContext.PeerConnection.AddTrack(screenTrack, _screenStream);
+                    peerContext.ScreenTrackId = screenTrack.Id;
+
+                    await RenegotiateAsync(peerContext);
+                }
+                catch (Exception exception)
+                {
+                    failures.Add($"{peerContext.Name}: {exception.Message}");
+                }
+            }
+
+            if (failures.Count > 0)
+                throw new Exception($"Sharing the screen failed for {string.Join("; ", failures)}");
         }
+
+        /// <summary>
+        /// Stops sending the screen, leaving the camera where it always was.
+        /// </summary>
+        /// <remarks>
+        /// Doing nothing when nothing is being shared, because both paths can reach this from
+        /// teardown as well as from a button, and a second stop is not a caller error.
+        ///
+        /// The transceiver is stopped, not just emptied, and that distinction is the whole of
+        /// whether the far side's tile goes away. <c>removeTrack</c> leaves the transceiver in
+        /// place and inactive: the sender stops sending - measured, frames stuck at 602 - but the
+        /// remote track is only muted, never ended, so the far side keeps a tile showing the last
+        /// frame it received. That is exactly the frozen-tile failure this project has spent the
+        /// day removing, and it would have been a new one. Stopping the transceiver ends the
+        /// remote track, which is what <c>AnnounceSecondSource</c> listens for.
+        ///
+        /// The cost is that the m-line is finished with: a later share negotiates a new one rather
+        /// than reusing it, so the session description grows by one m-line per share. That is how
+        /// WebRTC works and it is the right trade against a tile that never leaves.
+        /// </remarks>
+        public async Task StopScreenShareAsync()
+        {
+            if (_screenStream is null)
+                return;
+
+            _screenStream = null;
+
+            var peerContexts = _connectionContext?.PeerContexts.ToArray() ?? [];
+            var failures = new List<string>();
+
+            foreach (var peerContext in peerContexts)
+            {
+                var screenTrackId = peerContext.ScreenTrackId;
+                if (screenTrackId is null)
+                    continue;
+
+                peerContext.ScreenSender = null;
+                peerContext.ScreenTrackId = null;
+
+                try
+                {
+                    // Found by the track it carries rather than by the sender object kept from
+                    // AddTrack: on Blazor every GetTransceivers call builds new wrappers, so a
+                    // sender held since then is a different object from the one in this list.
+                    var transceiver = peerContext.PeerConnection.GetTransceivers()
+                        .FirstOrDefault(candidate => candidate.Sender?.Track?.Id == screenTrackId);
+
+                    if (transceiver is null)
+                        continue;
+
+                    transceiver.Stop();
+                    await RenegotiateAsync(peerContext);
+                }
+                catch (Exception exception)
+                {
+                    failures.Add($"{peerContext.Name}: {exception.Message}");
+                }
+            }
+
+            if (failures.Count > 0)
+                throw new Exception($"Stopping the share failed for {string.Join("; ", failures)}");
+        }
+
+        /// <summary>
+        /// Offers afresh to one peer, after the set of tracks going to it has changed.
+        /// </summary>
+        /// <remarks>
+        /// The same three steps as an ICE restart, without the flag: offer, apply it locally
+        /// because the peer cannot answer an offer this side has not applied, then send it.
+        ///
+        /// No glare handling. If both peers add a track in the same breath they will offer at each
+        /// other and one of the two <c>SetRemoteDescription</c> calls will fail on state, leaving
+        /// that pair to be repaired by the next negotiation. Perfect negotiation is the fix and it
+        /// is a larger change than this; sharing a screen is a deliberate act by one person, so
+        /// the race needs two people pressing the same button within a round trip of each other.
+        /// </remarks>
+        async Task RenegotiateAsync(PeerContext peerContext)
+        {
+            var offer = await peerContext.PeerConnection.CreateOffer();
+            await peerContext.PeerConnection.SetLocalDescription(offer);
+
+            var sdp = JsonSerializer.Serialize(offer, JsonHelper.WebRtcJsonSerializerOptions);
+            var result = await _signalingServerApi.SdpAsync(peerContext.Id, sdp);
+            if (!result.IsOk)
+                throw new Exception(result.ErrorMessage);
+
+            System.Diagnostics.Debug.WriteLine(
+                $"######## Renegotiated with peer:{peerContext.Name}");
+        }
+
+        #region A peer's second source
+
+        // The tile label a peer's second source was announced under, so it can be withdrawn by
+        // the same name. Keyed by peer, because a peer has at most one - this application shares
+        // one screen, and a third source would need a way to tell them apart that peer-to-peer
+        // does not have.
+        readonly Dictionary<Guid, string> _secondSourceLabels = new();
+
+        /// <summary>
+        /// Reports a peer's second stream as a tile of its own.
+        /// </summary>
+        /// <remarks>
+        /// The label is the tile's identity all the way up, and it is built the same way the
+        /// mediasoup path builds it - "<c>name (screen)</c>" - so that a view showing a peer's
+        /// camera and screen side by side does not have to know which connection it is on.
+        ///
+        /// The track ending is what withdraws it. Removing a sender at the far end ends the track
+        /// here, so there is no need for a message saying the share is over: the same signal that
+        /// says a local device died says a remote source went away.
+        /// </remarks>
+        void AnnounceSecondSource(Guid peerId, string peerName, IMediaStreamTrack track)
+        {
+            if (_connectionContext is null || track is null)
+                return;
+
+            var label = $"{peerName} (screen)";
+            _secondSourceLabels[peerId] = label;
+
+            var stream = _webRtc.Window(_jsRuntime).MediaStream();
+            stream.AddTrack(track);
+
+            track.OnEnded += (_, _) => RetireSecondSource(peerId);
+
+            System.Diagnostics.Debug.WriteLine($"<------- PeerJoined - tile:{label}");
+
+            _connectionContext.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerJoined,
+                Id = peerId,
+                Name = label,
+                MediaStream = stream
+            });
+        }
+
+        /// <summary>
+        /// Withdraws a peer's second-source tile, for a share that stopped or a peer that left.
+        /// </summary>
+        void RetireSecondSource(Guid peerId)
+        {
+            if (!_secondSourceLabels.Remove(peerId, out var label))
+                return;
+
+            // The peer keeps its own tile - only the second source is going - so this reports the
+            // label rather than the peer, exactly as the mediasoup path retires a source group.
+            System.Diagnostics.Debug.WriteLine($"<------- PeerLeft - tile:{label}");
+
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerLeft,
+                Id = peerId,
+                Name = label
+            });
+        }
+
+        #endregion
 
         #region Voice activity
 
@@ -587,6 +760,11 @@ namespace WebRTCme.Connection.Services
                 peerName = peerContext.Name;
                 await CreateOrDeletePeerConnectionAsync(peerId, peerName, isInitiator: peerContext.IsInitiator, 
                     isDelete: true);
+
+                // A peer that was sharing takes its second tile with it. Withdrawn first, because
+                // once the peer's own tile is gone a view sorting by name has nothing to attach
+                // the orphan to, and its tracks have already stopped with the connection.
+                RetireSecondSource(peerId);
 
                 _connectionContext.Observer.OnNext(new PeerResponse
                 {
@@ -949,13 +1127,43 @@ namespace WebRTCme.Connection.Services
                 }
                 void OnTrack(object s, IRTCTrackEvent e)
                 {
+                    var streamId = e.Streams?.FirstOrDefault()?.Id;
+
                     System.Diagnostics.Debug.WriteLine(
 ////                _logger.LogInformation(
                         $"######## OnTrack - room:{_connectionContext.UserContext.Room} " +
                         $"user:{_connectionContext.UserContext.Name} " +
                         $"peerUser:{peerName} " +
-                        $"trackType:{e.Track.Kind}");
-                    mediaStream.AddTrack(e.Track);
+                        $"trackType:{e.Track.Kind} stream:{streamId}");
+
+                    // The first stream this peer sends is its camera and microphone. Everything
+                    // after it on a different stream is a second source, which in this application
+                    // means a shared screen - there is nothing else that adds a track mid-call.
+                    //
+                    // This is the whole of the identification, and it is worth being plain about
+                    // why. Peer-to-peer carries no application data: mediasoup can hang
+                    // appData.source on a producer and have the server copy it onto every
+                    // consumer, and what arrives here is an msid and nothing else. So "which one
+                    // is the screen" is a question the receiver answers by position, not by being
+                    // told. The mechanism is general - any second stream gets its own tile - and
+                    // only the word "screen" in the label is an assumption.
+                    var context = _connectionContext.PeerContexts
+                        .SingleOrDefault(candidate => candidate.Id.Equals(peerId));
+
+                    if (context is not null && context.PrimaryStreamId is null)
+                        context.PrimaryStreamId = streamId;
+
+                    var isSecondSource = streamId is not null &&
+                        context?.PrimaryStreamId is not null &&
+                        streamId != context.PrimaryStreamId;
+
+                    if (!isSecondSource)
+                    {
+                        mediaStream.AddTrack(e.Track);
+                        return;
+                    }
+
+                    AnnounceSecondSource(peerId, peerName, e.Track);
                 }
             }
             catch (Exception ex)
