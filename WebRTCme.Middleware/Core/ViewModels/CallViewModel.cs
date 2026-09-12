@@ -46,10 +46,16 @@ namespace WebRTCme.Middleware
         IMediaStream _displayStream;
         ConnectionParameters _connectionParameters;
 
-        // The local tracks being watched for an unexpected end, and whether an end is expected.
-        // Teardown ends tracks too, and re-acquiring a camera on the way out of a call would turn
-        // leaving into a permission prompt.
-        readonly Dictionary<IMediaStreamTrack, EventHandler> _localTrackWatchers = new();
+        // The local tracks being watched for an unexpected end, keyed by track id, and whether an
+        // end is expected. Teardown ends tracks too, and re-acquiring a camera on the way out of a
+        // call would turn leaving into a permission prompt.
+        //
+        // By id rather than by the track object, because on Blazor the object is not stable: every
+        // GetTracks() builds fresh wrappers around the same underlying JS tracks, so a dictionary
+        // keyed by reference never matches one it has already seen. Measured by unplugging the
+        // webcam - three "track ended unexpectedly" lines for one camera, one per time this had
+        // been asked to watch the stream.
+        readonly Dictionary<string, (IMediaStreamTrack Track, EventHandler Handler)> _localTrackWatchers = new();
         bool _localMediaIsBeingReleased;
         readonly SemaphoreSlim _localTrackRecovery = new(1, 1);
 
@@ -405,19 +411,19 @@ namespace WebRTCme.Middleware
 
             foreach (var track in stream.GetTracks())
             {
-                if (track is null || _localTrackWatchers.ContainsKey(track))
+                if (track?.Id is null || _localTrackWatchers.ContainsKey(track.Id))
                     continue;
 
                 var ended = track;
                 EventHandler handler = (_, _) => OnLocalTrackEnded(ended);
-                _localTrackWatchers[ended] = handler;
+                _localTrackWatchers[ended.Id] = (ended, handler);
                 ended.OnEnded += handler;
             }
         }
 
         void UnwatchLocalTracks()
         {
-            foreach (var (track, handler) in _localTrackWatchers)
+            foreach (var (track, handler) in _localTrackWatchers.Values)
             {
                 try
                 {
@@ -492,7 +498,7 @@ namespace WebRTCme.Middleware
                 _cameraStream.RemoveTrack(deadTrack);
                 _cameraStream.AddTrack(newTrack);
 
-                _localTrackWatchers.Remove(deadTrack);
+                _localTrackWatchers.Remove(deadTrack.Id);
                 WatchLocalTracks(_cameraStream);
 
                 _mediaStreamManager.Update(new MediaStreamParameters

@@ -164,10 +164,35 @@ consumers     entries:12 unchanged                same consumer, no renegotiatio
 mute after    disabled 3807b28f                   Producer.Track followed the replacement
 ```
 
-**What this does not prove.** The `ended` event was dispatched at the track rather than caused by
-pulling the camera out, so what is verified is everything from our listener onwards. The browser's
-own dispatch on real device removal is specified behaviour on a listener that was already wired,
-but it has not been watched happening here.
+**Then the webcam was actually unplugged**, which is the same test without the synthetic event, and
+it behaved as designed - with one thing nobody had asked about falling out of it:
+
+```
+11:06:47  local Video track ended unexpectedly        x3
+11:06:47  Recovering the local Video track failed: Could not start video source
+```
+
+The recovery is right: one camera, unplugged, nothing to reopen, so it says so and leaves the rest
+of the call alone. The `x3` is not.
+
+### Blazor builds a new wrapper on every GetTracks, and each one adds listeners - 2026-09-12
+Found by the unplug above, and pre-existing. `MediaStream.GetTracks`, `GetVideoTracks` and
+`GetAudioTracks` each do `.Select(jsObjectRef => new MediaStreamTrack(...))`, and that constructor
+registers `ended`, `mute` and `unmute` on the underlying JS track. So every call to any of them
+attaches three more listeners, each holding a `DotNetObjectReference`, to tracks that already had
+them - and nothing removes them, because the wrappers are transient and never disposed.
+
+Two consequences, and only the first is measured. **Object identity is not stable**, so anything
+keeping a dictionary of tracks keyed by reference silently fails to match a track it has already
+seen - which is exactly what produced three "track ended unexpectedly" lines for one camera, one
+per time the recovery above had been asked to watch the stream. That is fixed there by keying on
+`IMediaStreamTrack.Id`, and it is a trap for the next person to hold a track in a collection.
+
+**The listeners themselves accumulate**, which is inferred from the code rather than counted. How
+much it matters depends entirely on how often `GetTracks` is called on a live call, and that has
+not been measured. Fixing it means caching the wrapper per JS object reference in the Blazor
+`MediaStream` and removing the listeners on dispose - contained, but wider than the bug that
+exposed it, and not done here.
 
 **Windows had no signal to give, so it polls.** Its native ABI
 (`WebRTCme.Bindings.Maui.Windows/Interop.cs`) exposes device *enumeration* and no device-lost
