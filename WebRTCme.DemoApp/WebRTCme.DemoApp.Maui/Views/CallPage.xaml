@@ -5,6 +5,7 @@
              xmlns:local="clr-namespace:WebRTCme.DemoApp.Maui"
              xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
              Shell.NavBarIsVisible="False"
+             x:Name="CallPageRoot"
              x:Class="WebRTCme.DemoApp.Maui.Views.CallPage">
     <ContentPage.Content>
 
@@ -117,12 +118,18 @@
                    Margin="12,0,12,4" />
 
             <!--
-                Fixed-size tiles that wrap: one per row on a phone, more as there is room. A fixed
-                size rather than an aspect ratio because MAUI has no aspect-ratio layout - and a
-                fixed one is what makes a row of tiles a grid, since streams arrive at whatever
-                size the camera sends and tiles sized to their streams are a ragged edge.
+                Tiles of one fixed shape that wrap: one per row on a phone, more as there is room.
+                One shape rather than each tile sizing to its stream, because streams arrive at
+                whatever the camera sends - 640x480 from a webcam, 480x640 from a phone held
+                upright - and a row of tiles sized to their streams is a ragged edge rather than a
+                grid.
+
+                The size itself is computed in the code-behind from the page width, not written
+                here: MAUI has no aspect-ratio layout and no width-based layout query, so a
+                hard-coded 300 is a tile that is too wide on a small phone in portrait and
+                ridiculous on a desktop window. See OnTilesSizeChanged.
             -->
-            <ScrollView Grid.Row="2">
+            <ScrollView Grid.Row="2" SizeChanged="OnTilesSizeChanged">
                 <FlexLayout BindableLayout.ItemsSource="{Binding MediaStreamParametersList}"
                             Wrap="Wrap"
                             Direction="Row"
@@ -131,7 +138,9 @@
                             Padding="4">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Border WidthRequest="300" HeightRequest="169" Margin="4"
+                            <Border WidthRequest="{Binding Source={x:Reference CallPageRoot}, Path=TileWidth}"
+                                    HeightRequest="{Binding Source={x:Reference CallPageRoot}, Path=TileHeight}"
+                                    Margin="4"
                                     BackgroundColor="{StaticResource SurfaceSunken}"
                                     Stroke="Transparent" StrokeThickness="2">
                                 <Border.StrokeShape>

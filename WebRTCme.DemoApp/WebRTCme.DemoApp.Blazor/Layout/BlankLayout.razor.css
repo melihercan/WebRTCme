@@ -1,5 +1,12 @@
 .blank-layout {
+    /*
+        dvh, with vh behind it for anything that does not know the unit. On a phone browser 100vh
+        is the viewport with the address bar hidden, so a full-height call page sits taller than
+        the screen and the control bar ends up under the chrome - on the one page where every
+        control has to be reachable.
+    */
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background: #121316;

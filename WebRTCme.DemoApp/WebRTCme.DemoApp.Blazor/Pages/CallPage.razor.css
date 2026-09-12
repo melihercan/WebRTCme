@@ -51,6 +51,14 @@
     gap: 8px;
     align-content: start;
     padding: 8px;
+    /*
+        Capped at roughly four across, the same cap the MAUI demo applies. Without it a wide
+        monitor keeps adding columns until the tiles are thumbnails - and this is a demo of a
+        calling library, not a conference grid.
+    */
+    max-width: 1440px;
+    margin-inline: auto;
+    width: 100%;
 }
 
 .tile-slot {
