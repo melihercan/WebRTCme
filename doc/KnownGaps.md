@@ -18,7 +18,8 @@ picking it up is possible today.
 
 | | blocked on | what it is |
 | --- | --- | --- |
-| **`getDisplayMedia` on iOS and Mac Catalyst** | a Mac | A platform project - ReplayKit and a broadcast extension. Sharing can only *start* where `getDisplayMedia` exists. Blazor, Windows and Android are done. |
+| **`getDisplayMedia` on Mac Catalyst** | nothing - it is next | Still throws `NotImplementedException`. iOS is done (2026-09-12) and the binding fix it needed applies here too, so the hard part is finished; worth checking whether ScreenCaptureKit beats ReplayKit on macOS before copying. |
+| **System-wide screen share on iOS** | a design decision | iOS shares *this app's own content* only. Sharing other apps needs a Broadcast Upload Extension: a second bundle, an App Group, and WebRTC running inside the extension. An architectural change, not an addition. |
 | **A lost capture device on iOS and Mac Catalyst** | a Mac | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small, once someone can build it. |
 | **`OnDeviceChange` on iOS and Mac Catalyst** | a Mac | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
 | **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
@@ -111,6 +112,56 @@ does, which is how the two exceptions above were caught, but the middleware logs
 and none of that appears - `log show` returns zero lines for the process. Reach for the app's
 stderr (`open --stderr`), and for `lsof` on the process to see whether it has a socket at all,
 which is how the permission hang above was told apart from a connection failure.
+
+## getDisplayMedia on iOS - 2026-09-12
+
+Works, with one honest limit and one buried cause worth reading.
+
+`RPScreenRecorder.StartCapture` in-process: ReplayKit delivers `CMSampleBuffer`s, which become
+`RTCVideoFrame`s pushed through a capturer delegate into the track's `RTCVideoSource`. Verified
+iPhone to Blazor over the peer-to-peer path - `828x1792` arriving and advancing 4.04s in 4s, beside
+the phone's camera at `480x640`. Stopping withdrew the tile *and* cleared the red recording
+indicator, which are two different things and only one of them is about the call.
+
+**The limit.** This captures the app's own content and nothing else, so the far side sees the call
+UI rather than whatever else is on the phone. That is what `RPScreenRecorder` does; a system-wide
+share needs a Broadcast Upload Extension, and that is a second bundle with its own process, an App
+Group, and WebRTC running inside the extension - an architectural change rather than an addition.
+What this delivers is the pipeline, which is identical whichever end the frames come from.
+
+### No RTCVideoFrame could be constructed on Apple at all
+The part worth keeping. `RTCVideoFrame` has three constructors:
+
+- two take a `CVPixelBuffer`, are marked deprecated in the binding, and **are absent from this
+  build of `WebRTC.framework`** - calling one compiles and throws `unrecognized selector` at
+  runtime, once per frame;
+- `initWithBuffer:` survives, and its parameter is `id<RTCVideoFrameBuffer>`.
+
+That parameter could not be expressed. Bound as the generated class `RTCVideoFrameBuffer`, nothing
+derives from it. Rebound as `IRTCVideoFrameBuffer`, nothing implements it either - the generator
+emits `RTCCVPixelBuffer : NSObject` and silently drops the conformance `ApiDefinitions.cs` declares.
+Both were tried before binding it to `RTCCVPixelBuffer`, the only buffer the framework hands out.
+
+So **no frame could be built on iOS or Mac Catalyst, and nothing had noticed, because nothing had
+ever tried**. The same shape as the `Streams` stub found the same day, one layer further down: not
+a gap someone left, but working-looking code that had never been executed.
+
+### Two mistakes on the way, both from reasoning instead of checking
+Recorded because the pattern repeated within an hour.
+
+**A comment asserting an API's behaviour.** `startCaptureWithHandler:`'s completion handler was
+documented here as running only on failure, so a two-second silence was read as success. It runs on
+success too, with a nil error. The app therefore reported a share iOS had never begun: the button
+read "Stop sharing", the far side negotiated a transceiver and got a tile, no frames arrived, and
+no red indicator contradicted any of it. The fix is to wait for the answer and believe what it says.
+
+**Reading a compiler error as one's own mistake.** The first version wrapped the buffer in an
+`RTCCVPixelBuffer`, which was right. It would not compile, so it was replaced with the raw
+`CVPixelBuffer`, which was wrong. The compiler had been reporting the binding bug above.
+
+The diagnostics are what ended both: the request, ReplayKit's answer, the recorder's own
+`Recording` flag, and a count of frames. Silence in a frame path cannot be read - there is no way
+to tell "not delivering" from "delivered and dropped here" without saying so out loud.
 
 ## What 2026-09-12 was, if you are reading this cold
 
