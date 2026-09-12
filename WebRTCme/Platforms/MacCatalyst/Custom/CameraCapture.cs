@@ -133,6 +133,9 @@ namespace WebRTCme
             ApplyFormat(device, format, frameRate);
 
             session.CommitConfiguration();
+
+            WatchSession(session);
+
             session.StartRunning();
 
             var dimensions = ((CMVideoFormatDescription)format.FormatDescription).Dimensions;
@@ -142,6 +145,34 @@ namespace WebRTCme
             // Every piece is held: AVFoundation keeps only weak references to the delegate and the
             // queue, and a collected delegate is a camera that runs and delivers nothing.
             return new Capture(session, input, output, delegateObject, queue);
+        }
+
+        // Held so the observers are not collected while the session is running.
+        static readonly System.Collections.Generic.List<NSObject> _sessionObservers = new();
+
+        /// <summary>
+        /// Reports the session going quiet.
+        /// </summary>
+        /// <remarks>
+        /// A stopped session, an interrupted one and a runtime error all look the same from the
+        /// sample-buffer delegate: the callbacks simply stop. Without these three lines the only
+        /// evidence is silence, which is the same evidence a blocked delegate queue produces.
+        /// </remarks>
+        static void WatchSession(AVCaptureSession session)
+        {
+            var center = NSNotificationCenter.DefaultCenter;
+
+            _sessionObservers.Add(center.AddObserver(
+                AVCaptureSession.RuntimeErrorNotification,
+                note => Echo($"capture session runtime error: {note?.UserInfo}"), session));
+
+            _sessionObservers.Add(center.AddObserver(
+                AVCaptureSession.WasInterruptedNotification,
+                note => Echo($"capture session interrupted: {note?.UserInfo}"), session));
+
+            _sessionObservers.Add(center.AddObserver(
+                AVCaptureSession.DidStopRunningNotification,
+                _ => Echo("capture session stopped running"), session));
         }
 
         /// <summary>
@@ -203,6 +234,7 @@ namespace WebRTCme
             readonly Webrtc.RTCVideoCapturer _capturer = new();
 
             long _frameCount;
+            long _lastFrameAt;
 
             internal Frames(Webrtc.IRTCVideoCapturerDelegate sink) => _sink = sink;
 
@@ -217,16 +249,28 @@ namespace WebRTCme
                     var timestampNs =
                         (long)(sampleBuffer.PresentationTimeStamp.Seconds * 1_000_000_000);
 
-                    // Every 60 frames - two seconds at 30fps. Frequent enough that a stall shows
-                    // up as a gap in the timestamps rather than as silence.
-                    if (++_frameCount == 1 || _frameCount % 60 == 0)
-                        Echo($"camera frame {_frameCount} {pixelBuffer.Width}x{pixelBuffer.Height}");
+                    var count = ++_frameCount;
+                    var now = Environment.TickCount64;
+                    var sinceLast = _lastFrameAt == 0 ? 0 : now - _lastFrameAt;
+                    _lastFrameAt = now;
 
-                    using var buffer = new Webrtc.RTCCVPixelBuffer(pixelBuffer);
-                    using var frame = new Webrtc.RTCVideoFrame(
-                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, timestampNs);
+                    var handOffMs = 0L;
 
-                    _sink.DidCaptureVideoFrame(_capturer, frame);
+                    using (var buffer = new Webrtc.RTCCVPixelBuffer(pixelBuffer))
+                    using (var frame = new Webrtc.RTCVideoFrame(
+                        buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, timestampNs))
+                    {
+                        var startedAt = Environment.TickCount64;
+                        _sink.DidCaptureVideoFrame(_capturer, frame);
+                        handOffMs = Environment.TickCount64 - startedAt;
+                    }
+
+                    // The first ten individually, then every 60. The gap and the hand-off cost are
+                    // what separate the three ways this goes wrong: a session that stopped, a
+                    // delegate queue blocked inside WebRTC, and frames that are simply slow.
+                    if (count <= 10 || count % 60 == 0)
+                        Echo($"camera frame {count} {pixelBuffer.Width}x{pixelBuffer.Height} " +
+                             $"gap={sinceLast}ms handoff={handOffMs}ms");
                 }
                 catch (Exception exception)
                 {
@@ -243,6 +287,14 @@ namespace WebRTCme
             }
         }
 
-        static void Echo(string line) => Console.WriteLine($"######## {line}");
+        static void Echo(string line)
+        {
+            Console.WriteLine($"######## {line}");
+
+            // Flushed, because this log is used to decide whether frames are arriving. A buffered
+            // stream makes "no frames" and "no flush yet" look the same, and on 2026-09-12 that
+            // cost a measurement cycle.
+            try { Console.Out.Flush(); } catch { }
+        }
     }
 }
