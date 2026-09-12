@@ -30,9 +30,10 @@ tags as inline and unstyled, so the tile label has never been styled at all. Pre
 
 ## Phase 0 - decisions
 
-These need answering before code is written, because each one changes what gets built.
+**Answered 2026-09-12.** All three went to the recommendation; the reasoning is kept below because
+the alternatives were real and someone may want to revisit them.
 
-### 1. Packages
+### 1. Packages — DECIDED: all three
 
 The repository rule is that no NuGet package is added without asking, so:
 
@@ -43,11 +44,12 @@ The repository rule is that no NuGet package is added without asking, so:
 | **Material Symbols** as a `MauiFont` | For MAUI icons. A font file rather than a package, and the *same glyph set MudBlazor uses*, so the two apps share an icon vocabulary rather than each having its own. |
 
 `BlazorPro.Spinkit` and `Blazored.Modal` are already referenced and MudBlazor has equivalents for
-both. Worth deciding whether to drop them or keep them; dropping is tidier, keeping is less churn.
+both. **Decided: keep them for now.** Dropping is tidier and can be done later as its own change;
+replacing working code during a UI migration mixes two kinds of risk in one diff.
 
-### 2. How far into the library does this reach?
+### 2. How far into the library does this reach? — DECIDED: minimally
 
-Recommendation: **minimally**. In `WebRTCme.Middleware`:
+In `WebRTCme.Middleware`:
 
 - fix the `<p4>`;
 - give the tile an aspect-ratio container so a grid of tiles is a grid rather than a ragged edge;
@@ -57,16 +59,16 @@ Recommendation: **minimally**. In `WebRTCme.Middleware`:
 Anything beyond that - overlaid controls, hover behaviour, per-tile menus - belongs in the demo
 apps. The library should render a stream well and stay out of the way.
 
-### 3. What happens to video that does not fit the tile?
+### 3. What happens to video that does not fit the tile? — DECIDED: cover remote, contain self-view
 
 Fixed-aspect tiles need a policy for a 480x640 stream in a 16:9 box:
 
 - `cover` fills the tile and crops the edges - looks right in a grid, hides part of the picture;
 - `contain` letterboxes - shows everything, leaves black bars.
 
-Recommendation: **cover for remote tiles, contain for the self-view.** Cropping someone else is a
-cosmetic choice; cropping yourself hides what you are actually sending, which is the one thing a
-self-view exists to tell you.
+**Cover for remote tiles, contain for the self-view.** Cropping someone else is a cosmetic
+choice; cropping yourself hides what you are actually sending, which is the one thing a self-view
+exists to tell you.
 
 ## Phase 1 - shared groundwork
 
