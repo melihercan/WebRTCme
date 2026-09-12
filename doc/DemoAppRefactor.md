@@ -322,12 +322,49 @@ while this was being checked: on a phone browser `100vh` is the viewport with th
 hidden, so the control bar ended up underneath the browser chrome, on the one page where every
 control has to be reachable.
 
-## Phase 5 - verification
+## Phase 5 - verification - IN PROGRESS
 
-At least one two-party call on each of the five platforms. This does double duty: as of
-2026-09-12 there are five commits - the Android wrapper-identity fix, three `async void` guards,
-the silent-catch logging and the device-recovery thread-safety fix - which compile everywhere and
-have run nowhere.
+At least one two-party call on each of the five platforms. This does double duty: it also puts
+run-time behind the commits from earlier in the day - the Android wrapper-identity fix, three
+`async void` guards, the silent-catch logging and the device-recovery thread-safety fix - which
+compiled everywhere and had run nowhere.
+
+| platform | state |
+| --- | --- |
+| Blazor | **done** - two-party with Android |
+| Android | **done** - two-party with Blazor, and again with Mac Catalyst |
+| Mac Catalyst | **done** - two-party with Android; its own rendering not seen, see below |
+| Windows | app running on the current build, needs one click to join |
+| iOS | needs an iPhone plugged into the Mac - `devicectl` lists three, all unavailable |
+
+### What the calls showed
+
+Everything the refactor added to the tile works on real hardware, and none of it costs the video:
+
+- **mute** - `Muted` badge on the peer's tile, `Android: mic muted` in the status row;
+- **camera off** - an overlay covering the last frame rather than a frozen picture;
+- **both at once** - `Android: mic muted, camera off`, so the two states travel together;
+- **speaking** - a green ring on the Mac Catalyst tile and `MacCatalyst: speaking`, seen on the
+  Android device;
+- **`contain` for the self-view, `cover` for a peer** - visible as soon as two tiles are up.
+
+The video kept running through every one of those toggles, which is the whole point of the
+observable peer-state properties: routed through `IMediaStreamManager.Update` they would have
+rebuilt the platform video renderer each time.
+
+### Two things about the rig, both worth knowing before trusting a result
+
+**A MAUI Windows app can launch days-old code.** The registered MSIX points at
+`bin\Debug\<tfm>\win-x64\AppX\`, and `dotnet build` does not refresh that folder - it updates
+`win-x64\` beside it. On 2026-09-12 the two were 18 hours apart, so the app started with the
+pre-refactor UI while the build reported success. Compare the two timestamps before concluding
+anything; re-register against `win-x64\AppxManifest.xml` to fix it. Same trap as the Android
+fast-deployment one, in different clothes.
+
+**`screencapture` over SSH cannot see app windows.** It returns the desktop picture with the menu
+bar and nothing else, because the SSH session has no Screen Recording permission. The app is
+running and driveable - the accessibility tree is complete, and clicking through it is how Mac
+Catalyst joined the call - but the Mac's own screen has to be looked at by a person.
 
 ## Two behaviours that must survive
 
