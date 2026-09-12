@@ -29,10 +29,15 @@ remaining binding stubs - 38 on Android, 33 on iOS - are on no path that runs; a
 call it", not "how many are left". The CoreAudio log spam on Mac Catalyst is noise from inside
 WebRTC; filter it before chasing an audio problem there.
 
-**Mac Catalyst has now run it** (2026-09-12, a Mac mini 2018 driven over SSH), and the prediction
-this paragraph used to make - that the first person to run it should expect to find something - was
-right twice over. See "What running Mac Catalyst found" below. **iOS still has not run**: it
-compiles, and it shares every line of the two bugs that were found, both now fixed.
+**Mac Catalyst has now run the 2026-09-11 and 2026-09-12 work** (a Mac mini 2018, driven over
+SSH), and the prediction this paragraph used to make - that the first person to run it should
+expect to find something - was right twice over. See "What running Mac Catalyst found" below.
+
+A correction while doing it: this file previously said Mac Catalyst had "run none of it", which was
+too broad. It had been run on 2026-09-10, which is where the CoreAudio note below came from; what
+it had not run was anything after that. The narrower claim is the one worth making, and the same
+care applies to **iOS, which still has not run any of this** - it compiles, and it shared every
+line of the two bugs found on Mac Catalyst, both now fixed.
 
 ## What running Mac Catalyst found - 2026-09-12
 
