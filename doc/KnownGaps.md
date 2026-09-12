@@ -11,16 +11,20 @@ of the value: several of them were wrong for a while in ways that cost real time
 
 ## What is actually open
 
-Nothing on this list is blocked on effort or on deciding whether it is worth doing. Each one is
-waiting on something that is not in this repository, and the table says which - because "open" and
-"nobody has got to it yet" are different states, and the difference is what tells you whether
-picking it up is possible today.
+The table says what each item is waiting on, because "open" and "nobody has got to it yet" are
+different states and only the first tells you whether it can be picked up today.
+
+**"A Mac" is no longer a blocker.** The Mac mini at 192.168.1.33 is set up and driveable over SSH:
+Mac Catalyst can be built, launched and operated through accessibility scripting, and an iPhone can
+be built to, installed and launched. Only taps on a physical iPhone need a person. Codesigning
+needs the build driven through `Terminal.app` via osascript, because an SSH session's keychain
+access is not the GUI session's - see the Mac Catalyst notes below.
 
 | | blocked on | what it is |
 | --- | --- | --- |
 | **System-wide screen share on iOS** | a design decision | iOS shares *this app's own content* only. Sharing other apps needs a Broadcast Upload Extension: a second bundle, an App Group, and WebRTC running inside the extension. An architectural change, not an addition. |
-| **A lost capture device on iOS and Mac Catalyst** | a Mac | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small, once someone can build it. |
-| **`OnDeviceChange` on iOS and Mac Catalyst** | a Mac | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
+| **A lost capture device on iOS and Mac Catalyst** | nothing - it is next | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small. |
+| **`OnDeviceChange` on iOS and Mac Catalyst** | nothing | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
 | **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 
