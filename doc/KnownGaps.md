@@ -23,7 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Outgoing frames carry the wrong rotation** | nobody - it can be picked up today | Seen on both Android and Mac Catalyst, 2026-09-12. The picture a *peer* receives is rotated 90 degrees. |
+| **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture. Mitigated, not fixed, by the demo's portrait lock. The Mac Catalyst half of this was fixed on 2026-09-12; see below. |
 
 ### The rotation one, in detail - 2026-09-12
 
@@ -60,11 +60,32 @@ leaves what peers receive exactly as wrong; on Mac Catalyst it changes nothing a
 there so the demo does not look broken - see `MainActivity` and `Info.plist` - not because the
 problem is solved.
 
-There is a proven pattern in the tree for the fix on the Apple side:
-`Platforms/MacCatalyst/Custom/ScreenCapture.cs` already takes a `CMSampleBuffer` to an
-`RTCCVPixelBuffer` to an `RTCVideoFrame` with an explicit `RTCVideoRotation_0` and pushes it
-through the capturer delegate. Driving the camera the same way, instead of through
-`RTCCameraVideoCapturer`, would put the rotation under this library's control.
+### Mac Catalyst - fixed 2026-09-12
+
+`Platforms/MacCatalyst/Custom/CameraCapture.cs` drives its own `AVCaptureSession` and builds the
+frames: `CMSampleBuffer` to `RTCCVPixelBuffer` to `RTCVideoFrame` with an explicit
+`RTCVideoRotation_0`, through the capturer delegate into the track's source. That is the path
+`ScreenCapture` already used on this platform, which is why it was the shape chosen - it was known
+to work here. Format selection, the preview and the one-session-per-track guard are unchanged;
+only the source of the frames moved.
+
+Rotation 0 is the truth rather than a workaround: a camera wired to a Mac does not move. Verified
+the same day - Mac Catalyst video arrives upright on an Android peer.
+
+### Android - still open
+
+Android's capturer reads the display rotation, and the picture does not follow when the device
+turns. The demo locks to portrait, which avoids it rather than fixing it; in portrait the frames
+Android sends are correct, confirmed against both a browser and a Mac peer.
+
+Already ruled out: handing the capturer an application context instead of an activity, which is
+the usual way display rotation goes stale. Ours comes from the MAUI handler, which is the activity.
+The next step is to instrument the rotation actually reaching the renderer, on a device, in both
+orientations.
+
+iOS is untested for this and should not be assumed either way. Unlike a Mac it genuinely rotates,
+so `UIDevice.orientation` is the right input there and the Mac Catalyst fix must **not** be copied
+across - see the note on `CameraCapture`.
 
 **Passed for now: Android simulcast.** Decided 2026-09-12, after checking rather than assuming.
 `SimulcastVideoEncoderFactory` is **not in WebRTC at all** - a checkout of `main` has 217 Java
