@@ -109,8 +109,13 @@ namespace WebRTCme.Connection.MediaSoup.Client
                 Track.OnEnded -= Consumer_TrackEnded;
                 Track.Stop();
             }
-            catch
-            { }
+            catch (Exception exception)
+            {
+                // Swallowed because this is teardown and there is nothing useful to do about a
+                // track that will not stop - but said out loud, because a silent catch in a
+                // cleanup path is indistinguishable from cleanup that worked.
+                Console.WriteLine($"######## consumer track would not stop: {exception.Message}");
+            }
         }
         
         void Consumer_TrackEnded(object sender, EventArgs e)

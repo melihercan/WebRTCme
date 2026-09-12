@@ -121,12 +121,26 @@ namespace WebRTCme.Middleware.Services
                 _mediaRecorderParametersList.Add(mediaRecorderParameters);
             }
 
+            // async void because the event signature gives no Task to return, which makes the
+            // try/catch load-bearing: an exception escaping here is raised on the thread pool
+            // with nobody to catch it and takes the process down. This writes to a file, so a
+            // full disk or a locked file is enough - and losing a recording should not lose the
+            // call it is recording.
             async void MediaRecorder_OnDataAvailable(object sender, IBlobEvent e)
             {
-                var blob = e.Data;
-                _logger.LogInformation($"---------------------------- {mediaRecorderParameters.FileName} RECORDER BLOB DATA: size:{blob.Size} type:{blob.Type }");
+                try
+                {
+                    var blob = e.Data;
+                    _logger.LogInformation($"---------------------------- {mediaRecorderParameters.FileName} RECORDER BLOB DATA: size:{blob.Size} type:{blob.Type }");
 
-                await mediaRecorderParameters.BlobStream.WriteAsync(blob);
+                    await mediaRecorderParameters.BlobStream.WriteAsync(blob);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception,
+                        $"Writing a recording chunk to {mediaRecorderParameters.FileName} failed: " +
+                        $"{exception.Message}");
+                }
             }
             void MediaRecorder_OnStart(object sender, EventArgs e)
             {

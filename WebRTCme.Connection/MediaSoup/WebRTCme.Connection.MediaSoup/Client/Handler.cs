@@ -67,7 +67,10 @@ namespace WebRTCme.Connection.MediaSoup.Client
             {
                 _pc?.Close();
             }
-            catch { }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"######## peer connection would not close: {exception.Message}");
+            }
         }
 
         public void Dispose()

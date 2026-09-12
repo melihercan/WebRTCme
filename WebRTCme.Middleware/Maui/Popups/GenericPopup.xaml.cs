@@ -61,18 +61,35 @@ namespace WebRTCme.Middleware.Maui.Popups
             return _out;
         }
 
+        // Both are async void because a Clicked handler has no Task to return, so an exception
+        // escaping either would be raised on the thread pool and take the process down - a popup
+        // that will not close is not worth losing a call over.
         private async void OkButton_Clicked(object sender, EventArgs e)
         {
-            _out.Ok = true;
-            _out.Entry = _in.EntryPlaceholder is null ? null : Entry.Text;
-            await CloseAsync();
+            try
+            {
+                _out.Ok = true;
+                _out.Entry = _in.EntryPlaceholder is null ? null : Entry.Text;
+                await CloseAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"######## Closing the popup failed: {exception.Message}");
+            }
         }
 
         private async void CancelButton_Clicked(object sender, EventArgs e)
         {
-            _out.Ok = false;
-            _out.Entry = null;
-            await CloseAsync();
+            try
+            {
+                _out.Ok = false;
+                _out.Entry = null;
+                await CloseAsync();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"######## Closing the popup failed: {exception.Message}");
+            }
         }
     }
 }

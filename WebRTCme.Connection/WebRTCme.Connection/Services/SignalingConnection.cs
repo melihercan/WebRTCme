@@ -1055,8 +1055,17 @@ namespace WebRTCme.Connection.Services
                         DataChannel = dataChannel
                     });
                 }
+                // async void because it is an event handler and the event signature gives no
+                // Task to return. That makes the try/catch below load-bearing rather than
+                // defensive: an exception escaping an async void is raised on the thread pool
+                // with nobody to catch it, and takes the process down. This one sends over the
+                // network and throws when the server says no, so it is reachable in ordinary
+                // operation - a signalling hiccup would have killed the app rather than failing
+                // one candidate.
                 async void OnIceCandidate(object s, IRTCPeerConnectionIceEvent e)
                 {
+                  try
+                  {
                     //_logger.LogInformation(
                     //    $"######## OnIceCandidate - room:{roomName} " +
                     //    $"user:{connectionContext.ConnectionRequestParameters.ConnectionParameters.UserName} " +
@@ -1083,6 +1092,15 @@ namespace WebRTCme.Connection.Services
                         if (!result.IsOk)
                             throw new Exception($"{result.ErrorMessage}");
                     }
+                  }
+                  catch (Exception exception)
+                  {
+                    // Reported, not rethrown. A candidate that cannot be delivered is a worse
+                    // call, not a dead process, and ICE is built to work with a subset of the
+                    // candidates it gathered.
+                    _logger.LogError(exception,
+                        $"Sending an ICE candidate to {peerName} failed: {exception.Message}");
+                  }
                 }
                 void OnIceConnectionStateChange(object s, EventArgs e)
                 {

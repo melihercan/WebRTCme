@@ -240,7 +240,14 @@ namespace WebRTCme.Connection.MediaSoup.Client
                     {
                         await Handler.StopSendingAsync(handlerSendResult.LocalId);
                     }
-                    catch { }
+                    catch (Exception exception)
+                    {
+                        // The original failure is about to be rethrown and matters more, so this
+                        // one is only reported - but an unwind that also failed is worth knowing
+                        // about when the rethrown error makes no sense on its own.
+                        Console.WriteLine(
+                            $"######## unwinding a failed produce also failed: {exception.Message}");
+                    }
                     // Rethrow rather than 'throw ex', which would discard where it came from.
                     throw;
                 }

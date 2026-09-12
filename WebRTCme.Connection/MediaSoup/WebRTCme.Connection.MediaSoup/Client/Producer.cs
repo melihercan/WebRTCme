@@ -126,7 +126,12 @@ namespace WebRTCme.Connection.MediaSoup.Client
                 if (track is not null && _stopTracks)
                 {
                     try { track.Stop(); }
-                    catch { }
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine(
+                            $"######## replacement track would not stop on a closed producer: " +
+                            $"{exception.Message}");
+                    }
                 }
                 throw new Exception("closed");
             }
@@ -212,8 +217,10 @@ namespace WebRTCme.Connection.MediaSoup.Client
                 if (_stopTracks)
                     Track.Stop();
             }
-            catch
-            { }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"######## producer track would not stop: {exception.Message}");
+            }
         }
     }
 }
