@@ -135,12 +135,21 @@ this again:
 - The call does not return until permission is settled, and the await sits on the UI thread, so
   the window freezes meanwhile. That reads as a crash from outside, and was reported as one. It is
   now raced against a timeout that names the setting to change.
-- The app is **ad-hoc signed with no team identifier** (`Signature=adhoc`, `TeamIdentifier=not
-  set`). macOS ties Screen Recording grants to a stable code identity, so a grant can evaporate on
-  relaunch and every rebuild definitely invalidates it. Three grant-relaunch-denied cycles went by
-  before that was the diagnosis. `tccutil reset ScreenCapture <bundle-id>` clears the recorded
-  decision and lets it ask cleanly; the durable fix is signing with the Apple Development identity
-  already on the machine rather than ad-hoc, and that is a project decision rather than a bug.
+- The app **was ad-hoc signed with no team identifier** (`Signature=adhoc`, `TeamIdentifier=not
+  set`). macOS ties Screen Recording grants to a stable code identity, so a grant evaporated on
+  relaunch and every rebuild invalidated it outright. Three grant-relaunch-denied cycles went by
+  before that was the diagnosis - the symptom looked like the permission not sticking, and the
+  cause was the app not being the same app twice.
+
+  **Fixed the same day** by giving the `net10.0-maccatalyst` target a `CodesignKey` naming the
+  Apple Development identity already on the machine, as the iOS target has always had. No
+  `CodesignProvision` is needed: that target declares no entitlements requiring a profile.
+  Measured afterwards - a grant survives a relaunch (126ms to first frame) and, the case that
+  actually matters during development, **survives a rebuild** (112ms). Before, a rebuild meant
+  granting again.
+
+  `tccutil reset ScreenCapture <bundle-id>` is still the way to clear a decision macOS has
+  recorded, which is worth knowing when a grant is genuinely poisoned.
 
 The same ad-hoc signing explains the camera prompts reappearing earlier the same day. It is one
 cause with two symptoms, and it looked like two unrelated annoyances until this.
