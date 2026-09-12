@@ -11,29 +11,64 @@ of the value: several of them were wrong for a while in ways that cost real time
 
 ## What is actually open
 
-Everything else below is either fixed or recorded for reference. These are the ones still standing,
-and none of them is a small change:
+Nothing on this list is blocked on effort or on deciding whether it is worth doing. Each one is
+waiting on something that is not in this repository, and the table says which - because "open" and
+"nobody has got to it yet" are different states, and the difference is what tells you whether
+picking it up is possible today.
 
-| | where the work is |
+| | blocked on | what it is |
+| --- | --- | --- |
+| **`getDisplayMedia` on iOS and Mac Catalyst** | a Mac | A platform project - ReplayKit and a broadcast extension. Sharing can only *start* where `getDisplayMedia` exists. Blazor, Windows and Android are done. |
+| **A lost capture device on iOS and Mac Catalyst** | a Mac | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small, once someone can build it. |
+| **`OnDeviceChange` on iOS and Mac Catalyst** | a Mac | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
+| **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
+| **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+
+**Two entries that were on this list and are not faults**, kept so nobody re-opens them. The
+remaining binding stubs - 38 on Android, 33 on iOS - are on no path that runs; ask "does anything
+call it", not "how many are left". The CoreAudio log spam on Mac Catalyst is noise from inside
+WebRTC; filter it before chasing an audio problem there.
+
+**Three of the five need the same thing.** Apple is where this branch is thin, and it is thin in a
+specific way: iOS and Mac Catalyst **compile and have run none of it**. A great deal of code
+changed there on reasoning alone across 2026-09-11 and 2026-09-12, and the first person to run
+either should expect to find something. An hour on a Mac is worth more to this branch than anything
+else on the list.
+
+## What 2026-09-12 was, if you are reading this cold
+
+One symptom with five causes: **a frozen tile on a call that still says it is connected.** That is
+worth stating up front because the entries below read as unrelated bugs, and they were not - each
+was found by fixing the one before it.
+
+| | what actually stopped |
 | --- | --- |
-| **`getDisplayMedia` on iOS and Mac Catalyst** | A platform project - ReplayKit and a broadcast extension. **Android is done** (2026-09-11). |
-| **Android cannot encode simulcast** | The native dependency. This AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. |
-| **The SFU's estimate collapses under simulcast** | mediasoup's congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
-| **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
-| **A lost capture device on iOS and Mac Catalyst** | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs there. The signal exists (`AVCaptureSessionWasInterrupted`) and nothing observes it. **Android, Blazor and Windows are done** (2026-09-12). |
+| the process | Android froze a backgrounded app, so ICE stopped answering |
+| the camera | another client took it and libwebrtc never reopened it |
+| the device | a webcam was unplugged and nothing was listening for the track ending |
+| the transceiver | a share was stopped with `removeTrack`, which mutes the far track but never ends it |
+| the peer | a dropped signalling connection left everyone sending to somebody who had gone |
 
-**What has run, and where.** Blazor, Android and Windows have all executed the 2026-09-11 work and
-are verified in live calls, and the 2026-09-12 Android work - the call foreground service and the
-camera recovery - is verified on the device. **iOS and Mac Catalyst compile and have run none of
-it** - a real amount of code changed there on reasoning alone, and the first person to run either
-should expect to find something.
+The fourth was mine, caught before it shipped because the first three had taught me what to look
+for. The fifth was found by accident while testing the third.
+
+**The recurring shape**, and the thing most worth taking from this document: a signal that is
+raised and never consumed looks exactly like a working feature until you go looking for the
+subscriber. `Producer.OnTrackEnded` was forwarded and subscribed to by nothing.
+`RoomHub` had no `OnDisconnectedAsync`. `OnDeviceChange` was declared on five platforms, raised on
+one, and reachable from none of them. A sweep for events with no `+=` anywhere found all three and
+is worth repeating.
+
+**The other one:** measure before building. Three times in one day the reasoning was sound and the
+measurement disagreed - a listener leak assumed to be per-frame that turned out to be per-action, a
+receiver-side stall signal that does not fire at all, and a registration-burst guard that could not
+work because the callbacks arrive on a looper. Two of those would have been wasted features.
 
 **If you are here to work on this, read these first.** The sections after "Verified against, and
-not" are field notes rather than gaps, and each one exists because something cost hours:
-how to run and debug the Windows app, how to tell a mute actually happened, the link failure only
-a Mac can see, the framework that fits neither platform, and why a JS return value is a reference
-rather than its contents.
+not" are field notes rather than gaps, and each one exists because something cost hours: how to run
+and debug the Windows app, how to tell a mute actually happened, the link failure only a Mac can
+see, the framework that fits neither platform, and why a JS return value is a reference rather than
+its contents.
 
 ## Features, and what became of them
 
@@ -196,9 +231,11 @@ So there is no reachable failure mode left for `mute` to report here. **Do not w
 first producing a case where it actually fires** - the two obvious ones do not, and the reason they
 do not is that something else already handled them.
 
-`OnDeviceChange` is in the same family and also raised by nobody on any platform, which means a
-camera being *plugged in* is never noticed. That one is real but small, and much less interesting
-than the loss case now that loss is handled.
+`OnDeviceChange` looked like the same family and was not - it turned out to be reachable, and is
+now wired on three platforms. Worth noting the difference, because the first reading of it here was
+wrong in a way the sweep encouraged: an event with no `+=` is not evidence that it cannot fire,
+only that nobody is listening. `mute` has no subscriber *and* no case that raises it;
+`OnDeviceChange` had no subscriber and Blazor was raising it the whole time. See its own entry.
 
 ### A peer that dropped never left the room - fixed 2026-09-12
 `RoomHub` had no `OnDisconnectedAsync`, so the only way out of a room was a client politely calling
@@ -453,13 +490,16 @@ visible to the user and not worth pretending away:
 - **mediasoup** produces the screen separately with `appData { source: "screen" }`. The server
   copies `source` onto every consumer it creates, so the receiving end can tell two video streams
   from one peer apart - there is nothing else in a consumer that distinguishes them.
-- **peer-to-peer** still swaps the camera track on the existing sender, so the screen arrives
-  *instead of* the camera. Carrying both would mean negotiating a second transceiver with every
-  peer.
+- **peer-to-peer** swapped the camera track on the existing sender until 2026-09-12, so the screen
+  arrived *instead of* the camera. It now adds a second transceiver per peer and renegotiates, and
+  tells the two apart by the screen travelling on its own `MediaStream` - see "Peer-to-peer carries
+  the camera and the screen at once" below, which also has the trap in stopping one.
 
 Verified both ways on 2026-09-11, Blazor sharing to Android: over mediasoup the phone showed
-`Alice` and `Alice (screen)` together and stopping retired only the screen tile; peer-to-peer
-showed the screen in place of Alice's camera and put the camera back on stop.
+`Alice` and `Alice (screen)` together and stopping retired only the screen tile; peer-to-peer at
+that point showed the screen in place of Alice's camera and put the camera back on stop. The
+peer-to-peer half was re-verified the other way round on 2026-09-12, Android sharing to Blazor,
+with three tiles and both cameras still live.
 
 **The real work was on the receiving side, not the producing side.** The `newConsumer` handler
 used to pair a peer's consumers with `FirstOrDefault` for audio and `FirstOrDefault` for video and
@@ -1193,9 +1233,10 @@ flag, which a reconnect resets without anyone asking.
 
 **The interface is no longer the thing holding anything back.** Device switching turned out to need
 nothing from it - `ReplaceOutgoingTrackAsync` plus a camera opened with different constraints - and
-screen share got its own pair of members in the end, because the mediasoup path produces the screen
-separately while peer-to-peer swaps the track, and that difference is visible to a user rather than
-an implementation detail worth hiding. What is left is platform work and features, not routes.
+screen share got its own pair of members in the end, because the two paths get there differently -
+mediasoup produces the screen separately, peer-to-peer negotiates a second transceiver with every
+peer - and that is a difference worth a member of its own rather than hiding behind a track swap,
+which is what it did until 2026-09-12. What is left is platform work and features, not routes.
 
 Layer control is the last member added, and it is worth knowing what it is not. The receive half
 sets a **ceiling**: it caps what a peer costs, and it cannot raise a floor the server has put
