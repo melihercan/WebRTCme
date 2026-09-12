@@ -104,6 +104,22 @@ namespace WebRTCme
                 }
                 catch (Exception exception)
                 {
+                    // Send it anyway, rotated wrongly, rather than not at all.
+                    //
+                    // This used to drop the frame, and the cost of that was out of all proportion
+                    // to the fault: one failing cast meant every frame was discarded and the Mac
+                    // sent no video at all - "video bytes=0 frames=0" in its own send statistics,
+                    // a blank tile on the peer. A quarter turn is a blemish; nothing is a broken
+                    // call.
+                    try
+                    {
+                        _sink.DidCaptureVideoFrame(capturer, frame);
+                    }
+                    catch
+                    {
+                        // Nothing further to try.
+                    }
+
                     // Swallowed, and said rarely: this runs on the capturer's queue, an exception
                     // escaping into Objective-C would end the process, and a fault here would
                     // otherwise repeat thirty times a second.
