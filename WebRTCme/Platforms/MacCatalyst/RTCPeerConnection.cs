@@ -112,9 +112,26 @@ namespace WebRTCme.MacCatalyst
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Adds a track to this connection, on the stream it belongs to.
+        /// </summary>
+        /// <remarks>
+        /// The stream id used to be <c>track.Id</c> - the <paramref name="stream"/> argument was
+        /// accepted and ignored - so every track this client sent went out on an msid of its own,
+        /// named after itself. The far side therefore never saw a peer's audio and video as one
+        /// stream, which is what an msid is for. Android has always passed <c>stream.Id</c>.
+        ///
+        /// It stayed invisible because nothing read the msid until 2026-09-12, when carrying the
+        /// camera and a shared screen at once peer-to-peer made "which stream did this arrive on"
+        /// the question that separates a second source from a camera. The first symptom was a
+        /// phantom "MacCatalyst (screen)" tile on the far side, holding this client's microphone:
+        /// its audio track looked like a second source because it had a different msid from its
+        /// own video.
+        /// </remarks>
         public IRTCRtpSender AddTrack(IMediaStreamTrack track, IMediaStream stream) =>
             new RTCRtpSender(NativeObject.AddTrack(
-                ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack, new string[] { track.Id }));
+                ((MediaStreamTrack)track).NativeObject as Webrtc.RTCMediaStreamTrack,
+                new string[] { stream?.Id ?? track.Id }));
 
         public IRTCRtpTransceiver AddTransceiver(MediaStreamTrackKind kind, RTCRtpTransceiverInit init)
         {
