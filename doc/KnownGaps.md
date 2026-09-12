@@ -23,8 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **System-wide screen share on iOS** | a design decision | iOS shares *this app's own content* only. Sharing other apps needs a Broadcast Upload Extension: a second bundle, an App Group, and WebRTC running inside the extension. An architectural change, not an addition. |
-| **A lost capture device on iOS and Mac Catalyst** | nothing - it is next | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs. The signal exists - `AVCaptureSessionWasInterrupted` - and nothing observes it. Small. |
-| **`OnDeviceChange` on iOS and Mac Catalyst** | nothing | Same shape again: `AVCaptureDeviceWasConnectedNotification` exists and nothing observes it. Blazor, Windows and Android now raise it. |
 | **Android cannot encode simulcast** | a package decision | The AAR ships no `SimulcastVideoEncoderFactory`, so the ladder negotiates and one stream comes out. Fixing it means swapping the native dependency. |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 
@@ -115,6 +113,58 @@ does, which is how the two exceptions above were caught, but the middleware logs
 and none of that appears - `log show` returns zero lines for the process. Reach for the app's
 stderr (`open --stderr`), and for `lsof` on the process to see whether it has a socket at all,
 which is how the permission hang above was told apart from a connection failure.
+
+## The Apple device signals, and the four faults hiding behind them - 2026-09-12
+
+Both Apple items are done: a capture device disappearing now ends the track that was using it, and
+`OnDeviceChange` is raised. One `CaptureDeviceWatcher` per Apple platform serves both, because they
+are one notification pair - `AVCaptureDeviceWasConnectedNotification` and its disconnected twin -
+read two ways.
+
+Verified on Mac Catalyst against a live Blazor call, unplugging the webcam and plugging it back in:
+
+```
+14:36:09.622  local Video track ended unexpectedly
+14:36:09.625  Recovering ... failed: No video capture device was found.
+14:36:09.625  devices changed: disconnected
+14:36:15.704  devices changed: connected
+14:36:15.704  a device appeared and the local Video track is still dead; trying again
+14:36:15.777  local Video track replaced after the device ended
+```
+
+73ms from the camera reappearing to video flowing again, untouched.
+
+**Getting there took six attempts, and each one hid the next.** Worth listing, because three of the
+four faults were in code written earlier the same day and believed to work:
+
+1. **The recovery gave up after one attempt.** Deliberate, and documented as such: "a device that
+   is gone is usually gone for a reason". That was right about blind retries and stopped being
+   right the moment `OnDeviceChange` began firing, which was an hour later. Nothing connected "a
+   device came back" to "something here is broken".
+2. **The retry looked for tracks reporting `ReadyState == Ended`.** Windows and Blazor report that
+   after a stop; Apple reports `Live`, because it forwards what the native track says and
+   libwebrtc has no `stop()` on a track. The retry worked on two platforms and silently did
+   nothing on the other two - the worst split, because it looks implemented. Fixed by remembering
+   the dead track by kind rather than asking any platform what a stopped track's state means.
+3. **`OnEnded` was raised on a different object than the one subscribed to.** `GetTracks` builds a
+   new wrapper every call, so `CallViewModel` subscribed on one instance and the watcher called
+   `Stop` on another. Both were right about their own object. This is the same wrapper-identity
+   trap recorded against Blazor earlier the same day, biting from the opposite side: there it
+   produced duplicate handlers, here a subscription that could never fire. The end is now
+   announced statically by track id.
+4. **`MediaStream.Create` dereferenced a null constraint.** Asking for video and not audio threw
+   `NullReferenceException` on iOS, Mac Catalyst *and Android* - which is exactly what recovering
+   one dead track does, so the recovery had never once worked on any of the three. Windows had the
+   null-safe check all along and nobody had carried it across.
+
+**The reason it took six attempts is the fifth fault, and it is the one worth keeping.** The MAUI
+demo app configured **no logging providers at all**, so every `ILogger` call in the middleware went
+nowhere on Android and both Apple platforms. Four of those cycles were spent inferring a call's
+behaviour from a frozen tile at the far end. Adding a thirty-line `ConsoleLoggerProvider` turned
+the next attempt into a single readable trace that named fault 4 immediately.
+
+The lesson was already written in this file that morning - *silence in a path cannot be read* - and
+the afternoon was spent reading silence anyway. Fix the diagnostics **first**.
 
 ## getDisplayMedia on Mac Catalyst - 2026-09-12
 **ScreenCaptureKit, not ReplayKit**, and the difference is the whole point: ReplayKit's in-process
