@@ -59,6 +59,14 @@ namespace WebRTCme.Middleware
         bool _localMediaIsBeingReleased;
         readonly SemaphoreSlim _localTrackRecovery = new(1, 1);
 
+        // Local tracks whose device died and could not be reopened, by kind, waiting for a device
+        // to appear. Remembered here rather than found by asking tracks their ReadyState, because
+        // that answer is not the same on every platform: Windows and Blazor report Ended after a
+        // track is stopped, and Apple reports Live, because it forwards what the native track
+        // says and the native track was never ended. Relying on it worked on two platforms and
+        // silently did nothing on the other two.
+        readonly Dictionary<MediaStreamTrackKind, IMediaStreamTrack> _awaitingDevice = new();
+
         string _recordingFileName = "WebRTCme.webm";
 
         /// <summary>
@@ -470,16 +478,13 @@ namespace WebRTCme.Middleware
             // where it is found again. RecoverLocalTrackAsync drops concurrent attempts, and a
             // successful one removes the dead track - so the set being announced repeatedly,
             // which it is, costs nothing.
-            foreach (var track in _cameraStream.GetTracks())
+            foreach (var (kind, deadTrack) in _awaitingDevice.ToArray())
             {
-                if (track?.ReadyState != MediaStreamTrackState.Ended)
-                    continue;
-
                 _logger.LogInformation(
-                    $"-------> a device appeared and the local {track.Kind} track is ended; " +
+                    $"-------> a device appeared and the local {kind} track is still dead; " +
                     $"trying again");
 
-                _ = RecoverLocalTrackAsync(track);
+                _ = RecoverLocalTrackAsync(deadTrack);
             }
         }
 
@@ -529,9 +534,10 @@ namespace WebRTCme.Middleware
 
                 if (newTrack is null)
                 {
+                    _awaitingDevice[kind] = deadTrack;
                     _logger.LogInformation(
                         $"-------> reopening the {kind} device produced no track; " +
-                        $"the call continues without it");
+                        $"the call continues without it until a device appears");
                     return;
                 }
 
@@ -542,6 +548,7 @@ namespace WebRTCme.Middleware
                 _cameraStream.RemoveTrack(deadTrack);
                 _cameraStream.AddTrack(newTrack);
 
+                _awaitingDevice.Remove(kind);
                 _localTrackWatchers.Remove(deadTrack.Id);
                 WatchLocalTracks(_cameraStream);
 
@@ -564,6 +571,7 @@ namespace WebRTCme.Middleware
             {
                 // Said and swallowed. This runs from a device event with nobody to throw to, and a
                 // call carrying one fewer track is better than a call that falls over.
+                _awaitingDevice[deadTrack.Kind] = deadTrack;
                 _logger.LogInformation(
                     $"Recovering the local {deadTrack.Kind} track failed: {exception.Message}");
             }
