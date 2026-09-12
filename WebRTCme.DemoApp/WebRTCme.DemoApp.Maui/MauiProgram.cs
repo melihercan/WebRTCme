@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using WebRTCme.Middleware;
 using Xamarinme;
@@ -31,6 +32,10 @@ public static class MauiProgram
             })
 			.Build());
 
+
+        // Without this every ILogger call in the middleware goes nowhere on every MAUI platform -
+        // see ConsoleLoggerProvider for what that costs when something goes wrong on a device.
+        builder.Logging.AddProvider(new ConsoleLoggerProvider());
 
         var webRtcMiddleware = CrossWebRtcMiddlewareMaui.Current;
 
