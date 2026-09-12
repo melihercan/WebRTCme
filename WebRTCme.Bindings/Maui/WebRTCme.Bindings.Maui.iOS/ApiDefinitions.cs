@@ -179,8 +179,24 @@ namespace Webrtc
 		NativeHandle Constructor (CVPixelBuffer pixelBuffer, int scaledWidth, int scaledHeight, int cropWidth, int cropHeight, int cropX, int cropY, RTCVideoRotation rotation, long timeStampNs);
 
 		// -(instancetype _Nonnull)initWithBuffer:(id<RTCVideoFrameBuffer> _Nonnull)frameBuffer rotation:(RTCVideoRotation)rotation timeStampNs:(int64_t)timeStampNs;
+		//
+		// RTCCVPixelBuffer, not the protocol. The Objective-C parameter is
+		// id<RTCVideoFrameBuffer>, and neither way of expressing that works here: bound as the
+		// generated class RTCVideoFrameBuffer nothing derives from it, and bound as
+		// IRTCVideoFrameBuffer nothing implements it either - the generator emits
+		// "RTCCVPixelBuffer : NSObject" and drops the conformance this file asks for. Both were
+		// tried on 2026-09-12.
+		//
+		// So it is bound to the concrete buffer, which is the only one this framework hands out.
+		// The selector is unchanged and the object is what Objective-C expects; what is lost is
+		// the ability to pass some other conforming buffer, and there is none to pass.
+		//
+		// This mattered because the two pixel-buffer constructors above are deprecated and no
+		// longer exist in this build of WebRTC.framework - calling one compiles and throws
+		// "unrecognized selector" per frame - so with this one untypeable, no RTCVideoFrame could
+		// be constructed on Apple at all. Nothing had noticed because nothing had ever tried.
 		[Export ("initWithBuffer:rotation:timeStampNs:")]
-		NativeHandle Constructor (RTCVideoFrameBuffer frameBuffer, RTCVideoRotation rotation, long timeStampNs);
+		NativeHandle Constructor (RTCCVPixelBuffer frameBuffer, RTCVideoRotation rotation, long timeStampNs);
 
 		// -(RTCVideoFrame * _Nonnull)newI420VideoFrame;
 		[Export ("newI420VideoFrame")]

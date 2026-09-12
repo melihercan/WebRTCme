@@ -203,11 +203,15 @@ namespace WebRTCme
                     Echo($"screen capture: frame {_frameCount} " +
                         $"{pixelBuffer.Width}x{pixelBuffer.Height} ts={timestampNs}");
 
-                // The CVPixelBuffer goes straight in: this constructor wraps it in an
-                // RTCCVPixelBuffer itself, so building one here only to hand it over would be a
-                // second wrapper around the same pixels.
+                // Wrapped, not passed raw. RTCVideoFrame's pixel-buffer constructors are
+                // deprecated and gone from this build of the framework - calling one compiles
+                // and then throws "unrecognized selector" for every frame, which is precisely
+                // what it did. initWithBuffer: is the surviving one, and it takes a buffer
+                // conforming to RTCVideoFrameBuffer; RTCCVPixelBuffer is that, and retains the
+                // CVPixelBuffer rather than copying it.
+                using var buffer = new Webrtc.RTCCVPixelBuffer(pixelBuffer);
                 using var frame = new Webrtc.RTCVideoFrame(
-                    pixelBuffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, timestampNs);
+                    buffer, Webrtc.RTCVideoRotation.RTCVideoRotation_0, timestampNs);
 
                 _sink.DidCaptureVideoFrame(_capturer, frame);
             }
