@@ -22,7 +22,7 @@ and none of them is a small change:
 | **A second producer for a shared screen, peer-to-peer** | A feature. The SFU path carries camera and screen at once; peer-to-peer would need a second transceiver per peer. |
 | **The remaining binding stubs** | 38 on Android, 33 on iOS, none on paths that run. Ask "does anything call it", not "how many are left". |
 | **CoreAudio log spam on Mac Catalyst** | Not a fault - noise from inside WebRTC. Filter it before chasing an audio problem there. |
-| **A lost capture device on Windows, iOS and Mac Catalyst** | The recovery is written and platform-independent; those three never raise `OnEnded` for a device that disappears, so it never runs there. **Android and Blazor are done** (2026-09-12). |
+| **A lost capture device on iOS and Mac Catalyst** | The recovery is platform-independent and already written; Apple never raises `OnEnded` for a device that disappears, so it never runs there. The signal exists (`AVCaptureSessionWasInterrupted`) and nothing observes it. **Android, Blazor and Windows are done** (2026-09-12). |
 
 **What has run, and where.** Blazor, Android and Windows have all executed the 2026-09-11 work and
 are verified in live calls, and the 2026-09-12 Android work - the call foreground service and the
@@ -169,12 +169,25 @@ pulling the camera out, so what is verified is everything from our listener onwa
 own dispatch on real device removal is specified behaviour on a listener that was already wired,
 but it has not been watched happening here.
 
-**Where it still does not run.** Windows, iOS and Mac Catalyst raise `OnEnded` only from their own
-`Stop()`, so a device disappearing underneath them is silent and the recovery above never fires.
-Windows is the awkward one: its native ABI (`WebRTCme.Bindings.Maui.Windows/Interop.cs`) exposes
-device *enumeration* and no device-lost callback at all, so noticing there means either polling
-`EnumerateDevices` or adding a callback to the native shim. Apple has the signal already -
-`AVCaptureSessionWasInterrupted` and `AVCaptureSessionInterruptionEnded` - and nothing observes it.
+**Windows had no signal to give, so it polls.** Its native ABI
+(`WebRTCme.Bindings.Maui.Windows/Interop.cs`) exposes device *enumeration* and no device-lost
+callback at all, and `WebRtcInterop.dll`'s source is not in this repository - so there was nothing
+to subscribe to and nothing to add one to. `CaptureDeviceWatcher` compares the live local tracks'
+device ids against enumeration every two seconds and ends a track whose device is no longer listed,
+which is what the recovery above is already listening for.
+
+Polling is not the answer anyone wants, and the shape of the compromise is worth stating: the
+timer exists only while something is being captured, and enumeration is a handful of P/Invokes
+that touch no media path. In practice it watches the camera and not the microphone - the shim
+always opens the default audio input and does not report which, so an audio track has no device
+id to miss from a list.
+
+**Where it still does not run.** iOS and Mac Catalyst raise `OnEnded` only from their own
+`Stop()`. Apple has the signal already - `AVCaptureSessionWasInterrupted` and
+`AVCaptureSessionInterruptionEnded` - and nothing observes it. That is the remaining work, and it
+is small; the reason it is not done here is that neither platform can be built or run from this
+machine, and the one thing this file is sure of about Apple is that code written for it on
+reasoning alone has not been right yet.
 
 ### Nothing reopened a camera the system took away - fixed 2026-09-12
 Found by testing the fix above, which is the only reason it was ever separated from it. With the

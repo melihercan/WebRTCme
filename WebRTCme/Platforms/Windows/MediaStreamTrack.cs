@@ -225,6 +225,10 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
         if (_readyState == MediaStreamTrackState.Ended)
             return;
 
+        // Before the event, so that a listener which reacts by opening another track cannot be
+        // beaten to it by a watcher still holding this one.
+        CaptureDeviceWatcher.Forget(this);
+
         Enabled = false;
         _readyState = MediaStreamTrackState.Ended;
         OnEnded?.Invoke(this, EventArgs.Empty);
@@ -233,6 +237,8 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
     public void Dispose()
     {
         IntPtr handle;
+
+        CaptureDeviceWatcher.Forget(this);
 
         lock (_gate)
         {

@@ -20,9 +20,50 @@ internal sealed class MediaDevices : IMediaDevices
     /// Never raised: the shim reports no device-change notifications. Declared because
     /// <see cref="IMediaDevices"/> requires it.
     /// </summary>
+    /// <remarks>
+    /// The absence is real and it costs something - see <see cref="CaptureDeviceWatcher"/>, which
+    /// has to poll <see cref="EnumerateInputDevices"/> to notice a camera being unplugged. Raising
+    /// this properly would need a callback added to the ABI, whose source is not in this
+    /// repository.
+    /// </remarks>
 #pragma warning disable CS0067 // no device-change signal in the ABI
     public event EventHandler<IMediaStreamTrackEvent> OnDeviceChange;
 #pragma warning restore CS0067
+
+    /// <summary>
+    /// The ids of the capture devices currently present, cameras and microphones.
+    /// </summary>
+    /// <remarks>
+    /// Split out of <see cref="EnumerateDevices"/> so that watching for a device to disappear
+    /// costs only the enumeration and not the <see cref="MediaDeviceInfo"/> objects and marshalled
+    /// labels around it - this runs every couple of seconds for the length of a call. Playout
+    /// devices are left out: nothing is captured from them, so nothing here can lose one.
+    /// </remarks>
+    internal static IEnumerable<string> EnumerateInputDevices()
+    {
+        var factory = WebRtcRuntime.Factory;
+
+        WebRtcRuntime.Check(VideoDeviceCount(factory, out var cameraCount), "count video devices");
+        for (var index = 0; index < cameraCount; index++)
+        {
+            if (VideoDeviceInfo(factory, index, out var name, out var id) != Ok)
+                continue;
+
+            WebRtcRuntime.TakeString(name);
+            yield return WebRtcRuntime.TakeString(id);
+        }
+
+        WebRtcRuntime.Check(AudioDeviceCount(factory, AudioDeviceRecording, out var micCount),
+                            "count AudioInput devices");
+        for (var index = 0; index < micCount; index++)
+        {
+            if (AudioDeviceInfo(factory, AudioDeviceRecording, index, out var name, out var id) != Ok)
+                continue;
+
+            WebRtcRuntime.TakeString(name);
+            yield return WebRtcRuntime.TakeString(id);
+        }
+    }
 
     public Task<MediaDeviceInfo[]> EnumerateDevices()
     {
@@ -144,6 +185,14 @@ internal sealed class MediaDevices : IMediaDevices
                 track.Dispose();
             throw;
         }
+
+        // Watched from here rather than from the constructor, because a remote track and a desktop
+        // track go through the same type and neither is a device that can be unplugged. In
+        // practice this watches the camera and not the microphone: the shim always opens the
+        // default audio input and does not say which it was, so an audio track has no device id
+        // to miss from a list.
+        foreach (var track in tracks)
+            CaptureDeviceWatcher.Watch(track as MediaStreamTrack);
 
         return Task.FromResult<IMediaStream>(new MediaStream(tracks));
     }
