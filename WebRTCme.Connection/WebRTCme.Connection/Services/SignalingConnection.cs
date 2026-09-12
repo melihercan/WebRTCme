@@ -508,8 +508,20 @@ namespace WebRTCme.Connection.Services
         // Above this, the microphone counts as carrying speech. Measured rather than picked: in
         // this project's own stats, silence sits between 0.0001 and 0.0006 and speech runs from
         // 0.005 to 0.16, so 0.01 is clear of the noise and well under the quietest speech seen.
-        // A noisy room will need it raised.
         const double SpeakingLevelThreshold = 0.01;
+
+        // How many samples in a row have to clear the threshold before the flag goes up.
+        //
+        // One is not enough on a noisy microphone, and raising the threshold instead would cost
+        // the quiet speech the threshold was chosen to catch. Measured on the Mac mini's USB
+        // webcam on 2026-09-12: its idle level sits between 0.0005 and 0.006 - an order of
+        // magnitude above the quiet room this was first calibrated in - and spikes past 0.01 every
+        // few seconds. One spike latched the flag, the two-second hold-off carried it to the next
+        // spike, and the peer saw "speaking" permanently.
+        //
+        // Speech sustains and a fan does not, so two in a row separates them. The cost is 400ms of
+        // extra latency at the start of a sentence, against a flag that was previously stuck on.
+        const int SpeakingSamplesToStart = 2;
 
         // How long the flag is held after the level drops below the threshold. Speech is full of
         // gaps, and without a hold-off the flag flickers several times a sentence - which is a
@@ -555,6 +567,7 @@ namespace WebRTCme.Connection.Services
             _ = Task.Run(async () =>
             {
                 var lastHeard = DateTime.MinValue;
+                var samplesAbove = 0;
 
                 while (!cts.IsCancellationRequested)
                 {
@@ -567,6 +580,11 @@ namespace WebRTCme.Connection.Services
                             continue;
 
                         if (level > SpeakingLevelThreshold)
+                            samplesAbove++;
+                        else
+                            samplesAbove = 0;
+
+                        if (samplesAbove >= SpeakingSamplesToStart)
                             lastHeard = DateTime.UtcNow;
 
                         var speaking = _outgoingAudioEnabled &&
