@@ -459,8 +459,29 @@ namespace WebRTCme.Middleware
         /// <c>AndroidSupport.CameraLost</c> recovers from - seen from the other side, and a moment
         /// earlier. A log line that says so turns a class of confusing report into an obvious one.
         /// </remarks>
-        void OnCaptureDevicesChanged(object sender, EventArgs e) =>
+        void OnCaptureDevicesChanged(object sender, EventArgs e)
+        {
             _logger.LogInformation("-------> the set of capture devices changed");
+
+            if (_localMediaIsBeingReleased || _cameraStream is null)
+                return;
+
+            // A track that ended and could not be reopened is left in the stream, so this is
+            // where it is found again. RecoverLocalTrackAsync drops concurrent attempts, and a
+            // successful one removes the dead track - so the set being announced repeatedly,
+            // which it is, costs nothing.
+            foreach (var track in _cameraStream.GetTracks())
+            {
+                if (track?.ReadyState != MediaStreamTrackState.Ended)
+                    continue;
+
+                _logger.LogInformation(
+                    $"-------> a device appeared and the local {track.Kind} track is ended; " +
+                    $"trying again");
+
+                _ = RecoverLocalTrackAsync(track);
+            }
+        }
 
         void OnLocalTrackEnded(IMediaStreamTrack track)
         {
@@ -484,11 +505,13 @@ namespace WebRTCme.Middleware
         /// ladder that were negotiated when the call started, so the far side sees the picture
         /// come back rather than a new stream arriving.
         ///
-        /// One attempt. A device that is gone is usually gone for a reason the user knows about,
-        /// and the honest thing is to stop and leave the call otherwise intact rather than to sit
-        /// in a loop reopening a camera nobody has plugged back in. This differs from Android's
-        /// camera recovery deliberately - there the device is known to be coming back, because
-        /// something with a temporary claim took it.
+        /// One attempt per event, rather than a loop. A device that is gone is gone, and sitting
+        /// in a retry loop reopening a camera nobody has plugged back in helps nobody - so this
+        /// gives up, and <see cref="OnCaptureDevicesChanged"/> tries again if a device actually
+        /// appears. That second half was missing until 2026-09-12 and the gap was visible: a
+        /// webcam unplugged and plugged back in left the call with a dead video track and a
+        /// working camera sitting unused, because nothing connected "a device came back" to
+        /// "something here is broken".
         /// </remarks>
         async Task RecoverLocalTrackAsync(IMediaStreamTrack deadTrack)
         {
