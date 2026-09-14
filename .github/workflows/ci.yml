@@ -1,8 +1,21 @@
 name: CI
 
+# Builds, packs and verifies both packages exactly the way `publish.yml` does, on every push to
+# master and every pull request into it.
+#
+# The point of the Windows/Mac split here is that CI should produce the *same* package a release
+# produces. It did not before: this workflow used to run on Windows alone, which builds a flat
+# Mac Catalyst WebRTC.framework that macOS refuses to codesign. Those packages restored and
+# compiled fine, so nothing failed until a release - or a consumer - reached a device. Now the
+# Apple slices come from a Mac and are merged in, and -RequireAppleNativeLayout fails the build
+# if they did not.
+#
+# The uploaded `nupkg` artifact is therefore a publishable package, and is what the test jobs
+# will consume.
+
 on:
   push:
-    branches: [master, 'feature/**']
+    branches: [master]
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -12,11 +25,80 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and pack
-    # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else,
-    # and the iOS and Mac Catalyst library slices do compile here - only linking an app needs a
-    # Mac. So nothing in this job proves the Apple native side links.
+  # Mac Catalyst's WebRTC.framework must be a versioned bundle - Versions/A plus symlinks - or
+  # macOS refuses to codesign an app embedding it. Windows can neither check those symlinks out of
+  # git nor write them into a zip, so that slice has to be built here. iOS comes along for the
+  # ride: its xcframework is flat and does build correctly on Windows, but keeping both Apple
+  # slices on one machine is one less way to be subtly wrong.
+  #
+  # Everything else stays on Windows, which is also the only host that can build
+  # net10.0-windows10.0.22621.0 - the two csprojs add that target framework behind an
+  # IsOSPlatform('windows') condition, so on any other host it does not exist and its slice would
+  # go missing from the package rather than failing loudly.
+  apple:
+    name: Build the Apple slices
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # Not `workload restore WebRTCme.sln`: the solution contains net10.0-windows projects whose
+      # workloads do not exist on macOS. Only what this job actually builds is installed.
+      - name: Install workloads
+        run: dotnet workload install ios maccatalyst
+
+      # These produce the assemblies and the .resources.zip files that carry the native
+      # frameworks. build-versioned-framework.sh runs as part of the Mac Catalyst build, rebuilding
+      # WebRTC.framework into the versioned layout before it is packed into the .resources.zip.
+      - name: Build iOS and Mac Catalyst
+        run: |
+          set -euo pipefail
+          dotnet build WebRTCme/WebRTCme.csproj -c Release -f net10.0-ios
+          dotnet build WebRTCme/WebRTCme.csproj -c Release -f net10.0-maccatalyst
+
+      # Fail here rather than handing a flat framework to the merge: this is the whole reason the
+      # job exists, and the merge itself cannot tell the difference.
+      - name: Verify the Mac Catalyst framework is versioned
+        run: |
+          set -euo pipefail
+          zip=WebRTCme/bin/Release/net10.0-maccatalyst/WebRTCme.Bindings.Maui.MacCatalyst.resources.zip
+          if unzip -l "$zip" | grep -q 'WebRTC.framework/Versions/A/WebRTC'; then
+            echo "Mac Catalyst framework is versioned."
+          else
+            echo "::error::$zip does not contain a versioned WebRTC.framework"
+            unzip -l "$zip" | head -20
+            exit 1
+          fi
+
+      - name: Collect the slices
+        run: |
+          set -euo pipefail
+          for tfm in net10.0-ios net10.0-maccatalyst; do
+            mkdir -p apple/$tfm
+            cp WebRTCme/bin/Release/$tfm/WebRTCme.dll                           apple/$tfm/
+            cp WebRTCme/bin/Release/$tfm/WebRTCme.Bindings.Maui.*.dll           apple/$tfm/
+            cp WebRTCme/bin/Release/$tfm/WebRTCme.Bindings.Maui.*.resources.zip apple/$tfm/
+          done
+          find apple -type f | sort
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: apple-slices
+          path: apple/**
+          if-no-files-found: error
+
+  package:
+    name: Build, pack and verify
+    needs: apple
+    # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else.
+    # The iOS and Mac Catalyst library slices do compile here too, and pack needs them present to
+    # lay the package out - the merge below then overwrites those two lib/ folders with the ones
+    # built on the Mac. The Windows-built Apple slices existing and being discarded is intended,
+    # not waste to optimise away.
     runs-on: windows-latest
 
     defaults:
@@ -38,6 +120,35 @@ jobs:
       - name: Install MAUI workloads
         run: dotnet workload restore WebRTCme.sln
 
+      # Versions are the build date, written normalised: 26.9.14, not 26.09.14. NuGet strips
+      # leading zeros, so a csproj saying 26.09.14 still packs WebRTCme.26.9.14.nupkg and every
+      # place that builds a file name or a tag from <Version> stops matching - including the push
+      # step in publish.yml, which by then has already spent its one-hour NuGet token.
+      #
+      # publish.yml checks both of these at tag time. Checking them here as well means a bad
+      # version fails the commit that introduced it rather than the release weeks later, which is
+      # the same reason packing runs on every push.
+      - name: Check the declared versions
+        run: |
+          set -euo pipefail
+          main=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme/WebRTCme.csproj | head -1)
+          middleware=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme.Middleware/WebRTCme.Middleware.csproj | head -1)
+
+          # The two are not independent: the middleware package records a dependency on WebRTCme at
+          # whatever version this build produces, so a mismatch would ship a package pointing at
+          # one that was never published.
+          if [ "$main" != "$middleware" ]; then
+            echo "::error::WebRTCme declares $main but WebRTCme.Middleware declares $middleware; they must match."
+            exit 1
+          fi
+
+          if echo "$main" | grep -qE '(^|\.)0[0-9]'; then
+            echo "::error::Version $main has a leading zero in a segment. NuGet normalises it away; declare the normalised form instead."
+            exit 1
+          fi
+
+          echo "Version: $main"
+
       # No separate restore step, and no --no-restore. The MAUI Windows app resolves runtime packs
       # per RuntimeIdentifier, and a plain solution-level restore does not fetch them: build then
       # fails with NETSDK1112 telling you to restore with a RuntimeIdentifier. Letting build do its
@@ -57,10 +168,42 @@ jobs:
           dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts
           dotnet pack WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: apple-slices
+          path: apple
+
+      # Swaps the Windows-built Apple slices for the macOS ones. The .resources.zip files are
+      # copied byte for byte and never unpacked - the symlinks live inside them, and rewriting one
+      # on Windows would flatten the framework again.
+      #
+      # Only WebRTCme is merged. WebRTCme.Middleware has Apple slices too, but they are managed
+      # assemblies with no native payload, so the ones Windows built are the same thing.
+      #
+      # The package is found rather than constructed: CI has no tag to take a version from, and the
+      # digit after the id is what stops "WebRTCme." also matching WebRTCme.Middleware.
+      - name: Merge the Apple slices
+        shell: pwsh
+        run: |
+          $package = Get-ChildItem artifacts/WebRTCme.*.nupkg |
+                     Where-Object { $_.Name -match '^WebRTCme\.\d' } |
+                     Select-Object -First 1
+          if (-not $package) { throw "No WebRTCme package found in artifacts/" }
+          ./.github/scripts/Merge-AppleSlices.ps1 -Package $package.FullName -AppleArtifactDirectory apple
+
+      # Asserts every slice and native payload is present and that no folded project leaked into
+      # the dependency groups. Both are things pack gets wrong in silence, and neither shows up in
+      # a consumer's build - a missing framework surfaces on a device, and a leaked dependency
+      # points at a package that was never published.
+      #
+      # -RequireAppleNativeLayout additionally opens the Mac Catalyst .resources.zip and insists on
+      # a versioned framework, so a merge that silently did nothing fails here. No -Version: the
+      # packages are matched by id against whatever version the csproj declares.
       - name: Verify packages
         shell: pwsh
-        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory artifacts
+        run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory artifacts -RequireAppleNativeLayout
 
+      # This is a publishable package, Apple slices and all. The test jobs will consume it.
       - uses: actions/upload-artifact@v7
         with:
           name: nupkg
