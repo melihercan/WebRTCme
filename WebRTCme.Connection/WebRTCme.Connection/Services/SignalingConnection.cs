@@ -505,10 +505,32 @@ namespace WebRTCme.Connection.Services
 
         #region Voice activity
 
-        // Above this, the microphone counts as carrying speech. Measured rather than picked: in
-        // this project's own stats, silence sits between 0.0001 and 0.0006 and speech runs from
-        // 0.005 to 0.16, so 0.01 is clear of the noise and well under the quietest speech seen.
-        const double SpeakingLevelThreshold = 0.01;
+        // Speech is judged against the room, not against a fixed number.
+        //
+        // A fixed one was tried first and cannot work across these devices. Measured 2026-09-14,
+        // media-source audioLevel, the same build on both ends of one call:
+        //
+        //                     silence            speech
+        //   Android phone     0.0002 - 0.0007    0.0023 - 0.0063
+        //   Mac mini webcam   0.0004 - 0.0012    up to 0.037
+        //
+        // The old 0.01 sat above everything Android produces, so that peer never reported
+        // speaking at all. Anything low enough to catch Android's quietest speech has under a
+        // factor of two over the Mac's idle level, which is not a margin. The microphones differ
+        // by about 2x in noise floor and 6x in speech peak, and no single constant fits both.
+        //
+        // What is stable across both is the *ratio*: speech runs three to fifty times the floor.
+        // So the floor is tracked per device and the threshold follows it.
+        const double SpeakingLevelFactor = 3.0;
+
+        // A floor for the floor, for a microphone that reports digital silence: without it a floor
+        // near zero makes any faint sound "speech".
+        const double SpeakingLevelFloor = 0.001;
+
+        // How fast the tracked noise floor follows the room, per sample. About four seconds at the
+        // 400ms sample interval - slow enough to ignore a cough, quick enough to settle when a fan
+        // starts.
+        const double NoiseFloorAdaption = 0.1;
 
         // How long the flag is held after the level drops below the threshold. Speech is full of
         // gaps, and without a hold-off the flag flickers several times a sentence - which is a
@@ -554,6 +576,7 @@ namespace WebRTCme.Connection.Services
             _ = Task.Run(async () =>
             {
                 var lastHeard = DateTime.MinValue;
+                var noiseFloor = double.NaN;
 
                 while (!cts.IsCancellationRequested)
                 {
@@ -565,8 +588,23 @@ namespace WebRTCme.Connection.Services
                         if (level is null)
                             continue;
 
-                        if (level > SpeakingLevelThreshold)
+                        var threshold = double.IsNaN(noiseFloor)
+                            ? SpeakingLevelFloor
+                            : Math.Max(SpeakingLevelFloor, noiseFloor * SpeakingLevelFactor);
+
+                        if (level > threshold)
+                        {
                             lastHeard = DateTime.UtcNow;
+                        }
+                        else
+                        {
+                            // Only quiet samples move the floor. Letting speech raise it would
+                            // walk the threshold up mid-sentence until the speaker fell below
+                            // their own floor and the flag dropped while they were still talking.
+                            noiseFloor = double.IsNaN(noiseFloor)
+                                ? level.Value
+                                : noiseFloor + (level.Value - noiseFloor) * NoiseFloorAdaption;
+                        }
 
                         var speaking = _outgoingAudioEnabled &&
                             DateTime.UtcNow - lastHeard < SpeakingHangover;
@@ -576,8 +614,13 @@ namespace WebRTCme.Connection.Services
 
                         _speaking = speaking;
 
-                        System.Diagnostics.Debug.WriteLine(
-                            $"######## Outgoing speaking:{speaking} level:{level:F4}");
+                        // Console, not Debug: this is read from a device log to check the
+                        // decision, and the floor and threshold are printed beside the level
+                        // because the level alone does not say why it was judged either way.
+                        Console.WriteLine(
+                            $"######## Outgoing speaking:{speaking} level:{level:F5} " +
+                            $"floor:{(double.IsNaN(noiseFloor) ? 0 : noiseFloor):F5} " +
+                            $"threshold:{threshold:F5}");
 
                         var result = await SendMediaStateAsync().ConfigureAwait(false);
                         if (!result.IsOk)
