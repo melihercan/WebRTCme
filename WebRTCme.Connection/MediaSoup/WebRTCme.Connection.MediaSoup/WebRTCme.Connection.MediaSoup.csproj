@@ -21,4 +21,14 @@
 		<ProjectReference Include="..\..\..\WebRTCme\WebRTCme.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!--
+		  H264 and CommonUtils are internal to this assembly - they are implementation detail of the
+		  mediasoup-client port, not surface anyone consumes - but they are pure functions over the
+		  SDP wire format and are exactly what unit tests are for. Granting the test project access
+		  is preferable to widening them to public purely to be testable.
+		-->
+		<InternalsVisibleTo Include="WebRTCme.Tests" />
+	</ItemGroup>
+
 </Project>

@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  Tier 1 of doc/TestingPlan.md: unit and integration tests for logic that needs no hardware,
+	  no device and no second peer. Plain net10.0, so it runs on any machine in seconds.
+
+	  This tests the *source tree*, not the packages - that is tier 2 (WebRTCme.PackageTests),
+	  which restores the packed .nupkg instead of referencing projects.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--
+		  FluentAssertions is deliberately held at the 7.x line. From 8.0 it moved to a licence
+		  that requires payment for commercial use; 7.2.2 is the last Apache-2.0 release. This is
+		  an open-source repository publishing public packages, so the free line is the right one.
+		-->
+		<PackageReference Include="FluentAssertions" Version="7.2.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+		<PackageReference Include="NSubstitute" Version="6.2.0" />
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="FluentAssertions" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\WebRTCme.Connection\MediaSoup\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
+	</ItemGroup>
+
+</Project>

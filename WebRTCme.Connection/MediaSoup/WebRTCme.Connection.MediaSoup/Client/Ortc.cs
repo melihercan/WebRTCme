@@ -563,7 +563,14 @@ namespace WebRTCme.Connection.MediaSoup.Client
                     {
                         filteredCodecs.Add(codecs[idx]);
 
-                        if (IsRtxCodec(codecs[idx + 1]))
+                        // The bounds check is not optional, and its absence was a porting slip:
+                        // JavaScript's codecs[idx + 1] is undefined past the end of the array and
+                        // isRtxCodec() simply says no, so mediasoup-client needs no guard. C#
+                        // throws instead. A preferred codec that happens to be last in the list -
+                        // an ordinary thing for a peer that lists VP8 then H264 and prefers H264 -
+                        // took the whole reduction out with an IndexOutOfRangeException. The
+                        // capCodec-is-null branch above always had the equivalent check.
+                        if (idx + 1 < codecs.Length && IsRtxCodec(codecs[idx + 1]))
                             filteredCodecs.Add(codecs[idx + 1]);
                         break;
                     }
