@@ -1,6 +1,6 @@
 name: CI
 
-# Builds, packs and verifies both packages exactly the way `publish.yml` does, on every push.
+# Builds, packs and verifies both packages exactly the way `publish.yml` does, on request.
 #
 # The point of the Windows/Mac split here is that CI should produce the *same* package a release
 # produces. It did not before: this workflow used to run on Windows alone, which builds a flat
@@ -12,12 +12,13 @@ name: CI
 # The uploaded `nupkg` artifact is therefore a publishable package, and is what the test jobs
 # will consume.
 
-# Every push, on every branch. Nothing here waits for a pull request to be opened: work on this
-# repository goes straight onto a branch, and a build that only runs once a PR exists would not
-# have run at all for most of the commits in its history.
+# Manual only. This is a two-machine build of five target frameworks and it is not quick, so it is
+# started when it is wanted rather than on every push.
+#
+# The cost of that is real and worth stating: nothing verifies a commit automatically any more, so
+# a packaging fault sits undetected until somebody runs this or pushes a tag. Packaging is where
+# this repository fails quietly - run it before tagging a release, not after.
 on:
-  push:
-    branches: ['**']
   workflow_dispatch:
 
 concurrency:
@@ -125,9 +126,9 @@ jobs:
       # place that builds a file name or a tag from <Version> stops matching - including the push
       # step in publish.yml, which by then has already spent its one-hour NuGet token.
       #
-      # publish.yml checks both of these at tag time. Checking them here as well means a bad
-      # version fails the commit that introduced it rather than the release weeks later, which is
-      # the same reason packing runs on every push.
+      # publish.yml checks both of these at tag time, which is the last possible moment and after
+      # a failed login has already burned a token. Checking them here means a run of this workflow
+      # before tagging catches a bad version while it is still cheap to fix.
       - name: Check the declared versions
         run: |
           set -euo pipefail
@@ -156,9 +157,9 @@ jobs:
       - name: Build
         run: dotnet build WebRTCme.sln -c Release
 
-      # Packing runs on every push and PR, not only on release. Packing is where this repository
-      # goes wrong quietly - pack discards build output it does not recognise without a word - so
-      # a commit that breaks a package should fail that commit rather than the release weeks later.
+      # Packing is not left to release day. It is where this repository goes wrong quietly - pack
+      # discards build output it does not recognise without a word - so a commit that breaks a
+      # package should be found by a run of this workflow rather than by the release itself.
       #
       # No --no-build: these projects' packing targets resolve their ProjectReferences, which counts
       # as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085).
