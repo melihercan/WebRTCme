@@ -334,8 +334,16 @@ compiled everywhere and had run nowhere.
 | Blazor | **done** - two-party with Android |
 | Android | **done** - two-party with Blazor, and again with Mac Catalyst |
 | Mac Catalyst | **done** - two-party with Android, both directions, 2026-09-14 |
-| Windows | app running on the current build, needs one click to join |
-| iOS | needs an iPhone plugged into the Mac - `devicectl` lists three, all unavailable |
+| Windows | **done** - joined a three-party call with Android and Mac Catalyst, 2026-09-14 |
+| iOS | the only one left - needs an iPhone plugged into the Mac |
+
+All four ran together at the end: Android, Mac Catalyst and Windows in **one three-party call**,
+each rendering the other two, which is further than this phase asked for. Blazor was verified
+separately because it and the MAUI Windows app share the machine's only camera.
+
+One rig note that cost time twice: **stopping the Blazor dev server does not release the camera.**
+The page is a WebAssembly application and keeps running in the tab after the server it was served
+from has gone. The tab has to be closed.
 
 ### What the calls showed
 
