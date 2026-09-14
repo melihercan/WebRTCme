@@ -1,7 +1,6 @@
 name: CI
 
-# Builds, packs and verifies both packages exactly the way `publish.yml` does, on every push to
-# master and every pull request into it.
+# Builds, packs and verifies both packages exactly the way `publish.yml` does, on every push.
 #
 # The point of the Windows/Mac split here is that CI should produce the *same* package a release
 # produces. It did not before: this workflow used to run on Windows alone, which builds a flat
@@ -13,11 +12,12 @@ name: CI
 # The uploaded `nupkg` artifact is therefore a publishable package, and is what the test jobs
 # will consume.
 
+# Every push, on every branch. Nothing here waits for a pull request to be opened: work on this
+# repository goes straight onto a branch, and a build that only runs once a PR exists would not
+# have run at all for most of the commits in its history.
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches: ['**']
   workflow_dispatch:
 
 concurrency:
