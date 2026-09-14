@@ -82,10 +82,15 @@
 	  So every MAUI consumer has to name these two versions itself, exactly as NU1605 instructs and
 	  exactly as WebRTCme.DemoApp.Maui already does. It is not optional and it is not discoverable
 	  until the restore fails, which makes it something the documentation has to say out loud.
+
+	  It also has to be kept in step. These were 10.0.80 until the packages moved to 10.0.101, and
+	  the test failed with the same NU1605 in the opposite direction until they were raised - which
+	  is the tier working rather than the tier being annoying. A consumer pinned to the old version
+	  would have hit exactly this.
 	-->
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
 	</ItemGroup>
 
 </Project>

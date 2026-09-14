@@ -90,6 +90,30 @@ Write-Host "Package source : $PackageSource"
 Write-Host "Version        : $Version"
 Write-Host ""
 
+# The version is not enough to identify a package here, and that nearly produced a false pass.
+#
+# NuGet caches by id and version. Two CI runs of the same commit both produce 26.9.9, with
+# different bytes - a dependency moved, a slice was rebuilt - and the second restore finds 26.9.9
+# already extracted under ~/.nuget/packages and never looks at the file in the feed. The build then
+# reports success against the package from an hour ago. Observed exactly that on 2026-09-14: the
+# cache held 64,134,427 bytes while the artifact under test was 64,134,436, and the run passed
+# while the new package would in fact have failed the restore.
+#
+# So the cached copy goes before every run. It costs a re-extract from a folder feed, which is
+# cheap, and it is the difference between testing the package and testing the name of one.
+foreach ($id in 'WebRTCme', 'WebRTCme.Middleware') {
+    $cached = Join-Path $env:USERPROFILE ".nuget/packages/$($id.ToLowerInvariant())/$Version"
+    if (Test-Path $cached) {
+        Write-Host "Evicting cached $id $Version"
+        Remove-Item $cached -Recurse -Force
+    }
+}
+
+# obj/ for the same reason: a project.assets.json from a previous run lets restore decide there is
+# nothing to do, which puts the stale package straight back.
+$objDir = Join-Path $PSScriptRoot 'WebRTCme.PackageTests/obj'
+if (Test-Path $objDir) { Remove-Item $objDir -Recurse -Force }
+
 # RestoreAdditionalProjectSources rather than a nuget.config, so the feed is a parameter of the run
 # instead of a fact about the checkout - and so nothing this script does can change what an ordinary
 # build of the repository restores.
