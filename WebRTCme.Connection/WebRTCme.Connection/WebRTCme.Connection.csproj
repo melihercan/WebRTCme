@@ -19,4 +19,13 @@
     <ProjectReference Include="..\Signaling\WebRTCme.Connection.Signaling.Proxy\WebRTCme.Connection.Signaling.Proxy.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      SpeakingDetector is internal - it is the voice-activity rule, not surface anyone consumes -
+      but it is a pure decision that took three attempts and a comma-decimal culture bug to get
+      right, so it is exactly what unit tests are for.
+    -->
+    <InternalsVisibleTo Include="WebRTCme.Tests" />
+  </ItemGroup>
+
 </Project>

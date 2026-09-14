@@ -38,6 +38,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\WebRTCme.Connection\MediaSoup\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
 	</ItemGroup>
 
 </Project>

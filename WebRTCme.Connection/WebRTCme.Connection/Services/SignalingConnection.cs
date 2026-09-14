@@ -505,41 +505,10 @@ namespace WebRTCme.Connection.Services
 
         #region Voice activity
 
-        // Speech is judged against the room, not against a fixed number.
-        //
-        // A fixed one was tried first and cannot work across these devices. Measured 2026-09-14,
-        // media-source audioLevel, the same build on both ends of one call:
-        //
-        //                     silence            speech
-        //   Android phone     0.0002 - 0.0007    0.0023 - 0.0063
-        //   Mac mini webcam   0.0004 - 0.0012    up to 0.037
-        //
-        // The old 0.01 sat above everything Android produces, so that peer never reported
-        // speaking at all. Anything low enough to catch Android's quietest speech has under a
-        // factor of two over the Mac's idle level, which is not a margin. The microphones differ
-        // by about 2x in noise floor and 6x in speech peak, and no single constant fits both.
-        //
-        // What is stable across both is the *ratio*: speech runs three to fifty times the floor.
-        // So the floor is tracked per device and the threshold follows it.
-        const double SpeakingLevelFactor = 3.0;
-
-        // A floor for the floor, for a microphone that reports digital silence: without it a floor
-        // near zero makes any faint sound "speech".
-        const double SpeakingLevelFloor = 0.001;
-
-        // How fast the tracked noise floor follows the room, per sample. About four seconds at the
-        // 400ms sample interval - slow enough to ignore a cough, quick enough to settle when a fan
-        // starts.
-        const double NoiseFloorAdaption = 0.1;
-
-        // How long the flag is held after the level drops below the threshold. Speech is full of
-        // gaps, and without a hold-off the flag flickers several times a sentence - which is a
-        // worse thing to put in front of a viewer than a flag that lags by a beat.
-        //
-        // Two seconds, from measurement rather than taste: at 900ms the flag still fell and rose
-        // twice inside a single spoken sentence, with the quiet stretches running 1.2 to 1.7
-        // seconds. Anything under about 1.8s reproduces that.
-        static readonly TimeSpan SpeakingHangover = TimeSpan.FromSeconds(2);
+        // The rule itself - noise floor, threshold and hangover - lives in SpeakingDetector, which
+        // is a pure class so it can be tested without a microphone or a two-second wait. What is
+        // left here is the sampling: reading the level, deciding when to send, and surviving a
+        // peer connection closing underneath.
 
         // Often enough to feel immediate, seldom enough that the cost stays bounded: each sample
         // is a full getStats call, which on Blazor crosses the JS interop boundary.
@@ -575,8 +544,7 @@ namespace WebRTCme.Connection.Services
 
             _ = Task.Run(async () =>
             {
-                var lastHeard = DateTime.MinValue;
-                var noiseFloor = double.NaN;
+                var detector = new SpeakingDetector();
 
                 while (!cts.IsCancellationRequested)
                 {
@@ -588,26 +556,11 @@ namespace WebRTCme.Connection.Services
                         if (level is null)
                             continue;
 
-                        var threshold = double.IsNaN(noiseFloor)
-                            ? SpeakingLevelFloor
-                            : Math.Max(SpeakingLevelFloor, noiseFloor * SpeakingLevelFactor);
+                        // Read before the sample, because sampling moves it and the log below is
+                        // meant to show what this level was judged against.
+                        var threshold = detector.Threshold;
 
-                        if (level > threshold)
-                        {
-                            lastHeard = DateTime.UtcNow;
-                        }
-                        else
-                        {
-                            // Only quiet samples move the floor. Letting speech raise it would
-                            // walk the threshold up mid-sentence until the speaker fell below
-                            // their own floor and the flag dropped while they were still talking.
-                            noiseFloor = double.IsNaN(noiseFloor)
-                                ? level.Value
-                                : noiseFloor + (level.Value - noiseFloor) * NoiseFloorAdaption;
-                        }
-
-                        var speaking = _outgoingAudioEnabled &&
-                            DateTime.UtcNow - lastHeard < SpeakingHangover;
+                        var speaking = detector.Sample(level.Value, DateTime.UtcNow, _outgoingAudioEnabled);
 
                         if (speaking == _speaking)
                             continue;
@@ -619,7 +572,7 @@ namespace WebRTCme.Connection.Services
                         // because the level alone does not say why it was judged either way.
                         Console.WriteLine(
                             $"######## Outgoing speaking:{speaking} level:{level:F5} " +
-                            $"floor:{(double.IsNaN(noiseFloor) ? 0 : noiseFloor):F5} " +
+                            $"floor:{(double.IsNaN(detector.NoiseFloor) ? 0 : detector.NoiseFloor):F5} " +
                             $"threshold:{threshold:F5}");
 
                         var result = await SendMediaStateAsync().ConfigureAwait(false);

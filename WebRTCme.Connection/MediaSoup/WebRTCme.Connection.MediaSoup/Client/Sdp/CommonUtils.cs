@@ -192,13 +192,23 @@ namespace WebRTCme.Connection.MediaSoup.Client.Sdp
 
         internal static DtlsParameters ExtractDtlsParameters(Utilme.SdpTransform.Sdp sdp)
         {
-            MediaObject mediaObject = new()
-            {
-                MediaDescription = sdp.MediaDescriptions
-                    .SingleOrDefault(md => md.Attributes.IceUfrag is not null &&  md.Port != 0)
-            };
-            if (mediaObject is null)
+            // First, not single. mediasoup-client uses find() here, and with BUNDLE every m-section
+            // repeats the ice-ufrag, so SingleOrDefault threw "Sequence contains more than one
+            // matching element" on any SDP carrying both audio and video. It survived because
+            // SetupTransportAsync runs once, at the first producer, when the local SDP usually has
+            // one section - so this was a crash waiting for the first caller that set both up
+            // before the transport was ready. They all share one ICE/DTLS transport under BUNDLE,
+            // so any of them describes it equally well.
+            var mediaDescription = sdp.MediaDescriptions
+                .FirstOrDefault(md => md.Attributes.IceUfrag is not null && md.Port != 0);
+
+            // Guarding the MediaDescription rather than the wrapper around it. The wrapper is
+            // newly constructed and can never be null, so the old check could not fire and a
+            // missing section arrived as a NullReferenceException two lines later instead.
+            if (mediaDescription is null)
                 throw new Exception("No active media section found");
+
+            MediaObject mediaObject = new() { MediaDescription = mediaDescription };
 
             var fingerprint = mediaObject.MediaDescription.Attributes.Fingerprint ?? sdp.Attributes.Fingerprint;
             DtlsRole? role = mediaObject.MediaDescription.Attributes.Setup.Role switch
