@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  Tier 3 of doc/TestingPlan.md: does the package actually work at runtime, on this platform?
+
+	  Tiers 1 and 2 are both managed-only. Nothing in them has loaded libwebrtc.aar,
+	  WebRTC.framework or WebRtcInterop.dll - a package whose native payload is missing, or built
+	  for the wrong architecture, passes every one of them. This is the tier that finds that out.
+
+	  The test is loopback: two RTCPeerConnections in the same process, offer and answer and ICE
+	  candidates handed between them in code. No signalling server, no second machine, no network,
+	  no camera, no UI. It proves the native half loaded, that SDP marshals both ways, that ICE
+	  candidates survive the round trip, and that DTLS and SCTP complete.
+
+	  Like tier 2 this references the PACKAGE, never the projects, because testing the repository
+	  would miss exactly the packaging faults this exists to catch. Run it through
+	  Tests/Test-Device.ps1, which supplies the version and the feed.
+
+	  One target framework at a time, by design: this is a process that runs on the machine it is
+	  built for. Windows builds and runs the net10.0-windows slice; the Mac mini builds and runs
+	  net10.0-maccatalyst. Android and iOS need a runner app on the device and are phase 4.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework Condition="'$(TargetFramework)' == ''">net10.0-windows10.0.22621.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+
+		<!--
+		  The native payload lives at runtimes/win-x64/native/WebRtcInterop.dll inside the package,
+		  and NuGet only lays a runtime-specific asset next to the executable when the build knows
+		  which runtime it is for. Without this the managed half loads and the first P/Invoke throws
+		  DllNotFoundException - which is a real failure mode of the package, but not one worth
+		  reproducing by misconfiguring the consumer.
+		-->
+		<RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">win-x64</RuntimeIdentifier>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WebRTCmePackageVersion Condition="'$(WebRTCmePackageVersion)' == ''">$(WEBRTCME_PACKAGE_VERSION)</WebRTCmePackageVersion>
+	</PropertyGroup>
+
+	<Target Name="RequirePackageVersion" BeforeTargets="CollectPackageReferences">
+		<Error Condition="'$(WebRTCmePackageVersion)' == ''"
+		       Text="Set the package version to test: -p:WebRTCmePackageVersion=26.9.9, or the WEBRTCME_PACKAGE_VERSION environment variable. Tests/Test-Device.ps1 does both." />
+	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="AwesomeAssertions" Version="9.6.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WebRTCme" Version="$(WebRTCmePackageVersion)" />
+	</ItemGroup>
+
+	<!-- The version a MAUI consumer has to name itself; see WebRTCme.PackageTests for why. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="AwesomeAssertions" />
+	</ItemGroup>
+
+</Project>

@@ -24,6 +24,40 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+| **Enumerating devices fails on Windows after a call** | nobody - it can be picked up today | Once a negotiation has reached DTLS, counting audio inputs returns an internal error and `EnumerateDevices` throws. Found by the tier-3 loopback tests, 2026-09-14. |
+
+### Device enumeration stops working on Windows once a call has happened - 2026-09-14
+
+Found by `Tests/WebRTCme.DeviceTests`, which is the first thing in this repository to load
+`WebRtcInterop.dll` outside an app.
+
+```
+InvalidOperationException: Failed to count AudioInput devices: internal error.
+  at WebRTCme.Windows.MediaDevices.AddAudioDevices
+  at WebRTCme.Windows.MediaDevices.EnumerateDevices
+```
+
+Bisected by running pairs of tests in one process. Enumeration succeeds:
+
+- on its own - eight devices, including the webcam's microphone;
+- from an MTA thread and from an STA thread, so it is not a COM apartment problem;
+- after creating and disposing a peer connection;
+- after producing an offer.
+
+It fails only once a negotiation has **completed** - offer, answer, ICE, DTLS and an open data
+channel - in the same process. So what breaks it is a call reaching the transport, not enumeration
+itself, and not the thread it is called on.
+
+Why it matters beyond the test: offering a device picker after a call has ended is an ordinary
+thing for an app to do, and on this evidence it throws. Worse, `AddAudioDevices` throws through
+`WebRtcRuntime.Check`, so a failure counting audio takes the **video** devices down with it rather
+than degrading to a partial list - the caller gets an exception instead of the cameras that were
+enumerated successfully a line earlier.
+
+Not yet diagnosed below the shim. The likely places are the audio device module's lifecycle - a
+call initialises it and teardown leaves it unusable - or peer-connection disposal racing the
+transport threads. The test that reproduces it is `Media_devices_can_be_enumerated_without_a_camera`,
+skipped with the reproduction in its remarks, and it turns green when this is fixed.
 
 ### The rotation one, in detail - 2026-09-12
 

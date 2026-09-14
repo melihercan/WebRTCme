@@ -94,8 +94,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.101" />
 		<PackageReference Include="System.Reactive" Version="7.0.0" />
-		<PackageReference Include="Utilme.Result" Version="26.9.7" />
-		<PackageReference Include="Utilme.SdpTransform" Version="26.9.7" />
+		<PackageReference Include="Utilme.Result" Version="26.9.14" />
+		<PackageReference Include="Utilme.SdpTransform" Version="26.9.14" />
 		<PackageReference Include="WebsocketClientLite.PCL" Version="9.1.0" />
 	</ItemGroup>
 
@@ -121,7 +121,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
 		<PackageReference Include="BlazorDialog" Version="4.2.1" />
-		<PackageReference Include="Blazorme.StreamSaver" Version="26.9.7" />
+		<PackageReference Include="Blazorme.StreamSaver" Version="26.9.14" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">

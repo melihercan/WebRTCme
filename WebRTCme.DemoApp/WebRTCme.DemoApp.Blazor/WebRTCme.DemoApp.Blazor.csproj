@@ -12,7 +12,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.12" PrivateAssets="all" />
     <PackageReference Include="MudBlazor" Version="9.10.0" />
     <PackageReference Include="BlazorPro.Spinkit" Version="1.2.0" />
-    <PackageReference Include="Blazored.Modal" Version="7.2.0" />
+    <!--
+      Blazored.Modal is gone, and nothing replaced it here because nothing was using it. It was
+      deprecated on nuget.org as Legacy, and DemoAppRefactor.md had decided to keep it rather than
+      swap a working dependency mid-migration - but the migration had already moved past it. Modals
+      now go through the middleware's IModalPopup, which sits on IBlazorDialogService, and the
+      dialogs this app opens are MudBlazor's. The reference was the last thing left of the old way.
+    -->
   </ItemGroup>
 
 
