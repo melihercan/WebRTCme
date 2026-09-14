@@ -87,35 +87,35 @@
 		<Compile Include="**\Blazor\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\WebRTCme.Bindings.Blazor\WebRTCme.Bindings.Blazor.csproj" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
 		<Compile Include="**\Android\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Android\WebRTCme.Bindings.Maui.Android.csproj" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
 		<Compile Include="**\iOS\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.iOS\WebRTCme.Bindings.Maui.iOS.csproj" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.22621.0'">
 		<Compile Include="**\Windows\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.Windows\WebRTCme.Bindings.Maui.Windows.csproj" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.12" />
 	</ItemGroup>
 
 	<!--
@@ -125,9 +125,9 @@
 		<Compile Include="**\MacCatalyst\**\*.cs" />
 		<Compile Include="*.cs" />
 		<ProjectReference Include="..\WebRTCme.Bindings\Maui\WebRTCme.Bindings.Maui.MacCatalyst\WebRTCme.Bindings.Maui.MacCatalyst.csproj" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
-		<PackageReference Include="Microsoft.JSInterop" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+		<PackageReference Include="Microsoft.JSInterop" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -141,8 +141,8 @@
 		  WebRTCme.Bindings.Blazor is packed into this package rather than depended on, so the
 		  packages it in turn needs have to be declared here.
 		-->
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.12" />
 		<PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
 	</ItemGroup>
 

@@ -7,10 +7,9 @@
   </PropertyGroup>
 
 	<ItemGroup>
-    <PackageReference Include="Utilme.Result" Version="1.0.1" />
-    <PackageReference Include="Utilme.SdpTransform" Version="1.0.0" />
-		<PackageReference Include="System.Reactive.Core" Version="6.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Utilme.Result" Version="26.9.7" />
+    <PackageReference Include="Utilme.SdpTransform" Version="26.9.7" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
 	</ItemGroup>
 
 
