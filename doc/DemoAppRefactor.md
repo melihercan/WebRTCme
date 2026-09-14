@@ -335,11 +335,15 @@ compiled everywhere and had run nowhere.
 | Android | **done** - two-party with Blazor, and again with Mac Catalyst |
 | Mac Catalyst | **done** - two-party with Android, both directions, 2026-09-14 |
 | Windows | **done** - joined a three-party call with Android and Mac Catalyst, 2026-09-14 |
-| iOS | the only one left - needs an iPhone plugged into the Mac |
+| iOS | **done** - joined a four-party call, 2026-09-14 |
 
-All four ran together at the end: Android, Mac Catalyst and Windows in **one three-party call**,
-each rendering the other two, which is further than this phase asked for. Blazor was verified
+They ran together at the end: Android, Mac Catalyst, Windows and iOS in **one four-party call**,
+each rendering the other three, which is further than this phase asked for. Blazor was verified
 separately because it and the MAUI Windows app share the machine's only camera.
+
+iOS was the first run of anything on that platform since the work began, and it started clean:
+no exception from the `RTCVideoFrame.buffer` binding change that was mirrored there, three video
+senders producing frames, three receivers, and its speaking flag reported alongside the others.
 
 One rig note that cost time twice: **stopping the Blazor dev server does not release the camera.**
 The page is a WebAssembly application and keeps running in the tab after the server it was served
