@@ -1,0 +1,91 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  Tier 2 of doc/TestingPlan.md: does the published package actually work for a consumer?
+
+	  This project references WebRTCme and WebRTCme.Middleware as PACKAGES, never as projects, and
+	  restores them from a folder feed holding the .nupkg files a CI run produced. That is the whole
+	  point: everything else in this repository tests the source tree, and the source tree is not
+	  what breaks. A package missing libwebrtc.aar, or with a lib/ folder named for the wrong
+	  platform version, compiles perfectly in-repo and fails only for whoever installs it.
+
+	  It is deliberately NOT in WebRTCme.sln. There is no package to restore until someone downloads
+	  a CI artifact, so a solution build would fail for anyone who has not - and a test that breaks
+	  the ordinary build gets deleted rather than fixed.
+
+	  Run it through Tests/Test-Package.ps1, which supplies the version and the feed:
+
+	      ./Tests/Test-Package.ps1 -Version 26.9.9
+
+	  Windows builds four slices plus net10.0-windows; a Mac builds the same four. Compiling the
+	  Apple slices proves the reference resolves, not that the native framework links - that needs
+	  a device and is tier 3.
+	-->
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+
+		<!-- The same floors the packages declare. A consumer asking for less is told to raise them. -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">28.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<!-- What a MAUI consumer is, on the platform target frameworks. net10.0 is the Blazor slice. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<!--
+	  No default. Testing "whatever happens to be in the folder" is how you end up certifying a
+	  package built last week, so the version has to be stated.
+	-->
+	<PropertyGroup>
+		<WebRTCmePackageVersion Condition="'$(WebRTCmePackageVersion)' == ''">$(WEBRTCME_PACKAGE_VERSION)</WebRTCmePackageVersion>
+	</PropertyGroup>
+
+	<Target Name="RequirePackageVersion" BeforeTargets="CollectPackageReferences">
+		<Error Condition="'$(WebRTCmePackageVersion)' == ''"
+		       Text="Set the package version to test: -p:WebRTCmePackageVersion=26.9.9, or the WEBRTCME_PACKAGE_VERSION environment variable. Tests/Test-Package.ps1 does both." />
+	</Target>
+
+	<ItemGroup>
+		<!--
+		  Both, explicitly, though WebRTCme.Middleware depends on WebRTCme and would bring it in
+		  anyway. Naming both is what a consumer of the whole stack writes, and it means a broken
+		  WebRTCme package fails here rather than hiding behind a transitive reference.
+		-->
+		<PackageReference Include="WebRTCme" Version="$(WebRTCmePackageVersion)" />
+		<PackageReference Include="WebRTCme.Middleware" Version="$(WebRTCmePackageVersion)" />
+	</ItemGroup>
+
+	<!--
+	  A real constraint on consumers, found by this test on its first run and kept here because it
+	  is the consumer's problem, not a quirk of this project.
+
+	  The packages depend on Microsoft.Maui.Controls 10.0.80. The MAUI workload's own implicit
+	  reference is whatever that workload bundles - 10.0.20 for the SDK installed here - and NuGet
+	  calls the difference a downgrade and fails the restore:
+
+	      error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.80 to 10.0.20
+	        WebRTCme.PackageTests -> WebRTCme 26.9.9 -> Microsoft.Maui.Controls (>= 10.0.80)
+	        WebRTCme.PackageTests -> Microsoft.Maui.Controls (>= 10.0.20)
+
+	  So every MAUI consumer has to name these two versions itself, exactly as NU1605 instructs and
+	  exactly as WebRTCme.DemoApp.Maui already does. It is not optional and it is not discoverable
+	  until the restore fails, which makes it something the documentation has to say out loud.
+	-->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.80" />
+	</ItemGroup>
+
+</Project>

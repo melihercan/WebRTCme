@@ -160,6 +160,47 @@ not load. Windows covers `net10.0`, `net10.0-android`, `net10.0-windows`; the Ma
 
 **This phase alone would have caught the packaging faults this repository has actually shipped.**
 
+### Done 2026-09-14, and what it found
+
+`Tests/WebRTCme.PackageTests` plus `Tests/Test-Package.ps1`, run against the packages from CI run
+34834534644:
+
+```powershell
+gh run download 34834534644 -n nupkg -D artifacts
+./Tests/Test-Package.ps1 -Version 26.9.9
+```
+
+Deliberately **not** in `WebRTCme.sln`: there is no package to restore until someone downloads a CI
+artifact, and a test that breaks the ordinary build gets deleted rather than fixed. The feed is
+passed as `RestoreAdditionalProjectSources` rather than written into a `nuget.config`, so the
+source is a parameter of the run and nothing it does changes what an ordinary build restores.
+
+**Compiling is not the assertion.** NuGet falls back: a `net10.0-android` project with no Android
+slice resolves `lib/net10.0/` instead and compiles perfectly, because the common API is identical
+across slices. What it would not have is any Android binding, and nothing says so until the app
+runs on a phone and finds nothing behind the interface. So the script reads `project.assets.json`
+back and requires every target framework to have resolved **its own** slice. All ten
+package/framework pairs do.
+
+**The finding, and it is a consumer's problem rather than a test's.** The first run failed:
+
+```
+error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.80 to 10.0.20
+  WebRTCme.PackageTests -> WebRTCme 26.9.9 -> Microsoft.Maui.Controls (>= 10.0.80)
+  WebRTCme.PackageTests -> Microsoft.Maui.Controls (>= 10.0.20)
+```
+
+The packages depend on `Microsoft.Maui.Controls` 10.0.80. The MAUI workload's own implicit
+reference is whatever that workload bundles - 10.0.20 for the SDK installed here - and NuGet calls
+the difference a downgrade and fails the restore. So **every MAUI consumer has to name
+`Microsoft.Maui.Controls` and `Microsoft.Maui.Controls.Compatibility` at 10.0.80 themselves**,
+exactly as `WebRTCme.DemoApp.Maui` already does and exactly as NU1605 instructs.
+
+It is not optional, and it is not discoverable until a restore fails. **This has to be in the
+documentation before the packages are published.** The alternative is to lower what the packages
+demand to whatever the current workload ships, which is a decision about which MAUI servicing band
+to support rather than a bug to fix.
+
 ### Phase 3 - runtime, where a plain process works
 
 `Tests/WebRTCme.DeviceTests`, multi-targeted, referencing the package the same way Phase 2 does.
