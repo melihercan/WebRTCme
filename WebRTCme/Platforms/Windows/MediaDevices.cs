@@ -101,7 +101,16 @@ internal sealed class MediaDevices : IMediaDevices
         var factory = WebRtcRuntime.Factory;
         var devices = new List<MediaDeviceInfo>();
 
-        WebRtcRuntime.Check(VideoDeviceCount(factory, out var cameraCount), "count video devices");
+        // Same rule as the audio side below: one kind of device being uncountable must not take the
+        // other kinds with it. Enumeration answers "what can I use?", and the honest answer to that
+        // is never an exception when some of it is known.
+        if (VideoDeviceCount(factory, out var cameraCount) != Ok)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                "######## Could not count video devices; reporting no cameras.");
+            cameraCount = 0;
+        }
+
         for (var index = 0; index < cameraCount; index++)
         {
             if (VideoDeviceInfo(factory, index, out var name, out var id) != Ok)
@@ -124,11 +133,43 @@ internal sealed class MediaDevices : IMediaDevices
         return Task.FromResult(devices.ToArray());
     }
 
+    /// <summary>
+    /// Adds whatever audio devices of <paramref name="kind"/> the engine can see, and adds none
+    /// if it cannot see any.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Deliberately does not throw when the count fails, and that is a fix rather than laziness.
+    /// It used to go through <c>WebRtcRuntime.Check</c>, so a failure counting microphones threw
+    /// out of <see cref="EnumerateDevices"/> and took the <em>cameras</em> with it - devices that
+    /// had already been enumerated successfully a few lines earlier. A caller asking "what can I
+    /// use?" got an exception instead of the list.
+    /// </para>
+    /// <para>
+    /// It is reachable. Once a negotiation has completed in this process the native ADM stops
+    /// answering, and <c>rtc_audio_device_count</c> returns an internal error from then on - see
+    /// doc/KnownGaps.md, found by the tier-3 loopback tests on 2026-09-14. Offering a device picker
+    /// after a call has ended is an ordinary thing for an app to do, and it threw.
+    /// </para>
+    /// <para>
+    /// The W3C call this implements does not throw for this either: <c>enumerateDevices()</c>
+    /// resolves with whatever the browser can see, and a missing microphone is an empty list rather
+    /// than an error. Reporting the cameras and no microphones is both more useful and closer to
+    /// the spec than reporting nothing at all.
+    /// </para>
+    /// </remarks>
     private static void AddAudioDevices(IntPtr factory, int abiKind, MediaDeviceInfoKind kind,
                                         List<MediaDeviceInfo> devices)
     {
-        WebRtcRuntime.Check(AudioDeviceCount(factory, abiKind, out var count),
-                            $"count {kind} devices");
+        if (AudioDeviceCount(factory, abiKind, out var count) != Ok)
+        {
+            // Written where a device log will show it. Silence here would turn "the engine cannot
+            // see your microphone" into "you have no microphone", which is a worse thing to be
+            // wrong about quietly.
+            System.Diagnostics.Debug.WriteLine(
+                $"######## Could not count {kind} devices; reporting none of that kind.");
+            return;
+        }
 
         for (var index = 0; index < count; index++)
         {

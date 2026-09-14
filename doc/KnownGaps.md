@@ -1,4 +1,4 @@
-﻿# Known gaps
+# Known gaps
 
 What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
 2026-09-12**. Everything here was checked against the code rather than remembered, and each entry
@@ -24,9 +24,9 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **Enumerating devices fails on Windows after a call** | nobody - it can be picked up today | Once a negotiation has reached DTLS, counting audio inputs returns an internal error and `EnumerateDevices` throws. Found by the tier-3 loopback tests, 2026-09-14. |
+| **The Windows ADM stops counting audio devices after a call** | WebRTCnative - it needs a shim rebuild | Once a negotiation has reached DTLS, `rtc_audio_device_count` returns an internal error for the life of the process. No longer fatal: enumeration reports the cameras and omits the microphones instead of throwing. Found by the tier-3 loopback tests, 2026-09-14. |
 
-### Device enumeration stops working on Windows once a call has happened - 2026-09-14
+### The Windows ADM stops counting audio devices once a call has happened - found and contained 2026-09-14
 
 Found by `Tests/WebRTCme.DeviceTests`, which is the first thing in this repository to load
 `WebRtcInterop.dll` outside an app.
@@ -54,10 +54,27 @@ thing for an app to do, and on this evidence it throws. Worse, `AddAudioDevices`
 than degrading to a partial list - the caller gets an exception instead of the cameras that were
 enumerated successfully a line earlier.
 
-Not yet diagnosed below the shim. The likely places are the audio device module's lifecycle - a
-call initialises it and teardown leaves it unusable - or peer-connection disposal racing the
-transport threads. The test that reproduces it is `Media_devices_can_be_enumerated_without_a_camera`,
-skipped with the reproduction in its remarks, and it turns green when this is fixed.
+**Half of this is fixed.** `AddAudioDevices` no longer throws when the count fails: it logs and
+reports no devices of that kind, and the video path was made to match, so one kind of device being
+uncountable can no longer take the others with it. That is also what the W3C call does -
+`enumerateDevices()` resolves with whatever can be seen, and a missing microphone is an empty list
+rather than an error. Verified against a locally packed build: after a completed negotiation,
+enumeration returns the cameras and omits the microphones instead of throwing, and
+`A_completed_call_does_not_hide_the_cameras` pins it.
+
+**The ADM fault itself is still open**, and it is not in this repository. `rtc_audio_device_count`
+lives in `WebRtcInterop/src/Interop.cc` in [WebRTCnative](https://github.com/melihercan/WebRTCnative),
+which creates one `AudioDeviceModule` alongside the factory, calls `Init()` on the worker thread,
+and hands it to `CreatePeerConnectionFactory`. After a call `adm->RecordingDevices()` returns a
+negative count, which the shim reports as `RTC_ERR_INTERNAL`. Worth knowing that the loopback that
+provokes it carries **no audio track at all** - a data channel is enough - so whatever disturbs the
+module is not the audio path being used.
+
+Fixing it means changing the shim and rebuilding `WebRtcInterop.dll` through that repository's
+workflow, then refreshing the binaries committed under
+`WebRTCme.Bindings/Maui/WebRTCme.Bindings.Maui.Windows/native/win-x64/`. The obvious thing to try
+first is re-`Init()`ing the module when a count fails, since `Init()` is cheap and returns success
+if the module is already up.
 
 ### The rotation one, in detail - 2026-09-12
 

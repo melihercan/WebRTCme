@@ -169,37 +169,81 @@ public class LoopbackTests
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <strong>Skipped because it fails, and the failure is in the Windows binding rather than
-    /// here.</strong> A completed negotiation leaves the native audio device module unable to
-    /// count inputs:
+    /// This test failed when it was written, and the fix is in the binding rather than here. A
+    /// completed negotiation leaves the native audio device module unable to count inputs, and
+    /// <c>AddAudioDevices</c> threw that through <c>WebRtcRuntime.Check</c> - so a failure counting
+    /// microphones took the <em>cameras</em> with it, devices which had been enumerated
+    /// successfully a few lines earlier:
     /// </para>
     /// <code>
     /// InvalidOperationException: Failed to count AudioInput devices: internal error.
-    ///   at WebRTCme.Windows.MediaDevices.AddAudioDevices
-    ///   at WebRTCme.Windows.MediaDevices.EnumerateDevices
     /// </code>
     /// <para>
-    /// Bisected on 2026-09-14 by running pairs of these tests. Enumeration succeeds on its own, and
+    /// Bisected on 2026-09-14 by running pairs of these tests. Enumeration succeeds on its own,
     /// after creating and disposing a peer connection, and after producing an offer - eight devices
     /// including the webcam microphone, from either an MTA or an STA thread. It fails only once
     /// <see cref="Two_peers_negotiate_and_a_data_channel_carries_a_message"/> has run in the same
-    /// process, so what breaks it is a negotiation that reaches DTLS and SCTP, not device
-    /// enumeration itself and not the apartment the call is made on.
+    /// process, so what breaks it is a negotiation reaching DTLS, not enumeration itself and not
+    /// the apartment the call is made on. The underlying ADM fault is still open in
+    /// doc/KnownGaps.md; what is fixed is that it no longer destroys the whole answer.
     /// </para>
     /// <para>
-    /// It matters beyond this test: showing a device picker after a call has ended is an ordinary
-    /// thing for an app to do, and on this evidence it would throw. Worth noting that
-    /// <c>AddAudioDevices</c> throws through <c>WebRtcRuntime.Check</c>, so a failure counting audio
-    /// takes the video devices down with it rather than degrading to a partial list.
+    /// xUnit runs the tests in a class one at a time but in no promised order, so this may run
+    /// before or after the negotiation. That is the point: it has to hold either way.
     /// </para>
     /// </remarks>
-    [Fact(Skip = "Windows binding defect: after a negotiation reaches DTLS, counting audio input devices fails. See the remarks.")]
-    public async Task Media_devices_can_be_enumerated_without_a_camera()
+    [Fact]
+    public async Task Media_devices_can_be_enumerated_whatever_else_has_happened()
     {
         var devices = Window().Navigator().MediaDevices;
 
         var enumerate = async () => await devices.EnumerateDevices();
 
-        await enumerate.Should().NotThrowAsync();
+        await enumerate.Should().NotThrowAsync(
+            "enumeration answers 'what can I use?', and one kind of device being uncountable "
+            + "must not turn the whole answer into an exception");
+    }
+
+    /// <summary>
+    /// The half of the fix worth pinning separately: even after a call has broken audio
+    /// enumeration, the cameras still come back.
+    /// </summary>
+    /// <remarks>
+    /// Skips rather than fails on a machine with no webcam, since that is a fact about the machine
+    /// and not about the package. Set WEBRTCME_TESTS_REQUIRED=1 to make a missing camera a failure,
+    /// which is what a release check would do.
+    /// </remarks>
+    [Fact]
+    public async Task A_completed_call_does_not_hide_the_cameras()
+    {
+        var devices = Window().Navigator().MediaDevices;
+
+        // Enumerate once before any call, to learn what this machine actually has.
+        var before = await devices.EnumerateDevices();
+        var cameras = before.Count(d => d.Kind == MediaDeviceInfoKind.VideoInput);
+
+        if (cameras == 0)
+        {
+            Environment.GetEnvironmentVariable("WEBRTCME_TESTS_REQUIRED").Should().NotBe("1",
+                "a release check must not pass on a machine with no camera to enumerate");
+            Assert.Skip("No camera attached, so there is nothing for a call to hide.");
+        }
+
+        using (var caller = Window().RTCPeerConnection(Configuration()))
+        using (var callee = Window().RTCPeerConnection(Configuration()))
+        {
+            caller.CreateDataChannel("probe");
+            var offer = await caller.CreateOffer();
+            await caller.SetLocalDescription(offer);
+            await callee.SetRemoteDescription(offer);
+            var answer = await callee.CreateAnswer();
+            await callee.SetLocalDescription(answer);
+            await caller.SetRemoteDescription(answer);
+        }
+
+        var after = await devices.EnumerateDevices();
+
+        after.Count(d => d.Kind == MediaDeviceInfoKind.VideoInput).Should().Be(cameras,
+            "a call must not change how many cameras the machine has");
     }
 }
