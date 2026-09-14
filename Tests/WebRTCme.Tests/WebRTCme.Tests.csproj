@@ -17,11 +17,15 @@
 
 	<ItemGroup>
 		<!--
-		  FluentAssertions is deliberately held at the 7.x line. From 8.0 it moved to a licence
-		  that requires payment for commercial use; 7.2.2 is the last Apache-2.0 release. This is
-		  an open-source repository publishing public packages, so the free line is the right one.
+		  AwesomeAssertions rather than FluentAssertions, and it is a licence decision rather than a
+		  preference. FluentAssertions moved to a commercial licence at 8.0 - free for open source,
+		  paid for commercial use - and 7.2.2 was the last Apache-2.0 release. Pinning to 7.2.2
+		  worked until an "update all" walked it to 8.10.0 without anyone deciding to.
+
+		  AwesomeAssertions is the fork of that last free version, Apache-2.0, same API. The swap
+		  cost one package id and one Using: not a single assertion changed.
 		-->
-		<PackageReference Include="FluentAssertions" Version="7.2.2" />
+		<PackageReference Include="AwesomeAssertions" Version="9.6.0" />
 		<!--
 		  The signalling server is hosted in-process by SignalingServerTests and driven with a real
 		  SignalR client over MessagePack - the protocol the production client actually uses - so a
@@ -41,7 +45,7 @@
 
 	<ItemGroup>
 		<Using Include="Xunit" />
-		<Using Include="FluentAssertions" />
+		<Using Include="AwesomeAssertions" />
 	</ItemGroup>
 
 	<!-- Needed to host the signalling server in-process; the test project is not a web project. -->
