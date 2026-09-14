@@ -23,7 +23,8 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture. Mitigated, not fixed, by the demo's portrait lock. The Mac Catalyst half of this was fixed on 2026-09-12; see below. |
+| **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+| **Windows renders every rotated frame sideways** | a change in WebRTCnative | The C ABI drops the rotation, so the renderer never receives it. Phones look sideways on Windows and nowhere else. See below. |
 
 ### The rotation one, in detail - 2026-09-12
 
@@ -71,6 +72,46 @@ only the source of the frames moved.
 
 Rotation 0 is the truth rather than a workaround: a camera wired to a Mac does not move. Verified
 the same day - Mac Catalyst video arrives upright on an Android peer.
+
+### Windows ignores frame rotation - 2026-09-14
+
+**Symptom, and the shape that identifies it:** in a four-party call seen from Windows, the two
+phones render sideways and the two desktops render upright. The same peers seen from Android all
+render upright, iOS included.
+
+That exonerates the senders. iOS and Android tag their frames correctly - an Apple renderer and an
+Android renderer both act on the tag and show them the right way up. **Windows does not, because
+the rotation never reaches it.**
+
+The rotation is dropped at the C ABI. `rtc_video_frame` in
+`WebRtcInterop/include/Interop.h` carries the three planes, their strides, width, height and a
+timestamp, and no rotation:
+
+    int32_t width;
+    int32_t height;
+    int64_t timestamp_us;
+    } rtc_video_frame;
+
+so `MediaStreamTrack.OnFrame` has nothing to pass on, `SubscribeToVideoFrames` is typed
+`Action<byte[], int, int>`, and `MediaView` blits the buffer into a `WriteableBitmap` exactly as
+it arrived. **There is no managed-side fix**: a 640x480 frame tagged for a quarter turn and one
+tagged upright are the same bytes and the same dimensions, so the renderer cannot tell them apart.
+
+Two ways to fix it, both in WebRTCnative:
+
+- **Pass it on.** Add a rotation field to `rtc_video_frame`, fill it from `frame.rotation()`, and
+  apply it when rendering. Keeps the Windows renderer honest about what it received, and any other
+  consumer of the ABI gets the information too.
+- **Apply it at the source.** Rotate the I420 buffer in the shim before handing it over, so the
+  ABI only ever carries upright frames. Less to change on this side, and it throws the information
+  away for anyone who wanted it.
+
+Either needs `WebRtcInterop` rebuilt and the binary re-vendored here, which is why this is not a
+one-line change.
+
+The Mac Catalyst rotation fix below is unaffected, and the reason it looked right on Windows is
+worth knowing: it sets rotation 0, and a renderer that ignores rotation happens to be correct for
+0. It was right for its own reasons, not because Windows was working.
 
 ### Android - still open
 
