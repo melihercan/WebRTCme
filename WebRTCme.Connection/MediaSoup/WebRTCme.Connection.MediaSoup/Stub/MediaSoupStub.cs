@@ -11,6 +11,11 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Utilme;
+// Utilme's own Unit, which is what Result<T> is documented to pair with: "a type with exactly one
+// value, used as the payload of a Result<T> for operations that succeed without producing
+// anything". Result<System.Reactive.Unit> predates it. Aliased rather than left to `using Utilme`
+// because System.Reactive is imported here too and both namespaces have a Unit.
+using Unit = Utilme.Unit;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.ClientWebSockets;
 using Microsoft.Maui.Devices;
@@ -99,7 +104,7 @@ namespace WebRTCme.Connection.MediaSoup
             _receiveLoop = Task.Run(() => ReceiveLoopAsync(_cts.Token));
             _dispatchLoop = Task.Run(() => DispatchLoopAsync(_cts.Token));
 
-            return Result<Unit>.Ok(Unit.Default);
+            return Result<Unit>.Ok(Unit.Value);
         }
 
 
@@ -403,7 +408,7 @@ namespace WebRTCme.Connection.MediaSoup
                     Data = data
                 }, cts.Token);
 
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch (Exception ex)
             {
@@ -421,7 +426,7 @@ namespace WebRTCme.Connection.MediaSoup
         public async Task<Result<Unit>> DisconnectAsync(Guid id)
         {
             await TearDownAsync();
-            return Result<Unit>.Ok(Unit.Default);
+            return Result<Unit>.Ok(Unit.Value);
         }
 
         /// <summary>

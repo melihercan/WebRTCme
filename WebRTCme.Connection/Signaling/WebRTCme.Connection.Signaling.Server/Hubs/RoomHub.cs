@@ -9,6 +9,11 @@ using WebRTCme.Connection.Signaling.Server.TurnServerProxies;
 using WebRTCme.Connection.Signaling.Server.Enums;
 using WebRTCme.Connection.Signaling.Server.Models;
 using Utilme;
+// Utilme's own Unit, which is what Result<T> is documented to pair with: "a type with exactly one
+// value, used as the payload of a Result<T> for operations that succeed without producing
+// anything". Result<System.Reactive.Unit> predates it. Aliased rather than left to `using Utilme`
+// because System.Reactive is imported here too and both namespaces have a Unit.
+using Unit = Utilme.Unit;
 
 namespace WebRTCme.Connection.Signaling.Server.Hubs
 {
@@ -110,7 +115,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
                 if (notifyOthers)
                     await Clients.GroupExcept(groupName, Context.ConnectionId).OnPeerJoinedAsync(id, name);
 
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch (Exception ex)
             {
@@ -193,7 +198,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
 
                 await RemoveClientAsync(client);
 
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch(Exception ex)
             {
@@ -217,7 +222,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
                     throw new Exception($"peerId:{peerId} no peer found");
 
                 await Clients.Client(peerClient.ConnectionId).OnPeerSdpAsync(selfClient.Id, selfClient.UserName, sdp);
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch(Exception ex)
             {
@@ -241,7 +246,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
                     throw new Exception($"peerId:{peerId} no peer found");
 
                 await Clients.Client(peerClient.ConnectionId).OnPeerIceAsync(selfClient.Id, ice);
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch (Exception ex)
             {
@@ -269,7 +274,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
                 await Clients.GroupExcept(groupName, client.ConnectionId)
                     .OnPeerMediaAsync(id, videoMuted, audioMuted, speaking);
 
-                return Result<Unit>.Ok(Unit.Default);
+                return Result<Unit>.Ok(Unit.Value);
             }
             catch (Exception ex)
             {
