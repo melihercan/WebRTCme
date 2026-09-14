@@ -47,10 +47,18 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # Not `workload restore WebRTCme.sln`: the solution contains net10.0-windows projects whose
-      # workloads do not exist on macOS. Only what this job actually builds is installed.
+      # The project rather than the solution: the solution contains net10.0-windows projects whose
+      # workloads do not exist on macOS, and asking for those fails here.
+      #
+      # But not `workload install ios maccatalyst` either, which is the obvious thing and is wrong.
+      # The builds below pass -f, which narrows what is *built* and nothing else: restore still
+      # evaluates every target framework this project and its ProjectReferences declare, so
+      # net10.0-android is evaluated and NETSDK1147 demands the android and maui-android workloads
+      # before a single Apple slice is compiled. Restoring against the project installs what its
+      # whole TargetFrameworks list needs, which on macOS excludes net10.0-windows because that one
+      # is added behind an IsOSPlatform('windows') condition.
       - name: Install workloads
-        run: dotnet workload install ios maccatalyst
+        run: dotnet workload restore WebRTCme/WebRTCme.csproj
 
       # These produce the assemblies and the .resources.zip files that carry the native
       # frameworks. build-versioned-framework.sh runs as part of the Mac Catalyst build, rebuilding
