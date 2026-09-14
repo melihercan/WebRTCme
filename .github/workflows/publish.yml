@@ -2,14 +2,26 @@ name: Publish
 
 # Publishes WebRTCme and WebRTCme.Middleware to nuget.org.
 #
-# The two are always published together and never separately: WebRTCme.Middleware depends on
-# WebRTCme at exactly the version it was built against, so shipping one alone leaves a dependency
-# nobody can resolve. There is therefore no per-package tag here, unlike Me.Toolkit.Maui.
+# This workflow builds nothing. It publishes the exact .nupkg files that a CI run produced,
+# verified and uploaded - the same bytes you downloaded and tested on a PC and a Mac.
+#
+# That is the whole point of the rewrite. It used to rebuild and repack from scratch here, which
+# meant the package that went to nuget.org had never been tested by anyone: you could test one
+# artifact and ship a different one built minutes later on a different runner. NuGet has no
+# TestFlight and no staging slot, and a published version is immutable - so the CI artifact is the
+# staging step, and this job is only the promotion.
+#
+# It also makes the macOS job unnecessary here. ci.yml already built the Apple slices on a Mac and
+# merged them in; doing it again would produce a different package.
+#
+# The two packages are always published together and never separately: WebRTCme.Middleware depends
+# on WebRTCme at exactly the version it was built against, so shipping one alone leaves a
+# dependency nobody can resolve.
 #
 # Ways in:
-#   * tag v<version>  — publishes both packages
-#   * run manually    — defaults to a dry run that packs and uploads the .nupkg files as build
-#                       artifacts without publishing anything
+#   * tag v<version>  — publishes the CI artifact built from the tagged commit
+#   * run manually    — defaults to a dry run that resolves and verifies the artifact without
+#                       publishing anything. Takes an optional run-id to name the CI run.
 #
 # Authentication is NuGet Trusted Publishing, so no API key is stored in this repository. It needs
 # a policy on nuget.org naming this repository and this workflow file. The glob must cover both
@@ -21,8 +33,12 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
+      run-id:
+        description: 'CI run to publish. Leave empty to use the newest successful CI run for this commit.'
+        type: string
+        required: false
       dry-run:
-        description: 'Pack only, do not push to NuGet'
+        description: 'Resolve and verify the artifact, do not push to NuGet'
         type: boolean
         default: true
       skip-duplicate:
@@ -35,85 +51,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Mac Catalyst's WebRTC.framework must be a versioned bundle - Versions/A plus symlinks - or
-  # macOS refuses to codesign an app embedding it. Windows can neither check those symlinks out nor
-  # write them into a zip, so that slice has to be built here. iOS comes along for the ride: its
-  # xcframework is flat and builds correctly on Windows, but keeping both Apple slices on one
-  # machine is one less way to be subtly wrong.
-  #
-  # Everything else stays on Windows, which is also the only host that can build net10.0-windows.
-  apple:
-    name: Build the Apple slices
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
-      # The project rather than the solution: the solution contains net10.0-windows projects whose
-      # workloads do not exist on macOS, and asking for those fails here.
-      #
-      # But not `workload install ios maccatalyst` either, which is what this said until a CI run
-      # on 2026-09-14 proved it wrong. The builds below pass -f, which narrows what is *built* and
-      # nothing else: restore still evaluates every target framework this project and its
-      # ProjectReferences declare, so net10.0-android is evaluated and NETSDK1147 demands the
-      # android and maui-android workloads before a single Apple slice is compiled. This workflow
-      # had never run, so it would have failed on the first release.
-      - name: Install workloads
-        run: dotnet workload restore WebRTCme/WebRTCme.csproj
-
-      # These produce the assemblies and the .resources.zip that carry the native frameworks.
-      # build-versioned-framework.sh runs here, rebuilding WebRTC.framework into the versioned
-      # layout before it is packed into the Mac Catalyst .resources.zip.
-      - name: Build iOS and Mac Catalyst
-        run: |
-          set -euo pipefail
-          dotnet build WebRTCme/WebRTCme.csproj -c Release -f net10.0-ios
-          dotnet build WebRTCme/WebRTCme.csproj -c Release -f net10.0-maccatalyst
-
-      # Fail here rather than shipping a flat framework: this is the whole reason the job exists.
-      - name: Verify the Mac Catalyst framework is versioned
-        run: |
-          set -euo pipefail
-          zip=WebRTCme/bin/Release/net10.0-maccatalyst/WebRTCme.Bindings.Maui.MacCatalyst.resources.zip
-          if unzip -l "$zip" | grep -q 'WebRTC.framework/Versions/A/WebRTC'; then
-            echo "Mac Catalyst framework is versioned."
-          else
-            echo "::error::$zip does not contain a versioned WebRTC.framework"
-            unzip -l "$zip" | head -20
-            exit 1
-          fi
-
-      - name: Collect the slices
-        run: |
-          set -euo pipefail
-          for tfm in net10.0-ios net10.0-maccatalyst; do
-            mkdir -p apple/$tfm
-            cp WebRTCme/bin/Release/$tfm/WebRTCme.dll                     apple/$tfm/
-            cp WebRTCme/bin/Release/$tfm/WebRTCme.Bindings.Maui.*.dll     apple/$tfm/
-            cp WebRTCme/bin/Release/$tfm/WebRTCme.Bindings.Maui.*.resources.zip apple/$tfm/
-          done
-          find apple -type f | sort
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: apple-slices
-          path: apple/**
-          if-no-files-found: error
-
   publish:
-    name: Pack and publish
-    needs: apple
-    # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else,
-    # and the iOS and Mac Catalyst library slices do compile here - only linking an app needs a
-    # Mac. Nothing in this job proves the Apple native side links.
+    name: Publish the tested packages
+    # windows-latest because Verify-Packages.ps1 is Windows PowerShell reading zip central
+    # directories, and because it is what the script has been exercised on. Nothing is compiled
+    # here, so this job is short.
     runs-on: windows-latest
 
     permissions:
       contents: read
+      # Reading artifacts from another workflow run.
+      actions: read
       # Lets the job request a GitHub OIDC token, which nuget.org exchanges for a
       # short-lived API key. Nothing long-lived is stored in the repository.
       id-token: write
@@ -123,91 +71,109 @@ jobs:
         shell: bash
 
     steps:
-      # The native halves of the bindings are committed rather than downloaded - libwebrtc.aar,
-      # WebRTC.xcframework, WebRTC.framework and the Windows interop DLLs - so a normal checkout
-      # is enough, but it is a large one.
+      # Only for .github/scripts/Verify-Packages.ps1. The packages themselves come from the CI run,
+      # not from this checkout, so this is a shallow one - none of the committed native payloads
+      # are needed here.
       - uses: actions/checkout@v7
-
-      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          fetch-depth: 1
 
-      # Reads the solution and installs exactly the workloads its target frameworks need, rather
-      # than a hardcoded list that would drift.
-      - name: Install MAUI workloads
-        run: dotnet workload restore WebRTCme.sln
+      # A tag push carries no run id, so the CI run is found by commit: the newest successful one
+      # for exactly this SHA. That is the enforcement, not a convenience - if CI has not run on the
+      # commit being tagged, there is no tested artifact and this fails rather than quietly
+      # building an untested one.
+      - name: Resolve the CI run
+        id: ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
 
-      # Versions are the build date: 26.9.9 is the 9th of September 2026. Write it normalised,
-      # without leading zeros - NuGet strips them anyway, so a csproj saying 26.09.09 produces
-      # WebRTCme.26.9.9.nupkg and every place that builds a file name from <Version> stops
-      # matching. Declaring the normalised form keeps csproj, tag and file name identical.
-      - name: Resolve version
+          if [ -n "${REQUESTED:-}" ]; then
+            run_id="$REQUESTED"
+            echo "Using the run id given: $run_id"
+          else
+            sha='${{ github.sha }}'
+            echo "Looking for a successful CI run on $sha"
+            run_id=$(gh run list \
+              --workflow=ci.yml \
+              --commit "$sha" \
+              --status success \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId // empty')
+
+            if [ -z "$run_id" ]; then
+              echo "::error::No successful CI run found for $sha. Run the CI workflow on this commit, test the artifact it produces, then tag it."
+              exit 1
+            fi
+            echo "Found CI run $run_id"
+          fi
+
+          echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Download the packages that run produced
+        uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+          run-id: ${{ steps.ci.outputs.run-id }}
+          github-token: ${{ github.token }}
+
+      # The version is read from the artifact rather than from a csproj in this checkout. The two
+      # can disagree - a commit could change <Version> after CI ran - and what is being published is
+      # the artifact, so it is the artifact that has to be self-consistent and match the tag.
+      #
+      # Versions are the build date, written normalised: 26.9.14, not 26.09.14. NuGet strips
+      # leading zeros, so a csproj saying 26.09.14 packs WebRTCme.26.9.14.nupkg and a tag built
+      # from <Version> stops matching the file. ci.yml rejects that form before it ever gets here.
+      - name: Resolve and check the version
         id: version
         run: |
           set -euo pipefail
-          declared=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme/WebRTCme.csproj | head -1)
-          middleware=$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' WebRTCme.Middleware/WebRTCme.Middleware.csproj | head -1)
+          ls -la artifacts
 
-          # The two versions are not independent: the middleware package records a dependency on
-          # WebRTCme at whatever version this build produces, so a mismatch would ship a package
-          # pointing at one that was never published.
-          if [ "$declared" != "$middleware" ]; then
-            echo "::error::WebRTCme declares $declared but WebRTCme.Middleware declares $middleware; they must match."
+          main=$(ls artifacts/WebRTCme.[0-9]*.nupkg 2>/dev/null | head -1)
+          middleware=$(ls artifacts/WebRTCme.Middleware.[0-9]*.nupkg 2>/dev/null | head -1)
+
+          if [ -z "$main" ] || [ -z "$middleware" ]; then
+            echo "::error::Expected both packages in the artifact; found: $(ls artifacts)"
             exit 1
           fi
 
-          # Catches the classic release bug: tagging one version while the csproj still says another.
+          main_version=$(basename "$main" .nupkg); main_version=${main_version#WebRTCme.}
+          mw_version=$(basename "$middleware" .nupkg); mw_version=${mw_version#WebRTCme.Middleware.}
+
+          # The middleware records a dependency on WebRTCme at whatever version it was built
+          # against, so a mismatch would ship a package pointing at one that was never published.
+          if [ "$main_version" != "$mw_version" ]; then
+            echo "::error::WebRTCme is $main_version but WebRTCme.Middleware is $mw_version; they must match."
+            exit 1
+          fi
+
+          # Catches the classic release bug: tagging one version while the artifact holds another.
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then
             tag="${GITHUB_REF_NAME#v}"
-            if [ "$tag" != "$declared" ]; then
-              echo "::error::Tag $GITHUB_REF_NAME does not match <Version>$declared</Version>"
+            if [ "$tag" != "$main_version" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match the artifact's version $main_version"
               exit 1
             fi
           fi
 
-          echo "value=$declared" >> "$GITHUB_OUTPUT"
-          echo "Version: $declared"
+          echo "value=$main_version" >> "$GITHUB_OUTPUT"
+          echo "Publishing version $main_version from CI run ${{ steps.ci.outputs.run-id }}"
 
-      - name: Build
-        run: dotnet build WebRTCme.sln -c Release
-
-      # No --no-build: these projects' packing targets resolve their ProjectReferences, which
-      # counts as invoking Build on them, and NoBuild makes that a hard error (NETSDK1085). Pack
-      # builds, and after the step above it is incremental.
-      - name: Pack
-        run: |
-          set -euo pipefail
-          dotnet pack WebRTCme/WebRTCme.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
-          dotnet pack WebRTCme.Middleware/WebRTCme.Middleware.csproj -c Release -o artifacts -p:ContinuousIntegrationBuild=true
-
-      - uses: actions/download-artifact@v7
-        with:
-          name: apple-slices
-          path: apple
-
-      # Swaps the Windows-built Apple slices for the macOS ones. The .resources.zip files are
-      # copied byte for byte and never unpacked - the symlinks live inside them, and rewriting one
-      # on Windows would flatten the framework again.
-      - name: Merge the Apple slices
-        shell: pwsh
-        run: ./.github/scripts/Merge-AppleSlices.ps1 -Package artifacts/WebRTCme.${{ steps.version.outputs.value }}.nupkg -AppleArtifactDirectory apple
-
-      # Asserts every slice and native payload is present and that no folded project leaked into
-      # the dependency groups. Both are things pack gets wrong in silence, and neither shows up in
-      # a consumer's build - a missing framework surfaces on a device, and a leaked dependency
-      # points at a package that was never published.
+      # Verified again here, on the artifact about to be published rather than on the one CI
+      # produced. They are the same bytes, so this should never fail - which is exactly why it is
+      # cheap to keep: it proves the download was what was expected, and it is the last gate before
+      # something immutable reaches nuget.org.
       #
-      # -RequireAppleNativeLayout additionally opens the Mac Catalyst .resources.zip and insists on
-      # a versioned framework, so a merge that silently did nothing cannot reach nuget.org.
+      # -RequireAppleNativeLayout opens the Mac Catalyst .resources.zip and insists on a versioned
+      # framework, so a package whose Apple slices were never merged cannot be published.
       - name: Verify packages
         shell: pwsh
         run: ./.github/scripts/Verify-Packages.ps1 -PackageDirectory artifacts -Version ${{ steps.version.outputs.value }} -RequireAppleNativeLayout
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: nupkg-${{ steps.version.outputs.value }}
-          path: artifacts/*.nupkg
-          if-no-files-found: error
 
       # Trusted Publishing: swap a GitHub OIDC token for an API key that nuget.org issues for one
       # hour. Requested immediately before the push, because the key expires and each token buys
@@ -233,7 +199,6 @@ jobs:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           set -euo pipefail
-          version='${{ steps.version.outputs.value }}'
 
           skip=()
           if [ "$SKIP_DUPLICATE" = "yes" ]; then
@@ -242,13 +207,11 @@ jobs:
           echo "skip-duplicate: $SKIP_DUPLICATE"
 
           for id in WebRTCme WebRTCme.Middleware; do
-            # Found rather than constructed. If <Version> is ever written with leading zeros the
-            # file is named after the normalised form instead, and a constructed path would miss
-            # it - after a successful login, which burns the token. The digit after the id is what
-            # stops "WebRTCme." also matching WebRTCme.Middleware.
+            # Found rather than constructed. The digit after the id is what stops "WebRTCme."
+            # also matching WebRTCme.Middleware.
             package=$(ls artifacts/$id.[0-9]*.nupkg 2>/dev/null | head -1)
             if [ -z "$package" ]; then
-              echo "::error::No package found for $id in artifacts/ (expected version $version)."
+              echo "::error::No package found for $id in artifacts/."
               exit 1
             fi
             echo "Pushing $package"
@@ -278,6 +241,15 @@ jobs:
             exit 1
           done
 
+      # Kept against the release itself as well as against the CI run, so the published bytes stay
+      # retrievable from the workflow that published them.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: published-${{ steps.version.outputs.value }}
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
       - name: Dry run summary
         if: github.event_name == 'workflow_dispatch' && inputs.dry-run
-        run: echo "::notice::Dry run - packages built and uploaded as artifacts, nothing published."
+        run: |
+          echo "::notice::Dry run - version ${{ steps.version.outputs.value }} from CI run ${{ steps.ci.outputs.run-id }} was resolved and verified. Nothing published."
