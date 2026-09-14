@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,18 +34,15 @@ namespace WebRTCme.Tests.Integration;
 /// be made parallel-safe by isolating the fixture.
 /// </para>
 /// <para>
-/// <strong>Two tests here are skipped, and the reason is a live defect rather than a gap in the
-/// tests.</strong> <c>Result&lt;T&gt;</c> does not survive MessagePack. It has no settable
-/// properties and one public constructor taking the value, so deserialisation goes through that
-/// constructor: <c>Value</c> arrives intact, while <c>Status</c> and <c>ErrorMessage</c> fall back
-/// to their defaults. Measured here - the hub returned <c>Error("...has already joined")</c> and
-/// the client received <c>IsOk=true, Status=Ok, ErrorMessage=null</c>.
-/// </para>
-/// <para>
-/// The production proxy invokes these same methods with the same protocol
-/// (<c>SignalingStub.JoinAsync</c> and the rest), so <em>every failure the signalling server
-/// reports arrives at a real client as success</em>. The skipped tests assert the behaviour that
-/// should hold and will pass once that is fixed; they are not describing an unreachable case.
+/// <strong>Failures arrive as <see cref="HubException"/>, not as a Result.</strong>
+/// <c>Result&lt;T&gt;</c> cannot carry one over MessagePack: it has no settable properties and one
+/// public constructor taking the value, so deserialisation goes through that constructor and
+/// <c>Status</c> and <c>ErrorMessage</c> revert to their defaults - a hub returning
+/// <c>Error("...has already joined")</c> reached the client as <c>IsOk=true, Status=Ok,
+/// ErrorMessage=null</c>. The hub therefore throws HubException, which SignalR propagates with its
+/// message intact, and <c>SignalingStub</c> converts it back to a <c>Result.Error</c> so callers
+/// keep the contract they had. These tests assert the raw wire behaviour, hence the
+/// <c>HubException</c> rather than a Result.
 /// </para>
 /// </remarks>
 public class SignalingServerTests : IAsyncLifetime
@@ -75,7 +73,7 @@ public class SignalingServerTests : IAsyncLifetime
                     app.UseEndpoints(endpoints => endpoints.MapHub<RoomHub>("/roomhub"));
                 });
             })
-            .StartAsync();
+            .StartAsync(Ct);
 
         _server = _host.GetTestServer();
     }
@@ -104,12 +102,18 @@ public class SignalingServerTests : IAsyncLifetime
         return connection;
     }
 
+    /// <summary>
+    /// The test's cancellation token, passed to everything that takes one so a cancelled run stops
+    /// promptly rather than sitting in a hub call. Shortened to keep the assertions readable.
+    /// </summary>
+    static CancellationToken Ct => TestContext.Current.CancellationToken;
+
     static readonly TimeSpan Patience = TimeSpan.FromSeconds(10);
 
     /// <summary>Waits for a notification, so a test fails as a timeout rather than hanging.</summary>
     static async Task<T> Awaited<T>(TaskCompletionSource<T> source)
     {
-        var completed = await Task.WhenAny(source.Task, Task.Delay(Patience));
+        var completed = await Task.WhenAny(source.Task, Task.Delay(Patience, Ct));
         completed.Should().BeSameAs(source.Task, "the notification should have arrived by now");
         return await source.Task;
     }
@@ -118,10 +122,10 @@ public class SignalingServerTests : IAsyncLifetime
     public async Task A_peer_can_join_a_room()
     {
         await using var peer = Client();
-        await peer.StartAsync();
+        await peer.StartAsync(Ct);
 
         var result = await peer.InvokeAsync<Result<System.Reactive.Unit>>(
-            "JoinAsync", Guid.NewGuid(), "alice", $"room-{Guid.NewGuid():N}");
+            "JoinAsync", Guid.NewGuid(), "alice", $"room-{Guid.NewGuid():N}", Ct);
 
         result.IsOk.Should().BeTrue(result.ErrorMessage);
     }
@@ -131,21 +135,22 @@ public class SignalingServerTests : IAsyncLifetime
     /// missing disconnect handler so damaging: a client reconnecting after a dropped transport was
     /// turned away by its own ghost.
     /// </summary>
-    [Fact(Skip = "Result<T> does not survive MessagePack: the hub's error arrives as IsOk=true, Status=Ok, ErrorMessage=null. See the class remarks.")]
+    [Fact]
     public async Task The_same_id_cannot_join_twice()
     {
         var room = $"room-{Guid.NewGuid():N}";
         var id = Guid.NewGuid();
 
         await using var peer = Client();
-        await peer.StartAsync();
+        await peer.StartAsync(Ct);
 
-        (await peer.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "alice", room)).IsOk.Should().BeTrue();
+        (await peer.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "alice", room, Ct)).IsOk.Should().BeTrue();
 
-        var again = await peer.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "alice", room);
+        var again = async () =>
+            await peer.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "alice", room, Ct);
 
-        again.IsOk.Should().BeFalse();
-        again.ErrorMessage.Should().Contain("already joined");
+        (await again.Should().ThrowAsync<HubException>())
+            .WithMessage("*already joined*", "the server's own message must survive the trip");
     }
 
     [Fact]
@@ -156,13 +161,13 @@ public class SignalingServerTests : IAsyncLifetime
 
         await using var alice = Client();
         alice.On<Guid, string>("OnPeerJoinedAsync", (id, name) => joined.TrySetResult((id, name)));
-        await alice.StartAsync();
-        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room);
+        await alice.StartAsync(Ct);
+        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room, Ct);
 
         var bobId = Guid.NewGuid();
         await using var bob = Client();
-        await bob.StartAsync();
-        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room);
+        await bob.StartAsync(Ct);
+        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room, Ct);
 
         var (id, name) = await Awaited(joined);
         id.Should().Be(bobId);
@@ -181,11 +186,11 @@ public class SignalingServerTests : IAsyncLifetime
 
         await using var alice = Client();
         alice.On<Guid, string>("OnPeerJoinedAsync", (id, _) => notified.TrySetResult(id));
-        await alice.StartAsync();
+        await alice.StartAsync(Ct);
 
-        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room);
+        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room, Ct);
 
-        var completed = await Task.WhenAny(notified.Task, Task.Delay(TimeSpan.FromSeconds(1)));
+        var completed = await Task.WhenAny(notified.Task, Task.Delay(TimeSpan.FromSeconds(1), Ct));
         completed.Should().NotBeSameAs(notified.Task, "the room's first peer has nobody to hear about");
     }
 
@@ -197,15 +202,15 @@ public class SignalingServerTests : IAsyncLifetime
 
         await using var alice = Client();
         alice.On<Guid>("OnPeerLeftAsync", id => left.TrySetResult(id));
-        await alice.StartAsync();
-        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room);
+        await alice.StartAsync(Ct);
+        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room, Ct);
 
         var bobId = Guid.NewGuid();
         await using var bob = Client();
-        await bob.StartAsync();
-        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room);
+        await bob.StartAsync(Ct);
+        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room, Ct);
 
-        (await bob.InvokeAsync<Result<System.Reactive.Unit>>("LeaveAsync", bobId)).IsOk.Should().BeTrue();
+        (await bob.InvokeAsync<Result<System.Reactive.Unit>>("LeaveAsync", bobId, Ct)).IsOk.Should().BeTrue();
 
         (await Awaited(left)).Should().Be(bobId);
     }
@@ -229,13 +234,13 @@ public class SignalingServerTests : IAsyncLifetime
 
         await using var alice = Client();
         alice.On<Guid>("OnPeerLeftAsync", id => left.TrySetResult(id));
-        await alice.StartAsync();
-        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room);
+        await alice.StartAsync(Ct);
+        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room, Ct);
 
         var bobId = Guid.NewGuid();
         var bob = Client();
-        await bob.StartAsync();
-        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room);
+        await bob.StartAsync(Ct);
+        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", bobId, "bob", room, Ct);
 
         // No LeaveAsync: the transport just goes away, the way a closed tab does.
         await bob.DisposeAsync();
@@ -256,45 +261,45 @@ public class SignalingServerTests : IAsyncLifetime
         // Somebody else has to be in the room, or it is removed when the last client goes and the
         // rejoin proves nothing about ghosts.
         await using var alice = Client();
-        await alice.StartAsync();
-        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room);
+        await alice.StartAsync(Ct);
+        await alice.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", Guid.NewGuid(), "alice", room, Ct);
 
         var left = new TaskCompletionSource<Guid>();
         alice.On<Guid>("OnPeerLeftAsync", peer => left.TrySetResult(peer));
 
         var bob = Client();
-        await bob.StartAsync();
-        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "bob", room);
+        await bob.StartAsync(Ct);
+        await bob.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "bob", room, Ct);
         await bob.DisposeAsync();
 
         await Awaited(left);
 
         await using var bobAgain = Client();
-        await bobAgain.StartAsync();
-        var rejoin = await bobAgain.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "bob", room);
+        await bobAgain.StartAsync(Ct);
+        var rejoin = await bobAgain.InvokeAsync<Result<System.Reactive.Unit>>("JoinAsync", id, "bob", room, Ct);
 
         rejoin.IsOk.Should().BeTrue(rejoin.ErrorMessage);
     }
 
-    [Fact(Skip = "Result<T> does not survive MessagePack: the hub's error arrives as IsOk=true, Status=Ok, ErrorMessage=null. See the class remarks.")]
+    [Fact]
     public async Task Leaving_a_room_nobody_is_in_is_an_error_rather_than_a_crash()
     {
         await using var peer = Client();
-        await peer.StartAsync();
+        await peer.StartAsync(Ct);
 
-        var result = await peer.InvokeAsync<Result<System.Reactive.Unit>>("LeaveAsync", Guid.NewGuid());
+        var leave = async () =>
+            await peer.InvokeAsync<Result<System.Reactive.Unit>>("LeaveAsync", Guid.NewGuid(), Ct);
 
-        result.IsOk.Should().BeFalse();
-        result.ErrorMessage.Should().Contain("no user found");
+        (await leave.Should().ThrowAsync<HubException>()).WithMessage("*no user found*");
     }
 
     [Fact]
     public async Task The_server_hands_out_ice_servers()
     {
         await using var peer = Client();
-        await peer.StartAsync();
+        await peer.StartAsync(Ct);
 
-        var result = await peer.InvokeAsync<Result<RTCIceServer[]>>("GetIceServersAsync");
+        var result = await peer.InvokeAsync<Result<RTCIceServer[]>>("GetIceServersAsync", Ct);
 
         result.IsOk.Should().BeTrue(result.ErrorMessage);
         result.Value.Should().NotBeNullOrEmpty("a peer cannot gather candidates without at least a STUN server");

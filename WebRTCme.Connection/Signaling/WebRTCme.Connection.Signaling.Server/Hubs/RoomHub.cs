@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,30 @@ using Utilme;
 
 namespace WebRTCme.Connection.Signaling.Server.Hubs
 {
+    /// <summary>
+    /// The mesh signalling hub.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <strong>Failures leave as <see cref="HubException"/>, not as <c>Result.Error</c>.</strong>
+    /// Returning one was the obvious thing and it did not work: <c>Result&lt;T&gt;</c> has no
+    /// settable properties and one public constructor taking the value, so MessagePack rebuilds it
+    /// through that constructor and <c>Status</c> and <c>ErrorMessage</c> fall back to their
+    /// defaults. A hub returning <c>Error("...has already joined")</c> arrived at the client as
+    /// <c>IsOk=true, Status=Ok, ErrorMessage=null</c> - every failure this server reported looked
+    /// like success, and the callers' <c>if (!result.IsOk) throw</c> lines were unreachable.
+    /// </para>
+    /// <para>
+    /// HubException is the one exception type SignalR propagates verbatim to the caller; anything
+    /// else reaches the client as "An unexpected error occurred invoking '...' on the server."
+    /// with the detail stripped. <c>SignalingStub</c> turns it back into a <c>Result.Error</c>, so
+    /// the <see cref="ISignalingServerApi"/> contract is unchanged for everyone above it.
+    /// </para>
+    /// <para>
+    /// Success still travels as <c>Result.Ok</c>, which survives the trip because <c>Value</c> is
+    /// what that constructor takes and Ok is what Status defaults to.
+    /// </para>
+    /// </remarks>
     public class RoomHub : Hub<ISignalingServerNotify>, ISignalingServerApi
     {
         readonly ILogger<RoomHub> _logger;
@@ -44,7 +68,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             }
             catch(Exception)
             {
-                return Result<RTCIceServer[]>.Error("IceServers not found");
+                throw new HubException("IceServers not found");
             }
         }
 
@@ -91,7 +115,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Result<Unit>.Error(ex.Message);
+                throw new HubException(ex.Message);
             }
         }
 
@@ -174,7 +198,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Result<Unit>.Error(ex.Message);
+                throw new HubException(ex.Message);
             }
         }
 
@@ -198,7 +222,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Result<Unit>.Error(ex.Message);
+                throw new HubException(ex.Message);
             }
         }
 
@@ -222,7 +246,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Result<Unit>.Error(ex.Message);
+                throw new HubException(ex.Message);
             }
         }
 
@@ -250,7 +274,7 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Result<Unit>.Error(ex.Message);
+                throw new HubException(ex.Message);
             }
 
         }

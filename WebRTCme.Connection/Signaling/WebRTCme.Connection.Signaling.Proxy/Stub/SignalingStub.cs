@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -165,23 +166,59 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
         }
 
 
+        /// <summary>
+        /// Invokes a hub method and turns a server-side failure back into a <c>Result.Error</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The server cannot answer with one. <c>Result&lt;T&gt;</c> has no settable properties and
+        /// one public constructor taking the value, so MessagePack rebuilds it through that
+        /// constructor and <c>Status</c> and <c>ErrorMessage</c> revert to their defaults: a hub
+        /// returning <c>Error("...has already joined")</c> arrived here as <c>IsOk=true,
+        /// Status=Ok, ErrorMessage=null</c>. Every failure the signalling server reported looked
+        /// like success, and every <c>if (!result.IsOk) throw</c> above this was dead code.
+        /// </para>
+        /// <para>
+        /// So the hub throws <see cref="HubException"/> - the one type SignalR propagates to the
+        /// caller with its message intact - and it is converted back here. Callers keep the
+        /// <see cref="ISignalingServerApi"/> contract they always had; the difference is that it
+        /// now tells the truth.
+        /// </para>
+        /// <para>
+        /// Only HubException is caught. A dropped transport or a timeout is not a refusal by the
+        /// server, and turning those into a tidy Result.Error would hide a connection that needs
+        /// reconnecting behind a message about this one call.
+        /// </para>
+        /// </remarks>
+        async Task<Result<TResult>> InvokeAsync<TResult>(string method, params object[] args)
+        {
+            try
+            {
+                return await _hubConnection.InvokeCoreAsync<Result<TResult>>(method, args);
+            }
+            catch (HubException exception)
+            {
+                return Result<TResult>.Error(exception.Message);
+            }
+        }
+
         public Task<Result<RTCIceServer[]>> GetIceServersAsync() =>
-            _hubConnection.InvokeAsync<Result<RTCIceServer[]>>(nameof(GetIceServersAsync));
+            InvokeAsync<RTCIceServer[]>(nameof(GetIceServersAsync));
 
         public Task<Result<Unit>> JoinAsync(Guid id, string name, string room) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(JoinAsync), id, name, room);
+            InvokeAsync<Unit>(nameof(JoinAsync), id, name, room);
 
         public Task<Result<Unit>> LeaveAsync(Guid id) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(LeaveAsync), id);
+            InvokeAsync<Unit>(nameof(LeaveAsync), id);
 
         public Task<Result<Unit>> SdpAsync(Guid peerId, string sdp) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(SdpAsync), peerId, sdp);
+            InvokeAsync<Unit>(nameof(SdpAsync), peerId, sdp);
 
         public Task<Result<Unit>> IceAsync(Guid peerId, string ice) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(IceAsync), peerId, ice);
+            InvokeAsync<Unit>(nameof(IceAsync), peerId, ice);
 
         public Task<Result<Unit>> MediaAsync(Guid id, bool videoMuted, bool audioMuted, bool speaking) =>
-            _hubConnection.InvokeAsync<Result<Unit>>(nameof(MediaAsync), id, videoMuted, audioMuted, speaking);
+            InvokeAsync<Unit>(nameof(MediaAsync), id, videoMuted, audioMuted, speaking);
 
 
         Task HubConnection_Closed(Exception arg)
