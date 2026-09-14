@@ -22,6 +22,14 @@
 		  an open-source repository publishing public packages, so the free line is the right one.
 		-->
 		<PackageReference Include="FluentAssertions" Version="7.2.2" />
+		<!--
+		  The signalling server is hosted in-process by SignalingServerTests and driven with a real
+		  SignalR client over MessagePack - the protocol the production client actually uses - so a
+		  serialisation fault in Result<Unit> would fail here rather than on a device.
+		-->
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.12" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
 		<PackageReference Include="NSubstitute" Version="6.2.0" />
 		<PackageReference Include="xunit.v3" Version="4.0.1" />
@@ -36,10 +44,16 @@
 		<Using Include="FluentAssertions" />
 	</ItemGroup>
 
+	<!-- Needed to host the signalling server in-process; the test project is not a web project. -->
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\WebRTCme.Connection\MediaSoup\WebRTCme.Connection.MediaSoup\WebRTCme.Connection.MediaSoup.csproj" />
 		<ProjectReference Include="..\..\WebRTCme.Connection\WebRTCme.Connection\WebRTCme.Connection.csproj" />
 		<ProjectReference Include="..\..\WebRTCme.Middleware\WebRTCme.Middleware.csproj" />
+		<ProjectReference Include="..\..\WebRTCme.Connection\Signaling\WebRTCme.Connection.Signaling.Server\WebRTCme.Connection.Signaling.Server.csproj" />
 	</ItemGroup>
 
 </Project>
