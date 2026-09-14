@@ -333,7 +333,7 @@ compiled everywhere and had run nowhere.
 | --- | --- |
 | Blazor | **done** - two-party with Android |
 | Android | **done** - two-party with Blazor, and again with Mac Catalyst |
-| Mac Catalyst | **done** - two-party with Android; its own rendering not seen, see below |
+| Mac Catalyst | **done** - two-party with Android, both directions, 2026-09-14 |
 | Windows | app running on the current build, needs one click to join |
 | iOS | needs an iPhone plugged into the Mac - `devicectl` lists three, all unavailable |
 
@@ -344,8 +344,15 @@ Everything the refactor added to the tile works on real hardware, and none of it
 - **mute** - `Muted` badge on the peer's tile, `Android: mic muted` in the status row;
 - **camera off** - an overlay covering the last frame rather than a frozen picture;
 - **both at once** - `Android: mic muted, camera off`, so the two states travel together;
-- **speaking** - a green ring on the Mac Catalyst tile and `MacCatalyst: speaking`, seen on the
-  Android device;
+- **speaking** - in both directions as of 2026-09-14, and it took three attempts to get there.
+  Two faults sat on top of each other. The level was read through the current culture and parsed
+  as invariant, so on a comma-decimal machine `0.0021` became twenty-one thousand: that peer
+  reported speaking permanently while the dot-decimal peer, parsing correctly, reported it never.
+  With that fixed the remaining fault was the threshold itself - a single constant that no pair of
+  microphones shares. Measured, silence against speech: Android `0.0002-0.0007` against
+  `0.0023-0.0063`, the Mac `0.0004-0.0012` against peaks of `0.037`. The threshold now follows a
+  per-device noise floor, and the two ends settle on visibly different thresholds - Android at the
+  absolute minimum `0.001`, the Mac adapting to `0.0014-0.0016`;
 - **`contain` for the self-view, `cover` for a peer** - visible as soon as two tiles are up.
 
 The video kept running through every one of those toggles, which is the whole point of the
