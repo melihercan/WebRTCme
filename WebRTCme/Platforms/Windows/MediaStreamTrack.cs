@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static WebRTCme.Bindings.Maui.Windows.Interop;
 using Frame = WebRTCme.Bindings.Maui.Windows.Interop.VideoFrame;
@@ -168,11 +168,18 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
         var bgra = new byte[FrameConverter.BgraLength(frame->Width, frame->Height)];
         FrameConverter.ToBgra(*frame, bgra);
 
+        // The size as it should be *seen*, which is not the size of the buffer when the sender
+        // turned the camera: a phone in portrait sends 640x480 tagged for a quarter turn and the
+        // viewer should get 480x640. The converter has already applied the turn, so subscribers
+        // are handed an upright frame and never have to know.
+        var width = FrameConverter.DisplayWidth(*frame);
+        var height = FrameConverter.DisplayHeight(*frame);
+
         foreach (var subscriber in subscribers)
         {
             try
             {
-                subscriber(bgra, frame->Width, frame->Height);
+                subscriber(bgra, width, height);
             }
             catch (Exception ex)
             {

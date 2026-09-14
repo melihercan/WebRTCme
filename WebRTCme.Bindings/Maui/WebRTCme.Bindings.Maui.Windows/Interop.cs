@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace WebRTCme.Bindings.Maui.Windows;
@@ -121,8 +121,25 @@ public static partial class Interop
         public int Id;                 // only meaningful when negotiated, else -1
     }
 
+    /// <summary>Clockwise degrees a renderer must turn a frame by before showing
+    /// it. The values are webrtc::VideoRotation's own.</summary>
+    public enum VideoRotation
+    {
+        Rotation0 = 0,
+        Rotation90 = 90,
+        Rotation180 = 180,
+        Rotation270 = 270,
+    }
+
     /// <summary>An I420 frame. The planes are valid only for the duration of
     /// the callback that delivered them.</summary>
+    /// <remarks>
+    /// Width and Height describe the buffer, not the picture: a phone in portrait
+    /// sends 640x480 with <see cref="VideoRotation.Rotation90"/>, and a viewer
+    /// should see 480x640. A renderer that ignores <see cref="Rotation"/> shows
+    /// every phone on its side and cannot notice - an upright frame and a turned
+    /// one are the same bytes at the same dimensions.
+    /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
     public struct VideoFrame
     {
@@ -135,6 +152,7 @@ public static partial class Interop
         public int Width;
         public int Height;
         public long TimestampUs;
+        public VideoRotation Rotation;
     }
 
     /// <summary>

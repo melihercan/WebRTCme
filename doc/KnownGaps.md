@@ -24,7 +24,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **Windows renders every rotated frame sideways** | a change in WebRTCnative | The C ABI drops the rotation, so the renderer never receives it. Phones look sideways on Windows and nowhere else. See below. |
 
 ### The rotation one, in detail - 2026-09-12
 
@@ -73,7 +72,7 @@ only the source of the frames moved.
 Rotation 0 is the truth rather than a workaround: a camera wired to a Mac does not move. Verified
 the same day - Mac Catalyst video arrives upright on an Android peer.
 
-### Windows ignores frame rotation - 2026-09-14
+### Windows ignored frame rotation - found and fixed 2026-09-14
 
 **Symptom, and the shape that identifies it:** in a four-party call seen from Windows, the two
 phones render sideways and the two desktops render upright. The same peers seen from Android all
@@ -97,14 +96,25 @@ so `MediaStreamTrack.OnFrame` has nothing to pass on, `SubscribeToVideoFrames` i
 it arrived. **There is no managed-side fix**: a 640x480 frame tagged for a quarter turn and one
 tagged upright are the same bytes and the same dimensions, so the renderer cannot tell them apart.
 
-Two ways to fix it, both in WebRTCnative:
+**Fixed the same day, across both repositories.** The ABI carries the rotation now rather than
+applying it: `rtc_video_rotation` and a `rotation` field on `rtc_video_frame`, filled in
+`FrameSink.cc` from `frame.rotation()`. Rotating inside the shim was the alternative and was
+rejected - it would cost a copy per frame for every consumer, including ones that can hand the
+angle to a compositor and get it free.
 
-- **Pass it on.** Add a rotation field to `rtc_video_frame`, fill it from `frame.rotation()`, and
-  apply it when rendering. Keeps the Windows renderer honest about what it received, and any other
-  consumer of the ABI gets the information too.
-- **Apply it at the source.** Rotate the I420 buffer in the shim before handing it over, so the
-  ABI only ever carries upright frames. Less to change on this side, and it throws the information
-  away for anyone who wanted it.
+On this side the turn is applied in `FrameConverter.ToBgra`, which already visits every pixel, so
+it costs a different destination index and no second pass. Subscribers receive an upright frame
+plus `DisplayWidth`/`DisplayHeight`, and `MediaView` needed no changes at all.
+
+Two things worth keeping from how it was verified, because both are ways this could have gone
+wrong quietly:
+
+- The rebuilt `WebRtcInterop.dll` is **the same size** as the one it replaced. Sizes prove nothing;
+  the hashes differ, which is what proved the change was in the build.
+- All eight sibling DLLs came back **byte-identical**, which is what makes this a drop-in at the
+  same WebRTC version (M152, branch-heads/7977) rather than a version bump. The artifact name
+  carries that version - `webrtc-interop-windows-x64-m152-7977` - which is why the workflow was
+  dispatched with `webrtc_branch=7977` rather than left to resolve the newest stable milestone.
 
 Either needs `WebRtcInterop` rebuilt and the binary re-vendored here, which is why this is not a
 one-line change.

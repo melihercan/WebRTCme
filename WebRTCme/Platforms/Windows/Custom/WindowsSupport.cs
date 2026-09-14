@@ -1,4 +1,4 @@
-using WebRTCme.Windows;
+﻿using WebRTCme.Windows;
 using static WebRTCme.Bindings.Maui.Windows.Interop;
 
 namespace WebRTCme;
