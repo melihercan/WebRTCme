@@ -203,9 +203,15 @@ function Invoke-Android {
 function Invoke-MacCatalyst {
     param([string] $Filter)
 
-    # The bundle is named from ApplicationTitle rather than the assembly - "WebRTCme Device
-    # Tests.app" - so the path contains spaces and every use of it stays quoted.
-    $app = "$macRepo/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst/maccatalyst-x64/WebRTCme Device Tests.app/Contents/MacOS/WebRTCme.DeviceTests.Runner"
+    # The runtime identifier is found rather than named. macos-latest is Apple Silicon and builds
+    # maccatalyst-arm64; an Intel Mac builds maccatalyst-x64. Hardcoding either means the path does
+    # not exist on the other, the app never starts, and this reports "the runner did not finish" -
+    # which reads exactly like a crash on launch.
+    #
+    # The bundle is also named from ApplicationTitle rather than the assembly - "WebRTCme Device
+    # Tests.app" - so the path contains spaces and stays quoted throughout.
+    $app = '$(find "__REPO__/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst" -name "WebRTCme.DeviceTests.Runner" -type f -perm +111 | head -1)'
+    $app = $app.Replace('__REPO__', $macRepo)
     $filterArg = if ($Filter) { "--filter=$Filter" } else { '' }
 
     # A literal here-string with the variable parts substituted afterwards: every $ below belongs to

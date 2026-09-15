@@ -240,12 +240,21 @@ jobs:
 
   unit:
     name: Unit and integration
-    runs-on: ubuntu-latest
+    # Windows, not Linux, despite this tier being pure managed code with no artifact to wait for.
+    # It references the projects, those multi-target iOS and Mac Catalyst, and restore evaluates
+    # every target framework a reference declares - so on Linux it fails with NETSDK1147 before a
+    # single test runs. Windows is the only host that can restore all five.
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+
+      # Restored from the project rather than named: -f narrows the build and not the restore, so
+      # the full set is needed whatever this tier actually compiles.
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.Tests/WebRTCme.Tests.csproj
 
       # The only tier that references the projects rather than the package, and the only one that
       # needs no artifact - so it does not wait for the build and runs beside it.
@@ -316,6 +325,12 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+
+      # The Blazor host reaches the scenarios through WebRTCme.DeviceTests.Core, which also targets
+      # Android - so the Android workload has to be here even though nothing Android is built.
+      # Restore evaluates every target framework a reference declares; -f narrows only the build.
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.BlazorTestHost/WebRTCme.BlazorTestHost.csproj
 
       - uses: actions/download-artifact@v7
         with:

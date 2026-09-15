@@ -19,7 +19,14 @@
 	-->
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<!--
+		  Apple target frameworks only where they can be restored. Their workload packs do not
+		  exist on Linux, and restore evaluates every declared target framework regardless of what
+		  -f asks to build - so on a Linux runner an Android-only build still failed with
+		  NETSDK1178 before it started.
+		-->
+		<TargetFrameworks>net10.0-android</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) OR $([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<OutputType>Exe</OutputType>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
