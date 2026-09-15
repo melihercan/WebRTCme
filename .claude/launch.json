@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "blazor-demo",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "WebRTCme.DemoApp/WebRTCme.DemoApp.Blazor",
+        "--urls",
+        "http://localhost:5176"
+      ],
+      "port": 5176
+    }
+  ]
+}

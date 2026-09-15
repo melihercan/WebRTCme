@@ -1502,6 +1502,31 @@ switching an encoding off means those frames are never produced at all.
 
 ## Verified against, and not
 
+### One call, five platforms - 2026-09-15
+
+Everything changed on 2026-09-14 and 2026-09-15 was run on real hardware afterwards, in a single
+mesh call in one room. Blazor, Android, Mac Catalyst and iOS were up together as a four-party call;
+Blazor was then dropped to free the PC's only camera and Windows took its place, making a second
+four-party call. Every platform carried live video in both directions.
+
+What that covered, none of which a test could have:
+
+- **the `HubException` signalling contract** - join, peer-joined, SDP and ICE relayed between five
+  clients. Every failure path the signalling server reports used to arrive as success, so this is
+  the first real exercise of the corrected contract;
+- **`Result<Utilme.Unit>` on the wire** - every signalling call round-tripping under MessagePack;
+- **the extracted `SpeakingDetector`** - the speaking flag propagating between platforms and shown
+  on the peers' tiles, on Android, Mac Catalyst and iOS. The Mac's logs settle the historical
+  culture bug directly, because that machine uses a comma decimal separator:
+  `Outgoing speaking:True level:0,00284 floor:0,00028 threshold:0,00100`;
+- **System.Reactive 7.0.0, MAUI 10.0.101, CommunityToolkit.Maui 15.0.1** - all five apps running
+  the whole call path after the dependency sweep;
+- **the rebuilt `WebRtcInterop.dll`** carrying the audio-device-module fix, on Windows;
+- **`OnDisconnectedAsync`** - closing the browser tab without calling `LeaveAsync` evicted the peer
+  from the other clients' stats within seconds rather than leaving them encoding to a ghost.
+
+Measured over the call: `lost=0` on every peer, RTT 1-6 ms on the LAN, 640x480 video.
+
 **The 2026-09-11 work has run on Blazor, Android and Windows. It has not run on iOS or Mac
 Catalyst.** That gap is worth stating plainly at the top of this section, because a lot of code
 changed on those two platforms on reasoning alone: `RTCRtpSender.SetParameters` and `ReplaceTrack`,
@@ -1652,6 +1677,33 @@ the dispatcher - but it does not explain this crash, and the commit message over
 So the procedure that works: **deploy from Visual Studio** (Ctrl+F5 - it regenerates the layout
 even if its own launch then fails), then **activate the package** with the command above.
 
+**Visual Studio is not actually required - 2026-09-15.** The paragraph above is about the `AppX/`
+layout, and a registration does not have to point at it. `Get-AppxPackage` reports where the
+registration lives, and on this machine it was already the loose layout:
+
+```
+InstallLocation : ...\bin\Debug\net10.0-windows10.0.22621.0\win-x64
+```
+
+That folder is exactly what `dotnet build` refreshes, so the staleness trap did not apply: a plain
+build updated the code the registered package runs. Check `InstallLocation` before assuming
+otherwise - the answer decides whether a Visual Studio deploy is needed at all.
+
+When a registration does point at a stale `AppX/`, re-register against the loose layout instead of
+deploying:
+
+```powershell
+Add-AppxPackage -Register "...\net10.0-windows10.0.22621.0\win-x64\AppxManifest.xml"
+```
+
+`0x80073CFB` ("already installed, and reinstallation was blocked") from that command is not a
+failure worth chasing when `InstallLocation` is already the loose layout - there is nothing to
+re-register, and the app launches with today's code regardless.
+
+Verified end to end on 2026-09-15: `dotnet build -f net10.0-windows10.0.22621.0`, confirm the
+assembly timestamps under `win-x64\` are current, then activate the package. The app joined a
+four-party call with Android, iOS and Mac Catalyst without Visual Studio being opened.
+
 **Reading Windows debug output.** `Debug.WriteLine` reaches the debugger when one is attached, and
 otherwise goes to the Win32 `OutputDebugString` channel, which a capture tool can read - only one
 consumer gets it, so a capture works only when the app runs without a debugger. `Console.WriteLine`
@@ -1692,6 +1744,51 @@ the *SFU* stopped forwarding, which it will do whether or not the sender stopped
 whole point of pausing server-side. Only `GetOutgoingStatsAsync` can tell you what left this
 device. Conflating the two hid the `DisableTrackOnPause` bug above for a full day of testing that
 looked, at every step, like it had passed.
+
+## Getting a build onto an iPhone - 2026-09-15
+
+Four things cost time putting the demo app on a physical iPhone, and none of them is about WebRTC
+either. The build itself was never the problem: it compiled and codesigned for `ios-arm64` first
+time.
+
+**`mlaunch` hangs on a locked phone, and says something else.** A `-t:Run` build sat at:
+
+```
+Please connect the device ':v2:udid=00008110-000528590CA1A01E'...
+```
+
+The device was connected. `mlaunch --listdev` listed it by name and UDID throughout. The actual
+cause only appeared through `devicectl`:
+
+```
+kAMDMobileImageMounterDeviceLocked: The device is locked.
+```
+
+iOS will not mount the developer disk image while the phone is locked, so nothing can install or
+launch. Unlock it first, and turn off auto-lock for the session - a phone that locks mid-test takes
+the developer session with it.
+
+**`-p:_DeviceName=:v2:udid=<udid>` did not work** with `Microsoft.iOS.Sdk.net9.0_26.2`. `mlaunch`
+treated the whole selector as a literal device name rather than parsing it. What worked was leaving
+`mlaunch` out of it: build without `-t:Run`, then install and launch with `devicectl`, which
+addresses the device by its paired identifier from `xcrun devicectl list devices`:
+
+```bash
+xcrun devicectl device install app --device <paired-identifier> path/to/App.app
+xcrun devicectl device process launch --device <paired-identifier> <bundle-id>
+```
+
+**`devicectl ... --console` kills the app when the console session ends**, and reports it as
+`The app terminated with the exit code 0`. That reads like a clean exit from the app and is nothing
+of the kind - the app was still initialising. Launched detached it stays up. Use `--console` to
+read startup output, not to decide whether the app survives; `devicectl device info processes` is
+the honest answer to that.
+
+**Check which device is actually plugged in.** Several iPhones can be paired and reachable at once,
+and `devicectl list devices` reports them all as `available (paired)` whether or not they are on the
+end of a cable. An hour went into diagnosing "the app will not stay running" on a phone that was
+not the one being looked at. `xcrun devicectl device info apps --device <id>` confirms where a build
+actually landed.
 
 ## A failure only the Mac can see
 
