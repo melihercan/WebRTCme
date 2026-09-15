@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<!--
 	  Tier 3 of doc/TestingPlan.md: does the package actually work at runtime, on this platform?
@@ -17,24 +17,32 @@
 	  Tests/Test-Device.ps1, which supplies the version and the feed.
 
 	  One target framework at a time, by design: this is a process that runs on the machine it is
-	  built for. Windows builds and runs the net10.0-windows slice; the Mac mini builds and runs
-	  net10.0-maccatalyst. Android and iOS need a runner app on the device and are phase 4.
+	  built for. That is Windows and only Windows today - see the target framework below for why
+	  Mac Catalyst cannot run as a plain test process, and doc/TestingPlan.md phase 4 for what it
+	  needs instead, along with Android and iOS.
 	-->
 
 	<PropertyGroup>
 		<!--
-		  The machine's own target framework, chosen here rather than passed in.
+		  Set here rather than passed in, because passing it does not work: -f and
+		  -p:TargetFramework are honoured by the build but not by the implicit restore, which
+		  resolves the project's declared framework instead, and the build then fails with NETSDK1005
+		  saying the assets file has no target for the one it was given.
 
-		  Passing -f or -p:TargetFramework instead does not work: the implicit restore resolves the
-		  project's declared framework while the build uses the one given, and the build then fails
-		  with NETSDK1005 saying the assets file has no target for it. On a Mac, a hardcoded Windows
-		  default also fails earlier still, with NETSDK1100 about targeting Windows on this
-		  operating system - which is a confusing thing to be told when you asked for Mac Catalyst.
+		  Windows only, and Mac Catalyst is not merely absent - it cannot work this way. Catalyst
+		  builds an .app rather than an executable, and xUnit v3 refuses to build a test project
+		  without an app host:
 
-		  So the default is the host's, and running these tests needs no framework argument at all.
+		    error : xUnit.net v3 test projects must build an app host ('<UseAppHost>true</UseAppHost>')
+		    error NETSDK1084: no application host available for the RuntimeIdentifier 'maccatalyst-x64'
+
+		  Setting UseAppHost is what produces the second, so the two cannot both be satisfied. Mac
+		  Catalyst needs the same device runner as Android and iOS: it belongs to phase 4 of
+		  doc/TestingPlan.md, which had put it in phase 3 on the assumption that a Catalyst process
+		  runs like a Windows one. It does not.
 		-->
 		<TargetFramework Condition="'$(TargetFramework)' == '' AND $([MSBuild]::IsOSPlatform('windows'))">net10.0-windows10.0.22621.0</TargetFramework>
-		<TargetFramework Condition="'$(TargetFramework)' == '' AND $([MSBuild]::IsOSPlatform('osx'))">net10.0-maccatalyst</TargetFramework>
+
 		<OutputType>Exe</OutputType>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -53,15 +61,6 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
 
-		<!--
-		  Mac Catalyst does not build an executable, it builds an .app, and an .app without a bundle
-		  identifier is refused outright: "A bundle identifier is required." Nothing is signed,
-		  installed or submitted from here - this only ever runs from the build output on the
-		  machine that built it - so the id exists to satisfy the packager rather than to identify
-		  anything.
-		-->
-		<ApplicationId Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">com.melihercan.webrtcme.devicetests</ApplicationId>
-		<ApplicationTitle Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">WebRTCme Device Tests</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup>

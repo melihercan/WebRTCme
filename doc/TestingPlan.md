@@ -203,11 +203,28 @@ to support rather than a bug to fix.
 
 ### Phase 3 - runtime, where a plain process works
 
-`Tests/WebRTCme.DeviceTests`, multi-targeted, referencing the package the same way Phase 2 does.
-Start with the two platforms where a test process just runs:
+`Tests/WebRTCme.DeviceTests`, referencing the package the same way Phase 2 does.
 
-- **Windows** (`net10.0-windows10.0.22621.0`) on the PC;
-- **Mac Catalyst** (`net10.0-maccatalyst`) on the Mac mini.
+**Windows only, and that is a correction.** This phase was planned for Windows *and* Mac Catalyst,
+on the assumption that a Catalyst test process runs the way a Windows one does. It does not, and
+the wall is hard rather than a matter of configuration. Catalyst builds an `.app` rather than an
+executable; xUnit v3 refuses to build a test project without an app host; and there is no app host
+to be had:
+
+```
+error : xUnit.net v3 test projects must build an app host ('<UseAppHost>true</UseAppHost>')
+error NETSDK1084: no application host available for the RuntimeIdentifier 'maccatalyst-x64'
+```
+
+Setting `UseAppHost` is what produces the second, so the two cannot both be satisfied. **Mac
+Catalyst moves to phase 4** and needs the same device runner as Android and iOS.
+
+Getting that far also cost two smaller mistakes worth recording, since both look like the tooling
+misbehaving and are neither. A hardcoded `net10.0-windows` default fails on a Mac with `NETSDK1100`
+about targeting Windows, which is a confusing thing to be told when you asked for Catalyst. And
+passing `-f` or `-p:TargetFramework` does not fix it: the build honours them and the implicit
+restore does not, so the build fails with `NETSDK1005` saying the assets file has no target for the
+framework it was just given. The project picks its own framework for that reason.
 
 Contents: the loopback negotiation above, plus `GetMediaDevices` enumeration, plus the media group
 that skips without a camera - `GetUserMedia`, track add, `OnTrack` firing on the far side, mute
@@ -225,6 +242,9 @@ nuget.org**; it comes from the `dotnet-eng` feed, so this phase introduces the r
 - **iOS** on the Mac mini, against the Simulator. A physical iPhone still needs a person for taps
   in general, but a headless runner app does not need taps - so the Simulator is the default and a
   real device is an option rather than a requirement.
+- **Mac Catalyst** on the Mac mini, arrived here from phase 3 for the reason given above. It is
+  the cheapest of the three to add, since the machine is the target and nothing has to be deployed
+  anywhere.
 
 Fallback if XHarness proves awkward: a minimal MAUI runner app per platform that runs the same
 assertions and reports through the exit code. More code, no extra feed.

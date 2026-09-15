@@ -9,8 +9,10 @@
   architecture passes both. This runs a real negotiation - two RTCPeerConnections in one process,
   offer and answer and ICE handed between them in code - and is the tier that finds that out.
 
-  It runs on the machine it tests. Windows runs the net10.0-windows slice; the Mac mini runs
-  net10.0-maccatalyst. Android and iOS need a runner app on the device and are phase 4.
+  It runs on the machine it tests, and that machine is Windows. Mac Catalyst turned out to belong
+  with Android and iOS rather than with Windows: it builds an .app rather than an executable, xUnit
+  v3 will not build a test project without an app host, and there is no app host for
+  maccatalyst-x64. All three need a device runner - phase 4 of doc/TestingPlan.md.
 
   As with tier 2, fetch the package from a CI run rather than packing locally - a locally packed
   one carries this machine's Apple slices, which on Windows are flat and unpublishable:
@@ -26,8 +28,7 @@
   Folder holding the .nupkg files. Defaults to artifacts/ at the repository root.
 
 .NOTES
-  There is no framework parameter. The project picks the host's target framework itself -
-  net10.0-windows on Windows, net10.0-maccatalyst on macOS - because passing -f or
+  There is no framework parameter. The project sets its own, because passing -f or
   -p:TargetFramework does not survive the implicit restore: restore resolves the project's declared
   framework while the build uses the one given, and the build fails with NETSDK1005 saying the
   assets file has no target for it.
@@ -51,8 +52,14 @@ if (-not (Test-Path $PackageSource)) {
     throw "No package source at $PackageSource. Download a CI artifact first: gh run download <run-id> -n nupkg -D artifacts"
 }
 
-if (-not ($IsWindows -or $IsMacOS)) {
-    throw "Tier 3 runs on Windows or macOS. Android and iOS are phase 4."
+if (-not $IsWindows) {
+    throw @"
+Tier 3 runs on Windows only.
+
+Mac Catalyst cannot run as a plain test process - it builds an .app, xUnit v3 requires an app host,
+and there is no app host for maccatalyst-x64 (NETSDK1084). It needs the device runner that Android
+and iOS need, which is phase 4 of doc/TestingPlan.md.
+"@
 }
 
 if (-not $Version) {
