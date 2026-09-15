@@ -88,6 +88,28 @@ Write-Host ""
     "-p:RestoreAdditionalProjectSources=$PackageSource"
 $exit = $LASTEXITCODE
 
+# The device-enumeration regression again, on its own, because it cannot prove anything in a
+# process where a call has already happened.
+#
+# The damage it looks for is process-global: once a negotiation has reached DTLS the audio device
+# module stops reporting microphones for the life of the process. A test that runs after the
+# negotiation test takes an already-broken baseline - zero microphones - and then finds it
+# unchanged, which is true and worthless. Written without this second pass, the test passed against
+# the very build it was written to catch.
+#
+# xUnit gives no ordering contract within a class, so the fix is a second process rather than an
+# ordering attribute: here nothing has negotiated yet, and the baseline is real.
+if ($exit -eq 0) {
+    Write-Host ""
+    Write-Host "Re-running the device-enumeration regression in a process where no call has happened..."
+
+    & dotnet run --project $project -c Release -f $Framework --no-build `
+        "-p:WebRTCmePackageVersion=$Version" `
+        "-p:RestoreAdditionalProjectSources=$PackageSource" `
+        -- -filterVSTest "FullyQualifiedName~A_completed_call_does_not_change_what_devices_exist"
+    $exit = $LASTEXITCODE
+}
+
 Write-Host ""
 if ($exit -ne 0) {
     Write-Host "Device test FAILED for $Version on $Framework." -ForegroundColor Red

@@ -205,28 +205,64 @@ public class LoopbackTests
     }
 
     /// <summary>
-    /// The half of the fix worth pinning separately: even after a call has broken audio
-    /// enumeration, the cameras still come back.
+    /// A call must not change what devices the machine appears to have.
     /// </summary>
     /// <remarks>
-    /// Skips rather than fails on a machine with no webcam, since that is a fact about the machine
-    /// and not about the package. Set WEBRTCME_TESTS_REQUIRED=1 to make a missing camera a failure,
-    /// which is what a release check would do.
+    /// <para>
+    /// The audio half of this is the one that pins the native fix. The Windows ADM used to stop
+    /// answering once a negotiation reached DTLS - <c>RecordingDevices()</c> returning -1 from
+    /// <c>CHECKinitialized_</c> for the rest of the process - so microphones vanished from
+    /// enumeration after any call, even one carrying no audio track. The shim now retries through
+    /// <c>Init()</c>, which is a no-op when the module is already up and revives it when it is not.
+    /// </para>
+    /// <para>
+    /// The camera half pins the C# containment that went in alongside it: a failure counting audio
+    /// used to throw out of <c>EnumerateDevices</c> and take the cameras with it, so this would
+    /// have failed even when the video path was working perfectly.
+    /// </para>
+    /// <para>
+    /// <strong>This test needs a process in which no call has happened yet, and it checks that
+    /// rather than assuming it.</strong> The damage is process-global: if a negotiation has already
+    /// run, the baseline it takes is the already-broken one - zero microphones - and "unchanged"
+    /// then holds trivially. That is not a hypothetical. Written without the guard below, it passed
+    /// against the very build it was meant to catch, because xUnit had run the negotiation test
+    /// first. Tests/Test-Device.ps1 runs it in its own process for this reason.
+    /// </para>
+    /// <para>
+    /// Skips rather than fails on a machine with nothing attached, since that is a fact about the
+    /// machine and not about the package. WEBRTCME_TESTS_REQUIRED=1 makes it a failure, which is
+    /// what a release check wants.
+    /// </para>
     /// </remarks>
     [Fact]
-    public async Task A_completed_call_does_not_hide_the_cameras()
+    public async Task A_completed_call_does_not_change_what_devices_exist()
     {
         var devices = Window().Navigator().MediaDevices;
 
         // Enumerate once before any call, to learn what this machine actually has.
         var before = await devices.EnumerateDevices();
         var cameras = before.Count(d => d.Kind == MediaDeviceInfoKind.VideoInput);
+        var microphones = before.Count(d => d.Kind == MediaDeviceInfoKind.AudioInput);
 
-        if (cameras == 0)
+        if (cameras == 0 && microphones == 0)
         {
             Environment.GetEnvironmentVariable("WEBRTCME_TESTS_REQUIRED").Should().NotBe("1",
-                "a release check must not pass on a machine with no camera to enumerate");
-            Assert.Skip("No camera attached, so there is nothing for a call to hide.");
+                "a release check must not pass on a machine with no devices to enumerate");
+            Assert.Skip("No capture devices attached, so there is nothing for a call to hide.");
+        }
+
+        // The guard that stops this passing for the wrong reason. A machine with cameras but no
+        // microphones is possible; a machine with microphones that report zero only after a call
+        // has already run in this process is the bug itself, and taking that as the baseline would
+        // hide it. Isolation is the caller's job - see the remarks - and this says so when it has
+        // not happened.
+        if (cameras > 0 && microphones == 0)
+        {
+            Assert.Fail(
+                "Baseline shows cameras but no microphones. Either this machine genuinely has "
+                + "none, or a call has already run in this process and broken the audio device "
+                + "module - in which case this test cannot prove anything and must be run in a "
+                + "process of its own, as Tests/Test-Device.ps1 does.");
         }
 
         using (var caller = Window().RTCPeerConnection(Configuration()))
@@ -245,5 +281,8 @@ public class LoopbackTests
 
         after.Count(d => d.Kind == MediaDeviceInfoKind.VideoInput).Should().Be(cameras,
             "a call must not change how many cameras the machine has");
+        after.Count(d => d.Kind == MediaDeviceInfoKind.AudioInput).Should().Be(microphones,
+            "a call must not change how many microphones the machine has - this is the assertion "
+            + "the native ADM fix exists for, and it failed before that fix");
     }
 }

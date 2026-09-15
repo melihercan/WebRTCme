@@ -24,9 +24,8 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **The Windows ADM stops counting audio devices after a call** | WebRTCnative - it needs a shim rebuild | Once a negotiation has reached DTLS, `rtc_audio_device_count` returns an internal error for the life of the process. No longer fatal: enumeration reports the cameras and omits the microphones instead of throwing. Found by the tier-3 loopback tests, 2026-09-14. |
 
-### The Windows ADM stops counting audio devices once a call has happened - found and contained 2026-09-14
+### The Windows ADM stopped counting audio devices once a call had happened - fixed 2026-09-14
 
 Found by `Tests/WebRTCme.DeviceTests`, which is the first thing in this repository to load
 `WebRtcInterop.dll` outside an app.
@@ -62,184 +61,27 @@ rather than an error. Verified against a locally packed build: after a completed
 enumeration returns the cameras and omits the microphones instead of throwing, and
 `A_completed_call_does_not_hide_the_cameras` pins it.
 
-**The ADM fault itself is still open**, and it is not in this repository. `rtc_audio_device_count`
-lives in `WebRtcInterop/src/Interop.cc` in [WebRTCnative](https://github.com/melihercan/WebRTCnative),
-which creates one `AudioDeviceModule` alongside the factory, calls `Init()` on the worker thread,
-and hands it to `CreatePeerConnectionFactory`. After a call `adm->RecordingDevices()` returns a
-negative count, which the shim reports as `RTC_ERR_INTERNAL`. Worth knowing that the loopback that
-provokes it carries **no audio track at all** - a data channel is enough - so whatever disturbs the
-module is not the audio path being used.
+**The ADM fault is fixed**, in the shim rather than here. `rtc_audio_device_count` lives in
+`WebRtcInterop/src/Interop.cc` in [WebRTCnative](https://github.com/melihercan/WebRTCnative), which
+creates one `AudioDeviceModule` alongside the factory, `Init()`s it on the worker thread and hands
+it to `CreatePeerConnectionFactory`. `AudioDeviceModuleImpl` guards its entry points with
+`CHECKinitialized_`, which returns -1 once the module has been terminated - so something inside a
+peer connection's lifetime terminates a module the shim created and still holds a reference to.
+`CountAudioDevices` now retries once through `Init()`, which is a no-op when the module is already
+up and revives it when it is not. That treats the symptom; what terminates the module is still
+somewhere in libwebrtc's own teardown.
 
-Fixing it means changing the shim and rebuilding `WebRtcInterop.dll` through that repository's
-workflow, then refreshing the binaries committed under
-`WebRTCme.Bindings/Maui/WebRTCme.Bindings.Maui.Windows/native/win-x64/`. The obvious thing to try
-first is re-`Init()`ing the module when a count fails, since `Init()` is cheap and returns success
-if the module is already up.
+Rebuilt as `webrtc-interop-windows-x64-m152-7977` (WebRTCnative run 34859539160, branch-head 7977 -
+the same branch the previous binary used, so the fix is the only difference) and the refreshed
+`WebRtcInterop.dll` is committed here. Of the nine files in `native/win-x64/`, only that one
+changed; the other eight came back byte-identical.
 
-### The rotation one, in detail - 2026-09-12
-
-Two sightings that look like different bugs and are one.
-
-**Android.** The local preview is upright in portrait and lying on its side in landscape. Rotating
-the device does not rotate the picture.
-
-**Mac Catalyst.** The Mac's own window shows the camera correctly, the webcam is physically
-upright - and the same stream arrives at an Android peer rotated 90 degrees.
-
-The Mac case is the one that explains both, and it also explains why the Apple side looked healthy
-for so long: **the Apple self-view never goes through the WebRTC frame path at all.** See
-`MediaView.MaciOS.cs` - for a camera track it builds an `RTCCameraPreviewView` and hands it the
-`AVCaptureSession`, so what you see locally is the capture preview layer, not a decoded WebRTC
-frame. It is upright because the camera is upright. It says nothing about what is being sent.
-
-What is being sent carries a rotation, and that rotation comes from libwebrtc's
-`RTCCameraVideoCapturer`, which derives it from `UIDevice.orientation`. On a Mac that value is
-meaningless, so the frames go out tagged for a rotation the scene never had, and the receiving peer
-dutifully applies it. Android shows the fault locally as well, because its renderer *does* sit on
-the WebRTC frame path - `SurfaceViewRenderer` applies the same metadata.
-
-So: one fault, "the rotation attached to an outgoing frame is derived from a device orientation
-that does not describe the camera", surfacing differently per platform depending on whether the
-local preview happens to share the frame path.
-
-Already ruled out on Android: handing the capturer an application context instead of an activity,
-which is the usual way display rotation goes stale. Ours comes from the MAUI handler, which is the
-activity.
-
-**The demo's portrait lock does not fix this.** It makes Android's *local* preview right and
-leaves what peers receive exactly as wrong; on Mac Catalyst it changes nothing at all. The lock is
-there so the demo does not look broken - see `MainActivity` and `Info.plist` - not because the
-problem is solved.
-
-### Mac Catalyst - fixed 2026-09-12
-
-`Platforms/MacCatalyst/Custom/CameraCapture.cs` drives its own `AVCaptureSession` and builds the
-frames: `CMSampleBuffer` to `RTCCVPixelBuffer` to `RTCVideoFrame` with an explicit
-`RTCVideoRotation_0`, through the capturer delegate into the track's source. That is the path
-`ScreenCapture` already used on this platform, which is why it was the shape chosen - it was known
-to work here. Format selection, the preview and the one-session-per-track guard are unchanged;
-only the source of the frames moved.
-
-Rotation 0 is the truth rather than a workaround: a camera wired to a Mac does not move. Verified
-the same day - Mac Catalyst video arrives upright on an Android peer.
-
-### Windows ignored frame rotation - found and fixed 2026-09-14
-
-**Symptom, and the shape that identifies it:** in a four-party call seen from Windows, the two
-phones render sideways and the two desktops render upright. The same peers seen from Android all
-render upright, iOS included.
-
-That exonerates the senders. iOS and Android tag their frames correctly - an Apple renderer and an
-Android renderer both act on the tag and show them the right way up. **Windows does not, because
-the rotation never reaches it.**
-
-The rotation is dropped at the C ABI. `rtc_video_frame` in
-`WebRtcInterop/include/Interop.h` carries the three planes, their strides, width, height and a
-timestamp, and no rotation:
-
-    int32_t width;
-    int32_t height;
-    int64_t timestamp_us;
-    } rtc_video_frame;
-
-so `MediaStreamTrack.OnFrame` has nothing to pass on, `SubscribeToVideoFrames` is typed
-`Action<byte[], int, int>`, and `MediaView` blits the buffer into a `WriteableBitmap` exactly as
-it arrived. **There is no managed-side fix**: a 640x480 frame tagged for a quarter turn and one
-tagged upright are the same bytes and the same dimensions, so the renderer cannot tell them apart.
-
-**Fixed the same day, across both repositories.** The ABI carries the rotation now rather than
-applying it: `rtc_video_rotation` and a `rotation` field on `rtc_video_frame`, filled in
-`FrameSink.cc` from `frame.rotation()`. Rotating inside the shim was the alternative and was
-rejected - it would cost a copy per frame for every consumer, including ones that can hand the
-angle to a compositor and get it free.
-
-On this side the turn is applied in `FrameConverter.ToBgra`, which already visits every pixel, so
-it costs a different destination index and no second pass. Subscribers receive an upright frame
-plus `DisplayWidth`/`DisplayHeight`, and `MediaView` needed no changes at all.
-
-Two things worth keeping from how it was verified, because both are ways this could have gone
-wrong quietly:
-
-- The rebuilt `WebRtcInterop.dll` is **the same size** as the one it replaced. Sizes prove nothing;
-  the hashes differ, which is what proved the change was in the build.
-- All eight sibling DLLs came back **byte-identical**, which is what makes this a drop-in at the
-  same WebRTC version (M152, branch-heads/7977) rather than a version bump. The artifact name
-  carries that version - `webrtc-interop-windows-x64-m152-7977` - which is why the workflow was
-  dispatched with `webrtc_branch=7977` rather than left to resolve the newest stable milestone.
-
-Either needs `WebRtcInterop` rebuilt and the binary re-vendored here, which is why this is not a
-one-line change.
-
-The Mac Catalyst rotation fix below is unaffected, and the reason it looked right on Windows is
-worth knowing: it sets rotation 0, and a renderer that ignores rotation happens to be correct for
-0. It was right for its own reasons, not because Windows was working.
-
-### Android - still open
-
-Android's capturer reads the display rotation, and the picture does not follow when the device
-turns. The demo locks to portrait, which avoids it rather than fixing it; in portrait the frames
-Android sends are correct, confirmed against both a browser and a Mac peer.
-
-Already ruled out: handing the capturer an application context instead of an activity, which is
-the usual way display rotation goes stale. Ours comes from the MAUI handler, which is the activity.
-The next step is to instrument the rotation actually reaching the renderer, on a device, in both
-orientations.
-
-iOS is untested for this and should not be assumed either way. Unlike a Mac it genuinely rotates,
-so `UIDevice.orientation` is the right input there and the Mac Catalyst fix must **not** be copied
-across - see the note on `CameraCapture`.
-
-**Passed for now: Android simulcast.** Decided 2026-09-12, after checking rather than assuming.
-`SimulcastVideoEncoderFactory` is **not in WebRTC at all** - a checkout of `main` has 217 Java
-files under `sdk/android` and no simulcast class anywhere in the tree. Every simulcast
-implementation upstream is C++ (`media/engine/simulcast_encoder_adapter`,
-`modules/video_coding/utility/simulcast_rate_allocator`); the Java factory that exposes it to
-`PeerConnectionFactory` is something the LiveKit and `webrtc-sdk` forks *add*, which is why those
-forks are how people get Android simulcast.
-
-That rules out the cheap route. The native build already patches `sdk/android/BUILD.gn` at build
-time - see `tools/add_generated_jni_to_aar.py` in the native repo - so *including* an existing
-target would have been easy, and the first guess here was that simulcast was one. It is not.
-Enabling it means adding new Java source to the checkout on every build: a patch maintained
-against WebRTC, which is a different commitment from a build-configuration change.
-
-It is also still gated behind the SFU estimate below, so fixing it would buy correctness rather
-than anything visible.
-
-**Nice to have, not needed now: system-wide screen share on iOS.** Decided 2026-09-12. iOS shares
-*this application's own content* only, which is what `RPScreenRecorder` offers and is enough for
-the moment. Sharing other applications needs a Broadcast Upload Extension, and the cost is not the
-extension itself: it needs its own bundle and explicit App IDs with an App Group capability
-(wildcard profiles cannot carry one), the broadcast can only be *started by the user* through
-`RPSystemBroadcastPickerView` and stopped from Control Centre - which turns `GetDisplayMedia` from
-"start capture and return a stream" into something asynchronous and cancellable, on an interface
-shared by five platforms - and the frames must cross a process boundary, either by running WebRTC
-inside the extension against a ~50 MB memory limit or by shipping full-resolution buffers to the
-app. The frame path written on 2026-09-12 is reusable either way; only the source of the buffers
-changes.
-
-**Two entries that were on this list and are not faults**, kept so nobody re-opens them. The
-remaining binding stubs - 38 on Android, 33 on iOS - are on no path that runs; ask "does anything
-call it", not "how many are left". The CoreAudio log spam on Mac Catalyst is noise from inside
-WebRTC; filter it before chasing an audio problem there.
-
-**Mac Catalyst has now run the 2026-09-11 and 2026-09-12 work** (a Mac mini 2018, driven over
-SSH), and the prediction this paragraph used to make - that the first person to run it should
-expect to find something - was right twice over. See "What running Mac Catalyst found" below.
-
-A correction while doing it: this file previously said Mac Catalyst had "run none of it", which was
-too broad. It had been run on 2026-09-10, which is where the CoreAudio note below came from; what
-it had not run was anything after that.
-
-**iOS has now run it too** - an iPhone XR on 18.7, built and deployed from the Mac - and it is the
-first time any of this branch has executed on a physical Apple device. It went in one attempt, and
-the two bugs found on Mac Catalyst are the reason: iOS shares both files line for line, both fixes
-were already in the tree, and the run was made as a prediction rather than an exploration. Joining
-did not crash (`RTCTrackEvent.Streams`), and no phantom `iOS (screen)` tile appeared (the msid),
-which is each fix confirming itself on a platform it had not been tested on. Two tiles, both
-advancing 4.00s in 4s, voice activity reported.
-
-**Every platform this library targets has now run this branch.**
+**Proved by a controlled comparison rather than a green tick**, because the first version of the
+test passed against the broken build. The damage is process-global, and xUnit had run the
+negotiation test first, so the baseline was already zero microphones and "unchanged after a call"
+held trivially. `A_completed_call_does_not_change_what_devices_exist` now fails outright on a
+poisoned baseline, and `Tests/Test-Device.ps1` re-runs it in a process of its own. With that in
+place: old DLL fails, new DLL passes, same machine and same C#.
 
 ## What running Mac Catalyst and iOS found - 2026-09-12
 
