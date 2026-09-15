@@ -47,6 +47,9 @@ param(
     [string] $PackageSource,
     [string] $Mac,
     [string] $DeviceId,
+    [switch] $Local,
+    [switch] $Simulator,
+    [string] $SimulatorName,
     [switch] $SkipBuild
 )
 
@@ -59,6 +62,29 @@ $appId     = 'com.melihercan.webrtcme.devicetests'
 
 # The scenario that has to run on its own, and why - see the description above.
 $isolated  = 'ACompletedCallDoesNotChangeWhatDevicesExist'
+
+# Where the Apple work happens. -Local means this machine is the Mac, which is how CI runs it on a
+# macOS runner; otherwise it is the Mac mini over SSH and the repository is at a known path there.
+$macRepo = if ($Local) { $repoRoot } else { '$HOME/Projects/WebRTCme' }
+
+# Runs a shell script on the Mac - here or over SSH.
+#
+# Carriage returns are stripped every time, and that is not cosmetic: this file has CRLF line
+# endings, so a here-string carries them into the script, and zsh treats the CR as part of the
+# command. Every line fails with "command not found: do^M" while the exit status and the WEBRTCME-
+# grep both come back empty - reported as "the runner did not finish", which is indistinguishable
+# from an app that crashed on launch.
+function Invoke-Shell {
+    param([string] $Script)
+
+    $clean = $Script.Replace("`r", '')
+
+    if (-not $Local) { return ssh -o BatchMode=yes $Mac $clean 2>&1 }
+
+    $file = Join-Path ([System.IO.Path]::GetTempPath()) "webrtcme-$([guid]::NewGuid().ToString('N')).sh"
+    Set-Content -Path $file -Value $clean -NoNewline
+    try { & /bin/zsh $file 2>&1 } finally { Remove-Item $file -Force -ErrorAction SilentlyContinue }
+}
 
 if (-not $PackageSource) { $PackageSource = Join-Path $repoRoot 'artifacts' }
 $PackageSource = [System.IO.Path]::GetFullPath($PackageSource)
@@ -176,17 +202,16 @@ function Invoke-MacCatalyst {
     param([string] $Filter)
 
     # The bundle is named from ApplicationTitle rather than the assembly - "WebRTCme Device
-    # Tests.app" - so the path contains spaces and every use of it has to stay quoted.
-    $app = '$HOME/Projects/WebRTCme/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst/maccatalyst-x64/WebRTCme Device Tests.app/Contents/MacOS/WebRTCme.DeviceTests.Runner'
+    # Tests.app" - so the path contains spaces and every use of it stays quoted.
+    $app = "$macRepo/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst/maccatalyst-x64/WebRTCme Device Tests.app/Contents/MacOS/WebRTCme.DeviceTests.Runner"
     $filterArg = if ($Filter) { "--filter=$Filter" } else { '' }
 
-    # A literal here-string, with the two variable parts substituted afterwards. Every $ below
-    # belongs to the remote shell, and writing it in an interpolating string means escaping each one
-    # - which is how the first version of this silently sent a script the shell could not run and
-    # reported "the runner did not finish".
+    # A literal here-string with the variable parts substituted afterwards: every $ below belongs to
+    # the remote shell, and escaping each one by hand is how the first version of this silently sent
+    # a script zsh could not run.
     #
-    # The executable inside the bundle is run directly so stdout comes back over SSH; `open` would
-    # detach it and send its output to the system log instead. No window server session is needed.
+    # The executable inside the bundle is run directly so stdout comes back; `open` would detach it
+    # and send its output to the system log. No window server session is needed.
     #
     # Polled rather than slept: a passing run takes about three seconds, a hung negotiation takes the
     # scenario's own 30s timeout. And no `timeout` command - macOS has none, and its absence is
@@ -205,14 +230,7 @@ grep WEBRTCME- "$LOG"
 rm -f "$LOG"
 '@
 
-    # Carriage returns stripped, and this is not cosmetic. This file has CRLF line endings, so the
-    # here-string above carries them into the script sent over SSH - and zsh treats the CR as part of
-    # the command, failing every line with "command not found: do^M" while the exit status and the
-    # WEBRTCME- grep both come back empty. The harness then reports "the runner did not finish",
-    # which is indistinguishable from an app that crashed on launch.
-    $remote = $script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg).Replace("`r", '')
-
-    $log = ssh -o BatchMode=yes $Mac $remote 2>&1
+    $log = Invoke-Shell ($script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg))
     return Read-Outcome -Lines $log -What 'maccatalyst'
 }
 
@@ -221,10 +239,12 @@ rm -f "$LOG"
 function Invoke-Ios {
     param([string] $Filter)
 
+    if ($Simulator) { return Invoke-IosSimulator -Filter $Filter }
+
     if (-not $DeviceId) {
         throw "iOS needs -DeviceId (or WEBRTCME_IOS_DEVICE): the paired identifier from " +
-              "xcrun devicectl list devices. Several iPhones can be paired and reported " +
-              "available whether or not they are plugged in, so this is not guessed."
+              "''xcrun devicectl list devices''. Several iPhones can be paired and reported " +
+              "''available'' whether or not they are plugged in, so this is not guessed."
     }
 
     # The filter travels as an environment variable, not an argument. devicectl documents trailing
@@ -250,56 +270,153 @@ grep WEBRTCME- "$LOG"
 rm -f "$LOG"
 '@
 
-    $remote = $script.Replace('__FILTER_EXPORT__', $filterExport).
-                      Replace('__DEVICE__', $DeviceId).
-                      Replace('__APPID__', $appId).
-                      Replace("`r", '')
-
-    $log = ssh -o BatchMode=yes $Mac $remote 2>&1
+    $log = Invoke-Shell ($script.Replace('__FILTER_EXPORT__', $filterExport).
+                                Replace('__DEVICE__', $DeviceId).
+                                Replace('__APPID__', $appId))
     return Read-Outcome -Lines $log -What 'ios'
+}
+
+# ---------------------------------------------------------------- ios simulator
+#
+# What CI runs, because a hosted runner has no phone. It is a weaker test than the device and is
+# not a substitute for it: the Simulator loads the *simulator* slice of WebRTC.xcframework, while
+# ios-arm64 is the slice that ships. It also has no capture devices, so the enumeration scenario
+# skips where the device passes - which is why WEBRTCME_TESTS_REQUIRED must not treat a skip here as
+# a failure, and why a green run must not be read as device verification.
+#
+# It is still worth running. Both faults found on 2026-09-15 were managed-code faults - a null
+# dereference and a serialisation shape - and this would have caught either.
+
+function Invoke-IosSimulator {
+    param([string] $Filter)
+
+    $filterExport = if ($Filter) { "export SIMCTL_CHILD_WEBRTCME_FILTER=$Filter" } else { '' }
+
+    # simctl forwards SIMCTL_CHILD_-prefixed variables into the app, the same trick devicectl needs
+    # and for the same reason.
+    $script = @'
+__FILTER_EXPORT__
+LOG=$(mktemp)
+xcrun simctl launch --console-pty "__SIM__" __APPID__ > "$LOG" 2>&1 &
+LAUNCHPID=$!
+for i in $(seq 1 60); do
+  grep -q WEBRTCME-SUMMARY "$LOG" && break
+  sleep 2
+done
+kill $LAUNCHPID 2>/dev/null
+xcrun simctl terminate "__SIM__" __APPID__ > /dev/null 2>&1
+grep WEBRTCME- "$LOG"
+rm -f "$LOG"
+'@
+
+    $log = Invoke-Shell ($script.Replace('__FILTER_EXPORT__', $filterExport).
+                                Replace('__SIM__', $ResolvedSimulator).
+                                Replace('__APPID__', $appId))
+    return Read-Outcome -Lines $log -What 'ios simulator'
 }
 
 # ---------------------------------------------------------------- build and install
 
+# ---------------------------------------------------------------- simulator selection
+
+# Which simulator, when -Simulator is given: named explicitly, or the first available iPhone. The
+# runner image decides what exists, and pinning a model here would break the day GitHub changes
+# the image.
+$ResolvedSimulator = $null
+if ($Simulator) {
+    $ResolvedSimulator = if ($SimulatorName) { $SimulatorName } else {
+        $found = Invoke-Shell 'xcrun simctl list devices available | grep -E "^ +iPhone" | head -1 | sed -E "s/.*\(([0-9A-Fa-f-]{36})\).*/\1/"'
+        ($found | Select-Object -Last 1).ToString().Trim()
+    }
+
+    if (-not $ResolvedSimulator) {
+        throw "no iOS simulator available on $(if ($Local) { 'this machine' } else { $Mac })"
+    }
+    Write-Host "Simulator      : $ResolvedSimulator"
+    Write-Host ""
+}
+
 if (-not $SkipBuild) {
     Write-Host "Building and installing the runner..."
+
+    # The Mac restores from its own copy of the artifact, and evicts the cached package first for
+    # the reason given at the top of this script.
+    $macFeed = if ($Local) { "$macRepo/artifacts" } else { '$HOME/Projects/WebRTCme/artifacts' }
+    $macPull = if ($Local) { '' } else { 'git pull --ff-only > /dev/null 2>&1' }
+
     switch ($Platform) {
         'android' {
+            # An emulator is just another adb device, so this one path serves CI and a real phone.
             & dotnet build $runner -f net10.0-android -c Debug -t:Install `
                 "-p:WebRTCmePackageVersion=$Version" "-p:RestoreAdditionalProjectSources=$PackageSource" --nologo |
                 Select-String -Pattern 'error|Build succeeded' | Select-Object -First 5
             if ($LASTEXITCODE -ne 0) { throw "android build/install failed" }
         }
-        'maccatalyst' {
-            # Built over plain SSH. No codesigning ceremony for this one: a Catalyst app run locally
-            # from its build output needs no signing identity, so the Terminal.app osascript dance a
-            # device deploy needs (see doc/KnownGaps.md) does not apply here.
-            #
-            # The Mac restores from its OWN copy of the artifact, not this machine's, and evicts the
-            # cached copy first for the reason given at the top of this script.
-            $remote = "cd ~/Projects/WebRTCme && git pull --ff-only >/dev/null 2>&1; " +
-                      "rm -rf ~/.nuget/packages/webrtcme/$Version && " +
-                      "dotnet build Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj " +
-                      "-f net10.0-maccatalyst -c Debug -p:WebRTCmePackageVersion=$Version " +
-                      "-p:RestoreAdditionalProjectSources=`$HOME/Projects/WebRTCme/artifacts --nologo"
 
-            $built = ssh -o BatchMode=yes $Mac $remote 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $built | Select-String -Pattern 'error' | Select-Object -First 5 | ForEach-Object { Write-Host $_ }
-                throw "maccatalyst build failed on $Mac. Is the artifact in ~/Projects/WebRTCme/artifacts there?"
+        'maccatalyst' {
+            # No codesigning ceremony. A Catalyst app run locally from its build output needs no
+            # signing identity, so the Terminal.app route an iOS device build needs does not apply
+            # here, and neither does a window server session.
+            $buildCatalyst = @'
+set -e
+cd "__REPO__"
+__PULL__
+rm -rf ~/.nuget/packages/webrtcme/__VERSION__
+dotnet build Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj -f net10.0-maccatalyst -c Debug -p:WebRTCmePackageVersion=__VERSION__ -p:RestoreAdditionalProjectSources=__FEED__ --nologo
+'@
+
+            $built = Invoke-Shell ($buildCatalyst.Replace('__REPO__', $macRepo).
+                                                 Replace('__PULL__', $macPull).
+                                                 Replace('__VERSION__', $Version).
+                                                 Replace('__FEED__', $macFeed))
+
+            if (-not ($built | Where-Object { $_ -match 'Build succeeded' })) {
+                $built | Select-String -Pattern 'error' | Select-Object -First 5 |
+                    ForEach-Object { Write-Host "  $_" }
+                throw "maccatalyst build failed. Is the artifact in $macFeed ?"
             }
-            $built | Select-String -Pattern 'Build succeeded' | Select-Object -First 1 | ForEach-Object { Write-Host $_ }
+            Write-Host "  build succeeded"
         }
+
         'ios' {
-            # Driven through Terminal.app, and that is the whole reason this case exists rather than
-            # a plain ssh build. Codesigning from an SSH session fails with
+            if ($Simulator) {
+                # No RuntimeIdentifier and no signing identity: a simulator build needs neither,
+                # which is the whole reason CI can run this and cannot run the device.
+                $buildSim = @'
+set -e
+cd "__REPO__"
+__PULL__
+rm -rf ~/.nuget/packages/webrtcme/__VERSION__
+dotnet build Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj -f net10.0-ios -c Debug -p:WebRTCmePackageVersion=__VERSION__ -p:RestoreAdditionalProjectSources=__FEED__ --nologo
+xcrun simctl bootstatus "__SIM__" -b
+xcrun simctl uninstall "__SIM__" __APPID__ > /dev/null 2>&1 || true
+xcrun simctl install "__SIM__" "$(dirname "$(find "__REPO__/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-ios" -name "WebRTCme.DeviceTests.Runner.app" -maxdepth 2 | head -1)")/WebRTCme.DeviceTests.Runner.app"
+echo SIMULATOR-READY
+'@
+
+                $built = Invoke-Shell ($buildSim.Replace('__REPO__', $macRepo).
+                                                Replace('__PULL__', $macPull).
+                                                Replace('__VERSION__', $Version).
+                                                Replace('__FEED__', $macFeed).
+                                                Replace('__SIM__', $ResolvedSimulator).
+                                                Replace('__APPID__', $appId))
+
+                if (-not ($built | Where-Object { $_ -match 'SIMULATOR-READY' })) {
+                    $built | Select-Object -Last 8 | ForEach-Object { Write-Host "  $_" }
+                    throw "ios simulator build/install failed"
+                }
+                Write-Host "  installed on the simulator"
+                break
+            }
+
+            # A device build. Codesigning from an SSH session fails with
             #
             #   /usr/bin/codesign exited with code 1: ... WebRTC.framework: errSecInternalComponent
             #
-            # because an SSH session's keychain is not the GUI session's and cannot reach the signing
-            # identity. osascript asks the logged-in desktop to run the build instead, which can.
-            # A completion file carries the exit code back, because osascript returns as soon as
-            # Terminal has accepted the command and says nothing about how it ended.
+            # because an SSH session's keychain is not the GUI session's and cannot reach the
+            # signing identity. osascript asks the logged-in desktop to run the build instead,
+            # which can. A completion file carries the exit code back, because osascript returns as
+            # soon as Terminal has accepted the command and says nothing about how it ended.
             $buildScript = @'
 #!/bin/zsh
 cd ~/Projects/WebRTCme
@@ -312,14 +429,6 @@ echo $? > /tmp/webrtcme-ios-build.done
 
             $buildScript = $buildScript.Replace('__VERSION__', $Version).Replace("`r", '')
 
-            # Heredoc with a quoted delimiter, so the remote shell expands nothing on the way in.
-            $write = "cat > /tmp/webrtcme-ios-build.sh <<'WEBRTCME_EOF'`n$buildScript`nWEBRTCME_EOF`nchmod +x /tmp/webrtcme-ios-build.sh"
-            ssh -o BatchMode=yes $Mac $write.Replace("`r", '') | Out-Null
-
-            Write-Host "  building on the Mac desktop (codesigning needs the GUI session's keychain)..."
-            # The launcher goes into a file as well. It contains double quotes for osascript, and a
-            # PowerShell double-quoted string has no \" escape - only the backtick - so building this
-            # inline ends the string at the first quote osascript needs.
             $runScript = @'
 #!/bin/zsh
 rm -f /tmp/webrtcme-ios-build.done
@@ -331,30 +440,29 @@ done
 cat /tmp/webrtcme-ios-build.done 2>/dev/null || echo TIMEOUT
 '@
 
-            $writeRun = "cat > /tmp/webrtcme-ios-run.sh <<'WEBRTCME_EOF'`n$($runScript.Replace("`r", ''))`nWEBRTCME_EOF`nchmod +x /tmp/webrtcme-ios-run.sh"
-            ssh -o BatchMode=yes $Mac $writeRun.Replace("`r", '') | Out-Null
+            # Both go into files on the Mac. They contain the double quotes osascript needs, and a
+            # PowerShell double-quoted string has no backslash escape - only the backtick - so
+            # building this inline ends the string at the first of them.
+            $eof = "WEBRTCME_EOF"
+            Invoke-Shell "cat > /tmp/webrtcme-ios-build.sh <<'$eof'`n$buildScript`n$eof`nchmod +x /tmp/webrtcme-ios-build.sh" | Out-Null
+            Invoke-Shell "cat > /tmp/webrtcme-ios-run.sh <<'$eof'`n$($runScript.Replace("`r", ''))`n$eof`nchmod +x /tmp/webrtcme-ios-run.sh" | Out-Null
 
-            $code = (ssh -o BatchMode=yes $Mac '/tmp/webrtcme-ios-run.sh' 2>&1 | Select-Object -Last 1).ToString().Trim()
+            Write-Host "  building on the Mac desktop (codesigning needs the GUI session's keychain)..."
+            $code = (Invoke-Shell '/tmp/webrtcme-ios-run.sh' | Select-Object -Last 1).ToString().Trim()
 
             if ($code -ne '0') {
-                ssh -o BatchMode=yes $Mac 'grep -E "error" /tmp/webrtcme-ios-build.log | head -5' 2>&1 |
+                Invoke-Shell 'grep -E "error" /tmp/webrtcme-ios-build.log | head -5' |
                     ForEach-Object { Write-Host "  $_" }
                 throw "ios build failed on $Mac (exit $code). Is the Mac logged in at the desktop?"
             }
 
             Write-Host "  installing on $DeviceId..."
             $app = '$HOME/Projects/WebRTCme/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-ios/ios-arm64/WebRTCme.DeviceTests.Runner.app'
-            $install = "xcrun devicectl device install app --device $DeviceId `"$app`""
-            $installed = ssh -o BatchMode=yes $Mac $install.Replace("`r", '') 2>&1
+            $installed = Invoke-Shell "xcrun devicectl device install app --device $DeviceId `"$app`""
             if (-not ($installed | Where-Object { $_ -match 'App installed' })) {
                 $installed | Select-Object -Last 5 | ForEach-Object { Write-Host "  $_" }
                 throw "ios install failed. Is the phone unlocked and trusted?"
             }
-        }
-        default {
-            throw "Building for $Platform happens on the Mac. Build it there first and re-run with -SkipBuild:`n" +
-                  "  ssh $Mac 'cd ~/Projects/WebRTCme && dotnet build Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj -f net10.0-$Platform -c Debug -p:WebRTCmePackageVersion=$Version -p:RestoreAdditionalProjectSources=<mac artifacts path>'`n" +
-                  "Codesigning needs the build driven through Terminal.app via osascript - an SSH session's keychain is not the GUI session's. See doc/KnownGaps.md."
         }
     }
     Write-Host ""
