@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  The loopback scenarios, once, so that two runners can execute the same checks.
+
+	  Phase 3 runs them through xUnit as a plain Windows process. Phase 4 cannot: Android, iOS and
+	  Mac Catalyst have no app host for a console test runner, so the tests have to run *inside an
+	  app* on the device. XHarness is the usual answer and is not usable here - the newest build on
+	  the dotnet-eng feed is from September 2023, which predates .NET 10 and the devicectl-era Apple
+	  tooling these platforms now need. doc/TestingPlan.md named a runner app as the fallback, and
+	  this is the half of it that both runners share.
+
+	  Deliberately not xUnit. A scenario returns a result rather than throwing, so the device runner
+	  can report a list without hosting a test framework, and the xUnit project on Windows wraps each
+	  one in a [Fact]. One implementation, two ways of reporting it - which also means a platform
+	  cannot quietly drift into testing something different.
+	-->
+
+	<PropertyGroup>
+		<!--
+		  net10.0 is the Blazor slice of the package, and it is here so that phase 5 runs these same
+		  scenarios in a browser rather than a second copy of them. The Blazor binding is JSInterop,
+		  so it needs an IJSRuntime that no other platform has - see LoopbackScenarios.JsRuntime.
+		-->
+		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">28.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WebRTCmePackageVersion Condition="'$(WebRTCmePackageVersion)' == ''">$(WEBRTCME_PACKAGE_VERSION)</WebRTCmePackageVersion>
+	</PropertyGroup>
+
+	<Target Name="RequirePackageVersion" BeforeTargets="CollectPackageReferences">
+		<Error Condition="'$(WebRTCmePackageVersion)' == ''"
+		       Text="Set the package version to test: -p:WebRTCmePackageVersion=26.9.15, or the WEBRTCME_PACKAGE_VERSION environment variable." />
+	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="WebRTCme" Version="$(WebRTCmePackageVersion)" />
+	</ItemGroup>
+
+	<!-- The version a MAUI consumer has to name itself; see WebRTCme.PackageTests for why. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+	</ItemGroup>
+
+</Project>

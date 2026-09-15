@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0">
+	<application android:allowBackup="true" android:supportsRtl="true" android:label="WebRTCme Device Tests"></application>
+	<!--
+	  Camera and microphone are declared even though the loopback scenarios use neither. Device
+	  enumeration is one of the scenarios, and on Android an app without these permissions is shown
+	  an empty device list rather than an error - which would make the enumeration scenario pass by
+	  reporting nothing, the exact shape of false pass this tier exists to avoid.
+	-->
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<!--
+	  No uses-sdk element at all. minSdkVersion comes from SupportedOSPlatformVersion in the csproj
+	  and targetSdkVersion from TargetPlatformVersion, which net10.0-android resolves to 36 - so
+	  neither is written down twice and neither can drift.
+	
+	  Stating it by hand went wrong in both directions: targetSdkVersion="33" is old enough that a
+	  modern device refuses the sideload, and a uses-sdk element carrying only minSdkVersion pins
+	  the target to the minimum - 28 - which is worse, and silently.
+	-->
+</manifest>

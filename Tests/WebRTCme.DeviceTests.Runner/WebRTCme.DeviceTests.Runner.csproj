@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  Phase 4 of doc/TestingPlan.md: the loopback scenarios, run on Android, iOS and Mac Catalyst.
+
+	  These three have no app host for a console test runner - xUnit v3 will not build a test project
+	  without one, and there is no app host for maccatalyst-x64 or for a phone - so the tests have to
+	  run *inside an app*. This is that app: it starts, runs WebRTCme.DeviceTests.Core's scenarios,
+	  prints one line per result, writes a report file, and shows the outcome on screen.
+
+	  Not XHarness, which is the usual answer to this. The newest build on the dotnet-eng feed is
+	  from September 2023 - it predates .NET 10, and it drives Apple devices through mlaunch, which
+	  is precisely the tool that failed on this SDK (it hangs with "Please connect the device" on a
+	  locked phone and does not parse :v2:udid= selectors). devicectl and adb do work, and
+	  Tests/Test-Device-Phase4.ps1 drives them directly.
+
+	  It references the PACKAGE through DeviceTests.Core, never the projects, because testing the
+	  repository would miss exactly the packaging faults this exists to catch.
+	-->
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+
+		<ApplicationTitle>WebRTCme Device Tests</ApplicationTitle>
+		<ApplicationId>com.melihercan.webrtcme.devicetests</ApplicationId>
+		<ApplicationIdGuid>6F2A1C74-9E3B-4C21-B8D6-5A0E7C934BD2</ApplicationIdGuid>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">28.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WebRTCmePackageVersion Condition="'$(WebRTCmePackageVersion)' == ''">$(WEBRTCME_PACKAGE_VERSION)</WebRTCmePackageVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.DeviceTests.Core\WebRTCme.DeviceTests.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+	</ItemGroup>
+
+</Project>

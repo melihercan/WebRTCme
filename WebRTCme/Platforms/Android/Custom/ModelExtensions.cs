@@ -65,8 +65,16 @@ namespace WebRTCme.Android
             return nativeIceServer;
         }
 
-        public static Webrtc.DataChannel.Init ToNative(this RTCDataChannelInit dataChannelInit) =>
-            new Webrtc.DataChannel.Init
+        public static Webrtc.DataChannel.Init ToNative(this RTCDataChannelInit dataChannelInit)
+        {
+            // Options are optional, here as in the W3C API: createDataChannel(label) means "all
+            // defaults", and IRTCPeerConnection.CreateDataChannel declares `options = null` to say so.
+            // Every field below already falls back with ??, so an absent options object and an empty one
+            // have to produce the same native configuration - dereferencing null instead threw out of
+            // every plain CreateDataChannel(label) call on this platform.
+            dataChannelInit ??= new RTCDataChannelInit();
+
+            return new Webrtc.DataChannel.Init
             {
                 Ordered = dataChannelInit.Ordered ?? true,
                 MaxRetransmitTimeMs = dataChannelInit.MaxPacketLifeTime ?? -1,
@@ -75,6 +83,7 @@ namespace WebRTCme.Android
                 Negotiated = dataChannelInit.Negotiated ?? false,
                 Id = dataChannelInit.Id ?? 1//WebRTCme.WebRtc.Id
             };
+        }
 
         public static Webrtc.SessionDescription ToNative(this RTCSessionDescriptionInit description) =>
             new Webrtc.SessionDescription(description.Type.ToNative(), description.Sdp);

@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  Phase 5 of doc/TestingPlan.md: drives WebRTCme.BlazorTestHost in headless Chromium and reads
+	  the results out of the page.
+
+	  Blazor is the only binding that cannot be tested from a test process, because it is JSInterop
+	  over the browser's own WebRTC implementation and there is no browser in a test process. So the
+	  scenarios run in the page - the host app - and this drives the browser and asserts on what
+	  comes back. Same division as Android: WebRTCme.DeviceTests.Runner runs them, the harness reads
+	  them.
+
+	  It is also the only platform needing no hardware at all. Chromium is launched with its
+	  fake-media-device switches, so the enumeration scenarios have devices to find without
+	  anything being plugged in, and without competing for the one real camera on this machine.
+	  BlazorRun names the switches.
+
+	  Run it through Tests/Test-Blazor.ps1, which builds the host against the package under test,
+	  serves it, and passes the URL in WEBRTCME_BLAZOR_URL.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AwesomeAssertions" Version="9.6.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+		<PackageReference Include="Microsoft.Playwright" Version="1.62.0" />
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="AwesomeAssertions" />
+	</ItemGroup>
+
+</Project>

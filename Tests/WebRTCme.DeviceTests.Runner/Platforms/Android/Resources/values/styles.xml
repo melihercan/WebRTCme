@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!--
+	  A MAUI activity has to run under an AppCompat descendant. MauiAppCompatActivity inflates a
+	  layout containing com.google.android.material.appbar.AppBarLayout, and Material components
+	  check the theme themselves and throw rather than degrade:
+
+	    java.lang.IllegalArgumentException: The style on this component requires your app theme to
+	    be Theme.AppCompat (or a descendant).
+
+	  An app generated from the MAUI template never meets this, because its splash screen assets
+	  make the build generate Maui.SplashTheme and point the activity at it. This project has no
+	  splash - it is a test harness with one label on it - so the theme has to be stated here, and
+	  MainActivity names it.
+	-->
+	<style name="WebRTCmeDeviceTests" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+
+</resources>

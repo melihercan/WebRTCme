@@ -1,7 +1,7 @@
 # Known gaps
 
 What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
-2026-09-12**. Everything here was checked against the code rather than remembered, and each entry
+2026-09-15**. Everything here was checked against the code rather than remembered, and each entry
 says where it actually stands - "not written" and "written but unreachable" need very different
 work, and most of what was wrong here turned out to be the second kind.
 
@@ -24,7 +24,77 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+| **Blazor needs the consumer to reconfigure JSInterop's JSON** | nobody - it can be picked up today | A Blazor app that does not apply the reflection workaround cannot create a peer connection at all. The library could stop requiring it; see below. |
 
+### A Blazor consumer has to reconfigure JSInterop's JSON, or nothing works at all - open 2026-09-15
+
+**This one is a condition of using the package, and it is written down nowhere a consumer would
+look.** Found by `Tests/WebRTCme.BlazorTests`, the first thing in this repository to consume the
+package from a Blazor app other than the demo.
+
+WebRTCme models optional dictionary members as nullable properties - `RTCConfiguration` leaves
+`BundlePolicy`, `IceTransportPolicy` and `RtcpMuxPolicy` null unless you set them. JSInterop
+serialises a null property as an explicit `null` rather than omitting it, and the browser rejects
+that, because null is not a member of an enum:
+
+```
+TypeError: Failed to construct 'RTCPeerConnection': Failed to read the 'bundlePolicy' property
+from 'RTCConfiguration': The provided value 'null' is not a valid enum value of type
+RTCBundlePolicy.
+```
+
+So on Blazor **the first peer connection throws** unless the app has already reached into
+`JSRuntime`'s non-public `JsonSerializerOptions` by reflection and told it to omit nulls. The demo
+app does this in `WebRTCme.DemoApp.Blazor/Program.cs`, in a `ConfigureProviders` method whose
+`try/catch` writes to the console and carries on - so the day that reflection stops working, the
+symptom is a call that will not start and a message nobody sees.
+
+`SignalingConnection.cs:988` - the mesh/P2P path, not an edge case - builds
+`new RTCConfiguration { IceServers = iceServers }` and leaves the other four members null. That is
+the call path this affects.
+
+Why it had never been noticed: the demo app is the only Blazor consumer that has ever existed, and
+it has carried the workaround since before the .NET 10 branch. Phase 5 is the first consumer
+written without copying the demo app's startup, and it failed on its first run.
+
+**The fix is available and not applied.** `WebRTCme.JsonHelper.WebRtcJsonSerializerOptions`
+already specifies exactly the right thing - `DefaultIgnoreCondition = WhenWritingNull`, camelCase
+naming and the enum converters - and nothing on the Blazor interop path uses it. Serialising the
+binding's own arguments with it would make the requirement disappear. Left alone here because it
+changes how every Blazor call marshals and that deserves its own change, not a footnote in a
+testing pass.
+
+Until then `Tests/WebRTCme.BlazorTestHost/Program.cs` applies the same workaround, deliberately as
+a consumer would rather than as a test fixture, and throws instead of swallowing when it cannot.
+
+### CreateDataChannel(label) threw on three platforms out of five - fixed 2026-09-15
+
+Found by `Tests/WebRTCme.DeviceTests.Runner` on an Android phone, 18ms into the second scenario,
+the first time the loopback scenarios ran anywhere other than Windows.
+
+`IRTCPeerConnection` declares `CreateDataChannel(string label, RTCDataChannelInit options = null)`,
+and the W3C API it mirrors says the same: `createDataChannel(label)` means "all defaults". Android,
+iOS and Mac Catalyst then called `options.ToNative()` on it unconditionally:
+
+```
+NullReferenceException
+  at WebRTCme.Android.ModelExtensions.ToNative(RTCDataChannelInit dataChannelInit)
+  at WebRTCme.Android.RTCPeerConnection.CreateDataChannel(String label, RTCDataChannelInit options)
+```
+
+Every field inside those conversions already had a `?? default` fallback, so the intent was there
+and only the guard was missing. Fixed by defaulting the argument in the three `ToNative`
+conversions, which makes an absent options object and an empty one produce the same native
+configuration - as they must.
+
+**Windows was the one platform that got it right**, guarding with `options?.`, and that is why it
+stayed hidden: tier 3 runs on Windows, passed all five scenarios, and proved nothing about the
+other four bindings. It is the clearest argument the suite has produced for phase 4 existing at
+all.
+
+Verified on Android against a locally packed `26.9.15-androidfix`. **The iOS and Mac Catalyst
+halves of the fix compile but have not been run** - they need a package built through the Mac CI
+job.
 ### The Windows ADM stopped counting audio devices once a call had happened - fixed 2026-09-14
 
 Found by `Tests/WebRTCme.DeviceTests`, which is the first thing in this repository to load

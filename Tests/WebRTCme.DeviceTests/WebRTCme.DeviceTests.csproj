@@ -86,6 +86,15 @@
 		<PackageReference Include="WebRTCme" Version="$(WebRTCmePackageVersion)" />
 	</ItemGroup>
 
+	<!--
+	  The scenarios themselves, shared with the device runner app that carries them onto Android,
+	  iOS and Mac Catalyst. This project is only their xUnit face, so that a platform cannot end up
+	  testing something subtly different from the others.
+	-->
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.DeviceTests.Core\WebRTCme.DeviceTests.Core.csproj" />
+	</ItemGroup>
+
 	<!-- The version a MAUI consumer has to name itself; see WebRTCme.PackageTests for why. -->
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />

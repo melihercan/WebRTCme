@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<!--
+	  Phase 5 of doc/TestingPlan.md: the loopback scenarios, run in a browser.
+
+	  Blazor is the odd one out. The other four bindings wrap a native WebRTC library; this one is
+	  JSInterop over the browser's own implementation, so it exists only inside a page and cannot be
+	  reached from a test process at all. The scenarios therefore have to be carried into a browser,
+	  and this is what carries them - the exact counterpart of WebRTCme.DeviceTests.Runner, which
+	  carries the same scenarios onto a phone.
+
+	  Tests/WebRTCme.BlazorTests drives it with Playwright and reads the results out of the DOM.
+
+	  Like every other tier this references the PACKAGE, never the projects, because testing the
+	  repository would miss exactly the packaging faults these tiers exist to catch. In particular
+	  it proves that JsInterop.js really does ship as _content/WebRTCme/JsInterop.js - a static web
+	  asset that pack can drop silently, and whose absence no managed test can notice.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.12" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\WebRTCme.DeviceTests.Core\WebRTCme.DeviceTests.Core.csproj" />
+	</ItemGroup>
+
+</Project>

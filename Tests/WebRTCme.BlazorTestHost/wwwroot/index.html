@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>WebRTCme Blazor device tests</title>
+	<base href="/" />
+</head>
+
+<body>
+	<!--
+	  The whole user interface. Playwright reads textContent for the result lines and waits on
+	  data-state, which starts as "running" and becomes "passed" or "failed" when the run ends.
+	  A run that leaves it at "running" did not finish, and that has to fail rather than look like
+	  zero failures - the same rule the device harness applies to a missing summary line.
+	-->
+	<pre id="webrtcme-results" data-state="running"></pre>
+
+	<div id="blazor-error-ui" style="display: none">
+		An unhandled error has occurred.
+		<a href="" class="reload">Reload</a>
+	</div>
+
+	<script src="_framework/blazor.webassembly.js"></script>
+
+	<!--
+	  From the package under test, and the reason this tier can catch something the managed tests
+	  cannot: the Blazor binding calls into this file, it ships as a static web asset, and pack
+	  drops payloads it does not recognise without a word. If it were missing the page would load
+	  and the first peer connection would fail.
+	-->
+	<script src="_content/WebRTCme/JsInterop.js"></script>
+
+	<script>
+		// Defined before Blazor starts Main: this script runs synchronously, blazor.webassembly.js
+		// only schedules the runtime.
+		const webrtcmeResults = () => document.getElementById('webrtcme-results');
+
+		window.webrtcmeReport = function (line) {
+			// Console too, so a failure is visible in Playwright's console capture as well as the
+			// DOM - useful when the page dies before anything can be read out of it.
+			console.log(line);
+			webrtcmeResults().textContent += line + '\n';
+		};
+
+		window.webrtcmeDone = function (ok) {
+			webrtcmeResults().dataset.state = ok ? 'passed' : 'failed';
+		};
+
+		window.webrtcmeFilter = function () {
+			return new URLSearchParams(window.location.search).get('filter') || '';
+		};
+	</script>
+</body>
+
+</html>

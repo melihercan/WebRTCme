@@ -249,12 +249,32 @@ nuget.org**; it comes from the `dotnet-eng` feed, so this phase introduces the r
 Fallback if XHarness proves awkward: a minimal MAUI runner app per platform that runs the same
 assertions and reports through the exit code. More code, no extra feed.
 
-### Phase 5 - Blazor
+### Phase 5 - Blazor - implemented
 
 The odd one out: the Blazor binding is JSInterop, so it only exists inside a browser. A Blazor
 WebAssembly test host driven by headless Chrome covers it. Chrome's
 `--use-fake-device-for-media-stream` supplies synthetic media, so Blazor is the one platform where
-the media group needs no hardware at all.
+the media group needs no hardware at all - and the one tier that can run while the Windows app is
+holding this machine's only camera.
+
+Three pieces, the same division as phase 4:
+
+- `Tests/WebRTCme.BlazorTestHost` - a Blazor WebAssembly app that runs the shared scenarios from
+  `WebRTCme.DeviceTests.Core` and writes each result into the DOM. No root component and no Razor;
+  the page is one `<pre>` element. The filter arrives as `?filter=`, the query-string equivalent of
+  the Android runner's intent extra.
+- `Tests/WebRTCme.BlazorTests` - Playwright driving headless Chromium, asserting on what the page
+  reported. It waits on the results element's `data-state`, so a page that never finished fails
+  rather than reading as zero failures.
+- `Tests/Test-Blazor.ps1` - builds the host against the package under test, serves it, waits for it
+  to answer, runs the tests against that URL.
+
+Sharing `DeviceTests.Core` meant giving it a `net10.0` target - the package's Blazor slice - and a
+`LoopbackScenarios.JsRuntime` hook, because Blazor is the one binding that needs an `IJSRuntime`
+and `IWebRtc.Window` takes it as an optional argument for exactly that reason.
+
+**What it found on its first run:** a Blazor consumer must reconfigure JSInterop's JSON serialiser
+by reflection or no peer connection can be created at all. See `doc/KnownGaps.md`.
 
 ## Configuration - one env var set, no machine-specific anything
 

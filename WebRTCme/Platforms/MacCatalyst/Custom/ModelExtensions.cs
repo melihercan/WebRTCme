@@ -39,8 +39,16 @@ namespace WebRTCme.MacCatalyst
             );
 
 
-        public static Webrtc.RTCDataChannelConfiguration ToNative(this RTCDataChannelInit dataChannelInit) =>
-            new Webrtc.RTCDataChannelConfiguration
+        public static Webrtc.RTCDataChannelConfiguration ToNative(this RTCDataChannelInit dataChannelInit)
+        {
+            // Options are optional, here as in the W3C API: createDataChannel(label) means "all
+            // defaults", and IRTCPeerConnection.CreateDataChannel declares `options = null` to say so.
+            // Every field below already falls back with ??, so an absent options object and an empty one
+            // have to produce the same native configuration - dereferencing null instead threw out of
+            // every plain CreateDataChannel(label) call on this platform.
+            dataChannelInit ??= new RTCDataChannelInit();
+
+            return new Webrtc.RTCDataChannelConfiguration
             {
                 IsOrdered = dataChannelInit.Ordered ?? true,
                 MaxRetransmits = dataChannelInit.MaxRetransmits ?? -1,
@@ -48,6 +56,7 @@ namespace WebRTCme.MacCatalyst
                 IsNegotiated = dataChannelInit.Negotiated ?? false,
                 ChannelId = dataChannelInit.Id ?? 1//WebRTCme.WebRtc.Id
             };
+        }
 
         public static Webrtc.RTCSessionDescription ToNative(this RTCSessionDescriptionInit description) =>
             new Webrtc.RTCSessionDescription(description.Type.ToNative(), description.Sdp);
