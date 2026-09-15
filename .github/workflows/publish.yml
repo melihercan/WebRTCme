@@ -153,10 +153,15 @@ jobs:
           fi
 
           # Catches the classic release bug: tagging one version while the artifact holds another.
+          # The tag may carry the readable spelling - v26.09.15 reads as a date in a way v26.9.15
+          # does not - so it is normalised before the comparison, the same way ci.yml normalises
+          # before packing. Both ends agree on what NuGet would store, and a tag that genuinely
+          # names a different version still fails.
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            tag="${GITHUB_REF_NAME#v}"
+            tag=$(echo "${GITHUB_REF_NAME#v}" |
+                  awk -F. '{for(i=1;i<=NF;i++) printf "%s%s", ($i+0), (i<NF?".":"")}')
             if [ "$tag" != "$main_version" ]; then
-              echo "::error::Tag $GITHUB_REF_NAME does not match the artifact's version $main_version"
+              echo "::error::Tag $GITHUB_REF_NAME normalises to $tag, but the artifact is $main_version"
               exit 1
             fi
           fi
