@@ -72,7 +72,9 @@ Write-Host ""
 # The same cache eviction the other tiers do. A version number is not enough on its own: a package
 # already in the global cache is used in preference to the folder feed, so a rebuilt .nupkg with the
 # same id and version would be ignored and the run would silently test the old bytes.
-$cached = Join-Path $env:USERPROFILE ".nuget/packages/webrtcme/$Version"
+# $HOME rather than $env:USERPROFILE, which is empty on macOS and Linux - where this would have
+# silently resolved to the filesystem root and evicted nothing.
+$cached = Join-Path $HOME ".nuget/packages/webrtcme/$Version"
 if (Test-Path $cached) {
     Write-Host "Evicting cached WebRTCme $Version"
     Remove-Item -Recurse -Force $cached
@@ -100,9 +102,16 @@ try {
     }
 
     Write-Host "Starting the host..."
-    $server = Start-Process dotnet `
-        -ArgumentList @('run', '--project', $host_, '-c', 'Release', '--no-build', '--urls', $url) `
-        -PassThru -WindowStyle Hidden
+    # -WindowStyle only exists on Windows: passing it on Linux or macOS throws rather than being
+    # ignored, which would fail this tier on a CI runner before the browser ever opened.
+    $serverArgs = @{
+        FilePath     = 'dotnet'
+        ArgumentList = @('run', '--project', $host_, '-c', 'Release', '--no-build', '--urls', $url)
+        PassThru     = $true
+    }
+    if ($IsWindows) { $serverArgs.WindowStyle = 'Hidden' }
+
+    $server = Start-Process @serverArgs
 
     # Poll rather than sleep: a warm build answers in a second or two, a cold one takes longer, and
     # waiting the worst case every time is wasteful. A host that never answers must fail here with

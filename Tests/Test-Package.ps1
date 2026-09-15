@@ -102,7 +102,9 @@ Write-Host ""
 # So the cached copy goes before every run. It costs a re-extract from a folder feed, which is
 # cheap, and it is the difference between testing the package and testing the name of one.
 foreach ($id in 'WebRTCme', 'WebRTCme.Middleware') {
-    $cached = Join-Path $env:USERPROFILE ".nuget/packages/$($id.ToLowerInvariant())/$Version"
+    # $HOME rather than $env:USERPROFILE, which is empty on macOS and Linux - where this would have
+    # silently resolved to the filesystem root and evicted nothing.
+    $cached = Join-Path $HOME ".nuget/packages/$($id.ToLowerInvariant())/$Version"
     if (Test-Path $cached) {
         Write-Host "Evicting cached $id $Version"
         Remove-Item $cached -Recurse -Force

@@ -218,3 +218,207 @@ jobs:
           name: nupkg
           path: artifacts/*.nupkg
           if-no-files-found: error
+
+  # ------------------------------------------------------------------ tests
+  #
+  # Everything below consumes the `nupkg` artifact the package job produced - the same bytes a
+  # release would publish, Apple slices and all. None of these jobs builds the repository's own
+  # projects against each other, because that would test the repository rather than the package,
+  # and packaging is where this repository fails quietly.
+  #
+  # What is deliberately absent: a real Android phone and a real iPhone. A hosted runner has
+  # neither, and the substitutes test the wrong binary - the Android emulator runs the x86_64 ABI
+  # from libwebrtc.aar, and the iOS Simulator the simulator slice of WebRTC.xcframework, where
+  # arm64 is what a user installs. Those two stay a pre-release ritual, one command each:
+  #
+  #   ./Tests/Test-Device-Phase4.ps1 -Platform android
+  #   ./Tests/Test-Device-Phase4.ps1 -Platform ios -DeviceId <paired identifier>
+  #
+  # A green run here is therefore not device verification, and should not be read as it. It is
+  # still worth having: both faults found on 2026-09-15 were managed-code faults - a null
+  # dereference and a serialisation shape - and every job below would have caught one or the other.
+
+  unit:
+    name: Unit and integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # The only tier that references the projects rather than the package, and the only one that
+      # needs no artifact - so it does not wait for the build and runs beside it.
+      #
+      # dotnet run, not dotnet test: xUnit v3 builds its own entry point, and `dotnet test` on the
+      # .NET 10 SDK fails to discover these.
+      - name: Tier 1
+        run: dotnet run --project Tests/WebRTCme.Tests -c Release
+
+  package-tests:
+    name: Package consumption
+    runs-on: windows-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # This tier compiles a consumer for every target framework the package ships, so the
+      # workloads have to be here. Restoring from the project gets the right set without naming
+      # them - and naming them is what goes wrong, since -f narrows the build and not the restore.
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.PackageTests/WebRTCme.PackageTests.csproj
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      - name: Tier 2
+        shell: pwsh
+        run: ./Tests/Test-Package.ps1
+
+  windows-runtime:
+    name: Runtime - Windows
+    runs-on: windows-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      # Loads WebRtcInterop.dll and negotiates between two peer connections in one process.
+      #
+      # A hosted runner has no camera and no microphone, which makes this more interesting than it
+      # sounds rather than less: creating a peer connection goes through libwebrtc's audio device
+      # module, and that module is what stopped counting inputs after a call in the bug fixed on
+      # 2026-09-14. If this job turns out to skip the enumeration scenarios, or to fail outright on
+      # a machine with no audio at all, that is worth knowing and is written down here rather than
+      # assumed either way.
+      - name: Tier 3
+        shell: pwsh
+        run: ./Tests/Test-Device.ps1
+
+  blazor:
+    name: Runtime - Blazor
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      # No hardware at all: Chromium is launched with its fake-media-device switches, so there is a
+      # synthetic camera and microphone. The one tier that is as good in CI as it is locally.
+      - name: Tier 5
+        shell: pwsh
+        run: ./Tests/Test-Blazor.ps1
+
+  maccatalyst:
+    name: Runtime - Mac Catalyst
+    runs-on: macos-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      # -Local: the Mac is this machine rather than the Mac mini over SSH. No signing identity is
+      # needed to run a Catalyst app from its own build output, and no window server session
+      # either, which is what makes this one as good here as it is on real hardware - it IS real
+      # hardware, and the same slice a user gets.
+      - name: Tier 4 - Mac Catalyst
+        shell: pwsh
+        run: ./Tests/Test-Device-Phase4.ps1 -Platform maccatalyst -Local
+
+  ios-simulator:
+    name: Runtime - iOS Simulator
+    runs-on: macos-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      # The Simulator, not a phone, with everything that implies - see the note at the top of this
+      # section. The simulator is chosen from whatever the runner image has rather than pinned to a
+      # model, which would break the day GitHub changes the image.
+      - name: Tier 4 - iOS Simulator
+        shell: pwsh
+        run: ./Tests/Test-Device-Phase4.ps1 -Platform ios -Local -Simulator
+
+  android-emulator:
+    name: Runtime - Android emulator
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: nupkg
+          path: artifacts
+
+      # The emulator needs hardware acceleration, and a hosted Linux runner only grants /dev/kvm to
+      # a user in the kvm group. Without this the emulator either refuses to start or falls back to
+      # software rendering and times out.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # An emulator is just another adb device, so the harness needs no emulator-specific path - it
+      # builds, installs with -t:Install and reads logcat exactly as it does with a phone.
+      #
+      # x86_64 deliberately: that is the only ABI with a usable emulator image, and it is also the
+      # honest limitation of this job - libwebrtc.aar's arm64 ABI is the one that reaches a user's
+      # phone, and nothing here loads it.
+      - name: Tier 4 - Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: pwsh ./Tests/Test-Device-Phase4.ps1 -Platform android

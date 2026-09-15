@@ -110,7 +110,9 @@ if (-not $Version) {
 # the folder feed, so a rebuilt .nupkg carrying the same id and version is ignored and the run
 # silently tests the old bytes. That is not hypothetical here: CI can pack the same date-based
 # version more than once in a day, and an earlier 26.9.15 exists that predates two fixes.
-$cached = Join-Path $env:USERPROFILE ".nuget/packages/webrtcme/$Version"
+# $HOME rather than $env:USERPROFILE, which is empty on macOS and Linux - where this would have
+# silently resolved to the filesystem root and evicted nothing.
+$cached = Join-Path $HOME ".nuget/packages/webrtcme/$Version"
 if (Test-Path $cached) {
     Write-Host "Evicting cached WebRTCme $Version"
     Remove-Item -Recurse -Force $cached
