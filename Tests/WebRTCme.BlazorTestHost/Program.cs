@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.JSInterop;
 using WebRTCme.DeviceTests.Core;
 
@@ -32,7 +29,12 @@ public static class Program
 
         var js = host.Services.GetRequiredService<IJSRuntime>();
 
-        MakeJsInteropOmitNulls(js);
+        // Nothing is done to JSInterop's JSON serialiser here, and that is the point of this host.
+        // Until the binding shaped its own arguments, a Blazor app had to reach into JSRuntime's
+        // non-public JsonSerializerOptions by reflection and set the ignore condition globally, or
+        // the first RTCPeerConnection threw - "The provided value 'null' is not a valid enum value
+        // of type RTCBundlePolicy". WebRTCme.DemoApp.Blazor still carries that workaround. If this
+        // host ever needs it again, the fix in JsRuntimeExtensions has regressed.
 
         // The scenarios reach the browser's WebRTC API through this. Nothing else on any platform
         // needs it, and every other binding ignores it.
@@ -67,57 +69,4 @@ public static class Program
         await host.RunAsync();
     }
 
-    /// <summary>
-    /// Makes JSInterop leave unset properties out of the JSON it sends to the browser.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// <b>This is a requirement the package places on every Blazor consumer, not a test fixture.</b>
-    /// WebRTCme's models use nullable properties for optional dictionary members - RTCConfiguration
-    /// leaves BundlePolicy, IceTransportPolicy and RtcpMuxPolicy null unless you set them - and
-    /// JSInterop serialises a null property as an explicit null rather than omitting it. The browser
-    /// rejects that outright, because null is not a member of an enum:
-    /// </para>
-    /// <code>
-    /// TypeError: Failed to construct 'RTCPeerConnection': Failed to read the 'bundlePolicy'
-    /// property from 'RTCConfiguration': The provided value 'null' is not a valid enum value
-    /// of type RTCBundlePolicy.
-    /// </code>
-    /// <para>
-    /// So a Blazor app that does not do this cannot create a peer connection at all. WebRTCme.DemoApp
-    /// .Blazor does it in Program.ConfigureProviders, by the same reflection, and this host does it
-    /// because a test host has to be an honest consumer - not because the test needs it.
-    /// </para>
-    /// <para>
-    /// The reflection is the ugly part and there is no supported alternative: the options object
-    /// JSInterop serialises with is a non-public property of JSRuntime, and WebAssemblyHostBuilder
-    /// exposes no way to configure it. It is also write-once - System.Text.Json seals an options
-    /// instance the first time it is used - so this has to happen before any interop call, which is
-    /// why it is the first thing after Build().
-    /// </para>
-    /// <para>
-    /// Recorded in doc/KnownGaps.md. The library could stop requiring it by serialising its own
-    /// arguments with JsonHelper.WebRtcJsonSerializerOptions, which already says exactly this.
-    /// </para>
-    /// </remarks>
-    static void MakeJsInteropOmitNulls(IJSRuntime js)
-    {
-        var property = typeof(JSRuntime).GetProperty(
-            "JsonSerializerOptions", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        if (property?.GetValue(js) is not JsonSerializerOptions options)
-        {
-            // Deliberately fatal, unlike the demo app, which catches and writes to the console. A
-            // test host that silently skipped this would report a page full of failures that say
-            // nothing about the package under test.
-            throw new InvalidOperationException(
-                "Could not reach JSRuntime.JsonSerializerOptions. WebRTCme needs JSInterop to omit "
-                + "nulls; see the remarks on this method.");
-        }
-
-        // DefaultIgnoreCondition, not the IgnoreNullValues the demo app sets - that property has been
-        // obsolete since .NET 5 and this is the setting it forwards to.
-        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    }
 }

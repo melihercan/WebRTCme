@@ -24,9 +24,8 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **Blazor needs the consumer to reconfigure JSInterop's JSON** | nobody - it can be picked up today | A Blazor app that does not apply the reflection workaround cannot create a peer connection at all. The library could stop requiring it; see below. |
 
-### A Blazor consumer has to reconfigure JSInterop's JSON, or nothing works at all - open 2026-09-15
+### A Blazor consumer had to reconfigure JSInterop's JSON, or nothing worked at all - fixed 2026-09-15
 
 **This one is a condition of using the package, and it is written down nowhere a consumer would
 look.** Found by `Tests/WebRTCme.BlazorTests`, the first thing in this repository to consume the
@@ -57,15 +56,34 @@ Why it had never been noticed: the demo app is the only Blazor consumer that has
 it has carried the workaround since before the .NET 10 branch. Phase 5 is the first consumer
 written without copying the demo app's startup, and it failed on its first run.
 
-**The fix is available and not applied.** `WebRTCme.JsonHelper.WebRtcJsonSerializerOptions`
-already specifies exactly the right thing - `DefaultIgnoreCondition = WhenWritingNull`, camelCase
-naming and the enum converters - and nothing on the Blazor interop path uses it. Serialising the
-binding's own arguments with it would make the requirement disappear. Left alone here because it
-changes how every Blazor call marshals and that deserves its own change, not a footnote in a
-testing pass.
+**Fixed by shaping the arguments in the binding**, in `JsRuntimeExtensions`, which is the single
+point every outbound Blazor call already passes through. `IJSRuntime` takes no per-call serializer
+options, but it writes a `JsonElement` through verbatim - so an argument serialised there with
+`DefaultIgnoreCondition = WhenWritingNull` arrives as those options describe whatever the host's
+own settings are. Only the API's own model classes are converted, tested by exact namespace
+(`WebRTCme`): `JsObjectRef` and `JsEventHandler` carry markers the JS side revives and a
+DotNetObjectReference only JSInterop can marshal, and they sit in
+`WebRTCme.Bindings.Blazor.Interops`, so the test excludes them.
 
-Until then `Tests/WebRTCme.BlazorTestHost/Program.cs` applies the same workaround, deliberately as
-a consumer would rather than as a test fixture, and throws instead of swallowing when it cannot.
+Two things were measured first, and both shaped the answer:
+
+- The obvious fix - `[JsonIgnore(WhenWritingNull)]` on the models - is **91 properties across 22
+  models**, not the handful it looks like. The API does not enable nullable reference types, so a
+  `string` or an array is as null-when-unset as an `int?`; counting only `?` properties gives 35
+  and misses two thirds of them. 91 hand-placed attributes with no compiler enforcement would also
+  regress the day somebody adds the 92nd property.
+- The options need **no converter list**. Every converter this API uses is already applied by
+  attribute - all 29 enums, and each property taking a `ConstrainBoolean`, `ConstrainDouble`,
+  `ConstrainULong` or `MediaStreamContraintsUnion` - and an attribute wins over the options list
+  anyway. That is why the binding can carry the two settings itself rather than reach up to
+  `JsonHelper`, which sits in WebRTCme and is above it in the layering.
+
+Proved by removing the workaround from `Tests/WebRTCme.BlazorTestHost` entirely: 6/6 against a
+package built with the fix, where the same host had failed 5 of 6 without it. The host now says in
+a comment that needing the workaround again would mean this has regressed.
+
+`WebRTCme.DemoApp.Blazor` still carries its reflection workaround. It is now harmless rather than
+load-bearing, and removing it is worth doing when the demo app is next touched.
 
 ### CreateDataChannel(label) threw on three platforms out of five - fixed 2026-09-15
 
