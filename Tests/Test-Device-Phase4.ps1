@@ -80,6 +80,15 @@ if (-not $Version) {
     Write-Host "Version not given; using the only one present: $Version"
 }
 
+# A version number is not enough on its own. A package already in the global cache is preferred to
+# the folder feed, so a rebuilt .nupkg carrying the same id and version is ignored and the run
+# silently tests the old bytes. That is not hypothetical here: CI can pack the same date-based
+# version more than once in a day, and an earlier 26.9.15 exists that predates two fixes.
+$cached = Join-Path $env:USERPROFILE ".nuget/packages/webrtcme/$Version"
+if (Test-Path $cached) {
+    Write-Host "Evicting cached WebRTCme $Version"
+    Remove-Item -Recurse -Force $cached
+}
 Write-Host ""
 Write-Host "Platform       : $Platform"
 Write-Host "Package source : $PackageSource"
