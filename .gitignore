@@ -341,3 +341,7 @@ healthchecksdb
 /WebRTCme.SignallingServer/appsettings.json
 /WebRTCme.Connection/MediaSoup/WebRTCme.Connection.MediaSoup.Server/package-lock.json
 /WebRTCme.Bindings/WebRTCme.Bindings.Native/webrtc.dll.EXPORTS.txt
+
+# Local dev scratch: launch profiles for driving the demo apps from a browser pane.
+# Machine-specific ports and paths, and nothing here belongs to anyone else.
+.claude/
