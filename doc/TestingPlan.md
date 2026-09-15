@@ -230,24 +230,56 @@ Contents: the loopback negotiation above, plus `GetMediaDevices` enumeration, pl
 that skips without a camera - `GetUserMedia`, track add, `OnTrack` firing on the far side, mute
 stopping the sender.
 
-### Phase 4 - runtime, on device
+### Phase 4 - runtime, on device - implemented
 
-Android and iOS cannot run a plain test process; they need a runner app on the device. **XHarness**
-(`Microsoft.DotNet.XHarness.CLI`) wraps a headless xUnit runner in a device app, deploys, runs and
-reports an exit code - written and maintained by the .NET team for exactly this. It is **not on
-nuget.org**; it comes from the `dotnet-eng` feed, so this phase introduces the repository's first
-`nuget.config` source beyond the default.
+Android, iOS and Mac Catalyst cannot run a plain test process - they build an .apk or an .app, and
+xUnit v3 refuses to build a test project without an app host, of which there is none for a phone or
+for maccatalyst-x64. So the scenarios run inside `Tests/WebRTCme.DeviceTests.Runner`, a MAUI app
+that executes `WebRTCme.DeviceTests.Core` and prints one line per result, and
+`Tests/Test-Device-Phase4.ps1` builds it, deploys it, runs it twice and reads the lines back.
 
-- **Android** on the PC, against a real device or an emulator.
-- **iOS** on the Mac mini, against the Simulator. A physical iPhone still needs a person for taps
-  in general, but a headless runner app does not need taps - so the Simulator is the default and a
-  real device is an option rather than a requirement.
-- **Mac Catalyst** on the Mac mini, arrived here from phase 3 for the reason given above. It is
-  the cheapest of the three to add, since the machine is the target and nothing has to be deployed
-  anywhere.
+**Not XHarness**, which the plan originally assumed. The newest build on the `dotnet-eng` feed is
+from September 2023: it predates .NET 10, and it drives Apple devices through `mlaunch`, which on
+this SDK hangs with "Please connect the device" on a locked phone and does not parse `:v2:udid=`
+selectors. `adb` and `devicectl` do work, and the harness drives them directly - so the extra feed
+the plan worried about is not needed either.
 
-Fallback if XHarness proves awkward: a minimal MAUI runner app per platform that runs the same
-assertions and reports through the exit code. More code, no extra feed.
+All three run from the PC, including the two Apple ones, over SSH to the Mac mini.
+
+- **Android** - `adb`, against a real device. The filter arrives as an intent extra. The launcher
+  activity is named explicitly in `[Activity(Name = ...)]` and resolved from the device with
+  `cmd package resolve-activity`, rather than hardcoding the hash MAUI would otherwise generate.
+- **iOS** - a real iPhone, not the Simulator. The Simulator works and is one command, but it runs
+  the simulator slice of `WebRTC.xcframework`; the arm64 slice is the one that ships, so the device
+  is what the harness targets. It also skips the device-enumeration scenario, correctly - a
+  simulator has no capture devices - which is a pass fewer than the device gives.
+- **Mac Catalyst** - built and run over plain SSH. No signing identity is needed to run a Catalyst
+  app locally from its build output, and no window server session either.
+
+Four things about the two Apple platforms are worth writing down, because each cost time and none
+is discoverable from an error message:
+
+1. **Codesigning for a device build must go through the desktop session.** From SSH it fails with
+   `/usr/bin/codesign exited with code 1: ... WebRTC.framework: errSecInternalComponent`, because
+   an SSH session's keychain is not the GUI session's. The harness uses `osascript` to ask
+   `Terminal.app` to run the build, and a completion file to carry the exit code back - `osascript`
+   returns as soon as Terminal accepts the command and says nothing about how it ended. Mac
+   Catalyst needs none of this.
+2. **devicectl's command-line arguments never reach the app.** Passed plainly or after a `--`
+   separator, the runner still executed all five scenarios instead of the one asked for, silently.
+   The filter travels as `DEVICECTL_CHILD_WEBRTCME_FILTER` instead, which devicectl does forward.
+   This one matters rather than merely annoys: an unfiltered "isolated" run is the full run again,
+   and the device-enumeration scenario is meaningless once a call has happened in that process.
+3. **macOS has no `timeout`.** Its absence is silent - "command not found" leaves the exit status to
+   whatever came next in the pipeline, so the app appears to have run and reported nothing.
+4. **A harness authored on Windows sends CRLF to zsh.** The remote script fails on every line with
+   `command not found: do^M`, the grep comes back empty, and the harness reports "the runner did not
+   finish" - indistinguishable from an app that crashed on launch. Every remote script has its
+   carriage returns stripped before it is sent.
+
+The last three were all found by running the thing. None of them produced an error that named the
+cause, and all three fail in the same direction: a green-looking or empty result rather than a loud
+one.
 
 ### Phase 5 - Blazor - implemented
 
