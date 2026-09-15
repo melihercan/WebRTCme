@@ -175,13 +175,42 @@ function Invoke-Android {
 function Invoke-MacCatalyst {
     param([string] $Filter)
 
-    $app = "~/Projects/WebRTCme/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst/maccatalyst-x64/WebRTCme.DeviceTests.Runner.app"
-    $filterArg = if ($Filter) { "--filter=$Filter" } else { "" }
+    # The bundle is named from ApplicationTitle rather than the assembly - "WebRTCme Device
+    # Tests.app" - so the path contains spaces and every use of it has to stay quoted.
+    $app = '$HOME/Projects/WebRTCme/Tests/WebRTCme.DeviceTests.Runner/bin/Debug/net10.0-maccatalyst/maccatalyst-x64/WebRTCme Device Tests.app/Contents/MacOS/WebRTCme.DeviceTests.Runner'
+    $filterArg = if ($Filter) { "--filter=$Filter" } else { '' }
 
-    # Run the executable inside the bundle directly, so stdout comes back over SSH. `open` would
-    # detach it and send its output to the system log instead.
-    $remote = "$app/Contents/MacOS/WebRTCme.DeviceTests.Runner $filterArg 2>&1 | grep WEBRTCME- &
-sleep 90; pkill -f WebRTCme.DeviceTests.Runner 2>/dev/null; true"
+    # A literal here-string, with the two variable parts substituted afterwards. Every $ below
+    # belongs to the remote shell, and writing it in an interpolating string means escaping each one
+    # - which is how the first version of this silently sent a script the shell could not run and
+    # reported "the runner did not finish".
+    #
+    # The executable inside the bundle is run directly so stdout comes back over SSH; `open` would
+    # detach it and send its output to the system log instead. No window server session is needed.
+    #
+    # Polled rather than slept: a passing run takes about three seconds, a hung negotiation takes the
+    # scenario's own 30s timeout. And no `timeout` command - macOS has none, and its absence is
+    # silent, because "command not found" leaves the exit code to whatever came next in the pipeline.
+    $script = @'
+APP="__APP__"
+LOG=$(mktemp)
+"$APP" __FILTER__ > "$LOG" 2>&1 &
+APPPID=$!
+for i in $(seq 1 60); do
+  grep -q WEBRTCME-SUMMARY "$LOG" && break
+  sleep 2
+done
+kill $APPPID 2>/dev/null
+grep WEBRTCME- "$LOG"
+rm -f "$LOG"
+'@
+
+    # Carriage returns stripped, and this is not cosmetic. This file has CRLF line endings, so the
+    # here-string above carries them into the script sent over SSH - and zsh treats the CR as part of
+    # the command, failing every line with "command not found: do^M" while the exit status and the
+    # WEBRTCME- grep both come back empty. The harness then reports "the runner did not finish",
+    # which is indistinguishable from an app that crashed on launch.
+    $remote = $script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg).Replace("`r", '')
 
     $log = ssh -o BatchMode=yes $Mac $remote 2>&1
     return Read-Outcome -Lines $log -What 'maccatalyst'
@@ -220,6 +249,26 @@ if (-not $SkipBuild) {
                 "-p:WebRTCmePackageVersion=$Version" "-p:RestoreAdditionalProjectSources=$PackageSource" --nologo |
                 Select-String -Pattern 'error|Build succeeded' | Select-Object -First 5
             if ($LASTEXITCODE -ne 0) { throw "android build/install failed" }
+        }
+        'maccatalyst' {
+            # Built over plain SSH. No codesigning ceremony for this one: a Catalyst app run locally
+            # from its build output needs no signing identity, so the Terminal.app osascript dance a
+            # device deploy needs (see doc/KnownGaps.md) does not apply here.
+            #
+            # The Mac restores from its OWN copy of the artifact, not this machine's, and evicts the
+            # cached copy first for the reason given at the top of this script.
+            $remote = "cd ~/Projects/WebRTCme && git pull --ff-only >/dev/null 2>&1; " +
+                      "rm -rf ~/.nuget/packages/webrtcme/$Version && " +
+                      "dotnet build Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj " +
+                      "-f net10.0-maccatalyst -c Debug -p:WebRTCmePackageVersion=$Version " +
+                      "-p:RestoreAdditionalProjectSources=`$HOME/Projects/WebRTCme/artifacts --nologo"
+
+            $built = ssh -o BatchMode=yes $Mac $remote 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                $built | Select-String -Pattern 'error' | Select-Object -First 5 | ForEach-Object { Write-Host $_ }
+                throw "maccatalyst build failed on $Mac. Is the artifact in ~/Projects/WebRTCme/artifacts there?"
+            }
+            $built | Select-String -Pattern 'Build succeeded' | Select-Object -First 1 | ForEach-Object { Write-Host $_ }
         }
         default {
             throw "Building for $Platform happens on the Mac. Build it there first and re-run with -SkipBuild:`n" +
