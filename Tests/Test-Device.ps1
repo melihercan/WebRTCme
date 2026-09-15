@@ -25,15 +25,17 @@
 .PARAMETER PackageSource
   Folder holding the .nupkg files. Defaults to artifacts/ at the repository root.
 
-.PARAMETER Framework
-  Target framework to run. Defaults to this machine's: net10.0-windows on Windows,
-  net10.0-maccatalyst on macOS.
+.NOTES
+  There is no framework parameter. The project picks the host's target framework itself -
+  net10.0-windows on Windows, net10.0-maccatalyst on macOS - because passing -f or
+  -p:TargetFramework does not survive the implicit restore: restore resolves the project's declared
+  framework while the build uses the one given, and the build fails with NETSDK1005 saying the
+  assets file has no target for it.
 #>
 [CmdletBinding()]
 param(
     [string] $Version,
-    [string] $PackageSource,
-    [string] $Framework
+    [string] $PackageSource
 )
 
 Set-StrictMode -Version Latest
@@ -49,10 +51,8 @@ if (-not (Test-Path $PackageSource)) {
     throw "No package source at $PackageSource. Download a CI artifact first: gh run download <run-id> -n nupkg -D artifacts"
 }
 
-if (-not $Framework) {
-    $Framework = if ($IsWindows) { 'net10.0-windows10.0.22621.0' }
-                 elseif ($IsMacOS) { 'net10.0-maccatalyst' }
-                 else { throw "Tier 3 runs on Windows or macOS. Android and iOS are phase 4." }
+if (-not ($IsWindows -or $IsMacOS)) {
+    throw "Tier 3 runs on Windows or macOS. Android and iOS are phase 4."
 }
 
 if (-not $Version) {
@@ -69,7 +69,9 @@ if (-not $Version) {
 # Same eviction as tier 2, and for the same reason: NuGet caches by id and version, two CI runs of
 # one commit both produce the same version with different bytes, and a cached copy means testing
 # the package from an hour ago while believing otherwise.
-$cached = Join-Path $env:USERPROFILE ".nuget/packages/webrtcme/$Version"
+# $HOME rather than $env:USERPROFILE, which is empty on macOS - where this would have silently
+# evicted nothing and tested whatever was already cached.
+$cached = Join-Path $HOME ".nuget/packages/webrtcme/$Version"
 if (Test-Path $cached) {
     Write-Host "Evicting cached WebRTCme $Version"
     Remove-Item $cached -Recurse -Force
@@ -80,10 +82,9 @@ if (Test-Path $objDir) { Remove-Item $objDir -Recurse -Force }
 Write-Host ""
 Write-Host "Package source : $PackageSource"
 Write-Host "Version        : $Version"
-Write-Host "Framework      : $Framework"
 Write-Host ""
 
-& dotnet run --project $project -c Release -f $Framework `
+& dotnet run --project $project -c Release `
     "-p:WebRTCmePackageVersion=$Version" `
     "-p:RestoreAdditionalProjectSources=$PackageSource"
 $exit = $LASTEXITCODE
@@ -103,7 +104,7 @@ if ($exit -eq 0) {
     Write-Host ""
     Write-Host "Re-running the device-enumeration regression in a process where no call has happened..."
 
-    & dotnet run --project $project -c Release -f $Framework --no-build `
+    & dotnet run --project $project -c Release --no-build `
         "-p:WebRTCmePackageVersion=$Version" `
         "-p:RestoreAdditionalProjectSources=$PackageSource" `
         -- -filterVSTest "FullyQualifiedName~A_completed_call_does_not_change_what_devices_exist"
@@ -112,10 +113,10 @@ if ($exit -eq 0) {
 
 Write-Host ""
 if ($exit -ne 0) {
-    Write-Host "Device test FAILED for $Version on $Framework." -ForegroundColor Red
+    Write-Host "Device test FAILED for $Version." -ForegroundColor Red
     Write-Host "A missing native payload reads as DllNotFoundException on the first P/Invoke;" -ForegroundColor Red
     Write-Host "one built for the wrong architecture reads as BadImageFormatException." -ForegroundColor Red
     exit $exit
 }
 
-Write-Host "Device test passed: $Version negotiates end to end on $Framework." -ForegroundColor Green
+Write-Host "Device test passed: $Version negotiates end to end on this host." -ForegroundColor Green
