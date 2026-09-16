@@ -161,6 +161,30 @@ if (-not $exe) { throw "built WebRTCme.DeviceTests.exe not found under $(Split-P
 Write-Host "Running the scenarios..."
 $exit = Invoke-Watched -Exe $exe.FullName
 
+# If it hung, find out whether the test platform can start at all before blaming the tests.
+#
+# On a hosted Windows runner this process loaded its assembly - the module initializer says so -
+# and then produced no xUnit banner and no scenario, which means the runner never started and
+# nothing of WebRTCme was ever called. `--help` exercises the same startup and none of the tests,
+# so if that hangs too the fault is the test platform on this machine; if it returns, startup
+# works and the hang is in discovery or a fixture.
+#
+# Only on failure, so a healthy run costs nothing.
+if ($exit -eq 124) {
+    Write-Host ""
+    Write-Host "Probing whether the test platform starts at all (--help, 60s)..." -ForegroundColor Yellow
+    $probe = Invoke-Watched -Exe $exe.FullName -Arguments @("--help") -Seconds 60
+
+    Write-Host ""
+    if ($probe -eq 124) {
+        Write-Host "--help hung too: the test platform does not start on this machine." -ForegroundColor Red
+        Write-Host "Nothing of WebRTCme is involved - no scenario had run when it stopped." -ForegroundColor Red
+    } else {
+        Write-Host "--help returned ($probe): the platform starts, so the hang is after startup -" -ForegroundColor Red
+        Write-Host "in discovery or a fixture, still before any scenario began." -ForegroundColor Red
+    }
+}
+
 # The device-enumeration regression again, on its own, because it cannot prove anything in a
 # process where a call has already happened.
 #

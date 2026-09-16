@@ -379,8 +379,16 @@ jobs:
           if ($media) { $media | Format-Table -AutoSize Name, Status | Out-String | Write-Host }
           else { Write-Host "  none" }
 
+      # Telemetry off for both the SDK and the test platform. Neither is known to be the cause,
+      # and both phone home on startup - which is the window this process hangs in, having loaded
+      # its assembly and never reached the xUnit banner. Cheap to rule out, and worth ruling out
+      # before anything more invasive.
       - name: Tier 3
         shell: pwsh
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+          TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
+          DOTNET_NOLOGO: 1
         run: ./Tests/Test-Device.ps1
 
   blazor:
