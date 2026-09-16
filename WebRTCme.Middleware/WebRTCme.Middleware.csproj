@@ -158,6 +158,16 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
+		<!--
+		  The third-party attribution record, at the package root. Same file and same reason as in
+		  WebRTCme.csproj: this package brings WebRTCme, so its consumers redistribute the same
+		  native binaries and inherit the same obligation. It also folds in the mediasoup-client
+		  port, which is a source-level derived work and is section 2 of that file.
+		-->
+		<None Include="..\NOTICE" Link="NOTICE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
 
 	<!--

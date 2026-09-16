@@ -150,6 +150,23 @@
 		<PackagePath></PackagePath>
 		<Pack>True</Pack>
 	  </None>
+	  <!--
+	    The third-party attribution record, at the package root.
+
+	    It ships because the obligation travels with the binaries rather than with this
+	    repository: these packages embed Google's WebRTC on four target frameworks out of five,
+	    and its BSD-3 terms require the copyright notice to be reproduced by anyone redistributing
+	    it in binary form - which is every application that references this package. A NOTICE a
+	    consumer has to go and find on GitHub does not do that job.
+
+	    Verify it after changing anything here, because pack is quiet about what it drops:
+
+	        unzip -l WebRTCme.<version>.nupkg | Select-String NOTICE
+	  -->
+	  <None Include="..\NOTICE" Link="NOTICE">
+		<PackagePath></PackagePath>
+		<Pack>True</Pack>
+	  </None>
 	</ItemGroup>
 
 	<!--
