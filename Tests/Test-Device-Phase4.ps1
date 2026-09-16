@@ -215,8 +215,27 @@ function Invoke-Android {
         $log = & $adb logcat -d 2>$null | Where-Object { $_ -match 'WEBRTCME-' }
     } while (-not ($log | Where-Object { $_ -match 'WEBRTCME-SUMMARY' }) -and (Get-Date) -lt $deadline)
 
+    # Anything that looks like a death, before the app is stopped.
+    #
+    # The WEBRTCME- filter above is deliberately narrow, and that narrowness hid something: a run
+    # that prints BEGIN for a scenario and then nothing looks identical whether the scenario blocked
+    # or the process died. A block would have been caught by the scenario timeout and reported; a
+    # crash leaves exactly this silence. Only logcat knows which, and only if asked.
+    $died = & $adb logcat -d 2>$null |
+            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|libwebrtc|UnsatisfiedLink|dlopen failed' } |
+            Select-Object -Last 25
+
     & $adb shell am force-stop $appId | Out-Null
-    return Read-Outcome -Lines $log -What 'android'
+
+    $ok = Read-Outcome -Lines $log -What 'android'
+
+    if (-not $ok -and $died) {
+        Write-Host ""
+        Write-Host "  what logcat says about the process dying:" -ForegroundColor Yellow
+        $died | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkYellow }
+    }
+
+    return $ok
 }
 
 # ---------------------------------------------------------------- mac catalyst
