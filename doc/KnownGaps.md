@@ -24,7 +24,45 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
+| **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+
+### libwebrtc aborts intermittently on the Android x86_64 emulator - open 2026-09-16
+
+`Tests/Test-Device-Phase4.ps1 -Platform android` passes on a real phone every time it has been run.
+On the CI emulator it fails about two runs in three, and when it fails the process does not throw -
+it dies:
+
+```
+F libc: Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE)
+        in tid 7249 (signaling_threa), pid 7204 (cme.devicetests)
+        Tombstone written to: tombstone_00
+```
+
+`signaling_threa` is libwebrtc's signaling thread, truncated to the fifteen characters Android
+allows a thread name. SIGABRT there is an `RTC_CHECK` failing - libwebrtc killing the process
+deliberately rather than continuing. Every frame of the backtrace is inside
+`libjingle_peerconnection_so.so`, unsymbolised, and the assertion text reaches neither logcat nor a
+readable tombstone, so **which** check failed is not known.
+
+Always in or around `ACompletedCallDoesNotChangeWhatDevicesExist` - enumerate the devices, complete
+a call, enumerate again. Sometimes in the full pass, sometimes only in the isolated re-run, and
+twice not at all. Seven runs: five failed, two passed.
+
+**What is not known**: whether this is libwebrtc misbehaving on x86_64, the emulator's synthetic
+camera and microphone, or something this repository does wrong that only that build catches. The
+`.aar` is prebuilt and stripped, so short of building libwebrtc with symbols there is no way from
+here to the assertion.
+
+**Why it is recorded rather than chased**: the emulator runs the **x86_64** ABI, and no user runs
+that - a phone is arm64, and the arm64 build has never aborted once across a day of runs. The job
+is worth keeping for the managed regressions it does catch, which is what it is good at: both faults
+found on 2026-09-15 were managed-code faults an emulator would have caught. It is not worth failing
+a release over.
+
+Related in shape, though not proven related in cause: the Windows audio device module fault fixed on
+2026-09-14 was also "enumeration breaks after a call has happened". That is why this scenario exists
+at all, and it is the one finding a third platform now trips over.
 
 ### A Windows consumer needs the Windows App Runtime, or its app hangs at startup - 2026-09-16
 
