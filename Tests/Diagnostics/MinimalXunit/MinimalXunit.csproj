@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  The smallest possible xUnit v3 test project, on the same target framework and runtime
+	  identifier as WebRTCme.DeviceTests and with nothing else in common - no WebRTCme, no native
+	  payload, no Microsoft.NET.Test.Sdk, no MAUI.
+
+	  Paired with PlainConsole next door: if that one runs and this one hangs, xUnit v3 on a Windows
+	  platform target framework is the answer, and the evidence is two projects that differ only in
+	  whether xUnit is present.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
+
+</Project>

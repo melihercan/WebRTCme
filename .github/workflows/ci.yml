@@ -26,7 +26,7 @@ on:
         required: false
         default: ''
       only:
-        description: 'Which test job to run: all, unit, package-tests, windows, blazor, maccatalyst, ios, android.'
+        description: 'Which test job to run: all, unit, package-tests, windows, blazor, maccatalyst, ios, android, diagnostics.'
         required: false
         default: 'all'
       artifact-run-id:
@@ -587,3 +587,93 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: pwsh ./Tests/Test-Device-Phase4.ps1 -Platform android
+
+  # ------------------------------------------------------------------ why does tier 3 not start?
+  #
+  # Not part of the suite. Two of the smallest programs that can be written, run to answer a
+  # question four rounds of guessing could not - see Tests/Diagnostics/README.md.
+  #
+  # WebRTCme.DeviceTests loads its assembly on this runner and then produces nothing: no xUnit
+  # banner, no test, nothing even when asked only for its help text. It differs from the unit tier,
+  # which passes on this same image, in two ways at once - a Windows platform target framework with
+  # a win-x64 runtime identifier, and everything it references - so neither can be blamed from that
+  # evidence alone.
+  #
+  # These two share the target framework and runtime identifier and differ only in whether xUnit is
+  # present. Whichever hangs is the answer.
+  #
+  # Never fails the run. It is an experiment, and an experiment that comes out badly is a result.
+  windows-diagnostics:
+    name: Diagnose the Windows tier
+    timeout-minutes: 20
+    runs-on: windows-latest
+    if: inputs.only == 'diagnostics'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build both probes
+        run: |
+          dotnet build Tests/Diagnostics/PlainConsole/PlainConsole.csproj -c Release --nologo
+          dotnet build Tests/Diagnostics/MinimalXunit/MinimalXunit.csproj -c Release --nologo
+
+      # Each under a watchdog, because the thing being measured is whether they finish at all.
+      # Output is redirected to files and printed afterwards, so it survives a process being
+      # killed - the same reason tier 3 does it.
+      - name: Run them
+        shell: pwsh
+        run: |
+          function Invoke-Probe {
+              param([string] $What, [string] $Exe, [string[]] $Arguments = @(), [int] $Seconds = 90)
+
+              Write-Host ""
+              Write-Host "===== $What ====="
+
+              if (-not (Test-Path $Exe)) { Write-Host "  not built: $Exe"; return "NOT BUILT" }
+
+              $out = New-TemporaryFile
+              $err = New-TemporaryFile
+              $p = Start-Process -FilePath $Exe -ArgumentList $Arguments -PassThru -NoNewWindow `
+                   -RedirectStandardOutput $out -RedirectStandardError $err
+
+              $finished = $p.WaitForExit($Seconds * 1000)
+              if (-not $finished) { try { $p.Kill($true) } catch { } }
+
+              Get-Content $out, $err -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $_" }
+              Remove-Item $out, $err -Force -ErrorAction SilentlyContinue
+
+              if ($finished) { Write-Host "  -> finished, exit $($p.ExitCode)"; return "RAN" }
+              Write-Host "  -> HUNG, killed after ${Seconds}s"
+              return "HUNG"
+          }
+
+          $tfm = "net10.0-windows10.0.22621.0/win-x64"
+          $plain = Invoke-Probe "PlainConsole - no xUnit at all" `
+                     "Tests/Diagnostics/PlainConsole/bin/Release/$tfm/PlainConsole.exe"
+          $xunit = Invoke-Probe "MinimalXunit - one trivial fact" `
+                     "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe"
+          $help  = Invoke-Probe "MinimalXunit --help - startup only, no tests" `
+                     "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe" @("--help") 60
+
+          Write-Host ""
+          Write-Host "===== verdict ====="
+          Write-Host "  PlainConsole      : $plain"
+          Write-Host "  MinimalXunit      : $xunit"
+          Write-Host "  MinimalXunit help : $help"
+          Write-Host ""
+
+          if ($plain -eq "HUNG") {
+              Write-Host "  A bare Windows-target executable does not start on this machine."
+              Write-Host "  xUnit is innocent; the fault is the target framework, the runtime"
+              Write-Host "  identifier or the apphost on this image."
+          } elseif ($xunit -eq "HUNG" -or $help -eq "HUNG") {
+              Write-Host "  A bare executable runs and the same thing with xUnit does not."
+              Write-Host "  xUnit v3 on a Windows platform target framework is the answer."
+          } else {
+              Write-Host "  Both run. So neither the target framework nor xUnit is sufficient on its"
+              Write-Host "  own, and the cause is something WebRTCme.DeviceTests adds on top -"
+              Write-Host "  the package and its native payload, or Microsoft.NET.Test.Sdk."
+          }
