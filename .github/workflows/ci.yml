@@ -561,6 +561,21 @@ jobs:
   android-emulator:
     name: Runtime - Android emulator
     timeout-minutes: 45
+
+    # Reports, does not gate. libwebrtc aborts on this emulator about two runs in three - a native
+    # SIGABRT on its signaling thread, around the scenario that enumerates devices, completes a call
+    # and enumerates again. The arm64 phone has never done it; the emulator runs x86_64, which no
+    # user does. Which RTC_CHECK fails cannot be found from here: the .aar is prebuilt and stripped,
+    # and the assertion text reaches neither logcat nor a readable tombstone. See doc/KnownGaps.md.
+    #
+    # Kept rather than deleted because of what it does catch reliably: managed regressions. Both
+    # faults found on 2026-09-15 were of that kind, and this job would have caught either. A failure
+    # here is worth reading - it is just not worth failing a release over, and a gate that is a coin
+    # toss is one people learn to ignore.
+    #
+    # Android is gated by the real phone instead, which is one command:
+    #   ./Tests/Test-Device-Phase4.ps1 -Platform android
+    continue-on-error: true
     runs-on: ubuntu-latest
     needs: package
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'android')
