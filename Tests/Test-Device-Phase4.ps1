@@ -222,8 +222,8 @@ function Invoke-Android {
     # or the process died. A block would have been caught by the scenario timeout and reported; a
     # crash leaves exactly this silence. Only logcat knows which, and only if asked.
     $died = & $adb logcat -d 2>$null |
-            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|libwebrtc|UnsatisfiedLink|dlopen failed' } |
-            Select-Object -Last 25
+            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|libwebrtc|UnsatisfiedLink|dlopen failed|Abort message|^.*F DEBUG|#0[0-9] pc ' } |
+            Select-Object -Last 40
 
     & $adb shell am force-stop $appId | Out-Null
 
