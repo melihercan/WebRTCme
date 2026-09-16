@@ -389,7 +389,25 @@ jobs:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
           TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
           DOTNET_NOLOGO: 1
+          # The test platform's own startup log. This process loads its assembly and then never
+          # reaches Main - not even for its help switch - so the only remaining witness is whatever
+          # the platform writes about itself on the way up.
+          TESTINGPLATFORM_DIAGNOSTIC: 1
+          TESTINGPLATFORM_DIAGNOSTIC_VERBOSITY: Trace
+          TESTINGPLATFORM_DIAGNOSTIC_OUTPUT_DIRECTORY: ${{ github.workspace }}/testdiag
         run: ./Tests/Test-Device.ps1
+
+      # Always, because the interesting case is the one where the step above failed.
+      - name: Test platform diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          $dir = "${{ github.workspace }}/testdiag"
+          if (-not (Test-Path $dir)) { Write-Host "no diagnostic directory - the platform wrote nothing"; return }
+          Get-ChildItem $dir -Recurse -File | ForEach-Object {
+            Write-Host "===== $($_.Name) ($($_.Length) bytes) ====="
+            Get-Content $_.FullName -TotalCount 200 | ForEach-Object { Write-Host $_ }
+          }
 
   blazor:
     name: Runtime - Blazor
