@@ -62,7 +62,28 @@ public static class LoopbackScenarios
     /// </remarks>
     public static IJSRuntime? JsRuntime { get; set; }
 
-    static IWindow Window() => CrossWebRtc.Current.Window(JsRuntime);
+    /// <summary>
+    /// The platform's window, with the first call traced.
+    /// </summary>
+    /// <remarks>
+    /// The first call is the expensive one and the one that can hang. On Windows it resolves
+    /// WebRtcRuntime.Factory, which calls Initialize() and FactoryCreate() as two synchronous
+    /// P/Invokes, and FactoryCreate builds libwebrtc's audio device module. A machine with no audio
+    /// endpoints at all - a hosted Windows Server runner has none - is the one place this has ever
+    /// failed to return, so the two lines around it are what say whether it did.
+    /// </remarks>
+    static IWindow Window()
+    {
+        if (_windowTraced) return CrossWebRtc.Current.Window(JsRuntime);
+
+        _windowTraced = true;
+        ScenarioTrace.Write("creating the first window - this initialises the native factory");
+        var window = CrossWebRtc.Current.Window(JsRuntime);
+        ScenarioTrace.Write("first window created");
+        return window;
+    }
+
+    static bool _windowTraced;
 
     /// <summary>
     /// The three fields a candidate needs to be re-added at the other end. The real signalling path
@@ -110,12 +131,15 @@ public static class LoopbackScenarios
             // that blocks blocks the calling thread, Task.WhenAny below is never reached, and the
             // timeout never fires. Starting the work on a pool thread means a synchronous block is
             // caught by exactly the same mechanism as an await that never completes.
+            ScenarioTrace.Write($"begin {name}");
+
             var work = Task.Run(body);
             var finished = await Task.WhenAny(work, Task.Delay(ScenarioTimeout));
 
             if (!ReferenceEquals(finished, work))
             {
                 clock.Stop();
+                ScenarioTrace.Write($"TIMED OUT {name} - still blocked");
                 return ScenarioResult.Fail(
                     name,
                     $"timed out after {ScenarioTimeout.TotalSeconds:F0}s - it is still blocked, and "
@@ -125,6 +149,7 @@ public static class LoopbackScenarios
 
             var failure = await work;
             clock.Stop();
+            ScenarioTrace.Write($"end {name} after {clock.ElapsedMilliseconds}ms");
             return failure is null
                 ? ScenarioResult.Pass(name, clock.Elapsed)
                 : ScenarioResult.Fail(name, failure, clock.Elapsed);
