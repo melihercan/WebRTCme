@@ -222,20 +222,38 @@ function Invoke-Android {
     # or the process died. A block would have been caught by the scenario timeout and reported; a
     # crash leaves exactly this silence. Only logcat knows which, and only if asked.
     $died = & $adb logcat -d 2>$null |
-            # Wide, because libwebrtc writes its RTC_CHECK text under its own tag - libjingle, rtc,
-            # WebRTC, jingle depending on the build - and the previous filter kept the backtrace but
-            # lost the one line that says which assertion failed.
-            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|UnsatisfiedLink|dlopen failed|Abort message|F DEBUG|#0[0-9] pc |libjingle|libwebrtc|rtc|WebRTC|CHECK|DCHECK|FATAL_ERROR' } |
-            Select-Object -Last 40
+            # Narrow on purpose. A wider net that matched 'rtc' anywhere pulled in BugleRcsEngine
+            # and half the system log, and pushed the crash itself out of the window.
+            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|UnsatisfiedLink|dlopen failed|Abort message|F DEBUG|libjingle' } |
+            Select-Object -Last 30
 
     & $adb shell am force-stop $appId | Out-Null
 
     $ok = Read-Outcome -Lines $log -What 'android'
 
+    # The assertion text, which logcat does not carry. libwebrtc aborts through RTC_CHECK and
+    # Android records the message in the tombstone rather than the log - so a backtrace full of
+    # unsymbolised libjingle frames says that it aborted and never why. This asks for the why.
+    #
+    # Best effort: reading tombstones needs root, which an emulator allows and a phone does not.
+    # Failure here is normal and must not replace the real result.
+    $abort = @()
+    if (-not $ok -and $died) {
+        & $adb root 2>&1 | Out-Null
+        Start-Sleep -Milliseconds 500
+        $abort = & $adb shell 'grep -h -m1 -A3 "Abort message" /data/tombstones/tombstone_* 2>/dev/null' 2>$null
+    }
+
     if (-not $ok -and $died) {
         Write-Host ""
         Write-Host "  what logcat says about the process dying:" -ForegroundColor Yellow
         $died | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkYellow }
+
+        if ($abort) {
+            Write-Host ""
+            Write-Host "  and what the tombstone says it was:" -ForegroundColor Yellow
+            $abort | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkYellow }
+        }
     }
 
     return $ok
