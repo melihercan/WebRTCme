@@ -199,23 +199,24 @@ package/framework pairs do.
 **The finding, and it is a consumer's problem rather than a test's.** The first run failed:
 
 ```
-error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.80 to 10.0.20
-  WebRTCme.PackageTests -> WebRTCme 26.9.9 -> Microsoft.Maui.Controls (>= 10.0.80)
+error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.101 to 10.0.20
+  WebRTCme.PackageTests -> WebRTCme 26.9.17 -> Microsoft.Maui.Controls (>= 10.0.101)
   WebRTCme.PackageTests -> Microsoft.Maui.Controls (>= 10.0.20)
 ```
 
-The packages depend on a `Microsoft.Maui.Controls` newer than the one the MAUI workload bundles
-implicitly, and NuGet calls the difference a downgrade and fails the restore. So **every MAUI
-consumer has to name `Microsoft.Maui.Controls` and `Microsoft.Maui.Controls.Compatibility`
-themselves**, at the version the packages ask for, exactly as `WebRTCme.DemoApp.Maui` already does
-and exactly as NU1605 instructs.
+The packages depend on the **current stable** `Microsoft.Maui.Controls`, which is ahead of the one
+the MAUI workload references implicitly, and NuGet calls the difference a downgrade and fails the
+restore. So **every MAUI consumer has to name `Microsoft.Maui.Controls` and
+`Microsoft.Maui.Controls.Compatibility` themselves**, at the version the packages ask for, exactly
+as `WebRTCme.DemoApp.Maui` already does and exactly as NU1605 instructs.
 
-> **The version above is what it was on 2026-09-14, against 26.9.9. It is now 10.0.101.** The error
-> is left as it was seen rather than rewritten, because the number is the least interesting part of
-> it. What matters is that **it moves** - and when it does, the pin has to be raised in
-> `Tests/WebRTCme.PackageTests` and in the wiki's `Getting started`, `Platform prerequisites` and
-> `Releases` pages in the same change. The tier catches a stale pin with the same NU1605 in the
-> opposite direction, which is the tier working rather than the tier being annoying.
+> **Both numbers move; the shape does not.** Tracking the latest stable band is what creates this
+> at all - a package asking only for what the workload already bundles would never trip it, and
+> that trade is the open decision below about which servicing band to support. When the version
+> does move, the pin has to be raised in `Tests/WebRTCme.PackageTests` and in the wiki's
+> `Getting started`, `Platform prerequisites` and `Releases` pages in the same change. The tier
+> catches a stale pin with the same NU1605 in the opposite direction, which is the tier working
+> rather than the tier being annoying.
 
 It is not optional, and it is not discoverable until a restore fails. **This has to be in the
 documentation before the packages are published.** *(It now is - see
