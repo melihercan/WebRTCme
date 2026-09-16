@@ -25,6 +25,14 @@ on:
         description: 'Version to pack, e.g. 26.09.15. Leave empty for today''s date. Normalised either way.'
         required: false
         default: ''
+      only:
+        description: 'Which test job to run: all, unit, package-tests, windows, blazor, maccatalyst, ios, android.'
+        required: false
+        default: 'all'
+      artifact-run-id:
+        description: 'Reuse the nupkg from this earlier run instead of building one. Skips the Apple and package jobs.'
+        required: false
+        default: ''
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -43,6 +51,7 @@ jobs:
   # go missing from the package rather than failing loudly.
   apple:
     name: Build the Apple slices
+    if: inputs.artifact-run-id == ''
     runs-on: macos-latest
 
     steps:
@@ -107,6 +116,7 @@ jobs:
 
   package:
     name: Build, pack and verify
+    if: inputs.artifact-run-id == ''
     needs: apple
     # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else.
     # The iOS and Mac Catalyst library slices do compile here too, and pack needs them present to
@@ -246,6 +256,7 @@ jobs:
     # every target framework a reference declares - so on Linux it fails with NETSDK1147 before a
     # single test runs. Windows is the only host that can restore all five.
     runs-on: windows-latest
+    if: inputs.only == 'all' || inputs.only == 'unit'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -270,6 +281,7 @@ jobs:
     timeout-minutes: 25
     runs-on: windows-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'package-tests')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -283,9 +295,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.PackageTests/WebRTCme.PackageTests.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       - name: Tier 2
         shell: pwsh
@@ -296,6 +317,7 @@ jobs:
     timeout-minutes: 15
     runs-on: windows-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'windows')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -309,9 +331,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.DeviceTests/WebRTCme.DeviceTests.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       # Loads WebRtcInterop.dll and negotiates between two peer connections in one process.
       #
@@ -321,6 +352,33 @@ jobs:
       # 2026-09-14. If this job turns out to skip the enumeration scenarios, or to fail outright on
       # a machine with no audio at all, that is worth knowing and is written down here rather than
       # assumed either way.
+      # What this machine has for audio, before anything tries to use it.
+      #
+      # The first RTCPeerConnection resolves WebRtcRuntime.Factory, which calls Initialize() and
+      # FactoryCreate() - two synchronous P/Invokes - and FactoryCreate builds libwebrtc's audio
+      # device module over Core Audio. A hosted runner has no audio hardware and does not run the
+      # Windows Audio service, and Core Audio can block rather than fail when that service is
+      # stopped. That is the current hypothesis for this tier hanging here with no output while
+      # passing everywhere else; see doc/KnownGaps.md.
+      #
+      # Never fails the job. It is here to describe the machine, not to judge it.
+      - name: What audio hardware is present
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Write-Host "--- audio services ---"
+          Get-Service -Name 'Audiosrv','AudioEndpointBuilder' -ErrorAction SilentlyContinue |
+            Format-Table -AutoSize Name, Status, StartType | Out-String | Write-Host
+          Write-Host "--- audio endpoints (Win32_SoundDevice) ---"
+          $sound = Get-CimInstance Win32_SoundDevice -ErrorAction SilentlyContinue
+          if ($sound) { $sound | Format-Table -AutoSize Name, Status | Out-String | Write-Host }
+          else { Write-Host "  none" }
+          Write-Host "--- media class devices ---"
+          $media = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue |
+            Where-Object { $_.PNPClass -in @('MEDIA','AudioEndpoint') }
+          if ($media) { $media | Format-Table -AutoSize Name, Status | Out-String | Write-Host }
+          else { Write-Host "  none" }
+
       - name: Tier 3
         shell: pwsh
         run: ./Tests/Test-Device.ps1
@@ -330,6 +388,7 @@ jobs:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'blazor')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -343,9 +402,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.BlazorTestHost/WebRTCme.BlazorTestHost.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       # No hardware at all: Chromium is launched with its fake-media-device switches, so there is a
       # synthetic camera and microphone. The one tier that is as good in CI as it is locally.
@@ -358,6 +426,7 @@ jobs:
     timeout-minutes: 30
     runs-on: macos-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'maccatalyst')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -368,9 +437,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       # -Local: the Mac is this machine rather than the Mac mini over SSH. No signing identity is
       # needed to run a Catalyst app from its own build output, and no window server session
@@ -385,6 +463,7 @@ jobs:
     timeout-minutes: 40
     runs-on: macos-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'ios')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -395,9 +474,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       # The Simulator, not a phone, with everything that implies - see the note at the top of this
       # section. The simulator is chosen from whatever the runner image has rather than pinned to a
@@ -411,6 +499,7 @@ jobs:
     timeout-minutes: 45
     runs-on: ubuntu-latest
     needs: package
+    if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'android')
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -434,9 +523,18 @@ jobs:
         run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
 
       - uses: actions/download-artifact@v7
+        if: inputs.artifact-run-id == ''
         with:
           name: nupkg
           path: artifacts
+
+      # Reusing a package an earlier run already built and verified. Testing one platform should
+      # not cost a two-machine build of five target frameworks.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
       # The emulator needs hardware acceleration, and a hosted Linux runner only grants /dev/kvm to
       # a user in the kvm group. Without this the emulator either refuses to start or falls back to
