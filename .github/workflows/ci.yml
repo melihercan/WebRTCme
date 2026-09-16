@@ -629,6 +629,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
 
+      # Defender, and whether it is the answer.
+      #
+      # The package puts 27 MB of unsigned native DLLs beside the executable - WebRtcInterop.dll,
+      # boringssl, protobuf, the MSVC runtime. Merely referencing the package stops the process
+      # starting on this machine, while the same program without it runs in under a second, and
+      # nothing in the test calls into any of it. Real-time scanning of those files on first
+      # execution would look exactly like that: nothing to do with the code, first run only, and
+      # only where a scanner is watching.
+      #
+      # This run excludes the workspace. If the package probe then runs, that is the answer, and it
+      # is a property of the machine rather than a fault in the package.
+      - name: Exclude the workspace from Defender
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          try {
+              Add-MpPreference -ExclusionPath "${{ github.workspace }}" -ErrorAction Stop
+              Write-Host "excluded ${{ github.workspace }}"
+              (Get-MpPreference).ExclusionPath | ForEach-Object { Write-Host "  now excluded: $_" }
+          } catch {
+              Write-Host "could not set an exclusion: $($_.Exception.Message)"
+          }
+
+          $d = Get-MpComputerStatus -ErrorAction SilentlyContinue
+          if ($d) { Write-Host "real-time protection: $($d.RealTimeProtectionEnabled)" }
+          else { Write-Host "Defender status unavailable" }
+
       - name: Build the probes
         shell: pwsh
         run: |
@@ -687,7 +714,7 @@ jobs:
           $sdk   = Invoke-Probe "XunitWithTestSdk - adds Microsoft.NET.Test.Sdk" `
                      "Tests/Diagnostics/XunitWithTestSdk/bin/Release/$tfm/XunitWithTestSdk.exe"
           $pkg   = Invoke-Probe "XunitWithPackage - adds the WebRTCme package" `
-                     "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe"
+                     "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe" @() 300
 
           Write-Host ""
           Write-Host "===== verdict ====="
