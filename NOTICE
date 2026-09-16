@@ -1,0 +1,182 @@
+================================================================================
+WebRTCme — THIRD-PARTY NOTICES
+================================================================================
+
+WebRTCme
+Copyright (c) 2024 melihercan
+Licensed under the MIT License. See LICENSE.
+
+WebRTCme redistributes third-party software, both as prebuilt native binaries
+inside its NuGet packages and as ported source in this repository. The notices
+below cover that software. They are required to be reproduced by anyone
+redistributing it — which includes an application that ships the WebRTCme or
+WebRTCme.Middleware packages.
+
+This file is an attribution record, not legal advice. Where it points at a
+license text, that text governs.
+
+Last reviewed: 2026-09-17.
+
+
+================================================================================
+1. THE WEBRTC NATIVE LIBRARIES  (Google / The WebRTC project authors)
+================================================================================
+
+Every platform except Blazor embeds a prebuilt build of Google's WebRTC:
+
+    Android         Jars/libwebrtc.aar
+                      classes.jar and libjingle_peerconnection_so.so for
+                      armeabi-v7a, arm64-v8a, x86 and x86_64
+    iOS             WebRTC.xcframework
+    Mac Catalyst    WebRTC.framework
+    Windows         WebRtcInterop.dll and its import closure, in
+                      runtimes/win-x64/native/
+
+    Blazor          nothing — WebRTC is supplied by the browser
+
+These are built from the WebRTC source tree by a separate repository,
+https://github.com/melihercan/WebRTCnative, and committed here as binaries.
+
+--------------------------------------------------------------------------------
+1.1  WebRTC — BSD 3-Clause
+--------------------------------------------------------------------------------
+
+Copyright (c) 2011, The WebRTC project authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The WebRTC source tree additionally carries an "Additional IP Rights Grant
+(Patents)" — its PATENTS file — granting a perpetual, worldwide, royalty-free
+patent license to Google's WebRTC implementation, terminating if the recipient
+initiates patent litigation against Google. It is not reproduced in the binary
+distributions embedded here; read it at:
+
+    https://webrtc.googlesource.com/src/+/refs/heads/main/PATENTS
+
+--------------------------------------------------------------------------------
+1.2  Components bundled inside the WebRTC binaries
+--------------------------------------------------------------------------------
+
+The WebRTC binaries statically include a number of third-party components, each
+under its own license. The full, authoritative text for all of them ships with
+the iOS build and is committed in this repository at:
+
+    WebRTCme.Bindings/Maui/WebRTCme.Bindings.Maui.iOS/
+        WebRTC.xcframework/LICENSE.md
+
+That file is the aggregate notice produced by the WebRTC build itself, and it
+is the text to reproduce. It covers, in addition to WebRTC itself:
+
+    abseil-cpp        dav1d             fft               fiat
+    g711              g722              libaom            libc++
+    libc++abi         libsrtp           libvpx            libyuv
+    llvm-libc         nasm              ooura             opus
+    perfetto          pffft             protobuf          rnnoise
+    spl_sqrt_floor    boringssl
+
+On Windows, four of these — abseil-cpp, boringssl, protobuf and libc++ — are
+not statically linked and ship as separate DLLs beside WebRtcInterop.dll. They
+are the same components under the same licenses.
+
+
+================================================================================
+2. MEDIASOUP-CLIENT  (versatica) — ISC
+================================================================================
+
+WebRTCme.Connection/MediaSoup/WebRTCme.Connection.MediaSoup is a C# port of
+mediasoup-client v3. It is a derived work at the source level — Device,
+Transport, Handler, Ortc, ScalabilityModes and the SDP layer follow the
+JavaScript original in structure and behaviour.
+
+    https://github.com/versatica/mediasoup-client
+
+Copyright © 2015, Iñaki Baz Castillo <ibc@aliax.net>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+The mediasoup *server* is not part of WebRTCme and is not redistributed here.
+WebRTCme.Connection/MediaSoup/server/ contains only a Dockerfile that builds
+versatica's mediasoup-demo from its own repository.
+
+
+================================================================================
+3. MICROSOFT VISUAL C++ RUNTIME  (Windows only)
+================================================================================
+
+The Windows native payload includes four Microsoft redistributable DLLs, so the
+binding works on a machine without the Visual C++ runtime installed:
+
+    msvcp140.dll        msvcp140_atomic_wait.dll
+    vcruntime140.dll    vcruntime140_1.dll
+
+These are redistributed under Microsoft's redistributable terms for the Visual
+C++ runtime.
+
+They are a deployment convenience rather than a requirement. An application
+packaged as MSIX with the VC++ runtime as a framework dependency, or one that
+states the runtime as a prerequisite, can remove them — see
+WebRTCme.Bindings/Maui/WebRTCme.Bindings.Maui.Windows/native/win-x64/README.md.
+
+
+================================================================================
+4. NOT IN THE PACKAGES — repository only
+================================================================================
+
+The following are present in this repository but are not redistributed in
+either NuGet package, so they create no obligation for consumers of WebRTCme.
+
+Open Iconic v1.1.1 — used by the standalone signalling server's web pages.
+Copyright (c) 2014 Waybury. Icons under the MIT License; the font under the SIL
+Open Font License 1.1. Texts at:
+
+    WebRTCme.Connection/Signaling/WebRTCme.Connection.Signaling.Server/
+        wwwroot/css/open-iconic/ICON-LICENSE
+        wwwroot/css/open-iconic/FONT-LICENSE
+
+
+================================================================================
+5. MANAGED DEPENDENCIES
+================================================================================
+
+The NuGet packages WebRTCme and WebRTCme.Middleware depend on managed packages
+— Microsoft.Maui.Controls, Microsoft.AspNetCore.*, System.Reactive,
+Macross.Json.Extensions, Utilme.*, and others — rather than embedding them.
+NuGet resolves those for the consumer and each carries its own license, so they
+are not reproduced here. The per-target-framework dependency list is in each
+package's .nuspec.
