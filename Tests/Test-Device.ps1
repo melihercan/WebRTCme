@@ -109,11 +109,57 @@ Write-Host "Building..."
     "-p:RestoreAdditionalProjectSources=$PackageSource"
 if ($LASTEXITCODE -ne 0) { Write-Host "build failed" -ForegroundColor Red; exit 1 }
 
+# ---------------------------------------------------------------- running, with a watchdog
+#
+# The test executable is run directly rather than through `dotnet run`, and killed if it does not
+# finish.
+#
+# Because a hung test process otherwise says nothing at all. On a hosted Windows runner this tier
+# printed "Running the scenarios..." and then produced not one further line - no xUnit banner, no
+# test name - until the job timed out. `dotnet run` gives no way to bound that, and output that
+# never flushed is output nobody can read.
+#
+# Redirecting to files and printing them afterwards means whatever the process managed to write
+# survives being killed. A missing xUnit banner then means something specific: the process did not
+# reach the runner at all, so the fault is in startup rather than in any scenario.
+function Invoke-Watched {
+    param([string] $Exe, [string[]] $Arguments = @(), [int] $Seconds = 240)
+
+    $out = New-TemporaryFile
+    $err = New-TemporaryFile
+
+    $process = Start-Process -FilePath $Exe -ArgumentList $Arguments -PassThru -NoNewWindow `
+        -RedirectStandardOutput $out -RedirectStandardError $err
+
+    $finished = $process.WaitForExit($Seconds * 1000)
+
+    if (-not $finished) {
+        Write-Host ""
+        Write-Host "TIMED OUT after ${Seconds}s - killing the test process." -ForegroundColor Red
+        try { $process.Kill($true) } catch { }
+    }
+
+    Get-Content $out, $err -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
+    Remove-Item $out, $err -Force -ErrorAction SilentlyContinue
+
+    if (-not $finished) {
+        Write-Host ""
+        Write-Host "Nothing above this line is a test result - it is whatever the process wrote" -ForegroundColor Red
+        Write-Host "before it stopped. No xUnit banner means it never reached the runner." -ForegroundColor Red
+        return 124
+    }
+
+    return $process.ExitCode
+}
+
+# Found rather than composed: the runtime identifier puts it in an extra folder, and naming the
+# path by hand is how the Mac Catalyst harness broke on a different architecture.
+$exe = Get-ChildItem (Join-Path (Split-Path -Parent $project) "bin/Release") -Recurse -Filter "WebRTCme.DeviceTests.exe" `
+       -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $exe) { throw "built WebRTCme.DeviceTests.exe not found under $(Split-Path -Parent $project)/bin/Release" }
+
 Write-Host "Running the scenarios..."
-& dotnet run --project $project -c Release --no-build `
-    "-p:WebRTCmePackageVersion=$Version" `
-    "-p:RestoreAdditionalProjectSources=$PackageSource"
-$exit = $LASTEXITCODE
+$exit = Invoke-Watched -Exe $exe.FullName
 
 # The device-enumeration regression again, on its own, because it cannot prove anything in a
 # process where a call has already happened.
@@ -130,11 +176,8 @@ if ($exit -eq 0) {
     Write-Host ""
     Write-Host "Re-running the device-enumeration regression in a process where no call has happened..."
 
-    & dotnet run --project $project -c Release --no-build `
-        "-p:WebRTCmePackageVersion=$Version" `
-        "-p:RestoreAdditionalProjectSources=$PackageSource" `
-        -- -filterVSTest "FullyQualifiedName~A_completed_call_does_not_change_what_devices_exist"
-    $exit = $LASTEXITCODE
+    $exit = Invoke-Watched -Exe $exe.FullName -Arguments @(
+        "-filterVSTest", "FullyQualifiedName~A_completed_call_does_not_change_what_devices_exist")
 }
 
 Write-Host ""
