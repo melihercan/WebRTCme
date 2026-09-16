@@ -1,7 +1,7 @@
 # Known gaps
 
 What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
-2026-09-15**. Everything here was checked against the code rather than remembered, and each entry
+2026-09-16**. Everything here was checked against the code rather than remembered, and each entry
 says where it actually stands - "not written" and "written but unreachable" need very different
 work, and most of what was wrong here turned out to be the second kind.
 
@@ -23,7 +23,39 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **Tier 3 hangs on a machine with no audio device** | nobody - it can be picked up today | A hosted Windows runner has no microphone or speaker, and the loopback tier hung there for six hours without output. Unreproduced locally, cause unknown; see below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+
+### Tier 3 hung for six hours on a machine with no audio device - open 2026-09-16
+
+Found by putting the suite in CI. `Tests/Test-Device.ps1` printed its header on a
+`windows-latest` runner and then produced nothing at all until GitHub stopped the job at its
+six-hour limit. No xUnit discovery line, no error, no stack - it simply stopped.
+
+**What is known.** It got as far as printing the version and package source, so the script ran
+and the artifact was present. Nothing after that reached the log. The same tier passes in a few
+hundred milliseconds on this PC and on every other platform.
+
+**What is not known.** Where it hung. Nothing distinguishes "hung in restore", "hung in the
+build" and "hung creating a peer connection" from the outside, because xUnit buffers its output
+and none of it was flushed.
+
+**Why it is suspicious rather than merely annoying.** The obvious difference between a hosted
+runner and every machine this has passed on is that the runner has **no audio device at all** -
+no microphone, no speaker, not even a disabled one. Creating a peer connection goes through
+libwebrtc's audio device module, and that module is already the subject of the fix on
+2026-09-14, where it returned -1 from `CHECKinitialized_` after `Terminate()` and made device
+enumeration throw. An ADM that blocks rather than fails when there is nothing to enumerate would
+look exactly like this.
+
+If that is what it is, it is a **product** fault and not a CI one: a Windows machine with no
+audio hardware is unusual but not impossible - a server, a VM, a kiosk - and an application that
+hangs on it has no way to recover.
+
+**Next step**, for whoever picks this up: run the tier on a Windows VM with audio disabled, or
+add `-p:xunit.diagnosticMessages=true` and an unbuffered console logger to the CI job and let it
+hit the timeout. The job now has `timeout-minutes: 15`, so it fails fast rather than burning six
+hours, but that only bounds the symptom.
 
 ### A Blazor consumer had to reconfigure JSInterop's JSON, or nothing worked at all - fixed 2026-09-15
 

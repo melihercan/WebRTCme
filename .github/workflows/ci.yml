@@ -240,6 +240,7 @@ jobs:
 
   unit:
     name: Unit and integration
+    timeout-minutes: 15
     # Windows, not Linux, despite this tier being pure managed code with no artifact to wait for.
     # It references the projects, those multi-target iOS and Mac Catalyst, and restore evaluates
     # every target framework a reference declares - so on Linux it fails with NETSDK1147 before a
@@ -266,6 +267,7 @@ jobs:
 
   package-tests:
     name: Package consumption
+    timeout-minutes: 25
     runs-on: windows-latest
     needs: package
     steps:
@@ -291,6 +293,7 @@ jobs:
 
   windows-runtime:
     name: Runtime - Windows
+    timeout-minutes: 15
     runs-on: windows-latest
     needs: package
     steps:
@@ -318,6 +321,7 @@ jobs:
 
   blazor:
     name: Runtime - Blazor
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: package
     steps:
@@ -345,6 +349,7 @@ jobs:
 
   maccatalyst:
     name: Runtime - Mac Catalyst
+    timeout-minutes: 30
     runs-on: macos-latest
     needs: package
     steps:
@@ -371,6 +376,7 @@ jobs:
 
   ios-simulator:
     name: Runtime - iOS Simulator
+    timeout-minutes: 40
     runs-on: macos-latest
     needs: package
     steps:
@@ -396,6 +402,7 @@ jobs:
 
   android-emulator:
     name: Runtime - Android emulator
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     needs: package
     steps:
@@ -403,6 +410,19 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+
+      # Jars/libwebrtc.aar is compiled for Java 21 - class file version 65 - and the runner
+      # defaults to a JDK that will not read it:
+      #
+      #   error: cannot access DataChannel ... bad class file: .../classes.jar
+      #   class file has wrong version 65.0, should be 61.0
+      #
+      # 61 is Java 17. This machine builds it because its own javac is newer; the runner needs
+      # telling. Worth knowing for anyone consuming the package on Android too, not just CI.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
       - name: Install workloads
         run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
