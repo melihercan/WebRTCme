@@ -1,80 +1,104 @@
-# 10 Feb 24 - V2.0.0 HAS BEEN RELEASED
-This release brings major upgrades with breaking changes, including platform and tool changes. For further details and the project's history, please refer to the previous [README](https://github.com/melihercan/WebRTCme/blob/master/README_V1.md). 
+# WebRTCme
 
-Added: 
-- .NET MAUI 
-- .NET 8 
+**WebRTC for .NET, with one API across five platforms.**
 
-Dropped: 
-- Xamarin 
-- .NET 5, 6, and 7 
+[![NuGet](https://img.shields.io/nuget/v/WebRTCme.svg?label=WebRTCme)](https://www.nuget.org/packages/WebRTCme)
+[![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.svg?label=WebRTCme.Middleware)](https://www.nuget.org/packages/WebRTCme.Middleware)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The Xamarin code has since been removed from the repo; the previous README above is the record of it. 
+Every platform has its own WebRTC SDK, and no two look alike: a Java SDK on Android, an
+Objective-C framework on Apple, a C++ library on Windows, and the browser's own JavaScript API on
+the web. WebRTCme maps all of them onto a single C# surface that mirrors the
+[W3C WebRTC 1.0 API](https://w3c.github.io/webrtc-pc/) — so if you have used `RTCPeerConnection` in
+JavaScript, you already know this API.
 
-Special thanks and credits to [Gøran Yri](https://github.com/EagleDelux) for his major contributions to .NET MAUI porting. 
+```csharp
+var window = CrossWebRtc.Current.Window();
+var pc     = window.RTCPeerConnection(new RTCConfiguration { IceServers = [] });
+var offer  = await pc.CreateOffer();
+```
 
-MediaSoup now works on Blazor, Android and iOS - verified with the three in one call. It is an SFU
-alternative to the peer-to-peer signaling connection, and the server it talks to is versatica's
-mediasoup-demo, which you deploy yourself; see
-[WebRTCme.Connection/MediaSoup/README.md](WebRTCme.Connection/MediaSoup/README.md). Mac Catalyst is
-compile-verified only. Screen sharing and mute are not wired up for this connection type yet.
+That runs unchanged on **Blazor WebAssembly, Android, iOS, Mac Catalyst and Windows**.
 
+## 📖 Documentation is in the [Wiki](https://github.com/melihercan/WebRTCme/wiki)
 
-![alt text](https://github.com/melihercan/WebRTCme/blob/master/non-code/docs/LibrariesAndPackages.png)
+| | |
+| --- | --- |
+| [**Getting started**](https://github.com/melihercan/WebRTCme/wiki/Getting-started) | Installing the packages and wiring them into a Blazor or MAUI app |
+| [**Hello world**](https://github.com/melihercan/WebRTCme/wiki/Hello-world) | Sixty lines that negotiate a real connection — no server, no camera, no network |
+| [**Platform prerequisites**](https://github.com/melihercan/WebRTCme/wiki/Platform-prerequisites) | **Read this before filing a bug.** Three traps, each of which fails silently |
+| [**What works where**](https://github.com/melihercan/WebRTCme/wiki/What-works-where) | Honest per-platform matrix, including what is unverified |
+| [**Releases**](https://github.com/melihercan/WebRTCme/wiki/Releases) | Versions, upgrading from 2.0.0, what is embedded |
+| [**Troubleshooting**](https://github.com/melihercan/WebRTCme/wiki/Troubleshooting) | Symptoms, and what actually causes them |
 
 ## Packages
 
-There are two.
+Two, and which you want depends on how much you want built for you.
 
-WebRTCme: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.svg)](https://www.nuget.org/packages/WebRTCme)
+| | What you get | When |
+| --- | --- | --- |
+| **[`WebRTCme`](https://www.nuget.org/packages/WebRTCme)** | The unified API and all five bindings, with their native halves. Peer connections, media streams, devices, data channels. | You have your own signalling and UI, or you are building a library. |
+| **[`WebRTCme.Middleware`](https://www.nuget.org/packages/WebRTCme.Middleware)** | The above, plus a video tile, media managers, view models, and a connection layer that does the signalling for you — peer-to-peer or through a mediasoup SFU. | You want a working call app without writing the plumbing. |
 
-WebRTCme.Middleware: [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.svg)](https://www.nuget.org/packages/WebRTCme.Middleware)
+`WebRTCme.Middleware` depends on `WebRTCme`, so referencing the middleware brings both. You never
+reference a binding directly.
 
-### Use case 1 - Cross-platform library
-- Use the **WebRTCme** package
-- A single cross-platform API over the native WebRTC bindings, which it contains
-- Build your own middleware or app on top of it
-
-### Use case 2 - Middleware
-- Use the **WebRTCme.Middleware** package, which brings in WebRTCme
-- Adds view models, media elements and the connection layer (peer-to-peer signaling and mediasoup)
-- Build your app directly on top of it
-
-Both packages carry every target framework - `net10.0` for Blazor, and `net10.0-android`,
-`net10.0-ios`, `net10.0-maccatalyst` and `net10.0-windows` for .NET MAUI - so you reference the
-same package whatever you are building and NuGet picks the slice that matches.
-
-## Upgrading from 2.0.0
-
-Two things need editing in a project.
-
-**Blazor apps: the JavaScript moved.** It ships with the WebRTCme package now rather than the
-Blazor bindings package, so in `wwwroot/index.html`:
-
-```diff
--<script src="_content/WebRTCme.Bindings.Blazor/JsInterop.js"></script>
-+<script src="_content/WebRTCme/JsInterop.js"></script>
+```powershell
+dotnet add package WebRTCme.Middleware
 ```
 
-**Three packages are retired.** `WebRTCme.Api`, `WebRTCme.Bindings` and `WebRTCme.Bindings.Blazor`
-are no longer published - their assemblies are inside the WebRTCme package. Remove any
-`PackageReference` to them; referencing WebRTCme alone replaces all three.
+Both packages carry every target framework — `net10.0` for Blazor, plus `net10.0-android`,
+`net10.0-ios`, `net10.0-maccatalyst` and `net10.0-windows10.0.22621.0` for .NET MAUI — so you
+reference the same package whatever you are building and NuGet picks the slice that matches.
 
-`WebRTCme.Api` went further than the other two: it is no longer a separate assembly at all, its
-types are compiled into `WebRTCme.dll`. They kept the `WebRTCme` namespace, so `using WebRTCme;`
-and every type name are unchanged and no source edit is needed. Only something bound to the
-*assembly* - a raw `<Reference Include="WebRTCme.Api" />`, or a pre-compiled third-party library
-built against it - has to be rebuilt.
+> **.NET 10 only.** The 2.0.0 line is the .NET 8 line and is frozen; there is no back-port.
+> Upgrading from 2.0.0 takes three edits — see
+> [Releases](https://github.com/melihercan/WebRTCme/wiki/Releases#upgrading-from-200).
 
-Nothing else moved. `WebRTCme.Middleware`, `WebRTCme.Middleware.Blazor` and
-`WebRTCme.Middleware.Maui` became one assembly, but all three namespaces are preserved, so
-existing `using` directives keep working. .NET MAUI XAML naming the assembly explicitly
-(`assembly=WebRTCme.Middleware.Maui`) is better written `assembly=WebRTCme.Middleware`, though the
-XAML compiler resolves the old spelling anyway by searching referenced assemblies.
+## Layout
 
-Mac Catalyst users should take this release specifically. Every earlier package built on Windows
-carried a broken `WebRTC.framework`: git cannot write symlinks on a Windows checkout without
-`core.symlinks`, so the framework's binary arrived as a 23-byte text file holding a path, and that
-is what was packed. The framework is stored flat now, and the native binary is really in it.
+```
+WebRTCme.Bindings/     per-platform native access — Blazor JSInterop, Java, ObjC, Windows P/Invoke
+WebRTCme/             the unified API and the plug-in            → package 1
+WebRTCme.Middleware/  video tile, managers, view models          → package 2
+WebRTCme.Connection/  signalling: mesh/P2P and a mediasoup SFU   ↳ folded into package 2
+WebRTCme.DemoApp/     sample apps, Blazor and MAUI
+Tests/                five tiers, from unit tests to on-device runs
+doc/                  KnownGaps.md, TestingPlan.md, Packaging.md
+```
 
+The native WebRTC libraries are built by a separate repository,
+[**WebRTCnative**](https://github.com/melihercan/WebRTCnative), and consumed here as prebuilt
+binaries.
 
+## Building
+
+```powershell
+dotnet build WebRTCme.sln
+```
+
+Everything builds on Windows, including the iOS and Mac Catalyst library slices — only *linking and
+deploying an app* for those needs a Mac.
+
+There is no `dotnet test`; the test projects are invoked directly. See
+[Testing](https://github.com/melihercan/WebRTCme/wiki/Testing).
+
+## Contributing
+
+Issues and pull requests are welcome. Two things worth knowing first:
+
+- `doc/KnownGaps.md` records what is missing, half-wired or fragile, and keeps entries after they
+  are fixed with what the fault looked like beforehand. It is the fastest way to recognise
+  something you have just hit.
+- A `NotImplementedException` on a path that matters to you is **worth an issue**. Most of the
+  unimplemented W3C surface has never been reached by anything, so a real call site is the signal
+  that decides what gets filled in next.
+
+## Credits
+
+Special thanks to [Gøran Yri](https://github.com/EagleDelux) for his major contributions to the
+.NET MAUI porting.
+
+WebRTCme is MIT licensed. It embeds Google's WebRTC and its dependencies, which carry their own
+terms — see
+[what is inside the packages](https://github.com/melihercan/WebRTCme/wiki/Releases#what-is-inside-the-packages).
