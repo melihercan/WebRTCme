@@ -716,6 +716,26 @@ jobs:
           $pkg   = Invoke-Probe "XunitWithPackage - adds the WebRTCme package" `
                      "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe" @() 300
 
+          # If the package is what stops it, which of its files?
+          #
+          # It ships the MSVC C runtime app-local - vcruntime140, msvcp140 and friends - and the
+          # Windows loader prefers a DLL beside the executable over the system copy. A CRT loaded
+          # from the wrong place is a known way to deadlock during startup, and it would explain a
+          # process that prints from a module initializer and then never reaches Main.
+          #
+          # So: take those four away and run the same executable again. Nothing else changes.
+          if ($pkg -eq "HUNG") {
+              $dir = "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm"
+              Write-Host ""
+              Write-Host "===== the same executable, without the app-local MSVC runtime ====="
+              Get-ChildItem $dir -Filter "*.dll" |
+                  Where-Object { $_.Name -match '^(vcruntime140|msvcp140|concrt140|libc\+\+)' } |
+                  ForEach-Object { Write-Host "  removing $($_.Name)"; Remove-Item $_.FullName -Force }
+
+              $noCrt = Invoke-Probe "XunitWithPackage minus the MSVC runtime" `
+                         "$dir/XunitWithPackage.exe" @() 120
+          } else { $noCrt = "n/a" }
+
           Write-Host ""
           Write-Host "===== verdict ====="
           Write-Host "  PlainConsole      : $plain"
@@ -723,9 +743,15 @@ jobs:
           Write-Host "  MinimalXunit help : $help"
           Write-Host "  XunitWithTestSdk  : $sdk"
           Write-Host "  XunitWithPackage  : $pkg"
+          Write-Host "  ... minus MSVC CRT : $noCrt"
           Write-Host ""
 
-          if ($pkg -eq "HUNG" -and $sdk -eq "RAN") {
+          if ($pkg -eq "HUNG" -and $noCrt -eq "RAN") {
+              Write-Host "  The package ships the MSVC C runtime beside the executable, and the"
+              Write-Host "  Windows loader prefers those over the system copies. Removing them is"
+              Write-Host "  enough to make the same program start. That is a packaging fault, and it"
+              Write-Host "  reaches consumers, not just CI."
+          } elseif ($pkg -eq "HUNG" -and $sdk -eq "RAN") {
               Write-Host "  Referencing the WebRTCme package is enough to stop the process starting,"
               Write-Host "  without anything calling into it. The cost is in loading or laying the"
               Write-Host "  package out, not in what it does."
