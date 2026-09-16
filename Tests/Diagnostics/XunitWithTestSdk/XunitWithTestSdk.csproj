@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  MinimalXunit plus the two packages WebRTCme.DeviceTests also carries:
+	  Microsoft.NET.Test.Sdk and xunit.runner.visualstudio. Nothing else differs.
+
+	  Both of those bring the VSTest platform, whose host expects to be driven by vstest.console over
+	  a socket - and a host that starts in that mode with nobody to talk to waits, which is exactly
+	  what this hang looks like: a process that loads, prints nothing, and never returns even for its
+	  help switch.
+
+	  MinimalXunit next door has neither and runs on the same machine in under a second. If this one
+	  hangs, that pair is the answer.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
+
+</Project>
