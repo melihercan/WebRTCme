@@ -200,7 +200,7 @@ package/framework pairs do.
 
 ```
 error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.101 to 10.0.20
-  WebRTCme.PackageTests -> WebRTCme 26.9.17 -> Microsoft.Maui.Controls (>= 10.0.101)
+  WebRTCme.PackageTests -> WebRTCme 26.9.16 -> Microsoft.Maui.Controls (>= 10.0.101)
   WebRTCme.PackageTests -> Microsoft.Maui.Controls (>= 10.0.20)
 ```
 
