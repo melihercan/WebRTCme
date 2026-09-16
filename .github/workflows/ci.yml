@@ -621,11 +621,31 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Build both probes
+      # The fourth probe references the package, so it needs one. Reused from an earlier run rather
+      # than built here - pass artifact-run-id when dispatching only=diagnostics.
+      - name: Reuse an earlier package
+        if: inputs.artifact-run-id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.artifact-run-id }} -n nupkg -D artifacts
+
+      - name: Build the probes
+        shell: pwsh
         run: |
           dotnet build Tests/Diagnostics/PlainConsole/PlainConsole.csproj -c Release --nologo
           dotnet build Tests/Diagnostics/MinimalXunit/MinimalXunit.csproj -c Release --nologo
           dotnet build Tests/Diagnostics/XunitWithTestSdk/XunitWithTestSdk.csproj -c Release --nologo
+
+          if (Test-Path artifacts) {
+              $pkg = Get-ChildItem artifacts -Filter "WebRTCme.*.nupkg" |
+                     Where-Object { $_.Name -match '^WebRTCme\.\d' } | Select-Object -First 1
+              $version = $pkg.BaseName -replace '^WebRTCme\.', ''
+              Write-Host "Package probe against $version"
+              dotnet build Tests/Diagnostics/XunitWithPackage/XunitWithPackage.csproj -c Release --nologo `
+                  "-p:WebRTCmePackageVersion=$version" "-p:RestoreAdditionalProjectSources=$PWD/artifacts"
+          } else {
+              Write-Host "No package supplied - skipping the package probe (pass artifact-run-id)."
+          }
 
       # Each under a watchdog, because the thing being measured is whether they finish at all.
       # Output is redirected to files and printed afterwards, so it survives a process being
@@ -666,6 +686,8 @@ jobs:
                      "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe" @("--help") 60
           $sdk   = Invoke-Probe "XunitWithTestSdk - adds Microsoft.NET.Test.Sdk" `
                      "Tests/Diagnostics/XunitWithTestSdk/bin/Release/$tfm/XunitWithTestSdk.exe"
+          $pkg   = Invoke-Probe "XunitWithPackage - adds the WebRTCme package" `
+                     "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe"
 
           Write-Host ""
           Write-Host "===== verdict ====="
@@ -673,9 +695,14 @@ jobs:
           Write-Host "  MinimalXunit      : $xunit"
           Write-Host "  MinimalXunit help : $help"
           Write-Host "  XunitWithTestSdk  : $sdk"
+          Write-Host "  XunitWithPackage  : $pkg"
           Write-Host ""
 
-          if ($sdk -eq "HUNG" -and $xunit -eq "RAN") {
+          if ($pkg -eq "HUNG" -and $sdk -eq "RAN") {
+              Write-Host "  Referencing the WebRTCme package is enough to stop the process starting,"
+              Write-Host "  without anything calling into it. The cost is in loading or laying the"
+              Write-Host "  package out, not in what it does."
+          } elseif ($sdk -eq "HUNG" -and $xunit -eq "RAN") {
               Write-Host "  The only difference between those two is Microsoft.NET.Test.Sdk and"
               Write-Host "  xunit.runner.visualstudio, so those are the cause - and xUnit v3 needs"
               Write-Host "  neither, since it brings its own entry point."

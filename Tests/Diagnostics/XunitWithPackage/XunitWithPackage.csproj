@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  MinimalXunit plus the package under test, and nothing else. No AwesomeAssertions, no
+	  Microsoft.NET.Test.Sdk, no scenarios - there is not even a reference to
+	  WebRTCme.DeviceTests.Core here, and the single test asserts true without touching WebRTCme.
+
+	  By this point everything else has been ruled out on the runner: a bare Windows-target
+	  executable runs, the same with xUnit v3 runs, and adding Microsoft.NET.Test.Sdk and
+	  xunit.runner.visualstudio changes nothing. The package is what is left - its assemblies, and
+	  the native payload that lands beside the executable.
+
+	  Merely referencing it is the point. Nothing here calls into it, so if this hangs, the cost is
+	  in loading or laying out the package rather than in anything it does.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WebRTCmePackageVersion Condition="'$(WebRTCmePackageVersion)' == ''">$(WEBRTCME_PACKAGE_VERSION)</WebRTCmePackageVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit.v3" Version="4.0.1" />
+		<PackageReference Include="WebRTCme" Version="$(WebRTCmePackageVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
+
+</Project>
