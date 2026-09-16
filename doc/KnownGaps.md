@@ -23,39 +23,55 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Tier 3 hangs on a machine with no audio device** | nobody - it can be picked up today | A hosted Windows runner has no microphone or speaker, and the loopback tier hung there for six hours without output. Unreproduced locally, cause unknown; see below. |
+| **Tier 3 will not start on a hosted Windows runner** | nobody, and it may not be worth it | The test executable never reaches Main there. Not a WebRTCme fault - no scenario runs, no library is loaded. Passes on real Windows; see below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
-### Tier 3 hung for six hours on a machine with no audio device - open 2026-09-16
+### Tier 3 will not start on a hosted Windows runner - open 2026-09-16
 
-Found by putting the suite in CI. `Tests/Test-Device.ps1` printed its header on a
-`windows-latest` runner and then produced nothing at all until GitHub stopped the job at its
-six-hour limit. No xUnit discovery line, no error, no stack - it simply stopped.
+`Tests/WebRTCme.DeviceTests` runs in about two seconds on a real Windows machine and has never
+failed there. On a `windows-latest` GitHub runner the process starts, loads its assembly, and
+then stops - for six hours the first time, until the job limit ended it.
 
-**What is known.** It got as far as printing the version and package source, so the script ran
-and the artifact was present. Nothing after that reached the log. The same tier passes in a few
-hundred milliseconds on this PC and on every other platform.
+**It is not a WebRTCme fault.** That took four wrong guesses to establish, so it is worth being
+precise about what is known:
 
-**What is not known.** Where it hung. Nothing distinguishes "hung in restore", "hung in the
-build" and "hung creating a peer connection" from the outside, because xUnit buffers its output
-and none of it was flushed.
+- The test assembly loads. A `[ModuleInitializer]` writes one line to stderr and that line
+  arrives, so managed code in the process runs.
+- Nothing after it does. No xUnit banner, no scenario `begin`, and the test platform never even
+  creates its own diagnostic directory with `TESTINGPLATFORM_DIAGNOSTIC=1`.
+- `--help` hangs identically. That switch runs no test, no discovery, and nothing of this
+  repository.
 
-**Why it is suspicious rather than merely annoying.** The obvious difference between a hosted
-runner and every machine this has passed on is that the runner has **no audio device at all** -
-no microphone, no speaker, not even a disabled one. Creating a peer connection goes through
-libwebrtc's audio device module, and that module is already the subject of the fix on
-2026-09-14, where it returned -1 from `CHECKinitialized_` after `Terminate()` and made device
-enumeration throw. An ADM that blocks rather than fails when there is nothing to enumerate would
-look exactly like this.
+So `Window()` is never called, `WebRtcRuntime.Factory` is never resolved, no native library is
+loaded, and no scenario begins. **Nothing of the package under test is reached before it stops.**
 
-If that is what it is, it is a **product** fault and not a CI one: a Windows machine with no
-audio hardware is unusual but not impossible - a server, a VM, a kiosk - and an application that
-hangs on it has no way to recover.
+**What was wrong along the way**, recorded because each looked convincing:
 
-**Next step**, for whoever picks this up: run the tier on a Windows VM with audio disabled, or
-add `-p:xunit.diagnosticMessages=true` and an unbuffered console logger to the CI job and let it
-hit the timeout. The job now has `timeout-minutes: 15`, so it fails fast rather than burning six
-hours, but that only bounds the symptom.
+1. *The audio device module blocks with no audio hardware.* The runner does have zero audio
+   endpoints, and `FactoryCreate` does build libwebrtc's ADM over Core Audio, and the ADM was
+   already the subject of the 2026-09-14 fix. All true, all irrelevant: no scenario runs, so that
+   code is never called.
+2. *The Windows Audio service is stopped on Server.* It is not. `Audiosrv` and
+   `AudioEndpointBuilder` are both Running - with no endpoints to manage.
+3. *It hangs in restore or the build.* It does not. Splitting the tier into three announced
+   phases showed restore taking a minute, the build 29 seconds, and the hang in the run.
+4. *`Microsoft.Maui.Controls` drags in WinUI and blocks before `Main`.* Plausible - it was the
+   only reference the passing unit tier lacked that could block that early - and removing it
+   changed nothing. The reference was dropped anyway, since this tier never needed it.
+
+What remains of the difference from the `unit` tier, which passes on the same image with the same
+xUnit v3 and the same invocation, is that this project targets `net10.0-windows10.0.22621.0` with
+a `win-x64` runtime identifier and that one targets plain `net10.0`.
+
+**Whether to chase it further is a real question.** It is CI-only, on a four-cpu headless Windows
+Server with no audio hardware - not an environment any consumer of this package runs in - and the
+same tier passes on actual Windows against the same CI-built artifact. The suite loses nothing it
+could have caught: tiers 2 and 5 and the three device tiers all run in CI, and Windows runtime
+coverage is one local command.
+
+The job is bounded rather than removed: `timeout-minutes: 15` on the job, a 240-second watchdog
+around the executable, and a `--help` probe that classifies the failure. It fails in about six
+minutes with a readable explanation instead of hanging.
 
 ### A Blazor consumer had to reconfigure JSInterop's JSON, or nothing worked at all - fixed 2026-09-15
 
