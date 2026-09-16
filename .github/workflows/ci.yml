@@ -51,7 +51,10 @@ jobs:
   # go missing from the package rather than failing loudly.
   apple:
     name: Build the Apple slices
-    if: inputs.artifact-run-id == ''
+    # Also skipped when nothing that needs a package is going to run. Dispatching only=diagnostics
+    # or only=unit otherwise started a two-machine build of five target frameworks that nothing
+    # then consumed.
+    if: inputs.artifact-run-id == '' && inputs.only != 'diagnostics' && inputs.only != 'unit'
     runs-on: macos-latest
 
     steps:
@@ -116,7 +119,10 @@ jobs:
 
   package:
     name: Build, pack and verify
-    if: inputs.artifact-run-id == ''
+    # Also skipped when nothing that needs a package is going to run. Dispatching only=diagnostics
+    # or only=unit otherwise started a two-machine build of five target frameworks that nothing
+    # then consumed.
+    if: inputs.artifact-run-id == '' && inputs.only != 'diagnostics' && inputs.only != 'unit'
     needs: apple
     # windows-latest, and it is the only choice: net10.0-windows10.0.22621.0 builds nowhere else.
     # The iOS and Mac Catalyst library slices do compile here too, and pack needs them present to
@@ -619,6 +625,7 @@ jobs:
         run: |
           dotnet build Tests/Diagnostics/PlainConsole/PlainConsole.csproj -c Release --nologo
           dotnet build Tests/Diagnostics/MinimalXunit/MinimalXunit.csproj -c Release --nologo
+          dotnet build Tests/Diagnostics/XunitWithTestSdk/XunitWithTestSdk.csproj -c Release --nologo
 
       # Each under a watchdog, because the thing being measured is whether they finish at all.
       # Output is redirected to files and printed afterwards, so it survives a process being
@@ -657,15 +664,22 @@ jobs:
                      "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe"
           $help  = Invoke-Probe "MinimalXunit --help - startup only, no tests" `
                      "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe" @("--help") 60
+          $sdk   = Invoke-Probe "XunitWithTestSdk - adds Microsoft.NET.Test.Sdk" `
+                     "Tests/Diagnostics/XunitWithTestSdk/bin/Release/$tfm/XunitWithTestSdk.exe"
 
           Write-Host ""
           Write-Host "===== verdict ====="
           Write-Host "  PlainConsole      : $plain"
           Write-Host "  MinimalXunit      : $xunit"
           Write-Host "  MinimalXunit help : $help"
+          Write-Host "  XunitWithTestSdk  : $sdk"
           Write-Host ""
 
-          if ($plain -eq "HUNG") {
+          if ($sdk -eq "HUNG" -and $xunit -eq "RAN") {
+              Write-Host "  The only difference between those two is Microsoft.NET.Test.Sdk and"
+              Write-Host "  xunit.runner.visualstudio, so those are the cause - and xUnit v3 needs"
+              Write-Host "  neither, since it brings its own entry point."
+          } elseif ($plain -eq "HUNG") {
               Write-Host "  A bare Windows-target executable does not start on this machine."
               Write-Host "  xUnit is innocent; the fault is the target framework, the runtime"
               Write-Host "  identifier or the apphost on this image."
