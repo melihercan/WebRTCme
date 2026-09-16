@@ -389,6 +389,38 @@ jobs:
       # and both phone home on startup - which is the window this process hangs in, having loaded
       # its assembly and never reached the xUnit banner. Cheap to rule out, and worth ruling out
       # before anything more invasive.
+      # The Windows App Runtime, which this machine does not have and the tier cannot start
+      # without.
+      #
+      # WebRTCme is a MAUI library on Windows, so its package depends on Microsoft.Maui.Controls,
+      # which brings the Windows App SDK, which injects a bootstrapper into the module constructor
+      # of anything referencing it. That bootstrapper looks for a matching Windows App Runtime
+      # framework package - and when it cannot find one it does not fail, it blocks. The process
+      # then hangs before Main with nothing written, which is what cost six hours and six rounds
+      # of wrong theories before a stack dump named it.
+      #
+      # Version 1.8 because that is what Microsoft.WindowsAppSDK resolves to here
+      # (1.8.260529003) and the bootstrapper matches on major.minor.
+      #
+      # A developer machine has this already - the MAUI workload installs it. A bare one does not,
+      # and neither does an end user running an unpackaged app; see doc/KnownGaps.md.
+      - name: Install the Windows App Runtime
+        shell: pwsh
+        run: |
+          $url = "https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe"
+          $exe = Join-Path $env:RUNNER_TEMP "windowsappruntimeinstall-x64.exe"
+
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile $exe -UseBasicParsing
+
+          Write-Host "Installing..."
+          $p = Start-Process -FilePath $exe -ArgumentList "--quiet" -PassThru -Wait
+          Write-Host "installer exit: $($p.ExitCode)"
+
+          # Not fatal on its own: the tier will say soon enough whether it worked, and a
+          # non-zero code here is often "already installed".
+          Get-AppxPackage -Name "Microsoft.WindowsAppRuntime*" -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host "  registered: $($_.Name) $($_.Version)" }
       - name: Tier 3
         shell: pwsh
         env:
@@ -721,7 +753,7 @@ jobs:
         shell: pwsh
         run: |
           function Invoke-Probe {
-              param([string] $What, [string] $Exe, [string[]] $Arguments = @(), [int] $Seconds = 90)
+              param([string] $What, [string] $Exe, [string[]] $Arguments = @(), [int] $Seconds = 180)
 
               Write-Host ""
               Write-Host "===== $What ====="
@@ -750,11 +782,11 @@ jobs:
           $xunit = Invoke-Probe "MinimalXunit - one trivial fact" `
                      "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe"
           $help  = Invoke-Probe "MinimalXunit --help - startup only, no tests" `
-                     "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe" @("--help") 60
+                     "Tests/Diagnostics/MinimalXunit/bin/Release/$tfm/MinimalXunit.exe" @("--help") 180
           $sdk   = Invoke-Probe "XunitWithTestSdk - adds Microsoft.NET.Test.Sdk" `
                      "Tests/Diagnostics/XunitWithTestSdk/bin/Release/$tfm/XunitWithTestSdk.exe"
           $pkg   = Invoke-Probe "XunitWithPackage - adds the WebRTCme package" `
-                     "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe" @() 300
+                     "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe" @() 180
 
           # If the package is what stops it, which of its files?
           #
@@ -773,7 +805,7 @@ jobs:
                   ForEach-Object { Write-Host "  removing $($_.Name)"; Remove-Item $_.FullName -Force }
 
               $noCrt = Invoke-Probe "XunitWithPackage minus the MSVC runtime" `
-                         "$dir/XunitWithPackage.exe" @() 120
+                         "$dir/XunitWithPackage.exe" @() 180
           } else { $noCrt = "n/a" }
 
           Write-Host ""

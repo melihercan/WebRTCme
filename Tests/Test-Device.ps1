@@ -207,8 +207,22 @@ if ($exit -eq 0) {
 Write-Host ""
 if ($exit -ne 0) {
     Write-Host "Device test FAILED for $Version." -ForegroundColor Red
-    Write-Host "A missing native payload reads as DllNotFoundException on the first P/Invoke;" -ForegroundColor Red
-    Write-Host "one built for the wrong architecture reads as BadImageFormatException." -ForegroundColor Red
+
+    # The hint depends on how it failed, because one hint for every failure was worse than none.
+    #
+    # This used to say "a missing native payload reads as DllNotFoundException" whatever had
+    # happened - including for a process that hung before reaching any P/Invoke at all, sending the
+    # reader after code that never ran. A hang is not what a missing or mismatched library looks
+    # like either: those throw, immediately and by name.
+    if ($exit -eq 124) {
+        Write-Host "It hung rather than threw, so nothing here failed to load. A missing or" -ForegroundColor Red
+        Write-Host "wrong-architecture library would have thrown by name - DllNotFoundException or" -ForegroundColor Red
+        Write-Host "BadImageFormatException. Something is blocking instead. The trace lines above say" -ForegroundColor Red
+        Write-Host "how far it got; doc/KnownGaps.md says what this was the one time it happened." -ForegroundColor Red
+    } else {
+        Write-Host "A missing native payload reads as DllNotFoundException on the first P/Invoke;" -ForegroundColor Red
+        Write-Host "one built for the wrong architecture reads as BadImageFormatException." -ForegroundColor Red
+    }
     exit $exit
 }
 
