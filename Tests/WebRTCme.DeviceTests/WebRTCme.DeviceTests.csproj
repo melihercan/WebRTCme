@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!--
 	  Tier 3 of doc/TestingPlan.md: does the package actually work at runtime, on this platform?
@@ -95,11 +95,19 @@
 		<ProjectReference Include="..\WebRTCme.DeviceTests.Core\WebRTCme.DeviceTests.Core.csproj" />
 	</ItemGroup>
 
-	<!-- The version a MAUI consumer has to name itself; see WebRTCme.PackageTests for why. -->
-	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.101" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
-	</ItemGroup>
+	<!--
+	  No Microsoft.Maui.Controls here, deliberately.
+
+	  It used to be referenced to mirror what a MAUI consumer must name for itself. That belongs in
+	  WebRTCme.PackageTests, which exists to prove exactly that and does; here it bought nothing and
+	  cost the tier its Windows CI job. On a Windows platform target framework it pulls in WinUI and
+	  the Windows App SDK, and on a headless Server runner this executable then loaded its assembly
+	  and never reached Main - no xUnit banner, no test, not even its own help switch returning. The unit tier,
+	  same xUnit and same runner image but plain net10.0 and no MAUI, starts fine.
+
+	  These tests are a console process that loads a native library and negotiates between two peer
+	  connections. Nothing in them is MAUI.
+	-->
 
 	<ItemGroup>
 		<Using Include="Xunit" />
