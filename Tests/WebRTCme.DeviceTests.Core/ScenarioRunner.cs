@@ -27,6 +27,9 @@ public static class ScenarioRunner
     /// <summary>Marks the end of the run, so a reader knows the log is complete rather than cut off.</summary>
     public const string SummaryPrefix = "WEBRTCME-SUMMARY";
 
+    /// <summary>Written before each scenario, so a blocked one can still be named.</summary>
+    public const string BeginPrefix = "WEBRTCME-BEGIN";
+
     /// <summary>Written first, so a reader can tell a started run from an app that died on launch.</summary>
     public const string StartPrefix = "WEBRTCME-START";
 
@@ -50,6 +53,12 @@ public static class ScenarioRunner
         var results = new List<ScenarioResult>(selected.Count);
         foreach (var scenario in selected)
         {
+            // Announced before it runs, not only after. A scenario that blocks used to leave no
+            // trace of itself at all, so the log ended after the previous one and the reader had to
+            // infer which scenario was missing. Now the last BEGIN without a matching result names
+            // it directly - which matters most on a device, where there is no debugger to attach.
+            report($"{BeginPrefix} | {scenario.Name}");
+
             var result = await scenario.Run();
             results.Add(result);
             report(result.ToLine());

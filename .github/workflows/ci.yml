@@ -302,6 +302,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # This tier targets net10.0-windows10.0.22621.0, which is a platform target framework and so
+      # pulls in Microsoft.Maui.Controls. Its sibling job already did this; this one did not, and a
+      # missing workload is one of the few things that could explain a silent six-hour hang here.
+      - name: Install workloads
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests/WebRTCme.DeviceTests.csproj
+
       - uses: actions/download-artifact@v7
         with:
           name: nupkg

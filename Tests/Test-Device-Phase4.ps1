@@ -151,6 +151,21 @@ function Read-Outcome {
 
     if (-not $summary) {
         Write-Host "  no summary line - the runner did not finish ($What)" -ForegroundColor Red
+
+        # Name the scenario that did not come back. The runner announces each one before running
+        # it, so the last BEGIN without a matching result is the one that blocked or crashed - and
+        # that is the single most useful fact about a run that produced nothing else.
+        $begun = @($Lines | Where-Object { $_ -match 'WEBRTCME-BEGIN' } |
+                   ForEach-Object { ($_ -split '\|')[-1].Trim() })
+        $done  = @($scenarios | ForEach-Object { ($_ -split '\|')[3].Trim() })
+        $stuck = $begun | Where-Object { $_ -notin $done } | Select-Object -Last 1
+
+        if ($stuck) {
+            Write-Host "  last scenario begun and never finished: $stuck" -ForegroundColor Red
+        } elseif (-not $begun) {
+            Write-Host "  no scenario ever began - the app did not start, or its output never arrived" -ForegroundColor Red
+        }
+
         return $false
     }
 

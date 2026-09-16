@@ -75,13 +75,49 @@ public static class LoopbackScenarios
         SdpMLineIndex = candidate.SdpMLineIndex
     };
 
+    /// <summary>
+    /// How long any one scenario may take before it is called a failure.
+    /// </summary>
+    /// <remarks>
+    /// Generous - the slowest passing scenario observed anywhere is under two seconds, on an
+    /// emulator - because this exists to catch a hang, not to police speed.
+    /// </remarks>
+    static readonly TimeSpan ScenarioTimeout = TimeSpan.FromSeconds(60);
+
     /// <summary>Runs one scenario, timing it and turning any exception into a failed result.</summary>
+    /// <remarks>
+    /// <para>
+    /// Bounded, and that is not a nicety. Until it was, a scenario that blocked took the whole run
+    /// with it: no summary line, no name, nothing to say which of the five stopped. A Windows CI
+    /// runner produced no output at all for six hours that way, and an Android emulator ran four
+    /// scenarios and then went quiet. Neither told anyone anything.
+    /// </para>
+    /// <para>
+    /// The blocked work is not cancelled, because nothing here can be: these are awaits on native
+    /// callbacks that never arrive. It is abandoned, the scenario is reported failed, and the run
+    /// carries on - so the remaining scenarios still say something, and the one that hung is named.
+    /// A run that continues after this is worth less than a clean one, and the message says so.
+    /// </para>
+    /// </remarks>
     static async Task<ScenarioResult> Run(string name, Func<Task<string?>> body)
     {
         var clock = Stopwatch.StartNew();
         try
         {
-            var failure = await body();
+            var work = body();
+            var finished = await Task.WhenAny(work, Task.Delay(ScenarioTimeout));
+
+            if (!ReferenceEquals(finished, work))
+            {
+                clock.Stop();
+                return ScenarioResult.Fail(
+                    name,
+                    $"timed out after {ScenarioTimeout.TotalSeconds:F0}s - it is still blocked, and "
+                    + "anything reported after this ran alongside it",
+                    clock.Elapsed);
+            }
+
+            var failure = await work;
             clock.Stop();
             return failure is null
                 ? ScenarioResult.Pass(name, clock.Elapsed)
