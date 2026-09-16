@@ -23,55 +23,68 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Tier 3 will not start on a hosted Windows runner** | nobody, and it may not be worth it | The test executable never reaches Main there. Not a WebRTCme fault - no scenario runs, no library is loaded. Passes on real Windows; see below. |
+| **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
-### Tier 3 will not start on a hosted Windows runner - open 2026-09-16
+### A Windows consumer needs the Windows App Runtime, or its app hangs at startup - 2026-09-16
 
-`Tests/WebRTCme.DeviceTests` runs in about two seconds on a real Windows machine and has never
-failed there. On a `windows-latest` GitHub runner the process starts, loads its assembly, and
-then stops - for six hours the first time, until the job limit ended it.
+**Not a defect, and not fixable in the package - a prerequisite that has to be written down.**
+WebRTCme is a MAUI library on Windows by design, so its package depends on
+`Microsoft.Maui.Controls`, which brings the Windows App SDK (1.8 here), which injects a
+bootstrapper into the **module constructor of anything that references the package**.
 
-**It is not a WebRTCme fault.** That took four wrong guesses to establish, so it is worth being
-precise about what is known:
+That bootstrapper looks for a matching **Windows App Runtime** framework package. When it cannot
+find one it does not fail - it blocks:
 
-- The test assembly loads. A `[ModuleInitializer]` writes one line to stderr and that line
-  arrives, so managed code in the process runs.
-- Nothing after it does. No xUnit banner, no scenario `begin`, and the test platform never even
-  creates its own diagnostic directory with `TESTINGPLATFORM_DIAGNOSTIC=1`.
-- `--help` hangs identically. That switch runs no test, no discovery, and nothing of this
-  repository.
+```
+[Native Frames]
+Microsoft.WindowsAppRuntime.Bootstrap.Net!...Bootstrap.TryInitialize(...)
+...BootstrapCS.AutoInitialize.AccessWindowsAppSDK()
+...WindowsAppRuntime.Common.AutoInitialize.InitializeWindowsAppSDK()
+<Module>..cctor()
+```
 
-So `Window()` is never called, `WebRtcRuntime.Factory` is never resolved, no native library is
-loaded, and no scenario begins. **Nothing of the package under test is reached before it stops.**
+So the consumer's app stops before `Main`, having written nothing. No exception, no message,
+nothing in a log. **A missing library would have thrown by name - this does not throw at all**,
+which is what makes it so hard to recognise.
 
-**What was wrong along the way**, recorded because each looked convincing:
+**Who has the runtime and who does not:**
 
-1. *The audio device module blocks with no audio hardware.* The runner does have zero audio
-   endpoints, and `FactoryCreate` does build libwebrtc's ADM over Core Audio, and the ADM was
-   already the subject of the 2026-09-14 fix. All true, all irrelevant: no scenario runs, so that
-   code is never called.
-2. *The Windows Audio service is stopped on Server.* It is not. `Audiosrv` and
-   `AudioEndpointBuilder` are both Running - with no endpoints to manage.
-3. *It hangs in restore or the build.* It does not. Splitting the tier into three announced
-   phases showed restore taking a minute, the build 29 seconds, and the hang in the run.
-4. *`Microsoft.Maui.Controls` drags in WinUI and blocks before `Main`.* Plausible - it was the
-   only reference the passing unit tier lacked that could block that early - and removing it
-   changed nothing. The reference was dropped anyway, since this tier never needed it.
+- A developer machine: yes, Visual Studio's MAUI workload installs it. This is why it has never
+  been seen here.
+- A clean Windows machine: no. It is not part of Windows.
+- A **packaged** (MSIX) consumer app: yes - the dependency is declared and the installer or Store
+  supplies it.
+- An **unpackaged** consumer app, which is what plain `dotnet publish` produces: no. Its users
+  need `WindowsAppRuntimeInstall.exe`, or the app must be built with
+  `<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>` so it carries the runtime.
 
-What remains of the difference from the `unit` tier, which passes on the same image with the same
-xUnit v3 and the same invocation, is that this project targets `net10.0-windows10.0.22621.0` with
-a `win-x64` runtime identifier and that one targets plain `net10.0`.
+**For the wiki**, when the documentation pass happens: say this plainly, and say the symptom.
+Nobody will diagnose a silent startup hang from first principles.
 
-**Whether to chase it further is a real question.** It is CI-only, on a four-cpu headless Windows
-Server with no audio hardware - not an environment any consumer of this package runs in - and the
-same tier passes on actual Windows against the same CI-built artifact. The suite loses nothing it
-could have caught: tiers 2 and 5 and the three device tiers all run in CI, and Windows runtime
-coverage is one local command.
+**How it was found**, because the path is worth remembering. `Tests/WebRTCme.DeviceTests` ran in
+two seconds on real Windows and hung on a `windows-latest` runner - six hours the first time,
+until the job limit stopped it. Six theories were wrong before a stack dump settled it:
 
-The job is bounded rather than removed: `timeout-minutes: 15` on the job, a 240-second watchdog
-around the executable, and a `--help` probe that classifies the failure. It fails in about six
-minutes with a readable explanation instead of hanging.
+1. *The audio device module blocks with no audio hardware.* No scenario ever ran, so that code
+   was never called.
+2. *The Windows Audio service is stopped on Server.* It is not - both services run, with no
+   endpoints to manage.
+3. *It hangs in restore or the build.* No - splitting the tier into three announced phases put
+   the hang in the run.
+4. *`Microsoft.Maui.Controls` drags in WinUI.* Removing the direct reference changed nothing -
+   **and this was dismissed too early**, because the package supplied MAUI transitively either
+   way. It was the right answer, disproved by a bad experiment.
+5. *Defender scans the 27 MB of native payload.* Real-time protection is already off on that
+   runner and both drives excluded.
+6. *The app-local MSVC runtime deadlocks the loader.* Removing all five CRT DLLs changed nothing.
+
+What settled it was measurement, not argument: a module initializer writing to **stderr** (xUnit
+captures stdout and replays it only when a test ends, so a test that never ends prints nothing),
+four minimal probes isolating one variable each, and finally `dotnet-stack report` on the live
+process. `Tests/Diagnostics/` holds the probes, committed rather than thrown away.
+
+CI installs the runtime in the Windows job, so the tier runs there now.
 
 ### A Blazor consumer had to reconfigure JSInterop's JSON, or nothing worked at all - fixed 2026-09-15
 
