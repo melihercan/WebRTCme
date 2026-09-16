@@ -677,6 +677,46 @@ jobs:
       # Each under a watchdog, because the thing being measured is whether they finish at all.
       # Output is redirected to files and printed afterwards, so it survives a process being
       # killed - the same reason tier 3 does it.
+      # What is the stuck process actually doing?
+      #
+      # Five hypotheses have been wrong - the target framework, xUnit, Microsoft.NET.Test.Sdk,
+      # Defender, the app-local MSVC runtime - and the package has no module initializer, no static
+      # constructor that does work, and only lazy LibraryImport stubs. Guessing has run out.
+      #
+      # dotnet-stack prints the managed stacks of a live process. Started, left to hang, and asked
+      # directly. Whatever is at the top of that stack is the answer.
+      - name: Stack of the hung process
+        if: always()
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $tfm = "net10.0-windows10.0.22621.0/win-x64"
+          $exe = "Tests/Diagnostics/XunitWithPackage/bin/Release/$tfm/XunitWithPackage.exe"
+          if (-not (Test-Path $exe)) { Write-Host "no package probe was built"; exit 0 }
+
+          dotnet tool install -g dotnet-stack 2>&1 | Out-String | Write-Host
+          $env:PATH = "$env:PATH;$env:USERPROFILE\.dotnet	ools"
+
+          $out = New-TemporaryFile
+          $p = Start-Process -FilePath $exe -PassThru -NoNewWindow `
+               -RedirectStandardOutput $out -RedirectStandardError "$out.err"
+
+          Write-Host "started pid $($p.Id); letting it sit for 40s"
+          Start-Sleep -Seconds 40
+
+          if ($p.HasExited) {
+              Write-Host "it exited on its own this time - nothing to dump"
+          } else {
+              Write-Host ""
+              Write-Host "===== managed stacks ====="
+              & dotnet-stack report -p $p.Id 2>&1 | ForEach-Object { Write-Host $_ }
+              try { $p.Kill($true) } catch { }
+          }
+
+          Write-Host ""
+          Write-Host "===== whatever it wrote ====="
+          Get-Content $out, "$out.err" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $_" }
+
       - name: Run them
         shell: pwsh
         run: |
