@@ -222,7 +222,10 @@ function Invoke-Android {
     # or the process died. A block would have been caught by the scenario timeout and reported; a
     # crash leaves exactly this silence. Only logcat knows which, and only if asked.
     $died = & $adb logcat -d 2>$null |
-            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|libwebrtc|UnsatisfiedLink|dlopen failed|Abort message|^.*F DEBUG|#0[0-9] pc ' } |
+            # Wide, because libwebrtc writes its RTC_CHECK text under its own tag - libjingle, rtc,
+            # WebRTC, jingle depending on the build - and the previous filter kept the backtrace but
+            # lost the one line that says which assertion failed.
+            Where-Object { $_ -match 'FATAL|AndroidRuntime|SIGSEGV|SIGABRT|tombstone|UnsatisfiedLink|dlopen failed|Abort message|F DEBUG|#0[0-9] pc |libjingle|libwebrtc|rtc|WebRTC|CHECK|DCHECK|FATAL_ERROR' } |
             Select-Object -Last 40
 
     & $adb shell am force-stop $appId | Out-Null
