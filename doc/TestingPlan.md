@@ -1,15 +1,21 @@
 # Testing the packages
 
 A plan for automated testing of `WebRTCme` and `WebRTCme.Middleware`, agreed 2026-09-14. Written
-before any test code exists, so the decisions are visible and can be argued with rather than
+before any test code existed, so the decisions are visible and can be argued with rather than
 reverse-engineered from a diff later. Same intent as `DemoAppRefactor.md`.
+
+> **All five phases are implemented.** This is kept as the record of what was decided and why -
+> including the parts the plan got wrong, which are marked where they occur and are the most useful
+> thing in it. For *how to run the suite*, read
+> [Testing](https://github.com/melihercan/WebRTCme/wiki/Testing) in the wiki, which is the
+> current, readable version.
 
 The goal in one line: **prove the published NuGet packages work, on every platform, without a
 person clicking anything.**
 
-The emphasis is on *published packages*. This repository has no tests at all today, so there is a
-temptation to write whatever is easiest to write. What is easiest is testing the source tree, and
-the source tree is not what breaks - `doc/Packaging.md` and `KnownGaps.md` both record the same
+The emphasis is on *published packages*. This repository had no tests at all when this was written,
+so there was a temptation to write whatever was easiest. What is easiest is testing the source tree,
+and the source tree is not what breaks - `doc/Packaging.md` and `KnownGaps.md` both record the same
 failure shape, repeatedly: the code was right, the *package* was wrong, and nothing noticed until a
 device did.
 
@@ -48,6 +54,10 @@ DevOps feed. This repository has no `nuget.config`, no `Directory.Build.props` a
 `Directory.Packages.props`, so using it means introducing the first of those.
 
 ## The shape - three tiers
+
+> As built it is **five**: the single "Runtime" tier below turned out to be three, because a phone,
+> a Mac Catalyst app and a browser each need a different way in. See *What the plan got wrong* at
+> the foot of this file. The three-tier shape is left here as it was decided.
 
 Deliberately *not* the DartSimPro pyramid, and the difference is the point. DartSimPro's product is
 an application, so its top tier is Appium driving a UI because there is no other way in.
@@ -114,11 +124,15 @@ so the negotiation core stays runnable everywhere.
 
 Ordered so that each phase is useful on its own and needs nothing from the phases after it.
 
-### Phase 1 - unit and integration, no rig at all
+### Phase 1 - unit and integration, no rig at all - implemented
 
 `Tests/WebRTCme.Tests`, plain `net10.0`, runs on any machine in seconds. Nothing here needs the
-package, a device, or a second peer. This is where roughly 80% of the defect surface is, and it can
-start today.
+package, a device, or a second peer. This is where roughly 80% of the defect surface is, and it
+could start immediately.
+
+**114 tests, about two seconds.** Two things landed differently from the list below:
+`Integration/DiGraphTests` is called `ServiceRegistrationTests`, and `CommonUtilsTests` was added
+for the `InternalsVisibleTo` surface described above.
 
 - `Unit/Ortc*` - the capability negotiation: `GetExtendedRtpCapabilites` against known local and
   remote capability pairs, `GetSendingRtpParameters`, `ReduceCodecs`, `CanSend` / `CanReceive`, and
@@ -190,18 +204,26 @@ error NU1605: Detected package downgrade: Microsoft.Maui.Controls from 10.0.80 t
   WebRTCme.PackageTests -> Microsoft.Maui.Controls (>= 10.0.20)
 ```
 
-The packages depend on `Microsoft.Maui.Controls` 10.0.80. The MAUI workload's own implicit
-reference is whatever that workload bundles - 10.0.20 for the SDK installed here - and NuGet calls
-the difference a downgrade and fails the restore. So **every MAUI consumer has to name
-`Microsoft.Maui.Controls` and `Microsoft.Maui.Controls.Compatibility` at 10.0.80 themselves**,
-exactly as `WebRTCme.DemoApp.Maui` already does and exactly as NU1605 instructs.
+The packages depend on a `Microsoft.Maui.Controls` newer than the one the MAUI workload bundles
+implicitly, and NuGet calls the difference a downgrade and fails the restore. So **every MAUI
+consumer has to name `Microsoft.Maui.Controls` and `Microsoft.Maui.Controls.Compatibility`
+themselves**, at the version the packages ask for, exactly as `WebRTCme.DemoApp.Maui` already does
+and exactly as NU1605 instructs.
+
+> **The version above is what it was on 2026-09-14, against 26.9.9. It is now 10.0.101.** The error
+> is left as it was seen rather than rewritten, because the number is the least interesting part of
+> it. What matters is that **it moves** - and when it does, the pin has to be raised in
+> `Tests/WebRTCme.PackageTests` and in the wiki's `Getting started`, `Platform prerequisites` and
+> `Releases` pages in the same change. The tier catches a stale pin with the same NU1605 in the
+> opposite direction, which is the tier working rather than the tier being annoying.
 
 It is not optional, and it is not discoverable until a restore fails. **This has to be in the
-documentation before the packages are published.** The alternative is to lower what the packages
-demand to whatever the current workload ships, which is a decision about which MAUI servicing band
-to support rather than a bug to fix.
+documentation before the packages are published.** *(It now is - see
+[Platform prerequisites](https://github.com/melihercan/WebRTCme/wiki/Platform-prerequisites).)*
+The alternative is to lower what the packages demand to whatever the current workload ships, which
+is a decision about which MAUI servicing band to support rather than a bug to fix.
 
-### Phase 3 - runtime, where a plain process works
+### Phase 3 - runtime, where a plain process works - implemented
 
 `Tests/WebRTCme.DeviceTests`, referencing the package the same way Phase 2 does.
 
@@ -362,12 +384,37 @@ plan.
 Also staying manual: real multi-party SFU behaviour against mediasoup, TURN relay paths, and
 anything needing two physically separate networks.
 
-## Open decisions
+## Open decisions - all three settled
 
-1. **Does Phase 1 wait for the `SpeakingDetector` extraction?** The tests are worth more than the
-   refactor costs, but it is a production-code change in service of testability, which deserves to
-   be an explicit yes rather than a surprise in a diff.
-2. **XHarness or a hand-rolled runner app** for Phase 4 - the trade is an extra NuGet feed against
-   more code to maintain.
-3. **Is `net10.0-android` consumption testable on the PC without a device?** Restore and compile,
-   yes. Anything beyond that is Phase 4.
+Kept with their answers, because two of them were decided by discovering the question was wrong
+rather than by weighing the alternatives.
+
+1. **Does Phase 1 wait for the `SpeakingDetector` extraction?** **No - it was done first.** The
+   threshold rule was lifted out of `SignalingConnection`'s `async` loop into a pure class taking
+   `(level, now)`, and `Unit/SpeakingDetectorTests` tests it, comma-decimal culture included. A
+   production-code change in service of testability, made explicitly rather than smuggled into a
+   diff.
+2. **XHarness or a hand-rolled runner app** for Phase 4? **Hand-rolled, and the trade turned out not
+   to exist.** The newest XHarness on the `dotnet-eng` feed is from September 2023: it predates
+   .NET 10, and it drives Apple devices through `mlaunch`, which hangs on a locked phone and does
+   not parse `:v2:udid=` selectors. `adb` and `devicectl` work and the harness drives them directly
+   - so the extra NuGet feed this worried about is not needed either.
+3. **Is `net10.0-android` consumption testable on the PC without a device?** **Yes, and the answer
+   below was too generous.** Restore and compile, yes - but compiling is not the assertion, because
+   NuGet falls back to `lib/net10.0/` and compiles perfectly with no Android binding present. The
+   tier reads `project.assets.json` back and requires each target framework to have resolved its own
+   slice. Anything beyond that is Phase 4.
+
+## What the plan got wrong
+
+Collected, because it is the most useful thing here and it is otherwise scattered across the
+phases above.
+
+- **Mac Catalyst cannot run Phase 3.** The plan assumed a Catalyst test process runs the way a
+  Windows one does. It builds an `.app` rather than an executable, xUnit v3 refuses to build a test
+  project without an app host, and there is no app host for `maccatalyst-x64`. It moved to Phase 4.
+- **XHarness was the wrong tool**, as above.
+- **"A Mac" was treated as a blocker throughout.** It is not: Mac Catalyst and iOS are both built,
+  launched and driven from the PC over SSH. Only taps on a physical iPhone need a person.
+- **Three tiers became five.** Phases 4 and 5 did not exist in the original shape; the diagram near
+  the top still shows three.
