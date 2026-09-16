@@ -104,7 +104,13 @@ public static class LoopbackScenarios
         var clock = Stopwatch.StartNew();
         try
         {
-            var work = body();
+            // Task.Run, not body() directly, and that is the difference between a timeout that
+            // works and one that only looks like it does. Several scenarios are synchronous up to
+            // their first await - NativeLibraryLoads is synchronous throughout - so a native call
+            // that blocks blocks the calling thread, Task.WhenAny below is never reached, and the
+            // timeout never fires. Starting the work on a pool thread means a synchronous block is
+            // caught by exactly the same mechanism as an await that never completes.
+            var work = Task.Run(body);
             var finished = await Task.WhenAny(work, Task.Delay(ScenarioTimeout));
 
             if (!ReferenceEquals(finished, work))

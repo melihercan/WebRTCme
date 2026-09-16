@@ -91,7 +91,26 @@ Write-Host "Package source : $PackageSource"
 Write-Host "Version        : $Version"
 Write-Host ""
 
-& dotnet run --project $project -c Release `
+# Restore, build and run as three announced steps rather than one `dotnet run`.
+#
+# Because a silent hang needs to be localised before it can be explained. On a hosted Windows
+# runner this tier printed its header and then produced nothing at all - for six hours the first
+# time, until the job limit stopped it - and a single `dotnet run` cannot say whether it died in
+# restore, in the build, or in the tests. Three steps and three messages can.
+Write-Host "Restoring..."
+& dotnet restore $project `
+    "-p:WebRTCmePackageVersion=$Version" `
+    "-p:RestoreAdditionalProjectSources=$PackageSource"
+if ($LASTEXITCODE -ne 0) { Write-Host "restore failed" -ForegroundColor Red; exit 1 }
+
+Write-Host "Building..."
+& dotnet build $project -c Release --no-restore `
+    "-p:WebRTCmePackageVersion=$Version" `
+    "-p:RestoreAdditionalProjectSources=$PackageSource"
+if ($LASTEXITCODE -ne 0) { Write-Host "build failed" -ForegroundColor Red; exit 1 }
+
+Write-Host "Running the scenarios..."
+& dotnet run --project $project -c Release --no-build `
     "-p:WebRTCmePackageVersion=$Version" `
     "-p:RestoreAdditionalProjectSources=$PackageSource"
 $exit = $LASTEXITCODE
