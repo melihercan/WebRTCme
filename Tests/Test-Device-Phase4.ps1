@@ -63,6 +63,10 @@ $appId     = 'com.melihercan.webrtcme.devicetests'
 # The scenario that has to run on its own, and why - see the description above.
 $isolated  = 'ACompletedCallDoesNotChangeWhatDevicesExist'
 
+# Set by Read-Outcome when a run reported a summary, so the failure hint can tell "a check failed"
+# from "it stopped".
+$sawSummary = $false
+
 # Where the Apple work happens. -Local means this machine is the Mac, which is how CI runs it on a
 # macOS runner; otherwise it is the Mac mini over SSH and the repository is at a known path there.
 $macRepo = if ($Local) { $repoRoot } else { '$HOME/Projects/WebRTCme' }
@@ -148,6 +152,8 @@ function Read-Outcome {
         $colour = if ($line -match '\| FAILED ') { 'Red' } elseif ($line -match '\| SKIPPED') { 'Yellow' } else { 'Green' }
         Write-Host ("  " + ($line -replace '.*WEBRTCME-SCENARIO \| ', '')) -ForegroundColor $colour
     }
+
+    if ($summary) { $script:sawSummary = $true }
 
     if (-not $summary) {
         Write-Host "  no summary line - the runner did not finish ($What)" -ForegroundColor Red
@@ -511,8 +517,17 @@ $isolatedOk = switch ($Platform) {
 Write-Host ""
 if (-not ($allOk -and $isolatedOk)) {
     Write-Host "Device test FAILED for $Version on $Platform." -ForegroundColor Red
-    Write-Host "A missing native payload reads as DllNotFoundException on the first call;" -ForegroundColor Red
-    Write-Host "one built for the wrong architecture reads as BadImageFormatException." -ForegroundColor Red
+
+    # Two different hints, because one for every failure sends readers to the wrong place. A run
+    # that reported nothing did not fail a check - it stopped - and a missing or mismatched native
+    # library is not what that looks like: those throw, immediately and by name.
+    if ($allOk -eq $false -and -not $sawSummary) {
+        Write-Host "It stopped rather than failed. The line above names the scenario that began and" -ForegroundColor Red
+        Write-Host "never came back, if one did; nothing at all means the app never started." -ForegroundColor Red
+    } else {
+        Write-Host "A missing native payload reads as DllNotFoundException on the first call;" -ForegroundColor Red
+        Write-Host "one built for the wrong architecture reads as BadImageFormatException." -ForegroundColor Red
+    }
     exit 1
 }
 
