@@ -33,14 +33,30 @@ public static class LoopbackScenarios
     static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
 
     /// <summary>Every scenario, in the order a runner should execute them.</summary>
+    /// <remarks>
+    /// The order is load-bearing, and not for the usual reason. Receiving a track leaves libwebrtc
+    /// holding something a finalizer will free underneath it - issue #45 - and the process then
+    /// dies on the next call into libwebrtc, wherever that happens to be. While the two scenarios
+    /// that receive a track ran in the middle, the crash landed on whichever innocent scenario came
+    /// after them, or on none of them if no collection happened in the window. An Android job that
+    /// passes on one run and dies on the next, on identical code, teaches nobody anything.
+    ///
+    /// So everything that does not receive a track runs first and reports honestly, and the two
+    /// that do are last. ACompletedCallDoesNotChangeWhatDevicesExist still has a completed call
+    /// behind it - TwoPeersNegotiateAndCarryAMessage - which is all it needs.
+    /// </remarks>
     public static IReadOnlyList<(string Name, Func<Task<ScenarioResult>> Run)> All =>
     [
         (nameof(NativeLibraryLoads), NativeLibraryLoads),
         (nameof(OfferIsRealSdp), OfferIsRealSdp),
         (nameof(TwoPeersNegotiateAndCarryAMessage), TwoPeersNegotiateAndCarryAMessage),
-        (nameof(ARemoteTrackArrivesWithoutCrashing), ARemoteTrackArrivesWithoutCrashing),
         (nameof(DevicesEnumerateWhateverElseHasHappened), DevicesEnumerateWhateverElseHasHappened),
         (nameof(ACompletedCallDoesNotChangeWhatDevicesExist), ACompletedCallDoesNotChangeWhatDevicesExist),
+
+        // Last, and in this order: the first receives a track, the second forces the collection
+        // that turns #45 from a race into a certainty.
+        (nameof(ARemoteTrackArrivesWithoutCrashing), ARemoteTrackArrivesWithoutCrashing),
+        (nameof(AReceivedTrackDoesNotPoisonTheProcess), AReceivedTrackDoesNotPoisonTheProcess),
     ];
 
     static RTCConfiguration Configuration() => new()
@@ -340,6 +356,71 @@ public static class LoopbackScenarios
                 return "the callee never raised OnTrack for the remote audio m-line";
 
             return null;
+        });
+
+    /// <summary>Receiving a track must not leave libwebrtc unusable afterwards.</summary>
+    /// <remarks>
+    /// <para>
+    /// Currently fails on Android, and is meant to. Reading a receiver's track inside the track
+    /// callback - <c>p0.Track()</c> there, <c>rtpReceiver.Track</c> on Apple - makes a wrapper over
+    /// a native object the app does not own, and finalizing that wrapper frees something libwebrtc
+    /// is still holding. The next call into libwebrtc faults at offset 0x30 on one of its own
+    /// threads, with no managed frames and nothing to catch. That is issue #45.
+    /// </para>
+    /// <para>
+    /// The forced collection is the point of this scenario rather than a heavy-handed way of
+    /// writing it. Without it the fault is a race that a loaded CI machine loses and a fast phone
+    /// wins, so the Android job passed or failed run to run on identical code - which is worse than
+    /// a job that simply fails, because it gets dismissed as flake and then fails on somebody
+    /// else's change. Forcing the collection makes the same defect reliable.
+    /// </para>
+    /// <para>
+    /// The canary at the end is the call that actually dies. The damage is done by the finalizer,
+    /// but the crash lands on whatever touches libwebrtc next, which is why it kept surfacing in
+    /// unrelated scenarios and sent several investigations after the wrong thing entirely.
+    /// </para>
+    /// <para>
+    /// Platforms where OnTrack never fires do not read a track and so pass this, which is accurate
+    /// rather than lucky: they are not exposed to #45 because the feature that exposes it does not
+    /// work. See <c>ARemoteTrackArrivesWithoutCrashing</c>, which is the one that says so.
+    /// </para>
+    /// </remarks>
+    public static Task<ScenarioResult> AReceivedTrackDoesNotPoisonTheProcess() =>
+        Run(nameof(AReceivedTrackDoesNotPoisonTheProcess), async () =>
+        {
+            var caller = Window().RTCPeerConnection(Configuration());
+            var callee = Window().RTCPeerConnection(Configuration());
+
+            var tracked = new TaskCompletionSource<bool>();
+            callee.OnTrack += (_, _) => tracked.TrySetResult(true);
+
+            caller.AddTransceiver(MediaStreamTrackKind.Audio,
+                new RTCRtpTransceiverInit { Direction = RTCRtpTransceiverDirection.SendOnly });
+
+            var offer = await caller.CreateOffer();
+            await caller.SetLocalDescription(offer);
+            await callee.SetRemoteDescription(offer);
+
+            // Not a failure if it never arrives: that is the other scenario's job to report, and
+            // saying it twice would make one defect look like two.
+            await Within(tracked);
+
+            caller.Dispose();
+            callee.Dispose();
+
+            for (var i = 0; i < 3; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            using var canary = Window().RTCPeerConnection(Configuration());
+            canary.CreateDataChannel("canary");
+            var probe = await canary.CreateOffer();
+
+            return probe.Sdp is null
+                ? "libwebrtc is still there but produced no SDP after a track was received"
+                : null;
         });
 
     /// <summary>
