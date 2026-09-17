@@ -466,16 +466,9 @@ namespace WebRTCme.iOS
 
         }
 
-        [Export("peerConnection:didAddReceiver:streams:")]
         public void DidAddReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.IRTCRtpReceiver rtpReceiver,
             Webrtc.RTCMediaStream[] mediaStreams)
         {
-            // Explicitly exported, and that is the whole reason this works. didAddReceiver is
-            // @optional in the protocol, and an optional member implemented in C# is not
-            // registered with the ObjC runtime unless it carries its own [Export] - so the
-            // method existed, compiled, and was simply never called. DidAddStream is
-            // @required, which is why it alone ever fired.
-            //
             // The Unified Plan callback for an incoming track, and the only one that can fire
             // here. DidAddStream above is Plan B, and the configuration sets SdpSemantics to
             // UnifiedPlan unconditionally - so until this was implemented OnTrack could not be
