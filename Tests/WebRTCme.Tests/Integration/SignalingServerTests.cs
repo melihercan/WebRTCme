@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR;
@@ -61,7 +61,11 @@ public class SignalingServerTests : IAsyncLifetime
                     services.AddSignalR().AddMessagePackProtocol();
                     services.AddRouting();
 
-                    // What Startup registers for the TURN side. StunOnly needs nothing external.
+                    // The TURN side, wired directly. Startup now picks the proxy from
+                    // SignalingServer:TurnServer and resolves ITurnServerProxy through the factory
+                    // - see issue #42 - and this mirrors the result rather than the mechanism,
+                    // because what these tests exercise is RoomHub, not the selection. StunOnly is
+                    // the default there and needs nothing external.
                     services.AddSingleton<TurnServerProxyFactory>();
                     services
                         .AddSingleton<StunOnlyProxy>()

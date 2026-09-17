@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -58,10 +58,12 @@ namespace WebRTCme.Connection.Signaling.Server.Hubs
         public event ISignalingServerNotify.PeerIceAsyncDelegateAsync PeerIceEventAsync { add { } remove { } }
         public event ISignalingServerNotify.PeerMediaAsyncDelegateAsync PeerMediaEventAsync { add { } remove { } }
 
-        public RoomHub(TurnServerProxyFactory turnServerProxyFactory, ILogger<RoomHub> logger)
+        // Takes the proxy rather than the factory. Choosing here is what made the choice invisible
+        // to configuration - see Startup, and issue #42.
+        public RoomHub(ITurnServerProxy turnServer, ILogger<RoomHub> logger)
         {
             _logger = logger;
-            _turnServer = turnServerProxyFactory.Create(TurnServer.StunOnly);
+            _turnServer = turnServer;
         }
 
         public async Task<Result<RTCIceServer[]>> GetIceServersAsync()
