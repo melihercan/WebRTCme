@@ -58,6 +58,7 @@ public static class LoopbackScenarios
         (nameof(NativeLibraryLoads), NativeLibraryLoads),
         (nameof(OfferIsRealSdp), OfferIsRealSdp),
         (nameof(TwoPeersNegotiateAndCarryAMessage), TwoPeersNegotiateAndCarryAMessage),
+        (nameof(ASenderSurvivesEnumeratingSendersAgain), ASenderSurvivesEnumeratingSendersAgain),
         (nameof(DevicesEnumerateWhateverElseHasHappened), DevicesEnumerateWhateverElseHasHappened),
         (nameof(ACompletedCallDoesNotChangeWhatDevicesExist), ACompletedCallDoesNotChangeWhatDevicesExist),
 
@@ -66,6 +67,63 @@ public static class LoopbackScenarios
         (nameof(ARemoteTrackArrivesWithoutCrashing), ARemoteTrackArrivesWithoutCrashing),
         (nameof(AReceivedTrackDoesNotPoisonTheProcess), AReceivedTrackDoesNotPoisonTheProcess),
     ];
+
+    /// <summary>A sender taken earlier must still work after the senders are enumerated again.</summary>
+    /// <remarks>
+    /// libwebrtc's getSenders() disposes every sender it handed out previously before returning a
+    /// fresh set, so a reference taken and kept is dead the moment anyone enumerates. Issue #22,
+    /// which named senders, receivers and transceivers.
+    ///
+    /// Transceivers were fixed: GetTransceivers keeps one wrapper per mid and rebinds it to the
+    /// fresh native each time, so an earlier reference stays usable. GetSenders and GetReceivers
+    /// never got the same treatment - each builds new wrappers over whatever the native list holds
+    /// now. The abandoned scaffolding for it is still in the file, commented out, next to both.
+    ///
+    /// GetParameters reads the native sender, so it is what notices. Not a contrived call either:
+    /// reading a sender's parameters is how you find out what is actually being sent.
+    /// </remarks>
+    public static Task<ScenarioResult> ASenderSurvivesEnumeratingSendersAgain() =>
+        Run(nameof(ASenderSurvivesEnumeratingSendersAgain), async () =>
+        {
+            using var pc = Window().RTCPeerConnection(Configuration());
+
+            pc.AddTransceiver(MediaStreamTrackKind.Audio,
+                new RTCRtpTransceiverInit { Direction = RTCRtpTransceiverDirection.SendRecv });
+
+            // A local description gives the transceiver a mid and the sender its parameters.
+            var offer = await pc.CreateOffer();
+            await pc.SetLocalDescription(offer);
+
+            var senders = pc.GetSenders();
+            if (senders is null || senders.Length == 0)
+                return "no senders to test with - the transceiver produced none";
+
+            var kept = senders[0];
+
+            // Works now.
+            try
+            {
+                _ = kept.GetParameters();
+            }
+            catch (Exception exception)
+            {
+                return $"the sender was unusable before anything else happened: {exception.Message}";
+            }
+
+            // The enumeration that disposes what it handed out last time.
+            _ = pc.GetSenders();
+
+            try
+            {
+                _ = kept.GetParameters();
+                return null;
+            }
+            catch (Exception exception)
+            {
+                return "the sender taken before the second enumeration is dead - " +
+                       $"{exception.GetType().Name}: {exception.Message}";
+            }
+        });
 
     static RTCConfiguration Configuration() => new()
     {
