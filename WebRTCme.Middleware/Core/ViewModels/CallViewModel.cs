@@ -318,7 +318,10 @@ namespace WebRTCme.Middleware
             _reRender = reRender;
             _localMediaStream.OnDeviceChange += OnCaptureDevicesChanged;
 
-            _cameraStream = await _localMediaStream.GetCameraMediaStreamAsync();
+            _cameraStream = await OpenLocalStreamAsync();
+            if (_cameraStream is null)
+                return;
+
             WatchLocalTracks(_cameraStream);
             _mediaStreamManager.Add(new MediaStreamParameters
             {
@@ -589,6 +592,54 @@ namespace WebRTCme.Middleware
             {
                 _localTrackRecovery.Release();
             }
+        }
+
+        /// <summary>
+        /// The local stream, degraded as far as the available devices allow.
+        /// </summary>
+        /// <remarks>
+        /// Both first, then either on its own. A machine with a microphone and no camera is an
+        /// ordinary thing to be - issue #30 - and asking for both used to throw straight out of
+        /// page-appearing, where there is nobody to catch it, and take the app down. A laptop with
+        /// the camera covered by policy lands here too.
+        ///
+        /// Same judgement the mid-call recovery above already makes: a call carrying one fewer
+        /// track beats a call that falls over. The difference is that this one has a person
+        /// watching, so when nothing at all can be opened it says so rather than failing silently.
+        /// </remarks>
+        async Task<IMediaStream> OpenLocalStreamAsync()
+        {
+            (string What, MediaStreamConstraints Constraints)[] attempts =
+            [
+                ("the camera and microphone", null),
+                ("the microphone alone", ConstraintsFor(MediaStreamTrackKind.Audio)),
+                ("the camera alone", ConstraintsFor(MediaStreamTrackKind.Video)),
+            ];
+
+            foreach (var attempt in attempts)
+            {
+                try
+                {
+                    return await _localMediaStream.GetCameraMediaStreamAsync(
+                        CameraType.Default, attempt.Constraints);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogInformation(
+                        $"Opening {attempt.What} failed: {exception.Message}");
+                }
+            }
+
+            _ = await _modalPopup.GenericPopupAsync(new GenericPopupIn
+            {
+                Title = "No camera or microphone",
+                Text = "Nothing could be opened to send." + Environment.NewLine +
+                       "Check that a camera or microphone is attached and that this app is " +
+                       "allowed to use it.",
+                Ok = "Ok",
+            });
+
+            return null;
         }
 
         // Asking for only the kind that died. GetCameraMediaStreamAsync's default asks for both.
