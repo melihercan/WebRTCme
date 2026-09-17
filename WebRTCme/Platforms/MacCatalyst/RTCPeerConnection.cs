@@ -156,6 +156,29 @@ namespace WebRTCme.MacCatalyst
 
         public void Close() => NativeObject.Close();
 
+        // Closing on dispose, which nothing did before. Unlike Android this was never a crash:
+        // the ObjC delegate is declared weak - @property (nonatomic, weak) id<RTCPeerConnectionDelegate> -
+        // so when this wrapper is deallocated the native side's delegate goes nil by itself and no
+        // callback can reach a dead object. That is why #45 was Android only, and why this is not
+        // a copy of the fix that went in there.
+        //
+        // It leaks all the same. Without a close the native peer connection stays open after the
+        // wrapper is gone: ICE and the transports keep running, and whatever it is capturing stays
+        // held. Disposing is the caller saying the session is finished, so finish it.
+        //
+        // The ObjC object itself is left to ARC rather than disposed here - senders, receivers and
+        // transceivers handed out earlier hold their own references to it, and pulling it out from
+        // under them is how the Android transceiver bugs started.
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && Interlocked.Exchange(ref _disposed, 1) == 0)
+                NativeObject.Close();
+
+            base.Dispose(disposing);
+        }
+
+        int _disposed;
+
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
