@@ -32,6 +32,10 @@ public static class LoopbackScenarios
     // coffee break. Host candidates over loopback are immediate; this is nearly all handshake.
     static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
 
+    // How long AReceivedTrackDoesNotPoisonTheProcess waits for a track before carrying on without
+    // one. Short on purpose: whether the track arrives is not what that scenario asserts.
+    static readonly TimeSpan TrackArrival = TimeSpan.FromSeconds(3);
+
     /// <summary>Every scenario, in the order a runner should execute them.</summary>
     /// <remarks>
     /// The order is load-bearing, and not for the usual reason. Receiving a track leaves libwebrtc
@@ -43,7 +47,11 @@ public static class LoopbackScenarios
     ///
     /// So everything that does not receive a track runs first and reports honestly, and the two
     /// that do are last. ACompletedCallDoesNotChangeWhatDevicesExist still has a completed call
-    /// behind it - TwoPeersNegotiateAndCarryAMessage - which is all it needs.
+    /// behind it - TwoPeersNegotiateAndCarryAMessage - which is all it needs. That much worked:
+    /// those two scenarios now report on every platform instead of being collateral damage.
+    ///
+    /// What it did not do is make the failure reliable - see AReceivedTrackDoesNotPoisonTheProcess,
+    /// which says so at length. The Android job is still one whose green means nothing.
     /// </remarks>
     public static IReadOnlyList<(string Name, Func<Task<ScenarioResult>> Run)> All =>
     [
@@ -368,11 +376,19 @@ public static class LoopbackScenarios
     /// threads, with no managed frames and nothing to catch. That is issue #45.
     /// </para>
     /// <para>
-    /// The forced collection is the point of this scenario rather than a heavy-handed way of
-    /// writing it. Without it the fault is a race that a loaded CI machine loses and a fast phone
-    /// wins, so the Android job passed or failed run to run on identical code - which is worse than
-    /// a job that simply fails, because it gets dismissed as flake and then fails on somebody
-    /// else's change. Forcing the collection makes the same defect reliable.
+    /// <b>This does not fire reliably, and the forced collection was not enough to make it.</b> It
+    /// was written to convert a race into a certainty and it does not: CI has run the whole suite
+    /// green on Android with this scenario in place, on code that reproduces the fault elsewhere.
+    /// Treat a green Android run as saying nothing, exactly as #45 does. What this scenario buys is
+    /// that when the fault does fire it fires here, with a name, instead of killing whichever
+    /// unrelated scenario happened to come next.
+    /// </para>
+    /// <para>
+    /// There is a plausible reason it got <em>less</em> likely rather than more, and it is worth
+    /// knowing before someone tries again: moving every other scenario ahead of the track read
+    /// also removed the calls into libwebrtc that the poisoned process used to die on. What is left
+    /// afterwards is one canary. Making this reliable probably means giving the fault more to land
+    /// on, not more collections - but that is a guess, and the last one was wrong.
     /// </para>
     /// <para>
     /// The canary at the end is the call that actually dies. The damage is done by the finalizer,
@@ -401,9 +417,12 @@ public static class LoopbackScenarios
             await caller.SetLocalDescription(offer);
             await callee.SetRemoteDescription(offer);
 
-            // Not a failure if it never arrives: that is the other scenario's job to report, and
-            // saying it twice would make one defect look like two.
-            await Within(tracked);
+            // Seconds rather than the usual patience. A loopback track arrives in about a hundred
+            // milliseconds where it arrives at all, and on the platforms where OnTrack never fires
+            // it never will - so waiting the full thirty spent half a minute of every Apple run
+            // learning nothing. Not a failure when it does not arrive either: that is the other
+            // scenario's job to report, and saying it twice would make one defect look like two.
+            await Task.WhenAny(tracked.Task, Task.Delay(TrackArrival));
 
             caller.Dispose();
             callee.Dispose();
