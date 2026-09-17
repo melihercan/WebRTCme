@@ -130,11 +130,24 @@ namespace WebRTCme.Middleware.Services
                 var dataChannels = _peers.Select(p => p.Value);
                 foreach (var dataChannel in dataChannels)
                     dataChannel.Send(object_);
+                return;
             }
-            else
+
+            // The two ways of having somewhere to send, and neither is guaranteed. Peers above is
+            // mesh; the producer channel is MediaSoup, which is the only thing that ever sets it.
+            // So on a mesh call this branch is reached whenever nobody else has joined yet, and it
+            // used to dereference a channel that is null by definition there - issue #31.
+            //
+            // Being alone in a room is not an error, and the message has already been added to the
+            // chat list by the caller, so there is nothing to fail: log it and carry on.
+            if (_producerDataChannel is null)
             {
-                _producerDataChannel.Send(object_);
+                Logger.LogWarning("Nothing to send to: no peers, and no producer data channel. " +
+                    "The object was not sent.");
+                return;
             }
+
+            _producerDataChannel.Send(object_);
         }
 
 
