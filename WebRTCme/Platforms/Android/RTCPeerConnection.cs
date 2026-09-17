@@ -132,6 +132,37 @@ namespace WebRTCme.Android
 
         public void Close() => NativeObject.Close();
 
+        // Closing the native peer connection is what revokes this observer, and nothing here used
+        // to do it. This class is the observer: libwebrtc holds a pointer to the Java proxy for
+        // it, and Java.Lang.Object.Dispose - which is what `using` reached before this override
+        // existed - tears that proxy down while the native peer connection is still open and
+        // still calling into it. The next callback dereferences a peer that is gone and aborts
+        // the process from one of libwebrtc's own threads, so there is nothing to catch and
+        // nothing in the managed stack to read afterwards.
+        //
+        // A data channel call quiesces quickly enough to usually get away with it. One carrying
+        // media does not, which is what issue #45 was: negotiate a media m-line, dispose, and the
+        // next call into libwebrtc - enumerating devices was enough - took the process down.
+        //
+        // Windows has always done this; see its Dispose, and the same note there about releasing
+        // revoking the observer. Android inherited Java.Lang.Object's, which knows nothing about
+        // a native peer connection.
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && Interlocked.Exchange(ref _disposed, 1) == 0)
+            {
+                // Close first: dispose alone leaves the session running, and the Java SDK wants
+                // both. Both are safe on an already-closed connection, so an app that called
+                // Close() itself is not a special case.
+                NativeObject.Close();
+                NativeObject.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        int _disposed;
+
         public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
