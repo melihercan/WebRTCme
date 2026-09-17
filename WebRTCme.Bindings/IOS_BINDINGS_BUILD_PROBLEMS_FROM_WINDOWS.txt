@@ -54,6 +54,14 @@ The cheap check, run against the framework binary on a Mac:
 Note the leading [[:space:]]* in that grep: without it the pattern also matches commented-out bindings and
 reports false positives for symbols that were already dealt with.
 
+CI runs this now, so it no longer depends on someone remembering to. .github/scripts/Verify-AppleFieldSymbols.sh
+checks all three slices - ios-arm64, the iOS simulator slice and Mac Catalyst - and the Apple job runs it before
+anything else, since it needs only the checkout. Run it by hand the same way from a Mac checkout:
+
+  ./.github/scripts/Verify-AppleFieldSymbols.sh
+
+It was written after issue #37, which was seven such symbols, undetected through a release for a year.
+
 - NETSDK1032 when building for the iOS simulator from the command line.
 
   error NETSDK1032: The RuntimeIdentifier platform 'iossimulator-x64' and the

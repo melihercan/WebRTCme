@@ -60,6 +60,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Before the workload restore, which takes minutes and this does not need: it reads the
+      # committed frameworks and the binding definitions, both of which arrived with the checkout.
+      #
+      # This is the only job that can run it. A binding declaring a symbol the framework no longer
+      # exports compiles, packs and restores anywhere; it fails when an *app* links, and nm is on
+      # macOS. That gap is how #37 shipped.
+      - name: Verify Apple bindings only name symbols the frameworks export
+        run: ./.github/scripts/Verify-AppleFieldSymbols.sh
+
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
