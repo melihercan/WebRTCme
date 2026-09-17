@@ -38,6 +38,7 @@ public static class LoopbackScenarios
         (nameof(NativeLibraryLoads), NativeLibraryLoads),
         (nameof(OfferIsRealSdp), OfferIsRealSdp),
         (nameof(TwoPeersNegotiateAndCarryAMessage), TwoPeersNegotiateAndCarryAMessage),
+        (nameof(ARemoteTrackArrivesWithoutCrashing), ARemoteTrackArrivesWithoutCrashing),
         (nameof(DevicesEnumerateWhateverElseHasHappened), DevicesEnumerateWhateverElseHasHappened),
         (nameof(ACompletedCallDoesNotChangeWhatDevicesExist), ACompletedCallDoesNotChangeWhatDevicesExist),
     ];
@@ -294,6 +295,49 @@ public static class LoopbackScenarios
             if (!await Within(received)) return "the message never arrived";
             var got = await received.Task;
             if (got != message) return $"expected '{message}', got '{got}'";
+
+            return null;
+        });
+
+    /// <summary>A remote track arriving must not take the process with it.</summary>
+    /// <remarks>
+    /// <para>
+    /// Every other scenario negotiates a data channel, so nothing here ever received media and
+    /// the platform's onTrack callback was never reached. On Android that callback crashed the
+    /// app: the generated binding declares onTrack as a default interface method whose body
+    /// calls back into Java, so leaving it unimplemented sent libwebrtc's call straight into the
+    /// abstract method it came from - AbstractMethodError, fatal, a few seconds into any call
+    /// carrying audio or video. Reported as issue #35 and invisible to tiers 1 and 2, because
+    /// nothing below this one loads the native SDK.
+    /// </para>
+    /// <para>
+    /// A send-only transceiver rather than getUserMedia, so this needs no camera, no microphone
+    /// and no permission prompt: what fires onTrack is the callee's remote description gaining
+    /// an m-line it will receive on, and that costs nothing to arrange. There is no ICE exchange
+    /// and no connection either - SetRemoteDescription is the whole trigger.
+    /// </para>
+    /// </remarks>
+    public static Task<ScenarioResult> ARemoteTrackArrivesWithoutCrashing() =>
+        Run(nameof(ARemoteTrackArrivesWithoutCrashing), async () =>
+        {
+            using var caller = Window().RTCPeerConnection(Configuration());
+            using var callee = Window().RTCPeerConnection(Configuration());
+
+            var tracked = new TaskCompletionSource<bool>();
+            callee.OnTrack += (_, _) => tracked.TrySetResult(true);
+
+            caller.AddTransceiver(MediaStreamTrackKind.Audio,
+                new RTCRtpTransceiverInit { Direction = RTCRtpTransceiverDirection.SendOnly });
+
+            var offer = await caller.CreateOffer();
+            await caller.SetLocalDescription(offer);
+            if (offer.Sdp is null || !offer.Sdp.Contains("m=audio"))
+                return "the send-only transceiver should have produced an audio m-line to receive on";
+
+            await callee.SetRemoteDescription(offer);
+
+            if (!await Within(tracked))
+                return "the callee never raised OnTrack for the remote audio m-line";
 
             return null;
         });

@@ -55,7 +55,17 @@ public class App : Application
             Content = new ScrollView { Content = new VerticalStackLayout { Padding = 16, Children = { _output } } }
         };
 
-        page.Appearing += async (_, _) => await RunAsync();
+        // Started here, not from page.Appearing, and that distinction cost a day.
+        //
+        // Appearing fires when the page becomes *visible*. A headless runner must not depend on
+        // that: on an emulator started with -no-window, or on any device where another app happens
+        // to be in front, the page never appears, no scenario ever runs, and the harness reports
+        // "the runner did not finish" - which reads exactly like a hang or a crash and is neither.
+        //
+        // Nothing here needs the UI. The scenarios are two peer connections talking to each other;
+        // the label is a courtesy for whoever is holding the device, and updating it is already
+        // wrapped so that a failure to draw cannot fail a run.
+        _ = RunAsync();
 
         return new Window(page);
     }
