@@ -341,6 +341,18 @@ namespace WebRTCme.Android
             OnTrack?.Invoke(this, new RTCTrackEvent(p0, p1));
         }
 
+        // Must be implemented even though the track event is raised from OnAddTrack above.
+        // The generated binding declares onTrack as a *default* interface method whose body
+        // calls InvokeVirtualVoidMethod("onTrack") back into Java. Leave it unimplemented and
+        // libwebrtc's call lands on that default, bounces to the abstract Java method and
+        // throws AbstractMethodError the moment a remote track arrives. Implementing it stops
+        // the bounce. It stays empty because onAddTrack fires for the same track, and raising
+        // OnTrack from both would deliver every remote track twice.
+        // Explicit implementation: the public OnTrack event above already owns the name.
+        void Webrtc.PeerConnection.IObserver.OnTrack(Webrtc.RtpTransceiver p0)
+        {
+        }
+
         void Webrtc.PeerConnection.IObserver.OnDataChannel(Webrtc.DataChannel p0) =>
             OnDataChannel?.Invoke(this, new RTCDataChannelEvent(p0));
 

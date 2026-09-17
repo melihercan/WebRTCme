@@ -126,8 +126,18 @@ namespace WebRTCme.Android
         public static Webrtc.RtpTransceiver.RtpTransceiverInit ToNative(this RTCRtpTransceiverInit init)
         {
             RTCRtpEncodingParameters[] initSendEncodings = init.SendEncodings ?? new RTCRtpEncodingParameters[] { };
-            var direction = init.Direction is null ? null : ((RTCRtpTransceiverDirection)init.Direction).ToNative();
-            var streamIds = init.Streams is null ? null : init.Streams.Select(stream => stream.Id).ToList();
+
+            // Every one of these three is optional on the W3C side and none of them may arrive at
+            // Java as null: RtpTransceiverInit's constructor copies both lists with
+            // new ArrayList<>(..) and reads the direction's native index, so a null is an
+            // immediate NullPointerException on the signalling thread - which aborts the process
+            // rather than surfacing as a catchable exception. Declaring a transceiver by kind and
+            // direction alone is the ordinary case, so this was every caller who did not also
+            // name a stream.
+            var direction = (init.Direction ?? RTCRtpTransceiverDirection.SendRecv).ToNative();
+            var streamIds = init.Streams is null
+                ? new List<string>()
+                : init.Streams.Select(stream => stream.Id).ToList();
             var sendEncodings = initSendEncodings.Select(encodings => encodings.ToNative()).ToList();
             return new Webrtc.RtpTransceiver.RtpTransceiverInit(direction, streamIds, sendEncodings);
         }
