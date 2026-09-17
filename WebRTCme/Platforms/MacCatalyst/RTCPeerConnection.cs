@@ -469,7 +469,19 @@ namespace WebRTCme.MacCatalyst
         public void DidAddReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.IRTCRtpReceiver rtpReceiver,
             Webrtc.RTCMediaStream[] mediaStreams)
         {
+            // The Unified Plan callback for an incoming track, and the only one that can fire
+            // here. DidAddStream above is Plan B, and the configuration sets SdpSemantics to
+            // UnifiedPlan unconditionally - so until this was implemented OnTrack could not be
+            // raised at all on Apple. Nothing noticed because nothing tested it: a remote track
+            // simply never reached SignalingConnection, which is what puts it on screen.
+            //
+            // Android has always done this from its own OnAddTrack, which is the same callback
+            // under the Java SDK's name.
+            var track = rtpReceiver.Track;
+            if (track is null)
+                return;
 
+            OnTrack?.Invoke(this, new RTCTrackEvent(track, mediaStreams?.FirstOrDefault()));
         }
 
         public void DidRemoveReceiver(Webrtc.RTCPeerConnection peerConnection, Webrtc.IRTCRtpReceiver rtpReceiver)
