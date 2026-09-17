@@ -23,6 +23,11 @@ namespace WebRTCme.Android
             _nativePeerConnection = nativePeerConnection;
         }
 
+        /// <summary>
+        /// Points this wrapper at the freshly enumerated native for the same sender.
+        /// </summary>
+        internal void Rebind(Webrtc.RtpSender nativeRtpSender) => RebindNativeObject(nativeRtpSender);
+
         public IRTCDTMFSender Dtmf => new RTCDTMFSender(NativeObject.Dtmf());
 
         public IMediaStreamTrack Track => new MediaStreamTrack(() => NativeObject.Track());

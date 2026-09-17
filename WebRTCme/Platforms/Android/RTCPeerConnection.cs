@@ -20,6 +20,12 @@ namespace WebRTCme.Android
         readonly Dictionary<string, RTCRtpTransceiver> _transceiverByMid = new();
         readonly List<RTCRtpTransceiver> _unnegotiatedTransceivers = new();
 
+        // The same, for the other two types the same disposal applies to. Keyed by the native id
+        // rather than a mid: senders and receivers have one from the moment they exist, where a
+        // mid only arrives with a local description.
+        readonly Dictionary<string, RTCRtpSender> _senderById = new();
+        readonly Dictionary<string, RTCRtpReceiver> _receiverById = new();
+
          private static Webrtc.MediaConstraints NativeDefaultMediaConstraints
         {
             get
@@ -196,26 +202,76 @@ namespace WebRTCme.Android
             throw new NotImplementedException();
         }
 
-        public IRTCRtpReceiver[] GetReceivers() =>
-            NativeObject.Receivers
-                .Select(nativeReceiver => new RTCRtpReceiver(nativeReceiver, NativeObject)).ToArray();
+        /// <summary>
+        /// The receivers, as wrappers that survive the next enumeration.
+        /// </summary>
+        /// <remarks>
+        /// Same treatment as GetTransceivers above, and for the same reason: libwebrtc disposes
+        /// every receiver it handed out before returning a fresh list, so handing back a new
+        /// wrapper each time leaves anything a caller kept pointing at a disposed peer. One
+        /// wrapper per receiver id, rebound to whatever is live now.
+        /// </remarks>
+        public IRTCRtpReceiver[] GetReceivers()
+        {
+            var natives = NativeObject.Receivers;
+            var receivers = new IRTCRtpReceiver[natives.Count];
 
-        //public IRTCRtpReceiver[] GetReceivers()
-        //{
-        //    RefreshReceiversDictionary();
-        //    return _receiversDictionary.Values.ToArray();
-        //}
+            for (var i = 0; i < natives.Count; i++)
+            {
+                var native = natives[i];
+                var id = native.Id();
 
-        public IRTCRtpSender[] GetSenders() =>
-            NativeObject.Senders
-                .Select(nativeSender => new RTCRtpSender(nativeSender, NativeObject)).ToArray();
+                if (id is not null && _receiverById.TryGetValue(id, out var receiver))
+                {
+                    receiver.Rebind(native);
+                }
+                else
+                {
+                    receiver = new RTCRtpReceiver(native, NativeObject);
+                    if (id is not null)
+                        _receiverById[id] = receiver;
+                }
 
+                receivers[i] = receiver;
+            }
 
-        //public IRTCRtpSender[] GetSenders()
-        //{
-        //    RefreshSendersDictionary();
-        //    return _sendersDictionary.Values.ToArray();
-        //}
+            return receivers;
+        }
+
+        /// <summary>
+        /// The senders, as wrappers that survive the next enumeration.
+        /// </summary>
+        /// <remarks>
+        /// See GetReceivers. This is the half of issue #22 that was left undone when transceivers
+        /// were fixed - a sender taken from here and kept threw "RtpSender has been disposed" the
+        /// moment anything enumerated again, which is not an unusual thing for a call to do.
+        /// </remarks>
+        public IRTCRtpSender[] GetSenders()
+        {
+            var natives = NativeObject.Senders;
+            var senders = new IRTCRtpSender[natives.Count];
+
+            for (var i = 0; i < natives.Count; i++)
+            {
+                var native = natives[i];
+                var id = native.Id();
+
+                if (id is not null && _senderById.TryGetValue(id, out var sender))
+                {
+                    sender.Rebind(native);
+                }
+                else
+                {
+                    sender = new RTCRtpSender(native, NativeObject);
+                    if (id is not null)
+                        _senderById[id] = sender;
+                }
+
+                senders[i] = sender;
+            }
+
+            return senders;
+        }
 
         public Task<IRTCStatsReport> GetStats()
         {

@@ -24,6 +24,11 @@ namespace WebRTCme.Android
             _nativePeerConnection = nativePeerConnection;
         }
 
+        /// <summary>
+        /// Points this wrapper at the freshly enumerated native for the same receiver.
+        /// </summary>
+        internal void Rebind(RtpReceiver nativeReceiver) => RebindNativeObject(nativeReceiver);
+
         // Resolved through this wrapper rather than captured, so the track survives the
         // re-enumeration that disposes the receiver it came from.
         public IMediaStreamTrack Track => new MediaStreamTrack(() => NativeObject.Track());
