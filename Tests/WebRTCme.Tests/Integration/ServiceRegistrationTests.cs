@@ -1,7 +1,9 @@
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebRTCme.Connection;
 using WebRTCme.Connection.MediaSoup;
 using WebRTCme.Connection.MediaSoup.ClientWebSockets;
+using WebRTCme.Connection.Signaling.Proxy;
 using WebRTCme.Middleware;
 
 namespace WebRTCme.Tests.Integration;
@@ -107,6 +109,77 @@ public class ServiceRegistrationTests
         var once = new ServiceCollection().AddMiddleware().Count;
         var twice = new ServiceCollection().AddMiddleware().AddMiddleware().Count;
 
-        twice.Should().Be(once * 2, "these are Add, not TryAdd");
+        twice.Should().BeGreaterThan(once, "these are Add, not TryAdd");
+    }
+
+    /// <summary>
+    /// The one deliberate exception to the Add-not-TryAdd rule above.
+    /// </summary>
+    /// <remarks>
+    /// The signalling URL provider is TryAdd so that an app supplying its own is not quietly
+    /// overridden by the configuration-backed default. Plain Add would make it depend on the order
+    /// the two registrations happen in - register yours before <c>AddSignaling()</c> and the
+    /// default, added afterwards, would win on resolution. That is the sort of rule nobody should
+    /// have to know. Added for issue #9.
+    /// </remarks>
+    [Fact]
+    public void The_signalling_url_provider_is_registered_once_and_yields_to_an_apps_own()
+    {
+        var services = new ServiceCollection().AddMiddleware().AddMiddleware();
+
+        services.Count(d => d.ServiceType == typeof(ISignalingServerUrlProvider))
+            .Should().Be(1, "TryAdd, so a provider the app registered survives");
+    }
+
+    static IServiceProvider ContainerWith(params (string Key, string Value)[] settings) =>
+        new ServiceCollection()
+            .AddSingleton<IConfiguration>(new ConfigurationBuilder()
+                .AddInMemoryCollection(settings.Select(s =>
+                    new KeyValuePair<string, string>(s.Key, s.Value)))
+                .Build())
+            .AddMiddleware()
+            .BuildServiceProvider();
+
+    [Fact]
+    public void The_default_provider_reads_the_address_from_configuration()
+    {
+        var container = ContainerWith(("SignalingServer:BaseUrl", "https://signalling.example.com"));
+
+        container.GetRequiredService<ISignalingServerUrlProvider>().BaseUrl
+            .Should().Be("https://signalling.example.com", "that is where it has always come from");
+    }
+
+    [Fact]
+    public void The_default_provider_says_nothing_rather_than_guessing_when_unconfigured()
+    {
+        // Null is the "not known yet" the interface documents, and the stub turns it into a message
+        // naming both ways of supplying one. It must not become an empty string or a default host.
+        var container = ContainerWith();
+
+        container.GetRequiredService<ISignalingServerUrlProvider>().BaseUrl.Should().BeNull();
+    }
+
+    [Fact]
+    public void An_app_can_supply_its_own_provider_before_or_after_the_defaults()
+    {
+        // Both orders, because getting this wrong is silent: the app's provider is registered and
+        // simply never used.
+        var before = new ServiceCollection()
+            .AddSingleton<ISignalingServerUrlProvider, FixedUrlProvider>()
+            .AddMiddleware()
+            .BuildServiceProvider();
+
+        var after = new ServiceCollection()
+            .AddMiddleware()
+            .AddSingleton<ISignalingServerUrlProvider, FixedUrlProvider>()
+            .BuildServiceProvider();
+
+        before.GetRequiredService<ISignalingServerUrlProvider>().Should().BeOfType<FixedUrlProvider>();
+        after.GetRequiredService<ISignalingServerUrlProvider>().Should().BeOfType<FixedUrlProvider>();
+    }
+
+    sealed class FixedUrlProvider : ISignalingServerUrlProvider
+    {
+        public string BaseUrl => "https://chosen-at-runtime.example.com";
     }
 }

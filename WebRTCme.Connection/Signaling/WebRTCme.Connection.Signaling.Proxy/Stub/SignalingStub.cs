@@ -32,6 +32,7 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
         readonly SemaphoreSlim _connectGate = new SemaphoreSlim(1, 1);
 
         CancellationTokenSource _cts = new CancellationTokenSource();
+        readonly ISignalingServerUrlProvider _urlProvider;
         HubConnection _hubConnection;
         string _signallingServerBaseUrl;
 
@@ -57,9 +58,34 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
             await PeerMediaEventAsync?.Invoke(peerId, videoMuted, audioMuted, speaking);
 
 
-        public SignalingStub(IConfiguration configuration)
+        public SignalingStub(ISignalingServerUrlProvider urlProvider)
         {
-            _signallingServerBaseUrl = configuration["SignalingServer:BaseUrl"];
+            _urlProvider = urlProvider;
+
+            // Warm up only when the address is already known. Building the hub connection here is
+            // what made the address a build-time decision - see #9 - so it now happens on first
+            // use instead, and a provider that does not know yet simply gets asked again later.
+            // Config-driven apps are unaffected: their provider answers immediately and this
+            // starts connecting exactly as it always did.
+            if (!string.IsNullOrWhiteSpace(_urlProvider.BaseUrl))
+                _ = EnsureConnectedAsync();
+        }
+
+        /// <summary>
+        /// Builds the hub connection, once, against whatever the provider says now.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The provider has no address yet.</exception>
+        void EnsureHubConnectionBuilt()
+        {
+            if (_hubConnection is not null)
+                return;
+
+            _signallingServerBaseUrl = _urlProvider.BaseUrl;
+            if (string.IsNullOrWhiteSpace(_signallingServerBaseUrl))
+                throw new InvalidOperationException(
+                    "There is no signalling server address. Set SignalingServer:BaseUrl in " +
+                    "configuration, or register an ISignalingServerUrlProvider that supplies one " +
+                    "before the first call.");
 
             //// TODO: Bypass only for debugging with self signed certs (local IPs).
 			////var bypassSslCertificateError = WebRTCme.DeviceInfoExt.IsAnroid;
@@ -100,13 +126,12 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
             _hubConnection.On<Guid, bool, bool, bool>(nameof(OnPeerMediaAsync), OnPeerMediaAsync);
 
             _hubConnection.Closed += HubConnection_Closed;
-
-            // Start connecting without waiting; a join will await EnsureConnectedAsync anyway.
-            _ = EnsureConnectedAsync();
         }
 
         public async Task EnsureConnectedAsync()
         {
+            EnsureHubConnectionBuilt();
+
             if (_hubConnection.State == HubConnectionState.Connected)
                 return;
 
@@ -124,7 +149,9 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
 
         public async Task DisconnectAsync()
         {
-            if (_hubConnection.State == HubConnectionState.Disconnected)
+            // Never built means never connected: there is nothing to disconnect, and asking for
+            // the address now would throw on the way out of an app that never placed a call.
+            if (_hubConnection is null || _hubConnection.State == HubConnectionState.Disconnected)
                 return;
 
             await _connectGate.WaitAsync();
@@ -146,12 +173,14 @@ namespace WebRTCme.Connection.Signaling.Proxy.Stub
             _cts.Cancel();
 
             await StopGracefullyAsync();
-            await _hubConnection.DisposeAsync();
+
+            if (_hubConnection is not null)
+                await _hubConnection.DisposeAsync();
         }
 
         async Task StopGracefullyAsync()
         {
-            if (_hubConnection.State == HubConnectionState.Disconnected)
+            if (_hubConnection is null || _hubConnection.State == HubConnectionState.Disconnected)
                 return;
 
             try
