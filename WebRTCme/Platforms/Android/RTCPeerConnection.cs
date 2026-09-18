@@ -169,9 +169,23 @@ namespace WebRTCme.Android
 
         int _disposed;
 
+        // RunContinuationsAsynchronously on every completion below, for the reason the Apple
+        // peer connection carries at length: the SdpObserver and StatsCollector callbacks arrive on
+        // libwebrtc's signalling thread, and without this flag TaskCompletionSource resumes the
+        // awaiting caller synchronously on that thread. Everything written after the await then
+        // runs inside libwebrtc's callback, in the middle of the operation that raised it - so a
+        // caller that disposes a connection after awaiting SetLocalDescription can close it before
+        // libwebrtc has finished with it.
+        //
+        // On iOS and Mac Catalyst that was fatal, deterministically: SIGSEGV at +0x30 in
+        // JsepTransportController::MaybeStartGathering, on a thread with no managed frame in sight.
+        // Whether the Java SDK reaches the same line after informing its observer has not been
+        // checked, so this is not a claim that Android crashed the same way - it is the same latent
+        // defect, fixed the same way, and the cost of the flag is nothing.
         public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
-            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.CreateAnswer(new SdpObserverProxy(tcs), new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var answer = await tcs.Task;
             // Android DOES NOT expose 'Type'!!! Set it manually here.
@@ -184,7 +198,8 @@ namespace WebRTCme.Android
 
         public async Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
-            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.CreateOffer(new SdpObserverProxy(tcs), new Webrtc.MediaConstraints()/*NativeDefaultMediaConstraints*/);
             var offer = await tcs.Task;
             // Android DOES NOT expose 'Type'!!! I set it manually here. 
@@ -275,7 +290,8 @@ namespace WebRTCme.Android
 
         public Task<IRTCStatsReport> GetStats()
         {
-            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            var tcs = new TaskCompletionSource<IRTCStatsReport>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.GetStats(new StatsExtensions.StatsCollectorProxy(tcs));
             return tcs.Task;
         }
@@ -301,7 +317,8 @@ namespace WebRTCme.Android
                     "More than one sender or receiver is using this track, so the statistics "
                     + "to report are ambiguous.");
 
-            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            var tcs = new TaskCompletionSource<IRTCStatsReport>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             var collector = new StatsExtensions.StatsCollectorProxy(tcs);
 
             if (senders.Length == 1)
@@ -390,21 +407,24 @@ namespace WebRTCme.Android
 
         public Task SetLocalDescription()
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetLocalDescription(new SdpObserverProxy(tcs));
             return tcs.Task;
         }
 
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription)
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetLocalDescription(new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetRemoteDescription(new SdpObserverProxy(tcs), sessionDescription.ToNative());
             return tcs.Task;
         }
