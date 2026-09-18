@@ -72,6 +72,10 @@ public class App : Application
 
     async Task RunAsync()
     {
+        // Before anything creates a peer connection, or the setup of the first one goes unlogged -
+        // which on Apple is exactly the part under suspicion.
+        NativeLogging.StartIfRequested();
+
         var lines = new StringBuilder();
 
         void Report(string line)

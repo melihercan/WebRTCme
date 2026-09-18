@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Runs the loopback scenarios on a device - Android, iOS or Mac Catalyst. Phase 4 of
   doc/TestingPlan.md.
@@ -39,6 +39,13 @@
 
 .PARAMETER SkipBuild
   Use what is already installed rather than rebuilding and reinstalling.
+
+.PARAMETER NativeLog
+  Turn libwebrtc's own logging on inside the app: verbose, info, warning or error. Off by default,
+  because the Apple fault these scenarios chase is probabilistic and timing-sensitive, and logging
+  every run would perturb the thing being measured. Native lines come back prefixed
+  WEBRTCME-NATIVE, which is deliberately not a prefix this script parses for results.
+  Apple platforms only - see Tests/WebRTCme.DeviceTests.Runner/NativeLogging.cs.
 #>
 [CmdletBinding()]
 param(
@@ -50,7 +57,8 @@ param(
     [switch] $Local,
     [switch] $Simulator,
     [string] $SimulatorName,
-    [switch] $SkipBuild
+    [switch] $SkipBuild,
+    [string] $NativeLog
 )
 
 Set-StrictMode -Version Latest
@@ -62,6 +70,9 @@ $appId     = 'com.melihercan.webrtcme.devicetests'
 
 # The scenario that has to run on its own, and why - see the description above.
 $isolated  = 'ACompletedCallDoesNotChangeWhatDevicesExist'
+
+# Counts the passes that produced native log lines, so each pass writes its own file.
+$nativePass = 0
 
 # Set by Read-Outcome when a run reported a summary, so the failure hint can tell "a check failed"
 # from "it stopped".
@@ -154,6 +165,23 @@ function Read-Outcome {
     }
 
     if ($summary) { $script:sawSummary = $true }
+
+    # Native lines are diagnostics, not results, so they are kept out of the display above - there
+    # can be thousands of them and they would bury the four lines that matter. They are written out
+    # instead, because the shell script deletes its temp log on the way home and this is the only
+    # surviving copy.
+    $native = @($Lines | Where-Object { $_ -match 'WEBRTCME-NATIVE' })
+    if ($native.Count -gt 0) {
+        # Numbered per pass. Each platform runs twice - everything, then the isolated scenario in a
+        # fresh process - and both passes have the same $What, so a fixed name means the second
+        # silently overwrites the first. The first is the interesting one.
+        $script:nativePass++
+        $slug = ($What -replace '[^A-Za-z0-9]+', '-').Trim('-')
+        $nativePath = Join-Path ([IO.Path]::GetTempPath()) "webrtcme-native-$slug-$($script:nativePass).log"
+        $native | ForEach-Object { $_ -replace '^.*?(?=WEBRTCME-NATIVE)', '' } |
+            Set-Content -Path $nativePath -Encoding utf8
+        Write-Host "  $($native.Count) native log lines -> $nativePath" -ForegroundColor DarkGray
+    }
 
     if (-not $summary) {
         Write-Host "  no summary line - the runner did not finish ($What)" -ForegroundColor Red
@@ -321,6 +349,9 @@ function Invoke-Ios {
     # it still ran all five scenarios. devicectl does forward anything prefixed DEVICECTL_CHILD_,
     # so the app sees WEBRTCME_FILTER. See Platforms/iOS/Program.cs.
     $filterExport = if ($Filter) { "export DEVICECTL_CHILD_WEBRTCME_FILTER=$Filter" } else { '' }
+    if ($NativeLog) {
+        $filterExport += "`nexport DEVICECTL_CHILD_WEBRTCME_WEBRTC_LOG=$NativeLog"
+    }
 
     # --console keeps the app attached so its stdout comes back. It also terminates the app when the
     # session ends, which is wanted here and is a trap elsewhere: a detached launch reports "exit
@@ -360,6 +391,9 @@ function Invoke-IosSimulator {
     param([string] $Filter)
 
     $filterExport = if ($Filter) { "export SIMCTL_CHILD_WEBRTCME_FILTER=$Filter" } else { '' }
+    if ($NativeLog) {
+        $filterExport += "`nexport SIMCTL_CHILD_WEBRTCME_WEBRTC_LOG=$NativeLog"
+    }
 
     # simctl forwards SIMCTL_CHILD_-prefixed variables into the app, the same trick devicectl needs
     # and for the same reason.
