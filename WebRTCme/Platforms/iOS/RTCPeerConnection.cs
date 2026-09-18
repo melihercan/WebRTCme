@@ -179,9 +179,27 @@ namespace WebRTCme.iOS
 
         int _disposed;
 
+        // RunContinuationsAsynchronously, and it is load-bearing rather than hygiene.
+        //
+        // These completions are signalled from libwebrtc's own callback, which runs on its
+        // signalling thread. Without this flag TaskCompletionSource runs the awaiting continuation
+        // *synchronously on that thread*, so everything the caller writes after the await executes
+        // inside libwebrtc's callback, in the middle of the operation that raised it.
+        //
+        // For SetLocalDescription that is fatal. Upstream informs the observer and then, on the
+        // next line, calls transport_controller_s()->MaybeStartGathering() - see
+        // sdp_offer_answer.cc:3086, whose comment explains the ordering. A caller that disposes the
+        // connection after awaiting therefore runs Close() before that line, Close() nulls
+        // transport_controller_copy_, and libwebrtc dereferences null at +0x30 on its own thread
+        // with no managed frame in sight. Recorded on 2026-09-18: ... have-local-offer -> closed,
+        // then RemoveSendStream, then the process ends.
+        //
+        // Platforms/Windows/RTCPeerConnection.cs has used this since it was written, and says why.
+        // Apple did not, which is the whole of the difference.
         public Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
-            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.AnswerForConstraints(
                 new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, err) => 
@@ -216,7 +234,8 @@ namespace WebRTCme.iOS
 
         public Task<RTCSessionDescriptionInit> CreateOffer(RTCOfferOptions options)
         {
-            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>();
+            var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.OfferForConstraints(
                 new Webrtc.RTCMediaConstraints(null, null),////NativeDefaultRTCMediaConstraints,
                 (nativeSessionDescription, nsError) =>
@@ -250,7 +269,8 @@ namespace WebRTCme.iOS
 
         public Task<IRTCStatsReport> GetStats()
         {
-            var tcs = new TaskCompletionSource<IRTCStatsReport>();
+            var tcs = new TaskCompletionSource<IRTCStatsReport>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             Webrtc.RTCPeerConnection_Stats.StatisticsWithCompletionHandler(NativeObject,
                 nativeReport => tcs.Complete(nativeReport));
             return tcs.Task;
@@ -285,7 +305,8 @@ namespace WebRTCme.iOS
 
         public Task SetLocalDescription()
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetLocalDescriptionWithCompletionHandler(
                 (nsError) =>
                 {
@@ -300,7 +321,8 @@ namespace WebRTCme.iOS
 
         public Task SetLocalDescription(RTCSessionDescriptionInit sessionDescription) 
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetLocalDescription(
                 sessionDescription.ToNative(),
                 (nsError) =>
@@ -316,7 +338,8 @@ namespace WebRTCme.iOS
 
         public Task SetRemoteDescription(RTCSessionDescriptionInit sessionDescription)
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             NativeObject.SetRemoteDescription(
                 sessionDescription.ToNative(),
                 (nsError) =>
