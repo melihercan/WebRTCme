@@ -346,6 +346,25 @@ a file timestamp.**
 | `WEBRTCME_TEST_ARTIFACTS` | `TestResults/` | Where logs and captured SDP go on failure. |
 | `WEBRTCME_ANDROID_UDID` | first attached | Which Android device. |
 | `WEBRTCME_IOS_DEVICE` | `iPhone` | Which Simulator. |
+| `WEBRTCME_WEBRTC_LOG` | unset | Severity for libwebrtc's own logging inside the runner - `verbose`, `info`, `warning`, `error`. Apple only. Set by `-NativeLog`; see below. |
+
+### Turning libwebrtc's own logging on
+
+`Test-Device-Phase4.ps1 -NativeLog info` starts an `RTCCallbackLogger` in the runner and funnels
+every line the native library emits out as `WEBRTCME-NATIVE`, which `Read-Outcome` writes to a temp
+file rather than printing - there can be hundreds, and they would bury the handful of scenario
+lines that are the result. One file per pass, numbered, because each platform runs twice and the
+first pass is usually the interesting one.
+
+It is off by default on purpose. The Apple fault this was built for is probabilistic, around 85% of
+runs, so logging every run perturbs what is being measured. Turn it on to diagnose, leave it off to
+measure a rate.
+
+It is also the thing that ended a night of guesswork on 2026-09-18. Twelve hypotheses about that
+crash were refuted by measurement and every hand-written probe stayed clean; the native log's last
+lines - `have-local-offer -> closed`, `RemoveSendStream`, then nothing - named the ordering in one
+run. **When a native crash resists reconstruction, read the library's own log before building
+another theory.**
 
 Note what is **absent**: no Appium URL, no per-host IP address, no signalling-server address. The
 loopback design means each host runs its own suite against itself, so the two machines never have
