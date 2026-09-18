@@ -156,19 +156,25 @@ namespace WebRTCme.MacCatalyst
 
         public void Close() => NativeObject.Close();
 
-        // Closing on dispose, which nothing did before. Unlike Android this was never a crash:
-        // the ObjC delegate is declared weak - @property (nonatomic, weak) id<RTCPeerConnectionDelegate> -
-        // so when this wrapper is deallocated the native side's delegate goes nil by itself and no
-        // callback can reach a dead object. That is why #45 was Android only, and why this is not
-        // a copy of the fix that went in there.
-        //
-        // It leaks all the same. Without a close the native peer connection stays open after the
-        // wrapper is gone: ICE and the transports keep running, and whatever it is capturing stays
-        // held. Disposing is the caller saying the session is finished, so finish it.
+        // Closing on dispose, which nothing did before. Without a close the native peer connection
+        // stays open after the wrapper is gone: ICE and the transports keep running, and whatever
+        // it is capturing stays held. Disposing is the caller saying the session is finished, so
+        // finish it.
         //
         // The ObjC object itself is left to ARC rather than disposed here - senders, receivers and
         // transceivers handed out earlier hold their own references to it, and pulling it out from
         // under them is how the Android transceiver bugs started.
+        //
+        // What stood here before said this could never crash, because the ObjC delegate property
+        // is weak and so goes nil when the wrapper is deallocated. The premise is true and the
+        // conclusion did not follow. Closing here is safe only because the completions above use
+        // RunContinuationsAsynchronously: without that, an awaiting caller resumed on libwebrtc's
+        // signalling thread and this Close ran *inside* SetLocalDescription, before the line where
+        // upstream starts ICE gathering - which then dereferenced the controller this had just
+        // destroyed. Deallocation was never the dangerous moment; disposal on the wrong thread was.
+        //
+        // The old comment also said #45 was Android only. It was not: the same defect killed the
+        // Android suite, and fixing it appears to have closed #45 as well.
         protected override void Dispose(bool disposing)
         {
             if (disposing && Interlocked.Exchange(ref _disposed, 1) == 0)
