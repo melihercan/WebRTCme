@@ -177,11 +177,28 @@ namespace WebRTCme.Android
         // caller that disposes a connection after awaiting SetLocalDescription can close it before
         // libwebrtc has finished with it.
         //
-        // On iOS and Mac Catalyst that was fatal, deterministically: SIGSEGV at +0x30 in
+        // This is load-bearing on Android too, not defensive hygiene. It was first described here
+        // as a latent hazard that had not been shown to crash anything; that was wrong, and the
+        // measurements are the reason to leave the flag alone:
+        //
+        //     build                emulator            SM-A176B
+        //     without the flag     5/5 died            died
+        //     with the flag        5/5 clean, 8/8      5/5 clean, 8/8
+        //
+        // What died was ACompletedCallDoesNotChangeWhatDevicesExist, with "FORTIFY:
+        // pthread_mutex_lock called on a destroyed mutex" - a scenario that passes on its own in a
+        // fresh process, so it was collateral rather than the cause, exactly as on Apple.
+        //
+        // It also appears to be issue #45. That crash was always described as a finalizer freeing
+        // something underneath libwebrtc, with the process dying wherever it next called in, and
+        // the scenario written to force it - AReceivedTrackDoesNotPoisonTheProcess - has since
+        // passed five consecutive CI runs in 78-105ms where it used to take 3-31 seconds or take
+        // the process with it. CI's emulator is the only place that ever reached that scenario and
+        // died there, which makes it the only honest before-and-after for #45.
+        //
+        // On iOS and Mac Catalyst the same defect was a SIGSEGV at +0x30 in
         // JsepTransportController::MaybeStartGathering, on a thread with no managed frame in sight.
-        // Whether the Java SDK reaches the same line after informing its observer has not been
-        // checked, so this is not a claim that Android crashed the same way - it is the same latent
-        // defect, fixed the same way, and the cost of the flag is nothing.
+        // Different symptom, one cause: a continuation resumed on a native library's own thread.
         public async Task<RTCSessionDescriptionInit> CreateAnswer(RTCAnswerOptions options)
         {
             var tcs = new TaskCompletionSource<RTCSessionDescriptionInit>(
