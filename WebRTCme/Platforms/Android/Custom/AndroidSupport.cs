@@ -400,6 +400,18 @@ namespace WebRTCme
         }
 
         /// <summary>
+        /// Takes the renderer off the track it was drawing. A view that is handed a different
+        /// track calls this first; without it both tracks feed the one renderer.
+        /// </summary>
+        public static void RemoveTrack(IMediaStreamTrack videoTrack, Webrtc.SurfaceViewRenderer rendererView)
+        {
+            if (videoTrack is null)
+                return;
+            if (((MediaStreamTrack)videoTrack).NativeObject is Webrtc.VideoTrack nativeVideoTrack)
+                nativeVideoTrack.RemoveSink(rendererView);
+        }
+
+        /// <summary>
         /// What a camera track was opened with, for a caller asking a track about itself.
         /// </summary>
         /// <remarks>

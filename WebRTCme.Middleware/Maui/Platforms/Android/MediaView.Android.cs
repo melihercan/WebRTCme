@@ -23,8 +23,22 @@ namespace WebRTCme.Middleware
             AddView(_rendererView);
         }
 
+        private IMediaStreamTrack _track;
+
+        /// <summary>
+        /// Shows a track, or a different one: the previous track's sink comes off the renderer
+        /// first, since a view can be rebound at any time (two tiles trading streams, say).
+        /// </summary>
         public void SetTrack(IMediaStreamTrack videoTrack)
         {
+            if (ReferenceEquals(_track, videoTrack))
+                return;
+
+            AndroidSupport.RemoveTrack(_track, _rendererView);
+            _track = videoTrack;
+            if (videoTrack is null)
+                return;
+
             AndroidSupport.SetTrack(videoTrack, _rendererView, _context/*, _eglBaseContext*/);
             //var nativeVideoTrack = videoTrack.NativeObject as Webrtc.VideoTrack;
 

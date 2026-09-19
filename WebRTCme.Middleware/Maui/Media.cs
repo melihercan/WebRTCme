@@ -1,27 +1,34 @@
 ﻿namespace WebRTCme.Middleware
 {
-    public class Media : View       
+    /// <summary>
+    /// A video tile bound to a stream. Each bindable property is registered under the name of
+    /// the property it backs: MAUI routes a change to the handler's mapper by that name, and a
+    /// property registered as "StreamProperty" reaches a mapper keyed "Stream" only once, when
+    /// the handler is created. Until 2026-09-19 that was the case, so a tile given a different
+    /// stream, label or mute later showed no change.
+    /// </summary>
+    public class Media : View
     {
         public static readonly BindableProperty StreamProperty = BindableProperty
-            .Create(nameof(StreamProperty), typeof(IMediaStream), typeof(Media), null);
+            .Create(nameof(Stream), typeof(IMediaStream), typeof(Media), null);
 
         public static readonly BindableProperty HangupProperty = BindableProperty
-            .Create(nameof(HangupProperty), typeof(bool), typeof(Media), false);
+            .Create(nameof(Hangup), typeof(bool), typeof(Media), false);
 
         public static readonly BindableProperty LabelProperty = BindableProperty
-            .Create(nameof(LabelProperty), typeof(string), typeof(Media), string.Empty);
+            .Create(nameof(Label), typeof(string), typeof(Media), string.Empty);
 
         public static readonly BindableProperty VideoMutedProperty = BindableProperty
-            .Create(nameof(VideoMutedProperty), typeof(bool), typeof(Media), false);
+            .Create(nameof(VideoMuted), typeof(bool), typeof(Media), false);
 
         public static readonly BindableProperty AudioMutedProperty = BindableProperty
-            .Create(nameof(AudioMutedProperty), typeof(bool), typeof(Media), false);
+            .Create(nameof(AudioMuted), typeof(bool), typeof(Media), false);
 
         public static readonly BindableProperty CameraTypeProperty = BindableProperty
-            .Create(nameof(CameraTypeProperty), typeof(CameraType), typeof(Media), CameraType.Default);
+            .Create(nameof(CameraType), typeof(CameraType), typeof(Media), CameraType.Default);
 
         public static readonly BindableProperty ShowControlsProperty = BindableProperty
-            .Create(nameof(ShowControlsProperty), typeof(bool), typeof(Media), false);
+            .Create(nameof(ShowControls), typeof(bool), typeof(Media), false);
 
         public IMediaStream Stream
         {

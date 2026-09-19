@@ -15,6 +15,34 @@ namespace WebRTCme
 {
     public static class IosSupport
     {
+        /// <summary>One capturer per camera track, started once; see <see cref="SetCameraTrack(Webrtc.RTCCameraPreviewView, IMediaStreamTrack)"/>.</summary>
+        static readonly ConcurrentDictionary<string, Webrtc.RTCCameraVideoCapturer> _capturersByTrackId = new();
+
+        /// <summary>
+        /// Shows a camera track in a preview view. The capture session belongs to the track,
+        /// not to the view: a second view given the same track (two tiles trading streams)
+        /// joins the running session rather than starting another capturer on the device.
+        /// </summary>
+        public static void SetCameraTrack(Webrtc.RTCCameraPreviewView cameraView, IMediaStreamTrack videoTrack)
+        {
+            var capturer = _capturersByTrackId.GetOrAdd(videoTrack.Id, _ =>
+            {
+                var started = new Webrtc.RTCCameraVideoCapturer();
+                SetCameraTrack(cameraView, videoTrack, started);
+                return started;
+            });
+            cameraView.CaptureSession = capturer.CaptureSession;
+        }
+
+        /// <summary>Takes a renderer off the track it was drawing, before the view shows another.</summary>
+        public static void RemoveRendererTrack(Webrtc.RTCMTLVideoView rendererView, IMediaStreamTrack videoTrack)
+        {
+            if (videoTrack is null)
+                return;
+            if (((MediaStreamTrack)videoTrack).NativeObject is Webrtc.RTCVideoTrack nativeVideoTrack)
+                nativeVideoTrack.RemoveRenderer((Webrtc.IRTCVideoRenderer)rendererView);
+        }
+
         public static void SetCameraTrack(Webrtc.RTCCameraPreviewView _cameraView, IMediaStreamTrack videoTrack, 
             Webrtc.RTCCameraVideoCapturer _videoCapturer)
         {

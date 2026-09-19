@@ -27,6 +27,35 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
+### A Maui Media tile never changed what it showed - fixed 2026-09-19
+
+Found by DirectCallMe when its call page let the two tiles trade streams: the view model changed,
+the bindings delivered the new `IMediaStream` values, and both tiles kept showing what they had
+been given at birth. On Windows and Android alike, and `Label` and `AudioMuted` behaved the same.
+
+`Maui/Media.cs` registered every bindable property under the name of the field rather than the
+property - `BindableProperty.Create(nameof(StreamProperty), ...)`. MAUI routes a change to the
+handler by that name, and the handler's mapper is keyed `nameof(Media.Stream)`. `"StreamProperty"`
+matched nothing, so `MapStream` ran exactly once, when the handler was created and every mapper
+runs, and never again. Seven properties, the same mistake in each.
+
+Fixed by registering each under its own name. That made the platform views see a *replaced* track
+for the first time, and three of them were not ready:
+
+- Windows already disposed the previous frame subscription in `MediaView.SetTrack`.
+- Android added the new track's sink to the renderer and never removed the old one, so a swap fed
+  two tracks into one view. The view now remembers its track and `RemoveSink`s it first
+  (`AndroidSupport.RemoveTrack`).
+- iOS and Mac Catalyst added a fresh `RTCMTLVideoView` or `RTCCameraPreviewView` as a subview on
+  every call, and started a new `RTCCameraVideoCapturer` on the device for a camera track each
+  time. The views now take the previous subview down (a renderer off its track, a preview simply
+  removed), and the capturer lives in the support class, one per camera track, as Android has done
+  since 2026-09-12 - a second view given the same camera joins the running session.
+
+Verified on Windows and Android with the tiles swapped mid-call against a locally packed
+`26.9.19-sinkfix`. **The Apple halves compile but have not been run.** Tracked as issue #47.
+**Ships with the next release**; 26.9.18 has the fault.
+
 ### The Windows frame sink deadlocked the app on navigation - fixed 2026-09-19
 
 Found by DirectCallMe on a Windows-to-Android call, in the first second after the connection came
