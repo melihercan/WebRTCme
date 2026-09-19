@@ -246,6 +246,16 @@ public static partial class Interop
     public static partial int VideoTrackCreate(IntPtr factory, string deviceId, string label,
                                                int width, int height, int fps, out IntPtr track);
 
+    /// <summary>
+    /// What the camera was actually opened at, which is not always what was asked for: a device
+    /// that does not publish the requested format answers with its nearest supported one and says
+    /// nothing. Returns <see cref="ErrNotFound"/> for audio and remote tracks.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_video_track_get_settings")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int VideoTrackGetSettings(IntPtr track, out int width, out int height,
+                                                     out int frameRate);
+
     [LibraryImport(Lib, EntryPoint = "rtc_media_track_set_enabled")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int MediaTrackSetEnabled(IntPtr track, int enabled);
@@ -370,6 +380,27 @@ public static partial class Interop
     [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_replace_track")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int RtpSenderReplaceTrack(IntPtr sender, IntPtr track);
+
+    /// <summary>
+    /// Reads the sender's encodings. Two-call: a null buffer learns the count, then a buffer of
+    /// at least that size. <c>Rid</c> and <c>ScalabilityMode</c> come back caller-owned -- take
+    /// them with <c>WebRtcRuntime.TakeString</c>, which frees them.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_get_parameters")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int RtpSenderGetParameters(IntPtr sender, RtpEncoding* buffer,
+                                                            int capacity, out int count);
+
+    /// <summary>
+    /// Applies the writable encoding fields. The shim does its own getParameters and applies
+    /// these onto it, so the transaction id WebRTC insists on never crosses the boundary; the
+    /// count has to match what the sender already has, and a sentinel clears rather than being
+    /// ignored, which is how a cap is lifted.
+    /// </summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_rtp_sender_set_parameters")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static unsafe partial int RtpSenderSetParameters(IntPtr sender, RtpEncoding* encodings,
+                                                            int encodingCount);
 
     /// <summary>The sender handle stays valid and must still be released.</summary>
     [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_remove_track")]

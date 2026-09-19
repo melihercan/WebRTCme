@@ -1,4 +1,4 @@
-# Native binaries
+﻿# Native binaries
 
 These come from the `webrtc-interop-windows-x64-*` artifact of the
 **WebRtcNativeInteropWindows** workflow in
@@ -12,8 +12,10 @@ Take only the files below, not the whole artifact. The workflow collects GN's
 referenced by abseil's symbolizer, and the copy in `System32` serves.
 
 `WebRtcInterop.dll.lib` is for C++ consumers and is not needed for P/Invoke.
-`WebRtcInterop.dll.pdb` is optional and large (~126 MB); take it only when
-debugging a native crash. `webrtc.dll` is **not** used — the interop DLL absorbs
+`WebRtcInterop.dll.pdb` is optional and large (~63 MB); take it only when
+debugging a native crash. The workflow builds at `symbol_level = 1`, so it
+carries line tables rather than full locals -- enough to resolve a crash
+address, and what keeps the build inside the runner's disk. `webrtc.dll` is **not** used — the interop DLL absorbs
 the WebRTC code it needs and does not depend on it.
 
 ## What belongs here

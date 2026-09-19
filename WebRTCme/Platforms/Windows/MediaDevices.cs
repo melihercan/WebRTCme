@@ -1,4 +1,4 @@
-using static WebRTCme.Bindings.Maui.Windows.Interop;
+﻿using static WebRTCme.Bindings.Maui.Windows.Interop;
 
 namespace WebRTCme.Windows;
 
@@ -319,6 +319,18 @@ internal sealed class MediaDevices : IMediaDevices
                 "close anything else using the camera and try again.");
 
         WebRtcRuntime.Check(status, $"open camera '{label}' at {width}x{height}@{frameRate}");
+
+        // What was asked for is a preference, not a contract: a camera that does not publish the
+        // requested format opens at its nearest supported one and says nothing. Reporting the
+        // request back would make GetSettings() and GetCapabilities() confidently wrong -- asking
+        // this Logitech for 999x777 opens it at 1600x896 -- so take the real numbers.
+        if (VideoTrackGetSettings(handle, out var actualWidth, out var actualHeight,
+                                  out var actualFrameRate) == Ok)
+        {
+            width = actualWidth;
+            height = actualHeight;
+            frameRate = actualFrameRate;
+        }
 
         return new MediaStreamTrack(handle, MediaStreamTrackKind.Video, id, label,
                                     isRemote: false, deviceId, width, height, frameRate);
