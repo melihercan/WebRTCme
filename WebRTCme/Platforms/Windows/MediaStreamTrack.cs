@@ -10,13 +10,23 @@ namespace WebRTCme.Windows;
 /// a peer.
 /// </summary>
 /// <remarks>
-/// The ABI allows a single frame sink per track, so this owns that one sink and fans frames out
-/// to however many subscribers the app attaches -- a local track feeding both a self-preview and
-/// something else would otherwise fail with INVALID_STATE on the second attach.
+/// <para>The ABI allows a single frame sink per track, so this owns that one sink and fans frames
+/// out to however many subscribers the app attaches -- a local track feeding both a self-preview
+/// and something else would otherwise fail with INVALID_STATE on the second attach.</para>
+/// <para>The frame thread never takes <see cref="_gate"/>. <c>rtc_video_track_remove_sink</c> is a
+/// blocking call onto the thread that delivers frames, and it is made while the gate is held; a
+/// frame callback that waited for the gate would then wait for the thread that is waiting for it.
+/// That deadlock was seen in the wild (2026-09-19): a MAUI page navigating away from a preview
+/// disposed its subscription with a frame in flight, and the UI thread and the capture thread
+/// froze each other. So the subscriber list is copy-on-write: writers replace the array under
+/// the gate, and <see cref="OnFrame"/> reads whichever array is current without locking.</para>
 /// </remarks>
 internal sealed class MediaStreamTrack : IMediaStreamTrack
 {
-    private readonly List<Action<byte[], int, int>> _subscribers = [];
+    private static readonly Action<byte[], int, int>[] NoSubscribers = [];
+
+    /// <summary>Replaced, never mutated: <see cref="OnFrame"/> reads it without the gate.</summary>
+    private Action<byte[], int, int>[] _subscribers = NoSubscribers;
     private readonly object _gate = new();
 
     private IntPtr _handle;
@@ -104,7 +114,7 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
         {
             ObjectDisposedException.ThrowIf(_handle == IntPtr.Zero, this);
 
-            _subscribers.Add(onBgraFrame);
+            Volatile.Write(ref _subscribers, [.. _subscribers, onBgraFrame]);
 
             if (!_sinkAttached)
             {
@@ -126,14 +136,36 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
     {
         lock (_gate)
         {
-            _subscribers.Remove(onBgraFrame);
+            var remaining = Without(_subscribers, onBgraFrame);
+            if (remaining is null)
+                return;
+            Volatile.Write(ref _subscribers, remaining);
 
-            if (_subscribers.Count == 0)
+            if (remaining.Length == 0)
                 DetachSink();
         }
     }
 
-    /// <summary>Caller holds <see cref="_gate"/>.</summary>
+    /// <summary>The array without the first occurrence of <paramref name="item"/>, or null when it is not there.</summary>
+    private static Action<byte[], int, int>[] Without(Action<byte[], int, int>[] items, Action<byte[], int, int> item)
+    {
+        var index = Array.IndexOf(items, item);
+        if (index < 0)
+            return null;
+        if (items.Length == 1)
+            return NoSubscribers;
+
+        var remaining = new Action<byte[], int, int>[items.Length - 1];
+        Array.Copy(items, 0, remaining, 0, index);
+        Array.Copy(items, index + 1, remaining, index, items.Length - index - 1);
+        return remaining;
+    }
+
+    /// <summary>
+    /// Caller holds <see cref="_gate"/>. The native remove returns only once the frame thread is
+    /// out of <see cref="OnFrame"/>, which is what makes freeing the handle afterwards safe -- and
+    /// why <see cref="OnFrame"/> must never wait for the gate.
+    /// </summary>
     private void DetachSink()
     {
         if (!_sinkAttached)
@@ -153,15 +185,13 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
         if (track is null || frame->Y == IntPtr.Zero || frame->Width <= 0 || frame->Height <= 0)
             return;
 
-        // Snapshot the handlers rather than converting under the lock: this is the capture
-        // thread, and holding it here would stall the pipeline behind an unsubscribe.
-        Action<byte[], int, int>[] subscribers;
-        lock (track._gate)
-        {
-            if (track._subscribers.Count == 0)
-                return;
-            subscribers = [.. track._subscribers];
-        }
+        // No lock here, ever: an unsubscribe on another thread holds the gate while the native
+        // remove-sink waits for this very thread to finish. The current array is enough; one
+        // that changed a moment ago delivers one more frame to a handler that just left, which
+        // the middleware tolerates, while a lock would deadlock the application.
+        var subscribers = Volatile.Read(ref track._subscribers);
+        if (subscribers.Length == 0)
+            return;
 
         // A fresh buffer per frame: the middleware hands it to the UI thread and reads it after
         // this call has returned, so a shared buffer would tear.
@@ -252,7 +282,7 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
             if (_handle == IntPtr.Zero)
                 return;
 
-            _subscribers.Clear();
+            Volatile.Write(ref _subscribers, NoSubscribers);
             DetachSink();
 
             handle = _handle;

@@ -27,6 +27,48 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
+### The Windows frame sink deadlocked the app on navigation - fixed 2026-09-19
+
+Found by DirectCallMe on a Windows-to-Android call, in the first second after the connection came
+up: the MAUI UI thread froze on the page it was leaving, and the phone saw a black tile because the
+capture thread had frozen with it. Two stacks from the live process, taken with a non-invasive
+`cdb -pv -p <pid> -c ".loadby sos coreclr; !clrstack -all; q"`:
+
+```
+UI thread
+  WebRTCme.Bindings.Maui.Windows.Interop.VideoTrackRemoveSink      (native: rtc_video_track_remove_sink,
+  WebRTCme.Windows.MediaStreamTrack.DetachSink                       blocked in WaitForSingleObjectEx)
+  WebRTCme.Windows.MediaStreamTrack.Unsubscribe                     holds _gate
+  WebRTCme.Windows.MediaStreamTrack+Subscription.Dispose
+  WebRTCme.Middleware.MediaView.SetTrack
+  WebRTCme.Middleware.MediaHandler.MapStream
+  ... Microsoft.Maui.Controls.ShellNavigationManager.GoToAsync
+
+capture thread
+  System.Threading.Monitor.Enter_Slowpath                           waiting for _gate
+  WebRTCme.Windows.MediaStreamTrack.OnFrame
+```
+
+`rtc_video_track_remove_sink` is a blocking call onto the libwebrtc thread that delivers frames,
+so it returns only once that thread is idle. `Unsubscribe` made the call while holding `_gate`,
+and `OnFrame`, on that thread, took `_gate` to snapshot the subscriber list. With a frame in
+flight at the moment the last subscriber left, each thread waited for the other. The middleware's
+`MediaView.SetTrack` disposes the previous subscription, so ordinary navigation from a preview
+page to a call page is enough to hit it; how often is down to the frame rate and the timing of the
+navigation, which is why weeks of calls passed before one froze.
+
+Fixed in `Platforms/Windows/MediaStreamTrack.cs` by taking the lock off the frame thread
+altogether: the subscriber list is now a copy-on-write array, replaced under `_gate` by
+`SubscribeToFrames`, `Unsubscribe` and `Dispose`, and read by `OnFrame` with a volatile read and
+no lock. The native remove still runs under the gate - that is what makes freeing the `GCHandle`
+after it safe, because no callback is in flight once it returns - and it is now harmless, since
+nothing the frame thread does can wait for the gate. A frame that races a change may reach a
+handler that just unsubscribed, once, which the middleware already tolerates.
+
+Builds on Windows, and the five loopback scenarios in `Tests/WebRTCme.DeviceTests` pass against a
+locally packed `26.9.19-sinkfix`; not yet run in a two-device call. **Ships with the next
+release**; 26.9.18 has the fault. Tracked as issue #46.
+
 ### libwebrtc aborts intermittently on the Android x86_64 emulator - open 2026-09-16
 
 `Tests/Test-Device-Phase4.ps1 -Platform android` passes on a real phone every time it has been run.
