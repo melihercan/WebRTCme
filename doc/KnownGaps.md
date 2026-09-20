@@ -1793,11 +1793,44 @@ assumed: all 41 `[Field]` declarations in both `ApiDefinitions.cs` were matched 
 Apple binaries. On M152 `kRTCIlbcCodecName` had been dropped upstream and only failed when an app
 linked, on a Mac.
 
-**What was verified, and what was not.** Windows was exercised end to end against the artifact
-bytes - eight C harnesses plus a managed smoke test. Android, iOS and Mac Catalyst were *built*,
-not *run*: no M153 binary has yet been launched on a phone, a simulator or a Mac. The iLBC failure
-on the last upgrade was invisible until an app linked, so treat the Apple platforms as unproven
-until one does.
+**All four ran on real hardware the same day**, in one room on one signalling server. Windows was
+additionally exercised against the artifact bytes directly - eight C harnesses plus a managed smoke
+test - before any of this.
+
+| | peer | Android sent | Android received |
+|---|---|---|---|
+| three-party | Windows | 120.7 MB video, 16730 frames | 115.8 MB video |
+| | Mac Catalyst | 8.6 MB video, 1113 frames | live, green speaker border |
+| after a restart | Windows | 8.37 MB video | 8.29 MB video |
+| | iOS | 7.88 MB video | 2.93 MB video |
+
+Loss across ~9 minutes and 17,800 frames was 51 video packets and 3 audio: noise. Round-trip times
+were 3-23 ms on the LAN.
+
+**iOS was the one that needed doing.** On the M152 upgrade `kRTCIlbcCodecName` had been dropped
+upstream, and that failure was invisible to every check available from Windows - it only appeared
+when an app *linked*, on a Mac. The `[Field]` audit said M153 was clean, but an audit is not a
+link. It has now linked, signed, installed, launched, and carried video and audio against both
+Google's Java SDK on Android and this repository's own interop shim on Windows.
+
+**A long call decays.** After about thirty minutes the three-party call degraded while every
+process was still alive: Mac Catalyst vanished from Android's tile list and the Windows peer went
+to `pair:none` with `inbound-rtp=0`, though its byte counters were frozen rather than falling.
+Restarting Android alone restored both. Nothing here was chased down, and it is not M153-specific -
+but a call that dies quietly with all its processes running is worth knowing about before a user
+reports it.
+
+**Running the Apple platforms from a script, for whoever does this next.** Mac Catalyst builds and
+runs over SSH with `-p:CodesignKey="-"`, which is ad-hoc signing and needs no identity at all. A
+physical iPhone does not: it needs a real Apple Development identity, and using that private key
+requires the keychain to authorise a non-interactive process. An SSH session can *see* the
+identities - `security find-identity` lists them - and is still refused their use, failing with
+`errSecInternalComponent`. Unlocking the keychain in a Terminal does not help, because that applies
+to a different security session. So the iPhone leg has to be run from a logged-in session on the
+Mac. Two things to avoid: `-t:Run` does not build, so it must follow a plain build rather than a
+clean; and a build that fails *at* the codesign step leaves an unsigned `.app` behind, which a
+later `-t:Run` will happily try to install, producing `0xe800801c (No code signature found)` from
+the device rather than anything about signing.
 
 One defect found and not yet fixed upstream: the Mac Catalyst artifact writes
 `PrivacyInfo.xcprivacy` to `Versions/A/Versions/A/Resources/` rather than `Versions/A/Resources/`,
