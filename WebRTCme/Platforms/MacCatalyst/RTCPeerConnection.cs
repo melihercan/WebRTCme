@@ -301,10 +301,16 @@ namespace WebRTCme.MacCatalyst
         public void RemoveTrack(IRTCRtpSender sender) =>
             NativeObject.RemoveTrack(((RTCRtpSender)sender).NativeObject as Webrtc.RTCRtpSender);
 
-        public void RestartIce()
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Asks ICE to gather fresh candidates and re-run connectivity checks, which is the only
+        /// way back from a transport that has failed -- a peer whose network path changed under it
+        /// does not recover on its own.
+        /// </summary>
+        /// <remarks>
+        /// Per W3C this raises negotiationneeded rather than doing the work itself: the caller
+        /// still has to offer, and the new offer carries fresh ICE credentials.
+        /// </remarks>
+        public void RestartIce() => NativeObject.RestartIce();
 
         public void SetConfiguration(RTCConfiguration configuration) =>
             NativeObject.SetConfiguration(configuration.ToNative());

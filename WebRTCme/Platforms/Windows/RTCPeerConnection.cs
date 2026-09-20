@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static WebRTCme.Bindings.Maui.Windows.Interop;
 
@@ -816,8 +816,22 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     public Task<IRTCCertificate> GenerateCertificate(Dictionary<string, object> keygenAlgorithm) =>
         throw new NotSupportedException("Certificate generation is not exposed by the Windows binding.");
 
-    public void RestartIce() =>
-        throw new NotSupportedException("ICE restart is not supported by the Windows binding.");
+    /// <summary>
+    /// Asks ICE to gather fresh candidates and re-run connectivity checks, which is the only
+    /// way back from a transport that has failed -- a peer whose network path changed under it
+    /// does not recover on its own.
+    /// </summary>
+    /// <remarks>
+    /// Per W3C this raises negotiationneeded rather than doing the work itself: the caller
+    /// still has to offer, and the new offer carries fresh ICE credentials.
+    /// </remarks>
+    public void RestartIce()
+    {
+        if (_handle == IntPtr.Zero)
+            return;
+
+        WebRtcRuntime.Check(PeerConnectionRestartIce(_handle), "restart ICE");
+    }
 
     public void SetConfiguration(RTCConfiguration configuration) =>
         throw new NotSupportedException(

@@ -414,10 +414,16 @@ namespace WebRTCme.Android
         }
 
 
-        public void RestartIce()
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Asks ICE to gather fresh candidates and re-run connectivity checks, which is the only
+        /// way back from a transport that has failed -- a peer whose network path changed under it
+        /// does not recover on its own.
+        /// </summary>
+        /// <remarks>
+        /// Per W3C this raises negotiationneeded rather than doing the work itself: the caller
+        /// still has to offer, and the new offer carries fresh ICE credentials.
+        /// </remarks>
+        public void RestartIce() => NativeObject.RestartIce();
 
         public void SetConfiguration(RTCConfiguration configuration) =>
             NativeObject.SetConfiguration(configuration.ToNative());
@@ -489,13 +495,37 @@ namespace WebRTCme.Android
         {
         }
 
+        // Set once libwebrtc has delivered a peer connection state of its own, which
+        // disables the ICE-derived stand-in below. Kept as a guard rather than deleting
+        // that stand-in outright: if a future native SDK ever stops calling this, the
+        // old behaviour returns instead of the event going silent.
+        private bool _nativeConnectionState;
+
+        // The real W3C peer connection state. The comment below used to say Android does
+        // not provide this event; it has for years - onConnectionChange is on
+        // PeerConnection.Observer and bound as IObserver.OnConnectionChange. Using it is
+        // what makes Failed observable, and it matches what iOS and Mac Catalyst do.
+        // Explicit implementation: the public OnConnectionStateChanged event owns the
+        // obvious name, and the generated interface member is a Java default method - the
+        // same shape as OnTrack above, which has to be implemented or the call bounces.
+        void Webrtc.PeerConnection.IObserver.OnConnectionChange(
+            Webrtc.PeerConnection.PeerConnectionState p0)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"OOOOOOOOOOOOOOOOOOOOOOO PeerConnection.ConnectionState: {p0}");
+
+            _nativeConnectionState = true;
+            OnConnectionStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         private bool _isConnected;
         public void OnIceConnectionChange(Webrtc.PeerConnection.IceConnectionState p0)
         {
             OnIceConnectionStateChange?.Invoke(this, EventArgs.Empty);
 
-            // !!! I don't know why Android DOES NOT provide Connection State Change event???
-            // I drive this event from Ice Connection State Change event here for now.
+            // This used to drive OnConnectionStateChanged from here, because "Android DOES
+            // NOT provide Connection State Change event". It does - see OnConnectionChange
+            // above - and the stand-in below now runs only if that never fires.
 
 #if false
 
@@ -553,6 +583,12 @@ namespace WebRTCme.Android
             {
             }
 #endif
+
+            // Only if the native peer connection state never arrives. Raising both would
+            // double every transition, and this stand-in cannot see Failed at all: it
+            // fires once on leaving Connected, when the state still reads Disconnected.
+            if (_nativeConnectionState)
+                return;
 
             if (p0 == PeerConnection.IceConnectionState.Connected || p0 == PeerConnection.IceConnectionState.Completed)
             {

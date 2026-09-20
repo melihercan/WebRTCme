@@ -26,7 +26,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **A failed transport is never noticed and never recovered** | nobody - it can be picked up today | A peer whose ICE fails leaves a tile frozen on its last frame forever, with the app still looking connected. `Failed` is not handled, and `RestartIce()` throws on all four native platforms. Seen twice now, from two different causes. See below. |
+| **Transport recovery has never run on a device** | a three-machine call and half an hour | Detecting `Failed` and recovering with an ICE restart is implemented on all five platforms and covered by unit tests, but no recovery has been observed on real hardware - the trigger is a network event nobody controls. See below. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 
@@ -1829,20 +1829,42 @@ half of that entry was never done:
 
 > Nothing reopening it, and nothing noticing the transports failed, is ours.
 
-It also warned, correctly, that treating recovery as optional was a mistake. It is still optional,
-and this is what that costs.
+It also warned, correctly, that treating recovery as optional was a mistake. It stayed optional
+until this, and the paragraphs below are what that cost.
 
-**The gap is three pieces, and none of them is present.**
+**The gap was three pieces, and none of them was present. All three are now in - 2026-09-20.**
 
-1. `SignalingConnection.OnConnectionStateChanged` acts only on `Connected`. `Disconnected` and
-   `Failed` fall through a commented-out branch marked *"WILL BE HANDLED BY PEER LEFT"* - but
+1. `SignalingConnection.OnConnectionStateChanged` acted only on `Connected`. `Disconnected` and
+   `Failed` fell through a commented-out branch marked *"WILL BE HANDLED BY PEER LEFT"* - but
    `PeerLeft` is server-driven, raised when a peer calls `LeaveAsync`. A peer whose transport dies
-   never leaves, so nothing is ever cleaned up and the tile stays on the last frame forever.
-2. `OnIceConnectionStateChange` has the state that would say so, and only logs it.
-3. `RestartIce()` **throws on all four native platforms** - `NotImplementedException` on Android,
-   iOS and Mac Catalyst, `NotSupportedException` on Windows - and is implemented only on Blazor.
-   The `IceRestart` offer option exists on `RTCOfferOptions` and is plumbed into no platform's
-   `CreateOffer`. So even code that wanted to recover has nothing to call.
+   never leaves, so nothing was ever cleaned up and the tile stayed on the last frame forever.
+   `Failed` is now handled: the initiator restarts ICE and offers again, up to
+   `MaxIceRestartAttempts` (3) times, after which the peer is reported as lost with a `PeerError`
+   rather than left looking connected. `Disconnected` is still deliberately ignored - W3C has it as
+   a state that frequently recovers by itself, and restarting on it throws away connections that
+   were about to come back.
+2. `RestartIce()` **threw on all four native platforms** - `NotImplementedException` on Android,
+   iOS and Mac Catalyst, `NotSupportedException` on Windows - and worked only on Blazor. Android,
+   iOS and Mac Catalyst were one line each: all three native SDKs have had the call for years and
+   the bindings simply never made it. Windows needed an ABI addition, `rtc_peer_connection_restart_ice`,
+   because the shim had no export for it.
+3. **Android could not report `Failed` at all**, which is the part that would have made the other
+   two useless on the platform that decayed. `OnIceConnectionChange` synthesised the peer connection
+   state from the ICE state, under a comment reading *"I don't know why Android DOES NOT provide
+   Connection State Change event???"*. It does, and has for years - `onConnectionChange` is on
+   `PeerConnection.Observer` and was already bound. The synthesis fired exactly once on leaving
+   `Connected`, when the state still reads `Disconnected`; the move to `Failed` afterwards raised
+   nothing. Android now uses the native callback, as iOS and Mac Catalyst already did, and the
+   synthesis remains only as a fallback if that callback ever stops arriving.
+
+**What this has not proved.** No recovery has been watched happen. The unit tests
+(`Tests/WebRTCme.Tests/Unit/SignalingConnectionRecoveryTests.cs`, six of them) pin the rules -
+restart on `Failed`, not on `Disconnected`, initiator only, bounded at three, report when the
+allowance is spent, reset on reconnect - and were checked against a build with the recovery
+disabled, where four of the six fail. That is the logic, not the platform. Nothing has confirmed
+that a real phone that has roamed off its network comes back, and the trigger is not something
+anyone can schedule. Windows is the least tested of the five: its ABI export has never been called
+from a device, only compiled.
 
 **On the trigger, a hypothesis and a discarded one.** Android is the peer that reported `pair:none`
 for Windows *and* lost Catalyst's tile, and one peer losing its network path explains both
@@ -1852,8 +1874,8 @@ Discarded on evidence: the Windows app is `Windows.FullTrustApplication`, so it 
 the UWP background suspension that would otherwise have been the tidy explanation.
 
 The trigger hardly matters for what to do about it. Networks change and phones roam; a call that
-cannot survive that is a call that dies in normal use. **The defect is that nothing detects it and
-nothing recovers.**
+cannot survive that is a call that dies in normal use. **The defect was that nothing detected it and
+nothing recovered**, which is what the three pieces above address.
 
 **Running the Apple platforms from a script, for whoever does this next.** Mac Catalyst builds and
 runs over SSH with `-p:CodesignKey="-"`, which is ad-hoc signing and needs no identity at all. A

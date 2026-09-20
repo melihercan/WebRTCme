@@ -276,6 +276,13 @@ public static partial class Interop
                                                    in PeerConnectionObserver observer,
                                                    IntPtr userData, out IntPtr pc);
 
+    /// <summary>W3C restartIce(): gather fresh candidates and re-run connectivity
+    /// checks. Does not renegotiate - the caller must offer afterwards, and that
+    /// offer carries the new ICE credentials.</summary>
+    [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_restart_ice")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int PeerConnectionRestartIce(IntPtr pc);
+
     /// <summary>W3C close(): an observable state transition. The handle stays
     /// valid so callbacks already in flight can land; release separately.</summary>
     [LibraryImport(Lib, EntryPoint = "rtc_peer_connection_close")]

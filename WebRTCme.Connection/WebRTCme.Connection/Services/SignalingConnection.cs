@@ -747,20 +747,7 @@ namespace WebRTCme.Connection.Services
                 var peerContext = _connectionContext.PeerContexts.Single(context => context.Id.Equals(peerId));
                 var peerConnection = peerContext.PeerConnection;
 
-                var offerDescription = await peerConnection.CreateOffer();
-
-                var sdp = JsonSerializer.Serialize(offerDescription, JsonHelper.WebRtcJsonSerializerOptions);
-                System.Diagnostics.Debug.WriteLine(
-////        _logger.LogInformation(
-                    $"-------> Sending Offer - room:{_connectionContext.UserContext.Room} " +
-                    $"user:{_connectionContext.UserContext.Name} " +
-                    $"peerUser:{peerName}");// sdp:{offerDescription.Sdp}");
-
-                await peerConnection.SetLocalDescription(offerDescription);
-
-                var result = await _signalingServerApi.SdpAsync(peerId, sdp);
-                if (!result.IsOk)
-                    throw new Exception($"{result.ErrorMessage}");
+                await SendOfferAsync(peerId, peerName, peerConnection);
             }
             catch (Exception ex)
             {
@@ -773,6 +760,100 @@ namespace WebRTCme.Connection.Services
                 });
             }
 
+        }
+
+        /// <summary>
+        /// Offers to a peer: create, apply locally, send. Used for the first offer and for the one
+        /// that carries fresh ICE credentials after a restart.
+        /// </summary>
+        async Task SendOfferAsync(Guid peerId, string peerName, IRTCPeerConnection peerConnection)
+        {
+            var offerDescription = await peerConnection.CreateOffer();
+
+            var sdp = JsonSerializer.Serialize(offerDescription, JsonHelper.WebRtcJsonSerializerOptions);
+            System.Diagnostics.Debug.WriteLine(
+                $"-------> Sending Offer - room:{_connectionContext.UserContext.Room} " +
+                $"user:{_connectionContext.UserContext.Name} " +
+                $"peerUser:{peerName}");
+
+            await peerConnection.SetLocalDescription(offerDescription);
+
+            var result = await _signalingServerApi.SdpAsync(peerId, sdp);
+            if (!result.IsOk)
+                throw new Exception($"{result.ErrorMessage}");
+        }
+
+        /// <summary>
+        /// How many ICE restarts a peer gets before the call is reported as lost.
+        /// </summary>
+        const int MaxIceRestartAttempts = 3;
+
+        /// <summary>
+        /// Recovers a peer whose transport has failed, by gathering fresh candidates and offering
+        /// again. Reports the peer as lost once the allowance is spent.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Only the initiator restarts. Both ends see <c>Failed</c>, and both restarting produces
+        /// glare - two offers crossing, one of which has to be rolled back - for no benefit, since
+        /// one restart re-runs connectivity checks for the pair.
+        /// </para>
+        /// <para>
+        /// Runs off the caller's thread deliberately. The state change arrives on WebRTC's
+        /// signalling thread, every peer connection in the process shares it, and creating an
+        /// offer from inside that callback deadlocks: the call blocks on the thread it was
+        /// delivered on.
+        /// </para>
+        /// </remarks>
+        void RecoverFailedPeer(PeerContext peerContext)
+        {
+            if (!peerContext.IsInitiator)
+                return;
+
+            if (peerContext.IceRestartAttempts >= MaxIceRestartAttempts)
+            {
+                _connectionContext?.Observer.OnNext(new PeerResponse
+                {
+                    Type = PeerResponseType.PeerError,
+                    Id = peerContext.Id,
+                    Name = peerContext.Name,
+                    ErrorMessage =
+                        $"The connection to {peerContext.Name} failed and could not be restored " +
+                        $"after {MaxIceRestartAttempts} attempts."
+                });
+                return;
+            }
+
+            peerContext.IceRestartAttempts++;
+            var attempt = peerContext.IceRestartAttempts;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    _logger.LogInformation(
+                        $"######## ICE restart {attempt}/{MaxIceRestartAttempts} for " +
+                        $"peer:{peerContext.Name}");
+
+                    peerContext.PeerConnection.RestartIce();
+                    await SendOfferAsync(peerContext.Id, peerContext.Name,
+                                         peerContext.PeerConnection);
+                }
+                catch (Exception exception)
+                {
+                    // Reported rather than rethrown: this runs detached, so an escaping exception
+                    // would be lost and the peer would simply stay dead with nothing said.
+                    _connectionContext?.Observer.OnNext(new PeerResponse
+                    {
+                        Type = PeerResponseType.PeerError,
+                        Id = peerContext.Id,
+                        Name = peerContext.Name,
+                        ErrorMessage =
+                            $"Could not restart the connection to {peerContext.Name}: " +
+                            exception.Message
+                    });
+                }
+            });
         }
 
         public async Task OnPeerLeftAsync(Guid peerId)
@@ -1046,6 +1127,13 @@ namespace WebRTCme.Connection.Services
                         $"peerUser:{peerName} " +
                         $"connectionState:{peerConnection.ConnectionState}");
                     if (peerConnection.ConnectionState == RTCPeerConnectionState.Connected)
+                    {
+                        // A peer that has connected has spent none of its recovery allowance.
+                        var connected = _connectionContext?.PeerContexts
+                            .SingleOrDefault(context => context.Id.Equals(peerId));
+                        if (connected is not null)
+                            connected.IceRestartAttempts = 0;
+
                         _connectionContext.Observer.OnNext(new PeerResponse
                         {
                             Type = PeerResponseType.PeerJoined,
@@ -1054,9 +1142,22 @@ namespace WebRTCme.Connection.Services
                             MediaStream = mediaStream,
                             DataChannel = isInitiator ? dataChannel : null
                         });
-                    //// WILL BE HANDLED BY PEER LEFT
-                    //else if (peerConnection.ConnectionState == RTCPeerConnectionState.Disconnected)
-                    //ConnectionResponseSubject.OnCompleted();
+                    }
+                    else if (peerConnection.ConnectionState == RTCPeerConnectionState.Failed)
+                    {
+                        // This used to read "WILL BE HANDLED BY PEER LEFT", and it is not: PeerLeft
+                        // is raised by the server when a peer calls LeaveAsync. A peer whose
+                        // transport dies never leaves, so nothing arrived, nothing was cleaned up,
+                        // and the tile stayed on its last frame with the call looking connected.
+                        //
+                        // Disconnected is deliberately not acted on. W3C has it as a state that
+                        // frequently recovers by itself, and restarting on it would throw away
+                        // connections that were about to come back.
+                        var failed = _connectionContext?.PeerContexts
+                            .SingleOrDefault(context => context.Id.Equals(peerId));
+                        if (failed is not null)
+                            RecoverFailedPeer(failed);
+                    }
                 }
                 void OnDataChannel(object s, IRTCDataChannelEvent e)
                 {

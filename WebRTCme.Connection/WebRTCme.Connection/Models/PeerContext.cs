@@ -23,6 +23,16 @@ namespace WebRTCme.Connection
         public IRTCRtpSender ScreenSender { get; set; }
 
         /// <summary>
+        /// How many times an ICE restart has been attempted for this peer since it last connected.
+        /// </summary>
+        /// <remarks>
+        /// Bounded because a restart that cannot succeed fails again, and an unbounded reaction to
+        /// <c>Failed</c> is an offer storm rather than a recovery. Reset on <c>Connected</c>, so a
+        /// call that recovers and later fails again gets a fresh allowance.
+        /// </remarks>
+        public int IceRestartAttempts { get; set; }
+
+        /// <summary>
         /// The id of the track that sender is carrying, so the transceiver can be found again.
         /// </summary>
         /// <remarks>
