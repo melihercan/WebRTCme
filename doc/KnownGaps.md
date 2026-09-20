@@ -1760,6 +1760,50 @@ switching an encoding off means those frames are never produced at all.
 
 ## Verified against, and not
 
+### Everything moved to M153 - 2026-09-20
+
+Chromium stable rolled M152 to M153 (`branch-heads` 7977 to 8010) on 2026-09-19, which put M152 on
+extended support. All four native artifacts were rebuilt against 8010 and installed.
+
+**The shim needed no source change at all.** Not one line: `WebRtcInterop` compiled against M153
+headers as written. Every hour this cost was the surrounding toolchain, which is worth knowing
+before the next rollover is budgeted as an afternoon.
+
+| What actually moved | How it presented |
+|---|---|
+| Windows SDK pin, to 10.0.28000 | `gn gen` dies in `setup_toolchain.py` about a missing include path |
+| Runner disk, VS 18 now in the image | `LLVM ERROR: ... no space on device`, 25 minutes in, after everything compiled |
+| Android javac `--release`, 21 to 25 | the AAR builds clean and the *consumer* rejects it |
+
+Three of those are recorded in WebRTCnative's `wiki/Troubleshooting.md`. Two are worth repeating
+here because they are about judgement rather than configuration:
+
+- **Working around a toolchain pin does not work.** Pointing the checkout at the SDK the runner
+  already had got past `gn gen`, then failed compiling libvpx with `unknown type name
+  'FILE_INFO_BY_HANDLE_CLASS'`. The pin was a real dependency. The fix was to install what it asks
+  for, which needed the image stripped first to make room.
+- **A green build is not a usable artifact.** The M153 Android archive passed every check the
+  workflow had - all four ABIs, the generated `*Jni` classes, `GEN_JNI` present - and was still
+  unreadable by .NET Android, because nothing compared its bytecode level against what consumes it.
+  The same blind spot had already put one stray major-69 class into the M152 archive, unnoticed
+  because nothing happened to load that class.
+
+**No binding change was needed**, unlike the M152 upgrade, and that was checked rather than
+assumed: all 41 `[Field]` declarations in both `ApiDefinitions.cs` were matched against all three
+Apple binaries. On M152 `kRTCIlbcCodecName` had been dropped upstream and only failed when an app
+linked, on a Mac.
+
+**What was verified, and what was not.** Windows was exercised end to end against the artifact
+bytes - eight C harnesses plus a managed smoke test. Android, iOS and Mac Catalyst were *built*,
+not *run*: no M153 binary has yet been launched on a phone, a simulator or a Mac. The iLBC failure
+on the last upgrade was invisible until an app linked, so treat the Apple platforms as unproven
+until one does.
+
+One defect found and not yet fixed upstream: the Mac Catalyst artifact writes
+`PrivacyInfo.xcprivacy` to `Versions/A/Versions/A/Resources/` rather than `Versions/A/Resources/`,
+so a faithful install drops the privacy manifest. It was restored by hand here; the next artifact
+will have the same problem.
+
 ### One call, five platforms - 2026-09-15
 
 Everything changed on 2026-09-14 and 2026-09-15 was run on real hardware afterwards, in a single
@@ -1865,9 +1909,9 @@ Two things worth keeping from doing it:
   fetching the headers first, and the compile confirmed it: the only errors were four instances of
   `-Wunsafe-buffer-usage`, which is a lint no header could have warned about.
 - **Pass `webrtc_branch` explicitly when dispatching the build.** Left empty it resolves the latest
-  stable Chromium milestone, which rolled to M153 on 2026-09-11; that branch fails `gn gen` on the
-  runner image and wastes forty minutes before reaching a compiler. It would also have been the
-  wrong WebRTC version to build against.
+  stable Chromium milestone, and a rollover mid-project silently changes what you are building
+  against. That was written when M153 additionally failed `gn gen` on the runner image; it no
+  longer does — see *Everything moved to M153* below — but the reason to pin has not changed.
 
 **Mute works peer-to-peer, both directions, both kinds** (Android + Windows, 2026-09-11). Camera
 off collapsed outbound video from ~1.14 MB per 5s to 71 kB and it recovered on unmute; a remote mic
