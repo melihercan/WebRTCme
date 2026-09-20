@@ -26,6 +26,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+| **A failed transport is never noticed and never recovered** | nobody - it can be picked up today | A peer whose ICE fails leaves a tile frozen on its last frame forever, with the app still looking connected. `Failed` is not handled, and `RestartIce()` throws on all four native platforms. Seen twice now, from two different causes. See below. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 
@@ -1813,12 +1814,46 @@ when an app *linked*, on a Mac. The `[Field]` audit said M153 was clean, but an 
 link. It has now linked, signed, installed, launched, and carried video and audio against both
 Google's Java SDK on Android and this repository's own interop shim on Windows.
 
-**A long call decays.** After about thirty minutes the three-party call degraded while every
-process was still alive: Mac Catalyst vanished from Android's tile list and the Windows peer went
-to `pair:none` with `inbound-rtp=0`, though its byte counters were frozen rather than falling.
-Restarting Android alone restored both. Nothing here was chased down, and it is not M153-specific -
-but a call that dies quietly with all its processes running is worth knowing about before a user
-reports it.
+**A long call decays, and it is the failure we already know about.** After about thirty minutes
+the three-party call degraded while every process was still alive: Mac Catalyst vanished from
+Android's tile list and the Windows peer went to `pair:none` with `inbound-rtp=0` and frozen byte
+counters. Restarting Android alone restored both.
+
+That fingerprint is the one recorded under *Backgrounding the Android app killed the call*:
+`pair:none`, counters frozen, transport `connected` -> `disconnected` -> `failed`, and an app that
+still looks connected. What is new is the circumstances. That entry is about a backgrounded app
+being frozen by Android policy, and its fix - `CallForegroundService` - stops the process being
+frozen in the first place. This call was a **mesh call with Android in the foreground**, screen on,
+`KeepScreenOn` set. So the cause was different and the consequence identical, because the second
+half of that entry was never done:
+
+> Nothing reopening it, and nothing noticing the transports failed, is ours.
+
+It also warned, correctly, that treating recovery as optional was a mistake. It is still optional,
+and this is what that costs.
+
+**The gap is three pieces, and none of them is present.**
+
+1. `SignalingConnection.OnConnectionStateChanged` acts only on `Connected`. `Disconnected` and
+   `Failed` fall through a commented-out branch marked *"WILL BE HANDLED BY PEER LEFT"* - but
+   `PeerLeft` is server-driven, raised when a peer calls `LeaveAsync`. A peer whose transport dies
+   never leaves, so nothing is ever cleaned up and the tile stays on the last frame forever.
+2. `OnIceConnectionStateChange` has the state that would say so, and only logs it.
+3. `RestartIce()` **throws on all four native platforms** - `NotImplementedException` on Android,
+   iOS and Mac Catalyst, `NotSupportedException` on Windows - and is implemented only on Blazor.
+   The `IceRestart` offer option exists on `RTCOfferOptions` and is plumbed into no platform's
+   `CreateOffer`. So even code that wanted to recover has nothing to call.
+
+**On the trigger, a hypothesis and a discarded one.** Android is the peer that reported `pair:none`
+for Windows *and* lost Catalyst's tile, and one peer losing its network path explains both
+symptoms at once - a Wi-Fi roam or DHCP renewal invalidates the candidate pair, and without an ICE
+restart there is no way back. Not proven: logcat was cleared on the restart that fixed it.
+Discarded on evidence: the Windows app is `Windows.FullTrustApplication`, so it is not subject to
+the UWP background suspension that would otherwise have been the tidy explanation.
+
+The trigger hardly matters for what to do about it. Networks change and phones roam; a call that
+cannot survive that is a call that dies in normal use. **The defect is that nothing detects it and
+nothing recovers.**
 
 **Running the Apple platforms from a script, for whoever does this next.** Mac Catalyst builds and
 runs over SSH with `-p:CodesignKey="-"`, which is ad-hoc signing and needs no identity at all. A
