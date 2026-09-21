@@ -42,7 +42,17 @@ namespace WebRTCme.Middleware
             }
             if (_cameraView is not null)
             {
+                // Disposed, not merely dropped. A capture session feeds one preview layer at a
+                // time, and the layer inside a preview view lives as long as the view's native
+                // object does - which, if the only thing released is the managed reference, is
+                // until a collection gets round to it. Measured on Mac Catalyst and iOS on
+                // 2026-09-21: the camera's new tile stayed black for eleven to thirteen seconds
+                // and then filled in by itself, which is a garbage collection, not a camera.
+                // Disposing hands the layer back now. Safe here because the view has left the
+                // hierarchy and nothing else holds it; the session belongs to the capturer,
+                // which outlives every view that shows it.
                 _cameraView.RemoveFromSuperview();
+                _cameraView.Dispose();
                 _cameraView = null;
             }
 
