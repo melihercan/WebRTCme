@@ -1,4 +1,4 @@
-namespace WebRTCme.BlazorTests;
+﻿namespace WebRTCme.BlazorTests;
 
 /// <summary>
 /// The loopback scenarios, run in the browser.
@@ -58,6 +58,14 @@ public class LoopbackTests : IAsyncLifetime
     [Fact]
     public void Two_peers_negotiate_and_a_data_channel_carries_a_message() =>
         Verify("TwoPeersNegotiateAndCarryAMessage");
+
+    /// <summary>
+    /// Here this is the browser's own restartIce(), which has always worked - so it is the control
+    /// for the four platforms where the call was missing until 2026-09-20.
+    /// </summary>
+    [Fact]
+    public void An_ice_restart_offers_fresh_credentials_and_the_call_survives() =>
+        Verify("AnIceRestartOffersFreshCredentials");
 
     [Fact]
     public void Media_devices_can_be_enumerated_whatever_else_has_happened() =>

@@ -1,4 +1,4 @@
-using WebRTCme.DeviceTests.Core;
+﻿using WebRTCme.DeviceTests.Core;
 
 namespace WebRTCme.DeviceTests;
 
@@ -60,6 +60,17 @@ public class LoopbackTests
     [Fact]
     public Task Two_peers_negotiate_and_a_data_channel_carries_a_message() =>
         Verify(LoopbackScenarios.TwoPeersNegotiateAndCarryAMessage);
+
+    /// <summary>
+    /// An ICE restart on a live connection, which on Windows is a new ABI export.
+    /// </summary>
+    /// <remarks>
+    /// The one tier that can catch an export which is present and does nothing: the scenario
+    /// compares the ICE ufrag before and after, and a no-op restart repeats it.
+    /// </remarks>
+    [Fact]
+    public Task An_ice_restart_offers_fresh_credentials_and_the_call_survives() =>
+        Verify(LoopbackScenarios.AnIceRestartOffersFreshCredentials);
 
     /// <summary>
     /// Enumeration answers "what can I use?", and one kind of device being uncountable must not turn

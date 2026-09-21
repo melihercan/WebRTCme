@@ -26,7 +26,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **Transport recovery has never run on a device** | a three-machine call and half an hour | Detecting `Failed` and recovering with an ICE restart is implemented on all five platforms and covered by unit tests, but no recovery has been observed on real hardware - the trigger is a network event nobody controls. See below. |
+| **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 
@@ -1857,14 +1857,24 @@ until this, and the paragraphs below are what that cost.
    nothing. Android now uses the native callback, as iOS and Mac Catalyst already did, and the
    synthesis remains only as a fallback if that callback ever stops arriving.
 
-**What this has not proved.** No recovery has been watched happen. The unit tests
-(`Tests/WebRTCme.Tests/Unit/SignalingConnectionRecoveryTests.cs`, six of them) pin the rules -
-restart on `Failed`, not on `Disconnected`, initiator only, bounded at three, report when the
-allowance is spent, reset on reconnect - and were checked against a build with the recovery
-disabled, where four of the six fail. That is the logic, not the platform. Nothing has confirmed
-that a real phone that has roamed off its network comes back, and the trigger is not something
-anyone can schedule. Windows is the least tested of the five: its ABI export has never been called
-from a device, only compiled.
+**What is covered, in two halves.** The decisions are pinned by
+`Tests/WebRTCme.Tests/Unit/SignalingConnectionRecoveryTests.cs` - restart on `Failed`, not on
+`Disconnected`, initiator only, bounded at three, report when the allowance is spent, reset on
+reconnect - checked against a build with the recovery disabled, where four of the six fail. Those
+substitute the peer connection, so they prove the logic and nothing about the platform.
+
+The platform half is `AnIceRestartOffersFreshCredentials` in `LoopbackScenarios`, which runs in
+tiers 3, 4 and 5 - so on Windows, Android, iOS, Mac Catalyst and in headless Chromium. It connects
+two peer connections for real, calls `RestartIce()`, and requires the ICE ufrag in the next offer to
+differ and the data channel to still carry a message afterwards. The ufrag is the discriminator
+because a plain re-offer keeps the existing credentials: an export that is present and does nothing
+- which is what a wrongly bound native call looks like, and was the specific risk on Windows - is
+caught. Verified by suppressing the `RestartIce()` call and watching it fail with the ufrag
+unchanged, against the packaged 26.9.20 build on Windows.
+
+**What neither half proves.** A loopback has no route to lose, so nothing here has watched a peer
+that genuinely lost its network path go to `Failed` and come back. That is the whole reason the
+recovery exists, and it still wants two machines and a real disconnection.
 
 **On the trigger, a hypothesis and a discarded one.** Android is the peer that reported `pair:none`
 for Windows *and* lost Catalyst's tile, and one peer losing its network path explains both

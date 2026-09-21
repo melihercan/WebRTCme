@@ -58,6 +58,7 @@ public static class LoopbackScenarios
         (nameof(NativeLibraryLoads), NativeLibraryLoads),
         (nameof(OfferIsRealSdp), OfferIsRealSdp),
         (nameof(TwoPeersNegotiateAndCarryAMessage), TwoPeersNegotiateAndCarryAMessage),
+        (nameof(AnIceRestartOffersFreshCredentials), AnIceRestartOffersFreshCredentials),
         (nameof(ASenderSurvivesEnumeratingSendersAgain), ASenderSurvivesEnumeratingSendersAgain),
         (nameof(DevicesEnumerateWhateverElseHasHappened), DevicesEnumerateWhateverElseHasHappened),
         (nameof(ACompletedCallDoesNotChangeWhatDevicesExist), ACompletedCallDoesNotChangeWhatDevicesExist),
@@ -172,6 +173,29 @@ public static class LoopbackScenarios
     /// The three fields a candidate needs to be re-added at the other end. The real signalling path
     /// serialises the same record to JSON and back; here it is handed over directly.
     /// </summary>
+    /// <summary>
+    /// The ICE username fragment out of an SDP, which is what changes across a restart.
+    /// </summary>
+    /// <remarks>
+    /// The first one only. A bundled offer repeats the same credentials per m-line, and the
+    /// comparison only needs a value that is stable across a plain re-offer and different after a
+    /// restart.
+    /// </remarks>
+    static string? IceUfrag(string sdp)
+    {
+        const string Attribute = "a=ice-ufrag:";
+        if (string.IsNullOrEmpty(sdp)) return null;
+
+        foreach (var line in sdp.Split('\n'))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.StartsWith(Attribute, StringComparison.Ordinal))
+                return trimmed[Attribute.Length..];
+        }
+
+        return null;
+    }
+
     static RTCIceCandidateInit Init(IRTCIceCandidate candidate) => new()
     {
         Candidate = candidate.Candidate,
@@ -377,6 +401,120 @@ public static class LoopbackScenarios
             if (!await Within(received)) return "the message never arrived";
             var got = await received.Task;
             if (got != message) return $"expected '{message}', got '{got}'";
+
+            return null;
+        });
+
+    /// <summary>An ICE restart must produce fresh credentials and leave the call working.</summary>
+    /// <remarks>
+    /// <para>
+    /// <c>RestartIce()</c> threw on all four native platforms until 2026-09-20, and is the only way
+    /// back from a transport that has failed. The recovery built on it is covered by unit tests, but
+    /// those substitute the peer connection - they prove the decisions, not that the platform
+    /// underneath can actually do it. On Windows it is a new ABI export, and an export that is
+    /// present but does nothing would satisfy every other check in this repository.
+    /// </para>
+    /// <para>
+    /// The discriminator is the ICE ufrag. A plain re-offer keeps the existing credentials; an offer
+    /// after a restart must carry new ones, because that is what tells the far end to re-run its
+    /// connectivity checks. A no-op <c>RestartIce()</c> - which is exactly what a missing or wrongly
+    /// bound native call looks like - produces the same ufrag twice and is caught here.
+    /// </para>
+    /// <para>
+    /// What this cannot do is kill the network path first. A loopback has nothing to lose: this
+    /// proves the restart happens and the call survives it, not that a peer which has genuinely lost
+    /// its route comes back. That still wants two machines and a real disconnection.
+    /// </para>
+    /// </remarks>
+    public static Task<ScenarioResult> AnIceRestartOffersFreshCredentials() =>
+        Run(nameof(AnIceRestartOffersFreshCredentials), async () =>
+        {
+            using var caller = Window().RTCPeerConnection(Configuration());
+            using var callee = Window().RTCPeerConnection(Configuration());
+
+            caller.OnIceCandidate += async (_, e) =>
+            {
+                if (e.Candidate is not null) await callee.AddIceCandidate(Init(e.Candidate));
+            };
+            callee.OnIceCandidate += async (_, e) =>
+            {
+                if (e.Candidate is not null) await caller.AddIceCandidate(Init(e.Candidate));
+            };
+
+            var connected = new TaskCompletionSource<bool>();
+            var failed = new TaskCompletionSource<bool>();
+            caller.OnConnectionStateChanged += (_, _) =>
+            {
+                if (caller.ConnectionState == RTCPeerConnectionState.Connected) connected.TrySetResult(true);
+                if (caller.ConnectionState == RTCPeerConnectionState.Failed) failed.TrySetResult(true);
+            };
+
+            var received = new TaskCompletionSource<string>();
+            var calleeChannelOpen = new TaskCompletionSource<bool>();
+            callee.OnDataChannel += (_, e) =>
+            {
+                var incoming = e.Channel;
+                incoming.OnMessage += (_, m) => received.TrySetResult(
+                    m.Data as string ?? Encoding.UTF8.GetString((byte[])m.Data));
+
+                // ReadyState first - see TwoPeersNegotiateAndCarryAMessage, which explains why
+                // waiting only on OnOpen hangs.
+                if (incoming.ReadyState == RTCDataChannelState.Open) calleeChannelOpen.TrySetResult(true);
+                else incoming.OnOpen += (_, _) => calleeChannelOpen.TrySetResult(true);
+            };
+
+            var channel = caller.CreateDataChannel("loopback");
+            var callerChannelOpen = new TaskCompletionSource<bool>();
+            channel.OnOpen += (_, _) => callerChannelOpen.TrySetResult(true);
+            if (channel.ReadyState == RTCDataChannelState.Open) callerChannelOpen.TrySetResult(true);
+
+            var firstOffer = await caller.CreateOffer();
+            await caller.SetLocalDescription(firstOffer);
+            await callee.SetRemoteDescription(firstOffer);
+
+            var firstAnswer = await callee.CreateAnswer();
+            await callee.SetLocalDescription(firstAnswer);
+            await caller.SetRemoteDescription(firstAnswer);
+
+            if (!await Within(connected)) return $"the peer connection did not connect within {Patience.TotalSeconds:0}s";
+            if (!await Within(callerChannelOpen)) return "the caller's data channel never opened";
+            if (!await Within(calleeChannelOpen)) return "the callee's data channel never opened";
+
+            var before = IceUfrag(firstOffer.Sdp);
+            if (before is null) return "the first offer carried no a=ice-ufrag to compare against";
+
+            // The call under test. On Windows this is the new ABI export; everywhere else it is a
+            // native SDK method the binding did not used to make.
+            caller.RestartIce();
+
+            var secondOffer = await caller.CreateOffer();
+            var after = IceUfrag(secondOffer.Sdp);
+            if (after is null) return "the offer after the restart carried no a=ice-ufrag";
+            if (after == before)
+                return $"the ICE ufrag is still '{before}' after RestartIce(), so the restart did "
+                     + "nothing - this offer carries the old credentials and gives the far end no "
+                     + "reason to re-run its connectivity checks";
+
+            await caller.SetLocalDescription(secondOffer);
+            await callee.SetRemoteDescription(secondOffer);
+
+            var secondAnswer = await callee.CreateAnswer();
+            await callee.SetLocalDescription(secondAnswer);
+            await caller.SetRemoteDescription(secondAnswer);
+
+            // A state enum is not evidence that the transport works. Sending through it is.
+            const string message = "still here after the restart";
+            channel.Send(message);
+
+            if (!await Within(received))
+                return "nothing arrived after the restart - the credentials changed but the call "
+                     + "did not survive the renegotiation";
+
+            var got = await received.Task;
+            if (got != message) return $"expected '{message}', got '{got}'";
+
+            if (failed.Task.IsCompleted)
+                return "the caller's connection reported Failed during the restart";
 
             return null;
         });
