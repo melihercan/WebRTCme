@@ -29,7 +29,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 
-Found by DirectCallMe when its call page let the two tiles trade streams: the view model changed,
+Found by a MAUI consumer whose call page let two tiles trade streams: the view model changed,
 the bindings delivered the new `IMediaStream` values, and both tiles kept showing what they had
 been given at birth. On Windows and Android alike, and `Label` and `AudioMuted` behaved the same.
 
@@ -58,7 +58,7 @@ Verified on Windows and Android with the tiles swapped mid-call against a locall
 
 ### The Windows frame sink deadlocked the app on navigation - fixed 2026-09-19
 
-Found by DirectCallMe on a Windows-to-Android call, in the first second after the connection came
+Found by a consumer on a Windows-to-Android call, in the first second after the connection came
 up: the MAUI UI thread froze on the page it was leaving, and the phone saw a black tile because the
 capture thread had frozen with it. Two stacks from the live process, taken with a non-invasive
 `cdb -pv -p <pid> -c ".loadby sos coreclr; !clrstack -all; q"`:
