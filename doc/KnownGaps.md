@@ -1159,7 +1159,7 @@ obvious: as a request it is rejected, and as a notification it is silently ignor
 `IMediaSoupServerApi` had no way to send a notification at all - only `ApiAsync`, which waits for a
 response - so `NotifyAsync` was added alongside it.
 
-### ICE restart - reachable and verified 2026-09-11
+### ICE restart - reachable 2026-09-11, actually restarting on all five 2026-09-21
 Was: `Handler.RestartIceAsync` and `Transport.RestartIceAsync` existed, were ported, and nothing
 called them. A connection that lost its ICE path stayed lost.
 
@@ -1171,6 +1171,27 @@ only to peers where this side is the initiator, so the two ends do not both offe
 Verified on a two-peer mediasoup call: two `restartIce` requests, both answered, and both video
 elements' `currentTime` advanced 4.5s across 4s of wall clock at 640x480 - media flowed straight
 through the restart rather than recovering after it.
+
+**And that verification was on Blazor, which is the only platform where it worked - corrected
+2026-09-21.** `RTCOfferOptions.IceRestart` is read by exactly one binding. Blazor hands the whole
+options object to the browser's `createOffer`, which honours `iceRestart`. The other four discard
+it: Android passes `new MediaConstraints()`, iOS and Mac Catalyst pass
+`new RTCMediaConstraints(null, null)`, and Windows ignores the parameter entirely. So on Android,
+iOS, Mac Catalyst and Windows the demo app's "restart ICE" button, `IConnection.RestartIceAsync()`
+and the mediasoup send transport's restart all produced a **plain re-offer carrying the old ICE
+credentials**. The call renegotiated, the request was answered, nothing restarted - and every
+observable signal short of reading the ufrag looked like success. That is why a browser test passed
+it.
+
+Found while updating the wiki, which said the feature was verified on all five. Both paths now call
+`RestartIce()` first, which is the W3C route and does not go through the options object at all; it
+is implemented on all five as of 2026-09-20. The option is left in place where it was, because it is
+correct and costs nothing on the binding that reads it.
+
+`TheManualRestartAsksThePlatformToRestartRatherThanJustSettingAnOption` pins it, and asserts on the
+`RestartIce()` call rather than on the offer option - asserting on the option would have passed
+against the bug, since the option was always being set. The mediasoup half is not covered: it needs
+a server, and the change there is the same one line.
 
 ### The SFU's bandwidth estimate collapses under simulcast
 **The biggest open quality problem on the mediasoup path**, and the entry that has been rewritten

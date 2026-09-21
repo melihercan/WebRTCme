@@ -1,4 +1,4 @@
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.JSInterop;
 using NSubstitute;
@@ -222,6 +222,34 @@ public class SignalingConnectionRecoveryTests
         harness.Errors.Should().NotBeEmpty(
             "the whole defect was a dead call that still looked alive - saying nothing is the bug");
         harness.Errors.First().Id.Should().Be(PeerId);
+    }
+
+    /// <summary>
+    /// The manual restart - the demo app's "restart ICE" button, and <c>IConnection.RestartIceAsync</c>
+    /// - has to restart ICE on every platform, not just the one that reads the offer option.
+    /// </summary>
+    /// <remarks>
+    /// It used to ask for <c>CreateOffer(new RTCOfferOptions { IceRestart = true })</c> and nothing
+    /// else. Only Blazor honours that: it hands the options object to the browser's createOffer.
+    /// Android passes <c>new MediaConstraints()</c>, iOS and Mac Catalyst pass
+    /// <c>new RTCMediaConstraints(null, null)</c>, and Windows ignores the parameter. So on four of
+    /// five platforms the button sent a plain re-offer, the call renegotiated, and nothing
+    /// restarted - while the wiki said the feature was verified everywhere.
+    ///
+    /// Asserting on the offer option instead of this call would pass against exactly that bug,
+    /// because the option was always being set. What matters is the call the bindings act on.
+    /// </remarks>
+    [Fact]
+    public async Task TheManualRestartAsksThePlatformToRestartRatherThanJustSettingAnOption()
+    {
+        var harness = await JoinedAsync();
+        var offersAfterJoin = harness.OffersSent;
+
+        await harness.Connection.RestartIceAsync();
+
+        harness.PeerConnection.Received(1).RestartIce();
+        harness.OffersSent.Should().Be(offersAfterJoin + 1,
+            "the restart sets a flag, and the offer after it is what carries the new credentials");
     }
 
     [Fact]

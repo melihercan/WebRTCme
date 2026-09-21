@@ -247,17 +247,16 @@ namespace WebRTCme.Connection.Services
             {
                 try
                 {
-                    var offer = await peerContext.PeerConnection.CreateOffer(
-                        new RTCOfferOptions { IceRestart = true });
+                    // RestartIce() rather than CreateOffer(new RTCOfferOptions { IceRestart = true }),
+                    // which is what this did until 2026-09-21 and which restarted nothing on four of
+                    // the five platforms. Only Blazor reads that option - it hands the whole options
+                    // object to the browser's createOffer. Android passes `new MediaConstraints()`,
+                    // iOS and Mac Catalyst pass `new RTCMediaConstraints(null, null)`, and Windows
+                    // ignores the parameter, so all four produced a plain re-offer carrying the old
+                    // ICE credentials. The call renegotiated and nothing restarted.
+                    peerContext.PeerConnection.RestartIce();
 
-                    // Local description first: it is what starts the new gathering, and the peer
-                    // cannot answer an offer this side has not applied.
-                    await peerContext.PeerConnection.SetLocalDescription(offer);
-
-                    var sdp = JsonSerializer.Serialize(offer, JsonHelper.WebRtcJsonSerializerOptions);
-                    var result = await _signalingServerApi.SdpAsync(peerContext.Id, sdp);
-                    if (!result.IsOk)
-                        throw new Exception(result.ErrorMessage);
+                    await SendOfferAsync(peerContext.Id, peerContext.Name, peerContext.PeerConnection);
 
                     System.Diagnostics.Debug.WriteLine(
                         $"######## ICE restart offered to peer:{peerContext.Name}");

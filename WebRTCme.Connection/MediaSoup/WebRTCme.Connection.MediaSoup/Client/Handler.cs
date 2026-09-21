@@ -180,6 +180,13 @@ namespace WebRTCme.Connection.MediaSoup.Client
 
             if (_direction == InternalDirection.Send)
             {
+                // The offer has to carry new local ICE credentials, and the IceRestart option below
+                // only delivers them on Blazor - the other four bindings discard the options object
+                // in CreateOffer. Without this the server restarts its half and this side re-offers
+                // with the same ufrag, which is not a restart. The option is left in place because
+                // it is correct and costs nothing where it is read.
+                _pc.RestartIce();
+
                 var offer = await _pc.CreateOffer(new RTCOfferOptions { IceRestart = true });
                 await _pc.SetLocalDescription(offer);
                 RTCSessionDescriptionInit answer = new() 
