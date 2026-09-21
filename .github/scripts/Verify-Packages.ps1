@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Checks that the two WebRTCme packages contain what they are supposed to.
 
@@ -64,6 +64,7 @@ $expected = @{
             'lib/net10.0-windows*/WebRTCme.Bindings.Maui.Windows.dll'
             'runtimes/win-x64/native/WebRtcInterop.dll'
             'staticwebassets/JsInterop.js'                                        # _content/WebRTCme/
+            'README.md'                                                           # the package's own page
         )
         AllowedWebRTCmeDependencies = @()
     }
@@ -80,6 +81,7 @@ $expected = @{
             'lib/net10.0-ios*/WebRTCme.Connection.dll'
             'lib/net10.0-maccatalyst*/WebRTCme.Middleware.dll'
             'lib/net10.0-windows*/WebRTCme.Middleware.dll'
+            'README.md'
         )
         AllowedWebRTCmeDependencies = @('WebRTCme')
     }

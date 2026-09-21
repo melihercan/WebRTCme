@@ -4,7 +4,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/WebRTCme.svg?label=WebRTCme)](https://www.nuget.org/packages/WebRTCme)
 [![NuGet](https://img.shields.io/nuget/v/WebRTCme.Middleware.svg?label=WebRTCme.Middleware)](https://www.nuget.org/packages/WebRTCme.Middleware)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/melihercan/WebRTCme/blob/master/LICENSE)
 
 Every platform has its own WebRTC SDK, and no two look alike: a Java SDK on Android, an
 Objective-C framework on Apple, a C++ library on Windows, and the browser's own JavaScript API on

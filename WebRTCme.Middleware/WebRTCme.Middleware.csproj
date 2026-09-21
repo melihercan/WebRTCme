@@ -32,6 +32,13 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/melihercan/WebRTCme</PackageProjectUrl>
 		<PackageIcon>me.png</PackageIcon>
+		<!--
+		  Shown on the package's page. Both packages carry the repository's own README, which
+		  covers the framework as a whole rather than one half of it: someone landing on either
+		  page wants to know what this is and which package they need. NuGet renders it without
+		  any of the surrounding repository, so every link in it has to be absolute.
+		-->
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/melihercan/WebRTCme/tree/master/WebRTCme.Middleware</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>WebRTC .NET Blazor MAUI Android iOS</PackageTags>
@@ -154,6 +161,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\README.md" Link="README.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 		<None Include="..\me.png" Link="me.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
