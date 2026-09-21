@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Windows consumers need the Windows App Runtime installed** | documentation | Not a defect - a consequence of WebRTCme being a MAUI library on Windows. Absent, a consumer app hangs at startup with no error. Must be in the wiki; see below. |
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 | **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
@@ -136,7 +135,7 @@ Related in shape, though not proven related in cause: the Windows audio device m
 2026-09-14 was also "enumeration breaks after a call has happened". That is why this scenario exists
 at all, and it is the one finding a third platform now trips over.
 
-### A Windows consumer needs the Windows App Runtime, or its app hangs at startup - 2026-09-16
+### A Windows consumer needs the Windows App Runtime, or its app hangs at startup - documented 2026-09-21
 
 **Not a defect, and not fixable in the package - a prerequisite that has to be written down.**
 WebRTCme is a MAUI library on Windows by design, so its package depends on
@@ -169,8 +168,12 @@ which is what makes it so hard to recognise.
   need `WindowsAppRuntimeInstall.exe`, or the app must be built with
   `<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>` so it carries the runtime.
 
-**For the wiki**, when the documentation pass happens: say this plainly, and say the symptom.
-Nobody will diagnose a silent startup hang from first principles.
+**Written up 2026-09-21**, and this is no longer open. The wiki carries it in three places, because
+the people who hit it arrive from three directions: `Platform prerequisites` section 1 has the
+explanation, the stack and the fix; `Getting started` section 3 repeats it where a consumer first
+adds the package; and `Hello world`'s troubleshooting table maps the symptom - "nothing happens, no
+exception, app never starts" - to it, which is the only entry point anyone diagnosing this from
+scratch actually has.
 
 **How it was found**, because the path is worth remembering. `Tests/WebRTCme.DeviceTests` ran in
 two seconds on real Windows and hung on a `windows-latest` runner - six hours the first time,
