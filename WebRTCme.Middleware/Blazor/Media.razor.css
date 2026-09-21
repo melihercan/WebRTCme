@@ -55,6 +55,14 @@
     font-size: 0.875rem;
 }
 
+/* Reuses the camera-off cover and only changes the words' weight and colour: both states mean
+   "what is on screen is not live", and showing them differently would suggest otherwise. Amber
+   rather than the muted grey because this one resolves by itself and is worth waiting out. */
+.camera-off.reconnecting {
+    color: #E0A030;
+    font-weight: 600;
+}
+
 .caption {
     position: absolute;
     left: 0;

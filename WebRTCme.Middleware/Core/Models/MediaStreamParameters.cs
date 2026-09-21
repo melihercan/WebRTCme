@@ -59,6 +59,7 @@ namespace WebRTCme.Middleware
         bool _peerAudioMuted;
         bool _peerVideoMuted;
         bool _peerSpeaking;
+        bool _peerReconnecting;
 
         /// <summary>
         /// Whether the peer has muted its microphone.
@@ -85,6 +86,21 @@ namespace WebRTCme.Middleware
         {
             get => _peerSpeaking;
             set => Set(ref _peerSpeaking, value);
+        }
+
+        /// <summary>
+        /// Whether this peer's transport failed and is being restarted.
+        /// </summary>
+        /// <remarks>
+        /// Not part of <c>ApplyPeerMediaToTiles</c>, which rebuilds the other three from what
+        /// peers report about themselves. A peer whose transport has died reports nothing - that
+        /// is the whole condition - so this is set from the connection's own view of it and
+        /// cleared when it comes back.
+        /// </remarks>
+        public bool PeerReconnecting
+        {
+            get => _peerReconnecting;
+            set => Set(ref _peerReconnecting, value);
         }
 
         void Set(ref bool field, bool value, [CallerMemberName] string name = null)

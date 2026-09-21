@@ -51,6 +51,9 @@ public class SignalingConnectionRecoveryTests
         public IEnumerable<PeerResponse> Errors =>
             Responses.Where(r => r.Type == PeerResponseType.PeerError);
 
+        public IEnumerable<PeerResponse> Of(PeerResponseType type) =>
+            Responses.Where(r => r.Type == type);
+
         /// <summary>
         /// Drives a connection state change the way the bindings do, by raising the event and
         /// letting the handler read the state back off the peer connection.
@@ -250,6 +253,63 @@ public class SignalingConnectionRecoveryTests
         harness.PeerConnection.Received(1).RestartIce();
         harness.OffersSent.Should().Be(offersAfterJoin + 1,
             "the restart sets a flag, and the offer after it is what carries the new credentials");
+    }
+
+    /// <summary>
+    /// A recovery in progress has to be visible, because the tile cannot show it.
+    /// </summary>
+    /// <remarks>
+    /// A peer whose transport died leaves its last frame on screen. It is a still picture of a
+    /// person, which reads as a working call where nobody happens to be moving - so the failure
+    /// mode of saying nothing is not "the user is uninformed", it is "the user believes the call
+    /// is fine". Recovery takes seconds, and without this the only thing ever said is the error
+    /// after the last attempt fails.
+    /// </remarks>
+    [Fact]
+    public async Task ARecoveryInProgressIsAnnounced()
+    {
+        var harness = await JoinedAsync();
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Failed);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnecting).Any());
+
+        var announced = harness.Of(PeerResponseType.PeerReconnecting).ToList();
+        announced.Should().ContainSingle("one attempt has been made, so one attempt is reported");
+        announced[0].Id.Should().Be(PeerId);
+        announced[0].Name.Should().Be("peer");
+    }
+
+    [Fact]
+    public async Task ARecoveredPeerIsAnnouncedToo()
+    {
+        var harness = await JoinedAsync();
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Failed);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnecting).Any());
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Connected);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnected).Any());
+
+        harness.Of(PeerResponseType.PeerReconnected).Should().ContainSingle(
+            "otherwise the tile stays covered by a Reconnecting overlay on a call that came back");
+    }
+
+    /// <summary>
+    /// A peer connecting for the first time has not recovered from anything.
+    /// </summary>
+    /// <remarks>
+    /// The obvious implementation raises PeerReconnected from the Connected branch unconditionally,
+    /// which fires on every join and makes the signal meaningless.
+    /// </remarks>
+    [Fact]
+    public async Task AFirstConnectionIsNotAnnouncedAsARecovery()
+    {
+        var harness = await JoinedAsync();
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Connected);
+        await Task.Delay(200);
+
+        harness.Of(PeerResponseType.PeerReconnected).Should().BeEmpty();
     }
 
     [Fact]

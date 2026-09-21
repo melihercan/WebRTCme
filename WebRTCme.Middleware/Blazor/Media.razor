@@ -15,7 +15,13 @@
            class="video @(IsLocal ? "contain" : "cover")"
            @ref="VideoElementReference"></video>
 
-    @if (PeerVideoMuted)
+    @if (PeerReconnecting)
+    {
+        @* Above the camera-off cover, because it is the more urgent of the two and a peer can
+           be both. Covering the frame is the point: what is on screen is stale. *@
+        <div class="camera-off reconnecting">Reconnecting&hellip;</div>
+    }
+    else if (PeerVideoMuted)
     {
         @* Covers the last frame rather than sitting beside it. A camera that has been turned
            off leaves its final picture on screen, which reads as a frozen call. *@

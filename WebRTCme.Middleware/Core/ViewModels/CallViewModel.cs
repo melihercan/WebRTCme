@@ -722,6 +722,21 @@ namespace WebRTCme.Middleware
                                 Ok = "Ok",
                             });
                             break;
+                        case PeerResponseType.PeerReconnecting:
+                            // Stats keep polling. A peer being restarted is still a peer, and
+                            // stopping here would blank the numbers for a call that is about to
+                            // carry on - the tile says what is happening instead.
+                            _logger.LogInformation(
+                                $"************* APP PeerReconnecting {peerResponse.Name}");
+                            SetTileReconnecting(peerResponse.Name, true);
+                            break;
+
+                        case PeerResponseType.PeerReconnected:
+                            _logger.LogInformation(
+                                $"************* APP PeerReconnected {peerResponse.Name}");
+                            SetTileReconnecting(peerResponse.Name, false);
+                            break;
+
                         case PeerResponseType.PeerMedia:
                             // Debug.WriteLine as well, because no logging provider is registered
                             // in these apps and the logger call alone reaches nothing.
@@ -1096,6 +1111,25 @@ namespace WebRTCme.Middleware
         /// A peer whose name is not yet known is listed under its id and matches nothing, which is
         /// the right outcome - there is no tile for it yet either.</para>
         /// </remarks>
+        /// <summary>
+        /// Marks one peer's tile as reconnecting, or clears it.
+        /// </summary>
+        /// <remarks>
+        /// Matched by label like <see cref="ApplyPeerMediaToTiles"/>, and set in place for the
+        /// same reason: going through <c>IMediaStreamManager.Update</c> would rebuild the platform
+        /// video renderer, which during a recovery is the one thing worth not disturbing.
+        /// </remarks>
+        void SetTileReconnecting(string peerName, bool reconnecting)
+        {
+            var tile = _mediaStreamManager.MediaStreamParametersList
+                .FirstOrDefault(candidate => !candidate.IsLocal && candidate.Label == peerName);
+
+            if (tile is null)
+                return;
+
+            _runOnUiThread.Invoke(() => tile.PeerReconnecting = reconnecting);
+        }
+
         void ApplyPeerMediaToTiles()
         {
             foreach (var tile in _mediaStreamManager.MediaStreamParametersList)

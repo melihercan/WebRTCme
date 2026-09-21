@@ -53,6 +53,13 @@ namespace WebRTCme.Middleware
         [Parameter]
         public bool PeerSpeaking { get; set; } = false;
 
+        /// <summary>
+        /// Whether this peer's transport is being restarted. The tile covers its last frame while
+        /// it is, because that frame is stale and a still picture reads as a working call.
+        /// </summary>
+        [Parameter]
+        public bool PeerReconnecting { get; set; } = false;
+
         [Inject]
         private IJSRuntime JsRuntime { get; set; }
 

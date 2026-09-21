@@ -1900,6 +1900,23 @@ unchanged, against the packaged 26.9.20 build on Windows.
 that genuinely lost its network path go to `Failed` and come back. That is the whole reason the
 recovery exists, and it still wants two machines and a real disconnection.
 
+**The recovery says so while it happens - 2026-09-21.** `PeerReconnecting` and `PeerReconnected`
+join the peer responses, and a tile covers its last frame with *Reconnecting...* between them. The
+cover matters more than it sounds: a peer whose transport died leaves a still picture of a person on
+screen, so the failure mode of saying nothing is not that the user is uninformed, it is that the
+user believes the call is fine. Until this, the only thing ever said was the `PeerError` after the
+third attempt failed, and nothing at all when recovery worked.
+
+`PeerReconnected` is raised only when the peer had attempts against it - the obvious implementation
+raises it from the `Connected` branch unconditionally, which fires on every join and makes the
+signal meaningless. Both signals and that guard are covered, each checked against a build without
+them.
+
+Set on `MediaStreamParameters` in place rather than through `IMediaStreamManager.Update`, which
+rebuilds the platform video renderer - during a recovery, the one thing worth not disturbing. The
+drawing itself is unverified, as all rendering here is: a headless test can prove the flag is set,
+not that anything appears.
+
 **On the trigger, a hypothesis and a discarded one.** Android is the peer that reported `pair:none`
 for Windows *and* lost Catalyst's tile, and one peer losing its network path explains both
 symptoms at once - a Wi-Fi roam or DHCP renewal invalidates the candidate pair, and without an ICE

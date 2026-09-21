@@ -826,6 +826,15 @@ namespace WebRTCme.Connection.Services
             peerContext.IceRestartAttempts++;
             var attempt = peerContext.IceRestartAttempts;
 
+            // Before the work, not after: the point is to say something during the seconds the
+            // tile is frozen, and the restart itself is what takes them.
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerReconnecting,
+                Id = peerContext.Id,
+                Name = peerContext.Name
+            });
+
             _ = Task.Run(async () =>
             {
                 try
@@ -1131,7 +1140,19 @@ namespace WebRTCme.Connection.Services
                         var connected = _connectionContext?.PeerContexts
                             .SingleOrDefault(context => context.Id.Equals(peerId));
                         if (connected is not null)
+                        {
+                            // Read before the reset, because the reset is what erases the evidence
+                            // that this was a recovery rather than a first connection.
+                            if (connected.IceRestartAttempts > 0)
+                                _connectionContext.Observer.OnNext(new PeerResponse
+                                {
+                                    Type = PeerResponseType.PeerReconnected,
+                                    Id = peerId,
+                                    Name = peerName
+                                });
+
                             connected.IceRestartAttempts = 0;
+                        }
 
                         _connectionContext.Observer.OnNext(new PeerResponse
                         {
