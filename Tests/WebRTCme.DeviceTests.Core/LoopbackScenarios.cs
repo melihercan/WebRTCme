@@ -92,7 +92,8 @@ public static class LoopbackScenarios
     /// </remarks>
     public static IReadOnlyList<(string Name, Func<Task<ScenarioResult>> Run)> Soaks =>
     [
-        (nameof(ClosingOnTheMainThreadRepeatedlyDoesNotWedge), ClosingOnTheMainThreadRepeatedlyDoesNotWedge),
+        (nameof(ClosingOffTheCallersThreadSurvivesASoak), ClosingOffTheCallersThreadSurvivesASoak),
+        (nameof(ClosingOnTheMainThreadWedgesTheProcess), ClosingOnTheMainThreadWedgesTheProcess),
     ];
 
     /// <summary>A sender taken earlier must still work after the senders are enumerated again.</summary>
@@ -548,7 +549,7 @@ public static class LoopbackScenarios
             return null;
         });
 
-    /// <summary>Closing a connected call on the main thread, many times over, must not wedge.</summary>
+    /// <summary>Tearing a connected call down hundreds of times, off the caller's thread, must not wedge.</summary>
     /// <remarks>
     /// <para>
     /// WebRTCnative#5. Closing a peer connection from the main thread deadlocks on Apple, and the
@@ -569,11 +570,22 @@ public static class LoopbackScenarios
     /// <c>EXC_CRASH</c>/<c>SIGSEGV</c> with no faulting address.
     /// </para>
     /// <para>
-    /// <b>Three ingredients, and every one is needed.</b> The close has to be on the main thread -
-    /// every other scenario here runs on a pool thread and so can never form the cycle. The call
-    /// has to be receiving audio, or the worker never reaches <c>StopPlayout</c> and there is no
-    /// audio unit to dispose. And it has to run many times: the reported rate is about one in
-    /// seventy-five setups, so sixty rounds clean is a coin toss and six hundred is an answer.
+    /// <b>This scenario closes off the caller's thread</b>, which is what WebRTCme does internally
+    /// and what its documentation tells a consumer to do. Six hundred clean rounds is the evidence
+    /// that the recommendation holds on real hardware rather than only in a unit test that
+    /// substitutes the peer connection.
+    /// </para>
+    /// <para>
+    /// <b>It is worth something only because the control fails.</b>
+    /// <see cref="ClosingOnTheMainThreadWedgesTheProcess"/> is the same soak closing on the main
+    /// thread, and on 2026-09-22 it reproduced the deadlock outright. Without that, a clean run
+    /// here would be an absence rather than a result - and at about one failure in seventy-five
+    /// setups, absence is cheap: sixty rounds clean is a coin toss, six hundred is an answer.
+    /// </para>
+    /// <para>
+    /// The call has to be receiving audio either way, or the worker never reaches
+    /// <c>StopPlayout</c> and there is no audio unit to dispose - which is the part of teardown
+    /// that wedges.
     /// </para>
     /// <para>
     /// A transceiver rather than <c>getUserMedia</c>, so this needs no microphone permission: what
@@ -586,7 +598,27 @@ public static class LoopbackScenarios
     /// will say which round it was.
     /// </para>
     /// </remarks>
-    public static Task<ScenarioResult> ClosingOnTheMainThreadRepeatedlyDoesNotWedge()
+    public static Task<ScenarioResult> ClosingOffTheCallersThreadSurvivesASoak() =>
+        Soak(nameof(ClosingOffTheCallersThreadSurvivesASoak), onMainThread: false);
+
+    /// <summary>The same soak, closing on the main thread, which is expected to wedge.</summary>
+    /// <remarks>
+    /// <para>
+    /// The control for the one above, and it is not expected to pass. Run on 2026-09-22 against
+    /// 26.9.21 on an Intel Mac mini it reproduced WebRTCnative#5 outright: the main thread blocked
+    /// in <c>Close()</c>, the signalling thread blocked in the operations batcher waiting on the
+    /// worker, and the worker inside Apple's <c>AudioComponentInstanceDispose</c> - where it went
+    /// on to abort in <c>free_tiny</c> with a corrupted free list.
+    /// </para>
+    /// <para>
+    /// Kept because a soak that passes proves very little unless the same harness has been watched
+    /// to fail. This is what makes the other one evidence rather than an absence.
+    /// </para>
+    /// </remarks>
+    public static Task<ScenarioResult> ClosingOnTheMainThreadWedgesTheProcess() =>
+        Soak(nameof(ClosingOnTheMainThreadWedgesTheProcess), onMainThread: true);
+
+    static Task<ScenarioResult> Soak(string name, bool onMainThread)
     {
         var rounds = 600;
         var configured = Environment.GetEnvironmentVariable("WEBRTCME_SOAK_ROUNDS");
@@ -598,17 +630,23 @@ public static class LoopbackScenarios
         // timing out with nothing to say.
         var budget = TimeSpan.FromSeconds(rounds * 5 + 120);
 
-        return Run(nameof(ClosingOnTheMainThreadRepeatedlyDoesNotWedge), async () =>
+        return Run(name, async () =>
         {
+            // Closing off the caller's thread is a pool hop and needs nothing from the app. The
+            // control does: there is no UI-thread deadlock to reproduce without a UI thread.
             var toMainThread = RunOnMainThread;
-            if (toMainThread is null)
+            if (onMainThread && toMainThread is null)
                 throw new SkipException(
                     "no main thread to marshal to - this reproduces a UI-thread deadlock and only "
                     + "means anything inside an app that has one");
 
+            Func<Action, Task> close = onMainThread
+                ? toMainThread!
+                : action => Task.Run(action);
+
             for (var round = 1; round <= rounds; round++)
             {
-                var failure = await OneMainThreadCloseRound(toMainThread, round);
+                var failure = await OneCloseRound(close, round, onMainThread);
                 if (failure is not null)
                     return failure;
 
@@ -620,8 +658,8 @@ public static class LoopbackScenarios
         }, budget);
     }
 
-    /// <summary>One round of the soak: connect a call carrying audio, then close it on the main thread.</summary>
-    static async Task<string?> OneMainThreadCloseRound(Func<Action, Task> toMainThread, int round)
+    /// <summary>One round: connect a call carrying audio, then close it the way this soak closes.</summary>
+    static async Task<string?> OneCloseRound(Func<Action, Task> close, int round, bool onMainThread)
     {
         var caller = Window().RTCPeerConnection(Configuration());
         var callee = Window().RTCPeerConnection(Configuration());
@@ -660,9 +698,9 @@ public static class LoopbackScenarios
                 return $"round {round}: the call did not connect within {Patience.TotalSeconds:0}s, "
                      + "so there was no audio unit to tear down and the soak proves nothing";
 
-            // The call under test. Closed on the main thread, deliberately, and the callee first
-            // because it is the receiving side - the one whose teardown reaches StopPlayout.
-            var closed = toMainThread(() =>
+            // The call under test. The callee first, because it is the receiving side - the one
+            // whose teardown reaches StopPlayout.
+            var closed = close(() =>
             {
                 callee.Close();
                 caller.Close();
@@ -673,9 +711,10 @@ public static class LoopbackScenarios
             // only say the whole soak stopped.
             var finished = await Task.WhenAny(closed, Task.Delay(TimeSpan.FromSeconds(30)));
             if (!ReferenceEquals(finished, closed))
-                return $"round {round}: Close() on the main thread has not returned after 30s. "
-                     + "The main thread is wedged - see WebRTCnative#5 - and everything after this "
-                     + "ran alongside a deadlocked run loop";
+                return $"round {round}: Close() has not returned after 30s, closing "
+                     + (onMainThread ? "on the main thread" : "off the caller's thread")
+                     + ". The thread it was closed on is wedged - see WebRTCnative#5 - and "
+                     + "anything reported after this ran alongside it";
 
             await closed;
             return null;

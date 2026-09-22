@@ -59,7 +59,8 @@ param(
     [string] $SimulatorName,
     [switch] $SkipBuild,
     [string] $NativeLog,
-    [string] $Scenario
+    [string] $Scenario,
+    [int]    $SoakRounds
 )
 
 Set-StrictMode -Version Latest
@@ -293,6 +294,15 @@ function Invoke-Android {
 function Invoke-MacCatalyst {
     param([string] $Filter)
 
+    # A regular pass finishes in about three seconds and the 120s below is generous. A soak runs
+    # for as long as its rounds take, so the poll has to outlast it or the harness kills the app
+    # mid-run and reports "the runner did not finish" - which reads exactly like a crash.
+    $waitIterations = if ($Scenario) { 1800 } else { 60 }
+
+    # Rounds reach the app through the environment, because the runner takes one argument and it
+    # is the filter.
+    $soakEnv = if ($SoakRounds -gt 0) { "export WEBRTCME_SOAK_ROUNDS=$SoakRounds" } else { '' }
+
     # The runtime identifier is found rather than named. macos-latest is Apple Silicon and builds
     # maccatalyst-arm64; an Intel Mac builds maccatalyst-x64. Hardcoding either means the path does
     # not exist on the other, the app never starts, and this reports "the runner did not finish" -
@@ -315,11 +325,12 @@ function Invoke-MacCatalyst {
     # scenario's own 30s timeout. And no `timeout` command - macOS has none, and its absence is
     # silent, because "command not found" leaves the exit code to whatever came next in the pipeline.
     $script = @'
+__SOAKENV__
 APP="__APP__"
 LOG=$(mktemp)
 "$APP" __FILTER__ > "$LOG" 2>&1 &
 APPPID=$!
-for i in $(seq 1 60); do
+for i in $(seq 1 __WAIT__); do
   grep -q WEBRTCME-SUMMARY "$LOG" && break
   sleep 2
 done
@@ -328,7 +339,8 @@ grep WEBRTCME- "$LOG"
 rm -f "$LOG"
 '@
 
-    $log = Invoke-Shell ($script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg))
+    $log = Invoke-Shell ($script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg).
+        Replace('__WAIT__', "$waitIterations").Replace('__SOAKENV__', $soakEnv))
     return Read-Outcome -Lines $log -What 'maccatalyst'
 }
 

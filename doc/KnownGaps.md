@@ -1828,9 +1828,32 @@ because a consumer calling it directly gets no other hint.
 is upstream's documented design, and disposing an audio unit is Apple's. What makes it a deadlock is
 a caller holding the main thread while both happen.
 
-**Unverified on a device.** The reasoning is sound and the unit test pins the thread, but nobody has
-run the soak that produced those five reports against the fix. At roughly one in seventy-five call
-setups, 600 rounds settles it. `SignalingConnection` closes peer connections from the subscription's dispose action,
+**Reproduced on demand - 2026-09-22.** `ClosingOnTheMainThreadWedgesTheProcess` in
+`LoopbackScenarios` does it deliberately: connect a call carrying audio, close it on the main
+thread, repeat. Run against 26.9.21 on the Intel Mac mini it wedged, and the runner's own crash
+report carries the same three threads as the five from the consumer - main blocked in `Close()`,
+signalling blocked in the operations batcher, worker inside `AudioComponentInstanceDispose`. On
+this rig the worker went further and aborted there, in `free_tiny` with a corrupted free list,
+which is the WebRTCme#49 family arriving on the dispose path rather than the `IOBufferDuration`
+one. Two faults, one run.
+
+That matters more than the fix it was written for: the deadlock is now something this repository
+can produce on demand, from its own test app, rather than something it waits for a consumer to
+hit.
+
+**The soak is a pair, and the shape is deliberate.** `ClosingOffTheCallersThreadSurvivesASoak` is
+the guard - it closes the way the library now does and the way the docs tell a consumer to, and it
+is expected to pass. The one above is the control and is expected to wedge. A soak that passes
+proves very little unless the same harness has been watched to fail, and at one failure in about
+seventy-five setups, sixty clean rounds is a coin toss while six hundred is an answer.
+
+Neither is in `All`: they are reachable only by name, through
+`Tests/Test-Device-Phase4.ps1 -Scenario`, because a tier that takes half an hour is a tier people
+stop running.
+
+**Still unverified:** the guard has not been run. It needs the Mac, and the deadlock is
+Apple-specific - Windows and Android have no `AudioComponentInstanceDispose`, so running it there
+would pass for the wrong reason. `SignalingConnection` closes peer connections from the subscription's dispose action,
 on whatever thread disposes it. The consumer that reported this closes from its own call-session
 teardown, which is reachable both from the app and from its `OnConnectionStateChanged` handler - and
 the latter runs on the signalling thread. Nothing here has reproduced it.
