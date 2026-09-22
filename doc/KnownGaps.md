@@ -1850,9 +1850,15 @@ Neither is in `All`: they are reachable only by name, through
 `Tests/Test-Device-Phase4.ps1 -Scenario`, because a tier that takes half an hour is a tier people
 stop running.
 
-**Still unverified:** the guard has not been run. It needs the Mac, and the deadlock is
-Apple-specific - Windows and Android have no `AudioComponentInstanceDispose`, so running it there
-would pass for the wrong reason. `SignalingConnection` closes peer connections from the subscription's dispose action,
+**The guard has now been run - 2026-09-23.** 600 rounds on the Intel Mac mini against 26.9.22,
+closing off the caller's thread: `PASSED | 449155ms`, about three quarters of a second a round, no
+crash report. The pass is conclusive on the count because the scenario only returns success after
+its loop completes - an early exit returns a failure naming the round it stopped on.
+
+So the pair has now been observed both ways on the same machine, a day apart: closing on the main
+thread wedged the process and produced a crash report carrying the full deadlock cycle, and closing
+off it survived six hundred teardowns without incident. That is what makes the second result
+evidence rather than an absence. `SignalingConnection` closes peer connections from the subscription's dispose action,
 on whatever thread disposes it. The consumer that reported this closes from its own call-session
 teardown, which is reachable both from the app and from its `OnConnectionStateChanged` handler - and
 the latter runs on the signalling thread. Nothing here has reproduced it.
