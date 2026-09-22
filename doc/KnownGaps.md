@@ -1824,6 +1824,62 @@ module deadlocking against the main thread" fit everything visible. The symbols 
 `PeerConnection::Close` and the operations batcher, with nothing audio-related anywhere in the
 cycle. This is the second Apple fault in a month where symbolication ended the guessing in one step.
 
+### An abort inside Apple's audio code during rapid call setup - open, 2026-09-22
+
+Reported as WebRTCme#49: Mac Catalyst died with `SIGABRT` on a libwebrtc worker thread, inside
+Apple's audio code, on the 33rd call setup of a soak that tore a session down and started another
+immediately. One report in about two hours of testing, so rare rather than routine.
+
+**The two WebRTC frames, symbolicated** against a dSYM that matches the shipped framework byte for
+byte:
+
+```
+-[RTCAudioSession description] + 146
+  -[RTCAudioSession IOBufferDuration] + 52
+    -[AVAudioSession IOBufferDuration]
+      getATDefaultDeviceAggregateID -> -[ATDefaultDeviceAggregate deviceID]
+        __on_zero_shared -> malloc_report -> abort
+```
+
+**The path that gets there**, read from `sdk/objc/native/src/audio/audio_device_ios.mm` at
+`branch-heads/8010`:
+
+```
+InitPlayout / InitRecording          per call, driven by the media engine
+  InitPlayOrRecord()
+    SetupAudioBuffersForActiveAudioSession()
+      NSTimeInterval io_buffer_duration = session.IOBufferDuration;   functional, sizes the buffers
+      RTCLog(@"%@", session);                                          reads it again via description
+```
+
+So a call setup reads `IOBufferDuration` twice: once because the ADM needs it, once to build a log
+line. On Catalyst each read goes through `getATDefaultDeviceAggregateID`, which drops the last
+shared reference to an aggregate-device object - and under rapid teardown that object's lifetime is
+being raced by the session going away beside it.
+
+**Whose bug this is.** The abort is in Apple's `AudioToolbox`, on a shared pointer reaching zero.
+Reading a documented `AVAudioSession` property should not corrupt the allocator, so the fault is
+most likely Apple's. libwebrtc's contribution is reading it twice where once would do, and doing the
+second read at every log level - `RTCLogFormat` builds its string before it checks the severity, so
+`%@` invokes `description` whether or not anything will be logged. That is worth raising upstream as
+a robustness point; it is not the cause.
+
+**There is no obvious lever in this repository.** The trigger is per-call audio initialisation
+driven by the media engine, with nothing exposed to a binding that would suppress it.
+
+**What was tried and reverted - and why it is recorded.** `8b25188c` added
+`AppleAudioUnit.KeepInitialized`, setting `RTCAudioSession.useManualAudio` and `isAudioEnabled` to
+keep the audio unit alive between calls. It does nothing here, and it was reverted in `a616378c`:
+`canPlayOrRecord` is `!useManualAudio || isAudioEnabled`, which is already always YES by default, so
+the setting changes no state at all. The reasoning also placed the crashing `RTCLog` under
+`should_initialize_audio_unit` when it is under `should_start_audio_unit`, and treated the read as
+purely diagnostic when the line above it reads the same property functionally.
+
+Both errors came from reading a summary of upstream source instead of the source. The corrected
+account above came from fetching the file and reading it. **Worth the space here because the wrong
+version was convincing**: it explained the stack, named a mechanism and proposed a fix, and was
+wrong in a way that no amount of re-reading the crash report would have exposed.
+
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
 
