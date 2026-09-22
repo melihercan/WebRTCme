@@ -12,7 +12,7 @@ using WebRTCme.Connection.Signaling;
 namespace WebRTCme.Tests.Unit;
 
 /// <summary>
-/// What a call does when a peer's transport dies under it.
+/// What a call does when a peer's transport dies under it, and how it tears one down.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -310,6 +310,53 @@ public class SignalingConnectionRecoveryTests
         await Task.Delay(200);
 
         harness.Of(PeerResponseType.PeerReconnected).Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// A peer connection must never be closed on the thread that asked for the teardown.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// On Apple, closing from the main thread deadlocks the process, and the chain is long enough
+    /// that nothing about the crash points back here: <c>Close()</c> blocks on libwebrtc's
+    /// signalling thread, which blocks on the worker, which reaches
+    /// <c>VoiceProcessingAudioUnit::DisposeAudioUnit</c>, where Apple's
+    /// <c>AudioComponentInstanceDispose</c> waits on a dispatch semaphore that needs the main run
+    /// loop - the very thread waiting at the top. The app stops responding, the system kills it,
+    /// and the report is <c>EXC_CRASH</c>/<c>SIGSEGV</c> with no faulting address. Diagnosed from
+    /// five crash reports as WebRTCnative#5.
+    /// </para>
+    /// <para>
+    /// The teardown is triggered from a thread of this test's own making rather than the test
+    /// thread, which is what makes the assertion deterministic: <c>Task.Run</c> schedules onto the
+    /// thread pool, and a dedicated thread is never a pool thread, so a close that happened inline
+    /// cannot be mistaken for one that was moved.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task APeerConnectionIsNeverClosedOnTheCallersThread()
+    {
+        var harness = await JoinedAsync();
+
+        var closedOn = 0;
+        harness.PeerConnection.When(peer => peer.Close())
+            .Do(_ => closedOn = Environment.CurrentManagedThreadId);
+
+        var triggeredOn = 0;
+        var trigger = new Thread(() =>
+        {
+            triggeredOn = Environment.CurrentManagedThreadId;
+            harness.Subscription.Dispose();
+        });
+        trigger.Start();
+        trigger.Join();
+
+        await WaitUntilAsync(() => closedOn != 0);
+
+        closedOn.Should().NotBe(0, "the peer connection should have been closed by the teardown");
+        closedOn.Should().NotBe(triggeredOn,
+            "closing on the thread that asked for the teardown deadlocks on Apple - the caller's " +
+            "thread has to stay free to service the audio unit being disposed underneath it");
     }
 
     [Fact]

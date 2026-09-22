@@ -101,7 +101,10 @@ namespace WebRTCme.Connection.Services
                         {
                             foreach (var peerContext in _connectionContext.PeerContexts)
                             {
-                                peerContext.PeerConnection.Close();
+                                // Off this thread - see CloseOffCallerThreadAsync. This runs from
+                                // the subscription being disposed, which for a MAUI page is the UI
+                                // thread, and on Apple closing there deadlocks the process.
+                                await CloseOffCallerThreadAsync(peerContext.PeerConnection);
                             }
                             _connectionContext = null;
                         }
@@ -762,6 +765,34 @@ namespace WebRTCme.Connection.Services
         }
 
         /// <summary>
+        /// Closes a peer connection without ever doing it on the caller's thread.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// On Apple, closing from the main thread deadlocks the process. <c>Close()</c> marshals to
+        /// libwebrtc's signalling thread and blocks; that thread batches teardown onto the worker
+        /// and blocks; the worker reaches <c>VoiceProcessingAudioUnit::DisposeAudioUnit</c>, and
+        /// Apple's <c>AudioComponentInstanceDispose</c> waits on a dispatch semaphore that needs
+        /// the main run loop - which is the thread at the top of that chain, blocked in
+        /// <c>Close()</c>. The app stops responding and the system kills it, which reads as
+        /// <c>EXC_CRASH</c>/<c>SIGSEGV</c> with no faulting address. Diagnosed from five crash
+        /// reports as WebRTCnative#5.
+        /// </para>
+        /// <para>
+        /// Awaited rather than abandoned: the close still completes before the caller carries on,
+        /// so nothing about the ordering changes. All that moves is which thread blocks - and the
+        /// one thread that must stay free is the one the caller is on.
+        /// </para>
+        /// <para>
+        /// Harmless where the hazard does not exist. On a caller that is already off the UI thread
+        /// this is one thread hop, and on Blazor WebAssembly, where there is no second thread to
+        /// hop to, it runs as it always did.
+        /// </para>
+        /// </remarks>
+        static Task CloseOffCallerThreadAsync(IRTCPeerConnection peerConnection) =>
+            Task.Run(() => peerConnection.Close());
+
+        /// <summary>
         /// Offers to a peer: create, apply locally, send. Used for the first offer and for the one
         /// that carries fresh ICE credentials after a restart.
         /// </summary>
@@ -1058,7 +1089,9 @@ namespace WebRTCme.Connection.Services
                     var senders = peerConnection.GetSenders();
                     foreach (var sender in senders)
                         peerConnection.RemoveTrack(sender);
-                    peerConnection.Close();
+
+                    // Off this thread - see CloseOffCallerThreadAsync.
+                    await CloseOffCallerThreadAsync(peerConnection);
 
                     _connectionContext.PeerContexts.Remove(peerContext);
                 }

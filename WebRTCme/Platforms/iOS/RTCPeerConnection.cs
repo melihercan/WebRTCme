@@ -154,6 +154,21 @@ namespace WebRTCme.iOS
         }
 
 
+        /// <summary>
+        /// W3C close(). An observable state transition; the handle stays valid so callbacks already
+        /// in flight can land.
+        /// </summary>
+        /// <remarks>
+        /// <b>Do not call this on the UI thread.</b> It blocks until libwebrtc's signalling thread
+        /// has torn the connection down, and that teardown reaches
+        /// <c>VoiceProcessingAudioUnit::DisposeAudioUnit</c> on the worker thread, where Apple's
+        /// <c>AudioComponentInstanceDispose</c> waits on a dispatch semaphore that needs the main
+        /// run loop. Called from the main thread, the main run loop is the thing blocked waiting
+        /// for all of it, the process stops responding and the system kills it - reported as
+        /// <c>EXC_CRASH</c>/<c>SIGSEGV</c> with no faulting address, which looks nothing like a
+        /// deadlock. Diagnosed from five crash reports as WebRTCnative#5. A
+        /// <c>Task.Run(() =&gt; pc.Close())</c> that the caller awaits is enough.
+        /// </remarks>
         public void Close() => NativeObject.Close();
 
         // Closing on dispose, which nothing did before. Without a close the native peer connection

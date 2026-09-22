@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Mac Catalyst wedges on rapid call teardown** | a reproduction, then a decision on whose fault it is | `Close()` deadlocks against libwebrtc's own operations chain, ~1 in 75 call setups. Reported by a consumer; not reproduced here. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 | **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
 
@@ -1751,7 +1750,7 @@ they share - it meant three of them lacked a workaround that the fourth had. Whe
 of four behaves differently, the odd one out is as likely to be the one masking the problem as the
 one causing it.
 
-### Close() deadlocks against its own operations chain on Mac Catalyst - open, 2026-09-22
+### Closing a peer connection on the UI thread deadlocks on Apple - diagnosed and fixed 2026-09-22
 
 Reported by a consumer as [WebRTCnative#5](https://github.com/melihercan/WebRTCnative/issues/5):
 an app that sets up and tears down peer connections in quick succession wedges, the main thread
@@ -1789,9 +1788,49 @@ dereferenced a controller `Close()` had just destroyed; this one deadlocks inste
 "closing while the signalling thread is mid-operation", and fixing the first did not make the second
 impossible - it only removed the path that guaranteed it.
 
-**What has not been established** is whether the fault is reachable through WebRTCme's own call
-paths, or only through a consumer that closes on the main thread while an SDP operation is
-outstanding. `SignalingConnection` closes peer connections from the subscription's dispose action,
+**The full cycle, from five crash reports.** The original excerpt carried three threads and the
+worker was not among them. The complete reports were fetched and symbolicated against the dSYM,
+matched to the crashed image by UUID, and all five carry the same shape:
+
+```
+thread 0  (main, from -[UIApplication _applicationOpenURLAction:payload:origin:])
+    PeerConnectionProxy::Close -> MethodCall::Marshal -> Event::Wait     waits on signalling
+thread 9  (signalling)
+    PeerConnection::Close -> ScopedOperationsBatcher::Run
+      -> Thread::BlockingCallImpl -> Event::Wait                         waits on worker
+thread 8  (worker, running the batched teardown)
+    BaseChannel::~BaseChannel -> WebRtcVoiceReceiveChannel::SetReceive
+      -> AudioState::RemoveReceivingStream -> AudioDeviceIOS::StopPlayout
+        -> ShutdownPlayOrRecord -> VoiceProcessingAudioUnit::DisposeAudioUnit
+          -> AudioComponentInstanceDispose        (Apple)
+            -> _dispatch_semaphore_wait_slow                             never signalled
+```
+
+The network thread is idle in `PhysicalSocketServer::WaitPoll`, which is why `network_tasks.Run()`
+had already returned and the batcher was stuck on `worker_tasks.Run()`.
+
+So the semaphore inside Apple's audio-unit disposal needs the main run loop, and the main run loop
+is the thread at the top of the chain, blocked in `Close()`. The process stops responding and is
+killed - `EXC_CRASH`/`SIGSEGV` with no faulting address, which looks nothing like a deadlock.
+
+**The fix is not to close on the UI thread.** `SignalingConnection` had two places that could:
+the subscription's teardown, which for a MAUI page runs on the UI thread, and the delete path in
+`CreateOrDeletePeerConnectionAsync`. Both now go through `CloseOffCallerThreadAsync`, which is a
+`Task.Run` the caller awaits - the close still completes in order, and all that moves is which
+thread blocks. `APeerConnectionIsNeverClosedOnTheCallersThread` pins it, triggering the teardown
+from a dedicated thread so that a close which happened inline cannot be mistaken for one that was
+moved; it fails against the inline version.
+
+`RTCPeerConnection.Close()` on iOS and Mac Catalyst now carries the warning in its own XML docs,
+because a consumer calling it directly gets no other hint.
+
+**Not ours to fix beyond that.** libwebrtc's `Close()` blocking the signalling thread on the worker
+is upstream's documented design, and disposing an audio unit is Apple's. What makes it a deadlock is
+a caller holding the main thread while both happen.
+
+**Unverified on a device.** The reasoning is sound and the unit test pins the thread, but nobody has
+run the soak that produced those five reports against the fix. At roughly one in seventy-five call
+setups, 600 rounds settles it. `SignalingConnection` closes peer connections from the subscription's dispose action,
 on whatever thread disposes it. The consumer that reported this closes from its own call-session
 teardown, which is reachable both from the app and from its `OnConnectionStateChanged` handler - and
 the latter runs on the signalling thread. Nothing here has reproduced it.
