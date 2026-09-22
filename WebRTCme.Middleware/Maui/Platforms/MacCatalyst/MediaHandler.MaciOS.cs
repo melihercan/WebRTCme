@@ -44,9 +44,20 @@ namespace WebRTCme.Middleware
             handler._label = media.Label;
         }
 
+        /// <summary>
+        /// Hides the preview while this machine's own video is muted.
+        /// </summary>
+        /// <remarks>
+        /// Apple needs this and Windows does not. A Windows tile renders the track, and a disabled
+        /// track delivers no frames, so its preview goes dark by itself. Here the local tile is an
+        /// <c>RTCCameraPreviewView</c> fed straight from the <c>AVCaptureSession</c>, which knows
+        /// nothing about the track - so muting changed the picture for every peer and left the
+        /// person who pressed the button looking at themselves.
+        /// </remarks>
         public static void MapVideoMuted(MediaHandler handler, Media media)
         {
-            
+            handler._videoMuted = media.VideoMuted;
+            handler._mediaView?.SetVideoMuted(media.VideoMuted);
         }
 
         public static void MapAudioMuted(MediaHandler handler, Media media)
@@ -86,6 +97,10 @@ namespace WebRTCme.Middleware
             
             if (_videoTrack is not null)
                 _mediaView.SetTrack(_videoTrack);
+
+            // A tile rebuilt while muted has to come back muted, or the preview
+            // reappears the next time anything else about the tile changes.
+            _mediaView.SetVideoMuted(_videoMuted);
 
             return _mediaView;
         }

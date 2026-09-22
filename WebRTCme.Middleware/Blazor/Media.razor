@@ -1,4 +1,4 @@
-@namespace WebRTCme.Middleware
+﻿@namespace WebRTCme.Middleware
 
 @*
     One tile: a stream, who it belongs to, and what they are doing with it.
@@ -21,10 +21,13 @@
            be both. Covering the frame is the point: what is on screen is stale. *@
         <div class="camera-off reconnecting">Reconnecting&hellip;</div>
     }
-    else if (PeerVideoMuted)
+    else if (PeerVideoMuted || VideoMuted)
     {
         @* Covers the last frame rather than sitting beside it. A camera that has been turned
-           off leaves its final picture on screen, which reads as a frozen call. *@
+           off leaves its final picture on screen, which reads as a frozen call.
+
+           VideoMuted is this machine's own camera, and it belongs here too: the person who
+           turned their camera off was the only one in the call still seeing themselves. *@
         <div class="camera-off">Camera off</div>
     }
 

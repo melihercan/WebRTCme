@@ -11,6 +11,7 @@ namespace WebRTCme.Middleware
         private Webrtc.RTCMTLVideoView _rendererView;
         private Webrtc.RTCCameraPreviewView _cameraView;
         private CGSize _rendererSize = CGSize.Empty;
+        private bool _videoMuted;
 
         public MediaView()
         {
@@ -77,9 +78,31 @@ namespace WebRTCme.Middleware
                 MacCatalystSupport.SetRendererTrack(_rendererView, videoTrack);
             }
 
+            // A view given a track while muted must not light up.
+            SetVideoMuted(_videoMuted);
             SetNeedsLayout();
         }
 
+
+        /// <summary>
+        /// Shows or hides what this view draws, for the local preview's own mute.
+        /// </summary>
+        /// <remarks>
+        /// Hidden rather than torn down: the capture session is still running - muting disables the
+        /// track, it does not stop the camera - so the preview layer is worth keeping. Rebuilding it
+        /// on every unmute would also bring back the ten-second black tile that disposing preview
+        /// views was added to remove.
+        /// </remarks>
+        public void SetVideoMuted(bool muted)
+        {
+            _videoMuted = muted;
+
+            if (_cameraView is not null)
+                _cameraView.Hidden = muted;
+
+            if (_rendererView is not null)
+                _rendererView.Hidden = muted;
+        }
 
         public override void LayoutSubviews()
         {

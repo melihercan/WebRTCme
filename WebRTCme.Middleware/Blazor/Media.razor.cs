@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
 using System;
@@ -17,9 +17,23 @@ namespace WebRTCme.Middleware
         [Parameter]
         public bool Hangup { get; set; } = false;
 
+        /// <summary>
+        /// Whether this machine's own outgoing video is muted - the local preview's own state.
+        /// </summary>
+        /// <remarks>
+        /// Covers this tile, the same way <see cref="PeerVideoMuted"/> covers a peer's. Until
+        /// 2026-09-22 this drove the video element's <c>muted</c> property instead, which is an
+        /// audio control and was never what the name said: it left the local preview playing its
+        /// own microphone back (<see cref="AudioMuted"/> drives that now, as it always meant to),
+        /// and it left the preview showing live video after the camera had been turned off.
+        /// </remarks>
         [Parameter]
         public bool VideoMuted { get; set; } = false;
 
+        /// <summary>
+        /// Whether this tile's audio should be silenced by the element - true for the local
+        /// preview, which would otherwise echo this machine's own microphone back at it.
+        /// </summary>
         [Parameter]
         public bool AudioMuted { get; set; } = false;
 
@@ -89,12 +103,12 @@ namespace WebRTCme.Middleware
             if (Stream is null)
                 return;
 
-            if (ReferenceEquals(_attachedStream, Stream) && _attachedMuted == VideoMuted)
+            if (ReferenceEquals(_attachedStream, Stream) && _attachedMuted == AudioMuted)
                 return;
 
-            BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, VideoMuted);
+            BlazorSupport.SetVideoSource(JsRuntime, VideoElementReference, Stream, AudioMuted);
             _attachedStream = Stream;
-            _attachedMuted = VideoMuted;
+            _attachedMuted = AudioMuted;
         }
 
         public void Dispose()

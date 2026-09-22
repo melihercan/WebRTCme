@@ -23,6 +23,10 @@ namespace WebRTCme.Middleware
     /// exists to avoid, one layer down and considerably more expensive.</para>
     /// <para>So: anything that changes while a call is running is a property on this object, set
     /// in place. Anything that identifies the stream goes through the manager.</para>
+    /// <para><see cref="VideoMuted"/> sits on the observable side for that reason, even though it
+    /// reads like one of the attach properties: muting a camera is something a person does over and
+    /// over during a call, and rebuilding the renderer each time would be the same mistake as
+    /// rebuilding it for every phrase somebody speaks.</para>
     /// </remarks>
     public class MediaStreamParameters : INotifyPropertyChanged
     {
@@ -40,7 +44,20 @@ namespace WebRTCme.Middleware
         /// </summary>
         public bool AudioMuted { get; set; }
 
-        public bool VideoMuted { get; set; }
+        /// <summary>
+        /// Whether this view's own outgoing video is muted - the local preview's own state, not a
+        /// peer's. See <see cref="PeerVideoMuted"/> for what a peer is doing.
+        /// </summary>
+        /// <remarks>
+        /// In the observable half despite describing the stream, because it changes while a call
+        /// runs: a person mutes and unmutes their camera repeatedly, and routing that through the
+        /// manager would rebuild the platform video renderer every time.
+        /// </remarks>
+        public bool VideoMuted
+        {
+            get => _videoMuted;
+            set => Set(ref _videoMuted, value);
+        }
 
         public CameraType CameraType { get; set; }
 
@@ -56,6 +73,7 @@ namespace WebRTCme.Middleware
         /// </remarks>
         public bool IsLocal { get; set; }
 
+        bool _videoMuted;
         bool _peerAudioMuted;
         bool _peerVideoMuted;
         bool _peerSpeaking;

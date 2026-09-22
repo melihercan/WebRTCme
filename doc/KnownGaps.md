@@ -1,4 +1,4 @@
-# Known gaps
+﻿# Known gaps
 
 What is missing, half-wired or fragile on the .NET 10 branch. Started 2026-09-09; **current as of
 2026-09-16**. Everything here was checked against the code rather than remembered, and each entry
@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Muting the camera does not change your own preview, on Apple** | nobody - it can be picked up today | Peers are told and show *Camera off*, and Windows blanks its own preview too. Apple does not: its preview comes from the capture session rather than the track, so muting leaves you looking at yourself. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -2023,39 +2022,64 @@ menu bar with every window missing, because the SSH session has no Screen Record
 looks exactly like an app with no window, and cost an hour here. Accessibility scripting still
 works and reports window geometry correctly, so use that to find out what is on screen.
 
-### Muting the camera does not change your own preview, on Apple - open, 2026-09-22
+### Muting the camera did not change your own preview, on Apple - fixed 2026-09-22
 
 Found once the Catalyst toolbar worked and its buttons could be pressed for the first time. Muting
-the camera turns the button red and stops peers receiving - the track is disabled, which is what
-mute means here and what a browser does - but the local tile carries on showing live video, so a
-user who has just turned their camera off is still looking at themselves.
+the camera turned the button red and stopped peers receiving - the track is disabled, which is what
+mute means here and what a browser does - but the local tile carried on showing live video, so a
+user who had just turned their camera off was still looking at themselves.
 
 **Apple only, and the reason is the preview's source.** Tested both ways on 2026-09-22: on
 Windows the local image does go off when the camera is muted, and comes back when it is unmuted.
-On Mac Catalyst it does not.
+On Mac Catalyst it did not.
 
-`MapVideoMuted` is empty on Mac Catalyst, iOS *and* Windows, so no platform handles this
+`MapVideoMuted` was empty on Mac Catalyst, iOS *and* Windows, so no platform handled this
 deliberately - Windows simply gets the right behaviour for free. Its local tile renders the
 **track**, and a disabled track delivers no frames, so there is nothing to draw. Apple's local tile
 is an `RTCCameraPreviewView` fed straight from the `AVCaptureSession`, which knows nothing about the
-track: disabling one changes nothing the preview layer is drawing, so it carries on showing live
+track: disabling one changes nothing the preview layer is drawing, so it carried on showing live
 video.
 
-So the fix is Apple's alone: the preview view has to be hidden, or the session stopped, when the
-local video is muted.
+**The fix is in four places, and only one of them is Apple.**
 
-**What is not broken:** the contract, and that is now checked rather than assumed. With Mac
+- `MediaStreamParameters.VideoMuted` moved from the attach half of that class to the observable
+  half. It read like an attach property, but muting is something a person does over and over
+  during a call, and routing it through the manager would have rebuilt the platform renderer every
+  time - the same mistake as rebuilding it for every phrase somebody speaks.
+- `CallViewModel.IsCameraMuted` now tells the local tile, found by `IsLocal` rather than by label,
+  because the label is the user's name and a peer could share it. The tile object is *replaced*
+  rather than edited when a local capture device is swapped mid-call, so that path carries the
+  current mute across too; it used to hand back an unmuted tile.
+- Apple's `MediaHandler.MapVideoMuted` sets `MediaView.SetVideoMuted`, which hides the preview or
+  renderer rather than tearing it down. The capture session is still running - muting disables the
+  track, it does not stop the camera - and rebuilding the preview on every unmute would bring back
+  the ten-second black tile that disposing preview views was added to remove. `CreatePlatformView`
+  and `SetTrack` both reapply it, so a tile rebuilt or rebound while muted comes back muted.
+- Blazor's `Media` had the same name meaning something else entirely: `VideoMuted` drove the video
+  element's `muted` property, which is an *audio* control. So the local preview played this
+  machine's own microphone back at it - `AudioMuted` was already set to true for exactly that
+  reason and was being ignored - and the picture never went off. `muted` now comes from
+  `AudioMuted`, and `VideoMuted` covers the tile the way `PeerVideoMuted` already did.
+
+Android is left alone deliberately. Its tile renders the track, like Windows, so it should blank
+for free - but that has not been observed, and guessing is what this file exists to stop.
+
+**Pinned by `CallViewModelMutePreviewTests`**, five tests, with both halves controlled: reverting
+`VideoMuted` to an auto-property fails the announcement test, and dropping the call to
+`SetLocalTileVideoMuted` fails that one *and* the covering test. One of the five is there to stop
+an over-correction - a mute that threw must leave the tile alone, because a preview that covers
+itself while the track is still live says "they cannot see you" when they can.
+
+**What was never broken:** the contract, and that is checked rather than assumed. With Mac
 Catalyst and Windows in one call, muting the camera on the Mac put *Camera off* over its tile on
 Windows and *MacCatalyst: camera off* in the status line; unmuting brought the video straight back.
 So the track is disabled and re-enabled, the advisory `PeerMedia` message arrives both ways, and the
-far side follows it in both directions. Only the muting machine is left in the dark - or rather,
-not in the dark, which is the whole complaint.
+far side follows it in both directions. Only the muting machine was left in the dark - or rather,
+not in the dark, which was the whole complaint.
 
-**Why it is a feature rather than a repair.** `MediaStreamParameters.VideoMuted` is in the set that
-describes how to *attach* a stream, so changing it rebuilds the tile rather than raising
-`PropertyChanged` - see the note on that class. Making the preview follow mute means plumbing it the
-way `PeerVideoMuted` already is, and then implementing `MapVideoMuted` on Apple to hide the preview.
-Windows needs nothing.
+**Not yet seen on a device.** The unit tier proves the view model and the tile; the Apple half is
+four lines of `Hidden = muted` that no test on Windows can run. Check it on the Mac before it is
+called done.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs

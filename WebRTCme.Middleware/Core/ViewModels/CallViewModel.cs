@@ -569,7 +569,9 @@ namespace WebRTCme.Middleware
                     Stream = _cameraStream,
                     Label = _connectionParameters.Name,
                     Hangup = false,
-                    VideoMuted = false,
+                    // The tile object is replaced rather than edited, so the current mute has to
+                    // be carried over: a camera swapped out mid-call used to come back unmuted.
+                    VideoMuted = IsCameraMuted,
                     AudioMuted = true,
                     CameraType = CameraType.Default,
                     ShowControls = false,
@@ -892,7 +894,31 @@ namespace WebRTCme.Middleware
                 _isCameraMuted = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CameraButtonText));
+
+                // The local tile as well, or the person who just turned their camera off is the
+                // only one in the call still looking at themselves. Everyone else is told through
+                // PeerMedia and covers the tile; this is the same news for the machine that made
+                // it. Windows blanks anyway - a disabled track feeds its renderer nothing - but
+                // Apple's preview comes from the capture session and never notices.
+                SetLocalTileVideoMuted(value);
             }
+        }
+
+        /// <summary>Tells the local tile whether this machine's own video is muted.</summary>
+        /// <remarks>
+        /// Matched by <see cref="MediaStreamParameters.IsLocal"/> rather than by label, because the
+        /// label is the user's name and a peer could share it. Set in place, so the tile follows
+        /// without its renderer being rebuilt.
+        /// </remarks>
+        void SetLocalTileVideoMuted(bool muted)
+        {
+            var local = _mediaStreamManager.MediaStreamParametersList
+                .FirstOrDefault(tile => tile.IsLocal);
+
+            if (local is null)
+                return;
+
+            _runOnUiThread.Invoke(() => local.VideoMuted = muted);
         }
 
         public string MicrophoneButtonText => IsMicrophoneMuted ? "Unmute microphone" : "Mute microphone";
