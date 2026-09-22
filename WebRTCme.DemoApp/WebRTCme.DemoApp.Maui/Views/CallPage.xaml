@@ -203,7 +203,21 @@
                 </FlexLayout>
             </ScrollView>
 
+            <!--
+                InputTransparent, and it is not cosmetic. A popup declared here is an ordinary
+                child of this Grid, and with no Grid.Row it lands in row 0 - on top of the toolbar,
+                because it is declared last. On Mac Catalyst its placeholder is a real, hit-testable
+                view stretched to the whole row, so every click meant for mute, camera, share,
+                record or hang-up landed on it instead and the toolbar was simply dead. The buttons
+                were fine; nothing ever reached them.
+
+                Invisible, so it looked like a MAUI or a WebRTCme fault, and the main thread sat
+                idle in its run loop the whole time - which rules out the explanations one reaches
+                for first. Windows and Android do not show it; whatever their placeholder is, it
+                does not take touches.
+            -->
             <popup:SfPopup x:Name="DebugMenuPopup"
+                           InputTransparent="True"
                            ShowHeader="False"
                            ShowFooter="False"
                            AutoSizeMode="Both"

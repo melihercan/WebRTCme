@@ -43,6 +43,7 @@ public class SignalingConnectionRecoveryTests
         public IRTCPeerConnection PeerConnection { get; init; }
         public List<PeerResponse> Responses { get; } = [];
         public IDisposable Subscription { get; set; }
+        public IMediaStream LocalStream { get; init; }
 
         /// <summary>Offers sent so far: the first join plus one per recovery.</summary>
         public int OffersSent => Api.ReceivedCalls()
@@ -100,6 +101,14 @@ public class SignalingConnectionRecoveryTests
         // A test that waited that out would be a test nobody runs.
         SignalingConnection.InitiatorRecoveryGrace = TimeSpan.FromMilliseconds(300);
 
+        // A local stream with one audio track, because muting checks for one before it does
+        // anything - and a test that stopped at that guard would never reach what it is about.
+        var localTrack = Substitute.For<IMediaStreamTrack>();
+        localTrack.Kind.Returns(MediaStreamTrackKind.Audio);
+        var localStream = Substitute.For<IMediaStream>();
+        localStream.GetAudioTracks().Returns([localTrack]);
+        localStream.GetVideoTracks().Returns([]);
+
         var connection = new SignalingConnection(
             api, webRtc, NullLogger<SignalingConnection>.Instance);
 
@@ -107,7 +116,8 @@ public class SignalingConnectionRecoveryTests
         {
             Connection = connection,
             Api = api,
-            PeerConnection = peerConnection
+            PeerConnection = peerConnection,
+            LocalStream = localStream
         };
 
         harness.Subscription = connection.ConnectionRequest(new UserContext
@@ -115,7 +125,8 @@ public class SignalingConnectionRecoveryTests
             ConnectionType = ConnectionType.Signaling,
             Id = Guid.NewGuid(),
             Name = "tester",
-            Room = "room"
+            Room = "room",
+            LocalStream = localStream
         }).Subscribe(harness.Responses.Add);
 
         // The subscription joins asynchronously; nothing below works until it has.
@@ -424,6 +435,62 @@ public class SignalingConnectionRecoveryTests
         harness.Of(PeerResponseType.PeerReconnected).Should().ContainSingle();
         harness.Errors.Should().BeEmpty("the call came back, so nothing was lost");
     }
+
+    /// <summary>
+    /// Leaving one call and joining another must not leave the second one contextless.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This connection is a DI singleton and a subscription's teardown is fire-and-forget, so the
+    /// two overlap: a caller who hangs up and rejoins can have the second call running before the
+    /// first has finished tearing down. The teardown used to clear the context unconditionally,
+    /// which wiped the live call's - and then mute, screen share and statistics all failed with
+    /// "there is no call", on a call that was plainly up and carrying video.
+    /// </para>
+    /// <para>
+    /// Seen on Mac Catalyst on 2026-09-22, and made easier to hit by closing peer connections off
+    /// the caller's thread - which is required there, so the race had to be closed rather than
+    /// avoided.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task AFinishedCallDoesNotWipeTheOneThatReplacedIt()
+    {
+        var harness = await JoinedAsync();
+
+        // A slow close, because the race needs the two to overlap and an instant teardown does not.
+        first_close_is_slow(harness);
+
+        // Both joins go through the SAME connection, which is what matters: it is registered as a
+        // DI singleton, so one instance holds the context both calls write to. Subscribing a second
+        // harness instead - which is what this test did at first - gives two objects with two
+        // fields, and the race cannot happen.
+        harness.Subscription.Dispose();
+
+        var rejoined = harness.Connection.ConnectionRequest(new UserContext
+        {
+            ConnectionType = ConnectionType.Signaling,
+            Id = Guid.NewGuid(),
+            Name = "tester",
+            Room = "room",
+            LocalStream = harness.LocalStream
+        }).Subscribe(_ => { });
+
+        // Long enough for the first teardown to finish on top of the second join.
+        await Task.Delay(900);
+
+        var muting = async () => await harness.Connection.SetOutgoingMediaEnabledAsync(
+            MediaStreamTrackKind.Audio, enabled: false);
+
+        await muting.Should().NotThrowAsync<InvalidOperationException>(
+            "the second call is live, so muting it must not report that there is no call");
+
+        rejoined.Dispose();
+    }
+
+    /// <summary>Makes this harness's close slow, so a teardown outlives the join that follows it.</summary>
+    static void first_close_is_slow(Harness harness) =>
+        harness.PeerConnection.When(peer => peer.Close()).Do(_ => Thread.Sleep(400));
 
     [Fact]
     public async Task ConnectingAgainRestoresTheAllowance()

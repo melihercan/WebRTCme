@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **No button on the call page responds on Mac Catalyst** | nobody - it can be picked up today | The demo's toolbar is dead there: mute, camera, share, record and hang-up all do nothing. The main page works. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -1948,7 +1947,7 @@ account above came from fetching the file and reading it. **Worth the space here
 version was convincing**: it explained the stack, named a mechanism and proposed a fix, and was
 wrong in a way that no amount of re-reading the crash report would have exposed.
 
-### No button on the call page responds on Mac Catalyst - open, 2026-09-22
+### No button on the call page responded on Mac Catalyst - fixed 2026-09-22
 
 Found while trying to verify `ae0434a5`, and it is the more serious of the two. On Mac Catalyst the
 demo's call page toolbar is inert: microphone, camera, screen share, record and hang-up all do
@@ -1968,19 +1967,48 @@ from there - and once in the call there is no way out except killing the app.
   element eighteen groups deep inside the window, so events do arrive and are hit-tested to
   *something* - just not to a button.
 
-**The lead.** The call page differs from the main page in one way: it has native media views in it.
-`MediaView` on Apple sets a hardcoded `Frame = new CGRect(0, 0, 1080, 1920)` in its constructor,
-and a media view that lingers in the hierarchy after its tile is gone would cover the window
-entirely and swallow every touch, while the visible tiles still draw in the right place lower down.
-That is a guess with a mechanism, not a diagnosis - nobody has dumped the view hierarchy to see
-whether a stale view is really there.
+**The lead was wrong, and the hierarchy said so.** The suspicion was a lingering `MediaView` -
+it sets a hardcoded `Frame = new CGRect(0, 0, 1080, 1920)` in its constructor, which would cover
+everything. Dumping the live native hierarchy from inside the app showed nothing of the sort: every
+`MediaView` was correctly framed, and all six toolbar buttons were present, 48x48, and
+`interaction=True`. The buttons were never the problem.
 
-It is worth connecting to `ae0434a5`, which disposes the camera *preview* view when a tile is
-dropped. That fix does not touch the `MediaView` wrapper around it.
+One line down, a sibling declared after them:
 
-**Two things this blocks.** Verifying `ae0434a5` itself, which needs leaving and rejoining a call to
-drop and recreate a preview view - the only route to that on Catalyst is the hang-up button. And any
-hand-check of call controls on that platform.
+```
+LayoutViewExt frame={{0, 0}, {1330, 72}} hidden=False alpha=1 interaction=True
+```
+
+Syncfusion's layout view, full width and exactly the toolbar row's height, drawn on top because it
+comes last. **It is the `SfPopup`.** The debug menu is declared as a child of the page's `Grid`
+with no `Grid.Row`, so it defaults to row 0 - the toolbar's row - and its placeholder is a real,
+hit-testable view stretched across it. Every click meant for a button landed there instead.
+
+Invisible, which is why it looked like a framework fault; and it explains the two things that had
+made no sense. The main thread was idle because the clicks *were* being delivered and hit-tested,
+just to the wrong view. And a synthetic click resolving to "a group eighteen levels deep" was
+literally true - that group.
+
+**Fixed** by `InputTransparent="True"` on the popup. Windows and Android never showed it, so
+whatever their placeholder is, it does not take touches.
+
+**How it was found matters more than the fix.** Reading the code produced a confident wrong answer
+twice - the `MediaView` frame, then the popup's overlay mode - and neither survived contact with
+the actual view tree. The dump took one temporary method writing to a file, because Catalyst's
+`Debug` output reaches neither the unified log nor an SSH session.
+
+**And behind it, a second bug nobody could have seen.** With the toolbar working, mute reported
+*"there is no call to mute"* on a call that was plainly up and carrying video. Those buttons had
+never been clickable on Catalyst, so nothing had ever exercised them there.
+
+`SignalingConnection` is a DI singleton and a subscription's teardown is fire-and-forget, so leaving
+a call and rejoining runs the two concurrently. The teardown cleared `_connectionContext`
+unconditionally - including when the field already held the *next* call's context. Everything that
+reads it then fails: mute, screen share, statistics. It now clears only its own, compared by
+reference.
+
+Closing peer connections off the caller's thread, which Apple requires, widens that window - so the
+race had to be closed rather than avoided.
 
 **A note for whoever picks this up.** `screencapture` over SSH on that Mac returns the wallpaper and
 menu bar with every window missing, because the SSH session has no Screen Recording permission. It

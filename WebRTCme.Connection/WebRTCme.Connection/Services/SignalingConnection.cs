@@ -58,6 +58,10 @@ namespace WebRTCme.Connection.Services
             {
                 bool isJoined = false;
 
+                // This subscription's own context, kept so the teardown below can tell whether the
+                // one on the field is still it.
+                ConnectionContext context = null;
+
                 try
                 {
                     // The transport is closed when a call ends, so bring it back up before joining.
@@ -71,11 +75,12 @@ namespace WebRTCme.Connection.Services
                     if (!result.IsOk)
                         throw new Exception($"{result.ErrorMessage}");
 
-                    _connectionContext = new ConnectionContext
+                    context = new ConnectionContext
                     {
                         UserContext = userContext,
                         Observer = observer,
                     };
+                    _connectionContext = context;
                     _outgoingAudioEnabled = true;
                     _outgoingVideoEnabled = true;
                     isJoined = true;
@@ -97,16 +102,26 @@ namespace WebRTCme.Connection.Services
                             // No error handling for leave.
                             _ = await _signalingServerApi.LeaveAsync(userContext.Id);
 
-                        if (_connectionContext is not null)
+                        if (context is not null)
                         {
-                            foreach (var peerContext in _connectionContext.PeerContexts)
+                            foreach (var peerContext in context.PeerContexts)
                             {
                                 // Off this thread - see CloseOffCallerThreadAsync. This runs from
                                 // the subscription being disposed, which for a MAUI page is the UI
                                 // thread, and on Apple closing there deadlocks the process.
                                 await CloseOffCallerThreadAsync(peerContext.PeerConnection);
                             }
-                            _connectionContext = null;
+
+                            // Only if it is still ours. This connection is a DI singleton and this
+                            // teardown is fire-and-forget, so a caller who leaves a call and joins
+                            // another quickly can have the second call already running by the time
+                            // this line is reached. Clearing unconditionally then wipes the live
+                            // call's context, and everything that reads it - mute, screen share,
+                            // statistics - starts failing with "there is no call", on a call that
+                            // is plainly up. Seen on Mac Catalyst on 2026-09-22, where closing now
+                            // happens off the caller's thread and the window is wider for it.
+                            if (ReferenceEquals(_connectionContext, context))
+                                _connectionContext = null;
                         }
 
                         // Close the transport too, rather than leaving it open until the process
