@@ -24,6 +24,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
 | **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
+| **Mac Catalyst wedges on rapid call teardown** | a reproduction, then a decision on whose fault it is | `Close()` deadlocks against libwebrtc's own operations chain, ~1 in 75 call setups. Reported by a consumer; not reproduced here. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 | **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
 
@@ -1691,6 +1692,79 @@ so a join cannot race a close. Verified on Android over two consecutive calls: b
 they share - it meant three of them lacked a workaround that the fourth had. When one platform out
 of four behaves differently, the odd one out is as likely to be the one masking the problem as the
 one causing it.
+
+### Close() deadlocks against its own operations chain on Mac Catalyst - open, 2026-09-22
+
+Reported by DirectCallMe as [WebRTCnative#5](https://github.com/melihercan/WebRTCnative/issues/5):
+an app that sets up and tears down peer connections in quick succession wedges, the main thread
+stops responding, and the system kills it. **8 occurrences in 600 consecutive call setups** - about
+one in seventy-five - on a Mac mini 2018 running the M153 Catalyst framework through 26.9.21.1.
+Termination is `EXC_CRASH`/`SIGSEGV` with `codes 0x0, 0x0`, which is a process killed for being
+unresponsive rather than a memory fault.
+
+**The cycle, symbolicated.** The report carried eight bare offsets because the shipped framework is
+stripped. Resolving them against a dSYM (see below) gives:
+
+```
+main thread                              signalling thread
+PeerConnectionProxy::Close()             Thread::ProcessMessages
+  MethodCall<...>::Marshal(Thread*)        Thread::Dispatch
+    Event::Wait  <- blocked                  PeerConnection::Close()
+                                               ScopedOperationsBatcher::Run()
+                                                 Thread::BlockingCallImpl()
+                                                   Event::Wait  <- blocked
+```
+
+The main thread marshals `Close()` to the signalling thread and blocks. The signalling thread runs
+that `Close()`, and inside it `ScopedOperationsBatcher::Run()` issues **a second blocking call**
+which never returns. The network thread is idle in `PhysicalSocketServer::WaitPoll` and is not
+involved.
+
+`ScopedOperationsBatcher` is libwebrtc's operations chain - the queue that serialises
+`SetLocalDescription`, `SetRemoteDescription` and `CreateAnswer`. `Close()` flushes it. So the shape
+is **`Close()` racing an operation still in flight**, which is why it needs rapid teardown-and-setup
+to appear and why a short soak never shows it.
+
+**This is the same family as the dispose crash**, `5599c1dc` and `13e8156a`, where a continuation
+resumed on libwebrtc's signalling thread and ran `Close()` *inside* `SetLocalDescription`. That one
+dereferenced a controller `Close()` had just destroyed; this one deadlocks instead. Both are
+"closing while the signalling thread is mid-operation", and fixing the first did not make the second
+impossible - it only removed the path that guaranteed it.
+
+**What has not been established** is whether the fault is reachable through WebRTCme's own call
+paths, or only through a consumer that closes on the main thread while an SDP operation is
+outstanding. `SignalingConnection` closes peer connections from the subscription's dispose action,
+on whatever thread disposes it. DirectCallMe closes from `CallSession.End()`, which is reachable
+both from the app and from `OnConnectionStateChanged` - and the latter runs on the signalling
+thread. Nothing here has reproduced it.
+
+**Measuring a fix needs one long run, not five short ones.** At 8 in 600 the per-round rate is
+~1.33%, so a clean 60-round soak has a ~45% chance of happening anyway and proves nothing, while a
+clean 600-round soak has ~0.03%. That is the opposite shape to the dispose crash, which killed ~85%
+of runs and so needed five clean runs to trust one. Match the soak to the base rate rather than
+applying a fixed rule.
+
+### Apple dSYMs, and why the offsets were readable at all - 2026-09-22
+
+`WebRtcNativeIosLib` and `WebRtcNativeMacCatalystLib` have had a `dsyms` input since the dispose
+crash. It had never been run, so every Apple crash report since has been bare offsets.
+
+Running it on the Catalyst build settled something worth keeping: `enable_dsyms=true
+symbol_level=2` produces a framework **byte-identical** to the one already shipped - same sha256,
+same `LC_UUID`s - so the debug information really does go entirely into the separate bundle. Which
+means **a dSYM built after the fact symbolicates a build that shipped without one**. No reshipping,
+no reproducing, and crash reports already in hand become readable.
+
+Both workflows now default to `dsyms: true` (WebRTCnative `128222f`). The bundle is a separate
+artifact on a 30-day retention, so it costs nothing to anyone who does not download it, and the
+moment you want symbols is always after the crash.
+
+Worth recording alongside: the offsets alone supported a confident and wrong reading. The high
+offsets in the blocked thread looked like the ObjC/audio layer, and a sibling report
+(WebRTCme#49) is genuinely an `AVAudioSession` fault in the same test runs, so "the audio device
+module deadlocking against the main thread" fit everything visible. The symbols showed
+`PeerConnection::Close` and the operations batcher, with nothing audio-related anywhere in the
+cycle. This is the second Apple fault in a month where symbolication ended the guessing in one step.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
