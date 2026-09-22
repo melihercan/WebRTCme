@@ -2093,6 +2093,20 @@ a preview view causes - which is the whole reason it is hidden rather than torn 
 Windows was re-checked rather than assumed: `MapVideoMuted` is still empty there, its own preview
 still blanks by itself, and nothing about its behaviour changed.
 
+**And Blazor, in Chrome, two tabs in one room, 2026-09-22.** Read off the elements rather than
+judged by eye, because the audio half of this is not visible:
+
+| tab | own tile | the other tab's tile |
+| --- | --- | --- |
+| both live | `muted: true`, uncovered | `muted: false`, uncovered |
+| tab 1's camera muted | `muted: true`, **Camera off** | tab 2 shows **Camera off** over tab 1, and *Blazor: camera off* in the status line |
+| unmuted again | uncovered | uncovered |
+
+`muted: true` on every own tile and `false` on every peer tile is the point of the change: the
+element's `muted` property is an audio control, so the local preview no longer plays this machine's
+own microphone back at it, and peers are still audible. **Controlled**: with the old line restored
+the local tile comes back as `muted: false`, which is the echo.
+
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
 
