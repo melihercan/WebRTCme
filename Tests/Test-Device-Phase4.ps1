@@ -58,7 +58,8 @@ param(
     [switch] $Simulator,
     [string] $SimulatorName,
     [switch] $SkipBuild,
-    [string] $NativeLog
+    [string] $NativeLog,
+    [string] $Scenario
 )
 
 Set-StrictMode -Version Latest
@@ -590,6 +591,20 @@ cat /tmp/webrtcme-ios-build.done 2>/dev/null || echo TIMEOUT
 
 # ---------------------------------------------------------------- run
 
+# -Scenario runs exactly one and skips the two-pass shape below. It exists for the soaks, which
+# are not in the regular set and take half an hour: asking for one by name is the only way to run
+# it, and pairing it with the isolated re-run would double a wait that is already the point.
+if ($Scenario) {
+    Write-Host "$Scenario, on its own:"
+    $allOk = switch ($Platform) {
+        'android'     { Invoke-Android -Filter $Scenario }
+        'maccatalyst' { Invoke-MacCatalyst -Filter $Scenario }
+        'ios'         { Invoke-Ios -Filter $Scenario }
+    }
+    $isolatedOk = $true
+}
+else {
+
 Write-Host "All scenarios:"
 $allOk = switch ($Platform) {
     'android'     { Invoke-Android }
@@ -603,6 +618,8 @@ $isolatedOk = switch ($Platform) {
     'android'     { Invoke-Android -Filter $isolated }
     'maccatalyst' { Invoke-MacCatalyst -Filter $isolated }
     'ios'         { Invoke-Ios -Filter $isolated }
+}
+
 }
 
 Write-Host ""

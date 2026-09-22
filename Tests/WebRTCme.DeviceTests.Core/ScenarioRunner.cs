@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace WebRTCme.DeviceTests.Core;
 
@@ -42,7 +42,14 @@ public static class ScenarioRunner
     /// <returns>True when nothing failed. Skips do not fail a run.</returns>
     public static async Task<bool> RunAsync(Action<string> report, string? filter = null)
     {
-        var selected = LoopbackScenarios.All
+        // Soaks are reachable only by name. They take half an hour by design, so an unfiltered
+        // run must never pick one up - but a harness that asks for one by name should get it
+        // rather than "no scenario matched", which reads as a typo.
+        var available = string.IsNullOrEmpty(filter)
+            ? LoopbackScenarios.All
+            : LoopbackScenarios.All.Concat(LoopbackScenarios.Soaks).ToList();
+
+        var selected = available
             .Where(s => string.IsNullOrEmpty(filter)
                         || s.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
             .ToList();

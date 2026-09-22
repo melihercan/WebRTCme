@@ -32,6 +32,19 @@ public static class LoopbackScenarios
     // coffee break. Host candidates over loopback are immediate; this is nearly all handshake.
     static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// Marshals an action onto the app's main thread, when there is one.
+    /// </summary>
+    /// <remarks>
+    /// Set by the device runner, which is a MAUI app and has <c>MainThread</c>. Left null
+    /// everywhere else - the Windows and Blazor tiers have no UI thread in the sense that matters
+    /// here, and a soak that needs one skips rather than pretending.
+    ///
+    /// A delegate rather than a direct MAUI call because this project compiles on bare
+    /// <c>net10.0</c> too, where <c>Microsoft.Maui.ApplicationModel</c> is not available.
+    /// </remarks>
+    public static Func<Action, Task>? RunOnMainThread { get; set; }
+
     // How long AReceivedTrackDoesNotPoisonTheProcess waits for a track before carrying on without
     // one. Short on purpose: whether the track arrives is not what that scenario asserts.
     static readonly TimeSpan TrackArrival = TimeSpan.FromSeconds(3);
@@ -67,6 +80,19 @@ public static class LoopbackScenarios
         // that turns #45 from a race into a certainty.
         (nameof(ARemoteTrackArrivesWithoutCrashing), ARemoteTrackArrivesWithoutCrashing),
         (nameof(AReceivedTrackDoesNotPoisonTheProcess), AReceivedTrackDoesNotPoisonTheProcess),
+    ];
+
+    /// <summary>
+    /// Scenarios that are too slow for the normal pass and run only when asked for by name.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not in <see cref="All"/>. A soak's whole value is in running long enough for a
+    /// rare fault to happen, which is the opposite of what the regular suite is for - and a tier
+    /// that takes half an hour is a tier people stop running.
+    /// </remarks>
+    public static IReadOnlyList<(string Name, Func<Task<ScenarioResult>> Run)> Soaks =>
+    [
+        (nameof(ClosingOnTheMainThreadRepeatedlyDoesNotWedge), ClosingOnTheMainThreadRepeatedlyDoesNotWedge),
     ];
 
     /// <summary>A sender taken earlier must still work after the senders are enumerated again.</summary>
@@ -227,7 +253,10 @@ public static class LoopbackScenarios
     /// A run that continues after this is worth less than a clean one, and the message says so.
     /// </para>
     /// </remarks>
-    static async Task<ScenarioResult> Run(string name, Func<Task<string?>> body)
+    static Task<ScenarioResult> Run(string name, Func<Task<string?>> body) =>
+        Run(name, body, ScenarioTimeout);
+
+    static async Task<ScenarioResult> Run(string name, Func<Task<string?>> body, TimeSpan timeout)
     {
         var clock = Stopwatch.StartNew();
         try
@@ -241,7 +270,7 @@ public static class LoopbackScenarios
             ScenarioTrace.Write($"begin {name}");
 
             var work = Task.Run(body);
-            var finished = await Task.WhenAny(work, Task.Delay(ScenarioTimeout));
+            var finished = await Task.WhenAny(work, Task.Delay(timeout));
 
             if (!ReferenceEquals(finished, work))
             {
@@ -249,7 +278,7 @@ public static class LoopbackScenarios
                 ScenarioTrace.Write($"TIMED OUT {name} - still blocked");
                 return ScenarioResult.Fail(
                     name,
-                    $"timed out after {ScenarioTimeout.TotalSeconds:F0}s - it is still blocked, and "
+                    $"timed out after {timeout.TotalSeconds:F0}s - it is still blocked, and "
                     + "anything reported after this ran alongside it",
                     clock.Elapsed);
             }
@@ -518,6 +547,145 @@ public static class LoopbackScenarios
 
             return null;
         });
+
+    /// <summary>Closing a connected call on the main thread, many times over, must not wedge.</summary>
+    /// <remarks>
+    /// <para>
+    /// WebRTCnative#5. Closing a peer connection from the main thread deadlocks on Apple, and the
+    /// chain is long enough that nothing about the crash points back at the call:
+    /// </para>
+    /// <code>
+    /// main         Close() -> Marshal -> Event::Wait              waits on signalling
+    /// signalling   PeerConnection::Close -> OperationsBatcher::Run
+    ///                -> BlockingCallImpl -> Event::Wait           waits on worker
+    /// worker       ~BaseChannel -> SetReceive -> StopPlayout
+    ///                -> DisposeAudioUnit
+    ///                  -> AudioComponentInstanceDispose  (Apple)
+    ///                    -> dispatch_semaphore_wait       needs the main run loop
+    /// </code>
+    /// <para>
+    /// The semaphore Apple waits on needs the main run loop, and the main run loop is the thread at
+    /// the top, blocked in <c>Close()</c>. The process stops responding and is killed, arriving as
+    /// <c>EXC_CRASH</c>/<c>SIGSEGV</c> with no faulting address.
+    /// </para>
+    /// <para>
+    /// <b>Three ingredients, and every one is needed.</b> The close has to be on the main thread -
+    /// every other scenario here runs on a pool thread and so can never form the cycle. The call
+    /// has to be receiving audio, or the worker never reaches <c>StopPlayout</c> and there is no
+    /// audio unit to dispose. And it has to run many times: the reported rate is about one in
+    /// seventy-five setups, so sixty rounds clean is a coin toss and six hundred is an answer.
+    /// </para>
+    /// <para>
+    /// A transceiver rather than <c>getUserMedia</c>, so this needs no microphone permission: what
+    /// starts playout is the far side having an audio m-line to receive on, not a real capture
+    /// device feeding it.
+    /// </para>
+    /// <para>
+    /// Rounds come from <c>WEBRTCME_SOAK_ROUNDS</c>, defaulting to 600. A wedged round is reported
+    /// by number rather than hanging the run, because once the main thread is stuck nothing else
+    /// will say which round it was.
+    /// </para>
+    /// </remarks>
+    public static Task<ScenarioResult> ClosingOnTheMainThreadRepeatedlyDoesNotWedge()
+    {
+        var rounds = 600;
+        var configured = Environment.GetEnvironmentVariable("WEBRTCME_SOAK_ROUNDS");
+        if (!string.IsNullOrWhiteSpace(configured) && int.TryParse(configured, out var parsed) && parsed > 0)
+            rounds = parsed;
+
+        // Generous: the point is to outlast the soak, not to bound a round. A wedged round is
+        // caught by its own clock below and reported, which is more useful than the whole scenario
+        // timing out with nothing to say.
+        var budget = TimeSpan.FromSeconds(rounds * 5 + 120);
+
+        return Run(nameof(ClosingOnTheMainThreadRepeatedlyDoesNotWedge), async () =>
+        {
+            var toMainThread = RunOnMainThread;
+            if (toMainThread is null)
+                throw new SkipException(
+                    "no main thread to marshal to - this reproduces a UI-thread deadlock and only "
+                    + "means anything inside an app that has one");
+
+            for (var round = 1; round <= rounds; round++)
+            {
+                var failure = await OneMainThreadCloseRound(toMainThread, round);
+                if (failure is not null)
+                    return failure;
+
+                if (round % 50 == 0)
+                    ScenarioTrace.Write($"soak: {round}/{rounds} rounds closed cleanly");
+            }
+
+            return null;
+        }, budget);
+    }
+
+    /// <summary>One round of the soak: connect a call carrying audio, then close it on the main thread.</summary>
+    static async Task<string?> OneMainThreadCloseRound(Func<Action, Task> toMainThread, int round)
+    {
+        var caller = Window().RTCPeerConnection(Configuration());
+        var callee = Window().RTCPeerConnection(Configuration());
+
+        try
+        {
+            caller.OnIceCandidate += async (_, e) =>
+            {
+                if (e.Candidate is not null) await callee.AddIceCandidate(Init(e.Candidate));
+            };
+            callee.OnIceCandidate += async (_, e) =>
+            {
+                if (e.Candidate is not null) await caller.AddIceCandidate(Init(e.Candidate));
+            };
+
+            var connected = new TaskCompletionSource<bool>();
+            callee.OnConnectionStateChanged += (_, _) =>
+            {
+                if (callee.ConnectionState == RTCPeerConnectionState.Connected) connected.TrySetResult(true);
+            };
+
+            // Send-only from the caller gives the callee something to receive, which is what starts
+            // playout and builds the audio unit this is about tearing down.
+            caller.AddTransceiver(MediaStreamTrackKind.Audio,
+                new RTCRtpTransceiverInit { Direction = RTCRtpTransceiverDirection.SendOnly });
+
+            var offer = await caller.CreateOffer();
+            await caller.SetLocalDescription(offer);
+            await callee.SetRemoteDescription(offer);
+
+            var answer = await callee.CreateAnswer();
+            await callee.SetLocalDescription(answer);
+            await caller.SetRemoteDescription(answer);
+
+            if (!await Within(connected))
+                return $"round {round}: the call did not connect within {Patience.TotalSeconds:0}s, "
+                     + "so there was no audio unit to tear down and the soak proves nothing";
+
+            // The call under test. Closed on the main thread, deliberately, and the callee first
+            // because it is the receiving side - the one whose teardown reaches StopPlayout.
+            var closed = toMainThread(() =>
+            {
+                callee.Close();
+                caller.Close();
+            });
+
+            // A round of its own, so a wedge is reported by number. Once the main thread is stuck
+            // nothing else in the process will name the round, and the scenario's own clock would
+            // only say the whole soak stopped.
+            var finished = await Task.WhenAny(closed, Task.Delay(TimeSpan.FromSeconds(30)));
+            if (!ReferenceEquals(finished, closed))
+                return $"round {round}: Close() on the main thread has not returned after 30s. "
+                     + "The main thread is wedged - see WebRTCnative#5 - and everything after this "
+                     + "ran alongside a deadlocked run loop";
+
+            await closed;
+            return null;
+        }
+        finally
+        {
+            caller.Dispose();
+            callee.Dispose();
+        }
+    }
 
     /// <summary>A remote track arriving must not take the process with it.</summary>
     /// <remarks>

@@ -90,6 +90,12 @@ public class App : Application
         bool ok;
         try
         {
+            // The one thing this app has that the scenarios cannot reach on their own. A soak
+            // that reproduces a UI-thread deadlock needs a real UI thread to marshal onto, and
+            // Core compiles on bare net10.0 where MainThread does not exist.
+            LoopbackScenarios.RunOnMainThread = action =>
+                MainThread.InvokeOnMainThreadAsync(action);
+
             ok = await ScenarioRunner.RunAsync(Report, Filter);
         }
         catch (Exception exception)
