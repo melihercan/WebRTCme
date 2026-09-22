@@ -23,7 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Muting the camera does not change your own preview** | nobody - it can be picked up today | Peers stop receiving, but the local tile keeps showing live video on Apple and a frozen frame on Windows. `MapVideoMuted` is empty on every platform. Found 2026-09-22. See below. |
+| **Muting the camera does not change your own preview** | nobody - it can be picked up today | Peers are told and show *Camera off*, verified between Catalyst and Windows. It is only the muting machine that carries on showing live video, on Apple, or a frozen frame on Windows. `MapVideoMuted` is empty on every platform. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -2039,8 +2039,12 @@ The symptom differs by platform for a reason worth knowing. On Apple the local t
 disabled track changes nothing it draws - the preview stays live. On Windows the preview renders the
 track, so muting freezes it on the last frame instead. Neither goes dark.
 
-**What is not broken:** the contract. Peers stop receiving. Unverified here only because the check
-needs a second machine in the call, and the Mac was alone.
+**What is not broken:** the contract, and that is now checked rather than assumed. With Mac
+Catalyst and Windows in one call, muting the camera on the Mac put *Camera off* over its tile on
+Windows and *MacCatalyst: camera off* in the status line; unmuting brought the video straight back.
+So the track is disabled and re-enabled, the advisory `PeerMedia` message arrives both ways, and the
+far side follows it in both directions. Only the muting machine is left in the dark - or rather,
+not in the dark, which is the whole complaint.
 
 **Why it is a feature rather than a repair.** `MediaStreamParameters.VideoMuted` is in the set that
 describes how to *attach* a stream, so changing it rebuilds the tile rather than raising
