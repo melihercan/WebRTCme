@@ -132,13 +132,27 @@ No gn args change, so the `.aar` is the same file whether it runs or not. That t
 into function names, which is the difference between "an `RTC_CHECK` failed somewhere" and knowing
 which one.
 
-**With one caveat that the Apple equivalent does not have.** There, the framework built with dSYMs
-was byte-identical to the one already shipped, so the dSYM symbolicated crash reports already in
-hand. Nobody has checked whether the Android build is reproducible in the same way, so it is not yet
-known whether a rebuild's unstripped objects line up with the `.aar` currently shipping. Checking is
-cheap - rebuild and compare the stripped `.so` inside the new `.aar` against the shipped one - and
-worth doing before anyone reads addresses off an old tombstone. If they do not match, the emulator
-reproduces this two runs in three, so a fresh one costs an afternoon rather than a wait.
+**And the build is reproducible, checked rather than assumed - 2026-09-22.** Rebuilding 8010 in
+WebRTCnative run 35708939622 produced all four `.so` files byte-identical to the ones in the `.aar`
+shipping today - same sha256 and, more to the point, the same GNU build-id, which is what a debugger
+matches an unstripped object to a stripped one by:
+
+| ABI | build-id |
+| --- | --- |
+| `arm64-v8a` | `262e48bf801b1c7c` |
+| `armeabi-v7a` | `b448f8bb3c605835` |
+| `x86` | `c09af998eee5dec5` |
+| `x86_64` | `a37148f593b4531a` |
+
+The unstripped objects carry those same build-ids, so they symbolicate the shipped binaries. The
+difference they make, on the ABI that aborts: the `.so` in the `.aar` has **no `.symtab` at all**,
+while its unstripped twin has **31,943 function symbols**. That is the whole distance between a
+column of addresses and a named frame.
+
+So nothing needs installing - the `.aar` in this repository is already exactly what the symbol build
+produces - and the symbols can be regenerated whenever they are wanted by rebuilding the same
+branch. Which matters, because the artifact is on a 30-day retention and would otherwise have been
+a deadline.
 
 **Why it is recorded rather than chased**: the emulator runs the **x86_64** ABI, and no user runs
 that - a phone is arm64, and the arm64 build has never aborted once across a day of runs. The job
