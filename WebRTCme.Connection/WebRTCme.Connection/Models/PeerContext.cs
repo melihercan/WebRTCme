@@ -33,6 +33,16 @@ namespace WebRTCme.Connection
         public int IceRestartAttempts { get; set; }
 
         /// <summary>
+        /// Whether this side is waiting for the other one to recover a failed transport.
+        /// </summary>
+        /// <remarks>
+        /// Only ever set on the answering side. The initiator restarts; the answerer can only wait,
+        /// and this is what stops it starting a second wait every time <c>Failed</c> is raised
+        /// again while the first is still running.
+        /// </remarks>
+        public bool IsAwaitingRecovery { get; set; }
+
+        /// <summary>
         /// The id of the track that sender is carrying, so the transceiver can be found again.
         /// </summary>
         /// <remarks>

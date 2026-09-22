@@ -835,10 +835,99 @@ namespace WebRTCme.Connection.Services
         /// delivered on.
         /// </para>
         /// </remarks>
+        /// <summary>
+        /// How long the answering side waits for the initiator to recover before reporting the peer
+        /// lost.
+        /// </summary>
+        /// <remarks>
+        /// Long enough for the initiator to spend its allowance: three attempts, each of which has
+        /// to wait for ICE to fail again, which took about ten seconds a time when this was watched
+        /// on real hardware. Shorter and the answerer gives up on a call that was coming back.
+        ///
+        /// Settable so a test does not have to wait three quarters of a minute. Nothing outside the
+        /// tests should touch it.
+        /// </remarks>
+        internal static TimeSpan InitiatorRecoveryGrace { get; set; } = TimeSpan.FromSeconds(45);
+
+        /// <summary>
+        /// What the answering side does when a transport fails: say so, and wait.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// It must not restart - both ends restarting is glare, which is why recovery is the
+        /// initiator's job. But doing nothing at all was worse than it looked: the answerer kept a
+        /// tile frozen on its last frame, with the call still looking connected to whoever was
+        /// watching it, which is the exact symptom this whole entry exists to remove. The initiator
+        /// learned; the answerer did not.
+        /// </para>
+        /// <para>
+        /// So it announces, and then it waits. If the initiator's restart lands, <c>Connected</c>
+        /// clears this the same way it clears a restart of its own. If nothing arrives before the
+        /// grace expires, the peer is reported lost.
+        /// </para>
+        /// <para>
+        /// In practice <c>PeerLeft</c> usually arrives first - a peer that has genuinely gone is
+        /// reported by the server within seconds. This is for the case where it has not gone,
+        /// signalling is still up, and the media path simply cannot be restored.
+        /// </para>
+        /// </remarks>
+        void AwaitInitiatorRecovery(PeerContext peerContext)
+        {
+            if (peerContext.IsAwaitingRecovery)
+                return;
+
+            peerContext.IsAwaitingRecovery = true;
+
+            System.Diagnostics.Debug.WriteLine(
+                $"######## waiting for {peerContext.Name} to restart - this side is not the initiator");
+
+            _connectionContext?.Observer.OnNext(new PeerResponse
+            {
+                Type = PeerResponseType.PeerReconnecting,
+                Id = peerContext.Id,
+                Name = peerContext.Name
+            });
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(InitiatorRecoveryGrace);
+
+                // Re-read rather than trusting the captured context: PeerLeft may have removed this
+                // peer while the grace ran, which is the common ending and needs no report of its
+                // own.
+                var peer = _connectionContext?.PeerContexts
+                    .SingleOrDefault(context => context.Id.Equals(peerContext.Id));
+                if (peer is null)
+                    return;
+
+                peer.IsAwaitingRecovery = false;
+
+                if (peer.PeerConnection.ConnectionState == RTCPeerConnectionState.Connected)
+                    return;
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## {peer.Name} did not come back within " +
+                    $"{InitiatorRecoveryGrace.TotalSeconds:0}s - reporting the call lost");
+
+                _connectionContext?.Observer.OnNext(new PeerResponse
+                {
+                    Type = PeerResponseType.PeerError,
+                    Id = peer.Id,
+                    Name = peer.Name,
+                    ErrorMessage =
+                        $"The connection to {peer.Name} failed and was not restored within " +
+                        $"{InitiatorRecoveryGrace.TotalSeconds:0} seconds."
+                });
+            });
+        }
+
         void RecoverFailedPeer(PeerContext peerContext)
         {
             if (!peerContext.IsInitiator)
+            {
+                AwaitInitiatorRecovery(peerContext);
                 return;
+            }
 
             if (peerContext.IceRestartAttempts >= MaxIceRestartAttempts)
             {
@@ -1187,8 +1276,10 @@ namespace WebRTCme.Connection.Services
                         if (connected is not null)
                         {
                             // Read before the reset, because the reset is what erases the evidence
-                            // that this was a recovery rather than a first connection.
-                            if (connected.IceRestartAttempts > 0)
+                            // that this was a recovery rather than a first connection. Both halves
+                            // count: the initiator knows by its spent attempts, and the answerer -
+                            // which never restarts and so never has any - by having been waiting.
+                            if (connected.IceRestartAttempts > 0 || connected.IsAwaitingRecovery)
                                 _connectionContext.Observer.OnNext(new PeerResponse
                                 {
                                     Type = PeerResponseType.PeerReconnected,
@@ -1197,6 +1288,7 @@ namespace WebRTCme.Connection.Services
                                 });
 
                             connected.IceRestartAttempts = 0;
+                            connected.IsAwaitingRecovery = false;
                         }
 
                         _connectionContext.Observer.OnNext(new PeerResponse

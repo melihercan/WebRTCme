@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **An answerer is never told its peer is gone** | nobody - it can be picked up today | Recovery is initiator-only by design, to avoid glare. But the answerer is told nothing when recovery fails: no restart, no error, a frozen tile and a call that still looks connected. Seen on 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -2212,10 +2211,26 @@ reported lost, and the tile was removed. That is correct behaviour for an unreac
 tests the give-up path rather than the recovery. **A test of ICE restart has to leave signalling
 up**, or it is testing something else.
 
-**One gap that attempt exposed.** The phone was the answerer, and `RecoverFailedPeer` is
-initiator-only - so it restarted nothing, reported nothing, and kept a frozen tile of a peer that
-was no longer there, with the call still looking connected to a user. That is the original decay
-symptom, surviving on the answering side. The initiator learns; the answerer does not. Open.
+**One gap that attempt exposed, fixed the same day.** The phone was the answerer, and
+`RecoverFailedPeer` was initiator-only - so it restarted nothing, reported nothing, and kept a
+frozen tile of a peer that was no longer there, with the call still looking connected. That is the
+original decay symptom, surviving on the answering side: the initiator learned, the answerer did
+not.
+
+It still must not restart - both ends restarting is glare, which is the whole reason recovery is
+the initiator's job. So instead it **announces and waits**: `PeerReconnecting` on `Failed`, so the
+tile says what is happening, and then `PeerError` if nothing has come back within
+`InitiatorRecoveryGrace`. Forty-five seconds, which is what three initiator attempts cost when this
+was watched on hardware - each one waiting about ten seconds for ICE to fail again.
+
+One trap worth naming, because the obvious implementation walks into it: `PeerReconnected` was
+raised only where a restart had been attempted, which is never true on this side, so the overlay
+would have stayed up over a call that had already come back. The `Connected` branch now clears
+both halves - spent attempts on one side, a pending wait on the other.
+
+In practice `PeerLeft` usually arrives first and this never runs, for the reason in the entry
+above. It is for the case where the peer has *not* gone, signalling is still up, and the media path
+simply cannot be restored.
 
 **The recovery says so while it happens - 2026-09-21.** `PeerReconnecting` and `PeerReconnected`
 join the peer responses, and a tile covers its last frame with *Reconnecting...* between them. The

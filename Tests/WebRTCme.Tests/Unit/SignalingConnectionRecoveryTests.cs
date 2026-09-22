@@ -96,6 +96,10 @@ public class SignalingConnectionRecoveryTests
         var webRtc = Substitute.For<IWebRtc>();
         webRtc.Window(Arg.Any<IJSRuntime>()).Returns(window);
 
+        // The answering side waits three quarters of a minute for the initiator on a real call.
+        // A test that waited that out would be a test nobody runs.
+        SignalingConnection.InitiatorRecoveryGrace = TimeSpan.FromMilliseconds(300);
+
         var connection = new SignalingConnection(
             api, webRtc, NullLogger<SignalingConnection>.Instance);
 
@@ -357,6 +361,68 @@ public class SignalingConnectionRecoveryTests
         closedOn.Should().NotBe(triggeredOn,
             "closing on the thread that asked for the teardown deadlocks on Apple - the caller's " +
             "thread has to stay free to service the audio unit being disposed underneath it");
+    }
+
+    /// <summary>
+    /// The answering side cannot restart, but it must not sit there silently either.
+    /// </summary>
+    /// <remarks>
+    /// Recovery is the initiator's job - both ends restarting is glare. But an answerer that did
+    /// nothing kept a tile frozen on its last frame with the call still looking connected, which is
+    /// the very symptom the recovery exists to remove, surviving on the other side. Watched on
+    /// hardware on 2026-09-22.
+    /// </remarks>
+    [Fact]
+    public async Task TheAnswererSaysSoEvenThoughItCannotRestart()
+    {
+        var harness = await JoinedAsync(isInitiator: false);
+        var offersAfterJoin = harness.OffersSent;
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Failed);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnecting).Any());
+
+        harness.Of(PeerResponseType.PeerReconnecting).Should().ContainSingle(
+            "a frozen tile with nothing said is indistinguishable from a working call");
+
+        harness.PeerConnection.DidNotReceive().RestartIce();
+        harness.OffersSent.Should().Be(offersAfterJoin, "restarting from both ends is glare");
+    }
+
+    [Fact]
+    public async Task TheAnswererReportsThePeerLostIfNobodyRecoversIt()
+    {
+        var harness = await JoinedAsync(isInitiator: false);
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Failed);
+
+        await WaitUntilAsync(() => harness.Errors.Any());
+
+        harness.Errors.Should().NotBeEmpty(
+            "waiting forever for an initiator that is never coming back is the old bug wearing a " +
+            "different hat");
+        harness.Errors.First().Id.Should().Be(PeerId);
+    }
+
+    /// <summary>
+    /// And it stops saying so once the initiator's restart lands.
+    /// </summary>
+    /// <remarks>
+    /// The obvious implementation raises PeerReconnected only where a restart was attempted, which
+    /// is never true on this side - so the overlay would stay up over a call that had come back.
+    /// </remarks>
+    [Fact]
+    public async Task TheAnswererClearsItselfWhenTheCallComesBack()
+    {
+        var harness = await JoinedAsync(isInitiator: false);
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Failed);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnecting).Any());
+
+        harness.RaiseConnectionState(RTCPeerConnectionState.Connected);
+        await WaitUntilAsync(() => harness.Of(PeerResponseType.PeerReconnected).Any());
+
+        harness.Of(PeerResponseType.PeerReconnected).Should().ContainSingle();
+        harness.Errors.Should().BeEmpty("the call came back, so nothing was lost");
     }
 
     [Fact]
