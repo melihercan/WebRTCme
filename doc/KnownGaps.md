@@ -23,6 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **Muting the camera does not change your own preview** | nobody - it can be picked up today | Peers stop receiving, but the local tile keeps showing live video on Apple and a frozen frame on Windows. `MapVideoMuted` is empty on every platform. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -1992,6 +1993,13 @@ literally true - that group.
 **Fixed** by `InputTransparent="True"` on the popup. Windows and Android never showed it, so
 whatever their placeholder is, it does not take touches.
 
+**Verified on the machine, 2026-09-22.** Every toolbar button responds, hang-up leaves the call, the
+debug menu opens, and its items respond - the last one proved by tapping *Restart ICE* in a call
+with no peers and getting the guard's own message back: *"This client does not offer to any peer in
+this call, so it cannot restart ICE."* Correct behaviour, and the dialog appearing at all is what
+shows the popup's content still takes input. That was the one thing `InputTransparent` could
+plausibly have broken, and it did not.
+
 **How it was found matters more than the fix.** Reading the code produced a confident wrong answer
 twice - the `MediaView` frame, then the popup's overlay mode - and neither survived contact with
 the actual view tree. The dump took one temporary method writing to a file, because Catalyst's
@@ -2014,6 +2022,31 @@ race had to be closed rather than avoided.
 menu bar with every window missing, because the SSH session has no Screen Recording permission. It
 looks exactly like an app with no window, and cost an hour here. Accessibility scripting still
 works and reports window geometry correctly, so use that to find out what is on screen.
+
+### Muting the camera does not change your own preview - open, 2026-09-22
+
+Found once the Catalyst toolbar worked and its buttons could be pressed for the first time. Muting
+the camera turns the button red and stops peers receiving - the track is disabled, which is what
+mute means here and what a browser does - but the local tile carries on showing live video, so a
+user who has just turned their camera off is still looking at themselves.
+
+**`MapVideoMuted` is empty on Mac Catalyst, iOS and Windows.** Nothing on any platform reacts to
+the `VideoMuted` property of a tile, so this is a feature that was never written rather than one
+platform's oversight.
+
+The symptom differs by platform for a reason worth knowing. On Apple the local tile is an
+`RTCCameraPreviewView`, fed straight from the `AVCaptureSession` rather than from the track, so a
+disabled track changes nothing it draws - the preview stays live. On Windows the preview renders the
+track, so muting freezes it on the last frame instead. Neither goes dark.
+
+**What is not broken:** the contract. Peers stop receiving. Unverified here only because the check
+needs a second machine in the call, and the Mac was alone.
+
+**Why it is a feature rather than a repair.** `MediaStreamParameters.VideoMuted` is in the set that
+describes how to *attach* a stream, so changing it rebuilds the tile rather than raising
+`PropertyChanged` - see the note on that class. Making the preview follow mute means plumbing it the
+way `PeerVideoMuted` already is, and then honouring it per platform: hiding the preview view on
+Apple, and on Windows something that reads as off rather than frozen.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
