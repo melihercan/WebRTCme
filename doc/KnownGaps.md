@@ -23,7 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **libwebrtc aborts intermittently on the Android emulator** | nobody - the prebuilt .aar has no symbols | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
+| **libwebrtc aborts intermittently on the Android emulator** | a rebuild, now that symbols are buildable | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Mac Catalyst wedges on rapid call teardown** | a reproduction, then a decision on whose fault it is | `Close()` deadlocks against libwebrtc's own operations chain, ~1 in 75 call setups. Reported by a consumer; not reproduced here. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 | **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
@@ -125,6 +125,20 @@ twice not at all. Seven runs: five failed, two passed.
 camera and microphone, or something this repository does wrong that only that build catches. The
 `.aar` is prebuilt and stripped, so short of building libwebrtc with symbols there is no way from
 here to the assertion.
+
+**Symbols are now buildable - 2026-09-21.** `WebRtcNativeAndroidLib` keeps the unstripped shared
+objects (WebRTCnative `d20dab3`), which the build already wrote to `lib.unstripped` and threw away.
+No gn args change, so the `.aar` is the same file whether it runs or not. That turns the backtrace
+into function names, which is the difference between "an `RTC_CHECK` failed somewhere" and knowing
+which one.
+
+**With one caveat that the Apple equivalent does not have.** There, the framework built with dSYMs
+was byte-identical to the one already shipped, so the dSYM symbolicated crash reports already in
+hand. Nobody has checked whether the Android build is reproducible in the same way, so it is not yet
+known whether a rebuild's unstripped objects line up with the `.aar` currently shipping. Checking is
+cheap - rebuild and compare the stripped `.so` inside the new `.aar` against the shipped one - and
+worth doing before anyone reads addresses off an old tombstone. If they do not match, the emulator
+reproduces this two runs in three, so a fresh one costs an afternoon rather than a wait.
 
 **Why it is recorded rather than chased**: the emulator runs the **x86_64** ABI, and no user runs
 that - a phone is arm64, and the arm64 build has never aborted once across a day of runs. The job
