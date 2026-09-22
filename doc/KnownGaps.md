@@ -1695,7 +1695,7 @@ one causing it.
 
 ### Close() deadlocks against its own operations chain on Mac Catalyst - open, 2026-09-22
 
-Reported by DirectCallMe as [WebRTCnative#5](https://github.com/melihercan/WebRTCnative/issues/5):
+Reported by a consumer as [WebRTCnative#5](https://github.com/melihercan/WebRTCnative/issues/5):
 an app that sets up and tears down peer connections in quick succession wedges, the main thread
 stops responding, and the system kills it. **8 occurrences in 600 consecutive call setups** - about
 one in seventy-five - on a Mac mini 2018 running the M153 Catalyst framework through 26.9.21.1.
@@ -1734,9 +1734,9 @@ impossible - it only removed the path that guaranteed it.
 **What has not been established** is whether the fault is reachable through WebRTCme's own call
 paths, or only through a consumer that closes on the main thread while an SDP operation is
 outstanding. `SignalingConnection` closes peer connections from the subscription's dispose action,
-on whatever thread disposes it. DirectCallMe closes from `CallSession.End()`, which is reachable
-both from the app and from `OnConnectionStateChanged` - and the latter runs on the signalling
-thread. Nothing here has reproduced it.
+on whatever thread disposes it. The consumer that reported this closes from its own call-session
+teardown, which is reachable both from the app and from its `OnConnectionStateChanged` handler - and
+the latter runs on the signalling thread. Nothing here has reproduced it.
 
 **Measuring a fix needs one long run, not five short ones.** At 8 in 600 the per-round rate is
 ~1.33%, so a clean 60-round soak has a ~45% chance of happening anyway and proves nothing, while a
