@@ -1824,66 +1824,6 @@ module deadlocking against the main thread" fit everything visible. The symbols 
 `PeerConnection::Close` and the operations batcher, with nothing audio-related anywhere in the
 cycle. This is the second Apple fault in a month where symbolication ended the guessing in one step.
 
-### An abort while building a debug string nobody reads - mitigated 2026-09-22
-
-Reported as WebRTCme#49: Mac Catalyst died with `SIGABRT` on a libwebrtc worker thread, inside
-Apple's audio code, on the 33rd call setup of a soak that tore a session down and started another
-immediately. One report in about two hours of testing, so rare rather than routine.
-
-**The two WebRTC frames in it symbolicate to this:**
-
-```
--[RTCAudioSession description] + 146
-  -[RTCAudioSession IOBufferDuration] + 52
-    -[AVAudioSession IOBufferDuration]
-      getATDefaultDeviceAggregateID -> -[ATDefaultDeviceAggregate deviceID]
-        __on_zero_shared -> malloc_report -> abort
-```
-
-So the process died **building a debug string**. `description` formats eleven audio-session
-properties, one of which is `IOBufferDuration`; on Catalyst reading it drops the last shared
-reference to an aggregate-device object, and under rapid teardown that object's lifetime is being
-raced.
-
-**And nothing could switch it off.** `audio_device_ios.mm` calls `RTCLog(@"%@", session)` in
-`UpdateAudioUnit` and `HandleValidRouteChange`, and upstream's macro formats before it filters:
-
-```c
-#define RTCLogFormat(severity, format, ...)                       do {                                                              NSString* log_string = RTCLogString(format, ##__VA_ARGS__);      RTCLogEx(severity, log_string);                               } while (false)
-```
-
-`RTCLogString` runs `stringWithFormat:` unconditionally, so `%@` invokes `description` whatever the
-log severity. A consumer cannot turn off a log it is dying inside.
-
-**Why it is reachable at all.** That `RTCLog` sits inside `if (should_initialize_audio_unit)`, and
-`UpdateAudioUnit` is reached only from `HandleInterruptionEnd` and `HandleCanPlayOrRecordChange`. So
-the crash needs the audio unit **rebuilt**, which is exactly what ending a call and starting another
-does: the session goes down, then up.
-
-**The mitigation is `AppleAudioUnit.KeepInitialized(true)`**, on iOS and Mac Catalyst. It sets
-`RTCAudioSession.useManualAudio` and `isAudioEnabled`, so libwebrtc stops building and tearing down
-the unit per call and keeps the one it has. `should_initialize_audio_unit` stays false and the
-branch is never entered.
-
-Toggling `isAudioEnabled` per call would not have worked - upstream documents that setting it to NO
-"will be stopped and uninitialized", which is the thing being avoided. On and left alone is the only
-useful setting.
-
-**It is opt-in, and it has to be.** Keeping the unit alive keeps the microphone open between calls,
-with the system recording indicator lit while the app is idle. That is a visible change to what a
-user sees, so it is not a default. Off, behaviour is unchanged.
-
-**What this does not do.** It makes the defect unreachable; it does not fix it. The defect is
-upstream and belongs upstream: a debug string built unconditionally on a teardown path. **Not yet
-reported there.** Patching it here was considered and rejected - every existing patch in
-WebRTCnative changes how libwebrtc is *built* and none changes what it *does*, and that line looks
-deliberate.
-
-**Unverified.** Nothing has run this on a device. The crash is one-in-two-hours, so confirming the
-mitigation needs a soak of the same shape as the one that found it, and confirming it does no harm
-needs an ordinary call on both platforms - the failure mode of getting this wrong is a call that
-comes up silent.
-
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
 
