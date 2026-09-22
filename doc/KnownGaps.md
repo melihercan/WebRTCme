@@ -2166,7 +2166,19 @@ could not before `onConnectionChange` was wired up; `Disconnected` passes withou
 `RestartIce()` recovers a live connection; and media resumes. **One second from `Failed` to
 `Connected`** - the restart found a working path the moment UDP was allowed again.
 
-Not confirmed: the three-attempt bound, because the first attempt succeeded.
+**The overlay was seen, on a second run.** `Reconnecting...` appeared on the Android tile in the
+Windows app and cleared when the call came back - which is the one thing no headless test can
+check, and the reason rendering is hand-verified here at all. It needed a second run because the
+first recovered in a single second and the overlay was on screen too briefly to catch.
+
+Not confirmed: the three-attempt bound, because the first attempt succeeded both times.
+
+**One loose end, recorded rather than smoothed over.** In both runs the call recovered *while the
+block was still in place* - 21:10:57 against a block lifted at 21:11:14, and 21:16:12 against one
+lifted at 21:16:35. The transport really did fail and really did recover, twice, so the result
+stands. But the block evidently stops applying once the restart gathers fresh candidates, and it is
+not understood why; a rule on the program's UDP behaved the same way as one on the peer's address.
+Anyone building on this harness should know the outage is not as total as it looks.
 
 **The first attempt at this test was wrong, and the way it was wrong is worth keeping.** Dropping
 the phone's Wi-Fi took signalling down with the media - the phone has no cellular data - so the
