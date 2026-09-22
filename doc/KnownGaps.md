@@ -23,7 +23,6 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **libwebrtc aborts intermittently on the Android emulator** | a rebuild, now that symbols are buildable | A native SIGABRT on the signaling thread, two runs in three, x86_64 only. The arm64 phone has never done it. See below. |
 | **Mac Catalyst wedges on rapid call teardown** | a reproduction, then a decision on whose fault it is | `Close()` deadlocks against libwebrtc's own operations chain, ~1 in 75 call setups. Reported by a consumer; not reproduced here. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 | **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
@@ -99,7 +98,7 @@ Builds on Windows, and the five loopback scenarios in `Tests/WebRTCme.DeviceTest
 locally packed `26.9.19-sinkfix`; not yet run in a two-device call. **Ships with the next
 release**; 26.9.18 has the fault. Tracked as issue #46.
 
-### libwebrtc aborts intermittently on the Android x86_64 emulator - open 2026-09-16
+### libwebrtc aborted intermittently on the Android x86_64 emulator - fixed 2026-09-18, confirmed 2026-09-22
 
 `Tests/Test-Device-Phase4.ps1 -Platform android` passes on a real phone every time it has been run.
 On the CI emulator it fails about two runs in three, and when it fails the process does not throw -
@@ -125,6 +124,37 @@ twice not at all. Seven runs: five failed, two passed.
 camera and microphone, or something this repository does wrong that only that build catches. The
 `.aar` is prebuilt and stripped, so short of building libwebrtc with symbols there is no way from
 here to the assertion.
+
+**It does not happen any more, and it stopped at a known commit - 2026-09-22.** Chased with the
+symbols below, and there was nothing left to symbolicate.
+
+The Android emulator job in CI has not failed since **2026-09-17**. The boundary is exact, and
+checked by commit ancestry rather than by date:
+
+| run | head | contains `13e8156a` | Android job |
+| --- | --- | --- | --- |
+| 35277414991 | `acbd3e74` | **no** | **failure** |
+| 35349313904 | `13e8156a` | yes | success |
+| ... ten more, to 35607596577 | | yes | success |
+
+Eleven consecutive green Android jobs, and the first of them is the run of the fix itself. Locally,
+five consecutive clean runs on a fresh AVD matching CI exactly - API 34, `google_apis`, `x86_64`,
+the same `-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none` - with
+`/data/tombstones/` empty afterwards. Against the two-in-three failure rate recorded above, five
+clean runs is `(1/3)^5`, about 0.4%.
+
+**So the cause was `13e8156a`**, which stopped continuations resuming on libwebrtc's signalling
+thread. That commit was made for the Apple crash and its Android half was described at the time as
+latent - a hazard that had not been proven to kill anything. It had been killing this. Nobody
+connected the two, which is why this entry sat open for four days after it stopped being true.
+
+That is the second item this week found already fixed: WebRTCnative#1 had been resolved for over two
+weeks by a change made for an unrelated reason. **Worth checking the open list against the code
+before treating "open" as "unfixed".**
+
+**What is not claimed.** The assertion text was never captured, so *which* `RTC_CHECK` failed is
+still unknown - the fault stopped before anyone read one. If it returns, the symbols below make that
+readable in one run, which is the state this entry should have been in all along.
 
 **Symbols are now buildable - 2026-09-21.** `WebRtcNativeAndroidLib` keeps the unstripped shared
 objects (WebRTCnative `d20dab3`), which the build already wrote to `lib.unstripped` and threw away.

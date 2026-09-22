@@ -450,8 +450,25 @@ if (-not $SkipBuild) {
     switch ($Platform) {
         'android' {
             # An emulator is just another adb device, so this one path serves CI and a real phone.
-            & dotnet build $runner -f net10.0-android -c Debug -t:Install `
-                "-p:WebRTCmePackageVersion=$Version" "-p:RestoreAdditionalProjectSources=$PackageSource" --nologo |
+            #
+            # ANDROID_SERIAL pins every adb call this script makes, but not this one: the .NET
+            # Android Install target shells out to adb itself and takes its target from the
+            # AdbTarget property instead. With a phone plugged in beside an emulator that
+            # difference installs to whichever adb picks first and then fails several steps later
+            # with "could not resolve the runner's launcher activity", which reads like a broken
+            # build rather than a package sitting on the wrong device. MSBuild takes properties
+            # from the environment, so passing it explicitly is enough.
+            $installArgs = @(
+                '-f', 'net10.0-android', '-c', 'Debug', '-t:Install',
+                "-p:WebRTCmePackageVersion=$Version",
+                "-p:RestoreAdditionalProjectSources=$PackageSource",
+                '--nologo')
+            if ($env:ANDROID_SERIAL) {
+                Write-Host "  targeting $env:ANDROID_SERIAL" -ForegroundColor DarkGray
+                $installArgs += "-p:AdbTarget=-s $env:ANDROID_SERIAL"
+            }
+
+            & dotnet build $runner @installArgs |
                 Select-String -Pattern 'error|Build succeeded' | Select-Object -First 5
             if ($LASTEXITCODE -ne 0) { throw "android build/install failed" }
         }
