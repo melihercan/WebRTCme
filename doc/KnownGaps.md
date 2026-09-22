@@ -23,6 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **No button on the call page responds on Mac Catalyst** | nobody - it can be picked up today | The demo's toolbar is dead there: mute, camera, share, record and hang-up all do nothing. The main page works. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -1946,6 +1947,45 @@ Both errors came from reading a summary of upstream source instead of the source
 account above came from fetching the file and reading it. **Worth the space here because the wrong
 version was convincing**: it explained the stack, named a mechanism and proposed a fix, and was
 wrong in a way that no amount of re-reading the crash report would have exposed.
+
+### No button on the call page responds on Mac Catalyst - open, 2026-09-22
+
+Found while trying to verify `ae0434a5`, and it is the more serious of the two. On Mac Catalyst the
+demo's call page toolbar is inert: microphone, camera, screen share, record and hang-up all do
+nothing when clicked directly on the machine. The main page is fine - the same build joins a call
+from there - and once in the call there is no way out except killing the app.
+
+**What was ruled out.**
+
+- **Not a hung UI thread.** `sample` on the process shows the main thread idle in
+  `CFRunLoopRun` -> `mach_msg2_trap`, waiting for events. So this is not the `Close()` deadlock
+  family, which was the first suspicion and the one that would have mattered most.
+- **Not the window failing to become key.** Bringing it frontmost with System Events changed
+  nothing.
+- **Not remote-access trickery.** The clicks were made on the machine itself; VNC was only being
+  used to see the screen.
+- **Not input failing to reach the app.** A synthetic `click at` from System Events resolved to an
+  element eighteen groups deep inside the window, so events do arrive and are hit-tested to
+  *something* - just not to a button.
+
+**The lead.** The call page differs from the main page in one way: it has native media views in it.
+`MediaView` on Apple sets a hardcoded `Frame = new CGRect(0, 0, 1080, 1920)` in its constructor,
+and a media view that lingers in the hierarchy after its tile is gone would cover the window
+entirely and swallow every touch, while the visible tiles still draw in the right place lower down.
+That is a guess with a mechanism, not a diagnosis - nobody has dumped the view hierarchy to see
+whether a stale view is really there.
+
+It is worth connecting to `ae0434a5`, which disposes the camera *preview* view when a tile is
+dropped. That fix does not touch the `MediaView` wrapper around it.
+
+**Two things this blocks.** Verifying `ae0434a5` itself, which needs leaving and rejoining a call to
+drop and recreate a preview view - the only route to that on Catalyst is the hang-up button. And any
+hand-check of call controls on that platform.
+
+**A note for whoever picks this up.** `screencapture` over SSH on that Mac returns the wallpaper and
+menu bar with every window missing, because the SSH session has no Screen Recording permission. It
+looks exactly like an app with no window, and cost an hour here. Accessibility scripting still
+works and reports window geometry correctly, so use that to find out what is on screen.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
