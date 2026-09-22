@@ -2077,9 +2077,21 @@ So the track is disabled and re-enabled, the advisory `PeerMedia` message arrive
 far side follows it in both directions. Only the muting machine was left in the dark - or rather,
 not in the dark, which was the whole complaint.
 
-**Not yet seen on a device.** The unit tier proves the view model and the tile; the Apple half is
-four lines of `Hidden = muted` that no test on Windows can run. Check it on the Mac before it is
-called done.
+**Verified on Mac Catalyst against Windows, 2026-09-22**, both directions, driven through
+accessibility scripting with `screencapture` run from the GUI session:
+
+| | Mac's own tile | the Mac's tile, seen from Windows | Windows' own tile |
+| --- | --- | --- | --- |
+| nothing muted | live | live | live |
+| Mac's camera muted | **blank** | *Camera off*, and *MacCatalyst: camera off* in the status line | live |
+| Mac unmuted | live again, immediately | live | live |
+| Windows' camera muted | *Camera off*, and *Windows: speaking, camera off* | - | black |
+
+The preview comes back the instant it is unmuted, with none of the ten-second delay that disposing
+a preview view causes - which is the whole reason it is hidden rather than torn down.
+
+Windows was re-checked rather than assumed: `MapVideoMuted` is still empty there, its own preview
+still blanks by itself, and nothing about its behaviour changed.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
