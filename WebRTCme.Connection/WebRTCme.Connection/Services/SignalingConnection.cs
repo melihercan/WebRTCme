@@ -842,6 +842,10 @@ namespace WebRTCme.Connection.Services
 
             if (peerContext.IceRestartAttempts >= MaxIceRestartAttempts)
             {
+                System.Diagnostics.Debug.WriteLine(
+                    $"######## ICE restart allowance spent for peer:{peerContext.Name} - " +
+                    $"reporting the call lost");
+
                 _connectionContext?.Observer.OnNext(new PeerResponse
                 {
                     Type = PeerResponseType.PeerError,
@@ -870,6 +874,14 @@ namespace WebRTCme.Connection.Services
             {
                 try
                 {
+                    // Debug.WriteLine as well as the logger, for the reason the PeerMedia branch
+                    // gives: the demo apps register no logging provider, so the logger call alone
+                    // reaches nothing. A recovery nobody can see happen is a recovery nobody can
+                    // diagnose - and this is the one path that only ever runs when something has
+                    // already gone wrong.
+                    System.Diagnostics.Debug.WriteLine(
+                        $"######## ICE restart {attempt}/{MaxIceRestartAttempts} for " +
+                        $"peer:{peerContext.Name}");
                     _logger.LogInformation(
                         $"######## ICE restart {attempt}/{MaxIceRestartAttempts} for " +
                         $"peer:{peerContext.Name}");

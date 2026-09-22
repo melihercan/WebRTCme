@@ -23,8 +23,8 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
+| **An answerer is never told its peer is gone** | nobody - it can be picked up today | Recovery is initiator-only by design, to avoid glare. But the answerer is told nothing when recovery fails: no restart, no error, a frozen tile and a call that still looks connected. Seen on 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
-| **Recovery from a genuinely dead path has never been watched** | two machines and a real disconnection | The ICE restart itself now runs on a live connection in tier 3/4/5, so the platform half is proved. What is not is the whole loop: a peer that has actually lost its route, going to `Failed` and coming back. A loopback has nothing to lose. See below. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 
@@ -2146,9 +2146,39 @@ because a plain re-offer keeps the existing credentials: an export that is prese
 caught. Verified by suppressing the `RestartIce()` call and watching it fail with the ufrag
 unchanged, against the packaged 26.9.20 build on Windows.
 
-**What neither half proves.** A loopback has no route to lose, so nothing here has watched a peer
-that genuinely lost its network path go to `Failed` and come back. That is the whole reason the
-recovery exists, and it still wants two machines and a real disconnection.
+**Watched end to end on real hardware - 2026-09-22.** Windows and an SM-A176B on one LAN, both
+running the MAUI demo against the local signalling server, video both ways. The media path was then
+broken *without* touching signalling - a firewall rule blocking UDP to and from the phone, leaving
+the HTTPS signalling on TCP alone - which is what a Wi-Fi roam or a NAT rebind does and what an
+earlier attempt got wrong:
+
+```
+21:10:39  UDP to the phone blocked
+21:10:46  Android -> Disconnected          deliberately not acted on
+21:10:56  Android -> Failed
+21:10:56  ######## ICE restart 1/3 for peer:Android
+21:10:57  Android -> Connected
+21:11:49  video 640x480, frames 2654, lost=0, both directions
+```
+
+Every claim in this entry is now confirmed on hardware: Android reaches `Failed` at all, which it
+could not before `onConnectionChange` was wired up; `Disconnected` passes without action;
+`RestartIce()` recovers a live connection; and media resumes. **One second from `Failed` to
+`Connected`** - the restart found a working path the moment UDP was allowed again.
+
+Not confirmed: the three-attempt bound, because the first attempt succeeded.
+
+**The first attempt at this test was wrong, and the way it was wrong is worth keeping.** Dropping
+the phone's Wi-Fi took signalling down with the media - the phone has no cellular data - so the
+restart offers had nowhere to be delivered. All three attempts were spent into a void, the peer was
+reported lost, and the tile was removed. That is correct behaviour for an unreachable peer, but it
+tests the give-up path rather than the recovery. **A test of ICE restart has to leave signalling
+up**, or it is testing something else.
+
+**One gap that attempt exposed.** The phone was the answerer, and `RecoverFailedPeer` is
+initiator-only - so it restarted nothing, reported nothing, and kept a frozen tile of a peer that
+was no longer there, with the call still looking connected to a user. That is the original decay
+symptom, surviving on the answering side. The initiator learns; the answerer does not. Open.
 
 **The recovery says so while it happens - 2026-09-21.** `PeerReconnecting` and `PeerReconnected`
 join the peer responses, and a tile covers its last frame with *Reconnecting...* between them. The
