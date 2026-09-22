@@ -2171,7 +2171,32 @@ Windows app and cleared when the call came back - which is the one thing no head
 check, and the reason rendering is hand-verified here at all. It needed a second run because the
 first recovered in a single second and the overlay was on screen too briefly to catch.
 
-Not confirmed: the three-attempt bound, because the first attempt succeeded both times.
+**The three-attempt bound is close to unreachable, and that was a surprise - 2026-09-22.** It has
+never been spent, and an attempt to force it showed why. With the phone's Wi-Fi off for ninety
+seconds, so no path could possibly be found:
+
+```
+21:20:47  Disconnected
+21:20:57  Failed
+21:20:57  ######## ICE restart 1/3 for peer:Android
+21:20:57  signallingState: HaveLocalOffer        the restart offer was made
+21:21:05  Closed
+```
+
+`Closed` is `CreateOrDeletePeerConnectionAsync(isDelete: true)`, which runs on **`PeerLeft`**. The
+signalling server noticed the phone's transport drop and reported the peer gone, eight seconds
+after the first restart - long before attempts two and three could be made.
+
+So in the case this recovery was written for, the server usually gets there first. A peer that has
+genuinely vanished is reported as left, the connection is torn down properly, and the allowance is
+never touched. `MaxIceRestartAttempts` and the `PeerError` behind it only matter in the narrower
+case where a peer is **still on signalling** but its media path cannot be restored - which is real,
+but rarer than the case that motivated the code.
+
+That is arguably the right outcome: `PeerLeft` is a better answer than three futile restarts. It
+does mean the give-up path is effectively untested and hard to test, and that an earlier reading of
+this - a tile disappearing, taken for the allowance being spent - was wrong. It was `PeerLeft`
+cleanup, and only ever one restart was attempted.
 
 **One loose end, recorded rather than smoothed over.** In both runs the call recovered *while the
 block was still in place* - 21:10:57 against a block lifted at 21:11:14, and 21:16:12 against one
