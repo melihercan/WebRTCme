@@ -23,7 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Muting the camera does not change your own preview** | nobody - it can be picked up today | Peers are told and show *Camera off*, verified between Catalyst and Windows. It is only the muting machine that carries on showing live video, on Apple, or a frozen frame on Windows. `MapVideoMuted` is empty on every platform. Found 2026-09-22. See below. |
+| **Muting the camera does not change your own preview, on Apple** | nobody - it can be picked up today | Peers are told and show *Camera off*, and Windows blanks its own preview too. Apple does not: its preview comes from the capture session rather than the track, so muting leaves you looking at yourself. Found 2026-09-22. See below. |
 | **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
@@ -2023,21 +2023,26 @@ menu bar with every window missing, because the SSH session has no Screen Record
 looks exactly like an app with no window, and cost an hour here. Accessibility scripting still
 works and reports window geometry correctly, so use that to find out what is on screen.
 
-### Muting the camera does not change your own preview - open, 2026-09-22
+### Muting the camera does not change your own preview, on Apple - open, 2026-09-22
 
 Found once the Catalyst toolbar worked and its buttons could be pressed for the first time. Muting
 the camera turns the button red and stops peers receiving - the track is disabled, which is what
 mute means here and what a browser does - but the local tile carries on showing live video, so a
 user who has just turned their camera off is still looking at themselves.
 
-**`MapVideoMuted` is empty on Mac Catalyst, iOS and Windows.** Nothing on any platform reacts to
-the `VideoMuted` property of a tile, so this is a feature that was never written rather than one
-platform's oversight.
+**Apple only, and the reason is the preview's source.** Tested both ways on 2026-09-22: on
+Windows the local image does go off when the camera is muted, and comes back when it is unmuted.
+On Mac Catalyst it does not.
 
-The symptom differs by platform for a reason worth knowing. On Apple the local tile is an
-`RTCCameraPreviewView`, fed straight from the `AVCaptureSession` rather than from the track, so a
-disabled track changes nothing it draws - the preview stays live. On Windows the preview renders the
-track, so muting freezes it on the last frame instead. Neither goes dark.
+`MapVideoMuted` is empty on Mac Catalyst, iOS *and* Windows, so no platform handles this
+deliberately - Windows simply gets the right behaviour for free. Its local tile renders the
+**track**, and a disabled track delivers no frames, so there is nothing to draw. Apple's local tile
+is an `RTCCameraPreviewView` fed straight from the `AVCaptureSession`, which knows nothing about the
+track: disabling one changes nothing the preview layer is drawing, so it carries on showing live
+video.
+
+So the fix is Apple's alone: the preview view has to be hidden, or the session stopped, when the
+local video is muted.
 
 **What is not broken:** the contract, and that is now checked rather than assumed. With Mac
 Catalyst and Windows in one call, muting the camera on the Mac put *Camera off* over its tile on
@@ -2049,8 +2054,8 @@ not in the dark, which is the whole complaint.
 **Why it is a feature rather than a repair.** `MediaStreamParameters.VideoMuted` is in the set that
 describes how to *attach* a stream, so changing it rebuilds the tile rather than raising
 `PropertyChanged` - see the note on that class. Making the preview follow mute means plumbing it the
-way `PeerVideoMuted` already is, and then honouring it per platform: hiding the preview view on
-Apple, and on Windows something that reads as off rather than frozen.
+way `PeerVideoMuted` already is, and then implementing `MapVideoMuted` on Apple to hide the preview.
+Windows needs nothing.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
