@@ -1964,6 +1964,12 @@ triggers it is something that app does around its calls. The soak found two faul
 along the way, both fixed: an offer dropped by a race with the join, and the Apple camera faults
 above.
 
+**Parked, 2026-09-23.** What the consumer app was doing during its run of aborts is not known, so
+there is nothing further to reproduce against. If it recurs, run that build with
+`MallocStackLogging=1` and keep the `.ips`: the report then carries the allocation history of the
+corrupted block, which points at the write that corrupted it rather than at wherever the corruption
+happened to be noticed - the only thing that would settle whose bug this is.
+
 ### No button on the call page responded on Mac Catalyst - fixed 2026-09-22
 
 Found while trying to verify `ae0434a5`, and it is the more serious of the two. On Mac Catalyst the
