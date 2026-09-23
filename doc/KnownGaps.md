@@ -2179,7 +2179,8 @@ The camera itself was never slow. It delivers its first frame about a second aft
 - The media view renders every track with the Metal renderer remote tiles already used, so
   nothing attaches a preview layer to the session. The tile now shows exactly what is being sent,
   as it always has on Windows and Android. It is **not mirrored** any more, which the preview
-  layer was.
+  layer was, and that is deliberate (decided 2026-09-23): every platform's self-view now shows
+  the same picture the peer receives.
 - `SetCameraTrack(view, track)` is kept for callers who want AVFoundation's preview, but it
   starts nothing now. The overload that took a capturer is `[Obsolete]`.
 
