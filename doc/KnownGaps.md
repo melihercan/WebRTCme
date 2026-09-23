@@ -2203,9 +2203,10 @@ saw the join seconds late. That was the same reconfiguration holding the UI up. 
 time. Getting back to the join page after leaving went from a median 11.6 s to **2.7 s**, which was
 the "hangup works, with a delay" reported on 2026-09-22.
 
-**iOS has the same change and has only been compiled.** It shares the design and the bug's shape
-(`IosSupport` had the same id-keyed cache and the same view-started capture), so it should behave
-the same. It needs a run on a phone before it is called verified.
+**And on an iPhone XR (iOS 18.7), against Windows, later the same day** - three calls in a row:
+the phone's own picture appeared almost at once every time, the camera indicator went out after
+every leave, and Windows received the phone's video on all three - including the second and third,
+which is where the fault used to send nothing.
 
 ### A join could silently never connect - fixed 2026-09-23
 
