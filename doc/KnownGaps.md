@@ -2061,8 +2061,9 @@ video.
   reason and was being ignored - and the picture never went off. `muted` now comes from
   `AudioMuted`, and `VideoMuted` covers the tile the way `PeerVideoMuted` already did.
 
-Android is left alone deliberately. Its tile renders the track, like Windows, so it should blank
-for free - but that has not been observed, and guessing is what this file exists to stop.
+Android is left alone deliberately. Its tile renders the track, like Windows, so it blanks for free
+- observed on a Galaxy A17 against Windows on 2026-09-23, where the local tile went black on mute
+and came straight back on unmute.
 
 **Pinned by `CallViewModelMutePreviewTests`**, five tests, with both halves controlled: reverting
 `VideoMuted` to an auto-property fails the announcement test, and dropping the call to
@@ -2106,6 +2107,47 @@ judged by eye, because the audio half of this is not visible:
 element's `muted` property is an audio control, so the local preview no longer plays this machine's
 own microphone back at it, and peers are still audible. **Controlled**: with the old line restored
 the local tile comes back as `muted: false`, which is the echo.
+
+### Every error dialog hung up the call, on every MAUI platform - fixed 2026-09-23
+
+Found on Android while checking the debug menu. Restart ICE pressed on the answering side is refused
+- correctly, because only the side that offers can restart - and the refusal's dialog took the call
+down with it. The signalling server received `LeaveAsync` from the phone 300 ms after the button,
+the camera closed, and the call stayed down for as long as the dialog was on screen: 32 seconds,
+until **Ok** was pressed, at which point the phone rejoined from scratch with a new camera session.
+
+**The dialog was navigation.** `IModalPopup` on MAUI showed a CommunityToolkit.Maui popup, and since
+that library's v12 rewrite a popup is a modal page: `ShowPopupAsync` pushes a `PopupPage` with
+`PushModalAsync` (confirmed in the 15.0.1 assembly). Pushing a page makes the page underneath
+disappear, and `OnDisappearing` is exactly where a call page is told to call
+`OnPageDisappearingAsync` - leave the room, release the camera. Dismissing the dialog made the page
+appear again, which started a new call.
+
+So it was never about ICE. It held for all nine places the middleware raises a dialog, on every
+MAUI platform: a failed mute, a failed screen share, the ICE refusal, and the connection-error path
+- which was worse, because after the dialog it tries to reconnect with streams the page's
+disappearance had just released, and then the page's reappearance started a second call on top.
+
+**Fixed by making the dialogs dialogs.** `ModalPopup` now uses the page's `DisplayAlertAsync` and
+`DisplayPromptAsync`, which are an `AlertDialog`, a `UIAlertController` or a `ContentDialog` -
+none of them navigation, so the page underneath never disappears. The toolkit popup is gone. It
+had cost two earlier bugs on its own: `InitializeComponent` threw on a property the toolkit had
+dropped, and it painted itself white in a dark app, so errors rendered white-on-white.
+`GenericPopupIn.Image` is not shown any more; nothing set it, and the resource path the old popup
+built for it pointed into another application's assembly.
+
+**Verified on the phone, with the failing run as the control.** Same topology both times - Windows
+in the room first and offering, the phone answering - and the same button. Before: `LeaveAsync`,
+camera closed, `PeerLeft` on Windows, no media for 32 seconds. After, with the native dialog held
+open for 20 seconds: no `LeaveAsync` or `JoinAsync` on the server, no `PeerLeft`, the phone's video
+still arriving on Windows throughout (3.1 MB to 8.4 MB inbound over that window), and dismissing
+the dialog changed nothing.
+
+**For anyone writing a call page:** leaving the call in `OnDisappearing` is only safe while nothing
+pushes a page over the call. A modal page of the app's own - a settings sheet, a permission
+explainer - will hang up the call the same way. The CommunityToolkit.Maui package reference is still
+in `WebRTCme.Middleware.csproj`, now unused by it; removing it changes what the published package
+depends on, so it is left for a release that means to.
 
 ### CoreAudio object-not-found spam on Mac Catalyst
 Every few seconds during a call, Mac Catalyst logs
