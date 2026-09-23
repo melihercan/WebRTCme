@@ -2113,6 +2113,50 @@ element's `muted` property is an audio control, so the local preview no longer p
 own microphone back at it, and peers are still audible. **Controlled**: with the old line restored
 the local tile comes back as `muted: false`, which is the echo.
 
+### A join could silently never connect - fixed 2026-09-23
+
+Found by the network soak built for WebRTCme#49: Mac Catalyst joining and leaving a call with
+Windows over the real signalling server, round after round. **Twice in thirteen rounds** the Mac
+joined, Windows offered, and nothing happened after that. The Mac sat on the call page with only
+its own tile, Windows had a peer connection that never connected, and neither side reported
+anything.
+
+**The server log showed where it stopped.** It had the Mac's join, then Windows' offer and fourteen
+candidates relayed to the Mac, and after that **nothing from the Mac**: no request for ICE servers,
+no answer, no candidates. A healthy round sends all three within a second. `sample` showed every
+libwebrtc thread idle and the main thread idle, so nothing was wedged natively. libwebrtc had simply
+never been asked to build the peer connection. The Mac's own log agreed: the healthy rounds each
+logged `LIST OF ICE SERVERS`, which is the first thing peer-connection creation does, and the stuck
+round logged nothing at all.
+
+**A race between the join's reply and the offer it provokes.** `ConnectionRequest` created the
+call's `ConnectionContext` *after* `JoinAsync` returned. But the server tells the rest of the room
+as soon as the join lands, and an initiator offers straight away. So the offer is relayed back
+while the join's reply is still in flight, and the two reach the client on separate continuations.
+When the offer's handler ran first:
+- It dereferenced a null context and threw.
+- Its `catch` reported the error through `_connectionContext?.Observer`, which was the same null
+  context.
+
+So the offer vanished: no answer, no error, no log line.
+
+Busy thread pools make this more likely. `CloseOffCallerThreadAsync` blocks pool threads in
+`Close()` for seconds at a time, and the join's continuation has to wait its turn behind them. Both
+stuck rounds came straight after a round whose join page returned quickly, so the previous call's
+teardown was still in progress.
+
+**Fixed by creating the context before the join is sent**, so anything the server relays after the
+join already has a call to land in. The SDP handler's `catch` now logs as well as reports, because
+a report that goes through a broken context goes nowhere.
+
+**Pinned** by `AnOfferThatArrivesBeforeTheJoinReturnsIsStillAnswered`. It holds the server's reply
+to the join back, delivers the offer, and then lets the join return. Controlled: without the fix
+no SDP is sent at all, which is exactly what the device showed.
+
+**On the device:** the same soak against the fixed build ran **50 rounds clean** in 18 minutes.
+The unfixed build had stuck 2 times in 13 rounds, and at that rate 50 clean rounds would happen by
+chance about once in five thousand.
+
 ### Every error dialog hung up the call, on every MAUI platform - fixed 2026-09-23
 
 Found on Android while checking the debug menu. Restart ICE pressed on the answering side is refused

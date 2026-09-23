@@ -67,11 +67,21 @@ public class SignalingConnectionRecoveryTests
         }
     }
 
-    static async Task<Harness> JoinedAsync(bool isInitiator = true)
+    /// <param name="joinGate">
+    /// When given, the server's answer to the join is held back until the test completes it, and
+    /// this returns as soon as the join has been sent - so a test can deliver what the server sends
+    /// in between. Nothing further is set up: no peer has joined or offered.
+    /// </param>
+    static async Task<Harness> JoinedAsync(bool isInitiator = true,
+        TaskCompletionSource<Result<Utilme.Unit>> joinGate = null)
     {
         var api = Substitute.For<ISignalingServerApi>();
-        api.JoinAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())
-            .Returns(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
+        if (joinGate is null)
+            api.JoinAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())
+                .Returns(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
+        else
+            api.JoinAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())
+                .Returns(joinGate.Task);
         api.LeaveAsync(Arg.Any<Guid>()).Returns(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
         api.SdpAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
         api.IceAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
@@ -133,6 +143,9 @@ public class SignalingConnectionRecoveryTests
         await WaitUntilAsync(() =>
             api.ReceivedCalls().Any(c => c.GetMethodInfo().Name == nameof(ISignalingServerApi.JoinAsync)));
 
+        if (joinGate is not null)
+            return harness;
+
         if (isInitiator)
         {
             await connection.OnPeerJoinedAsync(PeerId, "peer");
@@ -158,6 +171,44 @@ public class SignalingConnectionRecoveryTests
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
         while (!condition() && DateTime.UtcNow < deadline)
             await Task.Delay(10);
+    }
+
+    /// <summary>
+    /// An offer that arrives before this client's own join has returned is still answered.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The initiator offers the moment the server tells it this client has joined, and the server's
+    /// reply to the join and the relayed offer come back on separate continuations. So the offer
+    /// can be handled before the join's continuation has run - and that continuation is what created
+    /// the call's context. The handler read a null context, threw, and reported the failure through
+    /// that same null context, so the offer vanished without a trace: no answer, no error, no log.
+    /// The joining side sat on the call page with only its own tile, forever.
+    /// </para>
+    /// <para>
+    /// Found by a network soak on 2026-09-23 - Mac Catalyst joining and leaving a call with Windows
+    /// over the real signalling server - in its ninth round. The server log showed the Mac join and
+    /// Windows' offer and candidates relayed to it, and then nothing at all from the Mac, with every
+    /// libwebrtc thread idle.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task AnOfferThatArrivesBeforeTheJoinReturnsIsStillAnswered()
+    {
+        var joinGate = new TaskCompletionSource<Result<Utilme.Unit>>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var harness = await JoinedAsync(isInitiator: false, joinGate);
+
+        // The offer first, as the server's receive loop delivers it; the join's reply after.
+        var offerHandled = harness.Connection.OnPeerSdpAsync(PeerId, "peer",
+            """{"type":"offer","sdp":"v=0"}""");
+        joinGate.SetResult(Result<Utilme.Unit>.Ok(Utilme.Unit.Value));
+        await offerHandled.WaitAsync(TimeSpan.FromSeconds(5));
+
+        await WaitUntilAsync(() => harness.OffersSent > 0);
+
+        harness.Api.Received(1).SdpAsync(PeerId, Arg.Is<string>(sdp => sdp.Contains("answer", StringComparison.OrdinalIgnoreCase)));
+        harness.Errors.Should().BeEmpty("the offer belonged to this call and should simply be answered");
     }
 
     [Fact]

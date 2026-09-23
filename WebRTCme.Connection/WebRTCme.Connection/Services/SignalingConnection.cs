@@ -67,14 +67,15 @@ namespace WebRTCme.Connection.Services
                     // The transport is closed when a call ends, so bring it back up before joining.
                     await _signalingServerApi.EnsureConnectedAsync();
 
-                    // Do checks before creating connection context.
-                    var result = await _signalingServerApi.JoinAsync(
-                        userContext.Id,
-                        userContext.Name,
-                        userContext.Room);
-                    if (!result.IsOk)
-                        throw new Exception($"{result.ErrorMessage}");
-
+                    // The context exists before the join is sent, not after it returns. The server
+                    // tells everyone else in the room as soon as the join lands, and an initiator
+                    // offers straight away - so the offer is relayed back while the join's own
+                    // reply is still on its way, and the two reach this client on separate
+                    // continuations. Created afterwards, the context could still be null when the
+                    // offer was handled; the handler threw, reported it through that same null
+                    // context, and the offer vanished. The joining side then sat on the call page
+                    // with only its own tile, for good. Found by a network soak on Mac Catalyst on
+                    // 2026-09-23, twice in thirteen rounds.
                     context = new ConnectionContext
                     {
                         UserContext = userContext,
@@ -83,6 +84,14 @@ namespace WebRTCme.Connection.Services
                     _connectionContext = context;
                     _outgoingAudioEnabled = true;
                     _outgoingVideoEnabled = true;
+
+                    var result = await _signalingServerApi.JoinAsync(
+                        userContext.Id,
+                        userContext.Name,
+                        userContext.Room);
+                    if (!result.IsOk)
+                        throw new Exception($"{result.ErrorMessage}");
+
                     isJoined = true;
 
                     StartSpeakingDetection();
@@ -1098,6 +1107,12 @@ namespace WebRTCme.Connection.Services
             }
             catch (Exception ex)
             {
+                // Logged as well as reported, because the report goes through the call's context
+                // and a failure here can be the context being wrong - in which case the report
+                // goes nowhere, and an offer that is dropped without a word leaves a call that
+                // never connects and nothing anywhere to say why.
+                _logger.LogWarning(
+                    $"Handling {peerName}'s SDP failed: {ex.GetType().Name}: {ex.Message}");
                 _connectionContext?.Observer.OnNext(new PeerResponse
                 {
                     Type = PeerResponseType.PeerError,
