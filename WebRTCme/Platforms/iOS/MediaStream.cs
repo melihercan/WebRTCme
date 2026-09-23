@@ -51,11 +51,15 @@ namespace WebRTCme.iOS
                 var videoDevice = SelectCamera(videoConstraints);
 
                 // The track id is the device's UniqueID, which is how the capturer finds its
-                // camera later. Size and frame rate have to travel separately: nothing opens the
-                // camera until a view binds the track, and the constraints are gone by then.
+                // camera. The requested size and frame rate are recorded against it so the track
+                // can report what it was opened with.
                 IosSupport.SetRequestedFormat(videoDevice.UniqueID, videoConstraints);
 
-                mediaStreamTracks.Add(MediaStreamTrack.Create(MediaStreamTrackKind.Video, videoDevice.UniqueID));
+                // Live from the moment it is returned, as a browser's track is - see StartCamera.
+                var videoTrack = (MediaStreamTrack)MediaStreamTrack.Create(
+                    MediaStreamTrackKind.Video, videoDevice.UniqueID);
+                IosSupport.StartCamera(videoTrack);
+                mediaStreamTracks.Add(videoTrack);
             }
 
             var nativeMediaStream = 

@@ -182,6 +182,10 @@ namespace WebRTCme.MacCatalyst
         {
             if (ScreenCapture.IsScreenTrack(Id))
                 ScreenCapture.Stop();
+            else
+                // Stopping a track stops its camera. This used to leave the capturer running for
+                // the life of the process - the camera light stayed on after leaving a call.
+                MacCatalystSupport.StopCamera(this);
 
             // Before the event, so a listener that reacts by opening another device cannot be
             // beaten to it by a watcher still holding this one.

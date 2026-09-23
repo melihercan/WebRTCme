@@ -16,32 +16,83 @@ namespace WebRTCme
     public static class MacCatalystSupport
     {
         /// <summary>
-        /// Opens a camera into a track, and shows it in the preview view.
+        /// The capturer feeding each camera track, keyed by the native track.
         /// </summary>
         /// <remarks>
-        /// The frames go through <see cref="CameraCapture.Upright"/> on the way to the track's
-        /// source. <c>RTCCameraVideoCapturer</c> tags them from <c>UIDevice.orientation</c>, which
-        /// on a Mac describes nothing, so without that they arrive at a peer a quarter turn out.
-        /// The capturer itself is unchanged - it works, and only the label on its output was
-        /// wrong.
+        /// <para>Keyed by the native object rather than by the track's id, and that is the fix for
+        /// two faults found on 2026-09-23. A camera track's id is its device's <c>UniqueID</c>, so
+        /// every track ever opened on one camera has the same id. Keyed by it, the first call's
+        /// capturer was found and reused by every later call, still feeding the first call's video
+        /// source: from the second call on, <b>the peer received no video at all</b> - measured as
+        /// <c>video:0</c> inbound on Windows while the Mac's own preview showed the camera. And
+        /// since nothing ever stopped it, <b>the camera stayed on after the call</b> for as long
+        /// as the app ran.</para>
         /// </remarks>
-        /// <summary>One capturer per camera track, started once; see <see cref="SetCameraTrack(Webrtc.RTCCameraPreviewView, IMediaStreamTrack)"/>.</summary>
-        static readonly ConcurrentDictionary<string, Webrtc.RTCCameraVideoCapturer> _capturersByTrackId = new();
+        static readonly ConcurrentDictionary<IntPtr, Webrtc.RTCCameraVideoCapturer> _capturersByTrack = new();
 
         /// <summary>
-        /// Shows a camera track in a preview view. The capture session belongs to the track,
-        /// not to the view: a second view given the same track (two tiles trading streams)
-        /// joins the running session rather than starting another capturer on the device.
+        /// Opens the camera into a new camera track, so the track is live when it is handed back -
+        /// what a browser's <c>getUserMedia</c> does.
         /// </summary>
+        /// <remarks>
+        /// <para>Capture used to start only when a view first bound the track, which meant a track
+        /// nobody displayed sent no video, and the capture session was started with a preview layer
+        /// being attached to it moments later. Attaching a preview layer to a session makes
+        /// AVFoundation reconfigure it and reopen the device, and on a 2018 Mac mini that cost
+        /// <b>9 to 19 seconds with no frames</b> - measured frame by frame on 2026-09-23. It was the
+        /// "LED flashes and the picture takes ten seconds" seen on every join. Nothing attaches a
+        /// preview layer now: the local tile renders the track, as a remote one does.</para>
+        /// <para>The frames go through <see cref="CameraCapture.Upright"/> on the way to the
+        /// track's source. <c>RTCCameraVideoCapturer</c> tags them from <c>UIDevice.orientation</c>,
+        /// which on a Mac describes nothing, so without that they arrive at a peer a quarter turn
+        /// out.</para>
+        /// </remarks>
+        internal static void StartCamera(MediaStreamTrack track)
+        {
+            var nativeVideoTrack = (Webrtc.RTCVideoTrack)track.NativeObject;
+            var capturer = new Webrtc.RTCCameraVideoCapturer
+            {
+                Delegate = CameraCapture.Upright(
+                    (Webrtc.IRTCVideoCapturerDelegate)nativeVideoTrack.Source)
+            };
+
+            // The track id is the device's UniqueID (see MediaStream.Create); ModelID is not unique.
+            var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
+                .Single(device => device.UniqueID == track.Id);
+
+            var (format, fps) = SelectFormat(cameraDevice, track.Id);
+            Console.WriteLine($"######## camera {cameraDevice.LocalizedName} opening");
+            capturer.StartCaptureWithDevice(cameraDevice, format, fps);
+
+            _capturersByTrack[nativeVideoTrack.Handle] = capturer;
+        }
+
+        /// <summary>Stops the camera feeding a track, if one is. Called when the track is stopped.</summary>
+        internal static void StopCamera(MediaStreamTrack track)
+        {
+            if (track.NativeObject is Webrtc.RTCVideoTrack nativeVideoTrack
+                && _capturersByTrack.TryRemove(nativeVideoTrack.Handle, out var capturer))
+            {
+                Console.WriteLine($"######## camera {track.Id} closed");
+                capturer.StopCapture();
+            }
+        }
+
+        /// <summary>
+        /// Shows a camera track's capture session in a preview view.
+        /// </summary>
+        /// <remarks>
+        /// Kept for callers that want AVFoundation's own preview layer, and no longer used by
+        /// WebRTCme's media view - which renders the track instead. Attaching a preview layer to a
+        /// running session makes AVFoundation reconfigure it, and on some Macs the camera then
+        /// delivers nothing for ten seconds or more. This starts nothing: the track's own capturer,
+        /// started when the track was opened, is the only one.
+        /// </remarks>
         public static void SetCameraTrack(Webrtc.RTCCameraPreviewView cameraView, IMediaStreamTrack videoTrack)
         {
-            var capturer = _capturersByTrackId.GetOrAdd(videoTrack.Id, _ =>
-            {
-                var started = new Webrtc.RTCCameraVideoCapturer();
-                SetCameraTrack(cameraView, videoTrack, started);
-                return started;
-            });
-            cameraView.CaptureSession = capturer.CaptureSession;
+            if (((MediaStreamTrack)videoTrack).NativeObject is Webrtc.RTCVideoTrack nativeVideoTrack
+                && _capturersByTrack.TryGetValue(nativeVideoTrack.Handle, out var capturer))
+                cameraView.CaptureSession = capturer.CaptureSession;
         }
 
         /// <summary>Takes a renderer off the track it was drawing, before the view shows another.</summary>
@@ -53,23 +104,19 @@ namespace WebRTCme
                 nativeVideoTrack.RemoveRenderer((Webrtc.IRTCVideoRenderer)rendererView);
         }
 
-        public static void SetCameraTrack(Webrtc.RTCCameraPreviewView _cameraView, IMediaStreamTrack videoTrack, 
+        /// <summary>Starts a caller-supplied capturer on a track's camera and shows it.</summary>
+        [Obsolete("A camera track now owns its capturer, started when the track is opened. This " +
+                  "starts a second one on the same device; use SetCameraTrack(view, track).")]
+        public static void SetCameraTrack(Webrtc.RTCCameraPreviewView _cameraView, IMediaStreamTrack videoTrack,
             Webrtc.RTCCameraVideoCapturer _videoCapturer)
         {
             var nativeVideoTrack = ((MediaStreamTrack)videoTrack).NativeObject as Webrtc.RTCVideoTrack;
-            var nativeVideoSource = nativeVideoTrack.Source;
             _videoCapturer.Delegate = CameraCapture.Upright(
-                (Webrtc.IRTCVideoCapturerDelegate)nativeVideoSource);
-
+                (Webrtc.IRTCVideoCapturerDelegate)nativeVideoTrack.Source);
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
-                ////                .FirstOrDefault(device => device.Position == cameraType.ToNative());
-                // The track id is the device's UniqueID (see MediaStream.Create), so match on
-                // that - ModelID is not unique and does not identify the chosen device.
                 .Single(device => device.UniqueID == videoTrack.Id);
-
             var (format, fps) = SelectFormat(cameraDevice, videoTrack.Id);
             _videoCapturer.StartCaptureWithDevice(cameraDevice, format, fps);
-
             _cameraView.CaptureSession = _videoCapturer.CaptureSession;
         }
 

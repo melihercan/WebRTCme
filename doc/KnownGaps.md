@@ -1947,6 +1947,23 @@ account above came from fetching the file and reading it. **Worth the space here
 version was convincing**: it explained the stack, named a mechanism and proposed a fix, and was
 wrong in a way that no amount of re-reading the crash report would have exposed.
 
+**What 2026-09-23 ruled out, by measurement.** Thirteen crash reports on the Mac were read thread
+by thread:
+- **A blocked main thread is not required.** Three of the eight aborts had the main thread idle
+  in its run loop, so closing off the caller's thread cannot be the whole answer.
+- **Two audio units alive at once is not the trigger.** Every report has exactly three libwebrtc
+  threads: one factory, one audio device module.
+- **The detection sites are all inside Apple's audio stack.** They include `AggregateState`,
+  `AudioAnalytics` during `handleRouteChange`, and CoreAudio's own reporting thread. None is in
+  a managed or binding frame, so the corruption is noticed there and caused earlier.
+
+A network soak was then built to add the one ingredient the loopback soak lacked, a remote peer.
+It ran **263 rounds over 98 minutes without an abort**. The consumer's app aborted about every four
+minutes on the same machine, so the remote peer is not what it does differently either. Whatever
+triggers it is something that app does around its calls. The soak found two faults of its own
+along the way, both fixed: an offer dropped by a race with the join, and the Apple camera faults
+above.
+
 ### No button on the call page responded on Mac Catalyst - fixed 2026-09-22
 
 Found while trying to verify `ae0434a5`, and it is the more serious of the two. On Mac Catalyst the
@@ -2112,6 +2129,83 @@ judged by eye, because the audio half of this is not visible:
 element's `muted` property is an audio control, so the local preview no longer plays this machine's
 own microphone back at it, and peers are still audible. **Controlled**: with the old line restored
 the local tile comes back as `muted: false`, which is the echo.
+
+### On Apple, only the first call sent video, and every join waited 10-20 seconds for the camera - fixed 2026-09-23
+
+Reported as "the camera image appears very late, after ten seconds or more, on every join" on Mac
+Catalyst and, it seemed, iOS. It was measured before anyone theorised about it, and the
+measurement found something worse underneath.
+
+**Measured on Mac Catalyst against Windows, three calls from a fresh app.** The Mac's own tile was
+sampled by pixel contrast through `screencapture`, and Windows' inbound video bytes were read
+from its statistics:
+
+| call | Mac's own preview shows an image | Windows receives the Mac's video |
+| --- | --- | --- |
+| 1 | 17.1 s after Join | from about 18 s |
+| 2 | 23.0 s | **never** - `video:0` for the whole call |
+| 3 | 23.2 s | **never** |
+
+**Three faults, one design.** A camera's capture used to belong to whichever view showed it:
+- Capture started only when a view first bound the track.
+- The capturer was cached in a dictionary keyed by the track's id.
+- A camera track's id is its device's `UniqueID`, so every track ever opened on one camera has the
+  same id.
+
+That produced three separate faults:
+
+- **Only the first call sent video.** Every later call found the first call's capturer under the
+  same id and reused it, still feeding the first call's video source. The new track got no
+  frames, while the Mac's own preview happily showed the camera, because a preview layer reads
+  the capture session directly. The frame log showed it plainly: across 264 soak calls,
+  "correcting camera rotation", which is logged once per capturer, appeared exactly once.
+- **The camera stayed on after the call.** Nothing ever stopped a capturer. A camera track's
+  `Stop()` disabled the track and raised `ended`, and the capturer was still delivering frames a
+  minute after the soak finished.
+- **Every join stalled for 9 to 19 seconds.** Frame arrival was logged with timestamps. The first
+  frame came 1.1 s after capture started, then **a 9-second gap**. In later calls, where the tile
+  attached to a session already running, **a 19-second gap**. Attaching a preview layer to a
+  capture session makes AVFoundation reconfigure it and reopen the device: the camera light
+  flashing on join. Each join also built the local tile twice, attaching two preview layers 4 ms
+  apart. Both ends paid for it, because the frames being sent stopped too.
+
+The camera itself was never slow. It delivers its first frame about a second after being opened.
+
+**Fixed by making the track own its capturer, and rendering the local tile.**
+- `MacCatalystSupport.StartCamera` and `IosSupport.StartCamera` open the camera when
+  `getUserMedia` makes the track, so the track is live when it is returned, as a browser's is.
+  `StopCamera` closes it when the track is stopped.
+- Capturers are keyed by the native track, not by the id every track shares.
+- The media view renders every track with the Metal renderer remote tiles already used, so
+  nothing attaches a preview layer to the session. The tile now shows exactly what is being sent,
+  as it always has on Windows and Android. It is **not mirrored** any more, which the preview
+  layer was.
+- `SetCameraTrack(view, track)` is kept for callers who want AVFoundation's preview, but it
+  starts nothing now. The overload that took a capturer is `[Obsolete]`.
+
+**After, same measurement:**
+
+| call | Mac's own preview shows an image | Windows receives the Mac's video |
+| --- | --- | --- |
+| 1 | 5.9 s | from 7.8 s |
+| 2 | 4.4 s | from 5.7 s |
+| 3 | 4.3 s | from 5.7 s |
+
+Windows' statistics arrive every five seconds, so its times are only accurate to that. The log
+now shows `camera WEB CAM opening` on every join and `camera ... closed` on every leave, the same
+lines Android has always written. Muting still blanks the local tile, and that is still needed: a
+disabled track stops delivering frames, and a Metal view left alone holds the last one.
+
+**It also ended the call page's stalls.** The network soak had logged the Mac's call page going
+unresponsive to accessibility for about 15 seconds in 30 of 263 rounds, and in 20 rounds the peer
+saw the join seconds late. That was the same reconfiguration holding the UI up. On the fixed build,
+80 rounds had **no stalls and no slow joins**; at the old rate that happens by chance 0.004% of the
+time. Getting back to the join page after leaving went from a median 11.6 s to **2.7 s**, which was
+the "hangup works, with a delay" reported on 2026-09-22.
+
+**iOS has the same change and has only been compiled.** It shares the design and the bug's shape
+(`IosSupport` had the same id-keyed cache and the same view-started capture), so it should behave
+the same. It needs a run on a phone before it is called verified.
 
 ### A join could silently never connect - fixed 2026-09-23
 
