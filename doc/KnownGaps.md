@@ -2091,6 +2091,11 @@ accessibility scripting with `screencapture` run from the GUI session:
 The preview comes back the instant it is unmuted, with none of the ten-second delay that disposing
 a preview view causes - which is the whole reason it is hidden rather than torn down.
 
+**And on an iPhone XR (iOS 18.7) against Windows, 2026-09-23** - the first time this code ran on a
+phone rather than on Catalyst. The iPhone's own tile went blank on mute and came straight back on
+unmute, seen on the phone; Windows received `videoMuted:True` then `False` each time, including
+after a leave and an immediate rejoin.
+
 Windows was re-checked rather than assumed: `MapVideoMuted` is still empty there, its own preview
 still blanks by itself, and nothing about its behaviour changed.
 
@@ -2142,6 +2147,10 @@ camera closed, `PeerLeft` on Windows, no media for 32 seconds. After, with the n
 open for 20 seconds: no `LeaveAsync` or `JoinAsync` on the server, no `PeerLeft`, the phone's video
 still arriving on Windows throughout (3.1 MB to 8.4 MB inbound over that window), and dismissing
 the dialog changed nothing.
+
+**And on iOS**, iPhone XR against Windows the same day: the iPhone answering, Restart ICE refused
+with the native dialog held open for about ten seconds, and the server shows no leave or join
+around it - the only leave/join pair in that run is the deliberate one that followed.
 
 **For anyone writing a call page:** leaving the call in `OnDisappearing` is only safe while nothing
 pushes a page over the call. A modal page of the app's own - a settings sheet, a permission
