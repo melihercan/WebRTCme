@@ -4,22 +4,45 @@ using Webrtc = Org.Webrtc;
 
 namespace WebRTCme.Middleware
 {
+    /// <summary>
+    /// A video tile: the whole frame, fitted and centred, with bars where the tile and the picture
+    /// differ in shape.
+    /// </summary>
+    /// <remarks>
+    /// <para>Every view of a stream shows the whole camera picture, so the sender's own preview and
+    /// the peer's tile show the same thing at different sizes. It used to crop instead: a
+    /// <c>SurfaceViewRenderer</c> always draws its frame cropped to its own shape, and it was laid out
+    /// at the tile's, so a 1280x720 landscape picture in a phone's portrait tile kept only its middle
+    /// third and enlarged it about twice - a head where the sender saw head and shoulders, and soft,
+    /// blocky edges where the Windows Camera app showed the same camera crisp. Measured on
+    /// 2026-09-27: the phone received all 1280x720 at 30 fps; the loss was in the drawing.</para>
+    /// <para>So the renderer is sized to the frame's shape and centred, and the tile around it shows
+    /// through as the bars. Its scaling type only decides how it measures itself, which a parent
+    /// that lays it out directly never asks; the frame size comes from its events instead, which
+    /// report it with its rotation.</para>
+    /// </remarks>
     public class MediaView : ViewGroup
     {
         private readonly Context _context;
         private readonly Webrtc.SurfaceViewRenderer _rendererView;
         private readonly Webrtc.IEglBase.IContext _eglBaseContext;
-        //private bool _isCamera;
+        private readonly FrameEvents _frameEvents;
+
+        // The frame as it is shown: width and height swapped when it arrives rotated a quarter turn.
+        private int _frameWidth;
+        private int _frameHeight;
 
         public MediaView(Context context) : base(context)
         {
             _context = context;
             _eglBaseContext = AndroidSupport.GetNativeEglBase().EglBaseContext;
+            _frameEvents = new FrameEvents(this);
 
             _rendererView = new Webrtc.SurfaceViewRenderer(context);
             _rendererView.SetMirror(false);
             _rendererView.SetEnableHardwareScaler(true);
-            _rendererView.Init(_eglBaseContext, null);
+            _rendererView.SetScalingType(Webrtc.RendererCommon.ScalingType.ScaleAspectFit);
+            _rendererView.Init(_eglBaseContext, _frameEvents);
             AddView(_rendererView);
         }
 
@@ -39,43 +62,67 @@ namespace WebRTCme.Middleware
             if (videoTrack is null)
                 return;
 
-            AndroidSupport.SetTrack(videoTrack, _rendererView, _context/*, _eglBaseContext*/);
-            //var nativeVideoTrack = videoTrack.NativeObject as Webrtc.VideoTrack;
-
-            //var cameraEnum = new Webrtc.Camera2Enumerator(_context);
-            //var cameraDevices = cameraEnum.GetDeviceNames(); 
-            //var isCamera = cameraDevices.Any(device => device == videoTrack.Id);
-
-            //if (isCamera)
-            //{
-            //    var nativeVideoSource = AndroidSupport.GetNativeVideoSource(videoTrack);
-            //    var videoCapturer = cameraEnum.CreateCapturer(videoTrack.Id, null);
-            //    videoCapturer.Initialize(
-            //        Webrtc.SurfaceTextureHelper.Create(
-            //            "CameraVideoCapturerThread",
-            //            _eglBaseContext),
-            //        _context,
-            //        nativeVideoSource.CapturerObserver);
-            //    videoCapturer.StartCapture(480, 640, 30);
-            //}
-
-            //nativeVideoTrack.AddSink(_rendererView);
+            AndroidSupport.SetTrack(videoTrack, _rendererView, _context);
         }
 
         protected override void OnLayout(bool changed, int l, int t, int r, int b)
         {
-            System.Diagnostics.Debug.WriteLine($"@@@@@@ OnLayout {changed}, {l}, {t}, {r}, {b}");
+            // A child is placed in its parent's coordinates, which start at 0 whatever l and t are.
+            var width = r - l;
+            var height = b - t;
+            if (width <= 0 || height <= 0)
+                return;
 
-            //// TODO: FIND a better solution for this. 
-            //// it seems _rendererView.Layout t always starts from 0.
-            //// Therefore we need to adjust the t and b to the correct values.
-            b = b - t;
-            t = 0;
-            System.Diagnostics.Debug.WriteLine($"@@@@@@ OnLayout Adjusted {l}, {t}, {r}, {b}");
+            int x = 0, y = 0, w = width, h = height;
+            if (_frameWidth > 0 && _frameHeight > 0)
+            {
+                var scale = Math.Min((double)width / _frameWidth, (double)height / _frameHeight);
+                w = Math.Max(1, (int)Math.Round(_frameWidth * scale));
+                h = Math.Max(1, (int)Math.Round(_frameHeight * scale));
+                x = (width - w) / 2;
+                y = (height - h) / 2;
+            }
 
-            _rendererView.Layout(l, t, r, b);
+            _rendererView.Measure(
+                MeasureSpec.MakeMeasureSpec(w, MeasureSpecMode.Exactly),
+                MeasureSpec.MakeMeasureSpec(h, MeasureSpecMode.Exactly));
+            _rendererView.Layout(x, y, x + w, y + h);
+        }
+
+        private void OnFrameSize(int width, int height)
+        {
+            if (width == _frameWidth && height == _frameHeight)
+                return;
+
+            _frameWidth = width;
+            _frameHeight = height;
+            RequestLayout();
+        }
+
+        /// <summary>
+        /// The renderer's events. They arrive on its render thread, so the size is handed to the UI
+        /// thread before the view lays out again.
+        /// </summary>
+        private sealed class FrameEvents : Java.Lang.Object, Webrtc.RendererCommon.IRendererEvents
+        {
+            private readonly WeakReference<MediaView> _view;
+
+            public FrameEvents(MediaView view) => _view = new WeakReference<MediaView>(view);
+
+            public void OnFirstFrameRendered()
+            {
+            }
+
+            public void OnFrameResolutionChanged(int videoWidth, int videoHeight, int rotation)
+            {
+                if (!_view.TryGetTarget(out var view))
+                    return;
+
+                var quarterTurn = rotation % 180 != 0;
+                var width = quarterTurn ? videoHeight : videoWidth;
+                var height = quarterTurn ? videoWidth : videoHeight;
+                view.Post(() => view.OnFrameSize(width, height));
+            }
         }
     }
 }
-
-

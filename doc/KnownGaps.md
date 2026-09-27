@@ -23,7 +23,7 @@ access is not the GUI session's - see the Mac Catalyst notes below.
 | | blocked on | what it is |
 | --- | --- | --- |
 | **The SFU's estimate collapses under simulcast** | mediasoup | Its congestion control, not this client. The estimate only collapses when simulcast is in play, and probation stops with it. |
-| **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. |
+| **Frames do not follow the device's rotation on Android** | nobody - it can be picked up today | Rotating the device does not rotate the picture locally. Mitigated, not fixed, by the demo's portrait lock. **Not seen in DirectCallMe on 2026-09-27:** with its activity unlocked (orientation and screen size handled as configuration changes), a Samsung A17 on Android 16 turned by hand to landscape showed an upright self-view, and Windows received the same upright picture. Turning only the display with `adb` (`user_rotation`) while the phone stood upright gave a sideways picture on both sides, which is libwebrtc correcting for a turn the camera never made - a test artefact, not this gap. The demo has not been rechecked. |
 
 ### A Maui Media tile never changed what it showed - fixed 2026-09-19
 

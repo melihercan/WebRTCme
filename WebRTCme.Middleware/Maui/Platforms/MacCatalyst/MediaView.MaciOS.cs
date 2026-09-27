@@ -1,14 +1,11 @@
 ﻿using CoreGraphics;
-using Foundation;
 using UIKit;
 
 namespace WebRTCme.Middleware
 {
-    public class MediaView : UIView, Webrtc.IRTCVideoViewDelegate ////Webrtc.IRTCVideoViewDelegate
+    public class MediaView : UIView
     {
-        ////private Webrtc.RTCEAGLVideoView _rendererView;
         private Webrtc.RTCMTLVideoView _rendererView;
-        private CGSize _rendererSize = CGSize.Empty;
         private bool _videoMuted;
 
         public MediaView()
@@ -50,15 +47,14 @@ namespace WebRTCme.Middleware
                 MacCatalystSupport.RemoveRendererTrack(_rendererView, _track);
                 _rendererView.RemoveFromSuperview();
                 _rendererView = null;
-                _rendererSize = CGSize.Empty;
             }
 
             _track = videoTrack;
             if (videoTrack is null)
                 return;
 
-            _rendererView = new Webrtc.RTCMTLVideoView();
-            _rendererView.Delegate = this;
+            // The whole frame, fitted: see LayoutSubviews.
+            _rendererView = new Webrtc.RTCMTLVideoView { VideoContentMode = UIViewContentMode.ScaleAspectFit };
             AddSubview(_rendererView);
             MacCatalystSupport.SetRendererTrack(_rendererView, videoTrack);
 
@@ -83,73 +79,25 @@ namespace WebRTCme.Middleware
                 _rendererView.Hidden = muted;
         }
 
+        /// <summary>
+        /// The renderer takes the whole view and fits the frame inside it, so every view of a
+        /// stream shows the whole camera picture - the sender's own preview and the peer's tile
+        /// the same, whatever their shapes - with bars where the shapes differ.
+        /// </summary>
+        /// <remarks>
+        /// It used to fill instead, cropping to the view's shape, so a landscape picture in a
+        /// portrait tile lost two thirds of its width and the peer saw only a head where the sender
+        /// saw head and shoulders. The Metal view fits by itself and knows the frame's size and
+        /// rotation, which the layout here could not: its size callback only ever reported for the
+        /// OpenGL view this replaced, so the old fill code never ran and the view cropped by default.
+        /// </remarks>
         public override void LayoutSubviews()
         {
-            System.Diagnostics.Debug.WriteLine($"@@@@@@ LayoutSubviews Bounds:{Bounds}");
-
             base.LayoutSubviews();
 
-            CGRect frame = CGRect.Empty;
             if (_rendererView is not null)
-            {
-                if (_rendererSize.Width > 0 && _rendererSize.Height > 0)
-                {
-                    var scale = 0f;
-
-#if false
-                    ///////// ASPECT FIT
-                    frame = Bounds.WithAspectRatio(_rendererSize);
-                    if (frame.Width >= frame.Height)
-                        // Scale by height.
-                        scale = Bounds.Height / frame.Height;
-                    else
-                        // Scale by width.
-                        scale = Bounds.Width / frame.Width;
-                    frame.Size = new CGSize(frame.Width * scale, frame.Height * scale);
-                    _rendererView.Frame = frame;
-                    _rendererView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
-
-#endif
-
-                    /////// ASPECT FILL
-                    if (Bounds.Width >= Bounds.Height)
-                    {
-                        // View is landscape. Scale by width.
-                        frame = new CGRect(Bounds.X, Bounds.Y, Bounds.Width, 
-                            _rendererSize.Height * (Bounds.Width/_rendererSize.Width));
-                    }
-                    else
-                    {
-                        // View is portrait. Scale by height.
-                        frame = new CGRect(Bounds.X, Bounds.Y, 
-                            _rendererSize.Width * (Bounds.Height / _rendererSize.Height), Bounds.Height);
-                    }
-
-
-
-                    _rendererView.Frame = frame;
-                    _rendererView.Center = new CGPoint(Bounds.GetMidX(), Bounds.GetMidY());
-                    System.Diagnostics.Debug.WriteLine($"@@@@@@ _rendererView.Frame:{_rendererView.Frame}");
-                }
-                else
-                    _rendererView.Frame = Bounds;
-            }
+                _rendererView.Frame = Bounds;
         }
-
-        [Export("videoView:didChangeVideoSize:")]
-        public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
-        {
-            if (videoView is Webrtc.RTCEAGLVideoView renderer && renderer.Superview is UIView parent)
-            {
-                System.Diagnostics.Debug.WriteLine($"@@@@@@ DidChangeVideoSize renderer.Frame:{renderer.Frame} " +
-                    $"size:{size}");
-                _rendererSize = size;
-                SetNeedsLayout();
-                //                parent.Frame = new CGRect(0, 0, size.Width, size.Height);
-                //              parent.SetNeedsLayout();
-            }
-        }
-
 
     }
 }
