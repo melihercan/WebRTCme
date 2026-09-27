@@ -1,12 +1,16 @@
 ﻿using CoreGraphics;
+using Foundation;
 using UIKit;
 
 namespace WebRTCme.Middleware
 {
-    public class MediaView : UIView
+    public class MediaView : UIView, Webrtc.IRTCVideoViewDelegate
     {
         private Webrtc.RTCMTLVideoView _rendererView;
         private bool _videoMuted;
+
+        // The frame as it is shown, rotation applied; empty until the renderer reports it.
+        private CGSize _videoSize = CGSize.Empty;
 
         public MediaView()
         {
@@ -47,6 +51,7 @@ namespace WebRTCme.Middleware
                 MacCatalystSupport.RemoveRendererTrack(_rendererView, _track);
                 _rendererView.RemoveFromSuperview();
                 _rendererView = null;
+                _videoSize = CGSize.Empty;
             }
 
             _track = videoTrack;
@@ -55,6 +60,7 @@ namespace WebRTCme.Middleware
 
             // The whole frame, fitted: see LayoutSubviews.
             _rendererView = new Webrtc.RTCMTLVideoView { VideoContentMode = UIViewContentMode.ScaleAspectFit };
+            _rendererView.Delegate = this;
             AddSubview(_rendererView);
             MacCatalystSupport.SetRendererTrack(_rendererView, videoTrack);
 
@@ -80,23 +86,52 @@ namespace WebRTCme.Middleware
         }
 
         /// <summary>
-        /// The renderer takes the whole view and fits the frame inside it, so every view of a
-        /// stream shows the whole camera picture - the sender's own preview and the peer's tile
-        /// the same, whatever their shapes - with bars where the shapes differ.
+        /// The whole frame, fitted and centred: the renderer is sized to the frame's shape, so every
+        /// view of a stream shows the whole camera picture - the sender's own preview and the
+        /// peer's tile the same, whatever their shapes - with bars where the shapes differ.
         /// </summary>
         /// <remarks>
-        /// It used to fill instead, cropping to the view's shape, so a landscape picture in a
+        /// <para>It used to fill instead, cropping to the view's shape, so a landscape picture in a
         /// portrait tile lost two thirds of its width and the peer saw only a head where the sender
-        /// saw head and shoulders. The Metal view fits by itself and knows the frame's size and
-        /// rotation, which the layout here could not: its size callback only ever reported for the
-        /// OpenGL view this replaced, so the old fill code never ran and the view cropped by default.
+        /// saw head and shoulders. The size callback that layout relied on only ever answered for
+        /// the OpenGL view the Metal one replaced, so the fill code never ran and the Metal view
+        /// cropped by default.</para>
+        /// <para>Nor can the Metal view be left to fit by itself with its content mode, which was
+        /// tried: it held on an iPhone in portrait, and once the phone was turned the peer's picture
+        /// was stretched to the tile - its Metal layer resizes its drawable to its bounds when they
+        /// change, and the frame's own size is not sent again. Sized to the frame's shape here, the
+        /// drawable has that shape whatever it resizes to. The size it reports has the frame's
+        /// rotation applied already, so an upright portrait camera reports as portrait.</para>
         /// </remarks>
         public override void LayoutSubviews()
         {
             base.LayoutSubviews();
 
-            if (_rendererView is not null)
+            if (_rendererView is null)
+                return;
+
+            if (_videoSize.Width <= 0 || _videoSize.Height <= 0 || Bounds.Width <= 0 || Bounds.Height <= 0)
+            {
                 _rendererView.Frame = Bounds;
+                return;
+            }
+
+            var scale = System.Runtime.InteropServices.NFloat.Min(Bounds.Width / _videoSize.Width, Bounds.Height / _videoSize.Height);
+            var width = _videoSize.Width * scale;
+            var height = _videoSize.Height * scale;
+            _rendererView.Frame = new CGRect(
+                Bounds.X + (Bounds.Width - width) / 2, Bounds.Y + (Bounds.Height - height) / 2, width, height);
+        }
+
+        /// <summary>The frame's size, rotation applied: on the main queue, and again when it changes.</summary>
+        [Export("videoView:didChangeVideoSize:")]
+        public void DidChangeVideoSize(Webrtc.IRTCVideoRenderer videoView, CGSize size)
+        {
+            if (!ReferenceEquals(videoView, _rendererView) || size == _videoSize)
+                return;
+
+            _videoSize = size;
+            SetNeedsLayout();
         }
 
     }
