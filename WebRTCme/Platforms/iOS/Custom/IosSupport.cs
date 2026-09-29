@@ -51,10 +51,43 @@ namespace WebRTCme
             var cameraDevice = Webrtc.RTCCameraVideoCapturer.CaptureDevices
                 .Single(device => device.UniqueID == track.Id);
 
+            EnableMultitaskingCameraAccess(capturer.CaptureSession);
+
             var (format, fps) = SelectFormat(cameraDevice, track.Id);
             capturer.StartCaptureWithDevice(cameraDevice, format, fps);
 
             _capturersByTrack[nativeVideoTrack.Handle] = capturer;
+        }
+
+        /// <summary>
+        /// Keeps the camera running while another app shares the iPad's screen - Split View, Slide
+        /// Over, Stage Manager, or iPadOS 26's windows.
+        /// </summary>
+        /// <remarks>
+        /// Without it iPadOS interrupts the session the moment a second app is visible, with
+        /// "VideoDeviceNotAvailableWithMultipleForegroundApps": a windowed DirectCallMe on an iPad
+        /// Air sent no video and showed an empty self-view (2026-09-29). Supported is true on
+        /// iPadOS 18 and later for an app that declares <c>voip</c> in <c>UIBackgroundModes</c>, and
+        /// earlier only with Apple's multitasking-camera-access entitlement - so an app that
+        /// declares neither keeps the old behaviour, and an iPhone, which never multitasks the
+        /// camera, reports false and is left alone.
+        /// </remarks>
+        static void EnableMultitaskingCameraAccess(AVCaptureSession session)
+        {
+            // Mac Catalyst has no such property, and an iOS 15 device has neither it nor the
+            // multitasking it answers. The platform analyzer does not follow these guards in this
+            // slice - it reported the calls reachable on iOS 15 inside every form of them tried,
+            // early return, combined condition and attributes alike - hence the suppression, on
+            // these lines only.
+#pragma warning disable CA1416
+            if (OperatingSystem.IsIOSVersionAtLeast(16) && !OperatingSystem.IsMacCatalyst()
+                && session.MultitaskingCameraAccessSupported)
+            {
+                session.BeginConfiguration();
+                session.MultitaskingCameraAccessEnabled = true;
+                session.CommitConfiguration();
+            }
+#pragma warning restore CA1416
         }
 
         /// <summary>Stops the camera feeding a track, if one is. Called when the track is stopped.</summary>
