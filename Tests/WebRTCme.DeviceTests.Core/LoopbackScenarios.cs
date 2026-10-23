@@ -73,6 +73,7 @@ public static class LoopbackScenarios
         (nameof(TwoPeersNegotiateAndCarryAMessage), TwoPeersNegotiateAndCarryAMessage),
         (nameof(AnIceRestartOffersFreshCredentials), AnIceRestartOffersFreshCredentials),
         (nameof(ASenderSurvivesEnumeratingSendersAgain), ASenderSurvivesEnumeratingSendersAgain),
+        (nameof(ASenderWithNoTrackTakesOne), ASenderWithNoTrackTakesOne),
         (nameof(DevicesEnumerateWhateverElseHasHappened), DevicesEnumerateWhateverElseHasHappened),
         (nameof(ACompletedCallDoesNotChangeWhatDevicesExist), ACompletedCallDoesNotChangeWhatDevicesExist),
 
@@ -95,6 +96,54 @@ public static class LoopbackScenarios
         (nameof(ClosingOffTheCallersThreadSurvivesASoak), ClosingOffTheCallersThreadSurvivesASoak),
         (nameof(ClosingOnTheMainThreadWedgesTheProcess), ClosingOnTheMainThreadWedgesTheProcess),
     ];
+
+    /// <summary>
+    /// A sender made by <c>AddTransceiver</c>, with no track yet, takes one through ReplaceTrack.
+    /// </summary>
+    /// <remarks>
+    /// How a call that starts without a microphone or camera turns one on later without
+    /// renegotiating - a chat becoming a voice call, a voice call becoming a video call. The Windows
+    /// binding compared the new track's kind with the sender's current track, of which there was
+    /// none, and refused every track ("A  sender cannot take a Audio track", DirectCallMe,
+    /// 2026-10-23). Skipped where there is no microphone to make a track from, as on a CI runner.
+    /// </remarks>
+    public static Task<ScenarioResult> ASenderWithNoTrackTakesOne() =>
+        Run(nameof(ASenderWithNoTrackTakesOne), async () =>
+        {
+            using var pc = Window().RTCPeerConnection(Configuration());
+            var transceiver = pc.AddTransceiver(MediaStreamTrackKind.Audio,
+                new RTCRtpTransceiverInit { Direction = RTCRtpTransceiverDirection.SendRecv });
+
+            IMediaStream stream;
+            try
+            {
+                stream = await Window().Navigator().MediaDevices.GetUserMedia(new MediaStreamConstraints
+                {
+                    Audio = new MediaStreamContraintsUnion { Value = true },
+                });
+            }
+            catch (Exception exception)
+            {
+                throw new SkipException($"no microphone to make a track from: {exception.Message}");
+            }
+
+            var track = stream.GetAudioTracks().FirstOrDefault()
+                ?? throw new SkipException("the microphone gave no audio track");
+            try
+            {
+                await transceiver.Sender.ReplaceTrack(track);
+            }
+            catch (Exception exception)
+            {
+                return $"a sender with no track refused an audio track: {exception.Message}";
+            }
+
+            var now = transceiver.Sender.Track;
+            track.Stop();
+            return now?.Kind == MediaStreamTrackKind.Audio
+                ? null
+                : $"the sender took the track but reports {now?.Kind.ToString() ?? "none"}";
+        });
 
     /// <summary>A sender taken earlier must still work after the senders are enumerated again.</summary>
     /// <remarks>

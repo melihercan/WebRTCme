@@ -73,6 +73,14 @@ public class LoopbackTests
         Verify(LoopbackScenarios.AnIceRestartOffersFreshCredentials);
 
     /// <summary>
+    /// A sender negotiated with no track takes one later - a call turning its microphone or camera
+    /// on without renegotiating. Skipped without a microphone.
+    /// </summary>
+    [Fact]
+    public Task A_sender_with_no_track_takes_one_through_replace_track() =>
+        Verify(LoopbackScenarios.ASenderWithNoTrackTakesOne);
+
+    /// <summary>
     /// Enumeration answers "what can I use?", and one kind of device being uncountable must not turn
     /// the whole answer into an exception. On Windows a completed call used to leave the audio
     /// device module unable to count inputs, and that threw out of EnumerateDevices carrying the

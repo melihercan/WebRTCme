@@ -49,9 +49,14 @@ internal sealed class RTCRtpSender : IRTCRtpSender
                     $"Track must come from the Windows binding, got {newTrack.GetType().FullName}.",
                     nameof(newTrack));
 
-            if (newTrack.Kind != Track?.Kind)
+            // Only against a track this sender already has. A sender made by AddTransceiver starts
+            // with none - the line negotiated so a microphone or camera can come later, as a call
+            // that starts as a chat does - and knows its kind only natively; comparing with nothing
+            // refused every track it was given. libwebrtc checks the kind itself in that case and
+            // fails the replace, which Check below reports.
+            if (Track is not null && newTrack.Kind != Track.Kind)
                 throw new ArgumentException(
-                    $"A {Track?.Kind} sender cannot take a {newTrack.Kind} track.",
+                    $"A {Track.Kind} sender cannot take a {newTrack.Kind} track.",
                     nameof(newTrack));
 
             handle = windowsTrack.Handle;
