@@ -504,6 +504,22 @@ jobs:
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'maccatalyst')
     steps:
       - uses: actions/checkout@v7
+
+      # The runner image's default Xcode trails the iOS and Mac Catalyst workloads: from 10.0.402
+      # they require Xcode 27.1, while macos-26 still defaults to 26.x. Only an app build checks this
+      # - the library slices above compile either way - so it is these two jobs that need it. The
+      # newest Xcode 27 the image carries, rather than a pinned path that breaks on the next image.
+      - name: Select Xcode 27
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$xcode" ]; then
+            echo "::error::No Xcode 27 on this runner image; the iOS and Mac Catalyst workloads need it."
+            exit 1
+          fi
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
@@ -541,6 +557,22 @@ jobs:
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'ios')
     steps:
       - uses: actions/checkout@v7
+
+      # The runner image's default Xcode trails the iOS and Mac Catalyst workloads: from 10.0.402
+      # they require Xcode 27.1, while macos-26 still defaults to 26.x. Only an app build checks this
+      # - the library slices above compile either way - so it is these two jobs that need it. The
+      # newest Xcode 27 the image carries, rather than a pinned path that breaks on the next image.
+      - name: Select Xcode 27
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$xcode" ]; then
+            echo "::error::No Xcode 27 on this runner image; the iOS and Mac Catalyst workloads need it."
+            exit 1
+          fi
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
