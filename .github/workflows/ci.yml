@@ -125,6 +125,7 @@ jobs:
           name: apple-slices
           path: apple/**
           if-no-files-found: error
+          retention-days: 14
 
   package:
     name: Build, pack and verify
@@ -243,6 +244,7 @@ jobs:
           name: nupkg
           path: artifacts/*.nupkg
           if-no-files-found: error
+          retention-days: 14
 
   # ------------------------------------------------------------------ tests
   #

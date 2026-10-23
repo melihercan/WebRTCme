@@ -253,6 +253,7 @@ jobs:
           name: published-${{ steps.version.outputs.value }}
           path: artifacts/*.nupkg
           if-no-files-found: error
+          retention-days: 14
 
       - name: Dry run summary
         if: github.event_name == 'workflow_dispatch' && inputs.dry-run
