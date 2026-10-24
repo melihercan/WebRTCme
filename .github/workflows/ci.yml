@@ -55,7 +55,10 @@ jobs:
     # or only=unit otherwise started a two-machine build of five target frameworks that nothing
     # then consumed.
     if: inputs.artifact-run-id == '' && inputs.only != 'diagnostics' && inputs.only != 'unit'
-    runs-on: macos-latest
+    # xcode-27, not macos-latest: .NET for iOS and Mac Catalyst requires the Xcode it was built
+    # against - 27.1 from SDK 10.0.402 - and GitHub keeps Xcode 27 on its own image (macOS 27,
+    # arm64, default 27.1) rather than on macos-26.
+    runs-on: xcode-27
 
     steps:
       - uses: actions/checkout@v7
@@ -499,7 +502,10 @@ jobs:
   maccatalyst:
     name: Runtime - Mac Catalyst
     timeout-minutes: 30
-    runs-on: macos-latest
+    # xcode-27, not macos-latest: .NET for iOS and Mac Catalyst requires the Xcode it was built
+    # against - 27.1 from SDK 10.0.402 - and GitHub keeps Xcode 27 on its own image (macOS 27,
+    # arm64, default 27.1) rather than on macos-26.
+    runs-on: xcode-27
     needs: package
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'maccatalyst')
     steps:
@@ -536,7 +542,10 @@ jobs:
   ios-simulator:
     name: Runtime - iOS Simulator
     timeout-minutes: 40
-    runs-on: macos-latest
+    # xcode-27, not macos-latest: .NET for iOS and Mac Catalyst requires the Xcode it was built
+    # against - 27.1 from SDK 10.0.402 - and GitHub keeps Xcode 27 on its own image (macOS 27,
+    # arm64, default 27.1) rather than on macos-26.
+    runs-on: xcode-27
     needs: package
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'ios')
     steps:
