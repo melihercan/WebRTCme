@@ -38,16 +38,6 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# The Apple jobs are pinned, not floating like the rest. .NET for iOS and Mac Catalyst requires the
-# Xcode it was built against, and the floating SDK runs ahead of GitHub's runner images: from
-# 10.0.402 the workloads demand Xcode 27.1 while macos-26 carries 26.1-26.6 and there is no
-# macos-27 yet. 10.0.102 with workload set 10.0.106 (iOS/Mac Catalyst 26.2) is what the Mac mini
-# builds with. All three macOS jobs share it, so the package's Apple slices and the apps testing
-# them are built against the same iOS. Lift it when a runner image has the Xcode the latest needs.
-env:
-  APPLE_DOTNET_SDK: '10.0.102'
-  APPLE_WORKLOAD_SET: '10.0.106'
-
 jobs:
   # Mac Catalyst's WebRTC.framework must be a versioned bundle - Versions/A plus symlinks - or
   # macOS refuses to codesign an app embedding it. Windows can neither check those symlinks out of
@@ -81,11 +71,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ env.APPLE_DOTNET_SDK }}
-
-      # The runner image may carry a newer SDK of its own, which dotnet would otherwise pick.
-      - name: Hold this job to the pinned SDK
-        run: dotnet new globaljson --sdk-version "$APPLE_DOTNET_SDK" --roll-forward disable --force
+          dotnet-version: '10.0.x'
 
       # The project rather than the solution: the solution contains net10.0-windows projects whose
       # workloads do not exist on macOS, and asking for those fails here.
@@ -98,7 +84,7 @@ jobs:
       # whole TargetFrameworks list needs, which on macOS excludes net10.0-windows because that one
       # is added behind an IsOSPlatform('windows') condition.
       - name: Install workloads
-        run: dotnet workload restore --version "$APPLE_WORKLOAD_SET" WebRTCme/WebRTCme.csproj
+        run: dotnet workload restore WebRTCme/WebRTCme.csproj
 
       # These produce the assemblies and the .resources.zip files that carry the native
       # frameworks. build-versioned-framework.sh runs as part of the Mac Catalyst build, rebuilding
@@ -518,16 +504,28 @@ jobs:
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'maccatalyst')
     steps:
       - uses: actions/checkout@v7
+
+      # The runner image's default Xcode trails the iOS and Mac Catalyst workloads: from 10.0.402
+      # they require Xcode 27.1, while macos-26 still defaults to 26.x. Only an app build checks this
+      # - the library slices above compile either way - so it is these two jobs that need it. The
+      # newest Xcode 27 the image carries, rather than a pinned path that breaks on the next image.
+      - name: Select Xcode 27
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$xcode" ]; then
+            echo "::error::No Xcode 27 on this runner image; the iOS and Mac Catalyst workloads need it."
+            exit 1
+          fi
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ env.APPLE_DOTNET_SDK }}
-
-      # The runner image may carry a newer SDK of its own, which dotnet would otherwise pick.
-      - name: Hold this job to the pinned SDK
-        run: dotnet new globaljson --sdk-version "$APPLE_DOTNET_SDK" --roll-forward disable --force
+          dotnet-version: '10.0.x'
 
       - name: Install workloads
-        run: dotnet workload restore --version "$APPLE_WORKLOAD_SET" Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
 
       - uses: actions/download-artifact@v7
         if: inputs.artifact-run-id == ''
@@ -559,16 +557,28 @@ jobs:
     if: always() && (needs.package.result == 'success' || needs.package.result == 'skipped') && (inputs.only == 'all' || inputs.only == 'ios')
     steps:
       - uses: actions/checkout@v7
+
+      # The runner image's default Xcode trails the iOS and Mac Catalyst workloads: from 10.0.402
+      # they require Xcode 27.1, while macos-26 still defaults to 26.x. Only an app build checks this
+      # - the library slices above compile either way - so it is these two jobs that need it. The
+      # newest Xcode 27 the image carries, rather than a pinned path that breaks on the next image.
+      - name: Select Xcode 27
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$xcode" ]; then
+            echo "::error::No Xcode 27 on this runner image; the iOS and Mac Catalyst workloads need it."
+            exit 1
+          fi
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ env.APPLE_DOTNET_SDK }}
-
-      # The runner image may carry a newer SDK of its own, which dotnet would otherwise pick.
-      - name: Hold this job to the pinned SDK
-        run: dotnet new globaljson --sdk-version "$APPLE_DOTNET_SDK" --roll-forward disable --force
+          dotnet-version: '10.0.x'
 
       - name: Install workloads
-        run: dotnet workload restore --version "$APPLE_WORKLOAD_SET" Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
+        run: dotnet workload restore Tests/WebRTCme.DeviceTests.Runner/WebRTCme.DeviceTests.Runner.csproj
 
       - uses: actions/download-artifact@v7
         if: inputs.artifact-run-id == ''
