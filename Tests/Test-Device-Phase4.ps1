@@ -422,12 +422,22 @@ done
 kill $LAUNCHPID 2>/dev/null
 xcrun simctl terminate "__SIM__" __APPID__ > /dev/null 2>&1
 grep WEBRTCME- "$LOG"
+# No summary means the app never ran its scenarios; what simctl and the system said is the only
+# account of why, and keeping only WEBRTCME- lines threw it away.
+if ! grep -q WEBRTCME-SUMMARY "$LOG"; then
+  echo "--- simctl launch output (last 40 lines) ---"
+  tail -40 "$LOG"
+  echo "--- newest crash report for the runner, if any ---"
+  REPORT=$(ls -t ~/Library/Logs/DiagnosticReports/WebRTCme.DeviceTests.Runner* 2>/dev/null | head -1)
+  if [ -n "$REPORT" ]; then head -60 "$REPORT"; else echo "(none)"; fi
+fi
 rm -f "$LOG"
 '@
 
     $log = Invoke-Shell ($script.Replace('__FILTER_EXPORT__', $filterExport).
                                 Replace('__SIM__', $ResolvedSimulator).
                                 Replace('__APPID__', $appId))
+    $log | Where-Object { $_ -notmatch 'WEBRTCME-' } | ForEach-Object { Write-Host "  $_" }
     return Read-Outcome -Lines $log -What 'ios simulator'
 }
 
