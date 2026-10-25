@@ -336,11 +336,22 @@ for i in $(seq 1 __WAIT__); do
 done
 kill $APPPID 2>/dev/null
 grep WEBRTCME- "$LOG"
+# No summary means the app never ran its scenarios; its own output and the system's crash report
+# are the only account of why.
+if ! grep -q WEBRTCME-SUMMARY "$LOG"; then
+  echo "--- the runner: ${APP:-(not found)} ---"
+  echo "--- its output (last 40 lines) ---"
+  tail -40 "$LOG"
+  echo "--- newest crash report for the runner, if any ---"
+  REPORT=$(ls -t ~/Library/Logs/DiagnosticReports/WebRTCme.DeviceTests.Runner* 2>/dev/null | head -1)
+  if [ -n "$REPORT" ]; then head -60 "$REPORT"; else echo "(none)"; fi
+fi
 rm -f "$LOG"
 '@
 
     $log = Invoke-Shell ($script.Replace('__APP__', $app).Replace('__FILTER__', $filterArg).
         Replace('__WAIT__', "$waitIterations").Replace('__SOAKENV__', $soakEnv))
+    $log | Where-Object { $_ -notmatch 'WEBRTCME-' } | ForEach-Object { Write-Host "  $_" }
     return Read-Outcome -Lines $log -What 'maccatalyst'
 }
 
