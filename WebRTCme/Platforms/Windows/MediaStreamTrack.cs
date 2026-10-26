@@ -70,12 +70,19 @@ internal sealed class MediaStreamTrack : IMediaStreamTrack
 
     public MediaStreamTrackState ReadyState => _readyState;
 
+    /// <remarks>
+    /// The ABI cannot read the native flag back, so the getter says what was last set through this
+    /// wrapper - and the setter always passes the value on. A receiver's track comes in a new wrapper
+    /// each time the transceivers are listed, starting out enabled: the setter used to skip a value
+    /// equal to its own, so a remote track disabled through one wrapper could never be enabled again
+    /// through another - sound turned off in a call stayed off (2026-10-26).
+    /// </remarks>
     public bool Enabled
     {
         get => _enabled;
         set
         {
-            if (_handle == IntPtr.Zero || _enabled == value)
+            if (_handle == IntPtr.Zero)
                 return;
 
             WebRtcRuntime.Check(MediaTrackSetEnabled(_handle, value ? 1 : 0),
