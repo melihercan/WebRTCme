@@ -26,6 +26,29 @@ namespace WebRTCme.Middleware
             Children.Add(_image);
         }
 
+        /// <summary>
+        /// Asks for no room of its own: the view is as large as its layout makes it, and the
+        /// picture is fitted into that, as on the other platforms. Give it a size - Fill in a
+        /// sized cell, or a width and height.
+        /// </summary>
+        /// <remarks>
+        /// A WinUI element is never arranged smaller than it asked to be when measured: it is
+        /// laid out at that size and clipped. The image asked for the frame's pixel size when
+        /// measured with unlimited room, and anything asked for more than the tile when measured
+        /// with the whole layout's room - as a MAUI FlexLayout measures its items - so a group
+        /// call on Windows showed part of everyone's picture, enlarged (2026-10-26). One's own
+        /// camera, at 640x480, happened to fit. Arranged in more room than it asked for, the
+        /// image still fits the frame to it. Measuring the image again while arranging, at the
+        /// final size, is no way out: its changing size invalidates the layout, which then never
+        /// settles, and the app ends.
+        /// </remarks>
+        protected override global::Windows.Foundation.Size MeasureOverride(global::Windows.Foundation.Size availableSize)
+        {
+            var none = new global::Windows.Foundation.Size(0, 0);
+            _image.Measure(none);
+            return none;
+        }
+
         public void SetTrack(IMediaStreamTrack videoTrack)
         {
             _frameSubscription?.Dispose();
