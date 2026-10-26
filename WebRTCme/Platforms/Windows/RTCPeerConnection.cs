@@ -27,6 +27,19 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 {
     private readonly EventDispatcher _events = new();
     private readonly List<IRTCRtpSender> _senders = [];
+
+    /// <summary>
+    /// Every transceiver wrapper this connection has handed out, released with it.
+    /// </summary>
+    /// <remarks>
+    /// Each one holds native references - to the transceiver, and once asked, to its sender and
+    /// receiver - and callers rarely dispose them. A sender kept alive keeps its track, and a
+    /// camera track keeps the webcam: a camera turned on mid-call through a transceiver stayed
+    /// in use after the call until the process ended. <c>GetTransceivers</c> builds a fresh set on
+    /// every call, so this grows with each one; that is bounded by how often a caller asks during
+    /// one connection, and released all together when it ends.
+    /// </remarks>
+    private readonly List<RTCRtpTransceiver> _transceivers = [];
     private readonly RTCConfiguration _configuration;
     private readonly GCHandle _self;
 
@@ -338,6 +351,15 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
             _senders.Clear();
         }
 
+        // Disposing a transceiver disposes its sender and receiver too. One the caller already
+        // disposed does nothing the second time.
+        lock (_transceivers)
+        {
+            foreach (var transceiver in _transceivers)
+                transceiver.Dispose();
+            _transceivers.Clear();
+        }
+
         // Releasing revokes the observer, so no callback can arrive after this point and the
         // GCHandle behind user_data is safe to free.
         PeerConnectionRelease(handle);
@@ -345,6 +367,14 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
     }
 
     private void ThrowIfClosed() => ObjectDisposedException.ThrowIf(_handle == IntPtr.Zero, this);
+
+    /// <summary>Remembers a transceiver wrapper so <see cref="Dispose"/> releases it.</summary>
+    private RTCRtpTransceiver Keep(RTCRtpTransceiver transceiver)
+    {
+        lock (_transceivers)
+            _transceivers.Add(transceiver);
+        return transceiver;
+    }
 
     // ---- observer callbacks -------------------------------------------------
     // Static, and doing as little as possible: copy the borrowed strings, queue, return.
@@ -662,7 +692,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
                     out var handle),
                 $"add a {kind} transceiver");
 
-            return new RTCRtpTransceiver(this, handle);
+            return Keep(new RTCRtpTransceiver(this, handle));
         }
         finally
         {
@@ -740,7 +770,7 @@ internal sealed class RTCPeerConnection : IRTCPeerConnection
 
             var transceivers = new IRTCRtpTransceiver[count];
             for (var i = 0; i < count; i++)
-                transceivers[i] = new RTCRtpTransceiver(this, handles[i]);
+                transceivers[i] = Keep(new RTCRtpTransceiver(this, handles[i]));
             return transceivers;
         }
 
