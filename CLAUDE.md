@@ -131,7 +131,7 @@ but unreachable, and a good deal of Apple code compiles without ever having been
 - `publish.yml` publishes on a `v*` tag via NuGet Trusted Publishing (no API key secret). It
   **builds nothing**: it promotes the exact `.nupkg` bytes a CI run produced and you tested. A tag
   with no matching CI artifact has nothing to publish.
-- The MAUI packages are pinned to `Microsoft.Maui.Controls` 10.0.101, and **every MAUI consumer has
+- The MAUI packages are pinned to `Microsoft.Maui.Controls` 10.0.120, and **every MAUI consumer has
   to name that version themselves** or NuGet fails the restore with NU1605. Raising it here means
   raising it in `Tests/WebRTCme.PackageTests` and in the wiki's `Getting started`,
   `Platform prerequisites` and `Releases` pages in the same change.

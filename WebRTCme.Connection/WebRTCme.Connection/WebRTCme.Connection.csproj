@@ -9,7 +9,7 @@
 	<ItemGroup>
     <PackageReference Include="Utilme.Result" Version="26.9.14" />
     <PackageReference Include="Utilme.SdpTransform" Version="26.9.14" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.14" />
 	</ItemGroup>
 
 
