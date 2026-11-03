@@ -19,7 +19,8 @@ name: Publish
 # dependency nobody can resolve.
 #
 # Ways in:
-#   * tag v<version>  — publishes the CI artifact built from the tagged commit
+#   * tag v<version>  — publishes the CI artifact built from the tagged commit, then creates the
+#                       GitHub release for that tag
 #   * run manually    — defaults to a dry run that resolves and verifies the artifact without
 #                       publishing anything. Takes an optional run-id to name the CI run.
 #
@@ -59,7 +60,9 @@ jobs:
     runs-on: windows-latest
 
     permissions:
-      contents: read
+      # write, not read, only for the GitHub release created at the end. Nothing else here
+      # writes to the repository.
+      contents: write
       # Reading artifacts from another workflow run.
       actions: read
       # Lets the job request a GitHub OIDC token, which nuget.org exchanges for a
@@ -245,6 +248,60 @@ jobs:
             echo "::error::Pushing $package failed; see the raw response above."
             exit 1
           done
+
+      # The GitHub release, created only once both packages are on nuget.org, so the releases page
+      # never announces a version nobody can restore.
+      #
+      # This used to be a manual step, and it lapsed: after 26.9.16 five versions reached nuget.org
+      # and none reached the releases page, which went on calling 26.9.16 the latest for seven weeks.
+      #
+      # Tag pushes only. A manual dispatch has no tag to hang a release on - that is how 26.9.29
+      # was published, and why it has no tag and no release.
+      #
+      # The notes are the annotated tag's message, so a release says what its tag says, with
+      # nowhere else to keep in step. Read through the API rather than from git, because the
+      # checkout above is shallow and does not carry the tag object. A lightweight tag has no
+      # message, and gets a one-line release pointing at the wiki instead.
+      #
+      # If a release for this tag already exists - created by hand, or a re-run of this workflow -
+      # it is left alone rather than overwritten.
+      - name: Create the GitHub release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::notice::A GitHub release for $tag already exists; leaving it as it is."
+            exit 0
+          fi
+
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag")
+          message=""
+          if [ "$(echo "$ref" | jq -r .object.type)" = "tag" ]; then
+            message=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$(echo "$ref" | jq -r .object.sha)" --jq .message)
+            # The first line is the tag's title ("Release as 26.11.2"), which the release
+            # title already says.
+            message=$(printf '%s\n' "$message" | tail -n +2 | sed '/./,$!d')
+          fi
+          if [ -z "$message" ]; then
+            message="Release notes: https://github.com/$GITHUB_REPOSITORY/wiki/Releases"
+          fi
+
+          {
+            printf '%s\n\n' "$message"
+            echo "### Packages"
+            echo
+            echo "- [WebRTCme $VERSION](https://www.nuget.org/packages/WebRTCme/$VERSION)"
+            echo "- [WebRTCme.Middleware $VERSION](https://www.nuget.org/packages/WebRTCme.Middleware/$VERSION)"
+            echo
+            echo "Full notes for every release are on the wiki: [Releases](https://github.com/$GITHUB_REPOSITORY/wiki/Releases)."
+          } > release-notes.md
+
+          gh release create "$tag" --verify-tag --latest --title "$tag" --notes-file release-notes.md
 
       # Kept against the release itself as well as against the CI run, so the published bytes stay
       # retrievable from the workflow that published them.
